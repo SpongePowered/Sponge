@@ -54,7 +54,6 @@ shadowJar {
     exclude 'GradleStart**'
     exclude 'net/minecraftforge/**'
 
-    from project.mixinRefMap
     from sourceSets.java6.output
 
     dependencies {
