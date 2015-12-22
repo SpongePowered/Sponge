@@ -12,9 +12,10 @@ evaluationDependsOn api.path
 minecraftPlugin.replacer.putReplacement('SRG_DIR', "$DIR_MCP_MAPPINGS/srgs")
 
 // Mixins
-ext {
-    mixinSrg = new File(project.buildDir, 'tmp/mixins/mixins.srg')
-    mixinRefMap = new File(project.buildDir, "tmp/mixins/mixins.${implementation.toLowerCase()}.refmap.json")
+sourceSets {
+    main {
+        refMap = "mixins.${implementation.toLowerCase()}.refmap.json" 
+    }
 }
 
 minecraft {
@@ -24,13 +25,7 @@ minecraft {
 
 // Compile options
 compileJava {
-    options.compilerArgs += [
-            '-Xlint:-processing',
-            "-AoutSrgFile=${project.mixinSrg.canonicalPath}",
-            "-AoutRefMapFile=${project.mixinRefMap.canonicalPath}",
-            "-AreobfSrgFile=${project.file('build/srgs/mcp-srg.srg').canonicalPath}",
-            '-AdisableTargetValidator=true'
-    ]
+    options.compilerArgs += '-Xlint:-processing'
 }
 
 // Copy the current srgs to the build dir so the user doesn't have to go hunting for them
@@ -61,17 +56,8 @@ if (!plugins.hasPlugin('net.minecraftforge.forge')) {
     }
 }
 
-// Configure reobfuscation for mixins
-reobfJar.doFirst {
-    if (project.mixinSrg.exists()) {
-        addSecondarySrgFile project.mixinSrg
-    }
-}
-
 // Set manifest entries
 jar {
-    from project.mixinRefMap
-
     manifest {
         attributes(
                 'Specification-Name': api.name,
