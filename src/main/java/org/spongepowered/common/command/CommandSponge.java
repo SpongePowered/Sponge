@@ -37,14 +37,6 @@ import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.api.text.action.TextActions;
-import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -54,6 +46,14 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -67,9 +67,9 @@ import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
-import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -188,7 +188,7 @@ public class CommandSponge {
                         CommandResult res = super.execute(src, args);
                         if (args.hasAny("dump")) {
                             File file = new File(new File(new File("."), "chunk-dumps"),
-                                    "chunk-info-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.txt");
+                                "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(Instant.now()) + "-server.txt");
                             src.sendMessage(Texts.of("Writing chunk info to: ", file));
                             ChunkSaveHelper.writeChunks(file, args.hasAny("dump-all"));
                             src.sendMessage(Texts.of("Chunk info complete"));
@@ -309,7 +309,7 @@ public class CommandSponge {
                 .permission("sponge.command.heap")
                 .executor((src, args) -> {
                     File file = new File(new File(new File("."), "dumps"),
-                            "heap-dump-" + new SimpleDateFormat("yyyy-MM-dd_HH.mm.ss").format(new Date()) + "-server.bin");
+                            "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(Instant.now()) + "-server.bin");
                     src.sendMessage(Texts.of("Writing JVM heap data to: ", file));
                     SpongeHooks.dumpHeap(file, true);
                     src.sendMessage(Texts.of("Heap dump complete"));

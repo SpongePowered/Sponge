@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import com.google.gson.JsonObject;
 import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.UserListEntry;
 import org.spongepowered.api.Sponge;
@@ -41,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 
+import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
@@ -61,6 +61,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
 
     private Optional<CommandSource> commandSource = Optional.empty();
 
+    @SuppressWarnings("deprecation")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
         this.spongeReason = Texts.of();
@@ -96,8 +97,8 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     }
 
     @Override
-    public Date getCreationDate() {
-        return this.banStartDate;
+    public Instant getCreationDate() {
+        return this.banStartDate.toInstant();
     }
 
     @Override
@@ -111,8 +112,8 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     }
 
     @Override
-    public Optional<Date> getExpirationDate() {
-        return Optional.of(this.banEndDate);
+    public Optional<Instant> getExpirationDate() {
+        return Optional.of(this.banEndDate.toInstant());
     }
 
 }

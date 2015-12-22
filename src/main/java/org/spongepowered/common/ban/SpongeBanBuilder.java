@@ -33,7 +33,6 @@ import net.minecraft.server.management.BanList;
 import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.UserListBansEntry;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.ban.Ban;
@@ -42,6 +41,7 @@ import org.spongepowered.api.util.ban.BanTypes;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.time.Instant;
 import java.util.Date;
 
 import javax.annotation.Nullable;
@@ -52,9 +52,9 @@ public class SpongeBanBuilder implements Ban.Builder {
     private InetAddress address;
     private BanType banType;
     private Text reason;
-    private Date start = new Date();
-    private Date end;
-    private Text source;
+    private Instant start = Instant.now();
+    @Nullable private Instant end;
+    @Nullable private Text source;
 
     @Override
     public Ban.Builder profile(org.spongepowered.api.profile.GameProfile profile) {
@@ -92,15 +92,15 @@ public class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder startDate(Date date) {
-        checkNotNull(date, "Start date cannot be null!");
-        this.start = date;
+    public Ban.Builder startDate(Instant instant) {
+        checkNotNull(instant, "Start date cannot be null!");
+        this.start = instant;
         return this;
     }
 
     @Override
-    public Ban.Builder expirationDate(@Nullable Date date) {
-        this.end = date;
+    public Ban.Builder expirationDate(@Nullable Instant instant) {
+        this.end = instant;
         return this;
     }
 
@@ -125,13 +125,13 @@ public class SpongeBanBuilder implements Ban.Builder {
 
         if (this.banType == BanTypes.PROFILE) {
             checkState(this.profile != null, "User cannot be null!");
-            return (Ban) new UserListBansEntry((GameProfile) this.profile, this.start, sourceName, this.end, Texts.legacy().to(this.reason));
+            return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, Date.from(this.end), Texts.legacy().to(this.reason));
         } else {
             checkState(this.address != null, "Address cannot be null!");
 
             // This *should* be a static method, but apparently not...
             BanList ipBans = MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
-            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), this.start, sourceName, this.end, Texts.legacy().to(this.reason));
+            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName, Date.from(this.end), Texts.legacy().to(this.reason));
         }
     }
 
@@ -147,7 +147,7 @@ public class SpongeBanBuilder implements Ban.Builder {
         this.address = null;
         this.banType = null;
         this.reason = null;
-        this.start = new Date();
+        this.start = Instant.now();
         this.end = null;
         this.source = null;
 

@@ -47,6 +47,10 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public Optional<Enchantment> getById(String id) {
+        checkNotNull(id);
+        if (!id.contains(":")) {
+            id = "minecraft:" + id; // assume vanilla
+        }
         return Optional.ofNullable(this.enchantmentMappings.get(checkNotNull(id).toLowerCase()));
     }
 
@@ -66,31 +70,31 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public void registerDefaults() {
-        this.enchantmentMappings.put("protection", (Enchantment) net.minecraft.enchantment.Enchantment.protection);
-        this.enchantmentMappings.put("fire_protection", (Enchantment) net.minecraft.enchantment.Enchantment.fireProtection);
-        this.enchantmentMappings.put("feather_falling", (Enchantment) net.minecraft.enchantment.Enchantment.featherFalling);
-        this.enchantmentMappings.put("blast_protection", (Enchantment) net.minecraft.enchantment.Enchantment.blastProtection);
-        this.enchantmentMappings.put("projectile_protection", (Enchantment) net.minecraft.enchantment.Enchantment.projectileProtection);
-        this.enchantmentMappings.put("respiration", (Enchantment) net.minecraft.enchantment.Enchantment.respiration);
-        this.enchantmentMappings.put("aqua_affinity", (Enchantment) net.minecraft.enchantment.Enchantment.aquaAffinity);
-        this.enchantmentMappings.put("thorns", (Enchantment) net.minecraft.enchantment.Enchantment.thorns);
-        this.enchantmentMappings.put("depth_strider", (Enchantment) net.minecraft.enchantment.Enchantment.depthStrider);
-        this.enchantmentMappings.put("sharpness", (Enchantment) net.minecraft.enchantment.Enchantment.sharpness);
-        this.enchantmentMappings.put("smite", (Enchantment) net.minecraft.enchantment.Enchantment.smite);
-        this.enchantmentMappings.put("bane_of_arthropods", (Enchantment) net.minecraft.enchantment.Enchantment.baneOfArthropods);
-        this.enchantmentMappings.put("knockback", (Enchantment) net.minecraft.enchantment.Enchantment.knockback);
-        this.enchantmentMappings.put("fire_aspect", (Enchantment) net.minecraft.enchantment.Enchantment.fireAspect);
-        this.enchantmentMappings.put("looting", (Enchantment) net.minecraft.enchantment.Enchantment.looting);
-        this.enchantmentMappings.put("efficiency", (Enchantment) net.minecraft.enchantment.Enchantment.efficiency);
-        this.enchantmentMappings.put("silk_touch", (Enchantment) net.minecraft.enchantment.Enchantment.silkTouch);
-        this.enchantmentMappings.put("unbreaking", (Enchantment) net.minecraft.enchantment.Enchantment.unbreaking);
-        this.enchantmentMappings.put("fortune", (Enchantment) net.minecraft.enchantment.Enchantment.fortune);
-        this.enchantmentMappings.put("power", (Enchantment) net.minecraft.enchantment.Enchantment.power);
-        this.enchantmentMappings.put("punch", (Enchantment) net.minecraft.enchantment.Enchantment.punch);
-        this.enchantmentMappings.put("flame", (Enchantment) net.minecraft.enchantment.Enchantment.flame);
-        this.enchantmentMappings.put("infinity", (Enchantment) net.minecraft.enchantment.Enchantment.infinity);
-        this.enchantmentMappings.put("luck_of_the_sea", (Enchantment) net.minecraft.enchantment.Enchantment.luckOfTheSea);
-        this.enchantmentMappings.put("lure", (Enchantment) net.minecraft.enchantment.Enchantment.lure);
+        this.enchantmentMappings.put("minecraft:protection", (Enchantment) net.minecraft.enchantment.Enchantment.protection);
+        this.enchantmentMappings.put("minecraft:fire_protection", (Enchantment) net.minecraft.enchantment.Enchantment.fireProtection);
+        this.enchantmentMappings.put("minecraft:feather_falling", (Enchantment) net.minecraft.enchantment.Enchantment.featherFalling);
+        this.enchantmentMappings.put("minecraft:blast_protection", (Enchantment) net.minecraft.enchantment.Enchantment.blastProtection);
+        this.enchantmentMappings.put("minecraft:projectile_protection", (Enchantment) net.minecraft.enchantment.Enchantment.projectileProtection);
+        this.enchantmentMappings.put("minecraft:respiration", (Enchantment) net.minecraft.enchantment.Enchantment.respiration);
+        this.enchantmentMappings.put("minecraft:aqua_affinity", (Enchantment) net.minecraft.enchantment.Enchantment.aquaAffinity);
+        this.enchantmentMappings.put("minecraft:thorns", (Enchantment) net.minecraft.enchantment.Enchantment.thorns);
+        this.enchantmentMappings.put("minecraft:depth_strider", (Enchantment) net.minecraft.enchantment.Enchantment.depthStrider);
+        this.enchantmentMappings.put("minecraft:sharpness", (Enchantment) net.minecraft.enchantment.Enchantment.sharpness);
+        this.enchantmentMappings.put("minecraft:smite", (Enchantment) net.minecraft.enchantment.Enchantment.smite);
+        this.enchantmentMappings.put("minecraft:bane_of_arthropods", (Enchantment) net.minecraft.enchantment.Enchantment.baneOfArthropods);
+        this.enchantmentMappings.put("minecraft:knockback", (Enchantment) net.minecraft.enchantment.Enchantment.knockback);
+        this.enchantmentMappings.put("minecraft:fire_aspect", (Enchantment) net.minecraft.enchantment.Enchantment.fireAspect);
+        this.enchantmentMappings.put("minecraft:looting", (Enchantment) net.minecraft.enchantment.Enchantment.looting);
+        this.enchantmentMappings.put("minecraft:efficiency", (Enchantment) net.minecraft.enchantment.Enchantment.efficiency);
+        this.enchantmentMappings.put("minecraft:silk_touch", (Enchantment) net.minecraft.enchantment.Enchantment.silkTouch);
+        this.enchantmentMappings.put("minecraft:unbreaking", (Enchantment) net.minecraft.enchantment.Enchantment.unbreaking);
+        this.enchantmentMappings.put("minecraft:fortune", (Enchantment) net.minecraft.enchantment.Enchantment.fortune);
+        this.enchantmentMappings.put("minecraft:power", (Enchantment) net.minecraft.enchantment.Enchantment.power);
+        this.enchantmentMappings.put("minecraft:punch", (Enchantment) net.minecraft.enchantment.Enchantment.punch);
+        this.enchantmentMappings.put("minecraft:flame", (Enchantment) net.minecraft.enchantment.Enchantment.flame);
+        this.enchantmentMappings.put("minecraft:infinity", (Enchantment) net.minecraft.enchantment.Enchantment.infinity);
+        this.enchantmentMappings.put("minecraft:luck_of_the_sea", (Enchantment) net.minecraft.enchantment.Enchantment.luckOfTheSea);
+        this.enchantmentMappings.put("minecraft:lure", (Enchantment) net.minecraft.enchantment.Enchantment.lure);
     }
 
     @AdditionalRegistration
