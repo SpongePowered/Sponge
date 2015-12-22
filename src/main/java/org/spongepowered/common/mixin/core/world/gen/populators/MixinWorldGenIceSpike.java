@@ -80,6 +80,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
      * 
      * Purpose: overwritten to make use of populator parameters
      */
+    @Override
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         while (worldIn.isAirBlock(position) && position.getY() > 2) {

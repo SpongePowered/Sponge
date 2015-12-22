@@ -104,6 +104,7 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
         }
     }
 
+    @Override
     public void setMinHeight(VariableAmount height) {
         this.minHeight = height;
     }

@@ -37,6 +37,7 @@ import java.util.Random;
 @Mixin(WorldGenMegaPineTree.class)
 public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implements PopulatorObject {
 
+    @Override
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
 

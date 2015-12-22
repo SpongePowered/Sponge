@@ -43,6 +43,7 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
         super(p_i45448_1_);
     }
 
+    @Override
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
 
