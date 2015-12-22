@@ -32,6 +32,6 @@ import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin({EntityTNTPrimed.class, EntityCreeper.class, EntityMinecartTNT.class, EntityFireworkRocket.class})
-public abstract class MixinFusedExplosive extends MixinExplosive implements FusedExplosive {
+public abstract class MixinFusedExplosive implements FusedExplosive {
 
 }
