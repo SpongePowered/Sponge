@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.GameDictionary;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -48,6 +49,7 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.data.SpongeDataManager;
 
@@ -330,5 +332,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         } else {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public GameDictionary.Entry createGameDictionaryEntry() {
+        return new SpongeGameDictionaryEntry.Specific((Item) this.itemType, this.damageValue);
     }
 }

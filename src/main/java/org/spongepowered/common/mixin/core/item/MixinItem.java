@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.item.IMixinItem;
+import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -48,7 +49,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ItemType, IMixinItem {
+public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
 
     public Optional<BlockType> blockType = Optional.empty();
 
@@ -117,5 +118,10 @@ public abstract class MixinItem implements ItemType, IMixinItem {
 
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
         return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
+    }
+    
+    @Override
+    public ItemStack createDictionaryStack(int wildcardValue) {
+        return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
 }
