@@ -37,13 +37,13 @@ import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.source.ConsoleSource;
+import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.ConsoleSource;
-import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityType;
 
@@ -163,7 +163,7 @@ class TimingsExport extends Thread {
         builder.add("plugins", JSONUtil.mapArrayToObject(SpongeImpl.getGame().getPluginManager().getPlugins(), (plugin) -> {
             // TODO This is only available on Forge
 //            ModMetadata metadata = ((ModContainer) plugin).getMetadata();
-            return JSONUtil.objectBuilder().add(plugin.getName(), JSONUtil.objectBuilder()
+            return JSONUtil.objectBuilder().add(plugin.getId(), JSONUtil.objectBuilder()
                     .add("version", plugin.getVersion())
 //                    .add("description", metadata.description)
 //                    .add("website", metadata.url)

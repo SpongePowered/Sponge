@@ -27,8 +27,8 @@ package co.aikar.timings;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.EvictingQueue;
-import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig.TimingsCategory;
 
@@ -59,7 +59,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
         setHistoryInterval(config.getHistoryInterval());
         setHistoryLength(config.getHistoryLength());
 
-        SpongeImpl.getLogger().info("Sponge Timings: " + this.timingsEnabled +
+        SpongeImpl.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +
                                     " - Interval: " + timeSummary(this.historyInterval / 20) +
                                     " - Length: " + timeSummary(this.historyLength / 20));
@@ -88,9 +88,9 @@ public class SpongeTimingsFactory implements TimingsFactory {
     public Timing of(Object pluginObj, String name, @Nullable Timing groupHandler) {
         PluginContainer plugin = checkPlugin(pluginObj);
         if (groupHandler == null) {
-            groupHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
+            groupHandler = ofSafe(plugin.getId(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
         }
-        return TimingsManager.getHandler(plugin.getName(), name, groupHandler, true);
+        return TimingsManager.getHandler(plugin.getId(), name, groupHandler, true);
     }
 
     @Override
@@ -188,9 +188,9 @@ public class SpongeTimingsFactory implements TimingsFactory {
     public static Timing ofSafe(PluginContainer plugin, String name) {
         Timing pluginHandler = null;
         if (plugin != null) {
-            pluginHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
+            pluginHandler = ofSafe(plugin.getId(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
         }
-        return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name, pluginHandler);
+        return ofSafe(plugin != null ? plugin.getId() : "Minecraft - Invalid Plugin", name, pluginHandler);
     }
 
     public static TimingHandler ofSafe(String name, Timing groupHandler) {
