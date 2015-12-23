@@ -32,7 +32,7 @@ import java.util.Collection;
 
 public interface IMixinWorldSettings {
 
-    int getDimensionId();
+    Integer getDimensionId();
 
     boolean getIsMod();
 

@@ -179,7 +179,6 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
@@ -196,8 +195,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -265,7 +262,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean keepSpawnLoaded;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
-    public SpongeConfig<WorldConfig> worldConfig;
     @Nullable private volatile Context worldContext;
 
     private SpongeChunkProvider spongegen;
@@ -283,7 +279,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public Scoreboard worldScoreboard;
     @Shadow public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
-    @Shadow public List playerEntities;
+    @Shadow public List<EntityPlayer> playerEntities;
 
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();
@@ -319,23 +315,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
-        if (!client) {
-            String providerName = providerIn.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
-            this.worldConfig =
-                    new SpongeConfig<>(SpongeConfig.Type.WORLD,
-                            SpongeImpl.getSpongeConfigDir()
-                                    .resolve("worlds")
-                                    .resolve(providerName)
-                                    .resolve((providerIn.getDimensionId() == 0 ? "DIM0"
-                                            : DimensionRegistryModule.getInstance().getWorldFolder(providerIn.getDimensionId())))
-                                    .resolve("world.conf"),
-                            SpongeImpl.ECOSYSTEM_ID);
-            ((IMixinWorldInfo) info).setWorldConfig(this.worldConfig.getConfig());
-            this.keepSpawnLoaded = ((WorldProperties) info).doesKeepSpawnLoaded();
-            Collection<WorldGeneratorModifier> genModifiers = GeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
-            this.getProperties().setGeneratorModifiers(genModifiers);
-        }
-
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             this.worldBorder.addListener(new PlayerBorderListener());
         }
@@ -672,6 +651,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             SpongeEventFactory.createDropItemEventCustom(cause, (List<Entity>) (List<?>) this.capturedEntityItems,
                                                                          entitySnapshotBuilder.build(), (World) (Object) this);
                 } else {
+                    this.capturedEntities.add((Entity) entityIn);
                     event =
                             SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                                                                             entitySnapshotBuilder.build(), (World) (Object) this);
@@ -1756,7 +1736,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
-        return this.worldConfig;
+        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 
     @Override

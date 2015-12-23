@@ -30,8 +30,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
@@ -63,10 +61,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
@@ -86,14 +87,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private UUID uuid;
     private DimensionType dimensionType;
     private boolean isMod;
-    private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
     private NBTTagList playerUniqueIdNbt;
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
-    private WorldConfig worldConfig;
+    private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
 
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
@@ -142,16 +142,31 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.playerUniqueIdNbt = new NBTTagList();
         this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
         this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
-        this.dimensionType = DimensionTypes.OVERWORLD;
+        if (this.dimensionType == null) {
+            this.dimensionType = DimensionTypes.OVERWORLD;
+        }
+        createWorldConfig();
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
-        onConstruction(ci);
-
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
-        this.dimensionType = creationSettings.getDimensionType();
-        this.generatorModifiers = ImmutableList.copyOf(creationSettings.getGeneratorModifiers());
+        setDimensionType(creationSettings.getDimensionType());
+        if (((IMixinWorldSettings)(Object) settings).getDimensionId() != null) {
+            this.dimension = ((IMixinWorldSettings)(Object) settings).getDimensionId();
+        }
+        // make sure to set dimensionType and dimension id before attempting to generate world config
+        onConstruction(ci);
+        setDimensionType(creationSettings.getDimensionType());
+        this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
+        this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
+        this.worldConfig.getConfig().getWorld().setLoadOnStartup(creationSettings.loadOnStartup());
+        if (!creationSettings.getGeneratorModifiers().isEmpty()) {
+            this.worldConfig.getConfig().getWorldGenModifiers().clear();
+            this.worldConfig.getConfig().getWorldGenModifiers()
+                    .addAll(GeneratorModifierRegistryModule.getInstance().toIds(creationSettings.getGeneratorModifiers()));
+        }
+        this.worldConfig.save();
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
@@ -166,7 +181,22 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.dimensionType = info.dimensionType;
         this.isMod = info.isMod;
-        this.generatorModifiers = info.generatorModifiers;
+    }
+
+    @Override
+    public void createWorldConfig() {
+        if (this.worldConfig != null) {
+            return;
+        }
+
+        this.worldConfig =
+                new SpongeConfig<>(SpongeConfig.Type.WORLD,
+                        SpongeImpl.getSpongeConfigDir()
+                                .resolve("worlds")
+                                .resolve(this.dimensionType.getId())
+                                .resolve(this.levelName)
+                                .resolve("world.conf"),
+                        SpongeImpl.ECOSYSTEM_ID);
     }
 
     @Override
@@ -449,55 +479,55 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isEnabled() {
-        if (!this.worldConfig.isConfigEnabled()) {
+        if (!this.worldConfig.getConfig().isConfigEnabled()) {
             return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().isWorldEnabled();
         }
-        return this.worldConfig.getWorld().isWorldEnabled();
+        return this.worldConfig.getConfig().getWorld().isWorldEnabled();
     }
 
     @Override
     public void setEnabled(boolean enabled) {
-        this.worldConfig.getWorld().setWorldEnabled(enabled);
+        this.worldConfig.getConfig().getWorld().setWorldEnabled(enabled);
     }
 
     @Override
     public boolean loadOnStartup() {
-        if (!this.worldConfig.isConfigEnabled()) {
+        if (!this.worldConfig.getConfig().isConfigEnabled()) {
             return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().loadOnStartup();
         }
-        return this.worldConfig.getWorld().loadOnStartup();
+        return this.worldConfig.getConfig().getWorld().loadOnStartup();
     }
 
     @Override
     public void setLoadOnStartup(boolean state) {
-        this.worldConfig.getWorld().setLoadOnStartup(state);
+        this.worldConfig.getConfig().getWorld().setLoadOnStartup(state);
     }
 
     @Override
     public boolean doesKeepSpawnLoaded() {
-        if (!this.worldConfig.isConfigEnabled()) {
+        if (!this.worldConfig.getConfig().isConfigEnabled()) {
             return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().getKeepSpawnLoaded();
         }
-        return this.worldConfig.getWorld().getKeepSpawnLoaded();
+        return this.worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
     }
 
     @Override
     public void setKeepSpawnLoaded(boolean loaded) {
-        this.worldConfig.getWorld().setKeepSpawnLoaded(loaded);
+        this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(loaded);
     }
 
     @Override
     public boolean isPVPEnabled() {
-        if (!this.worldConfig.isConfigEnabled()) {
+        if (!this.worldConfig.getConfig().isConfigEnabled()) {
             return true;
         }
 
-        return this.worldConfig.getWorld().getPVPEnabled();
+        return this.worldConfig.getConfig().getWorld().getPVPEnabled();
     }
 
     @Override
     public void setPVPEnabled(boolean enabled) {
-        this.worldConfig.getWorld().setPVPEnabled(enabled);
+        this.worldConfig.getConfig().getWorld().setPVPEnabled(enabled);
     }
 
     @Override
@@ -516,25 +546,26 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public WorldConfig getWorldConfig() {
+    public SpongeConfig<WorldConfig> getWorldConfig() {
         return this.worldConfig;
     }
 
     @Override
-    public void setWorldConfig(WorldConfig config) {
+    public void setWorldConfig(SpongeConfig<WorldConfig> config) {
         this.worldConfig = config;
     }
 
     @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        return this.generatorModifiers;
+        return GeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
     }
 
     @Override
     public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
         checkNotNull(modifiers, "modifiers");
 
-        this.generatorModifiers = ImmutableList.copyOf(modifiers);
+        this.worldConfig.getConfig().getWorldGenModifiers().clear();
+        this.worldConfig.getConfig().getWorldGenModifiers().addAll(GeneratorModifierRegistryModule.getInstance().toIds(modifiers));
     }
 
     @Override

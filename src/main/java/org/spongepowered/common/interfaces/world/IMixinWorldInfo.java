@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 
 import java.util.Optional;
@@ -45,7 +46,7 @@ public interface IMixinWorldInfo {
 
     boolean getIsMod();
 
-    WorldConfig getWorldConfig();
+    SpongeConfig<WorldConfig> getWorldConfig();
 
     void setDimensionId(int id);
 
@@ -63,5 +64,7 @@ public interface IMixinWorldInfo {
 
     void setIsMod(boolean isMod);
 
-    void setWorldConfig(WorldConfig config);
+    void setWorldConfig(SpongeConfig<WorldConfig> config);
+
+    void createWorldConfig();
 }

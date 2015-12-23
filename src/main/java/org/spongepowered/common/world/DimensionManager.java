@@ -110,6 +110,14 @@ public class DimensionManager {
                 worldType = worldType.replace("provider", "");
         }
 
+        // Grab provider name if available
+        try {
+            WorldProvider worldProvider = provider.newInstance();
+            worldType = worldProvider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+        } catch (Exception e) {
+            // ignore
+        }
+
         DimensionRegistryModule.getInstance().registerAdditionalCatalog(new SpongeDimensionType(worldType, keepLoaded, provider, id));
         providers.put(id, provider);
         spawnSettings.put(id, keepLoaded);
