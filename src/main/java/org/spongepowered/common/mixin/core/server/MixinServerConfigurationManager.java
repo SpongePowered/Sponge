@@ -29,6 +29,7 @@ import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
@@ -38,6 +39,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S01PacketJoinGame;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
+import net.minecraft.network.play.server.S06PacketUpdateHealth;
 import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S1DPacketEntityEffect;
@@ -63,6 +65,7 @@ import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -408,7 +411,14 @@ public abstract class MixinServerConfigurationManager {
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
         playerIn.addSelfToInternalCraftingInventory();
-        playerIn.setHealth(playerIn.getHealth());
+
+        // Reset the health.
+        final MutableBoundedValue<Double> maxHealth = ((Player) playerIn).maxHealth();
+        final MutableBoundedValue<Integer> food = ((Player) playerIn).foodLevel();
+        final MutableBoundedValue<Double> saturation = ((Player) playerIn).saturation();
+        playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(1.0F);
+        playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth.get().floatValue());
+        playerIn.playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
 
         return playerIn;
     }
