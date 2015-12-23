@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.BlockParticle;
@@ -42,16 +41,14 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 
 
-public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<ParticleEffect, ParticleEffect.Builder> implements ParticleEffect.Builder {
-
-
+public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<ParticleEffect, ParticleType, ParticleEffect.Builder> implements ParticleEffect.Builder {
 
     @Override
     public SpongeParticleEffect build() throws IllegalStateException {
         return new SpongeParticleEffect(this.type, this.motion, this.offset, this.count);
     }
 
-    public static class BuilderColorable extends AbstractParticleEffectBuilder<ColoredParticle, ColoredParticle.Builder> implements ColoredParticle.Builder {
+    public static class BuilderColorable extends AbstractParticleEffectBuilder<ColoredParticle, ParticleType.Colorable, ColoredParticle.Builder> implements ColoredParticle.Builder {
 
         private Color color;
 
@@ -77,7 +74,7 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
 
     }
 
-    public static class BuilderResizable extends AbstractParticleEffectBuilder<ResizableParticle, ResizableParticle.Builder> implements ResizableParticle.Builder {
+    public static class BuilderResizable extends AbstractParticleEffectBuilder<ResizableParticle, ParticleType.Resizable, ResizableParticle.Builder> implements ResizableParticle.Builder {
 
         private float size;
 
@@ -102,7 +99,7 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
 
     }
 
-    public static class BuilderNote extends AbstractParticleEffectBuilder<NoteParticle, NoteParticle.Builder> implements NoteParticle.Builder {
+    public static class BuilderNote extends AbstractParticleEffectBuilder<NoteParticle, ParticleType.Note, NoteParticle.Builder> implements NoteParticle.Builder {
 
         private NotePitch note;
 
@@ -111,12 +108,6 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
             checkNotNull(note, "The note has to scale between 0 and 24!");
             this.note = note;
             return this;
-        }
-
-        @Override
-        public BuilderNote type(ParticleType particleType) {
-            checkArgument(particleType instanceof ParticleType.Note);
-            return (BuilderNote) super.type(particleType);
         }
 
 
@@ -139,7 +130,7 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
 
     }
 
-    public static class BuilderMaterial extends AbstractParticleEffectBuilder<ItemParticle, ItemParticle.Builder> implements ItemParticle.Builder {
+    public static class BuilderMaterial extends AbstractParticleEffectBuilder<ItemParticle, ParticleType.Item, ItemParticle.Builder> implements ItemParticle.Builder {
 
         private ItemStackSnapshot item;
 
@@ -148,12 +139,6 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
             checkNotNull(item, "The item type cannot be null!");
             this.item = item;
             return this;
-        }
-
-        @Override
-        public BuilderMaterial type(ParticleType particleType) {
-            checkArgument(particleType instanceof ParticleType.Material);
-            return (BuilderMaterial) super.type(particleType);
         }
 
 
@@ -170,7 +155,7 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
 
     }
 
-    public static class BuilderBlock extends AbstractParticleEffectBuilder<BlockParticle, BlockParticle.Builder> implements BlockParticle.Builder {
+    public static class BuilderBlock extends AbstractParticleEffectBuilder<BlockParticle, ParticleType.Block, BlockParticle.Builder> implements BlockParticle.Builder {
 
         private BlockState blockState;
 
@@ -178,12 +163,6 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
         public BuilderBlock block(BlockState blockState) {
             this.blockState = checkNotNull(blockState);
             return this;
-        }
-
-        @Override
-        public BuilderBlock type(ParticleType particleType) {
-            checkArgument(particleType instanceof ParticleType.Material);
-            return (BuilderBlock) super.type(particleType);
         }
 
         @Override

@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.util.Color;
@@ -97,11 +98,11 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("heart", new SpongeParticleType(EnumParticleTypes.HEART, false));
         this.addParticleType("barrier", new SpongeParticleType(EnumParticleTypes.BARRIER, false));
         this.addParticleType("item_crack",
-                             new SpongeParticleType.Material(EnumParticleTypes.ITEM_CRACK, new net.minecraft.item.ItemStack(Blocks.air), true));
+                             new SpongeParticleType.Item(EnumParticleTypes.ITEM_CRACK, new net.minecraft.item.ItemStack(Blocks.stone), true));
         this.addParticleType("block_crack",
-                             new SpongeParticleType.Material(EnumParticleTypes.BLOCK_CRACK, new net.minecraft.item.ItemStack(Blocks.air), true));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_CRACK, BlockTypes.STONE.getDefaultState(), true));
         this.addParticleType("block_dust",
-                             new SpongeParticleType.Material(EnumParticleTypes.BLOCK_DUST, new net.minecraft.item.ItemStack(Blocks.air), true));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_DUST, BlockTypes.STONE.getDefaultState(), true));
         this.addParticleType("water_drop", new SpongeParticleType(EnumParticleTypes.WATER_DROP, false));
         // Is this particle available to be spawned? It's not registered on the
         // client though

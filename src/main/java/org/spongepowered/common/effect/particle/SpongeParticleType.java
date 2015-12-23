@@ -25,6 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import net.minecraft.util.EnumParticleTypes;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
@@ -107,12 +108,12 @@ public class SpongeParticleType implements ParticleType {
 
     }
 
-    public static class Material extends SpongeParticleType implements ParticleType.Material {
+    public static class Item extends SpongeParticleType implements ParticleType.Item {
 
         // TODO: This should change to the sponge item stack type if a clone method available is
         private net.minecraft.item.ItemStack item;
 
-        public Material(EnumParticleTypes type, net.minecraft.item.ItemStack item, boolean motion) {
+        public Item(EnumParticleTypes type, net.minecraft.item.ItemStack item, boolean motion) {
             super(type, motion);
             this.item = item;
         }
@@ -120,6 +121,23 @@ public class SpongeParticleType implements ParticleType {
         @Override
         public ItemStack getDefaultItem() {
             return (ItemStack) this.item.copy();
+        }
+
+    }
+
+    public static class Block extends SpongeParticleType implements ParticleType.Block {
+
+        // TODO: This should change to the sponge item stack type if a clone method available is
+        private BlockState item;
+
+        public Block(EnumParticleTypes type, BlockState item, boolean motion) {
+            super(type, motion);
+            this.item = item;
+        }
+
+        @Override
+        public BlockState getDefaultBlockState() {
+            return this.item;
         }
 
     }
