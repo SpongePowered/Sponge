@@ -568,6 +568,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
                 ImmutableSpongeCommandData.class, tileEntityCommandDataProcessor);
 
+        final DyeableDataProcessor dyeableDataProcessor = new DyeableDataProcessor();
+        dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
+                ImmutableSpongeDyeableData.class, dyeableDataProcessor);
+
+
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
@@ -716,6 +721,9 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_IGNORES_COLLISION, new InvisibilityCollisionValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_PREVENTS_TARGETING, new InvisibilityTargetValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();

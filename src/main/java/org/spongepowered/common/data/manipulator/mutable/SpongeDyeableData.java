@@ -32,7 +32,9 @@ import org.spongepowered.api.data.manipulator.mutable.DyeableData;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
+@ImplementationRequiredForTest
 public class SpongeDyeableData extends AbstractSingleCatalogData<DyeColor, DyeableData, ImmutableDyeableData> implements DyeableData {
 
     public SpongeDyeableData(DyeColor dyeColor) {
