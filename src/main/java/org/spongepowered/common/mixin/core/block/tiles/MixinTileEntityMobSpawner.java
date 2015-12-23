@@ -31,12 +31,13 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
 import java.util.List;
 
 @NonnullByDefault
 @Mixin(TileEntityMobSpawner.class)
-public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implements MobSpawner {
+public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implements MobSpawner, IMixinMobSpawner {
 
     @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
 
@@ -58,6 +59,6 @@ public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implemen
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        // TODO manipulators.add(getMobSpawnerData());
+        manipulators.add(getMobSpawnerData());
     }
 }

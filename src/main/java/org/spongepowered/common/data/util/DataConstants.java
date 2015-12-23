@@ -44,10 +44,14 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.weighted.WeightedSerializableObject;
+import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -111,6 +115,16 @@ public final class DataConstants {
     
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
+
+    public static final short MINIMUM_SPAWNER_MAXIMUM_SPAWN_DELAY = 1;
+    public static final short DEFAULT_SPAWNER_REMAINING_DELAY = 20;
+    public static final short DEFAULT_SPAWNER_MINIMUM_SPAWN_DELAY = 200;
+    public static final short DEFAULT_SPAWNER_MAXIMUM_SPAWN_DELAY = 800;
+    public static final short DEFAULT_SPAWNER_SPAWN_COUNT = 4;
+    public static final short DEFAULT_SPAWNER_MAXMIMUM_NEARBY_ENTITIES = 6;
+    public static final short DEFAULT_SPAWNER_REQUIRED_PLAYER_RANGE = 16;
+    public static final short DEFAULT_SPAWNER_SPAWN_RANGE = 4;
+    public static final WeightedSerializableObject<EntitySnapshot> DEFAULT_SPAWNER_NEXT_ENTITY_TO_SPAWN = new WeightedSerializableObject<>(new SpongeEntitySnapshotBuilder().type(EntityTypes.PIG).build(), 1);
 
     public static final class Catalog {
         private Catalog() {}

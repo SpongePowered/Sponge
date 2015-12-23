@@ -22,23 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.ai;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.entity.ai.EntityMinecartMobSpawner;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartMobSpawner;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinMobSpawner;
 
-@Mixin(EntityMinecartMobSpawner.class)
-public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MinecartMobSpawner, IMixinMobSpawner {
+public interface IMixinMobSpawner {
 
-    @Shadow private MobSpawnerBaseLogic mobSpawnerLogic;
+    MobSpawnerBaseLogic getSpawnerBaseLogic();
 
-    @Override
-    public MobSpawnerBaseLogic getSpawnerBaseLogic() {
-        return this.mobSpawnerLogic;
-    }
 }
