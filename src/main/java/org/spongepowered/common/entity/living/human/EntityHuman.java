@@ -327,7 +327,7 @@ public class EntityHuman extends EntityCreature {
             return DataTransactionResult.successNoData();
         }
         this.fakeProfile.getProperties().removeAll("textures");
-        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN, this.skinUuid);
+        ImmutableValue<?> oldValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, this.skinUuid);
         this.skinUuid = null;
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();

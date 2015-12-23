@@ -40,6 +40,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.MathHelper;
+import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -52,7 +53,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -354,7 +354,7 @@ public class DamageEventHandler {
     public static Cause generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
-            Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (owner.isPresent()) {
                 return Cause.of(NamedCause.source(damageSource),
                                  NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));

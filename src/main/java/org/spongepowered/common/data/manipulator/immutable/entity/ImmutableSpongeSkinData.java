@@ -43,8 +43,8 @@ public class ImmutableSpongeSkinData extends AbstractImmutableSingleData<UUID, I
     }
 
     public ImmutableSpongeSkinData(UUID value) {
-        super(ImmutableSkinData.class, value, Keys.SKIN);
-        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN, value);
+        super(ImmutableSkinData.class, value, Keys.SKIN_UNIQUE_ID);
+        this.skinValue = new ImmutableSpongeValue<>(Keys.SKIN_UNIQUE_ID, value);
     }
 
     @Override

@@ -101,7 +101,6 @@ import java.awt.Color;
 import java.util.Map;
 import java.util.UUID;
 
-@SuppressWarnings({"unchecked"})
 public class KeyRegistry {
 
     private static final Map<String, Key<?>> keyMap = new MapMaker().concurrencyLevel(4).makeMap();
@@ -262,7 +261,7 @@ public class KeyRegistry {
         keyMap.put("banner_patterns", new PatternKey());
         keyMap.put("respawn_locations", makeMapKey(UUID.class, Vector3d.class, of("RespawnLocations")));
         keyMap.put("expiration_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("ExpirationTicks")));
-        keyMap.put("skin", makeSingleKey(UUID.class, Value.class, of("Skin")));
+        keyMap.put("skin_unique_id", makeSingleKey(UUID.class, Value.class, of("SkinUUID")));
         keyMap.put("moisture", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Moisture")));
         keyMap.put("angry", makeSingleKey(Boolean.class, Value.class, of("Angry")));
         keyMap.put("anger", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Anger")));
@@ -273,6 +272,7 @@ public class KeyRegistry {
         keyMap.put("generation", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Generation")));
     }
 
+    @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
     private static Map<String, Key<?>> getKeyMap() {
         generateKeyMap();
         return keyMap;

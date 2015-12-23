@@ -544,9 +544,9 @@ public class DataRegistrar {
 
         final EntityCommandDataProcessor entityCommandDataProcessor = new EntityCommandDataProcessor();
         final TileEntityCommandDataProcessor tileEntityCommandDataProcessor = new TileEntityCommandDataProcessor();
-        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class, 
+        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
                 ImmutableSpongeCommandData.class, entityCommandDataProcessor);
-        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class, 
+        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
                 ImmutableSpongeCommandData.class, tileEntityCommandDataProcessor);
 
 
@@ -716,7 +716,7 @@ public class DataRegistrar {
         final SkinDataProcessor skinDataProcessor = new SkinDataProcessor();
         dataManager.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
             ImmutableSpongeSkinData.class, skinDataProcessor);
-        dataManager.registerValueProcessor(Keys.SKIN, skinDataProcessor);
+        dataManager.registerValueProcessor(Keys.SKIN_UNIQUE_ID, skinDataProcessor);
 
         final ExpOrbDataProcessor expOrbDataProcessor = new ExpOrbDataProcessor();
         dataManager.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
@@ -770,7 +770,7 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
             ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
         dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
-        
+
         final GenerationDualProcessor generationDualProcessor = new GenerationDualProcessor();
         dataManager.registerDataProcessorAndImpl(GenerationData.class, SpongeGenerationData.class,
                 ImmutableGenerationData.class, ImmutableSpongeGenerationData.class, generationDualProcessor);

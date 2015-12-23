@@ -44,7 +44,7 @@ public class SpongeSkinData extends AbstractSingleData<UUID, SkinData, Immutable
     }
 
     public SpongeSkinData(UUID skinUuid) {
-        super(SkinData.class, skinUuid, Keys.SKIN);
+        super(SkinData.class, skinUuid, Keys.SKIN_UNIQUE_ID);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class SpongeSkinData extends AbstractSingleData<UUID, SkinData, Immutable
 
     @Override
     public Value<UUID> skin() {
-        return new SpongeValue<UUID>(Keys.SKIN, getValue());
+        return new SpongeValue<UUID>(Keys.SKIN_UNIQUE_ID, getValue());
     }
 
     @Override

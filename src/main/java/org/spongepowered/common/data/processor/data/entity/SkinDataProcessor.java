@@ -44,7 +44,7 @@ public class SkinDataProcessor extends
         AbstractSingleTargetDualProcessor<EntityHuman, UUID, Value<UUID>, SkinData, ImmutableSkinData> {
 
     public SkinDataProcessor() {
-        super(EntityHuman.class, Keys.SKIN);
+        super(EntityHuman.class, Keys.SKIN_UNIQUE_ID);
     }
 
     @Override
@@ -57,7 +57,7 @@ public class SkinDataProcessor extends
 
     @Override
     protected Value<UUID> constructValue(UUID actualValue) {
-        return new SpongeValue<>(Keys.SKIN, actualValue);
+        return new SpongeValue<>(Keys.SKIN_UNIQUE_ID, actualValue);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class SkinDataProcessor extends
 
     @Override
     protected ImmutableValue<UUID> constructImmutableValue(UUID value) {
-        return new ImmutableSpongeValue<UUID>(Keys.SKIN, value);
+        return new ImmutableSpongeValue<UUID>(Keys.SKIN_UNIQUE_ID, value);
     }
 
     @Override
