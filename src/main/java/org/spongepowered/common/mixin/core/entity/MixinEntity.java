@@ -77,7 +77,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -118,7 +117,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private net.minecraft.entity.Entity teleportVehicle;
     private float origWidth;
     private float origHeight;
-    @Nullable private Double modifiedEyeHeight = null;
+    @Nullable private DamageSource originalLava;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -186,15 +185,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             ci.cancel();
         }
     }
-
-    @Inject(method = "getEyeHeight()F", at = @At("HEAD"), cancellable = true)
-    public void onGetEyeHeight(CallbackInfoReturnable<Float> ci) {
-        if (this.modifiedEyeHeight != null) {
-            ci.setReturnValue(this.modifiedEyeHeight.floatValue());
-        }
-    }
-
-    private DamageSource originalLava;
 
     @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
     public void preSetOnFire(CallbackInfo callbackInfo) {
@@ -864,12 +854,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             getSpongeData().getCompoundTag(nbtKey).setLong("uuid_most", uuid.getMostSignificantBits());
         }
     }
-    
+
     @Override
     public Vector3d getVelocity() {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
-    
+
     @Override
     public void setVelocity(Vector3d velocity) {
         this.motionX = velocity.getX();
