@@ -786,6 +786,11 @@ public class DataRegistrar {
                 ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
         dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
 
+        final StoredEnchantmentDualProcessor storedEnchantmentDualProcessor = new StoredEnchantmentDualProcessor();
+        dataManager.registerDataProcessorAndImpl(StoredEnchantmentData.class, SpongeStoredEnchantmentData.class,
+                ImmutableStoredEnchantmentData.class, ImmutableSpongeStoredEnchantmentData.class, storedEnchantmentDualProcessor);
+        dataManager.registerValueProcessor(Keys.STORED_ENCHANTMENTS, storedEnchantmentDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 

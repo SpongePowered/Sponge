@@ -271,6 +271,7 @@ public class KeyRegistry {
         keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
         keyMap.put("critical_hit", makeSingleKey(Boolean.class, Value.class, of("CriticalHit")));
         keyMap.put("generation", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Generation")));
+        keyMap.put("stored_enchantments", makeListKey(ItemEnchantment.class, of("StoredEnchantments")));
     }
 
     private static Map<String, Key<?>> getKeyMap() {
