@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAITasks;
@@ -46,7 +47,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -98,7 +98,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     public List<? extends AITask<?>> goal$getTasksByType(AITaskType type) {
-        final List<AITask<?>> tasks = new ArrayList<>();
+        final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
 
         for (EntityAITasks.EntityAITaskEntry entry : (List<EntityAITasks.EntityAITaskEntry>) this.taskEntries) {
             final AITask<?> task = (AITask<?>) entry.action;
@@ -108,11 +108,17 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             }
         }
 
-        return tasks;
+        return tasks.build();
     }
 
     public List<? extends AITask<?>> goal$getTasks() {
-        return (List<? extends AITask<?>>) this.taskEntries;
+        final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
+        for (Object o : taskEntries) {
+            final EntityAITasks.EntityAITaskEntry entry = (EntityAITasks.EntityAITaskEntry) o;
+
+            tasks.add((AITask<?>) entry.action);
+        }
+        return tasks.build();
     }
 
     @Overwrite
@@ -146,6 +152,10 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     @Override
     public void setType(GoalType type) {
         this.type = type;
+    }
+
+    public void goal$clear() {
+        this.taskEntries.clear();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
