@@ -35,7 +35,6 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.mixin.core.entity.living.MixinEntityLivingBase;
 
 import java.util.Optional;
 

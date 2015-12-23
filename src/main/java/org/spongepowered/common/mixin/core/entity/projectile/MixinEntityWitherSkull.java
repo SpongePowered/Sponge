@@ -24,62 +24,60 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
-import javax.annotation.Nullable;
+@Mixin(EntityWitherSkull.class)
+public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkull {
 
-@Mixin(EntityThrowable.class)
-public abstract class MixinEntityThrowable extends MixinEntity implements Projectile {
+    private float damage = 0.0f;
+    private boolean damageSet = false;
 
-    @Shadow private EntityLivingBase thrower;
-    @Shadow private String throwerName;
-    @Shadow public abstract EntityLivingBase getThrower();
-
-
-    @Nullable
-    public ProjectileSource projectileSource;
-
-    @Override
-    public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.getThrower() != null && this.getThrower() instanceof ProjectileSource) {
-            return (ProjectileSource) this.getThrower();
-        }
-
-        return ProjectileSource.UNKNOWN;
+    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    protected float onAttackEntityFrom(float amount) {
+        return (float) getDamage();
     }
 
-    @Override
-    public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof EntityLivingBase) {
-            // This allows things like Vanilla kill attribution to take place
-            this.thrower = (EntityLivingBase) shooter;
+    public double getDamage() {
+        if (this.damageSet) {
+            return this.damage;
         } else {
-            this.thrower = null;
+            if (this.shootingEntity != null) {
+                return 8.0f;
+            } else {
+                return 5.0f;
+            }
         }
+    }
 
-        this.throwerName = null;
-        this.projectileSource = shooter;
+    public void setDamage(double damage) {
+        this.damageSet = true;
+        this.damage = (float) damage;
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        ProjectileSourceSerializer.readSourceFromNbt(compound, this);
+        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
+            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+            this.damageSet = true;
+        }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.thrower);
+        if (this.damageSet) {
+            compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+        } else {
+            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        }
     }
+
 }

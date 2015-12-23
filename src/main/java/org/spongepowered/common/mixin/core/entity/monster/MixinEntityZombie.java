@@ -22,13 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.monster.EntityZombie;
+import org.spongepowered.api.entity.living.monster.Zombie;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin(EntityZombie.class)
+public abstract class MixinEntityZombie extends MixinEntityMob implements Zombie {
 
+    @Shadow public abstract boolean isChild();
+    @Shadow public abstract void setChildSize(boolean isChild);
+
+
+    @Override
+    public void setScaleForAge() {
+        this.setChildSize(this.isChild());
+    }
 }

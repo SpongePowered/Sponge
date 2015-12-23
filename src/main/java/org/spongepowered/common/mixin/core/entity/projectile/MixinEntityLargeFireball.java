@@ -24,43 +24,64 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Snowball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
-@Mixin(EntitySnowball.class)
-public abstract class MixinEntitySnowball extends MixinEntityThrowable implements Snowball {
+@Mixin(EntityLargeFireball.class)
+public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball {
 
-    private double damageAmount = 0;
-    private boolean damageSet = false;
+    private static final String NEW_EXPLOSION_METHOD =
+        "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
+    @Shadow public int explosionPower;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
-        return this.damageSet ? (float) this.damageAmount : damage;
+    private float damage = 6.0f;
+
+    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    protected float onAttackEntityFrom(float amount) {
+        return this.damage;
+    }
+
+    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+        at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
+    protected Entity newExplosion(Entity entityIn) {
+        return (Entity) (Object) this;
+    }
+
+    public double getDamage() {
+        return this.damage;
+    }
+
+    public void setDamage(double damage) {
+        this.damage = (float) damage;
+    }
+
+    public int getExplosionPower() {
+        return this.explosionPower;
+    }
+
+    public void setExplosionPower(int explosionPower) {
+        this.explosionPower = explosionPower;
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
         if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-            this.damageSet = true;
+            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        if (this.damageSet) {
-            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
-        } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-        }
+        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
     }
-
 }

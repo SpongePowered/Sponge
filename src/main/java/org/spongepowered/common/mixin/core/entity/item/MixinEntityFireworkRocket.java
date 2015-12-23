@@ -22,53 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.projectile;
+package org.spongepowered.common.mixin.core.entity.item;
 
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
-import javax.annotation.Nullable;
+@Mixin(EntityFireworkRocket.class)
+public abstract class MixinEntityFireworkRocket extends MixinEntity implements Firework, IMixinEntityFireworkRocket {
 
-@Mixin(EntityThrowable.class)
-public abstract class MixinEntityThrowable extends MixinEntity implements Projectile {
+    @Shadow private int lifetime;
 
-    @Shadow private EntityLivingBase thrower;
-    @Shadow private String throwerName;
-    @Shadow public abstract EntityLivingBase getThrower();
+    private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
-
-    @Nullable
-    public ProjectileSource projectileSource;
+    @Override
+    public void detonate() {
+        this.lifetime = -1;
+    }
 
     @Override
     public ProjectileSource getShooter() {
-        if (this.projectileSource != null) {
-            return this.projectileSource;
-        } else if (this.getThrower() != null && this.getThrower() instanceof ProjectileSource) {
-            return (ProjectileSource) this.getThrower();
-        }
-
-        return ProjectileSource.UNKNOWN;
+        return this.projectileSource;
     }
 
     @Override
     public void setShooter(ProjectileSource shooter) {
-        if (shooter instanceof EntityLivingBase) {
-            // This allows things like Vanilla kill attribution to take place
-            this.thrower = (EntityLivingBase) shooter;
-        } else {
-            this.thrower = null;
-        }
-
-        this.throwerName = null;
         this.projectileSource = shooter;
+    }
+
+    @Override
+    public void setModifier(byte modifier) {
+        this.lifetime = 10 * modifier + this.rand.nextInt(6) + this.rand.nextInt(7);
     }
 
     @Override
@@ -80,6 +70,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.thrower);
+        ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
     }
+
 }

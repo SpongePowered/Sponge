@@ -22,13 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.monster.EntityCreeper;
+import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin(EntityCreeper.class)
+public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper {
+
+    @Shadow private int timeSinceIgnited;
+    @Shadow private int fuseTime = 30;
+    @Shadow public abstract void explode();
+    @Override
+    @Shadow public abstract void ignite();
+
+    public void creeper$detonate() {
+        this.explode();
+    }
+
+    public void creeper$ignite() {
+        this.ignite();
+    }
+
+    public void creeper$ignite(int fuseTicks) {
+        this.timeSinceIgnited = 0;
+        this.fuseTime = fuseTicks;
+        this.ignite();
+    }
 
 }

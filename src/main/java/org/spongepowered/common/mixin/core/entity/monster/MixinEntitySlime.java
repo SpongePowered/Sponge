@@ -22,13 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.monster;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.monster.EntitySlime;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
+import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+import java.util.List;
 
+@Mixin(EntitySlime.class)
+public abstract class MixinEntitySlime extends MixinEntityLiving implements Slime {
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(get(SlimeData.class).get());
+    }
 }

@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.item.EntityFireworkRocket;
+import net.minecraft.entity.item.EntityMinecartTNT;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.monster.EntityCreeper;
+import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin({EntityTNTPrimed.class, EntityCreeper.class, EntityMinecartTNT.class, EntityFireworkRocket.class})
+public abstract class MixinFusedExplosive implements FusedExplosive {
 
 }

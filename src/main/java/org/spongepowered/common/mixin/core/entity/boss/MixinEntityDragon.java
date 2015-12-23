@@ -22,13 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.boss;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.ImmutableSet.Builder;
+import net.minecraft.entity.boss.EntityDragon;
+import net.minecraft.entity.boss.EntityDragonPart;
+import org.spongepowered.api.entity.living.complex.EnderDragon;
+import org.spongepowered.api.entity.living.complex.EnderDragonPart;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+import java.util.Set;
+
+@Mixin(EntityDragon.class)
+public abstract class MixinEntityDragon extends MixinEntityLiving implements EnderDragon {
+
+    @Shadow public EntityDragonPart[] dragonPartArray;
+
+    @Override
+    public Set<EnderDragonPart> getParts() {
+        Builder<EnderDragonPart> builder = ImmutableSet.builder();
+
+        for (EntityDragonPart part : this.dragonPartArray) {
+            builder.add((EnderDragonPart) part);
+        }
+
+        return builder.build();
+    }
 
 }

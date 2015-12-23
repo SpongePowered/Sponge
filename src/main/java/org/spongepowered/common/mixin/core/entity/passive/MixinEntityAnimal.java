@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.passive.EntityAnimal;
+import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin(EntityAnimal.class)
+public abstract class MixinEntityAnimal extends MixinEntityAgeable implements Animal {
 
 }

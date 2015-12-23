@@ -22,45 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.projectile;
+package org.spongepowered.common.mixin.core.entity.effect;
 
-import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Snowball;
+import org.spongepowered.api.entity.weather.Lightning;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(EntitySnowball.class)
-public abstract class MixinEntitySnowball extends MixinEntityThrowable implements Snowball {
+@Mixin(EntityLightningBolt.class)
+public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning {
 
-    private double damageAmount = 0;
-    private boolean damageSet = false;
+    private boolean effect = false;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
-        return this.damageSet ? (float) this.damageAmount : damage;
+    @Override
+    public boolean isEffect() {
+        return this.effect;
+    }
+
+    @Override
+    public void setEffect(boolean effect) {
+        this.effect = effect;
+    }
+
+    @Inject(method = "onUpdate()V", at = {@At(value = "NEW", args = "class=net.minecraft.util.BlockPos"),
+            @At(value = "NEW", args = "class=net.minecraft.util.AxisAlignedBB")}, cancellable = true
+        )
+    public void onOnUpdate(CallbackInfo ci) {
+        if (this.effect) {
+            ci.cancel();
+        }
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-            this.damageSet = true;
+        if (compound.hasKey("effect")) {
+            this.effect = compound.getBoolean("effect");
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        if (this.damageSet) {
-            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
-        } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-        }
+        compound.setBoolean("effect", this.effect);
     }
-
 }

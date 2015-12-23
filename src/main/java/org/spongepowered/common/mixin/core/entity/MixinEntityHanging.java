@@ -22,44 +22,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.projectile;
+package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Snowball;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntitySnowball.class)
-public abstract class MixinEntitySnowball extends MixinEntityThrowable implements Snowball {
+@Mixin(EntityHanging.class)
+public abstract class MixinEntityHanging extends MixinEntity implements Hanging {
 
-    private double damageAmount = 0;
-    private boolean damageSet = false;
+    @Shadow public EnumFacing facingDirection;
+    @Shadow private int tickCounter1;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
-        return this.damageSet ? (float) this.damageAmount : damage;
-    }
+    @Shadow public abstract boolean onValidSurface();
+    @Shadow public abstract void onBroken(Entity entity);
 
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-            this.damageSet = true;
+    private boolean ignorePhysics = false;
+
+    /**
+     * Called to update the entity's position/logic.
+     */
+    @Overwrite
+    public void onUpdate() {
+        this.prevPosX = this.posX;
+        this.prevPosY = this.posY;
+        this.prevPosZ = this.posZ;
+
+        if (this.tickCounter1++ == 100 && !this.worldObj.isRemote) {
+            this.tickCounter1 = 0;
+
+            if (!this.isDead && !this.onValidSurface() && !this.ignorePhysics) {
+                this.setDead();
+                this.onBroken((Entity) null);
+            }
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        if (this.damageSet) {
-            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
-        } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        compound.setBoolean("ignorePhysics", this.ignorePhysics);
+    }
+
+    @Override
+    public void readFromNbt(NBTTagCompound compound) {
+        super.readFromNbt(compound);
+        if (compound.hasKey("ignorePhysics")) {
+            this.ignorePhysics = compound.getBoolean("ignorePhysics");
         }
     }
 

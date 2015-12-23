@@ -22,13 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.passive.EntityBat;
+import org.spongepowered.api.entity.living.Bat;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin(EntityBat.class)
+public abstract class MixinEntityBat implements Bat {
+
+    @Shadow public abstract boolean getIsBatHanging();
+    @Shadow public abstract void setIsBatHanging(boolean hanging);
+
+    public boolean isAwake() {
+        return !getIsBatHanging();
+    }
+
+    public void setAwake(boolean awake) {
+        setIsBatHanging(!awake);
+    }
 
 }

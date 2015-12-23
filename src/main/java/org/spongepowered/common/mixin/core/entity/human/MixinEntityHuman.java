@@ -22,13 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.mixin.core.entity.human;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.entity.living.Human;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+import java.util.Optional;
+
+@Mixin(value = EntityHuman.class, remap = false)
+public abstract class MixinEntityHuman extends MixinEntityCreature implements Human {
+
+    @Shadow private GameProfile fakeProfile;
+    private Inventory openInventory;
+
+    @Override
+    public String getName() {
+        return this.fakeProfile.getName();
+    }
+
+    @Override
+    public boolean isViewingInventory() {
+        return this.openInventory != null;
+    }
+
+    @Override
+    public Optional<Inventory> getOpenInventory() {
+        return Optional.ofNullable(this.openInventory);
+    }
+
+    @Override
+    public void openInventory(Inventory inventory) {
+        this.openInventory = checkNotNull(inventory);
+    }
+
+    @Override
+    public void closeInventory() {
+        this.openInventory = null;
+    }
 
 }

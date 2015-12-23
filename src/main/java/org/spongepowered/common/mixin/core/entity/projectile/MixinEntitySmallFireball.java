@@ -24,43 +24,44 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
-import net.minecraft.entity.projectile.EntitySnowball;
+import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.entity.projectile.Snowball;
+import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
-@Mixin(EntitySnowball.class)
-public abstract class MixinEntitySnowball extends MixinEntityThrowable implements Snowball {
+@Mixin(EntitySmallFireball.class)
+public abstract class MixinEntitySmallFireball extends MixinEntityFireball implements SmallFireball {
 
-    private double damageAmount = 0;
-    private boolean damageSet = false;
+    private float damage = 5.0f;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    private float onAttackEntityFrom(float damage) {
-        return this.damageSet ? (float) this.damageAmount : damage;
+    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+    protected float onAttackEntityFrom(float amount) {
+        return this.damage;
+    }
+
+    public double getDamage() {
+        return this.damage;
+    }
+
+    public void setDamage(double damage) {
+        this.damage = (float) damage;
     }
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
         if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-            this.damageSet = true;
+            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        if (this.damageSet) {
-            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
-        } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
-        }
+        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
     }
-
 }

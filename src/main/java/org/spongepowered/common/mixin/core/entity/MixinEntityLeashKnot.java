@@ -24,11 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.EntityFlying;
-import org.spongepowered.api.entity.living.Aerial;
+import net.minecraft.entity.EntityLeashKnot;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.hanging.LeashHitch;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(EntityFlying.class)
-public abstract class MixinEntityFlying extends MixinEntityLiving implements Aerial {
+@Mixin(EntityLeashKnot.class)
+public abstract class MixinEntityLeashKnot extends MixinEntityHanging implements LeashHitch {
 
+    @Override
+    public Entity getLeashedEntity() {
+        return null;
+    }
 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import net.minecraft.entity.passive.EntityWaterMob;
 import org.spongepowered.api.entity.living.Aquatic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.entity.living.MixinEntityLiving;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 @Mixin(EntityWaterMob.class)
 public abstract class MixinEntityWaterMob extends MixinEntityLiving implements Aquatic {

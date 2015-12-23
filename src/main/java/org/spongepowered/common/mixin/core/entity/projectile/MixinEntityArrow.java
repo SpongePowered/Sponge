@@ -29,7 +29,6 @@ import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
@@ -37,7 +36,6 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
 
