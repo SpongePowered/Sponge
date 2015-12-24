@@ -471,14 +471,13 @@ public class SpongeHooks {
         return SpongeImpl.getGlobalConfig();
     }
 
-    public static void setBlockState(World world, int x, int y, int z, BlockState state) {
-        setBlockState(world, new BlockPos(x, y, z), state);
+    public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
+        setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
     }
 
-    public static void setBlockState(World world, BlockPos position, BlockState state) {
+    public static void setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
         if (state instanceof IBlockState) {
-            // Notify neighbours or not?
-            world.setBlockState(position, (IBlockState) state);
+            world.setBlockState(position, (IBlockState) state, notifyNeighbors ? 3 : 2);
         } else {
             // TODO: Need to figure out what is sensible for other BlockState implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");

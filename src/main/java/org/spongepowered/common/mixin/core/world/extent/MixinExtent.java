@@ -95,7 +95,12 @@ public abstract class MixinExtent implements Extent {
 
     @Override
     public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
+        setBlock(position, block, true);
+    }
+
+    @Override
+    public void setBlock(Vector3i position, BlockState block, boolean notifyNeighbors) {
+        setBlock(position.getX(), position.getY(), position.getZ(), block, notifyNeighbors);
     }
 
     @Override
@@ -105,12 +110,22 @@ public abstract class MixinExtent implements Extent {
 
     @Override
     public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
+        setBlockType(position, type, true);
+    }
+
+    @Override
+    public void setBlockType(Vector3i position, BlockType type, boolean notifyNeighbors) {
+        setBlockType(position.getX(), position.getY(), position.getZ(), type, notifyNeighbors);
     }
 
     @Override
     public void setBlockType(int x, int y, int z, BlockType type) {
-        setBlock(x, y, z, type.getDefaultState());
+        setBlockType(x, y, z, type, true);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type, boolean notifyNeighbors) {
+        setBlock(x, y, z, type.getDefaultState(), notifyNeighbors);
     }
 
     @Override
