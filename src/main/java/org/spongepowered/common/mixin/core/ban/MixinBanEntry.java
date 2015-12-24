@@ -113,7 +113,6 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
 
     @Override
     public Optional<Instant> getExpirationDate() {
-        return Optional.of(this.banEndDate.toInstant());
+        return Optional.ofNullable(this.banEndDate == null ? null : this.banEndDate.toInstant());
     }
-
 }

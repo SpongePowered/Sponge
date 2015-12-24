@@ -125,19 +125,35 @@ public class SpongeBanBuilder implements Ban.Builder {
 
         if (this.banType == BanTypes.PROFILE) {
             checkState(this.profile != null, "User cannot be null!");
-            return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, Date.from(this.end), Texts.legacy().to(this.reason));
+            return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end), Texts.legacy().to(this.reason));
         } else {
             checkState(this.address != null, "Address cannot be null!");
 
             // This *should* be a static method, but apparently not...
             BanList ipBans = MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
-            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName, Date.from(this.end), Texts.legacy().to(this.reason));
+            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName, this.toDate(this.end), Texts.legacy().to(this.reason));
         }
     }
 
+    private Date toDate(Instant instant) {
+        return instant == null ? null : Date.from(instant);
+    }
+
     @Override
-    public Ban.Builder from(Ban value) {
+    public Ban.Builder from(Ban ban) {
         reset();
+        this.banType = ban.getType();
+
+        if (this.banType.equals(BanTypes.PROFILE)) {
+            this.profile = ((Ban.Profile) ban).getProfile();
+        } else {
+            this.address = ((Ban.Ip) ban).getAddress();
+        }
+
+        this.reason = ban.getReason();
+        this.start = ban.getCreationDate();
+        this.end = ban.getExpirationDate().orElse(null);
+        this.source = ban.getBanSource().orElse(null);
         return this;
     }
 
