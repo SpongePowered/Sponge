@@ -26,6 +26,7 @@ package org.spongepowered.common.effect.particle;
 
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
@@ -94,15 +95,15 @@ public class SpongeParticleType implements ParticleType {
 
     public static class Note extends SpongeParticleType implements ParticleType.Note {
 
-        private float note;
+        private NotePitch note;
 
-        public Note(EnumParticleTypes type, float note) {
+        public Note(EnumParticleTypes type, NotePitch note) {
             super(type, false);
             this.note = note;
         }
 
         @Override
-        public float getDefaultNote() {
+        public NotePitch getDefaultNote() {
             return this.note;
         }
 

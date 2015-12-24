@@ -188,7 +188,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Override
-    public int getDimensionId() {
+    public Integer getDimensionId() {
         return this.dimId;
     }
 

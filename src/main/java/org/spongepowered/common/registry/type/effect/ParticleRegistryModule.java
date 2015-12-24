@@ -32,6 +32,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
 import org.spongepowered.api.util.Color;
@@ -85,7 +86,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("villager_angry", new SpongeParticleType(EnumParticleTypes.VILLAGER_ANGRY, false));
         this.addParticleType("villager_happy", new SpongeParticleType(EnumParticleTypes.VILLAGER_HAPPY, true));
         this.addParticleType("town_aura", new SpongeParticleType(EnumParticleTypes.TOWN_AURA, true));
-        this.addParticleType("note", new SpongeParticleType.Note(EnumParticleTypes.NOTE, 0f));
+        this.addParticleType("note", new SpongeParticleType.Note(EnumParticleTypes.NOTE, NotePitches.F_SHARP0));
         this.addParticleType("portal", new SpongeParticleType(EnumParticleTypes.PORTAL, true));
         this.addParticleType("enchantment_table", new SpongeParticleType(EnumParticleTypes.ENCHANTMENT_TABLE, true));
         this.addParticleType("flame", new SpongeParticleType(EnumParticleTypes.FLAME, true));
