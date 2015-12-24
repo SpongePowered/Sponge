@@ -801,6 +801,11 @@ public class DataRegistrar {
                 ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
         dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
 
+        final KnockbackDualProcessor knockbackDualProcessor = new KnockbackDualProcessor();
+        dataManager.registerDataProcessorAndImpl(KnockbackData.class, SpongeKnockbackData.class, ImmutableKnockbackData.class, 
+                ImmutableSpongeKnockbackData.class, knockbackDualProcessor);
+        dataManager.registerValueProcessor(Keys.KNOCKBACK_STRENGTH, knockbackDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
