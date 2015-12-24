@@ -31,8 +31,10 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeKnockbackData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
+@ImplementationRequiredForTest
 public class SpongeKnockbackData extends AbstractIntData<KnockbackData, ImmutableKnockbackData> implements KnockbackData {
 
     public SpongeKnockbackData() {
