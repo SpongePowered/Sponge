@@ -95,6 +95,8 @@ public final class DataQueries {
 
     // Snapshots
     public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
+    public static final DataQuery SNAPSHOT_BLOCK_DATA = of("BlockStateData");
+    public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
 
     // Blocks
     public static final DataQuery BLOCK_STATE = of("BlockState");

@@ -205,8 +205,8 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
             builder.unsafeNbt(compound);
         }
         final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
-        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            final List<DataView> dataViews = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
+        if (container.contains(DataQueries.SNAPSHOT_TILE_DATA)) {
+            final List<DataView> dataViews = container.getViewList(DataQueries.SNAPSHOT_TILE_DATA).get();
             extraData = DataUtil.deserializeImmutableManipulatorList(dataViews);
         } else {
             extraData = ImmutableList.of();
