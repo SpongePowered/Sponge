@@ -29,6 +29,8 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ValueProcessor;
 
 import java.util.Optional;
@@ -98,29 +100,35 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
-        DataTransactionResult result = DataTransactionResult.failNoData();
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
-                result = processor.offerToStore(container, value);
+                final DataTransactionResult result = processor.offerToStore(container, value);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
                 }
             }
         }
-        return result;
+        final ImmutableValue<?> immutable;
+        if (value instanceof Value) {
+            immutable = ((Value) value).asImmutable();
+        } else if (value instanceof ImmutableValue) {
+            immutable = (ImmutableValue) value;
+        } else {
+            throw new IllegalArgumentException("Cannot parse over a BaseValue that is not either a Value or ImmutableValue!");
+        }
+        return DataTransactionResult.failResult(immutable);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        DataTransactionResult result = DataTransactionResult.failNoData();
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
-                result = processor.removeFrom(container);
+                final DataTransactionResult result = processor.removeFrom(container);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
                 }
             }
         }
-        return result;
+        return DataTransactionResult.failNoData();
     }
 }

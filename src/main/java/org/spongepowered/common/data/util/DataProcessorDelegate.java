@@ -126,11 +126,10 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        DataTransactionResult result = DataTransactionResult.failNoData();
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             tuple.getSecond().startTiming();
             if (tuple.getFirst().supports(dataHolder)) {
-                result = tuple.getFirst().set(dataHolder, manipulator, function);
+                final DataTransactionResult result = tuple.getFirst().set(dataHolder, manipulator, function);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     tuple.getSecond().stopTiming();
                     return result;
@@ -138,7 +137,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
             }
             tuple.getSecond().stopTiming();
         }
-        return result;
+        return DataTransactionResult.failResult(manipulator.asImmutable().getValues());
     }
 
     @Override
@@ -157,11 +156,10 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        DataTransactionResult result = DataTransactionResult.failNoData();
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
             tuple.getSecond().startTiming();
             if (tuple.getFirst().supports(dataHolder)) {
-                result = tuple.getFirst().remove(dataHolder);
+                final DataTransactionResult result = tuple.getFirst().remove(dataHolder);
                 tuple.getSecond().stopTiming();
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
@@ -170,7 +168,7 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
             tuple.getSecond().stopTiming();
 
         }
-        return result;
+        return DataTransactionResult.failNoData();
     }
 
     @Override
