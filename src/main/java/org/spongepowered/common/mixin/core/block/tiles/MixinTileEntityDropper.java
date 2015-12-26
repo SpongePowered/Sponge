@@ -31,6 +31,6 @@ import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
 @Mixin(TileEntityDropper.class)
-public abstract class MixinTileEntityDropper extends MixinTileEntityLockable implements Dropper {
+public abstract class MixinTileEntityDropper extends MixinTileEntityDispenser implements Dropper {
 
 }

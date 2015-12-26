@@ -47,6 +47,7 @@ public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implem
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
         manipulators.add(getCommandData());
     }
 

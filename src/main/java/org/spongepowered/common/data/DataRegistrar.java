@@ -78,6 +78,7 @@ import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
 import org.spongepowered.common.data.processor.dual.entity.*;
 import org.spongepowered.common.data.processor.dual.item.*;
+import org.spongepowered.common.data.processor.dual.tile.*;
 import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
@@ -380,6 +381,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class, ImmutableConnectedDirectionData.class,
                 ImmutableSpongeConnectedDirectionData.class, connectedDirectionDataProcessor);
 
+        final TileConnectedDirectionDataProcessor tileConnectedDirectionDataProcessor = new TileConnectedDirectionDataProcessor();
+        dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class,
+                ImmutableConnectedDirectionData.class, ImmutableSpongeConnectedDirectionData.class, tileConnectedDirectionDataProcessor);
+
         final DirectionalDataProcessor directionalDataProcessor = new DirectionalDataProcessor();
         dataManager.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
                 ImmutableSpongeDirectionalData.class, directionalDataProcessor);
@@ -518,6 +523,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
 
+        final FlowerPotDataProcessor flowerPotDataProcessor = new FlowerPotDataProcessor();
+        dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, flowerPotDataProcessor);
+
+
         final FallingBlockDataProcessor fallingBlockDataProcessor = new FallingBlockDataProcessor();
         dataManager.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
                                                   ImmutableSpongeFallingBlockData.class, fallingBlockDataProcessor);
@@ -548,7 +558,6 @@ public class DataRegistrar {
                 ImmutableSpongeCommandData.class, entityCommandDataProcessor);
         dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
                 ImmutableSpongeCommandData.class, tileEntityCommandDataProcessor);
-
 
         // Values
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -680,6 +689,7 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.PLAYER_CREATED, new PlayerCreatedValueProcessor());
         dataManager.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
         dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
+        dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new FlowerPotValueProcessor());
         dataManager.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.RABBIT_TYPE, new RabbitTypeValueProcessor());
         dataManager.registerValueProcessor(Keys.LOCK_TOKEN, new LockTokenValueProcessor());
@@ -760,6 +770,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(RotationalData.class, SpongeRotationalData.class, ImmutableRotationalData.class,
             ImmutableSpongeRotationalData.class, rotationalDataProcessor);
         dataManager.registerValueProcessor(Keys.ROTATION, rotationalDataProcessor);
+
+        final SkullRotationDataProcessor skullRotationDataProcessor = new SkullRotationDataProcessor();
+        dataManager.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
+            ImmutableSpongeDirectionalData.class, skullRotationDataProcessor);
+        dataManager.registerValueProcessor(Keys.DIRECTION, skullRotationDataProcessor);
 
         final SplashPotionDualProcessor splashPotionDualProcessor = new SplashPotionDualProcessor();
         dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,

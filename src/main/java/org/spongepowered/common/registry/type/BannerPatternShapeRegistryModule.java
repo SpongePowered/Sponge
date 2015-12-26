@@ -58,6 +58,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
     public void registerDefaults() {
         for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
             this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(), (BannerPatternShape) (Object) pattern);
+            this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(), (BannerPatternShape) (Object) pattern);
         }
     }
 
@@ -66,6 +67,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
         for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
             if (!this.bannerPatternShapeMappings.containsKey(pattern.name())) {
                 this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(), (BannerPatternShape) (Object) pattern);
+                this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(), (BannerPatternShape) (Object) pattern);
             }
         }
     }

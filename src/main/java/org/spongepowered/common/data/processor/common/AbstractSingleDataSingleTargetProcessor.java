@@ -50,13 +50,13 @@ public abstract class AbstractSingleDataSingleTargetProcessor<Holder, T, V exten
         this.holderClass = checkNotNull(holderClass);
     }
 
-    protected boolean supports(Holder entity) {
+    protected boolean supports(Holder dataHolder) {
         return true;
     }
 
-    protected abstract boolean set(Holder entity, T value);
+    protected abstract boolean set(Holder dataHolder, T value);
 
-    protected abstract Optional<T> getVal(Holder entity);
+    protected abstract Optional<T> getVal(Holder dataHolder);
 
     protected abstract ImmutableValue<T> constructImmutableValue(T value);
 

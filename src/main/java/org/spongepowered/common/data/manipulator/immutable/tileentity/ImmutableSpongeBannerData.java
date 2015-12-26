@@ -54,6 +54,7 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
         super(ImmutableBannerData.class);
         this.base = checkNotNull(base, "Null base!");
         this.layers = ImmutableList.copyOf(checkNotNull(layers, "Null pattern list!"));
+        registerGetters();
     }
 
     public DyeColor getBase() {

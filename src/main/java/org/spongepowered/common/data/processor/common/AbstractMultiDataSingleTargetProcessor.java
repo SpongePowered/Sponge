@@ -55,15 +55,15 @@ public abstract class AbstractMultiDataSingleTargetProcessor<Holder, T extends D
         return this.holderClass.isInstance(dataHolder) && supports((Holder) dataHolder);
     }
 
-    protected boolean supports(Holder entity) {
+    protected boolean supports(Holder dataHolder) {
         return true;
     }
 
-    protected abstract boolean doesDataExist(Holder entity);
+    protected abstract boolean doesDataExist(Holder dataHolder);
 
-    protected abstract boolean set(Holder entity, Map<Key<?>, Object> keyValues);
+    protected abstract boolean set(Holder dataHolder, Map<Key<?>, Object> keyValues);
 
-    protected abstract Map<Key<?>, ?> getValues(Holder entity);
+    protected abstract Map<Key<?>, ?> getValues(Holder dataHolder);
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override

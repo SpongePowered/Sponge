@@ -22,55 +22,70 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.tileentity;
+package org.spongepowered.common.data.processor.dual.tile;
 
-import net.minecraft.tileentity.TileEntityLockable;
-import net.minecraft.world.LockCode;
+import net.minecraft.block.BlockSkull;
+import net.minecraft.tileentity.TileEntitySkull;
+import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.data.ImmutableDataCachingUtil;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class TileEntityLockTokenValueProcessor extends AbstractSpongeValueProcessor<TileEntityLockable, String, Value<String>> {
+public class SkullRotationDataProcessor
+        extends AbstractSingleTargetDualProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
-    protected TileEntityLockTokenValueProcessor() {
-        super(TileEntityLockable.class, Keys.LOCK_TOKEN);
+    public SkullRotationDataProcessor() {
+        super(TileEntitySkull.class, Keys.DIRECTION);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof TileEntityLockable) {
-            set((TileEntityLockable) container, "");
-            return DataTransactionResult.successNoData();
-        }
+        // If a skull has rotation, you can't remove it
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected Value<String> constructValue(String actualValue) {
-        return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
+    protected Value<Direction> constructValue(Direction actualValue) {
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, actualValue);
     }
 
     @Override
-    protected boolean set(TileEntityLockable container, String value) {
-        container.setLockCode(value.length() == 0 ? LockCode.EMPTY_CODE : new LockCode(value));
+    protected boolean set(TileEntitySkull skull, Direction value) {
+        if (value.ordinal() > 15) {
+            return false;
+        }
+        skull.setSkullRotation(value.ordinal());
         return true;
     }
 
     @Override
-    protected Optional<String> getVal(TileEntityLockable container) {
-        return Optional.of(container.getLockCode().getLock());
+    protected Optional<Direction> getVal(TileEntitySkull skull) {
+        if (skull.getWorld().getBlockState(skull.getPos()).getValue(BlockSkull.FACING) != EnumFacing.UP) {
+            return Optional.empty();
+        }
+        return Optional.of(Direction.values()[skull.skullRotation]);
     }
 
     @Override
-    protected ImmutableValue<String> constructImmutableValue(String value) {
-        return new ImmutableSpongeValue<String>(Keys.LOCK_TOKEN, "", value);
+    protected ImmutableValue<Direction> constructImmutableValue(Direction value) {
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, Keys.DIRECTION, Direction.NORTH, value);
+    }
+
+    @Override
+    protected DirectionalData createManipulator() {
+        return new SpongeDirectionalData();
     }
 
 }

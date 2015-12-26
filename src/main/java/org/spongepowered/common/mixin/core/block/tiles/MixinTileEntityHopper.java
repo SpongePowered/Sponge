@@ -35,6 +35,8 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,13 +45,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityHopper.class)
-public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper {
+public abstract class MixinTileEntityHopper extends MixinTileEntityLockable implements Hopper, IMixinCustomNameable {
 
     @Shadow private int transferCooldown;
     @Shadow private String customName;
@@ -57,7 +61,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Used to track when an item is thrown into the world and sucked 
+     * Purpose: Used to track when an item is thrown into the world and sucked
      * into a hopper.
      */
     @Overwrite
@@ -80,7 +84,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
             }
             // Sponge end
             ItemStack itemstack = entityItem.getEntityItem().copy();
-            ItemStack itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(source, itemstack, (EnumFacing)null);
+            ItemStack itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(source, itemstack, (EnumFacing) null);
 
             if (itemstack1 != null && itemstack1.stackSize != 0) {
                 entityItem.setEntityItemStack(itemstack1);
@@ -102,4 +106,19 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
         }
         return container;
     }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        Optional<CooldownData> cooldownData = get(CooldownData.class);
+        if (cooldownData.isPresent()) {
+            manipulators.add(cooldownData.get());
+        }
+    }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityHopper) (Object) this).setCustomName(customName);
+    }
+
 }

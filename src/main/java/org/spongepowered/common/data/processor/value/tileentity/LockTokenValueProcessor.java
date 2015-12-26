@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.value.tileentity;
 
 import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
@@ -45,11 +45,15 @@ public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (container instanceof TileEntityLockable) {
-            set((TileEntityLockable) container, "");
+        if (!(container instanceof TileEntityLockable)) {
+            return DataTransactionResult.failNoData();
+        }
+        Optional<String> oldValue = getVal((TileEntityLockable) container);
+        if (!oldValue.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        return DataTransactionResult.failNoData();
+        ((TileEntityLockable) container).setLockCode(LockCode.EMPTY_CODE);
+        return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
     }
 
     @Override
@@ -64,11 +68,11 @@ public final class LockTokenValueProcessor extends AbstractSpongeValueProcessor<
     }
 
     @Override
-    protected Optional<String> getVal(TileEntityLockable container) {
-        if (container.getLockCode().isEmpty()) {
-            return Optional.empty();
+    protected Optional<String> getVal(TileEntityLockable tile) {
+        if (tile.isLocked()) {
+            return Optional.of(tile.getLockCode().getLock());
         }
-        return Optional.of(container.getLockCode().getLock());
+        return Optional.empty();
     }
 
     @Override

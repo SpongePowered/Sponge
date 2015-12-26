@@ -35,6 +35,7 @@ import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
@@ -82,6 +83,12 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         dataView.set(Keys.BANNER_BASE_COLOR.getQuery(), this.baseColor);
     }
 
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getBannerData());
+    }
+
     public void markDirtyAndUpdate() {
         this.markDirty();
         if (this.worldObj != null) {
@@ -96,7 +103,6 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
                 String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
-                SpongeImpl.getLogger().info("Found pattern id: " + patternId);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
                     registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));

@@ -24,85 +24,84 @@
  */
 package org.spongepowered.common.data.processor.data.tileentity;
 
-import com.google.common.collect.Maps;
 import net.minecraft.block.BlockJukebox;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataContainer;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.ItemRecord;
+import org.spongepowered.api.block.tileentity.Jukebox;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
-import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
-public class JukeboxDataProcessor extends AbstractTileEntityDataProcessor<BlockJukebox.TileEntityJukebox, RepresentedItemData, ImmutableRepresentedItemData> {
+public class JukeboxDataProcessor extends
+        AbstractTileEntitySingleDataProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>, RepresentedItemData, ImmutableRepresentedItemData> {
 
     public JukeboxDataProcessor() {
-        super(BlockJukebox.TileEntityJukebox.class);
+        super(BlockJukebox.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
     }
 
     @Override
-    protected boolean doesDataExist(BlockJukebox.TileEntityJukebox entity) {
-        return true;
-    }
-
-    @Override
-    protected boolean set(BlockJukebox.TileEntityJukebox entity, Map<Key<?>, Object> keyValues) {
-        entity.setRecord((ItemStack) ((ItemStackSnapshot)keyValues.get(Keys.REPRESENTED_ITEM)).createStack());
-        entity.getWorld().setBlockState(entity.getPos(), entity.getWorld().getBlockState(entity.getPos()).withProperty(BlockJukebox.HAS_RECORD, true), 2);
-        return false;
-    }
-
-    @Override
-    protected Map<Key<?>, ?> getValues(BlockJukebox.TileEntityJukebox entity) {
-        HashMap<Key<?>, ItemStackSnapshot> values = Maps.newHashMapWithExpectedSize(1);
-        if(entity.getRecord() != null) {
-            values.put(Keys.REPRESENTED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) entity.getRecord()).createSnapshot());
+    protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot stackSnapshot) {
+        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        if (stackSnapshot == ItemStackSnapshot.NONE) {
+            if (jukebox.getRecord() == null) {
+                return true;
+            }
+            ((Jukebox) jukebox).ejectRecord();
+            block = jukebox.getWorld().getBlockState(jukebox.getPos());
+            return block.getBlock() instanceof BlockJukebox && !(Boolean) block.getValue(BlockJukebox.HAS_RECORD);
         }
-        return values;
+        if (!(stackSnapshot.getType() instanceof ItemRecord)) {
+            return false;
+        }
+        ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
+        block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        return block.getBlock() instanceof BlockJukebox && (Boolean) block.getValue(BlockJukebox.HAS_RECORD);
     }
 
     @Override
-    public Optional<RepresentedItemData> fill(DataContainer container, RepresentedItemData representedItemData) {
-        representedItemData.set(Keys.REPRESENTED_ITEM, (ItemStackSnapshot)container.get(Keys.REPRESENTED_ITEM.getQuery()).get());
-        return Optional.of(representedItemData);
+    protected Optional<ItemStackSnapshot> getVal(BlockJukebox.TileEntityJukebox jukebox) {
+        if (jukebox.getRecord() == null) {
+            return Optional.empty();
+        }
+        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.getRecord()).createSnapshot());
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if(dataHolder instanceof BlockJukebox.TileEntityJukebox) {
-            Optional<ItemStackSnapshot> itemStackSnapshot = dataHolder.get(Keys.REPRESENTED_ITEM);
-            if (itemStackSnapshot.isPresent()) {
-                try {
-                    BlockJukebox.TileEntityJukebox jukebox = (BlockJukebox.TileEntityJukebox) dataHolder;
-                    ((BlockJukebox) Blocks.jukebox).dropRecord(jukebox.getWorld(), jukebox.getPos(), null);
-                    jukebox.getWorld().setBlockState(jukebox.getPos(),
-                            jukebox.getWorld().getBlockState(jukebox.getPos()).withProperty(BlockJukebox.HAS_RECORD, false), 2);
-                    return builder.replace(itemStackSnapshot.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
-                } catch (Exception e) {
-                    SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
-                    return builder.result(DataTransactionResult.Type.ERROR).build();
-                }
-            } else {
-                return DataTransactionResult.successNoData();
-            }
+        if (!(dataHolder instanceof BlockJukebox.TileEntityJukebox)) {
+            return DataTransactionResult.failNoData();
         }
-
-        return DataTransactionResult.failNoData();
+        Optional<ItemStackSnapshot> oldValue = getVal((BlockJukebox.TileEntityJukebox) dataHolder);
+        if (!oldValue.isPresent()) {
+            return DataTransactionResult.successNoData();
+        }
+        try {
+            ((Jukebox) dataHolder).ejectRecord();
+            return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
+        } catch (Exception e) {
+            SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
+        }
     }
 
     @Override
     protected RepresentedItemData createManipulator() {
         return new SpongeRepresentedItemData();
+    }
+
+    @Override
+    protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
+        return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
     }
 }

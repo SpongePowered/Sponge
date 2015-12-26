@@ -32,10 +32,11 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 @NonnullByDefault
 @Mixin(TileEntityFurnace.class)
-public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace {
+public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
 
     @Shadow private String furnaceCustomName;
 
@@ -50,5 +51,10 @@ public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable imp
             container.set(of("CustomName"), this.furnaceCustomName);
         }
         return container;
+    }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
     }
 }

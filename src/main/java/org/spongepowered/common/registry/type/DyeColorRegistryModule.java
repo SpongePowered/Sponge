@@ -77,7 +77,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
 
     public static Optional<DyeColor> fromId(int id) {
         for (EnumDyeColor color : EnumDyeColor.values()) {
-            if (color.ordinal() == id) {
+            if (color.getDyeDamage() == id) {
                 return Optional.of((DyeColor) (Object) color);
             }
         }

@@ -24,32 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import net.minecraft.tileentity.TileEntityBrewingStand;
-import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.tileentity.TileEntityPiston;
+import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
-@NonnullByDefault
-@Mixin(TileEntityBrewingStand.class)
-public abstract class MixinTileEntityBrewingStand extends MixinTileEntityLockable implements BrewingStand, IMixinCustomNameable {
-
-    @Shadow private String customName;
-
-    @Override
-    public void sendDataToContainer(DataView dataView) {
-        dataView.set(DataQueries.BLOCK_ENTITY_BREWING_TIME, this.getField(0));
-        if (this.customName != null) {
-            dataView.set(DataQueries.BLOCK_ENTITY_CUSTOM_NAME, this.customName);
-        }
-    }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityBrewingStand) (Object) this).setName(customName);
-    }
+@Mixin(TileEntityPiston.class)
+public abstract class MixinTileEntityPiston extends MixinTileEntity implements Piston {
 
 }

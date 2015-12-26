@@ -30,9 +30,12 @@ import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
 
 @NonnullByDefault
 @Mixin(TileEntityBeacon.class)
@@ -53,5 +56,11 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     public void sendDataToContainer(DataView dataView) {
         dataView.set(of("effect1"), getField(1));
         dataView.set(of("effect2"), getField(2));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        // TODO manipulators.add(getBeaconData());
     }
 }

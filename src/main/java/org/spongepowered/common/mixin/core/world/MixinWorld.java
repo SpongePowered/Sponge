@@ -1312,16 +1312,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 .position(location.getBlockPosition());
         if (state.getBlock() instanceof ITileEntityProvider) {
             net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
-            NBTTagCompound nbt = null;
             if (te != null) {
-                nbt = new NBTTagCompound();
+                TileEntity tile = (TileEntity) te;
+                for (DataManipulator<?, ?> manipulator : tile.getContainers()) {
+                    this.builder.add(manipulator);
+                }
+                NBTTagCompound nbt = new NBTTagCompound();
                 te.writeToNBT(nbt);
-            }
-            if (nbt != null) {
                 this.builder.unsafeNbt(nbt);
             }
         }
-
         return new SpongeBlockSnapshot(this.builder, updateFlag);
     }
 

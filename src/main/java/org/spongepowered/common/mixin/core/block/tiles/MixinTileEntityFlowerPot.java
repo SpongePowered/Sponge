@@ -24,43 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import net.minecraft.tileentity.TileEntityEnchantmentTable;
-import org.spongepowered.api.block.tileentity.EnchantmentTable;
-import org.spongepowered.api.data.DataContainer;
+import net.minecraft.tileentity.TileEntityFlowerPot;
+import org.spongepowered.api.block.tileentity.FlowerPot;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 import java.util.List;
+import java.util.Optional;
 
-@NonnullByDefault
-@Mixin(TileEntityEnchantmentTable.class)
-public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements EnchantmentTable, IMixinCustomNameable {
-
-    @Shadow private String customName;
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("CustomName"), this.customName);
-        return container;
-    }
+@Mixin(TileEntityFlowerPot.class)
+public abstract class MixinTileEntityFlowerPot extends MixinTileEntity implements FlowerPot {
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        if (((TileEntityEnchantmentTable) (Object) this).hasCustomName()) {
-            manipulators.add(get(DisplayNameData.class).get());
+        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
+        if (flowerItemData.isPresent()) {
+            manipulators.add(flowerItemData.get());
         }
-    }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityEnchantmentTable) (Object) this).setCustomName(customName);
     }
 }

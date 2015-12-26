@@ -24,28 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.block.tiles;
 
-import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.block.tileentity.Skull;
-import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntitySkull.class)
 public abstract class MixinTileEntitySkull extends MixinTileEntity implements Skull {
 
-    @Shadow private int skullRotation;
-
-    @Shadow public abstract GameProfile getPlayerProfile();
-    @Shadow public abstract void setPlayerProfile(GameProfile playerProfile);
-    @Shadow public abstract int getSkullType();
-    @Shadow public abstract void setType(int type);
-
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        return container;
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getSkullData());
+        Optional<DirectionalData> directionaData = get(DirectionalData.class);
+        if (directionaData.isPresent()) {
+            manipulators.add(directionaData.get());
+        }
+        Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
+        if (profileData.isPresent()) {
+            manipulators.add(profileData.get());
+        }
     }
 }

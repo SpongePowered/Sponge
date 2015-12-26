@@ -47,21 +47,24 @@ public class CooldownDataProcessor
 
     @Override
     public boolean set(TileEntityHopper entity, Integer value) {
+        if (value < 1) {
+            return false;
+        }
         entity.transferCooldown = value;
         return true;
     }
 
     @Override
     public Optional<Integer> getVal(TileEntityHopper entity) {
-        return Optional.of(entity.transferCooldown);
+        return Optional.ofNullable(entity.transferCooldown < 1 ? null : entity.transferCooldown);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
-                .minimum(0)
+                .minimum(1)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
+                .defaultValue(8)
                 .actualValue(value)
                 .build()
                 .asImmutable();
@@ -74,6 +77,14 @@ public class CooldownDataProcessor
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
+        if (dataHolder instanceof TileEntityHopper) {
+            int cooldown = ((TileEntityHopper) dataHolder).transferCooldown;
+            if (cooldown < 1) {
+                return DataTransactionResult.failNoData();
+            }
+            ((TileEntityHopper) dataHolder).transferCooldown = -1;
+            return DataTransactionResult.successRemove(constructImmutableValue(cooldown));
+        }
         return DataTransactionResult.failNoData();
     }
 }

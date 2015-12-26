@@ -33,12 +33,13 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileLauncher;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(TileEntityDispenser.class)
-public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser {
+public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser, IMixinCustomNameable {
 
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
@@ -48,6 +49,11 @@ public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable i
     @Override
     public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
         return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityDispenser) (Object) this).setCustomName(customName);
     }
 
 }

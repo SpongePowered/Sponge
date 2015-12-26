@@ -40,7 +40,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeCommandData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
@@ -156,7 +155,7 @@ public class SpongeCommandData extends AbstractData<CommandData, ImmutableComman
     }
 
     public SpongeCommandData setLastOutput(Text message) {
-        if (checkNotNull(message, "Null message! Use empty text instead!").toString().isEmpty()) {
+        if (Texts.toPlain(checkNotNull(message, "Null message! Use empty text instead!")).isEmpty()) {
             this.lastOutput = null;
         } else {
             this.lastOutput = message;

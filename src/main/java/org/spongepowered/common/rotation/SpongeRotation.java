@@ -25,23 +25,30 @@
 package org.spongepowered.common.rotation;
 
 import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 
 public class SpongeRotation implements Rotation {
 
-    final int angle;
+    private final int angle;
+    private final String name;
+    private String id;
 
-    public SpongeRotation(int angle) {
+    public SpongeRotation(int angle, String name) {
         this.angle = angle;
+        this.name = name;
     }
 
     @Override
     public String getId() {
-        return null; // TODO
+        if (this.id == null) {
+            this.id = RotationRegistryModule.rotationMap.inverse().get(this);
+        }
+        return this.id;
     }
 
     @Override
     public String getName() {
-        return null; // TODO
+        return this.name;
     }
 
     @Override

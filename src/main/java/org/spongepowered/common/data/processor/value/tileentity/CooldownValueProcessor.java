@@ -44,22 +44,25 @@ public class CooldownValueProcessor extends AbstractSpongeValueProcessor<TileEnt
     @Override
     public MutableBoundedValue<Integer> constructValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
-                .minimum(0)
+                .minimum(1)
                 .maximum(Integer.MAX_VALUE)
-                .defaultValue(0)
+                .defaultValue(8)
                 .actualValue(value)
                 .build();
     }
 
     @Override
     public boolean set(TileEntityHopper container, Integer value) {
+        if (value < 1) {
+            return false;
+        }
         container.transferCooldown = value;
         return true;
     }
 
     @Override
     public Optional<Integer> getVal(TileEntityHopper container) {
-        return Optional.of(container.transferCooldown);
+        return Optional.ofNullable(container.transferCooldown < 1 ? null : container.transferCooldown);
     }
 
     @Override
@@ -69,6 +72,14 @@ public class CooldownValueProcessor extends AbstractSpongeValueProcessor<TileEnt
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof TileEntityHopper) {
+            int cooldown = ((TileEntityHopper) container).transferCooldown;
+            if (cooldown < 1) {
+                return DataTransactionResult.failNoData();
+            }
+            ((TileEntityHopper) container).transferCooldown = -1;
+            return DataTransactionResult.successRemove(constructImmutableValue(cooldown));
+        }
         return DataTransactionResult.failNoData();
     }
 }

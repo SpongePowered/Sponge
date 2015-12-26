@@ -38,12 +38,12 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -123,14 +123,14 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public SpongeBlockSnapshotBuilder add(DataManipulator<?, ?> manipulator) {
-        return add((ImmutableDataManipulator) manipulator.asImmutable());
+        return add((ImmutableDataManipulator<?, ?>) checkNotNull(manipulator, "manipulator").asImmutable());
     }
 
     @Override
     public SpongeBlockSnapshotBuilder add(ImmutableDataManipulator<?, ?> manipulator) {
+        checkNotNull(manipulator, "manipulator");
         if (this.manipulators == null) {
             this.manipulators = Lists.newArrayList();
         }

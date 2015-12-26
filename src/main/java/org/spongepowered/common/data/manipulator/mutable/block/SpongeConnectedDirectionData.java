@@ -26,7 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.block;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -40,21 +40,21 @@ import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.HashSet;
 import java.util.Set;
 
-public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData> implements ConnectedDirectionData {
+public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectionData, ImmutableConnectedDirectionData>
+        implements ConnectedDirectionData {
 
-    private Set<Direction> connectedDirections = new HashSet<>();
+    private Set<Direction> connectedDirections = Sets.newHashSet();
 
     public SpongeConnectedDirectionData(Set<Direction> connectedDirections) {
         super(ConnectedDirectionData.class);
         registerGettersAndSetters();
-        this.connectedDirections = ImmutableSet.copyOf(connectedDirections);
+        this.connectedDirections = Sets.newHashSet(connectedDirections);
     }
 
     public SpongeConnectedDirectionData() {
-    	this(ImmutableSet.<Direction>of(Direction.NONE));
+        this(Sets.newHashSet());
     }
 
     @Override
@@ -128,11 +128,11 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private void setDirections(Set<Direction> directions) {
-        this.connectedDirections = ImmutableSet.copyOf(this.connectedDirections);
+        this.connectedDirections = Sets.newHashSet(directions);
     }
 
     private void setNorth(Boolean north) {
-        if(checkNotNull(north)) {
+        if (checkNotNull(north)) {
             this.connectedDirections.add(Direction.NORTH);
         } else {
             this.connectedDirections.remove(Direction.NORTH);
@@ -140,7 +140,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private void setSouth(Boolean south) {
-        if(checkNotNull(south)) {
+        if (checkNotNull(south)) {
             this.connectedDirections.add(Direction.SOUTH);
         } else {
             this.connectedDirections.remove(Direction.SOUTH);
@@ -148,7 +148,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private void setEast(Boolean east) {
-        if(checkNotNull(east)) {
+        if (checkNotNull(east)) {
             this.connectedDirections.add(Direction.EAST);
         } else {
             this.connectedDirections.remove(Direction.EAST);
@@ -156,7 +156,7 @@ public class SpongeConnectedDirectionData extends AbstractData<ConnectedDirectio
     }
 
     private void setWest(Boolean west) {
-        if(checkNotNull(west)) {
+        if (checkNotNull(west)) {
             this.connectedDirections.add(Direction.WEST);
         } else {
             this.connectedDirections.remove(Direction.WEST);

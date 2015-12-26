@@ -24,28 +24,29 @@
  */
 package org.spongepowered.common.data.processor.value.tileentity;
 
-import net.minecraft.block.BlockJukebox;
-import net.minecraft.block.BlockJukebox.TileEntityJukebox;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.item.ItemRecord;
-import org.spongepowered.api.block.tileentity.Jukebox;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockFlowerPot;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntityFlowerPot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
 
-public class JukeboxValueProcessor extends AbstractSpongeValueProcessor<BlockJukebox.TileEntityJukebox, ItemStackSnapshot, Value<ItemStackSnapshot>> {
+public class FlowerPotValueProcessor extends AbstractSpongeValueProcessor<TileEntityFlowerPot, ItemStackSnapshot, Value<ItemStackSnapshot>> {
 
-    public JukeboxValueProcessor() {
-        super(BlockJukebox.TileEntityJukebox.class, Keys.REPRESENTED_ITEM);
+    public FlowerPotValueProcessor() {
+        super(TileEntityFlowerPot.class, Keys.REPRESENTED_ITEM);
     }
 
     @Override
@@ -54,30 +55,29 @@ public class JukeboxValueProcessor extends AbstractSpongeValueProcessor<BlockJuk
     }
 
     @Override
-    protected boolean set(BlockJukebox.TileEntityJukebox jukebox, ItemStackSnapshot value) {
-        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
+    protected boolean set(TileEntityFlowerPot flowerPot, ItemStackSnapshot value) {
         if (value == ItemStackSnapshot.NONE) {
-            if (jukebox.getRecord() == null) {
-                return true;
+            flowerPot.setFlowerPotData(null, 0);
+        } else {
+            Item item = (Item) value.getType();
+            int meta = ((SpongeItemStackSnapshot) value).getDamageValue();
+            if (!((BlockFlowerPot) Blocks.flower_pot).canNotContain(Block.getBlockFromItem(item), meta)) {
+                return false;
             }
-            ((Jukebox) jukebox).ejectRecord();
-            block = jukebox.getWorld().getBlockState(jukebox.getPos());
-            return block.getBlock() instanceof BlockJukebox && !(Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+            flowerPot.setFlowerPotData(item, meta);
         }
-        if (!(value.getType() instanceof ItemRecord)) {
-            return false;
-        }
-        ((Jukebox) jukebox).insertRecord(value.createStack());
-        block = jukebox.getWorld().getBlockState(jukebox.getPos());
-        return block.getBlock() instanceof BlockJukebox && (Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+        flowerPot.markDirty();
+        flowerPot.getWorld().markBlockForUpdate(flowerPot.getPos());
+        return true;
     }
 
     @Override
-    protected Optional<ItemStackSnapshot> getVal(BlockJukebox.TileEntityJukebox jukebox) {
-        if (jukebox.getRecord() != null) {
-            return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.getRecord()).createSnapshot());
+    protected Optional<ItemStackSnapshot> getVal(TileEntityFlowerPot flowerPot) {
+        if (flowerPot.getFlowerPotItem() == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        ItemStack stack = new ItemStack(flowerPot.getFlowerPotItem(), 1, flowerPot.getFlowerPotData());
+        return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot());
     }
 
     @Override
@@ -87,19 +87,15 @@ public class JukeboxValueProcessor extends AbstractSpongeValueProcessor<BlockJuk
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        if (!(container instanceof BlockJukebox.TileEntityJukebox)) {
+        if (!(container instanceof TileEntityFlowerPot)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<ItemStackSnapshot> oldValue = getVal((TileEntityJukebox) container);
+        Optional<ItemStackSnapshot> oldValue = getVal((TileEntityFlowerPot) container);
         if (!oldValue.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        try {
-            ((Jukebox) container).ejectRecord();
-            return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
-        } catch (Exception e) {
-            SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
-            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
-        }
+        ((TileEntityFlowerPot) container).setFlowerPotData(null, 0);
+        ((TileEntityFlowerPot) container).markDirty();
+        return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
     }
 }

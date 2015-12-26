@@ -26,6 +26,7 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -36,14 +37,15 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeBannerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongePatternListValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @ImplementationRequiredForTest
 public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerData> implements BannerData {
@@ -53,14 +55,13 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
 
     public SpongeBannerData(DyeColor base, List<PatternLayer> layers) {
         super(BannerData.class);
-        this.base = checkNotNull(base);
-        this.layers = checkNotNull(layers).stream().collect(Collectors.toList());
+        this.base = checkNotNull(base, "base");
+        this.layers = Lists.newArrayList(checkNotNull(layers, "layers"));
+        registerGettersAndSetters();
     }
 
     public SpongeBannerData() {
-        super(BannerData.class);
-        this.base = DyeColors.WHITE;
-        registerGettersAndSetters();
+        this(DyeColors.WHITE, Collections.emptyList());
     }
 
     public DyeColor getBase() {
@@ -72,7 +73,7 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
     }
 
     public List<PatternLayer> getLayers() {
-        return this.layers.stream().collect(Collectors.toList());
+        return Lists.newArrayList(this.layers);
     }
 
     public void setLayers(List<PatternLayer> layers) {
@@ -92,12 +93,12 @@ public class SpongeBannerData extends AbstractData<BannerData, ImmutableBannerDa
 
     @Override
     public BannerData copy() {
-        return null;
+        return new SpongeBannerData(this.base, this.layers);
     }
 
     @Override
     public ImmutableBannerData asImmutable() {
-        return null;
+        return new ImmutableSpongeBannerData(this.base, this.layers);
     }
 
     @Override

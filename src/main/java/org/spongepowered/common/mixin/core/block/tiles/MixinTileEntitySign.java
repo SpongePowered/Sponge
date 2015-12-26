@@ -30,6 +30,7 @@ import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -64,5 +65,11 @@ public abstract class MixinTileEntitySign extends MixinTileEntity implements Sig
     @Override
     public Tristate permDefault(String permission) {
         return Tristate.TRUE;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getSignData());
     }
 }

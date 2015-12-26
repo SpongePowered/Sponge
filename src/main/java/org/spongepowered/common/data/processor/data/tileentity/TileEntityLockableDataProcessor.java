@@ -48,11 +48,15 @@ public final class TileEntityLockableDataProcessor
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof TileEntityLockable) {
-            set((TileEntityLockable) dataHolder, "");
+        if (!(dataHolder instanceof TileEntityLockable)) {
+            return DataTransactionResult.failNoData();
+        }
+        Optional<String> oldValue = getVal((TileEntityLockable) dataHolder);
+        if (!oldValue.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        return DataTransactionResult.failNoData();
+        ((TileEntityLockable) dataHolder).setLockCode(LockCode.EMPTY_CODE);
+        return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
     }
 
     @Override
@@ -63,11 +67,10 @@ public final class TileEntityLockableDataProcessor
 
     @Override
     protected Optional<String> getVal(TileEntityLockable tile) {
-        LockCode code = tile.getLockCode();
-        if (code.isEmpty()) {
-            return Optional.empty();
+        if (tile.isLocked()) {
+            return Optional.of(tile.getLockCode().getLock());
         }
-        return Optional.of(code.getLock());
+        return Optional.empty();
     }
 
     @Override

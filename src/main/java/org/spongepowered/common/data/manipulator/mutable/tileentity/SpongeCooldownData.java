@@ -39,7 +39,7 @@ public class SpongeCooldownData extends AbstractBoundedComparableData<Integer, C
     }
 
     public SpongeCooldownData() {
-        this(0);
+        this(1);
     }
 
     @Override
