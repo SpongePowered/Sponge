@@ -98,27 +98,29 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
 
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
+        DataTransactionResult result = DataTransactionResult.failNoData();
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
-                final DataTransactionResult result = processor.offerToStore(container, value);
+                result = processor.offerToStore(container, value);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
                 }
             }
         }
-        return DataTransactionResult.failNoData();
+        return result;
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        DataTransactionResult result = DataTransactionResult.failNoData();
         for (ValueProcessor<E, V> processor : this.processors) {
             if (processor.supports(container)) {
-                final DataTransactionResult result = processor.removeFrom(container);
+                result = processor.removeFrom(container);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
                 }
             }
         }
-        return DataTransactionResult.failNoData();
+        return result;
     }
 }
