@@ -31,7 +31,6 @@ import static org.objectweb.asm.Opcodes.CHECKCAST;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
-import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -60,8 +59,7 @@ public class SupportsDataFilterDelegate implements ParameterFilterDelegate {
         mv.visitVarInsn(ALOAD, localParam);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
         mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "supports", "(Ljava/lang/Class;)Z", true);
         Label success = new Label();
         if (this.anno.inverse()) {
             mv.visitJumpInsn(IFEQ, success);

@@ -45,16 +45,21 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.filter.IsCancelled;
+import org.spongepowered.api.event.filter.cause.After;
 import org.spongepowered.api.event.filter.cause.All;
+import org.spongepowered.api.event.filter.cause.Before;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
+import org.spongepowered.api.event.filter.cause.Named;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.filter.data.Supports;
 import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
@@ -62,6 +67,7 @@ import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDele
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.LastCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.NamedCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
@@ -292,8 +298,11 @@ public class FilterGenerator {
     private static enum ParameterSource {
         CAUSE_FIRST(First.class),
         CAUSE_LAST(Last.class),
+        CAUSE_BEFORE(Before.class),
+        CAUSE_AFTER(After.class),
         CAUSE_ALL(All.class),
-        CAUSE_ROOT(Root.class),;
+        CAUSE_ROOT(Root.class),
+        CAUSE_NAMED(Named.class);
 
         private final Class<? extends Annotation> cls;
 
@@ -308,11 +317,20 @@ public class FilterGenerator {
             if (this == CAUSE_LAST) {
                 return new LastCauseFilterSourceDelegate((Last) anno);
             }
+            if (this == CAUSE_BEFORE) {
+                return new BeforeCauseFilterSourceDelegate((Before) anno);
+            }
+            if (this == CAUSE_AFTER) {
+                return new AfterCauseFilterSourceDelegate((After) anno);
+            }
             if (this == CAUSE_ALL) {
                 return new AllCauseFilterSourceDelegate((All) anno);
             }
             if (this == CAUSE_ROOT) {
                 return new RootCauseFilterSourceDelegate((Root) anno);
+            }
+            if (this == CAUSE_NAMED) {
+                return new NamedCauseFilterSourceDelegate((Named) anno);
             }
             throw new UnsupportedOperationException();
         }

@@ -27,49 +27,61 @@ package org.spongepowered.common.event.filter.delegate;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
-import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INSTANCEOF;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
-import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.event.filter.data.Has;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.filter.cause.After;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
-public class HasDataFilterDelegate implements ParameterFilterDelegate {
+public class AfterCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
-    private final Has anno;
+    private final After anno;
 
-    public HasDataFilterDelegate(Has anno) {
+    public AfterCauseFilterSourceDelegate(After anno) {
         this.anno = anno;
     }
-    @Override
-    public void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam) {
-        if (!DataHolder.class.isAssignableFrom(param.getType())) {
-            throw new IllegalStateException("Annotated type for data filter is not a DataHolder");
-        }
 
-        mv.visitVarInsn(ALOAD, localParam);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
+    @Override
+    protected void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType) {
         mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, Type.getInternalName(Cause.class), "after", "(Ljava/lang/Class;)Ljava/util/Optional;", false);
+    }
+
+    @Override
+    protected void insertCheck(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+        mv.visitVarInsn(ALOAD, local);
+        Label failure = new Label();
         Label success = new Label();
-        if (this.anno.inverse()) {
-            mv.visitJumpInsn(IFEQ, success);
-        } else {
-            mv.visitJumpInsn(IFNE, success);
-        }
+
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
+        mv.visitJumpInsn(IFEQ, failure);
+
+        mv.visitVarInsn(ALOAD, local);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "get", "()Ljava/lang/Object;", false);
+
+        mv.visitVarInsn(ASTORE, local);
+        mv.visitVarInsn(ALOAD, local);
+
+        mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(targetType));
+        mv.visitJumpInsn(IFNE, success);
+
+        mv.visitLabel(failure);
         mv.visitInsn(ACONST_NULL);
         mv.visitInsn(ARETURN);
+
         mv.visitLabel(success);
     }
 
+    @Override
+    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+    }
 }
