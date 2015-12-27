@@ -35,15 +35,17 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
-public abstract class MixinExplosion implements Explosion {
+public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     public Vector3d origin;
     public Vec3 position; // Added for Forge
+    private boolean shouldBreakBlocks;
 
     @Shadow public boolean isFlaming;
     @Shadow public boolean isSmoking;
@@ -61,6 +63,13 @@ public abstract class MixinExplosion implements Explosion {
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
         this.origin = new Vector3d(this.explosionX, this.explosionY, this.explosionZ);
+    }
+
+    @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true)
+    public void onDoExplosionA(CallbackInfo ci) {
+        if (!shouldBreakBlocks) {
+            ci.cancel();
+        }
     }
 
     @Override
@@ -95,7 +104,11 @@ public abstract class MixinExplosion implements Explosion {
 
     @Override
     public boolean shouldBreakBlocks() {
-        return this.isSmoking; // TODO this needs to be fixed.
+        return this.shouldBreakBlocks;
     }
 
+    @Override
+    public void setShouldBreakBlocks(boolean shouldBreakBlocks) {
+        this.shouldBreakBlocks = shouldBreakBlocks;
+    }
 }

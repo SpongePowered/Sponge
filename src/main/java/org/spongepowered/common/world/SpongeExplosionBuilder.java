@@ -32,6 +32,7 @@ import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
@@ -121,8 +122,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
         final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
                 (Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
-                this.canCauseFire, this.shouldBreakBlocks);
-        explosion.isSmoking = this.shouldSmoke;
+                this.canCauseFire, this.shouldSmoke);
+        ((IMixinExplosion) explosion).setShouldBreakBlocks(this.shouldBreakBlocks);
         return (Explosion) explosion;
     }
 }
