@@ -38,7 +38,7 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import java.util.Collection;
 import java.util.Optional;
 
-@Mixin({BlockState.class, Block.class, Entity.class, TileEntity.class, ItemStack.class})
+@Mixin({BlockState.StateImplementation.class, Block.class, Entity.class, TileEntity.class, ItemStack.class})
 public abstract class MixinPropertyHolder implements PropertyHolder {
 
     @Override
