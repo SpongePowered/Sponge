@@ -70,7 +70,9 @@ public class RegistryHelper {
                 }
                 f.set(null, value);
             } catch (Exception e) {
-                logger.error("Error while mapping {}.{}", f.getDeclaringClass().getName(), f.getName(), e);
+                if (ignore) {
+                    logger.error("Error while mapping {}.{}", f.getDeclaringClass().getName(), f.getName(), e);
+                }
                 mappingSuccess = false;
             }
         }
