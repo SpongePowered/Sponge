@@ -28,11 +28,9 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C13PacketPlayerAbilities;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -70,6 +68,7 @@ public class MixinPacketThreadUtil {
                 if (itemstack != null && itemstack.getDisplayName().length() > 32767) {
                     SpongeHooks.logExploitItemNameOverflow(StaticMixinHelper.packetPlayer, itemstack.getDisplayName().length());
                     StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an itemstack name overflow exploit.");
+                    resetStaticData();
                     return;
                 }
                 
@@ -87,6 +86,7 @@ public class MixinPacketThreadUtil {
                     if (!StaticMixinHelper.packetPlayer.isDead) {
                         SpongeHooks.logExploitRespawnInvisibility(StaticMixinHelper.packetPlayer);
                         StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
+                        resetStaticData();
                         return;
                     }
                 }
@@ -110,15 +110,18 @@ public class MixinPacketThreadUtil {
             ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
                 .handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
             world.setProcessingCaptureCause(false);
-            StaticMixinHelper.packetPlayer = null;
-            StaticMixinHelper.processingPacket = null;
-            StaticMixinHelper.lastCursor = null;
-            StaticMixinHelper.lastOpenContainer = null;
-            StaticMixinHelper.prePacketProcessItem = null;
-            StaticMixinHelper.ignoreCreativeInventoryPacket = false;
+            resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);
         }
     }
 
+    private void resetStaticData() {
+        StaticMixinHelper.packetPlayer = null;
+        StaticMixinHelper.processingPacket = null;
+        StaticMixinHelper.lastCursor = null;
+        StaticMixinHelper.lastOpenContainer = null;
+        StaticMixinHelper.prePacketProcessItem = null;
+        StaticMixinHelper.ignoreCreativeInventoryPacket = false;
+    }
 }
