@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 @Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
@@ -62,7 +63,16 @@ public class MixinPacketThreadUtil {
             if (StaticMixinHelper.packetPlayer.theItemInWorldManager.isCreative() && (packetIn instanceof C16PacketClientStatus
                     && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
                 StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
-            } else if (packetIn instanceof C10PacketCreativeInventoryAction) {
+            } else if (StaticMixinHelper.packetPlayer.theItemInWorldManager.isCreative() && packetIn instanceof C10PacketCreativeInventoryAction) {
+                // Fix string overflow exploit in creative mode
+                C10PacketCreativeInventoryAction creativePacket = (C10PacketCreativeInventoryAction) packetIn;
+                ItemStack itemstack = creativePacket.getStack();
+                if (itemstack != null && itemstack.getDisplayName().length() > 32767) {
+                    SpongeHooks.logExploitItemNameOverflow(StaticMixinHelper.packetPlayer, itemstack.getDisplayName().length());
+                    StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an itemstack name overflow exploit.");
+                    return;
+                }
+                
                 long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                 if (packetDiff < 100) {
@@ -70,6 +80,20 @@ public class MixinPacketThreadUtil {
                 }
             }
 
+            // Fix invisibility respawn exploit
+            if (packetIn instanceof C16PacketClientStatus) {
+                C16PacketClientStatus statusPacket = (C16PacketClientStatus) packetIn;
+                if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
+                    if (!StaticMixinHelper.packetPlayer.isDead) {
+                        SpongeHooks.logExploitRespawnInvisibility(StaticMixinHelper.packetPlayer);
+                        StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
+                        return;
+                    }
+                }
+                
+            }
+
+            //System.out.println("RECEIVED PACKET " + packetIn);
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
             ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                     : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
@@ -78,7 +102,7 @@ public class MixinPacketThreadUtil {
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
             if (StaticMixinHelper.packetPlayer.getHeldItem() != null
                     && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                StaticMixinHelper.lastPlayerItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
+                StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
             world.setProcessingCaptureCause(true);
@@ -90,6 +114,7 @@ public class MixinPacketThreadUtil {
             StaticMixinHelper.processingPacket = null;
             StaticMixinHelper.lastCursor = null;
             StaticMixinHelper.lastOpenContainer = null;
+            StaticMixinHelper.prePacketProcessItem = null;
             StaticMixinHelper.ignoreCreativeInventoryPacket = false;
         } else { // client
             packetIn.processPacket(netHandler);

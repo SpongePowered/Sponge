@@ -36,6 +36,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -72,6 +73,7 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import javax.management.MBeanServer;
 
@@ -217,6 +219,49 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
             logInfo("Unload Chunk At [{0}] ({1}, {2})", world.provider.getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
+            logStack(config);
+        }
+    }
+
+    public static void logExploitSignCommandUpdates(EntityPlayer player, TileEntity te, String command) {
+        if (player.worldObj.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
+            logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
+                    player.getCommandSenderName(), 
+                    te.getWorld().getWorldInfo().getWorldName(),
+                    te.getPos().getX() + ", " + te.getPos().getY() + ", " + te.getPos().getZ(),
+                    command);
+            logStack(config);
+        }
+    }
+
+    public static void logExploitItemNameOverflow(EntityPlayer player, int length) {
+        if (player.worldObj.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
+            logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
+                    player.getCommandSenderName(), 
+                    length);
+            logStack(config);
+        }
+    }
+
+    public static void logExploitRespawnInvisibility(EntityPlayer player) {
+        if (player.worldObj.isRemote) {
+            return;
+        }
+
+        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        if (config.getConfig().getLogging().logExploitRespawnInvisibility) {
+            logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
+                    player.getCommandSenderName());
             logStack(config);
         }
     }
@@ -548,5 +593,12 @@ public class SpongeHooks {
         if (user.isPresent()) {
             ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.get().getUniqueId());
         }
+    }
+
+    // Remove below after update to 1.8.8
+    private static final Pattern formattingCodePattern = Pattern.compile("(?i)" + String.valueOf('\u00a7') + "[0-9A-FK-OR]");
+
+    public static String getTextWithoutFormattingCodes(String text) {
+        return text == null ? null : formattingCodePattern.matcher(text).replaceAll("");
     }
 }

@@ -56,7 +56,7 @@ public class StaticMixinHelper {
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
     public static SpongePopulatorType populator = null;
-    public static ItemStack lastPlayerItem = null;
+    public static ItemStack prePacketProcessItem = null;
     @SuppressWarnings("rawtypes")
     public static Class lastPopulatorClass = null;
     public static boolean isFlowerGen = false;

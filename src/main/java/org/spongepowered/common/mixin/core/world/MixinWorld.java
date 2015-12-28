@@ -940,19 +940,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     private void sendItemChangeToPlayer(EntityPlayerMP player) {
-        if (StaticMixinHelper.lastPlayerItem == null) {
+        if (StaticMixinHelper.prePacketProcessItem == null) {
             return;
         }
 
         // handle revert
         player.isChangingQuantityOnly = true;
-        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.lastPlayerItem;
+        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.prePacketProcessItem;
         Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
         player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
-                StaticMixinHelper.lastPlayerItem));
+                StaticMixinHelper.prePacketProcessItem));
     }
 
     @Override

@@ -116,6 +116,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String LOGGING_ENTITY_COLLISION_CHECKS = "entity-collision-checks";
     public static final String LOGGING_ENTITY_SPAWN = "entity-spawn";
     public static final String LOGGING_ENTITY_SPEED_REMOVAL = "entity-speed-removal";
+    public static final String LOGGING_EXPLOIT_SIGN_COMMAND_UPDATES = "exploit-sign-command-updates";
+    public static final String LOGGING_EXPLOIT_ITEMSTACK_NAME_OVERFLOW = "exploit-itemstack-name-overflow";
+    public static final String LOGGING_EXPLOIT_RESPAWN_INVISIBILITY = "exploit-respawn-invisibility";
     public static final String LOGGING_STACKTRACES = "log-stacktraces";
 
     // BLOCK TRACKING BLACKLIST
@@ -152,7 +155,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     private ObjectMapper<T>.BoundInstance configMapper;
     private T configBase;
     private String modId;
-    private String configName;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public SpongeConfig(Type type, Path path, String modId) {
@@ -167,12 +169,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             }
 
             this.loader = HoconConfigurationLoader.builder().setPath(path).build();
-            if (type == Type.GLOBAL) {
-                this.configName = "GLOBAL";
-            } else {
-                this.configName = path.getParent().getFileName().toString().toUpperCase();
-            }
-
             this.configMapper = (ObjectMapper.BoundInstance) ObjectMapper.forClass(this.type.type).bindToNew();
 
             reload();
@@ -231,10 +227,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             String prop = key.substring(key.indexOf('.') + 1);
             return getRootNode().getNode(category).getNode(prop);
         }
-    }
-
-    public String getConfigName() {
-        return this.configName;
     }
 
     public Type getType() {
@@ -666,6 +658,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private boolean entityDespawnLogging = false;
         @Setting(value = LOGGING_ENTITY_DEATH, comment = "Log when living entities are destroyed")
         private boolean entityDeathLogging = false;
+        @Setting(value = LOGGING_EXPLOIT_SIGN_COMMAND_UPDATES, comment = "Log when server receives exploited packet to update a sign containing commands from player with no permission.")
+        public boolean logExploitSignCommandUpdates = false;
+        @Setting(value = LOGGING_EXPLOIT_ITEMSTACK_NAME_OVERFLOW, comment = "Log when server receives exploited packet with itemstack name exceeding string limit.")
+        public boolean logExploitItemStackNameOverflow = false;
+        @Setting(value = LOGGING_EXPLOIT_RESPAWN_INVISIBILITY, comment = "Log when player attempts to respawn invisible to surrounding players.")
+        public boolean logExploitRespawnInvisibility = false;
         @Setting(value = LOGGING_STACKTRACES, comment = "Add stack traces to dev logging")
         private boolean logWithStackTraces = false;
         @Setting(value = LOGGING_ENTITY_COLLISION_CHECKS, comment = "Whether to log entity collision/count checks")
