@@ -80,7 +80,8 @@ public class MixinPacketThreadUtil {
             }
 
             // Fix invisibility respawn exploit
-            if (packetIn instanceof C16PacketClientStatus) {
+            // Disabled until it can be tested further
+            /*if (packetIn instanceof C16PacketClientStatus) {
                 C16PacketClientStatus statusPacket = (C16PacketClientStatus) packetIn;
                 if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
                     if (!StaticMixinHelper.packetPlayer.isDead) {
@@ -91,7 +92,7 @@ public class MixinPacketThreadUtil {
                     }
                 }
                 
-            }
+            }*/
 
             //System.out.println("RECEIVED PACKET " + packetIn);
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
