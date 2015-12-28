@@ -28,19 +28,10 @@ import com.google.common.base.Objects;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.world.WorldProviderEnd;
-import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraft.world.biome.WorldChunkManagerHell;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderDebug;
-import net.minecraft.world.gen.ChunkProviderEnd;
-import net.minecraft.world.gen.ChunkProviderFlat;
-import net.minecraft.world.gen.ChunkProviderGenerate;
-import net.minecraft.world.gen.ChunkProviderHell;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -56,6 +47,7 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
@@ -139,9 +131,8 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
     @Override
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
         final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-        final IChunkProvider chunkProvider = this.getChunkGenerator(mcWorld, settings);
-        final WorldChunkManager chunkManager = this.getChunkManager(mcWorld);
-
+        final IChunkProvider chunkProvider = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
+        final WorldChunkManager chunkManager = mcWorld.provider.worldChunkMgr;
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
                 (BiomeGenerator) chunkManager,
                 SpongeGenerationPopulator.of((WorldServer) world, chunkProvider));
@@ -157,52 +148,6 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             spawnHeight = 50;
         }
         return spawnHeight;
-    }
-
-    public WorldChunkManager getChunkManager(net.minecraft.world.World world) {
-        // For the Vanilla End and Nether dimensions, we cannot change their WorldType from DEFAULT (we would break mods) but, for Sponge, we need
-        // to return the correct ChunkManager. This compromise maximizes compatibility (even if getting the generator of a Vanilla NETHER won't return
-        // GeneratorTypes.NETHER in Sponge (for example, blame mods and Mojang)
-
-        final WorldChunkManager manager;
-
-        if ((Object) this == WorldType.FLAT) {
-            final FlatGeneratorInfo flatgeneratorinfo = FlatGeneratorInfo.createFlatGeneratorFromString(world.getWorldInfo().getGeneratorOptions());
-            manager = new WorldChunkManagerHell(
-                    BiomeGenBase.getBiomeFromBiomeList(flatgeneratorinfo.getBiome(), BiomeGenBase.field_180279_ad), 0.5F);
-        } else if ((Object) this == WorldType.DEBUG_WORLD) {
-            manager = new WorldChunkManagerHell(BiomeGenBase.plains, 0.0F);
-        } else if (world.provider instanceof WorldProviderHell) {
-            manager = world.getWorldChunkManager();
-        } else if (world.provider instanceof WorldProviderEnd) {
-            manager = new WorldChunkManagerHell(BiomeGenBase.sky, 0f);
-        } else {
-            manager = new WorldChunkManager(world);
-        }
-
-        return manager;
-    }
-
-    public IChunkProvider getChunkGenerator(net.minecraft.world.World world, String generatorOptions) {
-        // For the Vanilla End and Nether dimensions, we cannot change their WorldType from DEFAULT (we would break mods) but, for Sponge, we need
-        // to return the correct ChunkProvider. This compromise maximizes compatibility (even if getting the generator of a Vanilla NETHER won't
-        // return GeneratorTypes.NETHER in Sponge (for example, blame mods and Mojang)
-
-        final IChunkProvider provider;
-        if ((Object) this == WorldType.FLAT) {
-            provider = new ChunkProviderFlat(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(),
-                    generatorOptions);
-        } else if ((Object) this == WorldType.DEBUG_WORLD) {
-            provider = new ChunkProviderDebug(world);
-        } else if (world.provider instanceof WorldProviderHell) {
-            provider = new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
-        } else if (world.provider instanceof WorldProviderEnd) {
-            provider = new ChunkProviderEnd(world, world.getSeed());
-        } else {
-            provider = new ChunkProviderGenerate(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
-        }
-
-        return provider;
     }
 
     @Override

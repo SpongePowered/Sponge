@@ -29,6 +29,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
@@ -59,7 +60,15 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow protected boolean isHellWorld;
     @Shadow public WorldType terrainType;
     @Shadow protected boolean hasNoSky;
+    @Shadow private String generatorSettings;
     @Shadow public abstract String getDimensionName();
+    @Shadow public abstract IChunkProvider createChunkGenerator();
+
+    @Override
+    public IChunkProvider createChunkGenerator(String settings) {
+        this.generatorSettings = settings;
+        return this.createChunkGenerator();
+    }
 
     @Override
     public String getName() {

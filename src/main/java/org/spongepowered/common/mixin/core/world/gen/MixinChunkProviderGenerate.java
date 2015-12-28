@@ -57,6 +57,9 @@ import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
@@ -95,6 +98,13 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
 
     @Shadow private BiomeGenBase[] biomesForGeneration;
     private BiomeGenerator biomegen;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void onConstruct(net.minecraft.world.World worldIn, long p_i45636_2_, boolean p_i45636_4_, String p_i45636_5_, CallbackInfo ci) {
+        if (this.settings == null) {
+            this.settings = new ChunkProviderSettings.Factory().func_177864_b();
+        }
+    }
 
     @Override
     public void setBiomeGenerator(BiomeGenerator biomes) {
@@ -231,7 +241,7 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Remove the call to get biomes for generation.
      * TODO could be redirect?
      */

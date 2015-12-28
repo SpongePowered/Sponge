@@ -1799,12 +1799,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-//        if (generatorSettings.contains(IMixinWorldType.STRING_VALUE)) {
-//            String options = generatorSettings.getString(IMixinWorldType.STRING_VALUE).get();
-//            if (options.equals("")) {
-//                return;
-//            }
-//        }
+
         SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
