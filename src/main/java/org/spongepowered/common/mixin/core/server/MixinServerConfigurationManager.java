@@ -277,12 +277,13 @@ public abstract class MixinServerConfigurationManager {
 
         // Move logic for creating join message up here
         //
-        // Set scoreboard earlier. This initializes the player's worldScoreboard,
-        // and sends the proper packets. The former is needed for the chat message
-        // below (getting the display name), and it's perfectly safe to move
-        // sending the packets here.
+        // This sends the objective/score creation packets
+        // to the player, without attempting to remove them from their
+        // previous scoreboard (which is set in a field initializer).
+        // This allows #getWorldScoreboard to function
+        // as normal, without causing issues when it is initialized on the client.
 
-        player.setScoreboard((Scoreboard) worldserver.getScoreboard());
+        ((IMixinEntityPlayerMP) playerIn).initScoreboard();
 
         ChatComponentTranslation chatcomponenttranslation;
 

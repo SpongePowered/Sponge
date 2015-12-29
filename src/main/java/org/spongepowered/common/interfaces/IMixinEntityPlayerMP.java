@@ -42,4 +42,6 @@ public interface IMixinEntityPlayerMP {
 
     MessageSink getDeathMessageSink();
 
+    void initScoreboard();
+
 }

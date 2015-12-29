@@ -116,7 +116,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow public MinecraftServer mcServer;
 
-    private Scoreboard spongeScoreboard;
+    private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
     @Nullable private Vector3d velocityOverride = null;
 
@@ -336,10 +336,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (scoreboard == null) {
             scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
         }
-        if (this.spongeScoreboard != null) { // Only happens once, when initializing player.
-            ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this);
-        }
+        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this);
         this.spongeScoreboard = scoreboard;
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+    }
+
+    @Override
+    public void initScoreboard() {
         ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
     }
 
