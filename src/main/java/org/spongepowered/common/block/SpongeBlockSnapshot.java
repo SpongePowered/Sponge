@@ -393,6 +393,26 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
+    public int hashCode() {
+        return Objects.hashCode(this.worldUniqueId, this.pos, this.blockState, this.extraData);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeBlockSnapshot other = (SpongeBlockSnapshot) obj;
+        return Objects.equal(this.worldUniqueId, other.worldUniqueId)
+                && Objects.equal(this.pos, other.pos)
+                && Objects.equal(this.blockState, other.blockState)
+                && Objects.equal(this.extraData, other.extraData);
+    }
+
+    @Override
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("worldUniqueId", this.worldUniqueId)
