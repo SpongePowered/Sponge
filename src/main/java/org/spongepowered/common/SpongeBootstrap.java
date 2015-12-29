@@ -79,9 +79,9 @@ public final class SpongeBootstrap {
     }
 
     public static void initializeCommands() {
-        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
-        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
-        Sponge.getCommandDispatcher().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
+        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
+        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 
     private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {

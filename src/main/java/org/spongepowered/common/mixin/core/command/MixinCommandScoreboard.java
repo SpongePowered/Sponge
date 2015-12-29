@@ -59,7 +59,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     private String realName;
 
     @Inject(method = "joinTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onGetUUIDJoin(ICommandSender p_147190_1_, String p_147190_2_[], int p_147190_3_, CallbackInfo ci, Scoreboard scoreboard, String s, HashSet hashset, HashSet hashset1, String s1, List list, Iterator iterator, Entity entity) {
+    public void onGetUUIDJoin(ICommandSender p_147190_1_, String[] p_147190_2_, int p_147190_3_, CallbackInfo ci, Scoreboard scoreboard, String s, HashSet hashset, HashSet hashset1, String s1, List list, Iterator iterator, Entity entity) {
         this.onGetUUID(entity);
     }
 
@@ -69,7 +69,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     }
 
     @Inject(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onGetUUIDLeave(ICommandSender p_147199_1_, String p_147199_2_[], int p_147199_3_, CallbackInfo ci, Scoreboard scoreboard, HashSet hashset, HashSet hashset1, String s, List list, Iterator iterator, Entity entity) {
+    private void onGetUUIDLeave(ICommandSender p_147199_1_, String[] p_147199_2_, int p_147199_3_, CallbackInfo ci, Scoreboard scoreboard, HashSet hashset, HashSet hashset1, String s, List list, Iterator iterator, Entity entity) {
         this.onGetUUID(entity);
     }
 

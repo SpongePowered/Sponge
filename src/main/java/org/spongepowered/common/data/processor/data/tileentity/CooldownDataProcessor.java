@@ -80,7 +80,7 @@ public class CooldownDataProcessor
         if (dataHolder instanceof TileEntityHopper) {
             int cooldown = ((TileEntityHopper) dataHolder).transferCooldown;
             if (cooldown < 1) {
-                return DataTransactionResult.failNoData();
+                return DataTransactionResult.successNoData();
             }
             ((TileEntityHopper) dataHolder).transferCooldown = -1;
             return DataTransactionResult.successRemove(constructImmutableValue(cooldown));
