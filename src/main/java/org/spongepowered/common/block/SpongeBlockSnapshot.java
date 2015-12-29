@@ -411,4 +411,34 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     public Collection<Property<?, ?>> getApplicableProperties() {
         return this.blockState.getApplicableProperties();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
+        return this.updateFlag == that.updateFlag &&
+               Objects.equal(this.extendedState, that.extendedState) &&
+               Objects.equal(this.worldUniqueId, that.worldUniqueId) &&
+               Objects.equal(this.pos, that.pos) &&
+               Objects.equal(this.extraData, that.extraData) &&
+               Objects.equal(this.blockData, that.blockData) &&
+               Objects.equal(this.compound, that.compound);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects
+            .hashCode(this.extendedState,
+                this.worldUniqueId,
+                this.pos,
+                this.extraData,
+                this.blockData,
+                this.updateFlag,
+                this.compound);
+    }
 }
