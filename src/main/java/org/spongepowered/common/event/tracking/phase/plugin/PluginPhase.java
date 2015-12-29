@@ -45,6 +45,7 @@ public final class PluginPhase extends TrackingPhase {
         public static final IPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
         public static final IPhaseState CUSTOM_SPAWN = new PluginPhaseState();
         public static final IPhaseState CUSTOM_EXPLOSION = new CustomExplosionState();
+        public static final IPhaseState FAKEPLAYER = new FakeplayerState();
 
         private State() {
         }
@@ -81,6 +82,8 @@ public final class PluginPhase extends TrackingPhase {
     public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
         if (state instanceof ListenerPhaseState) {
             ((ListenerPhaseState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
+        } else if (state instanceof FakeplayerState) {
+            ((FakeplayerState) state).associateAdditionalBlockChangeCauses(context, builder, causeTracker);
         }
     }
 

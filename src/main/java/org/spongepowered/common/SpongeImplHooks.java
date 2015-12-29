@@ -47,6 +47,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.MapStorage;
 import org.spongepowered.common.event.tracking.ItemDropData;
+import org.spongepowered.common.world.FakePlayer;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -79,7 +80,7 @@ public final class SpongeImplHooks {
     }
 
     public static boolean isFakePlayer(Entity entity) {
-        return false;
+        return entity instanceof FakePlayer;
     }
 
     public static void firePlayerJoinSpawnEvent(EntityPlayerMP playerMP) {
@@ -171,11 +172,15 @@ public final class SpongeImplHooks {
         boolean isAdventure = world.getWorldInfo().getGameType() == GameType.ADVENTURE;
         int spawnFuzz = Math.max(0, world.getMinecraftServer().getSpawnRadius(world));
         int border = MathHelper.floor(world.getWorldBorder().getClosestDistance(ret.getX(), ret.getZ()));
-        if (border < spawnFuzz) spawnFuzz = border;
+        if (border < spawnFuzz) {
+            spawnFuzz = border;
+        }
 
         if (!world.provider.hasNoSky() && !isAdventure && spawnFuzz != 0)
         {
-            if (spawnFuzz < 2) spawnFuzz = 2;
+            if (spawnFuzz < 2) {
+                spawnFuzz = 2;
+            }
             int spawnFuzzHalf = spawnFuzz / 2;
             ret = world.getTopSolidOrLiquidBlock(ret.add(world.rand.nextInt(spawnFuzzHalf) - spawnFuzz, 0, world.rand.nextInt(spawnFuzzHalf) - spawnFuzz));
         }

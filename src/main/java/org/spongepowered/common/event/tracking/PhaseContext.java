@@ -48,6 +48,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -94,6 +95,13 @@ public class PhaseContext {
         this.contextObjects.add(namedCause);
         if (namedCause.getName().equals(NamedCause.SOURCE)) {
             this.source = namedCause.getCauseObject();
+        }
+        return this;
+    }
+
+    public PhaseContext addCause(Cause cause) {
+        for (Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+            add(NamedCause.of(entry.getKey(), entry.getValue()));
         }
         return this;
     }
@@ -293,6 +301,14 @@ public class PhaseContext {
             return Optional.of((T) this.source);
         }
         return Optional.empty();
+    }
+
+    public Cause toCause() {
+        Cause.Builder b = Cause.builder();
+        for (NamedCause namedCause : this.contextObjects) {
+            b.named(namedCause);
+        }
+        return b.build();
     }
 
     public Optional<User> getOwner() {
