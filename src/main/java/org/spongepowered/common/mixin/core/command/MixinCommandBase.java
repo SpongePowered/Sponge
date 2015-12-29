@@ -22,10 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.command;
 
-public interface IMixinScoreboard {
+import net.minecraft.command.CommandBase;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 
-    boolean isClient();
+@Mixin(CommandBase.class)
+public abstract class MixinCommandBase implements IMixinCommandBase {
+
+    private boolean expandedSelector;
+
+    @Override
+    public boolean isExpandedSelector() {
+        return this.expandedSelector;
+    }
+
+    @Override
+    public void setExpandedSelector(boolean expandedSelector) {
+        this.expandedSelector = expandedSelector;
+    }
 
 }

@@ -31,6 +31,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExperienceHolderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
@@ -292,23 +293,11 @@ public class SelectorResolver {
     private void addTeamFilters(List<Predicate<Entity>> filters) {
         Selector sel = this.selector;
         Optional<Invertible<String>> teamOpt = sel.getArgument(ArgumentTypes.TEAM);
-        Collection<World> worlds = Lists.newArrayList();
-        for (Extent e : this.extents) {
-            if (e instanceof World) {
-                worlds.add((World) e);
-            } else if (e instanceof Chunk) {
-                worlds.add(((Chunk) e).getWorld());
-            }
-        }
-        if (teamOpt.isPresent() && !worlds.isEmpty()) {
+        if (teamOpt.isPresent()) {
             Invertible<String> teamArg = teamOpt.get();
             final boolean inverted = teamArg.isInverted();
-            ImmutableSet.Builder<Team> teamBuilder = ImmutableSet.builder();
-            for (World w : worlds) {
-                teamBuilder.addAll(asSet(w.getScoreboard().getTeam(teamArg.getValue())));
-            }
-            final Collection<Team> teams = teamBuilder.build();
-                filters.add(new Predicate<Entity>() {
+            final Collection<Team> teams = Sponge.getGame().getServer().getServerScoreboard().get().getTeams();
+            filters.add(new Predicate<Entity>() {
 
                 @Override
                 public boolean test(Entity input) {

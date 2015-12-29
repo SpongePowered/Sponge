@@ -27,7 +27,10 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
+import net.minecraft.network.play.server.S3CPacketUpdateScore;
+import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
 import net.minecraft.network.play.server.S3EPacketTeams;
+import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -40,19 +43,25 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(ServerScoreboard.class)
-public abstract class MixinServerScoreboard extends MixinScoreboard implements IMixinServerScoreboard {
+public abstract class MixinServerScoreboardPacketSending extends MixinScoreboardLogic implements IMixinServerScoreboard {
+
+    private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+    private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
     @Shadow
     MinecraftServer scoreboardMCServer;
 
     private List<EntityPlayerMP> players = new ArrayList<>();
 
-    private void sendToPlayers(Packet packet) {
+    @Override
+    public void sendToPlayers(Packet packet) {
         for (EntityPlayerMP player: this.players) {
             player.playerNetServerHandler.sendPacket(packet);
         }
@@ -65,7 +74,20 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
     }
 
     void sendScoreboard(EntityPlayerMP player) {
-        this.scoreboardMCServer.getConfigurationManager().sendScoreboard((ServerScoreboard) (Object) this, player);
+        for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
+            player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 0));
+        }
+
+        for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
+            player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 0));
+            for (Score score: (Collection<Score>) this.getSortedScores(objective)) {
+                player.playerNetServerHandler.sendPacket(new S3CPacketUpdateScore(score));
+            }
+        }
+
+        for (int i = 0; i < 19; ++i) {
+            player.playerNetServerHandler.sendPacket(new S3DPacketDisplayScoreboard(i, this.getObjectiveInDisplaySlot(i)));
+        }
     }
 
     @Override
@@ -93,52 +115,67 @@ public abstract class MixinServerScoreboard extends MixinScoreboard implements I
         }
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onUpdateScoreValue(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    public boolean onUpdateScoreValue(Set set, Object object) {
+        return true;
+    }
+
+    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveScore(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
-    public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet packet) {
+    //@Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    /*public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
-    }
+    }*/
 
-    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    public boolean onUpdateObjective(Set set, Object object) {
+        return true;
+    }
+
+    @Redirect(method = "func_96533_c", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    public boolean onSendDisplayPackets(Set set, Object object) {
+        return true;
+    }
+
+    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onSendTeamUpdate(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V"))
+    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }

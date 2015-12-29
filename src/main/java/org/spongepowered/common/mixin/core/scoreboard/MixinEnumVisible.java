@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.scoreboard;
+package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public class SpongeVisibility implements Visibility {
+@Mixin(Team.EnumVisible.class)
+public abstract class MixinEnumVisible implements Visibility {
 
-    private Team.EnumVisible handle;
-
-    public SpongeVisibility(Team.EnumVisible handle) {
-        this.handle = handle;
-    }
+    @Shadow public String field_178830_e; // internalName
 
     @Override
     public String getId() {
-        return this.handle.name();
+        return this.field_178830_e;
     }
 
     @Override
     public String getName() {
-        return this.handle.toString();
-    }
-
-    public Team.EnumVisible getHandle() {
-        return this.handle;
+        return this.field_178830_e;
     }
 }

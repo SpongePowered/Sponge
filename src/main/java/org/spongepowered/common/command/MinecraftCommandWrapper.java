@@ -47,6 +47,7 @@ import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.ArrayList;
@@ -110,6 +111,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
+            ((IMixinCommandHandler) handler).setExpandedSelector(true);
+
             for (Entity entity : list) {
                 splitArgs[usernameIndex] = entity.getUniqueID().toString();
 
@@ -118,6 +121,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
                 }
             }
             splitArgs[usernameIndex] = previousNameVal;
+
+            ((IMixinCommandHandler) handler).setExpandedSelector(false);
         } else {
             if (tryExecute(handler, mcSender, splitArgs, arguments)) {
                 ++successCount;

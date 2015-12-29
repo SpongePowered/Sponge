@@ -123,7 +123,6 @@ public final class NbtDataUtil {
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
 
-
     // Compatibility tags for Forge
     public static final String FORGE_DATA_TAG = "ForgeData";
     public static final String UUID_MOST = "UUIDMost";

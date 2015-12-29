@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.command;
 
-public interface IMixinScoreboard {
+public interface IMixinCommandBase {
 
-    boolean isClient();
+    boolean isExpandedSelector();
+
+    void setExpandedSelector(boolean expandedSelector);
 
 }

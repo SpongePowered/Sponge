@@ -22,15 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
+package org.spongepowered.common.interfaces.command;
 
-import net.minecraft.scoreboard.Team;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+public interface IMixinCommandHandler {
 
-@Mixin(Team.class)
-public abstract class MixinTeam {
+    boolean isExpandedSelector();
 
-    @Shadow public abstract boolean isSameTeam(Team other);
-
+    void setExpandedSelector(boolean expandedSelector);
 }

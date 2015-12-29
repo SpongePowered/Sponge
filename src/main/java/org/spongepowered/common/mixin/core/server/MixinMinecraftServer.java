@@ -59,6 +59,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -796,5 +797,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!this.enableSaving) {
             ci.cancel();
         }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public Optional<Scoreboard> getServerScoreboard() {
+        WorldServer world = DimensionManager.getWorldFromDimId(0);
+        if (world != null) {
+            return Optional.of((Scoreboard) world.getScoreboard());
+        }
+        return Optional.empty();
     }
 }

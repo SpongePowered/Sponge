@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -42,14 +41,14 @@ import java.util.UUID;
 public class SpongeScore implements Score {
 
     private Text name;
+    public String legacyName;
     private int score;
-
-    private UUID uuid = UUID.randomUUID();
 
     private Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
 
     public SpongeScore(Text name) {
         this.name = name;
+        this.legacyName = Texts.legacy().to(name);
     }
 
     @Override
@@ -70,7 +69,14 @@ public class SpongeScore implements Score {
 
     private void updateScore() {
         for (net.minecraft.scoreboard.Score score : this.scores.values()) {
-            score.setScorePoints(this.score);
+            int j = score.scorePoints;
+            score.scorePoints = this.score;
+
+            if (j != this.score || score.field_178818_g)
+            {
+                score.field_178818_g = false;
+                score.getScoreScoreboard().func_96536_a(score);
+            }
         }
     }
 
@@ -83,53 +89,26 @@ public class SpongeScore implements Score {
         return objectives;
     }
 
-    public void addToObjective(Objective objective) {
-        for (ScoreObjective scoreObjective: ((SpongeObjective) objective).getObjectives()) {
-            this.addToScoreObjective(scoreObjective);
+    public net.minecraft.scoreboard.Score getScoreFor(ScoreObjective objective) {
+        if (this.scores.containsKey(objective)) {
+            return this.scores.get(objective);
         }
-    }
+        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(objective.theScoreboard, objective, this.legacyName);
 
-    @SuppressWarnings({"deprecation", "unchecked"})
-    public void addToScoreObjective(ScoreObjective scoreObjective) {
-        Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap =
-                (Map<ScoreObjective, net.minecraft.scoreboard.Score>) scoreObjective.theScoreboard.entitiesScoreObjectives.get(this.name);
-        if (scoreMap == null) {
-            scoreMap = Maps.newHashMap();
-        }
+        // We deliberately set the fields here instead of using the methods.
+        // Since a new score is being created here, we want to avoid
+        // sending packets until everything is in the proper state.
+        score.scorePoints = this.score;
 
-        if (scoreMap.containsKey(scoreObjective) && ((IMixinScore) scoreMap.get(scoreObjective)).spongeCreated()) {
-            throw new IllegalArgumentException("A score already exists with the name " + this.name);
-        }
-
-        String name = Texts.legacy().to(this.name);
-
-        net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(scoreObjective.theScoreboard, scoreObjective, name);
-        ((IMixinScore) score).setSpongeCreated();
         ((IMixinScore) score).setSpongeScore(this);
-        score.setScorePoints(this.score);
-        this.scores.put(scoreObjective, score);
+        this.scores.put(objective, score);
 
-        scoreObjective.theScoreboard.entitiesScoreObjectives.put(name, scoreMap);
-
-        scoreMap.put(scoreObjective, score);
+        return score;
     }
 
-    public void removeFromObjective(Objective objective) {
-        for (ScoreObjective scoreObjective: ((SpongeObjective) objective).getObjectives()) {
-            this.removeFromScoreObjective(scoreObjective);
+    public void removeScoreFor(ScoreObjective objective) {
+        if (this.scores.remove(objective) == null) {
+            throw new IllegalStateException("Attempting to remove an score without an entry!");
         }
-    }
-
-    @SuppressWarnings("deprecation")
-    public void removeFromScoreObjective(ScoreObjective objective) {
-        objective.theScoreboard.removeObjectiveFromEntity(Texts.legacy().to(this.name), objective);
-    }
-
-    public net.minecraft.scoreboard.Score getScore(ScoreObjective objective) {
-        return this.scores.get(objective);
-    }
-
-    public UUID getUuid() {
-        return this.uuid;
     }
 }

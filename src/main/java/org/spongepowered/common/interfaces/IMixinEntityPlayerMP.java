@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.text.sink.MessageSink;
 
 import javax.annotation.Nullable;
 
@@ -36,7 +37,9 @@ public interface IMixinEntityPlayerMP {
     boolean usesCustomClient();
 
     User getUserObject();
-    
+
     void setVelocityOverride(@Nullable Vector3d velocity);
+
+    MessageSink getDeathMessageSink();
 
 }

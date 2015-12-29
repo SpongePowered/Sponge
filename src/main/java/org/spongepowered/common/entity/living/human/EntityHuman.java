@@ -44,6 +44,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
@@ -53,6 +54,10 @@ import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.ArmorEquipable;
+import org.spongepowered.api.scoreboard.TeamMember;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.Texts;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -71,7 +76,7 @@ import java.util.concurrent.TimeUnit;
  *
  * Hostile mobs don't attack the human, should this be default behaviour?
  */
-public class EntityHuman extends EntityCreature {
+public class EntityHuman extends EntityCreature implements TeamMember {
 
     // According to http://wiki.vg/Mojang_API#UUID_-.3E_Profile_.2B_Skin.2FCape
     // you can access this data once per minute, lets cache for 2 minutes
@@ -112,6 +117,16 @@ public class EntityHuman extends EntityCreature {
         this.dataWatcher.addObject(18, 0);
         // Enables all skin features
         this.dataWatcher.addObject(10, (byte) 0xFF);
+    }
+
+    @Override
+    public Text getTeamRepresentation() {
+        return Texts.of(this.fakeProfile.getName());
+    }
+
+    @Override
+    public Team getTeam() {
+        return this.worldObj.getScoreboard().getPlayersTeam(this.fakeProfile.getName());
     }
 
     @Override

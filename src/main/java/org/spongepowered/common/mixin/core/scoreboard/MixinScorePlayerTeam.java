@@ -27,159 +27,270 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scoreboard.Team;
+import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.registry.type.text.TextColorsRegistryModule;
-import org.spongepowered.common.registry.type.scoreboard.VisibilityRegistryModule;
-import org.spongepowered.common.scoreboard.SpongeTeam;
+import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mixin(ScorePlayerTeam.class)
-public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTeam {
+@Implements(@Interface(iface = Team.class, prefix = "team$"))
+public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team implements IMixinTeam {
 
     @Shadow public Scoreboard theScoreboard;
     @Shadow public String registeredName;
+    @Shadow public Set<String> membershipSet;
     @Shadow public String teamNameSPT;
     @Shadow public EnumChatFormatting chatFormat;
     @Shadow public String namePrefixSPT;
     @Shadow public String colorSuffix;
     @Shadow public boolean allowFriendlyFire;
     @Shadow public boolean canSeeFriendlyInvisibles;
-    @Shadow public Team.EnumVisible nameTagVisibility;
-    @Shadow public Team.EnumVisible deathMessageVisibility;
-    @Shadow public Set<String> membershipSet;
-    @SuppressWarnings("rawtypes")
-    @Shadow public abstract Collection getMembershipCollection();
+    @Shadow public net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
+    @Shadow public net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
 
-    private SpongeTeam spongeTeam;
+    @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
-    @Override
-    public SpongeTeam getSpongeTeam() {
-        return this.spongeTeam;
+    private Text displayName;
+    private Text prefix;
+    private Text suffix;
+    private TextColor color;
+
+    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;sendTeamUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+
+    // Minecraft doesn't do a null check on theScoreboard, so we redirect
+    // the call and do it ourselves.
+    private void doTeamUpdate() {
+        if (this.theScoreboard != null) {
+            this.theScoreboard.sendTeamUpdate((ScorePlayerTeam) (Object) this);
+        }
     }
 
-    @Override
-    public void setSpongeTeam(SpongeTeam team) {
-        this.spongeTeam = team;
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onInit(CallbackInfo ci) {
+        // Initialize cached values
+        this.displayName = Texts.legacy().fromUnchecked(this.teamNameSPT);
+        this.prefix = Texts.legacy().fromUnchecked(this.namePrefixSPT);
+        this.suffix = Texts.legacy().fromUnchecked(this.colorSuffix);
+        this.color = TextColorsRegistryModule.enumChatColor.get(this.chatFormat);
     }
 
-    @SuppressWarnings("deprecation")
-    @Inject(method = "setTeamName", at = @At("HEAD"), cancellable = true)
+    public String team$getName() {
+        return this.registeredName;
+    }
+
+    public Text team$getDisplayName() {
+        return this.displayName;
+    }
+
+    public void team$setDisplayName(Text text) {
+        String newText = Texts.legacy().to(text);
+        if (newText.length() > 32) {
+            throw new IllegalArgumentException(String.format("Display name is %s characters long! It must be at most 32.", newText.length()));
+        }
+        this.displayName = text;
+        this.teamNameSPT = newText;
+        this.doTeamUpdate();
+    }
+
+    public TextColor team$getColor() {
+        return this.color;
+    }
+
+    public void team$setColor(TextColor color) {
+        this.color = color;
+        this.chatFormat = ((SpongeTextColor) color).getHandle();
+        this.doTeamUpdate();
+    }
+
+    public Text team$getPrefix() {
+        return this.prefix;
+    }
+
+    public void team$setPrefix(Text prefix) {
+        String newPrefix = Texts.legacy().to(prefix);
+        if (newPrefix.length() > 16) {
+            throw new IllegalArgumentException(String.format("Prefix is %s characters long! It must be at most 16.", newPrefix.length()));
+        }
+        this.prefix = prefix;
+        this.namePrefixSPT = newPrefix;
+        this.doTeamUpdate();
+    }
+
+    public Text team$getSuffix() {
+        return this.suffix;
+    }
+
+    public void team$setSuffix(Text suffix) {
+        String newSuffix = Texts.legacy().to(suffix);
+        if (newSuffix.length() > 16) {
+            throw new IllegalArgumentException(String.format("Suffix is %s characters long! It must be at most 16.", newSuffix.length()));
+        }
+        this.suffix = suffix;
+        this.colorSuffix = newSuffix;
+        this.doTeamUpdate();
+    }
+
+    public boolean team$allowFriendlyFire() {
+        return this.allowFriendlyFire;
+    }
+
+    @Intrinsic
+    public void team$setAllowFriendlyFire(boolean allowFriendlyFire) {
+        this.setAllowFriendlyFire(allowFriendlyFire);
+    }
+
+    public boolean team$canSeeFriendlyInvisibles() {
+        return this.canSeeFriendlyInvisibles;
+    }
+
+    public void team$setCanSeeFriendlyInvisibles(boolean enabled) {
+        this.canSeeFriendlyInvisibles = enabled;
+        this.doTeamUpdate();
+    }
+
+    public Visibility team$getNameTagVisibility() {
+        return (Visibility) (Object) this.nameTagVisibility;
+    }
+
+    public void team$setNameTagVisibility(Visibility visibility) {
+        this.nameTagVisibility = (EnumVisible) (Object) visibility;
+        this.doTeamUpdate();
+    }
+
+    public Visibility team$getDeathMessageVisibility() {
+        return (Visibility) (Object) this.deathMessageVisibility;
+    }
+
+    public void team$setDeathMessageVisibility(Visibility visibility) {
+        this.deathMessageVisibility= (EnumVisible) (Object) visibility;
+        this.doTeamUpdate();
+    }
+
+    public Set<Text> team$getMembers() {
+        return this.membershipSet.stream().map((String name) -> Texts.legacy().fromUnchecked(name)).collect(Collectors.toSet());
+    }
+
+    public void team$addMember(Text member) {
+        String legacyName = Texts.legacy().to(member);
+        if (legacyName.length() > 16) {
+            throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 16.", legacyName.length()));
+        }
+        if (this.theScoreboard != null) {
+            this.theScoreboard.addPlayerToTeam(legacyName, this.registeredName);
+        } else {
+            this.membershipSet.add(legacyName); // this is normally done by addPlayerToTeam
+        }
+    }
+
+    public boolean team$removeMember(Text member) {
+        String legacyName = Texts.legacy().to(member);
+        if (this.theScoreboard != null) {
+            return this.theScoreboard.removePlayerFromTeams(legacyName);
+        } else {
+            return this.membershipSet.remove(legacyName);
+        }
+    }
+
+    public Optional<org.spongepowered.api.scoreboard.Scoreboard> team$getScoreboard() {
+        return Optional.ofNullable((org.spongepowered.api.scoreboard.Scoreboard) this.theScoreboard);
+    }
+
+    public boolean team$unregister() {
+        if (this.theScoreboard == null) {
+            return false;
+        }
+        this.theScoreboard.removeTeam((ScorePlayerTeam) (Object) this);
+        this.theScoreboard = null;
+        return true;
+    }
+
+    @Redirect(method = "setTeamName", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetTeamName(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
+    }
+
+    @Inject(method = "setTeamName", at = @At("HEAD"))
     public void onSetTeamName(String name, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setDisplayName(Texts.legacy().fromUnchecked(name));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
+        if (name != null) {
+            this.displayName = Texts.legacy().fromUnchecked(name);
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Inject(method = "setNamePrefix", at = @At("HEAD"), cancellable = true)
+    @Redirect(method = "setNamePrefix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetNamePrefix(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
+    }
+
+    @Inject(method = "setNamePrefix", at = @At("HEAD"))
     public void onSetNamePrefix(String prefix, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setPrefix(Texts.legacy().fromUnchecked(prefix));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
+        if (prefix != null) {
+            this.prefix = Texts.legacy().fromUnchecked(prefix);
         }
     }
 
-    @SuppressWarnings("deprecation")
-    @Inject(method = "setNameSuffix", at = @At("HEAD"), cancellable = true)
+    @Redirect(method = "setNameSuffix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetNameSuffix(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
+    }
+
+    @Inject(method = "setNameSuffix", at = @At("HEAD"))
     public void onSetNameSuffix(String suffix, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setSuffix(Texts.legacy().fromUnchecked(suffix));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
+        if (suffix != null) {
+            this.suffix = Texts.legacy().fromUnchecked(suffix);
         }
     }
 
-    @Inject(method = "setAllowFriendlyFire", at = @At("HEAD"), cancellable = true)
-    public void onSetAllowFriendlyFire(boolean allowFriendlyFire, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setAllowFriendlyFire(allowFriendlyFire);
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
-        }
+    @Redirect(method = "setAllowFriendlyFire", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetAllowFriendlyFire(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
     }
 
-    @Inject(method = "setSeeFriendlyInvisiblesEnabled", at = @At("HEAD"), cancellable = true)
-    public void onSetSeeFriendlyInvisiblesEnable(boolean canSeeFriendlyInvisibles, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setCanSeeFriendlyInvisibles(canSeeFriendlyInvisibles);
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
-        }
+    @Redirect(method = "setSeeFriendlyInvisiblesEnabled", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetSeeFriendlyInvisiblesEnabled(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
     }
 
-    @Inject(method = "setNameTagVisibility", at = @At("HEAD"), cancellable = true)
-    public void onSetNametagVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setNameTagVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
-        }
+    @Redirect(method = "setNameTagVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetNameTagVisibility(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
     }
 
-    @Inject(method = "setDeathMessageVisibility", at = @At("HEAD"), cancellable = true)
-    public void onSetDeathMessageVisibility(Team.EnumVisible visibility, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setDeathTextVisibility(VisibilityRegistryModule.enumVisible.get(visibility));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "setChatFormat", at = @At("HEAD"), cancellable = true)
-    public void onSetChatFormat(EnumChatFormatting formatting, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.spongeTeam.allowRecursion = false;
-            this.spongeTeam.setColor(TextColorsRegistryModule.enumChatColor.get(formatting));
-            this.spongeTeam.allowRecursion = true;
-            ci.cancel();
-        }
+    @Redirect(method = "setDeathMessageVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    private void onSetDeathMessageVisibility(Scoreboard scoreboard, ScorePlayerTeam team) {
+        this.doTeamUpdate();
     }
 
     @Inject(method = "setChatFormat", at = @At("RETURN"))
-    public void onSetChatFormatEnd(EnumChatFormatting formatting, CallbackInfo ci) {
-        // In vanilla, this is always set in conjunction with the prefix and suffix,
-        // so the packet is only sent in the prefix and suffix setters. The color
-        // can be set independently with Sponge, so it's necessary to send the packet
-        // here.
-        this.theScoreboard.sendTeamUpdate((ScorePlayerTeam) (Object) this);
-    }
-
-    @Override
-    public boolean isSameTeam(Team other) {
-        return other != null && ((IMixinTeam) other).getSpongeTeam() == this.spongeTeam;
-    }
-
-    private boolean shouldEcho() {
-        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || this.spongeTeam.getScoreboards().size() == 1)
-                && this.spongeTeam.allowRecursion;
+    private void onSetChatFormat(EnumChatFormatting format, CallbackInfo ci) {
+        this.color = TextColorsRegistryModule.enumChatColor.get(format);
+        // This isn't called by Vanilla, so we inject the call ourselves.
+        this.doTeamUpdate();
     }
 
     @SuppressWarnings("rawtypes")
@@ -224,7 +335,7 @@ public abstract class MixinScorePlayerTeam extends MixinTeam implements IMixinTe
         for (int i = 0; i < MinecraftServer.getServer().getConfigurationManager().playerEntityList.size(); ++i) {
             EntityPlayerMP player = (EntityPlayerMP)MinecraftServer.getServer().getConfigurationManager().playerEntityList.get(i);
 
-            if (player.getTeam() != (Team)(Object)this) {
+            if (player.getTeam() != this) {
                 sources.add((Player) player);
             }
         }

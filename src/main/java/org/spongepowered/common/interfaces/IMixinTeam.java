@@ -26,13 +26,8 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.text.sink.MessageSink;
-import org.spongepowered.common.scoreboard.SpongeTeam;
 
 public interface IMixinTeam {
-
-    void setSpongeTeam(SpongeTeam team);
-
-    SpongeTeam getSpongeTeam();
 
     MessageSink getSinkForPlayer(EntityPlayerMP player);
 

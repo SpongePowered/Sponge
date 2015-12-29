@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.scoreboard.ServerScoreboard;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
@@ -67,4 +68,6 @@ public interface IMixinWorldInfo {
     void setWorldConfig(SpongeConfig<WorldConfig> config);
 
     void createWorldConfig();
+
+    void setScoreboard(ServerScoreboard scoreboard);
 }

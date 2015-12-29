@@ -22,10 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-public interface IMixinScoreboard {
+import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.ServerScoreboard;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinScoreboard;
 
-    boolean isClient();
+@Mixin(Scoreboard.class)
+public abstract class MixinScoreboardClientCheck implements IMixinScoreboard {
 
+    private boolean isClient;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onInit(CallbackInfo ci) {
+        this.isClient = !(((Object) this) instanceof ServerScoreboard);
+    }
+
+    @Override
+    public boolean isClient() {
+        return this.isClient;
+    }
 }

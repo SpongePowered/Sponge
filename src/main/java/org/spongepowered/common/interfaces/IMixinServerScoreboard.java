@@ -25,11 +25,14 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 
-public interface IMixinServerScoreboard {
+public interface IMixinServerScoreboard extends IMixinScoreboard {
 
     void addPlayer(EntityPlayerMP player);
 
     void removePlayer(EntityPlayerMP player);
+
+    void sendToPlayers(Packet packet);
 
 }

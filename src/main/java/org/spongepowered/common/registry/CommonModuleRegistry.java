@@ -263,7 +263,7 @@ public final class CommonModuleRegistry {
             .registerModule(DimensionType.class, DimensionRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
-            .registerModule(DisplaySlot.class, new DisplaySlotRegistryModule())
+            .registerModule(DisplaySlot.class,DisplaySlotRegistryModule.getInstance())
             .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
             .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
             .registerModule(Enchantment.class, new EnchantmentRegistryModule())

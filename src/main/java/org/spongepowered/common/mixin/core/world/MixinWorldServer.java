@@ -30,9 +30,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.scoreboard.ScoreboardSaveData;
 import net.minecraft.util.BlockPos;
-import net.minecraft.village.VillageCollection;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
@@ -46,19 +44,18 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinScoreboardSaveData;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -89,24 +86,10 @@ public abstract class MixinWorldServer extends MixinWorld {
             ci.cancel();
         }
     }
-    
+
     @Inject(method = "init", at = @At("HEAD"))
     public void beforeInit(CallbackInfoReturnable<World> cir) {
         updateWorldGenerator();
-    }
-
-    @Inject(method = "init", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/scoreboard/ScoreboardSaveData;setScoreboard(Lnet/minecraft/scoreboard/Scoreboard;)V", shift = At.Shift.BEFORE),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onInit(CallbackInfoReturnable<World> cir, String s, VillageCollection villagecollection, ScoreboardSaveData scoreboardsavedata) {
-        ((IMixinScoreboardSaveData) scoreboardsavedata).setSpongeScoreboard(this.spongeScoreboard);
-        this.spongeScoreboard.getScoreboards().add(this.worldScoreboard);
-    }
-
-    @Surrogate
-    public void onInit(CallbackInfoReturnable<World> cir, ScoreboardSaveData scoreboardsavedata) {
-        ((IMixinScoreboardSaveData) scoreboardsavedata).setSpongeScoreboard(this.spongeScoreboard);
-        this.spongeScoreboard.getScoreboards().add(this.worldScoreboard);
     }
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
@@ -138,7 +121,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
     }
- 
+
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;"
             + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {

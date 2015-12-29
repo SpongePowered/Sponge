@@ -33,7 +33,6 @@ import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
-import org.spongepowered.common.scoreboard.SpongeVisibility;
 
 import java.util.Collection;
 import java.util.Map;
@@ -43,7 +42,6 @@ public final class VisibilityRegistryModule implements CatalogRegistryModule<Vis
 
     @RegisterCatalog(Visibilities.class)
     public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
-    public static final Map<Team.EnumVisible, SpongeVisibility> enumVisible = Maps.newEnumMap(Team.EnumVisible.class);
 
     @Override
     public Optional<Visibility> getById(String id) {
@@ -57,15 +55,9 @@ public final class VisibilityRegistryModule implements CatalogRegistryModule<Vis
 
     @Override
     public void registerDefaults() {
-        this.addVisibility("all", Team.EnumVisible.ALWAYS);
-        this.addVisibility("own_team", Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
-        this.addVisibility("other_teams", Team.EnumVisible.HIDE_FOR_OWN_TEAM);
-        this.addVisibility("none", Team.EnumVisible.NEVER);
-    }
-
-    private void addVisibility(String name, Team.EnumVisible handle) {
-        SpongeVisibility visibility = new SpongeVisibility(handle);
-        visibilityMappings.put(name, visibility);
-        enumVisible.put(handle, visibility);
+        this.visibilityMappings.put("all", (Visibility) (Object) Team.EnumVisible.ALWAYS);
+        this.visibilityMappings.put("own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
+        this.visibilityMappings.put("other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
+        this.visibilityMappings.put("none", (Visibility) (Object) Team.EnumVisible.NEVER);
     }
 }

@@ -38,10 +38,12 @@ import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -58,9 +60,12 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -79,12 +84,13 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.util.Collection;
 import java.util.List;
@@ -110,10 +116,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow public MinecraftServer mcServer;
 
-    private Scoreboard spongeScoreboard = ((World) this.worldObj).getScoreboard();
+    private Scoreboard spongeScoreboard;
 
-    private net.minecraft.scoreboard.Scoreboard mcScoreboard = this.worldObj.getScoreboard();
-    
     @Nullable private Vector3d velocityOverride = null;
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
@@ -330,12 +334,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void setScoreboard(Scoreboard scoreboard) {
         if (scoreboard == null) {
-            scoreboard = ((World) this.worldObj).getScoreboard();
+            scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
         }
-        ((IMixinServerScoreboard) this.mcScoreboard).removePlayer((EntityPlayerMP) (Object) this);
+        if (this.spongeScoreboard != null) { // Only happens once, when initializing player.
+            ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this);
+        }
         this.spongeScoreboard = scoreboard;
-        this.mcScoreboard = ((SpongeScoreboard) scoreboard).getPlayerScoreboard();
-        ((IMixinServerScoreboard) this.mcScoreboard).addPlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
     }
 
     @Override
@@ -344,8 +349,27 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    public MessageSink getDeathMessageSink() {
+        EntityPlayerMP player = (EntityPlayerMP) (Object) this;
+        if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
+            Team team = player.getTeam();
+
+            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
+                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                    return ((IMixinTeam) team).getSinkForPlayer(player);
+                } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                    return ((IMixinTeam) team).getNonTeamSink();
+                }
+            } else {
+                return this.getMessageSink();
+            }
+        }
+        return MessageSinks.toNone();
+    }
+
+    @Override
     public net.minecraft.scoreboard.Scoreboard getWorldScoreboard() {
-        return this.mcScoreboard;
+        return (net.minecraft.scoreboard.Scoreboard) this.spongeScoreboard;
     }
 
     @Override
@@ -406,7 +430,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void setSleepingIgnored(boolean sleepingIgnored) {
         this.sleepingIgnored = sleepingIgnored;
     }
-    
+
     @Override
     public Vector3d getVelocity() {
         if (this.velocityOverride != null) {
@@ -414,13 +438,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         return super.getVelocity();
     }
-    
+
     @Override
     public void setVelocity(Vector3d velocity) {
         super.setVelocity(velocity);
         this.velocityOverride = null;
     }
-    
+
     @Override
     public void setVelocityOverride(@Nullable Vector3d velocity) {
         this.velocityOverride = velocity;

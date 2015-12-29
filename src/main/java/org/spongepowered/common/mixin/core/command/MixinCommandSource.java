@@ -77,25 +77,8 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
 
     @Override
     public MessageSink getMessageSink() {
-        CommandSource source = this;
-        if (source instanceof EntityPlayerMP) {
-            EntityPlayerMP player = (EntityPlayerMP)(Object) this;
-            if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
-                Team team = player.getTeam();
-
-                if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
-                    if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
-                        this.sink = ((IMixinTeam)team).getSinkForPlayer((EntityPlayerMP) player);
-                    } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
-                        this.sink = ((IMixinTeam)team).getNonTeamSink();
-                    }
-                }
-            } else {
-                this.sink = MessageSinks.toNone();
-            }
-        }
-
         return this.sink;
+
     }
 
     @Override

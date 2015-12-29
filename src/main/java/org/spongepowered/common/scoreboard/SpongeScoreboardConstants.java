@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.scoreboard;
 
-public interface IMixinScoreboard {
+public class SpongeScoreboardConstants {
 
-    boolean isClient();
+    public static final int OBJECTIVE_PACKET_ADD = 0;
+    public static final int OBJECTIVE_PACKET_REMOVE = 1;
 
 }

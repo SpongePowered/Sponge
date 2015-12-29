@@ -35,6 +35,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
@@ -94,6 +95,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
+
+    private ServerScoreboard scoreboard;
 
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
@@ -541,6 +544,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public void setScoreboard(ServerScoreboard scoreboard) {
+        this.scoreboard = scoreboard;
+    }
+
+    @Override
     public boolean getIsMod() {
         return this.isMod;
     }
@@ -690,6 +698,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.playerUniqueIdNbt.appendTag(valueNbt);
             iterator.remove();
         }
+
+        //this.scoreboard.fie
     }
 
     @Override

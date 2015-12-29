@@ -27,12 +27,15 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
+import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.scoreboard.SpongeScore;
 
 @Mixin(Score.class)
@@ -40,45 +43,30 @@ public abstract class MixinScore implements IMixinScore {
 
     @Shadow public Scoreboard theScoreboard;
 
-    public boolean spongeCreated;
-
-    public SpongeScore score;
-
-    private boolean allowRecursion = true;
+    public SpongeScore spongeScore;
 
     @Override
-    public boolean spongeCreated() {
-        return this.spongeCreated;
-    }
-
-    @Override
-    public void setSpongeCreated() {
-        this.spongeCreated = true;
+    public SpongeScore getSpongeScore() {
+        return this.spongeScore;
     }
 
     @Override
     public void setSpongeScore(SpongeScore score) {
-        this.score = score;
+        this.spongeScore = score;
     }
 
-    @Override
-    public SpongeScore getSpongeScore() {
-        return this.score;
-    }
-
-    @Inject(method = "setScorePoints", at = @At("RETURN"), cancellable = true)
+    @Inject(method = "setScorePoints", at = @At("HEAD"), cancellable = true)
     public void onSetScorePoints(int points, CallbackInfo ci) {
-        if (this.shouldEcho()) {
-            this.allowRecursion = false;
-            this.score.setScore(points);
-            this.allowRecursion = true;
-            ci.cancel();
+        if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
+            return; // Let the normal logic take over.
         }
-    }
-
-    private boolean shouldEcho() {
-        return (((IMixinScoreboard) this.theScoreboard).echoToSponge() || ((IMixinScoreboard) this.theScoreboard).getSpongeScoreboard()
-                .getScoreboards().size() == 1) && this.allowRecursion;
+        if (this.spongeScore == null) {
+            SpongeImpl.getLogger().warn("Returning score because null score!");
+            ci.cancel();
+            return;
+        }
+        this.spongeScore.setScore(points);
+        ci.cancel();
     }
 
 }

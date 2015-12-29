@@ -68,6 +68,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
+import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
@@ -337,7 +338,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<DisplaySlot> getDisplaySlotForColor(TextColor color) {
-        throw new UnsupportedOperationException(); // TODO
+        return Optional.ofNullable(DisplaySlotRegistryModule.getInstance().displaySlotMappings.get(color.getId()));
     }
 
     @Override

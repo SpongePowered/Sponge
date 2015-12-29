@@ -37,10 +37,14 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.interfaces.command.IMixinCommandBase;
+import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 @Mixin(CommandHandler.class)
-public abstract class MixinCommandHandler {
+public abstract class MixinCommandHandler implements IMixinCommandHandler {
+
+    private boolean expandedSelector;
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
@@ -48,6 +52,7 @@ public abstract class MixinCommandHandler {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.setProcessingCaptureCause(true);
         }
+        ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
     }
 
     @Inject(method = "tryExecute", at = @At(value = "RETURN"))
@@ -57,6 +62,7 @@ public abstract class MixinCommandHandler {
             world.handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
             world.setProcessingCaptureCause(false);
         }
+        ((IMixinCommandBase) command).setExpandedSelector(false);
     }
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
@@ -72,5 +78,15 @@ public abstract class MixinCommandHandler {
                                Throwable error, ChatComponentTranslation comp) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
+    }
+
+    @Override
+    public boolean isExpandedSelector() {
+        return this.expandedSelector;
+    }
+
+    @Override
+    public void setExpandedSelector(boolean expandedSelector) {
+        this.expandedSelector = expandedSelector;
     }
 }

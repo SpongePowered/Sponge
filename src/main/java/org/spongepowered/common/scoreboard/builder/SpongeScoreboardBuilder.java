@@ -26,10 +26,11 @@ package org.spongepowered.common.scoreboard.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.common.scoreboard.SpongeScoreboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,12 +68,12 @@ public class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard build() throws IllegalStateException {
-        SpongeScoreboard scoreboard = new SpongeScoreboard();
+        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(MinecraftServer.getServer());
         for (Objective objective: this.objectives) {
             scoreboard.addObjective(objective);
         }
         for (Team team: this.teams) {
-            scoreboard.addTeam(team);
+            scoreboard.registerTeam(team);
         }
         return scoreboard;
     }

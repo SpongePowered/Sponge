@@ -76,6 +76,7 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
@@ -95,7 +96,6 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -120,7 +120,6 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @SuppressWarnings("rawtypes")
     @Shadow public List playerEntityList;
-    @Shadow protected abstract void sendScoreboard(ServerScoreboard scoreboardIn, EntityPlayerMP playerIn);
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
     @Shadow public abstract MinecraftServer getServerInstance();
@@ -277,6 +276,14 @@ public abstract class MixinServerConfigurationManager {
         // Sponge Start
 
         // Move logic for creating join message up here
+        //
+        // Set scoreboard earlier. This initializes the player's worldScoreboard,
+        // and sends the proper packets. The former is needed for the chat message
+        // below (getting the display name), and it's perfectly safe to move
+        // sending the packets here.
+
+        player.setScoreboard((Scoreboard) worldserver.getScoreboard());
+
         ChatComponentTranslation chatcomponenttranslation;
 
         if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
@@ -289,9 +296,6 @@ public abstract class MixinServerConfigurationManager {
         }
 
         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
-
-
-        player.setScoreboard(((IMixinScoreboard) worldserver.getScoreboard()).getSpongeScoreboard());
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;

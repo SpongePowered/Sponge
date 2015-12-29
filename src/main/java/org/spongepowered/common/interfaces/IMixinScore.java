@@ -28,10 +28,6 @@ import org.spongepowered.common.scoreboard.SpongeScore;
 
 public interface IMixinScore {
 
-    boolean spongeCreated();
-
-    void setSpongeCreated();
-
     void setSpongeScore(SpongeScore score);
 
     SpongeScore getSpongeScore();

@@ -195,7 +195,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.scoreboard.SpongeScoreboard;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -265,8 +264,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Nullable private volatile Context worldContext;
 
     private SpongeChunkProvider spongegen;
-
-    protected SpongeScoreboard spongeScoreboard = new SpongeScoreboard();
 
     // @formatter:off
     @Shadow public Profiler theProfiler;
@@ -1916,17 +1913,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
         }
-    }
-
-    @Override
-    public org.spongepowered.api.scoreboard.Scoreboard getScoreboard() {
-        return this.spongeScoreboard;
-    }
-
-    @Override
-    public void setScoreboard(org.spongepowered.api.scoreboard.Scoreboard scoreboard) {
-        this.spongeScoreboard = checkNotNull(((SpongeScoreboard) scoreboard), "Scoreboard cannot be null!");
-        this.worldScoreboard = ((SpongeScoreboard) scoreboard).createScoreboard(scoreboard);
     }
 
     @Override

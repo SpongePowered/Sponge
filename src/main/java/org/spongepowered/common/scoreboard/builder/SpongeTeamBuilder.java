@@ -27,6 +27,7 @@ package org.spongepowered.common.scoreboard.builder;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import net.minecraft.scoreboard.ScorePlayerTeam;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -34,7 +35,6 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
-import org.spongepowered.common.scoreboard.SpongeTeam;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -59,6 +59,9 @@ public class SpongeTeamBuilder implements Team.Builder {
     @Override
     public Team.Builder name(String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
+        if (this.displayName == null) {
+            this.displayName = Texts.of(this.name);
+        }
         return this;
     }
 
@@ -130,7 +133,7 @@ public class SpongeTeamBuilder implements Team.Builder {
             .canSeeFriendlyInvisibles(value.canSeeFriendlyInvisibles())
             .suffix(value.getSuffix())
             .nameTagVisibility(value.getNameTagVisibility())
-            .deathTextVisibility(value.getDeathTextVisibility())
+            .deathTextVisibility(value.getDeathMessageVisibility())
             .members(value.getMembers());
         return this;
     }
@@ -155,7 +158,19 @@ public class SpongeTeamBuilder implements Team.Builder {
         checkState(this.name != null, "Name cannot be null!");
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
-        return new SpongeTeam(this.name, this.displayName, this.color, this.prefix, this.suffix, this.allowFriendlyFire, this.showFriendlyInvisibles,
-                this.nameTagVisibility, this.deathMessageVisibility, new HashSet<>(this.members));
+        Team team = (Team) new ScorePlayerTeam(null, this.name);
+        team.setDisplayName(displayName);
+        team.setColor(this.color);
+        team.setPrefix(this.prefix);
+        team.setSuffix(this.suffix);
+        team.setAllowFriendlyFire(this.allowFriendlyFire);
+        team.setCanSeeFriendlyInvisibles(this.showFriendlyInvisibles);
+        team.setNameTagVisibility(this.nameTagVisibility);
+        team.setDeathMessageVisibility(this.deathMessageVisibility);
+        for (Text member: this.members) {
+            team.addMember(member);
+        }
+
+        return team;
     }
 }
