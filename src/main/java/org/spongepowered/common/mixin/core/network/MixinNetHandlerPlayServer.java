@@ -78,7 +78,6 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
@@ -395,7 +394,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V"))
     public void onDisconnectPlayer(IChatComponent reason, CallbackInfo ci) {
         Text message = SpongeTexts.toText(this.tmpQuitMessage);
-        Text newMessage = Texts.of(message);
+        Text newMessage = Text.of(message);
         Player player = (Player) this.playerEntity;
         Set<CommandSource> sources = new HashSet<>();
         sources.add(player);

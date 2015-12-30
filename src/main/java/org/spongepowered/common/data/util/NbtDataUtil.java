@@ -207,7 +207,7 @@ public final class NbtDataUtil {
 
     public static List<Text> getLoreFromNBT(NBTTagCompound subCompound) {
         final NBTTagList list = subCompound.getTagList(ITEM_LORE, TAG_STRING);
-        return SpongeTexts.fromLegacy(list);
+        return SpongeTexts.fromNbtLegacy(list);
     }
 
     public static void removeLoreFromNBT(ItemStack stack) {
@@ -252,7 +252,7 @@ public final class NbtDataUtil {
         if (list.hasNoTags()) {
             return new ArrayList<>();
         }
-        return SpongeTexts.fromLegacy(list);
+        return SpongeTexts.fromNbtLegacy(list);
     }
 
     public static void removePagesFromNBT(ItemStack stack) {

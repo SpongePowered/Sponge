@@ -34,7 +34,6 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -84,7 +83,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
             this.description = SpongeTexts.toText(motd);
         } else {
             this.serverMotd = new ChatComponentText("");
-            this.description = Texts.of();
+            this.description = Text.of();
         }
     }
 

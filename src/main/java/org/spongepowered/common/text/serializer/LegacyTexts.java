@@ -22,17 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.text.serializer;
 
 import com.google.common.collect.Lists;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.TextRepresentation;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -42,17 +39,13 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-public class LegacyTextRepresentation implements TextRepresentation {
-    public static final LegacyTextRepresentation DEFAULT_CHAR_INSTANCE = new LegacyTextRepresentation(SpongeTexts.COLOR_CHAR);
+public final class LegacyTexts {
+
     private static final EnumChatFormatting[] formatting = EnumChatFormatting.values();
     private static final String LOOKUP;
 
-    private final char legacyChar;
-
-    public LegacyTextRepresentation(char legacyChar) {
-        this.legacyChar = legacyChar;
+    private LegacyTexts() {
     }
-
 
     static {
         char[] lookup = new char[formatting.length];
@@ -87,31 +80,19 @@ public class LegacyTextRepresentation implements TextRepresentation {
         return pos != -1 ? formatting[pos] : null;
     }
 
-    @Override
-    public String to(Text text) {
-        return to(text, SpongeTexts.getDefaultLocale());
+    public static String serialize(Text text, char code) {
+        return ((IMixinText) text).toLegacy(code);
     }
 
-    @Override
-    public String to(Text text, Locale locale) {
-        return ((IMixinText) text).toLegacy(this.legacyChar, locale);
-    }
-
-    @Override
-    public Text from(String input) throws TextMessageException {
-        return fromUnchecked(input);
-    }
-
-    @Override
-    public Text fromUnchecked(String input) {
-        int next = input.lastIndexOf(this.legacyChar, input.length() - 2);
+    public static Text parse(String input, char code) {
+        int next = input.lastIndexOf(code, input.length() - 2);
         if (next == -1) {
-            return Texts.of(input);
+            return Text.of(input);
         }
 
         List<Text> parts = Lists.newArrayList();
 
-        TextBuilder.Literal current = null;
+        LiteralText.Builder current = null;
         boolean reset = false;
 
         int pos = input.length();
@@ -124,24 +105,24 @@ public class LegacyTextRepresentation implements TextRepresentation {
                         if (reset) {
                             parts.add(current.build());
                             reset = false;
-                            current = Texts.builder("");
+                            current = Text.builder("");
                         } else {
-                            current = Texts.builder("").append(current.build());
+                            current = Text.builder("").append(current.build());
                         }
                     } else {
-                        current = Texts.builder("");
+                        current = Text.builder("");
                     }
 
                     current.content(input.substring(from, pos));
                 } else if (current == null) {
-                    current = Texts.builder("");
+                    current = Text.builder("");
                 }
 
                 reset |= applyStyle(current, format);
                 pos = next;
             }
 
-            next = input.lastIndexOf(this.legacyChar, next - 1);
+            next = input.lastIndexOf(code, next - 1);
         } while (next != -1);
 
         if (current != null) {
@@ -149,10 +130,10 @@ public class LegacyTextRepresentation implements TextRepresentation {
         }
 
         Collections.reverse(parts);
-        return Texts.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
+        return Text.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
     }
 
-    private static boolean applyStyle(TextBuilder builder, EnumChatFormatting formatting) {
+    private static boolean applyStyle(Text.Builder builder, EnumChatFormatting formatting) {
         switch (formatting) {
             case BOLD:
                 builder.style(TextStyles.BOLD);
@@ -199,10 +180,18 @@ public class LegacyTextRepresentation implements TextRepresentation {
     }
 
     public static String strip(String text, char code) {
-        return strip(text, code, false);
+        return strip(text, code, false, false);
     }
 
-    public static String strip(String text, char code, boolean all) {
+    public static String stripAll(String text, char code) {
+        return strip(text, code, true, false);
+    }
+
+    public static String stripChars(String text, char code) {
+        return strip(text, code, false, true);
+    }
+
+    private static String strip(String text, char code, boolean all, boolean keepFormat) {
         int next = text.indexOf(code);
         int last = text.length() - 1;
         if (next == -1 || next == last) {
@@ -220,7 +209,7 @@ public class LegacyTextRepresentation implements TextRepresentation {
             pos = next;
 
             if (isFormat(text.charAt(next + 1))) {
-                pos = next += 2; // Skip formatting
+                pos = next += keepFormat ? 1 : 2; // Skip formatting
             } else if (all) {
                 pos = next += 1; // Skip code only
             } else {
@@ -232,4 +221,5 @@ public class LegacyTextRepresentation implements TextRepresentation {
 
         return result.append(text, pos, text.length()).toString();
     }
+
 }

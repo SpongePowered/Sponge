@@ -49,7 +49,6 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -293,7 +292,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public Text getTeamRepresentation() {
-        return Texts.of(this.getUniqueID().toString());
+        return Text.of(this.getUniqueID().toString());
     }
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =

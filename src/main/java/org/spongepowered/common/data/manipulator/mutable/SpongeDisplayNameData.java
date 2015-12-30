@@ -34,7 +34,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -48,7 +48,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     private boolean displays = false;
 
     public SpongeDisplayNameData() {
-        this(Texts.of(), false);
+        this(Text.of(), false);
     }
 
     public SpongeDisplayNameData(Text displayName) {
@@ -64,7 +64,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
 
     @Override
     public Value<Text> displayName() {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, Texts.of(), this.displayName);
+        return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), this.displayName);
     }
 
     @Override
@@ -85,7 +85,8 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     @Override
     public int compareTo(DisplayNameData o) {
         return ComparisonChain.start()
-                .compare(Texts.json().to(o.get(Keys.DISPLAY_NAME).get()), Texts.json().to(this.displayName))
+                .compare(TextSerializers.JSON.serialize(o.get(Keys.DISPLAY_NAME).get()),
+                        TextSerializers.JSON.serialize(this.displayName))
                 .compare(o.get(Keys.SHOWS_DISPLAY_NAME).get(), this.displays)
                 .result();
     }
@@ -93,7 +94,7 @@ public class SpongeDisplayNameData extends AbstractData<DisplayNameData, Immutab
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(Keys.DISPLAY_NAME.getQuery(), Texts.json().to(this.displayName))
+            .set(Keys.DISPLAY_NAME.getQuery(), TextSerializers.JSON.serialize(this.displayName))
             .set(Keys.SHOWS_DISPLAY_NAME, this.displays);
     }
 

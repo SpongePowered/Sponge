@@ -24,30 +24,22 @@
  */
 package org.spongepowered.common.data.type;
 
-import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeTileEntityType implements TileEntityType {
+public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
 
-    private final Class<? extends TileEntity> clazz;
-    private final String id;
     private final String name;
+    private final Class<? extends TileEntity> clazz;
 
     public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id) {
-        this.clazz = clazz;
-        this.name = name;
-        this.id = id;
-    }
-
-    @Override
-    public Class<? extends TileEntity> getTileEntityType() {
-        return this.clazz;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
+        super(id);
+        this.name = checkNotNull(name, "name");
+        this.clazz = checkNotNull(clazz, "clazz");
     }
 
     @Override
@@ -56,30 +48,14 @@ public class SpongeTileEntityType implements TileEntityType {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(this.clazz, this.name, this.id);
+    public Class<? extends TileEntity> getTileEntityType() {
+        return this.clazz;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeTileEntityType other = (SpongeTileEntityType) obj;
-        return Objects.equal(this.clazz, other.clazz)
-               && Objects.equal(this.name, other.name)
-               && Objects.equal(this.id, other.id);
+    protected ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("TileEntityClass", this.clazz);
     }
 
-    @Override
-    public String toString() {
-        return Objects.toStringHelper("TileEntityType")
-            .add("TileEntityClass", this.clazz)
-            .add("name", this.name)
-            .add("id", this.id)
-            .toString();
-    }
 }

@@ -44,6 +44,7 @@ import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeEntityType;
@@ -52,6 +53,7 @@ import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.CustomCatalogRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -147,19 +149,20 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         this.entityTypeMappings.put("rabbit", newEntityTypeFromName("Rabbit"));
         this.entityTypeMappings.put("villager", newEntityTypeFromName("Villager"));
         this.entityTypeMappings.put("ender_crystal", newEntityTypeFromName("EnderCrystal"));
-        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "Egg", EntityEgg.class));
-        this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class));
-        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "Lightning", EntityLightningBolt.class));
-        this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class));
-        this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class));
-        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class));
-        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7));
+        this.entityTypeMappings.put("egg", new SpongeEntityType(-1, "Egg", EntityEgg.class, new SpongeTranslation("item.egg.name")));
+        this.entityTypeMappings.put("fishing_hook", new SpongeEntityType(-2, "FishingHook", EntityFishHook.class, new SpongeTranslation("item.fishingRod.name")));
+        this.entityTypeMappings.put("lightning", new SpongeEntityType(-3, "Lightning", EntityLightningBolt.class, null));
+        this.entityTypeMappings.put("weather", new SpongeEntityType(-4, "Weather", EntityWeatherEffect.class, new SpongeTranslation("soundCategory.weather")));
+        this.entityTypeMappings.put("player", new SpongeEntityType(-5, "Player", EntityPlayerMP.class, new SpongeTranslation("soundCategory.player")));
+        this.entityTypeMappings.put("complex_part", new SpongeEntityType(-6, "ComplexPart", EntityDragonPart.class, null));
+        this.entityTypeMappings.put("human", registerCustomEntity(EntityHuman.class, "Human", -7, null));
     }
 
     @SuppressWarnings("unchecked")
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
         return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
-                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName));
+                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName),
+                new SpongeTranslation("entity." + mcName + ".name"));
     }
 
     private SpongeEntityType newEntityTypeFromName(String name) {
@@ -167,11 +170,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     @SuppressWarnings("unchecked")
-    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId) {
+    private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId, Translation translation) {
         String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
         EntityList.classToStringMapping.put(entityClass, entityFullName);
         EntityList.stringToClassMapping.put(entityFullName, entityClass);
-        return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass);
+        return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 
     @CustomCatalogRegistration

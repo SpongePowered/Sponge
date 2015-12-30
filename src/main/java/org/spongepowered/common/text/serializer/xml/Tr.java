@@ -22,15 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.xml;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.text.TextBuilder;
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class Span extends Element {
+public class Tr extends Element {
+
+    @XmlAttribute(required = true)
+    private String key;
+
+    public Tr() {}
+
+    public Tr(String key) {
+        this.key = key;
+    }
+
     @Override
-    protected void modifyBuilder(TextBuilder builder) {
+    protected void modifyBuilder(Text.Builder builder) {
+        // TODO: get rid of this
+    }
+
+    @Override
+    public Text.Builder toText() throws Exception {
+        ImmutableList.Builder<Object> build = ImmutableList.builder();
+        for (Object child : this.mixedContent) {
+            build.add(builderFromObject(child).build());
+        }
+        Text.Builder builder = Text.builder(new SpongeTranslation(this.key), build.build().toArray());
+        applyTextActions(builder);
+        return builder;
     }
 }

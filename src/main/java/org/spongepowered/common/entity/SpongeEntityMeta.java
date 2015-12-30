@@ -26,62 +26,28 @@ package org.spongepowered.common.entity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.CatalogType;
+import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeEntityMeta implements CatalogType {
+public class SpongeEntityMeta extends SpongeCatalogType {
 
     public final int type;
-    public final String name;
 
     public SpongeEntityMeta(int type, String name) {
+        super(name);
         this.type = type;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        SpongeEntityMeta other = (SpongeEntityMeta) obj;
-        if (this.type != other.type) {
-            return false;
-        } else if (!this.name.equals(other.name)) {
-            return false;
-        }
-        return true;
     }
 
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(of("id"), this.type).set(of("name"), this.name);
+        return new MemoryDataContainer().set(of("id"), this.type).set(of("name"), getId());
     }
 
     @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("type", this.type)
-                .add("name", this.name)
-                .toString();
+    protected ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("type", this.type);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.type, this.name);
-    }
 }

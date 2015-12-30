@@ -78,7 +78,6 @@ import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -182,9 +181,9 @@ public abstract class MixinServerConfigurationManager {
 
         // Sponge start - fire login event
         String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
-        Text disconnectMessage = Texts.of("You are not allowed to log in to this server.");
+        Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
         if (kickReason != null) {
-            disconnectMessage = Texts.of(kickReason);
+            disconnectMessage = Text.of(kickReason);
         }
 
         Player player = (Player) playerIn;

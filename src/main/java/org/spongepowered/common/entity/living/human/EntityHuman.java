@@ -56,7 +56,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -121,7 +120,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public Text getTeamRepresentation() {
-        return Texts.of(this.fakeProfile.getName());
+        return Text.of(this.fakeProfile.getName());
     }
 
     @Override

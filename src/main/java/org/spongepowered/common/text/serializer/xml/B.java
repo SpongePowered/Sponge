@@ -22,38 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.xml;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextStyles;
 
-import java.net.URL;
-
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlRootElement;
 
 @XmlRootElement
-public class A extends Element {
-
-    @XmlAttribute(required = true)
-    private URL href;
-
-    public A() {
-    }
-
-    public A(URL href) {
-        this.href = href;
-    }
+public class B extends Element {
 
     @Override
-    protected void modifyBuilder(TextBuilder builder) {
-        if (this.href == null) {
-            throw new IllegalArgumentException("href is null! Make sure it is a valid URL");
-        }
-        builder.onClick(TextActions.openUrl(this.href));
-    }
-
-    public void setUrl(URL href) {
-        this.href = href;
+    protected void modifyBuilder(Text.Builder builder) {
+        builder.style(TextStyles.BOLD);
     }
 }

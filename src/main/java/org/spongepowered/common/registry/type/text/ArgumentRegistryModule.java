@@ -31,8 +31,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.text.selector.ArgumentHolder;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.ArgumentTypes;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistryModule;
-import org.spongepowered.common.registry.factory.SelectorFactoryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.text.selector.SpongeArgumentHolder;
@@ -49,7 +49,7 @@ public final class ArgumentRegistryModule implements RegistryModule {
 
     @Override
     public void registerDefaults() {
-        final SpongeSelectorFactory factory = SelectorFactoryModule.INSTANCE;
+        final SpongeSelectorFactory factory = SpongeImpl.getRegistry().getSelectorFactory();
         // POSITION
         ArgumentType<Integer> x = factory.createArgumentType("x", Integer.class);
         ArgumentType<Integer> y = factory.createArgumentType("y", Integer.class);

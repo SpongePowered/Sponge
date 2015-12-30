@@ -37,7 +37,7 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.event.filter.FilterFactory;
@@ -299,7 +299,7 @@ public class EventFilterTest {
         NamedCauseListener listener = new NamedCauseListener();
         AnnotatedEventListener namedCauseListener = this.getListener(listener, "namedCauseListener", SubEvent.class, BlockState.class);
 
-        Cause cause1 = Cause.of(NamedCause.of(NamedCause.OWNER, Texts.of()));
+        Cause cause1 = Cause.of(NamedCause.of(NamedCause.OWNER, Text.of()));
         Cause cause2 = Cause.of(NamedCause.of(NamedCause.OWNER, mock(BlockState.class)));
 
         SubEvent event1 = new SubEvent(cause1);

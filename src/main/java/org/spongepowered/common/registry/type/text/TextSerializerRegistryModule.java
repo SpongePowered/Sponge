@@ -22,28 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.registry.type.text;
 
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentText;
-import org.spongepowered.api.text.LiteralText;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.text.serializer.LegacyTexts;
+import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.text.serializer.TextSerializer;
+import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.common.registry.RegistryModule;
+import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.text.serializer.JsonTextSerializer;
+import org.spongepowered.common.text.serializer.PlainTextSerializer;
+import org.spongepowered.common.text.serializer.SpongeFormattingCodeTextSerializer;
+import org.spongepowered.common.text.serializer.xml.TextXmlTextSerializer;
 
-import java.util.Locale;
+public final class TextSerializerRegistryModule implements RegistryModule {
 
-@Mixin(value = LiteralText.class, remap = false)
-public abstract class MixinTextLiteral extends MixinText {
-
-    @Shadow protected String content;
-
-    @Override
-    protected ChatComponentStyle createComponent() {
-        // TODO: Make sure this doesn't break anything else
-        return new ChatComponentText(LegacyTexts.stripChars(this.content, COLOR_CHAR));
-    }
+    @RegisterCatalog(TextSerializers.class)
+    private static final ImmutableMap<String, TextSerializer> textSerializerMappings = ImmutableMap.<String, TextSerializer>builder()
+            .put("plain", new PlainTextSerializer())
+            .put("legacy_formatting_code", new SpongeFormattingCodeTextSerializer(COLOR_CHAR))
+            .put("formatting_code", new SpongeFormattingCodeTextSerializer('&'))
+            .put("json", new JsonTextSerializer())
+            .put("text_xml", new TextXmlTextSerializer())
+            .build();
 
 }

@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.text.selector;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.Selector;
-import org.spongepowered.api.text.selector.SelectorBuilder;
 import org.spongepowered.api.text.selector.SelectorType;
-import org.spongepowered.api.text.selector.Selectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Location;
@@ -54,8 +55,8 @@ public class SpongeSelector implements Selector {
     private final String plain;
 
     public SpongeSelector(SelectorType type, ImmutableMap<ArgumentType<?>, Argument<?>> arguments) {
-        this.type = type;
-        this.arguments = arguments;
+        this.type = checkNotNull(type, "type");
+        this.arguments = checkNotNull(arguments, "arguments");
         this.plain = buildString();
     }
 
@@ -147,10 +148,8 @@ public class SpongeSelector implements Selector {
     }
 
     @Override
-    public SelectorBuilder builder() {
-        SelectorBuilder builder = Selectors.builder(getType());
-        builder.add(getArguments());
-        return builder;
+    public Selector.Builder toBuilder() {
+        return Selector.builder().from(this);
     }
 
     private String buildString() {

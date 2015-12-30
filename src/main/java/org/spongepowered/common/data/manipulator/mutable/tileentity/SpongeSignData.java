@@ -32,7 +32,7 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSign
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
@@ -49,7 +49,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     private final List<Text> lines;
 
     public SpongeSignData() {
-        this(Lists.newArrayList(Texts.of(), Texts.of(), Texts.of(), Texts.of()));
+        this(Lists.newArrayList(Text.of(), Text.of(), Text.of(), Text.of()));
     }
 
     public SpongeSignData(List<Text> lines) {
@@ -67,7 +67,7 @@ public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> im
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.SIGN_LINES.getQuery(), this.lines.stream()
-                .map(line -> Texts.json().to(line))
+                .map(TextSerializers.JSON::serialize)
                 .collect(Collectors.toList()));
     }
 

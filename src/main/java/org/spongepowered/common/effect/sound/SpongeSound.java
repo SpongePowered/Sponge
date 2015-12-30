@@ -25,24 +25,20 @@
 package org.spongepowered.common.effect.sound;
 
 import org.spongepowered.api.effect.sound.SoundType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeSound implements SoundType {
+public class SpongeSound extends SpongeCatalogType implements SoundType {
 
     private final String name;
-    private final String id;
 
     public SpongeSound(String name, String id) {
+        super(id);
         this.name = name;
-        this.id = id;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
     }
 
     @Override
     public String getName() {
         return this.name;
     }
+
 }

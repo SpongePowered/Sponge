@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.world.EnumDifficulty;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(EnumDifficulty.class)
@@ -36,6 +38,7 @@ public class MixinEnumDifficulty implements Difficulty {
 
     @Shadow private int difficultyId;
     @Shadow private String difficultyResourceKey;
+    private Translation translation;
 
     @Override
     public String getId() {
@@ -46,4 +49,14 @@ public class MixinEnumDifficulty implements Difficulty {
     public String getName() {
         return this.difficultyResourceKey.replace("options.difficulty.", "");
     }
+
+    @Override
+    public Translation getTranslation() {
+        // Maybe move this to a @Inject at the end of the constructor
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.difficultyResourceKey);
+        }
+        return this.translation;
+    }
+
 }

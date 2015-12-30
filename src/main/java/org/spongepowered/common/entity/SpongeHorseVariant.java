@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant {
 
@@ -35,6 +36,19 @@ public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant
 
     @Override
     public Translation getTranslation() {
-        return null;
+        switch (type) {
+            case 0:
+            default:
+                return new SpongeTranslation("entity.horse.name");
+            case 1:
+                return new SpongeTranslation("entity.donkey.name");
+            case 2:
+                return new SpongeTranslation("entity.mule.name");
+            case 3:
+                return new SpongeTranslation("entity.zombiehorse.name");
+            case 4:
+                return new SpongeTranslation("entity.skeletonhorse.name");
+        }
     }
+
 }
