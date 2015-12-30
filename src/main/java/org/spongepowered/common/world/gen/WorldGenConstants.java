@@ -25,6 +25,11 @@
 package org.spongepowered.common.world.gen;
 
 import com.google.common.base.Predicate;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderHell;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.SeededVariableAmount;
@@ -36,6 +41,31 @@ import java.util.Random;
 public final class WorldGenConstants {
 
     public static final String VILLAGE_FLAG = "VILLAGE";
+
+    private static final Class<?>[] MIXINED_CHUNK_PROVIDERS =
+            new Class<?>[] {ChunkProviderGenerate.class, ChunkProviderFlat.class, ChunkProviderHell.class, ChunkProviderEnd.class};
+
+    public static boolean isValid(IChunkProvider cp, Class<?> api_type) {
+        if (api_type.isInstance(cp)) {
+            for (Class<?> mixind : MIXINED_CHUNK_PROVIDERS) {
+                if (cp.getClass().equals(mixind)) {
+                    return true;
+                }
+                // If our chunk provider is an instance of one of our mixed in classes but is not the class
+                // then its a custom chunk provider which is extending one of the vanilla classes but if we
+                // use it as a generation populator directly then we would lose the custom logic of the
+                // extending class so we wrap it instead so that the provideChunk method is called.
+                if(mixind.isInstance(cp)) {
+                    // TODO We could do a check here to see if the chunk provider directly implements
+                    // GenerationPopulator despite extending a vanilla chunk provider so that a mod could
+                    // implement our genpop interface and use the vanilla provider.
+                    return false;
+                }
+            }
+            return true;
+        }
+        return false;
+    }
 
     public static final SeededVariableAmount<Double> GROUND_COVER_DEPTH = new SeededVariableAmount<Double>() {
 

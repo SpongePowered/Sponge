@@ -206,6 +206,7 @@ import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -1924,7 +1925,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
+        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkProvider) {
+            // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
+            // from a mod chunk provider extending a provider that we mixed into
+            if (WorldGenConstants.isValid((IChunkProvider) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
+                ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
+            }
+        } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
+            // If its not a chunk provider but is a populator provider then we call it as well
             ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
         }
 

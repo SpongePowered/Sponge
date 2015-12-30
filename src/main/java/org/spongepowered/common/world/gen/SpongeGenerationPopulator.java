@@ -32,6 +32,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderHell;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
@@ -56,7 +60,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
      * @return The generator populator.
      */
     public static GenerationPopulator of(World world, IChunkProvider chunkGenerator) {
-        if (chunkGenerator instanceof GenerationPopulator) {
+        if (WorldGenConstants.isValid(chunkGenerator, GenerationPopulator.class)) {
             return (GenerationPopulator) chunkGenerator;
         }
         if (chunkGenerator instanceof SpongeChunkProvider) {
