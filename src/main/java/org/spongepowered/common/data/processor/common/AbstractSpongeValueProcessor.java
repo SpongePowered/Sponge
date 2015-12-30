@@ -40,7 +40,7 @@ import java.util.Optional;
 public abstract class AbstractSpongeValueProcessor<C, E, V extends BaseValue<E>> implements ValueProcessor<E, V> {
 
     private final Class<C> containerClass;
-    private final Key<V> key;
+    protected final Key<V> key;
 
     protected AbstractSpongeValueProcessor(Class<C> containerClass, Key<V> key) {
         this.key = checkNotNull(key, "The key is null!");
