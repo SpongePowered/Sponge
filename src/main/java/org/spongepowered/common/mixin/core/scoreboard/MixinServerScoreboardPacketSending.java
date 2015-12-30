@@ -33,6 +33,7 @@ import net.minecraft.network.play.server.S3EPacketTeams;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -43,14 +44,13 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
 @Mixin(ServerScoreboard.class)
-public abstract class MixinServerScoreboardPacketSending extends MixinScoreboardLogic implements IMixinServerScoreboard {
+public abstract class MixinServerScoreboardPacketSending extends Scoreboard implements IMixinServerScoreboard {
 
     private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
