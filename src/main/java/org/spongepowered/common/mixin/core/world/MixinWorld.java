@@ -1520,8 +1520,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
+        setBlock(x, y, z, block, true);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
         checkBlockBounds(x, y, z);
-        SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block);
+        SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block, notifyNeighbors);
     }
 
     @Override
