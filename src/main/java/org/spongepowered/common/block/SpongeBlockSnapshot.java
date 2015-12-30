@@ -54,6 +54,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.util.persistence.NbtTranslator;
+import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -79,6 +80,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableMap<Key<?>, ImmutableValue<?>> blockKeyValueMap;
     private final ImmutableSet<ImmutableValue<?>> blockValueSet;
     private int updateFlag; // internal use
+    public CaptureType captureType; // used internally for post event
     @Nullable final NBTTagCompound compound;
 
     // Internal use for restores

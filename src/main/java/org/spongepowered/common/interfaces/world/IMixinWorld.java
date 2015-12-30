@@ -47,8 +47,6 @@ public interface IMixinWorld {
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
 
-    List<BlockSnapshot> getBlockBreakList();
-
     List<Entity> getCapturedEntities();
 
     List<Entity> getCapturedEntityItems();
