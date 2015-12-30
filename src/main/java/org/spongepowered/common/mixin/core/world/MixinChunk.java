@@ -154,8 +154,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         this.biomeMin = this.blockMin.toVector2(true);
         this.biomeMax = this.blockMax.toVector2(true);
         this.world = (org.spongepowered.api.world.World) world;
-        this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
-                this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
+        if (this.world.getUniqueId() != null) { // Client worlds have no UUID
+            this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
+                    this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
+        }
     }
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
