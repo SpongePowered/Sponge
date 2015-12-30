@@ -24,12 +24,43 @@
  */
 package org.spongepowered.common.mixin.core.entity.boss;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(EntityWither.class)
 public abstract class MixinEntityWither extends MixinEntityMob implements Wither {
 
+    @Shadow public abstract int getWatchedTargetId(int p_82203_1_);
+    @Shadow public abstract void updateWatchedTargetId(int targetOffset, int newId);
+
+    @Override
+    public List<Living> getTargets() {
+        List<Living> values = new ArrayList<>();
+        for (int i = 0; i < 2; i++) {
+            int id = getWatchedTargetId(i);
+            if (id > 0) {
+                values.add((Living) this.worldObj.getEntityByID(id));
+            }
+        }
+        return values;
+    }
+
+    @Override
+    public void setTargets(List<Living> targets) {
+        checkNotNull(targets, "Targets is null!");
+        for (int i = 0; i < 2; i++) {
+            updateWatchedTargetId(i, targets.size() > i ? ((EntityLivingBase) targets.get(i)).getEntityId() : 0);
+        }
+    }
 }

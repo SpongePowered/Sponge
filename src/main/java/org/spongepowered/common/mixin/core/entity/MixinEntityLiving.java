@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
@@ -60,6 +61,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
     @Shadow private boolean canPickUpLoot;
+    @Shadow private EntityLivingBase attackTarget;
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
@@ -149,4 +151,17 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }
 
+    @Override
+    public Optional<Entity> getTarget() {
+        return Optional.ofNullable((Entity) this.attackTarget);
+    }
+
+    @Override
+    public void setTarget(@Nullable Entity target) {
+        if (target instanceof EntityLivingBase) {
+            this.attackTarget = (EntityLivingBase) target;
+        } else {
+            this.attackTarget = null;
+        }
+    }
 }
