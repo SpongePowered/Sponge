@@ -31,16 +31,17 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpOrbDa
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
 
-public class ImmutableSpongeExpOrbData extends AbstractImmutableBoundedComparableData<Integer, ImmutableExpOrbData, ExpOrbData> implements ImmutableExpOrbData {
+public class ImmutableSpongeExpOrbData extends AbstractImmutableIntData<ImmutableExpOrbData, ExpOrbData> implements ImmutableExpOrbData {
 
     public ImmutableSpongeExpOrbData(int value) {
         this(value, 0, Integer.MAX_VALUE, 0);
     }
 
     public ImmutableSpongeExpOrbData(int value, int minimum, int maximum, int defaultValue) {
-        super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, intComparator(), SpongeExpOrbData.class, minimum, maximum, defaultValue);
+        super(ImmutableExpOrbData.class, value, Keys.CONTAINED_EXPERIENCE, SpongeExpOrbData.class, minimum, maximum, defaultValue);
     }
 
     @Override

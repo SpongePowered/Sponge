@@ -31,10 +31,10 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDelayable
 import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDelayableData;
 
-public class ImmutableSpongeDelayableData extends
-        AbstractImmutableBoundedComparableData<Integer, ImmutableDelayableData, DelayableData> implements ImmutableDelayableData {
+public class ImmutableSpongeDelayableData extends AbstractImmutableIntData<ImmutableDelayableData, DelayableData> implements ImmutableDelayableData {
 
     public ImmutableSpongeDelayableData(int value) {
         this(value, 1, 4);
@@ -45,7 +45,7 @@ public class ImmutableSpongeDelayableData extends
     }
 
     public ImmutableSpongeDelayableData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableDelayableData.class, value, Keys.DELAY, intComparator(), SpongeDelayableData.class, lowerBound, upperBound, defaultValue);
+        super(ImmutableDelayableData.class, value, Keys.DELAY, SpongeDelayableData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override

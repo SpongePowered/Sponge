@@ -29,10 +29,11 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCool
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class ImmutableSpongeCooldownData extends AbstractImmutableBoundedComparableData<Integer, ImmutableCooldownData, CooldownData>
+public class ImmutableSpongeCooldownData extends AbstractImmutableIntData<ImmutableCooldownData, CooldownData>
         implements ImmutableCooldownData {
 
     public ImmutableSpongeCooldownData() {
@@ -44,7 +45,7 @@ public class ImmutableSpongeCooldownData extends AbstractImmutableBoundedCompara
     }
 
     public ImmutableSpongeCooldownData(int value, int minimum, int maximum, int defaultValue) {
-        super(ImmutableCooldownData.class, value, Keys.COOLDOWN, Integer::compare, SpongeCooldownData.class, minimum, maximum, defaultValue);
+        super(ImmutableCooldownData.class, value, Keys.COOLDOWN, SpongeCooldownData.class, minimum, maximum, defaultValue);
     }
 
     @Override

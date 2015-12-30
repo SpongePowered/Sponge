@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ComparisonChain;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
@@ -63,6 +64,12 @@ public abstract class AbstractImmutableBooleanData<I extends ImmutableDataManipu
     @Override
     public M asMutable() {
         return ReflectionUtil.createInstance(this.mutableClass, this.getValue());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(this.usedKey, this.value);
     }
 
     @Override

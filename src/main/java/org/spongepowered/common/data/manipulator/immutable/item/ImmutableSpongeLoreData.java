@@ -57,6 +57,6 @@ public class ImmutableSpongeLoreData extends AbstractImmutableSingleListData<Tex
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.getValue()));
+        return super.toContainer().set(Keys.ITEM_LORE.getQuery(), SpongeTexts.asJson(this.getValue()));
     }
 }

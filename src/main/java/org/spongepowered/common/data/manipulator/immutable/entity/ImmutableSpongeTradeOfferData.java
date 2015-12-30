@@ -46,7 +46,7 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableSingleListDa
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.TRADE_OFFERS, getValue());
     }
 

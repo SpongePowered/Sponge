@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
@@ -55,6 +56,12 @@ public class ImmutableSpongeRepresentedItemData extends AbstractImmutableSingleD
     @Override
     public RepresentedItemData asMutable() {
         return new SpongeRepresentedItemData(this.value);
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.REPRESENTED_ITEM, this.value);
     }
 
     @Override

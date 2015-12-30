@@ -49,7 +49,7 @@ public class ImmutableSpongeFireworkEffectData extends AbstractImmutableSingleLi
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
             .set(Keys.FIREWORK_EFFECTS, this.getValue());
     }
 }

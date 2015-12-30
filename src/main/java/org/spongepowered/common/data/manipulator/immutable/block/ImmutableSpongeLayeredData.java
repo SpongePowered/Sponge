@@ -31,9 +31,10 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableLayeredDa
 import org.spongepowered.api.data.manipulator.mutable.block.LayeredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeLayeredData;
 
-public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparableData<Integer, ImmutableLayeredData, LayeredData> implements ImmutableLayeredData {
+public class ImmutableSpongeLayeredData extends AbstractImmutableIntData<ImmutableLayeredData, LayeredData> implements ImmutableLayeredData {
 
     public ImmutableSpongeLayeredData(int value) {
         this(value, 0, Integer.MAX_VALUE);
@@ -44,7 +45,7 @@ public class ImmutableSpongeLayeredData extends AbstractImmutableBoundedComparab
     }
 
     public ImmutableSpongeLayeredData(int value, int lowerBound, int upperBound, int actualValue) {
-        super(ImmutableLayeredData.class, value, Keys.LAYER, intComparator(), SpongeLayeredData.class, lowerBound, upperBound, actualValue);
+        super(ImmutableLayeredData.class, value, Keys.LAYER, SpongeLayeredData.class, lowerBound, upperBound, actualValue);
     }
 
     @Override

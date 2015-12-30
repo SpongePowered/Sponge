@@ -31,12 +31,14 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableFluidLeve
 import org.spongepowered.api.data.manipulator.mutable.block.FluidLevelData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeFluidLevelData;
 
-public class ImmutableSpongeFluidLevelData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFluidLevelData, FluidLevelData> implements ImmutableFluidLevelData {
+public class ImmutableSpongeFluidLevelData extends AbstractImmutableIntData<ImmutableFluidLevelData, FluidLevelData>
+    implements ImmutableFluidLevelData {
 
     public ImmutableSpongeFluidLevelData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableFluidLevelData.class, value, Keys.FLUID_LEVEL, intComparator(), SpongeFluidLevelData.class, lowerBound, upperBound, defaultValue);
+        super(ImmutableFluidLevelData.class, value, Keys.FLUID_LEVEL, SpongeFluidLevelData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override

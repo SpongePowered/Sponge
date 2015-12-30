@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
 import org.spongepowered.api.data.manipulator.mutable.ColoredData;
@@ -49,6 +50,12 @@ public class ImmutableSpongeColoredData extends AbstractImmutableSingleData<Colo
     @Override
     public ColoredData asMutable() {
         return new SpongeColoredData(this.getValue());
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .set(Keys.COLOR, this.value);
     }
 
     @Override

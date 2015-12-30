@@ -29,9 +29,10 @@ import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrew
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
 
-public class ImmutableSpongeBrewingStandData extends AbstractImmutableBoundedComparableData<Integer, ImmutableBrewingStandData, BrewingStandData>
+public class ImmutableSpongeBrewingStandData extends AbstractImmutableIntData<ImmutableBrewingStandData, BrewingStandData>
     implements ImmutableBrewingStandData {
 
     public ImmutableSpongeBrewingStandData(int value) {
@@ -39,7 +40,7 @@ public class ImmutableSpongeBrewingStandData extends AbstractImmutableBoundedCom
     }
 
     public ImmutableSpongeBrewingStandData(int value, int lower, int upper, int defaultValue) {
-        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME, Integer::compare, SpongeBrewingStandData.class, lower, upper, defaultValue);
+        super(ImmutableBrewingStandData.class, value, Keys.REMAINING_BREW_TIME, SpongeBrewingStandData.class, lower, upper, defaultValue);
     }
 
     @Override

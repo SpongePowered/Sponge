@@ -25,6 +25,8 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
@@ -49,6 +51,16 @@ public class ImmutableSpongeVelocityData extends AbstractImmutableSingleData<Vec
     @Override
     public VelocityData asMutable() {
         return new SpongeVelocityData(this.value);
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return super.toContainer()
+            .createView(Keys.VELOCITY.getQuery())
+                .set(Queries.POSITION_X, this.value.getX())
+                .set(Queries.POSITION_Y, this.value.getY())
+                .set(Queries.POSITION_Z, this.value.getZ())
+            .getContainer();
     }
 
     @Override

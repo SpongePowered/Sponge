@@ -31,16 +31,17 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSlimeDat
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
 
-public class ImmutableSpongeSlimeData extends AbstractImmutableBoundedComparableData<Integer, ImmutableSlimeData, SlimeData> implements ImmutableSlimeData {
+public class ImmutableSpongeSlimeData extends AbstractImmutableIntData<ImmutableSlimeData, SlimeData> implements ImmutableSlimeData {
 
     protected ImmutableSpongeSlimeData(int value) {
-        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, 0, Integer.MAX_VALUE, 0);
+        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, SpongeSlimeData.class, 0, Integer.MAX_VALUE, 0);
     }
 
     public ImmutableSpongeSlimeData(int value, int minimum, int maximum, int defaultSize) {
-        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, intComparator(), SpongeSlimeData.class, minimum, maximum, defaultSize);
+        super(ImmutableSlimeData.class, value, Keys.SLIME_SIZE, SpongeSlimeData.class, minimum, maximum, defaultSize);
     }
 
     @Override

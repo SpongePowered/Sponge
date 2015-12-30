@@ -31,16 +31,17 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthDat
 import org.spongepowered.api.data.manipulator.mutable.block.GrowthData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeGrowthData;
 
-public class ImmutableSpongeGrowthData extends AbstractImmutableBoundedComparableData<Integer, ImmutableGrowthData, GrowthData> implements ImmutableGrowthData {
+public class ImmutableSpongeGrowthData extends AbstractImmutableIntData<ImmutableGrowthData, GrowthData> implements ImmutableGrowthData {
 
     public ImmutableSpongeGrowthData(int value, int lowerBound, int upperBound) {
         this(value, lowerBound, upperBound, 0);
     }
 
     public ImmutableSpongeGrowthData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableGrowthData.class, value, Keys.GROWTH_STAGE, intComparator(), SpongeGrowthData.class, lowerBound, upperBound, defaultValue);
+        super(ImmutableGrowthData.class, value, Keys.GROWTH_STAGE, SpongeGrowthData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override

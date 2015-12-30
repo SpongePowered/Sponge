@@ -31,9 +31,11 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureD
 import org.spongepowered.api.data.manipulator.mutable.block.MoistureData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeMoistureData;
 
-public class ImmutableSpongeMoistureData extends AbstractImmutableBoundedComparableData<Integer, ImmutableMoistureData, MoistureData> implements ImmutableMoistureData {
+public class ImmutableSpongeMoistureData extends AbstractImmutableIntData<ImmutableMoistureData, MoistureData>
+    implements ImmutableMoistureData {
 
     public ImmutableSpongeMoistureData() {
         this(0);
@@ -48,7 +50,7 @@ public class ImmutableSpongeMoistureData extends AbstractImmutableBoundedCompara
     }
 
     public ImmutableSpongeMoistureData(int value, int lowerBound, int upperBound, int defaultValue) {
-        super(ImmutableMoistureData.class, value, Keys.MOISTURE, intComparator(), SpongeMoistureData.class, lowerBound, upperBound, defaultValue);
+        super(ImmutableMoistureData.class, value, Keys.MOISTURE, SpongeMoistureData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override

@@ -24,21 +24,19 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableExpirableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
-public class ImmutableSpongeExpirableData extends AbstractImmutableBoundedComparableData<Integer, ImmutableExpirableData, ExpirableData>
+public class ImmutableSpongeExpirableData extends AbstractImmutableIntData<ImmutableExpirableData, ExpirableData>
     implements ImmutableExpirableData{
 
     public ImmutableSpongeExpirableData(int value, int upperBound) {
-        super(ImmutableExpirableData.class, value, Keys.EXPIRATION_TICKS, intComparator(), SpongeExpirableData.class, 0, upperBound, 0);
+        super(ImmutableExpirableData.class, value, Keys.EXPIRATION_TICKS, SpongeExpirableData.class, 0, upperBound, 0);
     }
 
     @Override

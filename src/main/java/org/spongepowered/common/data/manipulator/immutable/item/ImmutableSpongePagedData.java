@@ -57,6 +57,6 @@ public class ImmutableSpongePagedData extends AbstractImmutableSingleListData<Te
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.getValue()));
+        return super.toContainer().set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.getValue()));
     }
 }

@@ -29,17 +29,19 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkRocketD
 import org.spongepowered.api.data.manipulator.mutable.FireworkRocketData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
 import org.spongepowered.common.data.util.ComparatorUtil;
 
-public class ImmutableSpongeFireworkRocketData extends AbstractImmutableBoundedComparableData<Integer, ImmutableFireworkRocketData, FireworkRocketData> implements ImmutableFireworkRocketData {
+public class ImmutableSpongeFireworkRocketData extends AbstractImmutableIntData<ImmutableFireworkRocketData, FireworkRocketData>
+    implements ImmutableFireworkRocketData {
 
     public ImmutableSpongeFireworkRocketData(int value) {
         this(value, 0, Integer.MAX_VALUE, 1);
     }
 
     public ImmutableSpongeFireworkRocketData(int value, int minimum, int maximum, int defaultValue) {
-        super(ImmutableFireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER, ComparatorUtil.intComparator(),
+        super(ImmutableFireworkRocketData.class, value, Keys.FIREWORK_FLIGHT_MODIFIER,
             SpongeFireworkRocketData.class, minimum, maximum, defaultValue);
     }
 

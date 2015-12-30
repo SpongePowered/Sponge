@@ -31,13 +31,14 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAngerabl
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAngerableData;
 
-public class ImmutableSpongeAngerableData extends AbstractImmutableBoundedComparableData<Integer, ImmutableAngerableData, AngerableData>
+public class ImmutableSpongeAngerableData extends AbstractImmutableIntData<ImmutableAngerableData, AngerableData>
         implements ImmutableAngerableData {
 
     public ImmutableSpongeAngerableData(Integer value) {
-        super(ImmutableAngerableData.class, value, Keys.ANGER, intComparator(), SpongeAngerableData.class, Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
+        super(ImmutableAngerableData.class, value, Keys.ANGER, SpongeAngerableData.class, Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
     }
 
     @Override

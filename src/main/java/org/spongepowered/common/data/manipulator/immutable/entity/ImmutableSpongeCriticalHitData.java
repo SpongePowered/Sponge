@@ -61,7 +61,7 @@ public class ImmutableSpongeCriticalHitData extends AbstractImmutableSingleData<
 
     @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.CRITICAL_HIT, getValue());
     }
 
