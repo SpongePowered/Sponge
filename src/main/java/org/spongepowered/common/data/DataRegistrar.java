@@ -486,14 +486,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, vehicleDataProcessor);
 
-        final TargetMultipleLivingDataProcessor targetMultipleLivingDataProcessor = new TargetMultipleLivingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(TargetMultipleLivingData.class, SpongeTargetMultipleLivingData.class, ImmutableTargetMultipleLivingData.class,
-                ImmutableSpongeTargetMultipleLivingData.class, targetMultipleLivingDataProcessor);
-
-        final TargetLivingDataProcessor targetLivingDataProcessor = new TargetLivingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(TargetLivingData.class, SpongeTargetLivingData.class, ImmutableTargetLivingData.class,
-                ImmutableSpongeTargetLivingData.class, targetLivingDataProcessor);
-
         dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
                 ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());
         dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
@@ -653,8 +645,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.NOTE_PITCH, new NoteValueProcessor());
         dataManager.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataManager.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
-        dataManager.registerValueProcessor(Keys.TARGET, new TargetLivingValueProcessor());
-        dataManager.registerValueProcessor(Keys.TARGETS, new TargetMultipleLivingValueProcessor());
         dataManager.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
         dataManager.registerValueProcessor(Keys.FIREWORK_EFFECTS, new ItemFireworkEffectsValueProcessor());
         dataManager.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new EntityFireworkRocketValueProcessor());

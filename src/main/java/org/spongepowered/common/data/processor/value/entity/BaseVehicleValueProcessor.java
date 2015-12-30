@@ -30,14 +30,20 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
+import org.spongepowered.common.entity.SpongeEntitySnapshot;
 
 import java.util.Optional;
 
-public class BaseVehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, Entity, Value<Entity>> {
+import javax.annotation.Nullable;
+
+public class BaseVehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, EntitySnapshot, Value<EntitySnapshot>> {
 
     public BaseVehicleValueProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.BASE_VEHICLE);
@@ -49,23 +55,23 @@ public class BaseVehicleValueProcessor extends AbstractSpongeValueProcessor<net.
     }
 
     @Override
-    protected Value<Entity> constructValue(Entity defaultValue) {
-        return new SpongeEntityValue(this.getKey(), defaultValue);
+    protected Value<EntitySnapshot> constructValue(EntitySnapshot defaultValue) {
+        return new SpongeValue<>(this.getKey(), defaultValue);
     }
 
     @Override
-    protected boolean set(net.minecraft.entity.Entity container, Entity value) {
-        return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value);
+    protected boolean set(net.minecraft.entity.Entity container, EntitySnapshot value) {
+        return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value.restore().orElse(null));
     }
 
     @Override
-    protected Optional<Entity> getVal(net.minecraft.entity.Entity container) {
+    protected Optional<EntitySnapshot> getVal(net.minecraft.entity.Entity container) {
         return Optional.ofNullable(EntityUtil.getBaseVehicle(container));
     }
 
     @Override
-    protected ImmutableValue<Entity> constructImmutableValue(Entity value) {
-        return new ImmutableSpongeEntityValue(this.getKey(), value);
+    protected ImmutableValue<EntitySnapshot> constructImmutableValue(EntitySnapshot value) {
+        return new ImmutableSpongeValue<>(this.getKey(), value);
     }
 
 }

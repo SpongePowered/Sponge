@@ -120,7 +120,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
         this.entityId = entity.getUniqueId();
         this.manipulators = Lists.newArrayList();
         for (DataManipulator<?, ?> manipulator : entity.getContainers()) {
-            add((ImmutableDataManipulator) manipulator.asImmutable());
+            addManipulator((ImmutableDataManipulator) manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
         ((net.minecraft.entity.Entity) entity).writeToNBT(this.compound);
@@ -160,7 +160,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
                 break;
             }
         }
-        if (replaceIndex == -1) {
+        if (replaceIndex != -1) {
             this.manipulators.remove(replaceIndex);
         }
         this.manipulators.add(manipulator);
@@ -201,7 +201,7 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
         this.scale = transform.getScale();
         this.manipulators = Lists.newArrayList();
         for (DataManipulator<?, ?> manipulator : ((Entity) minecraftEntity).getContainers()) {
-            this.manipulators.add(manipulator.asImmutable());
+            addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
         minecraftEntity.writeToNBT(this.compound);

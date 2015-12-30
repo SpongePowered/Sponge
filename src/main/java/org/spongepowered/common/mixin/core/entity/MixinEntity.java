@@ -52,6 +52,8 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -235,7 +237,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        // Until mixin can resolve it's funkyness with default methods.
+        Optional<VehicleData> vehicleData = get(VehicleData.class);
+        if (vehicleData.isPresent()) {
+            manipulators.add(vehicleData.get());
+        }
+        if (this.fire > 0) {
+            manipulators.add(get(IgniteableData.class).get());
+        }
+
     }
 
     @Override
@@ -563,6 +572,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public UUID getUniqueId() {
         return this.entityUniqueID;
+    }
+
+    public Optional<Entity> getPassenger() {
+        return Optional.ofNullable((Entity) this.riddenByEntity);
+    }
+
+    public Optional<Entity> getVehicle() {
+        return Optional.ofNullable((Entity) this.ridingEntity);
     }
 
     public Entity getBaseVehicle() {

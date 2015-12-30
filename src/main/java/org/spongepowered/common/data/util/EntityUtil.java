@@ -32,6 +32,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.ArrayList;
@@ -69,8 +70,7 @@ public final class EntityUtil {
         return false;
     }
 
-    @Nullable
-    public static org.spongepowered.api.entity.Entity getBaseVehicle(Entity passenger) {
+    public static EntitySnapshot getBaseVehicle(Entity passenger) {
         if (passenger.ridingEntity == null) {
             return null;
         }
@@ -79,7 +79,7 @@ public final class EntityUtil {
             baseVehicle = baseVehicle.ridingEntity;
         }
 
-        return (org.spongepowered.api.entity.Entity) baseVehicle;
+        return ((org.spongepowered.api.entity.Entity) baseVehicle).createSnapshot();
     }
 
     @SuppressWarnings("unchecked")

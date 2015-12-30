@@ -84,7 +84,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
-        this.entityUuid = builder.entityId;
+        this.entityUuid = builder.entityId == null ? null : builder.entityId;
         if (builder.manipulators == null) {
             this.manipulators = ImmutableList.of();
         } else {
@@ -106,10 +106,10 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
             this.values = valueBuilder.build();
         }
         this.compound = builder.compound == null ? null : (NBTTagCompound) builder.compound.copy();
-        this.worldUuid = builder.worldId;
-        this.position = builder.position;
-        this.rotation = builder.rotation;
-        this.scale = builder.scale;
+        this.worldUuid = builder.worldId == null ? null : builder.worldId;
+        this.position = builder.position == null ? null : builder.position;
+        this.rotation = builder.rotation == null ? null : builder.rotation;
+        this.scale = builder.scale == null ? null : builder.scale;
     }
 
     @Override
@@ -119,6 +119,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Transform<World>> getTransform() {
+        if (this.worldUuid == null) {
+            return Optional.empty();
+        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Transform<World> transform = new Transform<>(optional.get(), this.position, this.rotation);
@@ -134,6 +137,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Location<World>> getLocation() {
+        if (this.worldUuid == null) {
+            return Optional.empty();
+        }
         Optional<World> optional = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (optional.isPresent()) {
             final Location<World> location = new Location<>(optional.get(), this.position);
@@ -389,10 +395,15 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         if (!world.isPresent()) {
             return Optional.empty();
         }
-
-        Optional<Entity> entity = world.get().createEntity(getType(), this.position);
-        if (entity.isPresent()) {
-            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity.get();
+        if (this.entityUuid != null) {
+            Optional<Entity> entity = world.get().getEntity(this.entityUuid);
+            if (entity.isPresent()) {
+                return entity;
+            }
+        }
+        Optional<Entity> newEntity = world.get().createEntity(getType(), this.position);
+        if (newEntity.isPresent()) {
+            net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity.get();
             nmsEntity.readFromNBT(this.compound);
 
             boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(world.get())));

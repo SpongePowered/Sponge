@@ -35,93 +35,97 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleD
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVehicleData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
 import java.lang.ref.WeakReference;
 
+import javax.annotation.Nullable;
+
 @ImplementationRequiredForTest
 public class SpongeVehicleData extends AbstractData<VehicleData, ImmutableVehicleData> implements VehicleData {
 
-    private WeakReference<Entity> vehicle;
-    private WeakReference<Entity> baseVehicle;
+    private @Nullable EntitySnapshot vehicle;
+    private @Nullable EntitySnapshot baseVehicle;
 
-    public SpongeVehicleData(Entity vehicle, Entity baseVehicle) {
+    public SpongeVehicleData() {
+        this((EntitySnapshot) null, null);
+    }
+
+    public SpongeVehicleData(@Nullable EntitySnapshot vehicle, @Nullable EntitySnapshot baseVehicle) {
         super(VehicleData.class);
-        if (vehicle != null) {
-            this.vehicle = new WeakReference<>(vehicle);
-        }
-        if (baseVehicle != null) {
-            this.baseVehicle = new WeakReference<>(baseVehicle);
-        }
+        this.vehicle = vehicle;
+        this.baseVehicle = baseVehicle;
         registerGettersAndSetters();
     }
 
-    public SpongeVehicleData() {
-        this(null, null);
+    public SpongeVehicleData(Entity vehicle, Entity baseVehicle) {
+        this(checkNotNull(vehicle, "Vehicle").createSnapshot(), checkNotNull(baseVehicle, "Base vehicle").createSnapshot());
     }
 
     @Override
-    public Value<Entity> vehicle() {
-        checkState(this.vehicle.get() != null);
-        return new SpongeEntityValue(Keys.VEHICLE, this.vehicle.get());
+    public Value<EntitySnapshot> vehicle() {
+        checkState(this.vehicle != null);
+        return new SpongeValue<>(Keys.VEHICLE, this.vehicle);
     }
 
     @Override
-    public Value<Entity> baseVehicle() {
-        checkState(this.vehicle.get() != null);
-        checkState(this.baseVehicle.get() != null);
-        return new SpongeEntityValue(Keys.BASE_VEHICLE, this.baseVehicle.get());
+    public Value<EntitySnapshot> baseVehicle() {
+        checkState(this.vehicle != null);
+        checkState(this.baseVehicle != null);
+        return new SpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
     }
 
     @Override
     public VehicleData copy() {
-        checkState(this.vehicle.get() != null);
-        checkState(this.baseVehicle.get() != null);
-        return new SpongeVehicleData(this.vehicle.get(), this.baseVehicle.get());
+        checkState(this.vehicle != null);
+        checkState(this.baseVehicle != null);
+        return new SpongeVehicleData(this.vehicle, this.baseVehicle);
     }
 
     @Override
     public ImmutableVehicleData asImmutable() {
-        checkState(this.vehicle.get() != null);
-        checkState(this.baseVehicle.get() != null);
-        return new ImmutableSpongeVehicleData(this.vehicle.get(), this.baseVehicle.get());
+        checkState(this.vehicle != null);
+        checkState(this.baseVehicle != null);
+        return new ImmutableSpongeVehicleData(this.vehicle, this.baseVehicle);
     }
 
     @Override
     public DataContainer toContainer() {
-        checkState(this.vehicle.get() != null);
-        checkState(this.baseVehicle.get() != null);
+        checkState(this.vehicle != null);
+        checkState(this.baseVehicle != null);
         return new MemoryDataContainer()
-            .set(Keys.VEHICLE.getQuery(), this.vehicle.get().getUniqueId())
-            .set(Keys.BASE_VEHICLE.getQuery(), this.baseVehicle.get().getUniqueId());
+            .set(Keys.VEHICLE, this.vehicle)
+            .set(Keys.BASE_VEHICLE, this.baseVehicle);
     }
 
-    public Entity getVehicle() {
-        return checkNotNull(this.vehicle.get());
+    public EntitySnapshot getVehicle() {
+        return checkNotNull(this.vehicle);
     }
 
-    public SpongeVehicleData setVehicle(Entity value) {
-        this.vehicle = new WeakReference<>(checkNotNull(value));
+    public SpongeVehicleData setVehicle(EntitySnapshot value) {
+        this.vehicle = checkNotNull(value);
         return this;
     }
 
-    public Entity getBaseVehicle() {
-        checkState(this.baseVehicle.get() != null);
-        return this.baseVehicle.get();
+    public EntitySnapshot getBaseVehicle() {
+        checkState(this.baseVehicle != null);
+        return this.baseVehicle;
     }
 
-    public SpongeVehicleData setBaseVehicle(Entity value) {
-        this.baseVehicle = new WeakReference<>(checkNotNull(value));
+    public SpongeVehicleData setBaseVehicle(EntitySnapshot value) {
+        this.baseVehicle = checkNotNull(value);
         return this;
     }
 
     @Override
     public int compareTo(VehicleData o) {
-        return ComparisonChain.start().compare(o.vehicle().get().getUniqueId(), this.vehicle.get().getUniqueId())
-                .compare(o.baseVehicle().get().getUniqueId(), this.baseVehicle.get().getUniqueId()).result();
+        return ComparisonChain.start().compare(o.vehicle().get().getUniqueId().orElse(null), this.vehicle.getUniqueId().orElse(null))
+                .compare(o.baseVehicle().get().getUniqueId().orElse(null), this.baseVehicle.getUniqueId().orElse(null)).result();
     }
 
     @Override

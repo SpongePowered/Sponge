@@ -33,16 +33,20 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecraft.entity.Entity, VehicleData, ImmutableVehicleData> {
 
@@ -57,31 +61,25 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean set(net.minecraft.entity.Entity entity, Map<Key<?>, Object> keyValues) {
-        final net.minecraft.entity.Entity vehicle = (net.minecraft.entity.Entity) keyValues.get(Keys.VEHICLE);
-        return EntityUtil.setVehicle(entity, vehicle);
+        final EntitySnapshot vehicle = (EntitySnapshot) keyValues.get(Keys.VEHICLE);
+        Optional<Entity> entity1 = vehicle.restore();
+        return EntityUtil.setVehicle(entity, (net.minecraft.entity.Entity) entity1.orElse(null));
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(net.minecraft.entity.Entity entity) {
-        return ImmutableMap.of(Keys.VEHICLE, entity.ridingEntity, Keys.BASE_VEHICLE, EntityUtil.getBaseVehicle(entity));
+        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.ridingEntity).createSnapshot(), Keys.BASE_VEHICLE, EntityUtil.getBaseVehicle(entity));
     }
 
     @Override
     public Optional<VehicleData> fill(DataContainer container, final VehicleData vehicleData) {
-        if (!container.contains(Keys.VEHICLE.getQuery())) {
+        if (!container.contains(Keys.VEHICLE.getQuery(), Keys.BASE_VEHICLE.getQuery())) {
             return Optional.empty();
         } else {
-            final UUID uuid = UUID.fromString(container.getString(Keys.VEHICLE.getQuery()).get());
-            for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
-                for (Entity entity : world.getEntities()) {
-                    if (entity.getUniqueId().equals(uuid)) {
-                        vehicleData.set(Keys.VEHICLE, entity);
-                        return Optional.of(vehicleData);
-                    }
-                }
-            }
+            EntitySnapshot vehicle = container.getSerializable(Keys.VEHICLE.getQuery(), EntitySnapshot.class).get();
+            EntitySnapshot baseVehicle = container.getSerializable(Keys.BASE_VEHICLE.getQuery(), EntitySnapshot.class).get();
+            return Optional.of(vehicleData.set(Keys.VEHICLE, vehicle).set(Keys.BASE_VEHICLE, baseVehicle));
         }
-        return Optional.empty();
     }
 
     @Override
@@ -91,7 +89,7 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
             if (entity.isRiding()) {
                 Entity ridingEntity = (Entity) entity.ridingEntity;
                 entity.mountEntity(null);
-                return DataTransactionResult.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
+                return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, ridingEntity.createSnapshot()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         } else {

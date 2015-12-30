@@ -30,14 +30,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
 
 import java.util.Optional;
 
-public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, Entity, Value<Entity>> {
+public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.minecraft.entity.Entity, EntitySnapshot, Value<EntitySnapshot>> {
 
     public VehicleValueProcessor() {
         super(net.minecraft.entity.Entity.class, Keys.VEHICLE);
@@ -55,7 +58,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
             if (entity.isRiding()) {
                 Entity ridingEntity = (Entity) entity.ridingEntity;
                 entity.mountEntity(null);
-                return DataTransactionResult.successResult(new ImmutableSpongeEntityValue(Keys.VEHICLE, ridingEntity));
+                return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, ridingEntity.createSnapshot()));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         } else {
@@ -64,23 +67,28 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
     }
 
     @Override
-    protected Value<Entity> constructValue(Entity defaultValue) {
-        return new SpongeEntityValue(this.getKey(), defaultValue);
+    protected Value<EntitySnapshot> constructValue(EntitySnapshot defaultValue) {
+        return new SpongeValue<>(this.getKey(), defaultValue);
     }
 
     @Override
-    protected boolean set(net.minecraft.entity.Entity container, Entity value) {
+    protected boolean set(net.minecraft.entity.Entity container, EntitySnapshot value) {
         return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value);
     }
 
     @Override
-    protected Optional<Entity> getVal(net.minecraft.entity.Entity container) {
-        return Optional.ofNullable((Entity) (container.ridingEntity));
+    protected Optional<EntitySnapshot> getVal(net.minecraft.entity.Entity container) {
+        Entity entity = (Entity) container.ridingEntity;
+        if (entity == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(entity.createSnapshot());
+        }
     }
 
     @Override
-    protected ImmutableValue<Entity> constructImmutableValue(Entity value) {
-        return new ImmutableSpongeEntityValue(this.getKey(), value);
+    protected ImmutableValue<EntitySnapshot> constructImmutableValue(EntitySnapshot value) {
+        return new ImmutableSpongeValue<>(this.getKey(), value);
     }
 
 }
