@@ -41,7 +41,7 @@ import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.command.source.RconSource;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.common.SpongeImpl;
@@ -94,7 +94,7 @@ class TimingsExport extends Thread {
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", SERVER_NAME)
-                    .add("motd", Texts.toPlain(SpongeImpl.getGame().getServer().getMotd()))
+                    .add("motd", SpongeImpl.getGame().getServer().getMotd().toPlain())
                     .add("online-mode", SpongeImpl.getGame().getServer().getOnlineMode())
                     .add("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon());
         }
@@ -239,8 +239,8 @@ class TimingsExport extends Thread {
     @Override
     public synchronized void start() {
         if (this.sender instanceof RconSource) {
-            this.sender.sendMessage(Texts.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
-            this.sender.sendMessage(Texts.of(TextColors.RED, "You should use ", TextColors.YELLOW,
+            this.sender.sendMessage(Text.of(TextColors.RED, "Warning: Timings report done over RCON will cause lag spikes."));
+            this.sender.sendMessage(Text.of(TextColors.RED, "You should use ", TextColors.YELLOW,
                     "/sponge timings report" + TextColors.RED, " in game or console."));
             run();
         } else {
@@ -250,7 +250,7 @@ class TimingsExport extends Thread {
 
     @Override
     public void run() {
-        this.sender.sendMessage(Texts.of(TextColors.GREEN, "Preparing Timings Report..."));
+        this.sender.sendMessage(Text.of(TextColors.GREEN, "Preparing Timings Report..."));
 
         this.out.add("data", JSONUtil.mapArray(this.history, TimingHistory::export));
 
@@ -275,9 +275,9 @@ class TimingsExport extends Thread {
             response = getResponse(con);
 
             if (con.getResponseCode() != 302) {
-                this.sender.sendMessage(Texts.of(
+                this.sender.sendMessage(Text.of(
                         TextColors.RED, "Upload Error: " + con.getResponseCode() + ": " + con.getResponseMessage()));
-                this.sender.sendMessage(Texts.of(TextColors.RED, "Check your logs for more information"));
+                this.sender.sendMessage(Text.of(TextColors.RED, "Check your logs for more information"));
                 if (response != null) {
                     SpongeImpl.getLogger().fatal(response);
                 }
@@ -285,7 +285,7 @@ class TimingsExport extends Thread {
             }
 
             String location = con.getHeaderField("Location");
-            this.sender.sendMessage(Texts.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(location)), location));
+            this.sender.sendMessage(Text.of(TextColors.GREEN, "View Timings Report: ", TextActions.openUrl(new URL(location)), location));
             if (!(this.sender instanceof ConsoleSource)) {
                 SpongeImpl.getLogger().info("View Timings Report: " + location);
             }
@@ -294,7 +294,7 @@ class TimingsExport extends Thread {
                 SpongeImpl.getLogger().info("Timing Response: " + response);
             }
         } catch (IOException ex) {
-            this.sender.sendMessage(Texts.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.sender.sendMessage(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             if (response != null) {
                 SpongeImpl.getLogger().fatal(response);
             }
@@ -316,7 +316,7 @@ class TimingsExport extends Thread {
             return bos.toString();
 
         } catch (IOException ex) {
-            this.sender.sendMessage(Texts.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
+            this.sender.sendMessage(Text.of(TextColors.RED, "Error uploading timings, check your logs for more information"));
             SpongeImpl.getLogger().warn(con.getResponseMessage(), ex);
             return null;
         } finally {

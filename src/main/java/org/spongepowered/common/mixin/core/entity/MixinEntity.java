@@ -45,6 +45,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -67,6 +68,7 @@ import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.util.persistence.InvalidDataException;
@@ -171,6 +173,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow(prefix = "shadow$")
+    public abstract IChatComponent shadow$getDisplayName();
     @Shadow public abstract void setSize(float width, float height);
 
 
@@ -981,4 +985,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
         StaticMixinHelper.collidePlayer = null;
     }
+
+    @Override
+    public Translation getTranslation() {
+        return getType().getTranslation();
+    }
+
 }

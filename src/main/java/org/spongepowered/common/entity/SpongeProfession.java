@@ -27,7 +27,6 @@ package org.spongepowered.common.entity;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 import java.util.ArrayList;
@@ -43,16 +42,6 @@ public class SpongeProfession extends SpongeEntityMeta implements Profession {
     }
 
     @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return null;
-    }
-
-    @Override
     public List<Career> getCareers() {
         return ImmutableList.copyOf(this.careers);
     }
@@ -60,4 +49,5 @@ public class SpongeProfession extends SpongeEntityMeta implements Profession {
     public List<Career> getUnderlyingCareers() {
         return this.careers;
     }
+
 }

@@ -32,7 +32,6 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -43,7 +42,7 @@ import java.util.List;
 public class ImmutableSpongeLoreData extends AbstractImmutableSingleListData<Text, ImmutableLoreData, LoreData> implements ImmutableLoreData {
 
     public ImmutableSpongeLoreData() {
-        this(ImmutableList.of(Texts.of()));
+        this(ImmutableList.of(Text.of()));
     }
 
     public ImmutableSpongeLoreData(List<Text> lore) {

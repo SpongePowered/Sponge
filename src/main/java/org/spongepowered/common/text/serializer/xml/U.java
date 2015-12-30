@@ -22,23 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.factory;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.text.TextFactory;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.common.registry.FactoryRegistry;
-import org.spongepowered.common.text.SpongeTextFactory;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextStyles;
 
-public class TextFactoryModule implements FactoryRegistry<TextFactory, Texts> {
+import javax.xml.bind.annotation.XmlRootElement;
 
-    @Override
-    public Class<Texts> getFactoryOwner() {
-        return Texts.class;
-    }
+@XmlRootElement
+public class U extends Element {
 
     @Override
-    public TextFactory provideFactory() {
-        return new SpongeTextFactory();
+    protected void modifyBuilder(Text.Builder builder) {
+        builder.style(TextStyles.UNDERLINE);
     }
-
 }

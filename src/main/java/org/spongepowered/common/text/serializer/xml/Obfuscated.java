@@ -22,25 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.factory;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.text.selector.SelectorFactory;
-import org.spongepowered.api.text.selector.Selectors;
-import org.spongepowered.common.registry.FactoryRegistry;
-import org.spongepowered.common.text.selector.SpongeSelectorFactory;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextStyles;
 
-public class SelectorFactoryModule implements FactoryRegistry<SelectorFactory, Selectors> {
+import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
-    public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
-
-    @Override
-    public Class<Selectors> getFactoryOwner() {
-        return Selectors.class;
-    }
+@XmlSeeAlso(Obfuscated.O.class)
+@XmlRootElement
+public class Obfuscated extends Element {
 
     @Override
-    public SelectorFactory provideFactory() {
-        return INSTANCE;
+    protected void modifyBuilder(Text.Builder builder) {
+        builder.style(TextStyles.OBFUSCATED);
     }
 
+    @XmlRootElement
+    public static class O extends Obfuscated {
+
+    }
 }

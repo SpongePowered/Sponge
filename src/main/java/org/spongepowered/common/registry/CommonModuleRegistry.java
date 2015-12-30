@@ -153,9 +153,6 @@ public final class CommonModuleRegistry {
         final List<FactoryRegistry<?, ?>> factoryRegistries = new ArrayList<>();
         factoryRegistries.add(new MessageSinkFactoryModule());
         factoryRegistries.add(new ResourcePackFactoryModule());
-        factoryRegistries.add(new SelectorFactoryModule());
-        factoryRegistries.add(new SelectorFactoryModule());
-        factoryRegistries.add(new TextFactoryModule());
         factoryRegistries.add(new TimingsFactoryModule());
 
         try {
@@ -279,6 +276,7 @@ public final class CommonModuleRegistry {
             .registerModule(Hinge.class, new HingeRegistryModule())
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
+            .registerModule(new LocaleRegistryModule())
             .registerModule(LogAxis.class, new LogAxisRegistryModule())
             .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
@@ -307,7 +305,8 @@ public final class CommonModuleRegistry {
             .registerModule(SoundType.class, new SoundRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
-            .registerModule(TextColor.class, new TextColorsRegistryModule())
+            .registerModule(TextColor.class, new TextColorRegistryModule())
+            .registerModule(new TextSerializerRegistryModule())
             .registerModule(new TextStyleRegistryModule())
             .registerModule(TileEntityType.class, TileEntityTypeRegistryModule.getInstance())
             .registerModule(ToolType.class, new ToolTypeRegistryModule())

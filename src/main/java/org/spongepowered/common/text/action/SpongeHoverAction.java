@@ -57,7 +57,7 @@ public class SpongeHoverAction {
         throw new UnsupportedOperationException(action.getClass().toString());
     }
 
-    public static HoverEvent getHandle(HoverAction<?> action, Locale locale) {
+    public static HoverEvent getHandle(HoverAction<?> action) {
         HoverEvent.Action type = getType(action);
         IChatComponent component;
 

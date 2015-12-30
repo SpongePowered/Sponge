@@ -32,7 +32,6 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.format.TextColors;
 
@@ -60,7 +59,7 @@ public class SpongeTeamBuilder implements Team.Builder {
     public Team.Builder name(String name) {
         this.name = checkNotNull(name, "Name cannot be null!");
         if (this.displayName == null) {
-            this.displayName = Texts.of(this.name);
+            this.displayName = Text.of(this.name);
         }
         return this;
     }
@@ -143,8 +142,8 @@ public class SpongeTeamBuilder implements Team.Builder {
         this.name = null;
         this.displayName = null;
         this.color = TextColors.RESET;
-        this.prefix = Texts.of();
-        this.suffix = Texts.of();
+        this.prefix = Text.of();
+        this.suffix = Text.of();
         this.allowFriendlyFire = false;
         this.showFriendlyInvisibles = false;
         this.nameTagVisibility = Visibilities.ALL;

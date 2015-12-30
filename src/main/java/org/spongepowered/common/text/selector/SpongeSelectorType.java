@@ -26,24 +26,13 @@ package org.spongepowered.common.text.selector;
 
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.common.SpongeCatalogType;
 
 @NonnullByDefault
-public class SpongeSelectorType implements SelectorType {
-
-    private final String id;
+public class SpongeSelectorType extends SpongeCatalogType implements SelectorType {
 
     public SpongeSelectorType(String id) {
-        this.id = id;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return getId();
+        super(id);
     }
 
 }

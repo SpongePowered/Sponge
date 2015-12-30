@@ -22,39 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.xml;
+package org.spongepowered.common.text.serializer;
 
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
+import org.spongepowered.api.text.serializer.TextSerializerFactory;
 
-import javax.xml.bind.annotation.XmlAttribute;
-import javax.xml.bind.annotation.XmlRootElement;
+@SuppressWarnings("deprecation")
+public final class SpongeTextSerializerFactory implements TextSerializerFactory {
 
-@XmlRootElement
-public class Placeholder extends Span {
+    public static final TextSerializerFactory INSTANCE = new SpongeTextSerializerFactory();
 
-    @XmlAttribute(required = true)
-    private String key;
-
-    public Placeholder() {
-    }
-
-    public Placeholder(String key) {
-        this.key = key;
+    private SpongeTextSerializerFactory() {
     }
 
     @Override
-    protected void modifyBuilder(TextBuilder builder) {
-        // TODO: get rid of this
+    public FormattingCodeTextSerializer getFormattingCodeTextSerializer(char legacyChar) {
+        return new SpongeFormattingCodeTextSerializer(legacyChar);
     }
 
-    @Override
-    public TextBuilder toText() throws Exception {
-        TextBuilder.Placeholder builder = Texts.placeholderBuilder(this.key);
-        if (!this.mixedContent.isEmpty()) {
-            builder.fallback(super.toText().build());
-        }
-        applyTextActions(builder);
-        return builder;
-    }
 }

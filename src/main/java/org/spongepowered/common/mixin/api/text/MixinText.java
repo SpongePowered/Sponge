@@ -58,20 +58,16 @@ public abstract class MixinText implements IMixinText {
     @Shadow protected Optional<HoverAction<?>> hoverAction;
     @Shadow protected Optional<ShiftClickAction<?>> shiftClickAction;
 
-    private Map<Locale, IChatComponent> localizedComponents;
+    private IChatComponent component;
     private String json;
 
-    protected ChatComponentStyle createComponent(Locale locale) {
+    protected ChatComponentStyle createComponent() {
         throw new UnsupportedOperationException();
     }
 
-    private IChatComponent initializeComponent(Locale locale) {
-        if (this.localizedComponents == null) {
-            this.localizedComponents = Collections.synchronizedMap(new HashMap<>());
-        }
-        IChatComponent component = this.localizedComponents.get(locale);
-        if (component == null) {
-            component = createComponent(locale);
+    private IChatComponent initializeComponent() {
+        if (this.component == null) {
+            this.component = createComponent();
             ChatStyle style = component.getChatStyle();
 
             if (this.format.getColor() != TextColors.NONE) {
@@ -91,7 +87,7 @@ public abstract class MixinText implements IMixinText {
             }
 
             if (this.hoverAction.isPresent()) {
-                style.setChatHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get(), locale));
+                style.setChatHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
             }
 
             if (this.shiftClickAction.isPresent()) {
@@ -100,31 +96,30 @@ public abstract class MixinText implements IMixinText {
             }
 
             for (Text child : this.children) {
-                component.appendSibling(((IMixinText) child).toComponent(locale));
+                component.appendSibling(((IMixinText) child).toComponent());
             }
-            this.localizedComponents.put(locale, component);
         }
         return component;
     }
 
-    private IChatComponent getHandle(Locale locale) {
-        return initializeComponent(locale);
+    private IChatComponent getHandle() {
+        return initializeComponent();
     }
 
     @Override
-    public IChatComponent toComponent(Locale locale) {
-        return getHandle(locale).createCopy(); // Mutable instances are not nice :(
+    public IChatComponent toComponent() {
+        return getHandle().createCopy(); // Mutable instances are not nice :(
     }
 
     @Override
-    public String toPlain(Locale locale) {
-        return ((IMixinChatComponent) getHandle(locale)).toPlain();
+    public String toPlain() {
+        return ((IMixinChatComponent) getHandle()).toPlain();
     }
 
     @Override
-    public String toJson(Locale locale) {
+    public String toJson() {
         if (this.json == null) {
-            this.json = IChatComponent.Serializer.componentToJson(getHandle(locale));
+            this.json = IChatComponent.Serializer.componentToJson(getHandle());
         }
 
         return this.json;
@@ -132,12 +127,12 @@ public abstract class MixinText implements IMixinText {
 
     @Override
     public String getLegacyFormatting() {
-        return ((IMixinChatComponent) getHandle(SpongeTexts.getDefaultLocale())).getLegacyFormatting();
+        return ((IMixinChatComponent) getHandle()).getLegacyFormatting();
     }
 
     @Override
-    public String toLegacy(char code, Locale locale) {
-        return ((IMixinChatComponent) getHandle(locale)).toLegacy(code);
+    public String toLegacy(char code) {
+        return ((IMixinChatComponent) getHandle()).toLegacy(code);
     }
 
 }

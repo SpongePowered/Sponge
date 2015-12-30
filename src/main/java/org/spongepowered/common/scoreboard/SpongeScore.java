@@ -28,9 +28,10 @@ import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,7 +49,7 @@ public class SpongeScore implements Score {
 
     public SpongeScore(Text name) {
         this.name = name;
-        this.legacyName = Texts.legacy().to(name);
+        this.legacyName = SpongeTexts.toLegacy(name);
     }
 
     @Override

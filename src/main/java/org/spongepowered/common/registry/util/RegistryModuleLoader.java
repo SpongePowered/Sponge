@@ -53,9 +53,9 @@ public final class RegistryModuleLoader {
                     invokeCustomRegistration(module, checkNotNull(method, "Custom registration module was null!"));
 
                 }
-            } else {
-                if (hasCatalogRegistration(module) && isDefaultProperPhase(module)) {
-                    module.registerDefaults();
+            } else if (isDefaultProperPhase(module)) {
+                module.registerDefaults();
+                if (hasCatalogRegistration(module)) {
                     Map<String, ?> map = getCatalogMap(module);
                     if (map.isEmpty()) {
                         return;

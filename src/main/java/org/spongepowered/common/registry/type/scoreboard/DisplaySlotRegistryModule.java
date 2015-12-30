@@ -33,7 +33,7 @@ import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.common.registry.CatalogRegistryModule;
-import org.spongepowered.common.registry.type.text.TextColorsRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
@@ -43,7 +43,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-@RegistrationDependency(TextColorsRegistryModule.class)
+@RegistrationDependency(TextColorRegistryModule.class)
 public final class DisplaySlotRegistryModule implements CatalogRegistryModule<DisplaySlot> {
 
     @RegisterCatalog(DisplaySlots.class)
@@ -73,7 +73,7 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
         this.displaySlotMappings.put("sidebar", new SpongeDisplaySlot("sidebar", null, 1));
         this.displaySlotMappings.put("below_name", new SpongeDisplaySlot("below_name", null, 2));
 
-        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry : TextColorsRegistryModule.enumChatColor.entrySet()) {
+        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
             this.displaySlotMappings.put(entry.getValue().getId(),
                                          new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
         }

@@ -51,6 +51,8 @@ import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticGroup;
 import org.spongepowered.api.statistic.TeamStatistic;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.api.text.selector.SelectorFactory;
+import org.spongepowered.api.text.serializer.TextSerializerFactory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
@@ -68,7 +70,10 @@ import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
+import org.spongepowered.common.text.selector.SpongeSelectorFactory;
+import org.spongepowered.common.text.serializer.SpongeTextSerializerFactory;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.graph.DirectedGraph;
 import org.spongepowered.common.util.graph.TopologicalOrder;
 import org.spongepowered.common.world.extent.SpongeExtentBufferFactory;
@@ -85,6 +90,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -338,6 +344,21 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public ValueFactory getValueFactory() {
         return SpongeValueFactory.getInstance();
+    }
+
+    @Override
+    public TextSerializerFactory getTextSerializerFactory() {
+        return SpongeTextSerializerFactory.INSTANCE;
+    }
+
+    @Override
+    public SpongeSelectorFactory getSelectorFactory() {
+        return SpongeSelectorFactory.INSTANCE;
+    }
+
+    @Override
+    public Locale getLocale(String locale) {
+        return LanguageUtil.LOCALE_CACHE.getUnchecked(locale);
     }
 
     private void registerModulePhase() {

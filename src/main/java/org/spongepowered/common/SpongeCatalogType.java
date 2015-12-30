@@ -22,69 +22,87 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.translation;
+
+package org.spongepowered.common;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import net.minecraft.util.StatCollector;
+import com.google.common.base.Objects.ToStringHelper;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-import java.util.Locale;
-
-@NonnullByDefault
-public class SpongeTranslation implements Translation {
+public abstract class SpongeCatalogType implements CatalogType {
 
     private final String id;
 
-    public SpongeTranslation(String id) {
+    public SpongeCatalogType(String id) {
         this.id = checkNotNull(id, "id");
     }
 
     @Override
-    public String getId() {
+    public final String getId() {
         return this.id;
     }
 
     @Override
-    public String get(Locale locale) {
-        return StatCollector.translateToLocal(this.id);
+    public String getName() {
+        return getId();
     }
 
     @Override
-    public String get(Locale locale, Object... args) {
-        return StatCollector.translateToLocalFormatted(this.id, args);
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("id", this.id)
-                .toString();
-    }
-
-    @Override
-    public int hashCode() {
+    public final int hashCode() {
         return this.id.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
+    public final boolean equals(Object obj) {
         if (obj == null) {
             return false;
         }
         if (getClass() != obj.getClass()) {
             return false;
         }
-        SpongeTranslation other = (SpongeTranslation) obj;
-        if (!this.id.equals(other.id)) {
-            return false;
+        final CatalogType other = (CatalogType) obj;
+        return getId().equals(other.getId());
+    }
+
+    @Override
+    public final String toString() {
+        return toStringHelper().toString();
+    }
+
+    protected ToStringHelper toStringHelper() {
+        return Objects.toStringHelper(this)
+                .add("id", getId())
+                .add("name", getName());
+    }
+
+    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
+
+        private final Translation translation;
+
+        public Translatable(String id, Translation translation) {
+            super(id);
+            this.translation = checkNotNull(translation, "translation");
         }
-        return true;
+
+        @Override
+        public String getName() {
+            return getTranslation().get();
+        }
+
+        @Override
+        public final Translation getTranslation() {
+            return this.translation;
+        }
+
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("translation", getTranslation());
+        }
+
     }
 
 }

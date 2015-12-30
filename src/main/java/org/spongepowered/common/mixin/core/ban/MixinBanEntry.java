@@ -30,7 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.time.Instant;
 import java.util.Date;
@@ -64,20 +65,12 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     @SuppressWarnings("deprecation")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
-        this.spongeReason = Texts.of();
-        this.source = Texts.of();
+        this.spongeReason = Text.of();
+        this.source = Text.of();
 
-        try {
-            this.spongeReason = Texts.legacy().from(this.reason);
-        } catch (TextMessageException e) {
-            SpongeImpl.getLogger().error("Error parsing legacy color codes for ban reason!", e);
-        }
+        this.spongeReason = SpongeTexts.fromLegacy(this.reason);
+        this.source = SpongeTexts.fromLegacy(this.bannedBy);
 
-        try {
-            this.source = Texts.legacy().from(this.bannedBy);
-        } catch (TextMessageException e) {
-            SpongeImpl.getLogger().error("Error parsing legacy color codes for ban source!", e);
-        }
         this.setSource();
     }
 

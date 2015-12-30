@@ -22,11 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.text;
+package org.spongepowered.common.text.serializer;
 
-import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.FormattingCodeTextSerializer;
 
-public interface IMixinChatComponentTranslation {
+import java.util.Locale;
 
-    void setTranslation(Translation translation);
+public final class SpongeFormattingCodeTextSerializer implements FormattingCodeTextSerializer {
+
+    private final char formattingChar;
+
+    public SpongeFormattingCodeTextSerializer(char formattingChar) {
+        this.formattingChar = formattingChar;
+    }
+
+    @Override
+    public char getCharacter() {
+        return this.formattingChar;
+    }
+
+    @Override
+    public String serialize(Text text) {
+        return LegacyTexts.serialize(text, this.formattingChar);
+    }
+
+    @Override
+    public Text deserialize(String input) {
+        return LegacyTexts.parse(input, this.formattingChar);
+    }
+
+    @Override
+    public String stripCodes(String text) {
+        return LegacyTexts.strip(text, this.formattingChar);
+    }
+
+    @Override
+    public String replaceCodes(String text, char to) {
+        return LegacyTexts.replace(text, this.formattingChar, to);
+    }
+
 }

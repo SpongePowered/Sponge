@@ -32,9 +32,9 @@ import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.AdditionalRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -69,7 +69,8 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     public void registerDefaults() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
             if (fishType.canCook()) {
-                CookedFish cooked = new SpongeCookedFish(fishType.name(), fishType.name(), fishType);
+                CookedFish cooked = new SpongeCookedFish(fishType.name(),
+                        new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
                 this.fishMap.put(cooked.getId().toLowerCase(), cooked);
             }
         }
@@ -79,7 +80,8 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
             if (fishType.canCook() && !this.fishMap.containsKey(fishType.name().toLowerCase())) {
-                CookedFish cooked = new SpongeCookedFish(fishType.name(), fishType.name(), fishType);
+                CookedFish cooked = new SpongeCookedFish(fishType.name(),
+                        new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
                 this.fishMap.put(cooked.getId().toLowerCase(), cooked);
             }
         }

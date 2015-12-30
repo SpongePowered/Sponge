@@ -30,7 +30,7 @@ import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.registry.type.text.TextColorsRegistryModule;
+import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 
 @NonnullByDefault
 public class SpongeTextColor implements TextColor {
@@ -68,7 +68,7 @@ public class SpongeTextColor implements TextColor {
     }
 
     public static SpongeTextColor of(EnumChatFormatting color) {
-        return TextColorsRegistryModule.enumChatColor.get(color);
+        return TextColorRegistryModule.enumChatColor.get(color);
     }
 
 }

@@ -26,33 +26,60 @@ package org.spongepowered.common.mixin.core.potion;
 
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
-public abstract class MixinPotion {
+public abstract class MixinPotion implements PotionEffectType {
 
     @Shadow private String name;
-    @Shadow public abstract boolean isInstant();
+
+    @Override
+    @Shadow
+    public abstract boolean isInstant();
+
+    private Translation translation;
+    private Translation potionTranslation;
+
+    public String potion$getId() {
+        return this.name;
+    }
+
+    public String potion$getName() {
+        return this.name;
+    }
 
     @Intrinsic
     public boolean potion$isInstant() {
         return this.isInstant();
     }
 
-    public String potion$getId() {
-        return this.name;
+    @Shadow(prefix = "shadow$")
+    public abstract String shadow$getName();
+
+    @Override
+    public Translation getTranslation() {
+        // Maybe move this to a @Inject at the end of the constructor
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(shadow$getName());
+        }
+        return this.translation;
     }
 
     @Intrinsic
-    public String potion$getName() {
-        return this.name;
+    @Override
+    public Translation getPotionTranslation() {
+        // Maybe move this to a @Inject at the end of the constructor
+        if (this.potionTranslation == null) {
+            this.potionTranslation = new SpongeTranslation(shadow$getName() + ".postfix");
+        }
+        return this.potionTranslation;
     }
-
-    // TODO translation
 
 }

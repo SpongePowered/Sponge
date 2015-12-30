@@ -38,7 +38,6 @@ import org.spongepowered.api.text.selector.ArgumentHolder.Limit;
 import org.spongepowered.api.text.selector.ArgumentType;
 import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
-import org.spongepowered.api.text.selector.SelectorBuilder;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -56,7 +55,13 @@ import java.util.Set;
 import java.util.function.Function;
 
 @NonnullByDefault
+@SuppressWarnings("deprecation")
 public class SpongeSelectorFactory implements SelectorFactory {
+
+    public static final SpongeSelectorFactory INSTANCE = new SpongeSelectorFactory();
+
+    private SpongeSelectorFactory() {
+    }
 
     private static final Map<String, SelectorType> idToType;
 
@@ -119,8 +124,8 @@ public class SpongeSelectorFactory implements SelectorFactory {
             .newLinkedHashMap();
 
     @Override
-    public SelectorBuilder createBuilder(SelectorType type) {
-        return new SpongeSelectorBuilder(type);
+    public Selector.Builder createBuilder() {
+        return new SpongeSelectorBuilder();
     }
 
     @SuppressWarnings("unchecked")

@@ -25,16 +25,15 @@
 package org.spongepowered.common.mixin.core.text;
 
 import net.minecraft.util.ChatComponentScore;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ChatComponentScore.class)
 public abstract class MixinChatComponentScore extends MixinChatComponentStyle {
 
     @Override
-    protected TextBuilder createBuilder() {
-        return Texts.builder();
+    protected Text.Builder createBuilder() {
+        return Text.builder();
     }
 
 }

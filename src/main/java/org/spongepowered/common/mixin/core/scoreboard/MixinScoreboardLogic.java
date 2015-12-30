@@ -37,7 +37,7 @@ import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -56,6 +56,7 @@ import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.SpongeScore;
 import org.spongepowered.common.scoreboard.SpongeScoreboardConstants;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -217,7 +218,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     }
 
     public Optional<Team> scoreboard$getMemberTeam(Text member) {
-        return Optional.ofNullable((Team) this.teamMemberships.get(Texts.legacy().to(member)));
+        return Optional.ofNullable((Team) this.teamMemberships.get(SpongeTexts.toLegacy(member)));
     }
 
     // Add team
@@ -255,7 +256,8 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     @Override
     public Score getValueFromObjective(String name, ScoreObjective objective) {
-        return ((SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getOrCreateScore(Texts.legacy().fromUnchecked(name))).getScoreFor(objective);
+        return ((SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getOrCreateScore(SpongeTexts.fromLegacy(name)))
+                .getScoreFor(objective);
     }
 
     @SuppressWarnings("unchecked")
@@ -263,14 +265,14 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     public void removeObjectiveFromEntity(String name, ScoreObjective objective) {
         if (objective != null) {
             SpongeObjective spongeObjective = ((IMixinScoreObjective) objective).getSpongeObjective();
-            Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(Texts.legacy().fromUnchecked(name));
+            Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeTexts.fromLegacy(name));
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
                 SpongeImpl.getLogger().warn("Objective " + objective + " did have have the score " + name);
             }
         } else {
-            Text textName = Texts.legacy().fromUnchecked(name);
+            Text textName = SpongeTexts.fromLegacy(name);
             for (ScoreObjective scoreObjective: (Collection<ScoreObjective>) this.scoreObjectives.values()) {
                 ((IMixinScoreObjective) scoreObjective).getSpongeObjective().removeScore(textName);
             }

@@ -28,6 +28,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -160,6 +161,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         } else {
             compound.removeTag("infiniteDespawnDelay");
         }
+    }
+
+    @Override
+    public Translation getTranslation() {
+        return getItemData().item().get().getType().getTranslation();
     }
 
 }

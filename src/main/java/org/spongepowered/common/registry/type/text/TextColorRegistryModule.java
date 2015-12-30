@@ -40,7 +40,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 
-public final class TextColorsRegistryModule implements CatalogRegistryModule<TextColor> {
+public final class TextColorRegistryModule implements CatalogRegistryModule<TextColor> {
 
     @RegisterCatalog(TextColors.class)
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();

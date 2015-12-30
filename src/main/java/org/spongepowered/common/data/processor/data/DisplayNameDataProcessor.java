@@ -42,13 +42,14 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
         if (dataHolder instanceof Entity && ((Entity) dataHolder).hasCustomName()) {
             final String displayName = ((Entity) dataHolder).getCustomNameTag();
             final boolean shows = ((Entity) dataHolder).getAlwaysRenderNameTag();
-            final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(displayName), shows);
+            final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(displayName), shows);
             return Optional.of(data);
         } else if (dataHolder instanceof ItemStack) {
             if (((ItemStack) dataHolder).getItem() == Items.written_book) {
@@ -74,13 +75,13 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
                     return Optional.empty(); // The book wasn't initialized.
                 }
                 final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
-                final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(titleString));
+                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(titleString));
                 return Optional.of(data);
             }
             final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
             if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, 8)) {
                 final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
-                final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(displayString));
+                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(displayString));
                 return Optional.of(data);
             } else {
                 return Optional.empty();
@@ -88,7 +89,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
         } else if (dataHolder instanceof IWorldNameable) {
             if (((IWorldNameable) dataHolder).hasCustomName()) {
                 final String customName = ((IWorldNameable) dataHolder).getCommandSenderName();
-                final DisplayNameData data = new SpongeDisplayNameData(Texts.legacy().fromUnchecked(customName));
+                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
                 return Optional.of(data);
             }
         }
@@ -110,7 +111,7 @@ public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<Displa
     @Override
     public Optional<DisplayNameData> fill(DataContainer container, DisplayNameData displayNameData) {
         final String json = DataUtil.getData(container, Keys.DISPLAY_NAME, String.class);
-        final Text displayName = Texts.json().fromUnchecked(json);
+        final Text displayName = TextSerializers.JSON.deserialize(json);
         final boolean shows = DataUtil.getData(container, Keys.SHOWS_DISPLAY_NAME);
         return Optional.of(displayNameData.set(Keys.DISPLAY_NAME, displayName).set(Keys.SHOWS_DISPLAY_NAME, shows));
     }
