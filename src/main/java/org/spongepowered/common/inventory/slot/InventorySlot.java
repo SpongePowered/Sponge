@@ -56,28 +56,28 @@ public interface InventorySlot extends org.spongepowered.api.item.inventory.Slot
     int getSlotNumber();
 
     @Override
-    default Optional<Inventory> parent() {
-        return Optional.of((Inventory) getNMSInventory());
+    default Inventory parent() {
+        return (Inventory) getNMSInventory();
     }
 
     @Override
-    default ItemStack poll() {
-        return fetch(true);
+    default Optional<ItemStack> poll() {
+        return Optional.of(fetch(true));
     }
 
     @Override
-    default ItemStack poll(int limit) {
-        return fetchSome(true, limit);
+    default Optional<ItemStack> poll(int limit) {
+        return Optional.of(fetchSome(true, limit));
     }
 
     @Override
-    default ItemStack peek() {
-        return fetch(false);
+    default Optional<ItemStack> peek() {
+        return Optional.of(fetch(false));
     }
 
     @Override
-    default ItemStack peek(int limit) {
-        return fetchSome(false, limit);
+    default Optional<ItemStack> peek(int limit) {
+        return Optional.of(fetchSome(false, limit));
     }
 
     @Override
