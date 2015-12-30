@@ -36,7 +36,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.world.CaptureType;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
 
 import java.util.List;
 import java.util.Map;
@@ -75,8 +74,6 @@ public interface IMixinWorld {
     Optional<TileEntity> getCurrentTickTileEntity();
 
     void updateWorldGenerator();
-    
-    SpongeChunkProvider getSpongeChunkProvider();
 
     void handlePostTickCaptures(Cause cause);
 

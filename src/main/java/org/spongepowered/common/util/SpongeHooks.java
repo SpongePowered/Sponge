@@ -231,7 +231,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(player.worldObj);
         if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
-                    player.getCommandSenderName(), 
+                    player.getCommandSenderName(),
                     te.getWorld().getWorldInfo().getWorldName(),
                     te.getPos().getX() + ", " + te.getPos().getY() + ", " + te.getPos().getZ(),
                     command);
@@ -247,7 +247,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(player.worldObj);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
-                    player.getCommandSenderName(), 
+                    player.getCommandSenderName(),
                     length);
             logStack(config);
         }
@@ -476,24 +476,27 @@ public class SpongeHooks {
     }
 
     public static void setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        if (state instanceof IBlockState) {
-            world.setBlockState(position, (IBlockState) state, notifyNeighbors ? 3 : 2);
-        } else {
-            // TODO: Need to figure out what is sensible for other BlockState implementing classes.
-            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
+        world.setBlockState(position, toBlockState(state), notifyNeighbors ? 3 : 2);
+    }
+
+    public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
+        setBlockState(chunk, new BlockPos(x, y, z), state, notifyNeighbors);
+    }
+
+    public static void setBlockState(Chunk chunk, BlockPos position, BlockState state, boolean notifyNeighbors) {
+        if (notifyNeighbors) { // delegate to world
+            setBlockState(chunk.getWorld(), position, state, true);
+            return;
         }
+        chunk.setBlockState(position, toBlockState(state));
     }
 
-    public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state) {
-        setBlockState(chunk, new BlockPos(x, y, z), state);
-    }
-
-    public static void setBlockState(Chunk chunk, BlockPos position, BlockState state) {
+    private static IBlockState toBlockState(BlockState state) {
         if (state instanceof IBlockState) {
-            // Notify neighbours or not?
-            chunk.setBlockState(position, (IBlockState) state);
+            return (IBlockState) state;
         } else {
-            // TODO: Need to figure out what is sensible for other BlockState implementing classes.
+            // TODO: Need to figure out what is sensible for other BlockState
+            // implementing classes.
             throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
         }
     }

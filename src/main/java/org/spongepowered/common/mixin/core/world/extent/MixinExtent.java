@@ -33,16 +33,6 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Property;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -72,8 +62,6 @@ import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
 
 @Mixin({World.class, Chunk.class, ExtentViewDownsize.class, ExtentViewTransform.class})
 public abstract class MixinExtent implements Extent {
@@ -264,158 +252,6 @@ public abstract class MixinExtent implements Extent {
     public ImmutableBlockVolume getImmutableBlockCopy() {
         return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
             getBlockMin(), getBlockSize());
-    }
-
-    @Override
-    public void setRawData(Vector3i position, DataView container) throws InvalidDataException {
-        setRawData(position.getX(), position.getY(), position.getZ(), container);
-    }
-
-    @Override
-    public boolean validateRawData(Vector3i position, DataView container) {
-        return validateRawData(position.getX(), position.getY(), position.getZ(), container);
-    }
-
-    @Override
-    public Collection<DataManipulator<?, ?>> getManipulators(Vector3i coordinates) {
-        return getManipulators(coordinates.getX(), coordinates.getY(), coordinates.getZ());
-    }
-
-    @Override
-    public <E> Optional<E> get(Vector3i coordinates, Key<? extends BaseValue<E>> key) {
-        return get(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key);
-    }
-
-    @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> get(Vector3i coordinates, Class<T> manipulatorClass) {
-        return get(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Vector3i coordinates, Class<T> manipulatorClass) {
-        return getOrCreate(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public <E> E getOrNull(Vector3i coordinates, Key<? extends BaseValue<E>> key) {
-        return getOrNull(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key);
-    }
-
-    @Override
-    public <E> E getOrElse(Vector3i coordinates, Key<? extends BaseValue<E>> key, E defaultValue) {
-        return getOrElse(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key, defaultValue);
-    }
-
-    @Override
-    public <E, V extends BaseValue<E>> Optional<V> getValue(Vector3i coordinates, Key<V> key) {
-        return getValue(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key);
-    }
-
-    @Override
-    public boolean supports(Vector3i coordinates, Key<?> key) {
-        return supports(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key);
-    }
-
-    @Override
-    public boolean supports(Vector3i coordinates, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
-        return supports(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public boolean supports(Vector3i coordinates, DataManipulator<?, ?> manipulator) {
-        return supports(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulator);
-    }
-
-    @Override
-    public Set<Key<?>> getKeys(Vector3i coordinates) {
-        return getKeys(coordinates.getX(), coordinates.getY(), coordinates.getZ());
-    }
-
-    @Override
-    public Set<ImmutableValue<?>> getValues(Vector3i coordinates) {
-        return getValues(coordinates.getX(), coordinates.getY(), coordinates.getZ());
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(Vector3i coordinates, BaseValue<E> value) {
-        return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), value);
-    }
-
-    @Override
-    public DataTransactionResult offer(Vector3i coordinates, DataManipulator<?, ?> manipulator) {
-        return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulator);
-    }
-
-    @Override
-    public DataTransactionResult offer(Vector3i coordinates, Iterable<DataManipulator<?, ?>> manipulators) {
-        return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulators);
-    }
-
-    @Override
-    public DataTransactionResult remove(Vector3i coordinates, Class<? extends DataManipulator<?, ?>> manipulatorClass) {
-        return remove(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulatorClass);
-    }
-
-    @Override
-    public DataTransactionResult remove(Vector3i coordinates, Key<?> key) {
-        return remove(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key);
-    }
-
-    @Override
-    public DataTransactionResult undo(Vector3i coordinates, DataTransactionResult result) {
-        return undo(coordinates.getX(), coordinates.getY(), coordinates.getZ(), result);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(Vector3i coordinatesTo, Vector3i coordinatesFrom) {
-        return copyFrom(coordinatesTo.getX(), coordinatesTo.getY(), coordinatesTo.getZ(), coordinatesFrom.getX(), coordinatesFrom.getY(),
-            coordinatesFrom.getZ());
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(Vector3i coordinatesTo, Vector3i coordinatesFrom, MergeFunction function) {
-        return copyFrom(coordinatesTo.getX(), coordinatesTo.getY(), coordinatesTo.getZ(), coordinatesFrom.getX(), coordinatesFrom.getY(),
-            coordinatesFrom.getZ(), function);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(Vector3i to, DataHolder from, MergeFunction function) {
-        return copyFrom(to.getX(), to.getY(), to.getZ(), from, function);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(Vector3i to, DataHolder from) {
-        return copyFrom(to.getX(), to.getY(), to.getZ(), from);
-    }
-
-    @Override
-    public DataTransactionResult offer(Vector3i coordinates, DataManipulator<?, ?> manipulator, MergeFunction function) {
-        return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), manipulator, function);
-    }
-
-    @Override
-    public <E> DataTransactionResult transform(Vector3i coordinates, Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        return transform(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key, function);
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(Vector3i coordinates, Key<? extends BaseValue<E>> key, E value) {
-        return offer(coordinates.getX(), coordinates.getY(), coordinates.getZ(), key, value);
-    }
-
-    @Override
-    public boolean supports(Vector3i coordinates, BaseValue<?> value) {
-        return supports(coordinates.getX(), coordinates.getY(), coordinates.getZ(), value);
-    }
-
-    @Override
-    public <T extends Property<?, ?>> Optional<T> getProperty(Vector3i coordinates, Class<T> propertyClass) {
-        return getProperty(coordinates.getX(), coordinates.getY(), coordinates.getZ(), propertyClass);
-    }
-
-    @Override
-    public Collection<Property<?, ?>> getProperties(Vector3i coordinates) {
-        return getProperties(coordinates.getX(), coordinates.getY(), coordinates.getZ());
     }
 
 }

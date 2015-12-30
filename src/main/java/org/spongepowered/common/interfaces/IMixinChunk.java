@@ -34,7 +34,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
 
 public interface IMixinChunk {
 
@@ -43,8 +42,6 @@ public interface IMixinChunk {
     Map<Short, PlayerTracker> getTrackedShortPlayerPositions();
 
     Map<Integer, PlayerTracker> getTrackedIntPlayerPositions();
-
-    Optional<UUID> getTrackedPlayerUniqueId(BlockPos pos);
 
     Optional<User> getBlockOwner(BlockPos pos);
 

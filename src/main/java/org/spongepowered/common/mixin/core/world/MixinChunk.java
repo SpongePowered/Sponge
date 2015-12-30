@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Maps;
@@ -46,16 +47,20 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.ScheduledBlockUpdate;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -67,7 +72,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
@@ -85,6 +89,7 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -96,6 +101,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public Map<Integer, PlayerTracker> trackedIntBlockPositions = Maps.newHashMap();
     public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
     private Cause populateCause;
+    private org.spongepowered.api.world.World world;
+    private UUID uuid;
 
     private static final int NUM_XZ_BITS = 4;
     private static final int NUM_SHORT_Y_BITS = 8;
@@ -146,6 +153,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         this.blockMax = this.blockMin.add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
         this.biomeMin = this.blockMin.toVector2(true);
         this.biomeMax = this.blockMax.toVector2(true);
+        this.world = (org.spongepowered.api.world.World) world;
+        this.uuid = new UUID(this.world.getUniqueId().getMostSignificantBits() ^ (x * 2 + 1),
+                this.world.getUniqueId().getLeastSignificantBits() ^ (z * 2 + 1));
     }
 
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
@@ -160,6 +170,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
         }
+    }
+
+    @Override
+    public UUID getUniqueId() {
+        return this.uuid;
     }
 
     @Override
@@ -218,7 +233,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public org.spongepowered.api.world.World getWorld() {
-        return (org.spongepowered.api.world.World) this.worldObj;
+        return this.world;
     }
 
     @Override
@@ -247,13 +262,40 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
-        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block);
+        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
+        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
+                block, notifyNeighbors);
+    }
+
+    @Override
+    public void setBlockType(int x, int y, int z, BlockType type, boolean notifyNeighbors) {
+        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
+                type.getDefaultState(), notifyNeighbors);
     }
 
     @Override
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
         return (BlockType) shadow$getBlock(x, y, z);
+    }
+
+    @Override
+    public BlockSnapshot createSnapshot(int x, int y, int z) {
+        return this.world.createSnapshot(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    }
+
+    @Override
+    public boolean restoreSnapshot(BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return this.world.restoreSnapshot(snapshot, force, notifyNeighbors);
+    }
+
+    @Override
+    public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
+        return this.world.restoreSnapshot(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), snapshot, force, notifyNeighbors);
     }
 
     @Override
@@ -666,6 +708,31 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return new BlockPos(x, y, z);
     }
 
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3d position) {
+        return this.world.createEntity(type, this.chunkPos.mul(16).toDouble().add(position.min(15, this.blockMax.getY(), 15)));
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3i position) {
+        return this.world.createEntity(type, this.chunkPos.mul(16).add(position.min(15, this.blockMax.getY(), 15)));
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(DataContainer entityContainer) {
+        return this.world.createEntity(entityContainer);
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> createEntity(DataContainer entityContainer, Vector3d position) {
+        return this.world.createEntity(entityContainer, this.chunkPos.mul(16).toDouble().add(position.min(15, this.blockMax.getY(), 15)));
+    }
+
+    @Override
+    public boolean spawnEntity(org.spongepowered.api.entity.Entity entity, Cause cause) {
+        return this.world.spawnEntity(entity, cause);
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities() {
@@ -676,9 +743,96 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return entities;
     }
 
+    @Override
+    public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
+        Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
+        for (ClassInheritanceMultiMap entityClassMap : this.entityLists) {
+            for (Object entity : entityClassMap) {
+                if (filter.test((org.spongepowered.api.entity.Entity) entity)) {
+                    entities.add((org.spongepowered.api.entity.Entity) entity);
+                }
+            }
+        }
+        return entities;
+    }
+
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Collection<org.spongepowered.api.block.tileentity.TileEntity> getTileEntities() {
-        return (Collection) this.chunkTileEntityMap.values();
+        return Sets.newHashSet((Collection) this.chunkTileEntityMap.values());
     }
+
+    @Override
+    public Collection<org.spongepowered.api.block.tileentity.TileEntity>
+            getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
+        Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
+        for (Entry<BlockPos, TileEntity> entry : this.chunkTileEntityMap.entrySet()) {
+            if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {
+                tiles.add((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue());
+            }
+        }
+        return tiles;
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.block.tileentity.TileEntity> getTileEntity(int x, int y, int z) {
+        return Optional.ofNullable((org.spongepowered.api.block.tileentity.TileEntity) this.getTileEntity(
+                new BlockPos(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15)), EnumCreateEntityType.CHECK));
+    }
+
+    @Override
+    public Optional<org.spongepowered.api.entity.Entity> restoreSnapshot(EntitySnapshot snapshot, Vector3d position) {
+        return this.world.restoreSnapshot(snapshot, position);
+    }
+
+    @Override
+    public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
+        return this.world.getScheduledUpdates(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15));
+    }
+
+    @Override
+    public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
+        return this.world.addScheduledUpdate(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), priority, ticks);
+    }
+
+    @Override
+    public void removeScheduledUpdate(int x, int y, int z, ScheduledBlockUpdate update) {
+        this.world.removeScheduledUpdate(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), update);
+    }
+
+    @Override
+    public boolean hitBlock(int x, int y, int z, Direction side, Cause cause) {
+        return this.world.hitBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), side, cause);
+    }
+
+    @Override
+    public boolean interactBlock(int x, int y, int z, Direction side, Cause cause) {
+        return this.world.interactBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), side, cause);
+    }
+
+    @Override
+    public boolean placeBlock(int x, int y, int z, BlockState block, Direction side, Cause cause) {
+        return this.world.placeBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), block, side, cause);
+    }
+
+    @Override
+    public boolean interactBlockWith(int x, int y, int z, ItemStack itemStack, Direction side, Cause cause) {
+        return this.world.interactBlockWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, side, cause);
+    }
+
+    @Override
+    public boolean digBlock(int x, int y, int z, Cause cause) {
+        return this.world.digBlock(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), cause);
+    }
+
+    @Override
+    public boolean digBlockWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
+        return this.world.digBlockWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
+    }
+
+    @Override
+    public int getBlockDigTimeWith(int x, int y, int z, ItemStack itemStack, Cause cause) {
+        return this.world.getBlockDigTimeWith(this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15), itemStack, cause);
+    }
+
 }
