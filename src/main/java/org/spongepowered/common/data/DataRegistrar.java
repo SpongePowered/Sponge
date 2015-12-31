@@ -809,6 +809,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
                 ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
         dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
+        
+        final BlazeFlammableDualProcessor blazeFlammableDualProcessor = new BlazeFlammableDualProcessor();
+        dataManager.registerDataProcessorAndImpl(FlammableData.class, SpongeFlammableData.class,
+                ImmutableFlamableData.class, ImmutableSpongeFlammableData.class, blazeFlammableDualProcessor);
+        dataManager.registerValueProcessor(Keys.IS_AFLAME, blazeFlammableDualProcessor);
 
         final KnockbackDualProcessor knockbackDualProcessor = new KnockbackDualProcessor();
         dataManager.registerDataProcessorAndImpl(KnockbackData.class, SpongeKnockbackData.class, ImmutableKnockbackData.class,
