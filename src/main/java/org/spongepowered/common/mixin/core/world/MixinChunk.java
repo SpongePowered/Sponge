@@ -274,12 +274,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public void setBlockType(int x, int y, int z, BlockType type, boolean notifyNeighbors) {
-        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
-                type.getDefaultState(), notifyNeighbors);
-    }
-
-    @Override
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
         return (BlockType) shadow$getBlock(x, y, z);

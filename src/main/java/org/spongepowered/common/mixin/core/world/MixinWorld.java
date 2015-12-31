@@ -128,11 +128,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.entity.weather.Lightning;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.SpongeEventFactoryUtils;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
@@ -142,7 +138,6 @@ import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
-import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.Texts;
@@ -202,7 +197,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -213,7 +207,6 @@ import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
@@ -652,9 +645,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                             SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                                                                             entitySnapshotBuilder.build(), (World) (Object) this);
                 }
-                SpongeImpl.postEvent(event);
-
-                if (!((Cancellable) event).isCancelled()) {
+                if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
                     if (entityIn instanceof EntityWeatherEffect) {
                         return addWeatherEffect(entityIn, cause);
                     }
@@ -1100,6 +1091,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         continue;
                     }
                 }
+                if (entity.isRemoved()) { // Entity removed in an event handler
+                    iterator.remove();
+                    continue;
+                }
 
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity;
                 int x = MathHelper.floor_double(nmsEntity.posX / 16.0D);
@@ -1173,6 +1168,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         iterator.remove();
                         continue;
                     }
+                }
+                if (entity.isRemoved()) { // Entity removed in an event handler
+                    iterator.remove();
+                    continue;
                 }
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity;
                 if (nmsEntity instanceof EntityWeatherEffect) {
