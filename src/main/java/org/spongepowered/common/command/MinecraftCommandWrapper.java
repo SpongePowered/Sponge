@@ -208,12 +208,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
     }
 
     @Override
-    public List<String> getSuggestions(CommandSource source, String arguments, @Nullable Location<World> location) throws CommandException {
+    public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
+        // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), location == null ? null : VecHelper.toBlockPos(location));
+        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), null);
         if (suggestions == null) {
             return ImmutableList.of();
         }

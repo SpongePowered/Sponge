@@ -124,7 +124,7 @@ public class SpongeCallbackHolder {
         }
 
         @Override
-        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context, Location<World> location) {
+        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
             return ImmutableList.of();
         }
     }
