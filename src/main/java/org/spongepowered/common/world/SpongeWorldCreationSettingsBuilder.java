@@ -42,7 +42,6 @@ import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.mixin.core.world.MixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
 import java.util.Random;
@@ -274,7 +273,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         final WorldSettings settings =
                 new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);
-        settings.setWorldName(this.name);
+        ((IMixinWorldSettings) (Object) settings).setActualWorldName(this.name);
         ((IMixinWorldSettings) (Object) settings).setDimensionType(this.dimensionType);
         ((IMixinWorldSettings) (Object) settings).setGeneratorSettings(this.generatorSettings);
         ((IMixinWorldSettings) (Object) settings).setGeneratorModifiers(this.generatorModifiers);

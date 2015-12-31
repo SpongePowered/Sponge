@@ -62,7 +62,6 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
@@ -364,7 +363,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (worldInfo == null) {
                 newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                newWorldSettings.setWorldName(worldFolder);
+                newWorldSettings.setWorldName(generator); // setGeneratorOptions
+                ((IMixinWorldSettings) (Object) newWorldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
                     newWorldSettings.enableBonusChest();

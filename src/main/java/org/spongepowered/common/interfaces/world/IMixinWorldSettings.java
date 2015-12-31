@@ -53,4 +53,7 @@ public interface IMixinWorldSettings {
     void setIsMod(boolean isMod);
 
     void setPVPEnabled(boolean enabled);
+
+    void setActualWorldName(String name);
+
 }

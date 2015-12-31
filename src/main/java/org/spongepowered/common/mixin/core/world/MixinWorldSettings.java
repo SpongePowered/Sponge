@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -35,8 +36,14 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 
@@ -44,6 +51,7 @@ import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
+@Implements(@Interface(iface = WorldCreationSettings.class, prefix = "settings$"))
 public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
 
     private DimensionType dimensionType;
@@ -53,6 +61,8 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean keepSpawnLoaded;
     private boolean pvpEnabled;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
+    // MCP's worldName is actually the generatorOptions
+    private String actualWorldName;
     // internal use only
     private int dimId;
     private boolean isMod;
@@ -64,11 +74,31 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Shadow private WorldType terrainType;
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
-    @Shadow private String worldName;
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void onConstructed(long seedIn, WorldSettings.GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn,
+            CallbackInfo ci) {
+        this.actualWorldName = "";
+    }
+
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    private void onConstructed(WorldInfo info, CallbackInfo ci) {
+        this.actualWorldName = info.getWorldName();
+    }
+
+    @Intrinsic
+    public String settings$getWorldName() {
+        // In a dev environment this won't be called and instead the generator
+        // settings will be returned. There isn't a way to fix this because the
+        // wrongly named getWorldName() (should be getGeneratorOptions()) has
+        // an identical signature to the API getWorldName()
+        // Reobfuscated builds are not affected
+        return this.actualWorldName;
+    }
 
     @Override
-    public String getWorldName() {
-        return this.worldName;
+    public void setActualWorldName(String name) {
+        this.actualWorldName = name;
     }
 
     @Override
