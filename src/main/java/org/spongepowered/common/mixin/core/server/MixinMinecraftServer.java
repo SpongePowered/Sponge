@@ -406,6 +406,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionId(dim);
                 ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionType(((Dimension) provider).getType());
+
                 worldInfo = new WorldInfo(newWorldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
             } else {
@@ -423,15 +424,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
             ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
-            if (!((WorldProperties) worldInfo).loadOnStartup()) {
-                continue;
-            }
-
-            UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
+            final UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
             SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
                 (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+
+            if (!((WorldProperties) worldInfo).loadOnStartup()) {
+                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
+                        + "or use a plugin", worldFolder, dim);
+                continue;
+            }
+
             final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
@@ -620,16 +624,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return Optional.empty();
         }
 
-        File file = new File(getFolderName(), worldName);
-
+        final File file = new File(getFolderName(), worldName);
         if ((file.exists()) && (!file.isDirectory())) {
             throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
         }
 
         int dim;
-        WorldInfo worldInfo = null;
+        WorldInfo worldInfo;
         AnvilSaveHandler savehandler = getHandler(worldName);
-        Optional<WorldProperties> worldProperties = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
+        final Optional<WorldProperties> worldProperties = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
         if (worldProperties.isPresent()) {
             worldInfo = (WorldInfo) worldProperties.get();
         } else {
@@ -639,10 +642,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (worldInfo != null) {
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
-                SpongeImpl.getLogger().error("Unable to load world {}. World is disabled!", worldName);
-                return Optional.empty();
-            } else if (!((WorldProperties) worldInfo).loadOnStartup()) {
-                SpongeImpl.getLogger().warn("World {} [loadOnStartup] is disabled.. Skipping world load...", worldName);
+                SpongeImpl.getLogger().error("World {} cannot be loaded as it is disabled.", worldName);
                 return Optional.empty();
             }
 
@@ -730,14 +730,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldSettings) settings).setDimensionId(dim);
         worldInfo = new WorldInfo((WorldSettings) (Object) settings, settings.getWorldName());
         UUID uuid = UUID.randomUUID();
+        ((IMixinWorldInfo) worldInfo).getWorldConfig().getConfig().setConfigEnabled(true);
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
-        if (!settings.getGeneratorModifiers().isEmpty()) {
-            // temporary fix until we get setting for setting overrides into configs
-            ((IMixinWorldInfo) worldInfo).getWorldConfig().getConfig().setConfigEnabled(true);
-        }
         ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
         WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
         DimensionRegistryModule.getInstance().registerWorldDimensionId(dim, worldName);

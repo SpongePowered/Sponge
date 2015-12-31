@@ -151,6 +151,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.dimensionType = DimensionTypes.OVERWORLD;
         }
         createWorldConfig();
+
+        System.err.println(getWorldName() + " " + this.worldConfig.getConfig().isConfigEnabled() + " " + this.worldConfig.getConfig().getWorld()
+                .getKeepSpawnLoaded());
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
@@ -165,8 +168,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.dimension = ((IMixinWorldSettings)(Object) settings).getDimensionId();
         }
         // make sure to set dimensionType and dimension id before attempting to generate world config
-        onConstruction(ci);
         setDimensionType(creationSettings.getDimensionType());
+        onConstruction(ci);
         this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
         this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
         this.worldConfig.getConfig().getWorld().setLoadOnStartup(creationSettings.loadOnStartup());

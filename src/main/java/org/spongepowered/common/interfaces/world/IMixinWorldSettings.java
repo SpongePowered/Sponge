@@ -32,6 +32,8 @@ import java.util.Collection;
 
 public interface IMixinWorldSettings {
 
+    String getActualWorldName();
+
     Integer getDimensionId();
 
     boolean getIsMod();

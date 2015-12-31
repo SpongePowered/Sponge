@@ -439,11 +439,11 @@ public class SpongeHooks {
     }
 
     public static SpongeConfig<?> getActiveConfig(World world) {
-        SpongeConfig<WorldConfig> config = ((IMixinWorld) world).getWorldConfig();
-        if (config.getConfig().isConfigEnabled()) {
-            return config;
-        } else if (((IMixinWorldProvider) world.provider).getDimensionConfig() != null && ((IMixinWorldProvider) world.provider)
-                .getDimensionConfig().getConfig().isConfigEnabled()) {
+        final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
+        final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinWorldProvider) world.provider).getDimensionConfig();
+        if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
+            return worldConfig;
+        } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
             return ((IMixinWorldProvider) world.provider).getDimensionConfig();
         } else {
             return SpongeImpl.getGlobalConfig();
