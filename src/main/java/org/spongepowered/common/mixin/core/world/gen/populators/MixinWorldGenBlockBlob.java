@@ -35,6 +35,8 @@ import net.minecraft.world.gen.feature.WorldGenBlockBlob;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.BlockBlob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -57,6 +59,11 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
         this.block = (BlockState) block.getDefaultState();
         this.radius = VariableAmount.fixed(radius);
         this.count = VariableAmount.baseWithRandomAddition(0, 3);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.BLOCK_BLOB;
     }
 
     @Override

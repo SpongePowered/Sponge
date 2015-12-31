@@ -48,6 +48,11 @@ public final class EnumTraitRegistryModule implements AdditionalCatalogRegistryM
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(EnumTrait<?> extraCatalog) {
         this.enumTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
     }

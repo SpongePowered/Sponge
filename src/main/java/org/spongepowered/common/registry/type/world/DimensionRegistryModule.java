@@ -60,6 +60,11 @@ public final class DimensionRegistryModule implements AdditionalCatalogRegistryM
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
         this.dimensionTypeMappings.put(dimType.getName().toLowerCase(), dimType);
         this.providerIdMappings.put(((SpongeDimensionType) dimType).getDimensionTypeId(), dimType);

@@ -28,6 +28,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 
 import java.util.List;
@@ -54,6 +55,11 @@ public class FilteredPopulator implements IFlaggedPopulator {
         for (String f : flags) {
             this.requiredFlags.add(f);
         }
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return this.wrapped.getType();
     }
 
     @Override

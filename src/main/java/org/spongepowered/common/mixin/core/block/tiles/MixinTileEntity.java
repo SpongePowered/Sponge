@@ -97,7 +97,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id);
-        SpongeImpl.getRegistry().registerAdditionalType(TileEntityType.class, tileEntityType);
+        TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);
     }
 
     @Override

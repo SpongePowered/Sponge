@@ -54,6 +54,11 @@ public class CareerRegistryModule implements AdditionalCatalogRegistryModule<Car
     private final Map<String, Career> careerMap = new HashMap<>();
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(Career extraCatalog) {
         if (this.forgeSpongeMapping.containsKey(extraCatalog.getId().toLowerCase())) {
             // Basically, forge has alternate names for a minor few vanilla

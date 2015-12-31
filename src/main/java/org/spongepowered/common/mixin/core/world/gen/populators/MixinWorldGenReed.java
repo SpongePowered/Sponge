@@ -32,6 +32,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenReed;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Reed;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -51,6 +53,11 @@ public class MixinWorldGenReed implements Reed {
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
         this.height = VariableAmount.baseWithRandomAddition(2, 2);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.REED;
     }
 
     @Override

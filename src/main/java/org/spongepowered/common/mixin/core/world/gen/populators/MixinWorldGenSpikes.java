@@ -34,6 +34,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenSpikes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -58,6 +60,11 @@ public class MixinWorldGenSpikes implements EnderCrystalPlatform {
         this.probability = 0.2;
         this.radius = VariableAmount.baseWithRandomAddition(1, 4);
         this.height = VariableAmount.baseWithRandomAddition(6, 32);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.ENDER_CRYSTAL_PLATFORM;
     }
 
     @Override

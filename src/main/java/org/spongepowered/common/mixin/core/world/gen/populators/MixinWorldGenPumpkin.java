@@ -33,6 +33,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenPumpkin;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Pumpkin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -52,6 +54,11 @@ public class MixinWorldGenPumpkin implements Pumpkin {
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
         this.chance = 0.1;
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.PUMPKIN;
     }
 
     @Override

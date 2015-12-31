@@ -36,6 +36,8 @@ import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.MatterProperty.Matter;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,6 +63,11 @@ public abstract class MixinWorldGenLake implements Lake {
     public void onConstructed(Block block, CallbackInfo ci) {
         this.prob = 0.25D;
         this.height = VariableAmount.baseWithRandomAddition(0, 256);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.LAKE;
     }
 
     @Override

@@ -35,6 +35,8 @@ import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.SeaFloor;
 
 import java.util.Random;
@@ -53,6 +55,11 @@ public class SeaFloorPopulator implements SeaFloor {
         this.count = checkNotNull(count, "count");
         this.check = checkNotNull(check, "check");
         this.depth = checkNotNull(depth, "depth");
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.SEA_FLOOR;
     }
 
     @Override

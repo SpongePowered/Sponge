@@ -37,7 +37,7 @@ import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.world.gen.SpongePopulatorType;
+import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Arrays;
 
@@ -55,7 +55,6 @@ public class StaticMixinHelper {
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
-    public static SpongePopulatorType populator = null;
     public static ItemStack prePacketProcessItem = null;
     @SuppressWarnings("rawtypes")
     public static Class lastPopulatorClass = null;
@@ -67,7 +66,7 @@ public class StaticMixinHelper {
     public static EntityLivingBase currentTargetEntity = null;
     public static Cause dropCause = null;
     @SuppressWarnings("rawtypes")
-    public static Class runningGenerator = null;
+    public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;

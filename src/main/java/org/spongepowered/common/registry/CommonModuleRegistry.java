@@ -288,7 +288,7 @@ public final class CommonModuleRegistry {
             .registerModule(PistonType.class, new PistonTypeRegistryModule())
             .registerModule(PlantType.class, new PlantTypeModuleRegistry())
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
-            .registerModule(PopulatorType.class, new PopulatorTypeRegistryModule())
+            .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
             .registerModule(PortionType.class, new PortionTypeRegistryModule())
             .registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule())
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())

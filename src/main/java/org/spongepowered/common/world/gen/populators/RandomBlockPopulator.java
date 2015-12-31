@@ -33,6 +33,8 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
 
 import java.util.Random;
@@ -56,6 +58,11 @@ public class RandomBlockPopulator implements RandomBlock {
         this.state = checkNotNull(block);
         this.height = checkNotNull(height);
         this.check = checkNotNull(check);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.GENERIC_BLOCK;
     }
 
     @Override

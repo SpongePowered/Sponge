@@ -24,30 +24,81 @@
  */
 package org.spongepowered.common.registry.type.world.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.world.gen.feature.WorldGenerator;
+import net.minecraft.world.gen.GeneratorBushFeature;
+import net.minecraft.world.gen.feature.WorldGenBigMushroom;
+import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenBlockBlob;
+import net.minecraft.world.gen.feature.WorldGenCactus;
+import net.minecraft.world.gen.feature.WorldGenClay;
+import net.minecraft.world.gen.feature.WorldGenDeadBush;
+import net.minecraft.world.gen.feature.WorldGenDesertWells;
+import net.minecraft.world.gen.feature.WorldGenDoublePlant;
+import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.world.gen.feature.WorldGenFire;
+import net.minecraft.world.gen.feature.WorldGenFlowers;
+import net.minecraft.world.gen.feature.WorldGenForest;
+import net.minecraft.world.gen.feature.WorldGenGlowStone1;
+import net.minecraft.world.gen.feature.WorldGenGlowStone2;
+import net.minecraft.world.gen.feature.WorldGenHellLava;
+import net.minecraft.world.gen.feature.WorldGenHugeTrees;
+import net.minecraft.world.gen.feature.WorldGenIcePath;
+import net.minecraft.world.gen.feature.WorldGenIceSpike;
+import net.minecraft.world.gen.feature.WorldGenLakes;
+import net.minecraft.world.gen.feature.WorldGenLiquids;
+import net.minecraft.world.gen.feature.WorldGenMegaJungle;
+import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
+import net.minecraft.world.gen.feature.WorldGenMelon;
+import net.minecraft.world.gen.feature.WorldGenMinable;
+import net.minecraft.world.gen.feature.WorldGenPumpkin;
+import net.minecraft.world.gen.feature.WorldGenReed;
+import net.minecraft.world.gen.feature.WorldGenSand;
+import net.minecraft.world.gen.feature.WorldGenSavannaTree;
+import net.minecraft.world.gen.feature.WorldGenShrub;
+import net.minecraft.world.gen.feature.WorldGenSpikes;
+import net.minecraft.world.gen.feature.WorldGenSwamp;
+import net.minecraft.world.gen.feature.WorldGenTaiga1;
+import net.minecraft.world.gen.feature.WorldGenTaiga2;
+import net.minecraft.world.gen.feature.WorldGenTallGrass;
+import net.minecraft.world.gen.feature.WorldGenTrees;
+import net.minecraft.world.gen.feature.WorldGenVines;
+import net.minecraft.world.gen.feature.WorldGenWaterlily;
+import net.minecraft.world.gen.feature.WorldGeneratorBonusChest;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.registry.ExtraClassCatalogRegistryModule;
+import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.util.CustomCatalogRegistration;
 import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
-public final class PopulatorTypeRegistryModule implements ExtraClassCatalogRegistryModule<PopulatorType, WorldGenerator> {
+public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegistryModule<PopulatorType> {
 
-    public final Map<Class<? extends net.minecraft.world.gen.feature.WorldGenerator>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
+    public static PopulatorTypeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
-    @RegisterCatalog(PopulatorTypes.class)
-    protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
+    public final Map<Class<?>, PopulatorType> populatorClassToTypeMappings = Maps.newHashMap();
+
+    @RegisterCatalog(PopulatorTypes.class) protected final Map<String, PopulatorType> populatorTypeMappings = Maps.newHashMap();
+
+    public Function<Class<?>, PopulatorType> customTypeFunction;
+
+    private PopulatorTypeRegistryModule() {
+        this.customTypeFunction = (type) -> {
+            return new SpongePopulatorType(type.getSimpleName(), type.getName().contains("net.minecraft.") ? "minecraft" : "unknown");
+        };
+    }
 
     @Override
     public Optional<PopulatorType> getById(String id) {
@@ -61,90 +112,130 @@ public final class PopulatorTypeRegistryModule implements ExtraClassCatalogRegis
 
     @Override
     public void registerDefaults() {
-        this.populatorTypeMappings
-            .put("big_mushroom", new SpongePopulatorType("big_mushroom", net.minecraft.world.gen.feature.WorldGenBigMushroom.class));
-        this.populatorTypeMappings.put("big_tree", new SpongePopulatorType("big_tree", net.minecraft.world.gen.feature.WorldGenBigTree.class));
-        this.populatorTypeMappings.put("birch_tree", new SpongePopulatorType("birch_tree", net.minecraft.world.gen.feature.WorldGenForest.class));
-        this.populatorTypeMappings.put("block_blob", new SpongePopulatorType("block_blob", net.minecraft.world.gen.feature.WorldGenBlockBlob.class));
-        this.populatorTypeMappings
-            .put("bonus_chest", new SpongePopulatorType("bonus_chest", net.minecraft.world.gen.feature.WorldGeneratorBonusChest.class));
-        this.populatorTypeMappings.put("bush", new SpongePopulatorType("bush", net.minecraft.world.gen.GeneratorBushFeature.class));
-        this.populatorTypeMappings.put("cactus", new SpongePopulatorType("cactus", net.minecraft.world.gen.feature.WorldGenCactus.class));
-        this.populatorTypeMappings
-            .put("canopy_tree", new SpongePopulatorType("canopy_tree", net.minecraft.world.gen.feature.WorldGenCanopyTree.class));
-        this.populatorTypeMappings.put("clay", new SpongePopulatorType("clay", net.minecraft.world.gen.feature.WorldGenClay.class));
-        this.populatorTypeMappings.put("dead_bush", new SpongePopulatorType("dead_bush", net.minecraft.world.gen.feature.WorldGenDeadBush.class));
-        this.populatorTypeMappings
-            .put("desert_well", new SpongePopulatorType("desert_well", net.minecraft.world.gen.feature.WorldGenDesertWells.class));
-        this.populatorTypeMappings
-            .put("double_plant", new SpongePopulatorType("double_plant", net.minecraft.world.gen.feature.WorldGenBigMushroom.class));
-        this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon", net.minecraft.world.gen.feature.WorldGenDungeons.class));
-        this.populatorTypeMappings
-            .put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform", net.minecraft.world.gen.feature.WorldGenSpikes.class));
-        this.populatorTypeMappings.put("fire", new SpongePopulatorType("fire", net.minecraft.world.gen.feature.WorldGenFire.class));
-        this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower", net.minecraft.world.gen.feature.WorldGenFlowers.class));
-        this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone", net.minecraft.world.gen.feature.WorldGenGlowStone1.class));
-        this.populatorTypeMappings.put("glowstone2", new SpongePopulatorType("glowstone2", net.minecraft.world.gen.feature.WorldGenGlowStone2.class));
-        this.populatorTypeMappings.put("ice_path", new SpongePopulatorType("ice_path", net.minecraft.world.gen.feature.WorldGenIcePath.class));
-        this.populatorTypeMappings.put("ice_spike", new SpongePopulatorType("ice_spike", net.minecraft.world.gen.feature.WorldGenIceSpike.class));
-        this.populatorTypeMappings
-            .put("jungle_bush_tree", new SpongePopulatorType("jungle_bush_tree", net.minecraft.world.gen.feature.WorldGenShrub.class));
-        this.populatorTypeMappings.put("lake", new SpongePopulatorType("lake", net.minecraft.world.gen.feature.WorldGenLakes.class));
-        this.populatorTypeMappings.put("lava", new SpongePopulatorType("lava", net.minecraft.world.gen.feature.WorldGenHellLava.class));
-        this.populatorTypeMappings.put("liquid", new SpongePopulatorType("liquid", net.minecraft.world.gen.feature.WorldGenLiquids.class));
-        this.populatorTypeMappings
-            .put("mega_jungle_tree", new SpongePopulatorType("mega_jungle_tree", net.minecraft.world.gen.feature.WorldGenMegaJungle.class));
-        this.populatorTypeMappings
-            .put("mega_pine_tree", new SpongePopulatorType("mega_pinge_tree", net.minecraft.world.gen.feature.WorldGenMegaPineTree.class));
-        this.populatorTypeMappings.put("melon", new SpongePopulatorType("melon", net.minecraft.world.gen.feature.WorldGenMelon.class));
-        this.populatorTypeMappings.put("ore", new SpongePopulatorType("ore", net.minecraft.world.gen.feature.WorldGenMinable.class));
-        this.populatorTypeMappings
-            .put("pointy_taiga_tree", new SpongePopulatorType("pointy_taiga_tree", net.minecraft.world.gen.feature.WorldGenTaiga1.class));
-        this.populatorTypeMappings.put("pumpkin", new SpongePopulatorType("pumpkin", net.minecraft.world.gen.feature.WorldGenPumpkin.class));
-        this.populatorTypeMappings.put("reed", new SpongePopulatorType("reed", net.minecraft.world.gen.feature.WorldGenReed.class));
-        this.populatorTypeMappings.put("sand", new SpongePopulatorType("sand", net.minecraft.world.gen.feature.WorldGenSand.class));
-        this.populatorTypeMappings
-            .put("savanna_tree", new SpongePopulatorType("savanna_tree", net.minecraft.world.gen.feature.WorldGenSavannaTree.class));
-        this.populatorTypeMappings.put("shrub", new SpongePopulatorType("shrub", net.minecraft.world.gen.feature.WorldGenTallGrass.class));
-        this.populatorTypeMappings.put("swamp_tree", new SpongePopulatorType("swamp_tree", net.minecraft.world.gen.feature.WorldGenSwamp.class));
-        this.populatorTypeMappings
-            .put("tall_taiga_tree", new SpongePopulatorType("tall_taiga_tree", net.minecraft.world.gen.feature.WorldGenTaiga2.class));
-        this.populatorTypeMappings.put("tree", new SpongePopulatorType("tree", net.minecraft.world.gen.feature.WorldGenTrees.class));
-        this.populatorTypeMappings.put("vine", new SpongePopulatorType("vine", net.minecraft.world.gen.feature.WorldGenVines.class));
-        this.populatorTypeMappings.put("water_lily", new SpongePopulatorType("water_lily", net.minecraft.world.gen.feature.WorldGenWaterlily.class));
+        this.populatorTypeMappings.put("big_mushroom", new SpongePopulatorType("big_mushroom"));
+        this.populatorTypeMappings.put("block_blob", new SpongePopulatorType("block_blob"));
+        this.populatorTypeMappings.put("cactus", new SpongePopulatorType("cactus"));
+        this.populatorTypeMappings.put("dead_bush", new SpongePopulatorType("dead_bush"));
+        this.populatorTypeMappings.put("desert_well", new SpongePopulatorType("desert_well"));
+        this.populatorTypeMappings.put("double_plant", new SpongePopulatorType("double_plant"));
+        this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon"));
+        this.populatorTypeMappings.put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform"));
+        this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower"));
+        this.populatorTypeMappings.put("forest", new SpongePopulatorType("forest"));
+        this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone"));
+        this.populatorTypeMappings.put("ice_path", new SpongePopulatorType("ice_path"));
+        this.populatorTypeMappings.put("ice_spike", new SpongePopulatorType("ice_spike"));
+        this.populatorTypeMappings.put("lake", new SpongePopulatorType("lake"));
+        this.populatorTypeMappings.put("melon", new SpongePopulatorType("melon"));
+        this.populatorTypeMappings.put("mushroom", new SpongePopulatorType("mushroom"));
+        this.populatorTypeMappings.put("nether_fire", new SpongePopulatorType("nether_fire"));
+        this.populatorTypeMappings.put("ore", new SpongePopulatorType("ore"));
+        this.populatorTypeMappings.put("pumpkin", new SpongePopulatorType("pumpkin"));
+        this.populatorTypeMappings.put("generic_block", new SpongePopulatorType("generic_block"));
+        this.populatorTypeMappings.put("generic_object", new SpongePopulatorType("generic_object"));
+        this.populatorTypeMappings.put("reed", new SpongePopulatorType("reed"));
+        this.populatorTypeMappings.put("sea_floor", new SpongePopulatorType("sea_floor"));
+        this.populatorTypeMappings.put("shrub", new SpongePopulatorType("shrub"));
+        this.populatorTypeMappings.put("vine", new SpongePopulatorType("vine"));
+        this.populatorTypeMappings.put("water_lily", new SpongePopulatorType("water_lily"));
+
+        // internal
+        this.populatorTypeMappings.put("animal", new SpongePopulatorType("animal"));
+        this.populatorTypeMappings.put("bonus_chest", new SpongePopulatorType("bonus_chest"));
+        this.populatorTypeMappings.put("ender_dragon", new SpongePopulatorType("ender_dragon"));
+        this.populatorTypeMappings.put("plains_grass", new SpongePopulatorType("plains_grass"));
+        this.populatorTypeMappings.put("snow", new SpongePopulatorType("snow"));
+        this.populatorTypeMappings.put("structure", new SpongePopulatorType("structure"));
+        this.populatorTypeMappings.put("unknown", new SpongePopulatorType("unknown"));
+        
+        this.populatorClassToTypeMappings.put(WorldGenBigMushroom.class, this.populatorTypeMappings.get("big_mushroom"));
+        this.populatorClassToTypeMappings.put(WorldGenBigTree.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenBlockBlob.class, this.populatorTypeMappings.get("block_blob"));
+        this.populatorClassToTypeMappings.put(WorldGenCactus.class, this.populatorTypeMappings.get("cactus"));
+        this.populatorClassToTypeMappings.put(WorldGenClay.class, this.populatorTypeMappings.get("sea_floor"));
+        this.populatorClassToTypeMappings.put(WorldGenDeadBush.class, this.populatorTypeMappings.get("dead_bush"));
+        this.populatorClassToTypeMappings.put(WorldGenDesertWells.class, this.populatorTypeMappings.get("desert_well"));
+        this.populatorClassToTypeMappings.put(WorldGenDoublePlant.class, this.populatorTypeMappings.get("double_plant"));
+        this.populatorClassToTypeMappings.put(WorldGenDungeons.class, this.populatorTypeMappings.get("dungeon"));
+        this.populatorClassToTypeMappings.put(WorldGeneratorBonusChest.class, this.populatorTypeMappings.get("bonus_chest"));
+        this.populatorClassToTypeMappings.put(WorldGenFire.class, this.populatorTypeMappings.get("generic_block"));
+        this.populatorClassToTypeMappings.put(WorldGenFlowers.class, this.populatorTypeMappings.get("flower"));
+        this.populatorClassToTypeMappings.put(WorldGenForest.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenGlowStone1.class, this.populatorTypeMappings.get("glowstone"));
+        this.populatorClassToTypeMappings.put(WorldGenGlowStone2.class, this.populatorTypeMappings.get("glowstone"));
+        this.populatorClassToTypeMappings.put(WorldGenHellLava.class, this.populatorTypeMappings.get("generic_block"));
+        this.populatorClassToTypeMappings.put(WorldGenHugeTrees.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenIcePath.class, this.populatorTypeMappings.get("ice_path"));
+        this.populatorClassToTypeMappings.put(WorldGenIceSpike.class, this.populatorTypeMappings.get("ice_spike"));
+        this.populatorClassToTypeMappings.put(WorldGenLakes.class, this.populatorTypeMappings.get("lake"));
+        this.populatorClassToTypeMappings.put(WorldGenLiquids.class, this.populatorTypeMappings.get("generic_block"));
+        this.populatorClassToTypeMappings.put(WorldGenMegaJungle.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenMegaPineTree.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenMelon.class, this.populatorTypeMappings.get("melon"));
+        this.populatorClassToTypeMappings.put(WorldGenMinable.class, this.populatorTypeMappings.get("ore"));
+        this.populatorClassToTypeMappings.put(WorldGenPumpkin.class, this.populatorTypeMappings.get("pumpkin"));
+        this.populatorClassToTypeMappings.put(WorldGenReed.class, this.populatorTypeMappings.get("reed"));
+        this.populatorClassToTypeMappings.put(WorldGenSand.class, this.populatorTypeMappings.get("sea_floor"));
+        this.populatorClassToTypeMappings.put(WorldGenSavannaTree.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenShrub.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenSpikes.class, this.populatorTypeMappings.get("ender_crystal_platform"));
+        this.populatorClassToTypeMappings.put(WorldGenSwamp.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenTaiga1.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenTaiga2.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenTallGrass.class, this.populatorTypeMappings.get("shrub"));
+        this.populatorClassToTypeMappings.put(WorldGenTrees.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenVines.class, this.populatorTypeMappings.get("vine"));
+        this.populatorClassToTypeMappings.put(WorldGenWaterlily.class, this.populatorTypeMappings.get("water_lily"));
+        this.populatorClassToTypeMappings.put(GeneratorBushFeature.class, this.populatorTypeMappings.get("mushroom"));
     }
 
-    @CustomCatalogRegistration
-    public void onRegistration() {
-        registerDefaults();
-        RegistryHelper.mapFields(PopulatorTypes.class, fieldName -> {
-            PopulatorType populatorType = this.populatorTypeMappings.get(fieldName.toLowerCase());
-            if (populatorType != null) {
-                this.populatorClassToTypeMappings.put(((SpongePopulatorType) populatorType).populatorClass, populatorType);
-                // remove old mapping
-                this.populatorTypeMappings.remove(fieldName.toLowerCase());
-                // add new mapping with minecraft id
-                this.populatorTypeMappings.put(((SpongePopulatorType) populatorType).getId(), populatorType);
-            } else {
-                SpongeImpl.getLogger().error("A populator is null at the moment! Populator: " + fieldName);
-            }
-            return populatorType;
-        });
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
     }
 
     @Override
     public void registerAdditionalCatalog(PopulatorType extraCatalog) {
+        checkNotNull(extraCatalog, "CatalogType cannot be null");
+        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
+        checkArgument(!this.populatorTypeMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
         this.populatorTypeMappings.put(extraCatalog.getId(), extraCatalog);
-        this.populatorClassToTypeMappings.put(((SpongePopulatorType) extraCatalog).populatorClass, extraCatalog);
     }
 
-    @Override
-    public boolean hasRegistrationFor(Class<? extends WorldGenerator> mappedClass) {
-        return this.populatorClassToTypeMappings.containsKey(mappedClass);
+    public void registerClassMapping(Class<? extends net.minecraft.world.gen.feature.WorldGenerator> generator, PopulatorType type) {
+        this.populatorClassToTypeMappings.put(generator, type);
     }
 
-    @Override
-    public PopulatorType getForClass(Class<? extends WorldGenerator> clazz) {
-        return this.populatorClassToTypeMappings.get(clazz);
+    @CustomCatalogRegistration
+    public void registerCatalogs() {
+        registerDefaults();
+        RegistryHelper.mapFields(PopulatorTypes.class, this.populatorTypeMappings);
+        RegistryHelper.mapFields(InternalPopulatorTypes.class, this.populatorTypeMappings);
+    }
+
+    public boolean hasRegistrationFor(Class<?> cls) {
+        return this.populatorClassToTypeMappings.containsKey(cls);
+    }
+
+    public PopulatorType getForClass(Class<?> cls) {
+        return this.populatorClassToTypeMappings.get(cls);
+    }
+
+    public PopulatorType getOrCreateForType(Class<?> cls) {
+        if (hasRegistrationFor(cls)) {
+            return getForClass(cls);
+        }
+        PopulatorType type = this.customTypeFunction.apply(cls);
+        if (type == null) {
+            return InternalPopulatorTypes.UNKNOWN;
+        }
+        registerAdditionalCatalog(type);
+        this.populatorClassToTypeMappings.put(cls, type);
+        return type;
+    }
+
+    private static final class Holder {
+
+        private static final PopulatorTypeRegistryModule INSTANCE = new PopulatorTypeRegistryModule();
     }
 }

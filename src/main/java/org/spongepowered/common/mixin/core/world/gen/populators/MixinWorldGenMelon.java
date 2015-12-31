@@ -31,6 +31,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenMelon;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Melon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,6 +49,11 @@ public class MixinWorldGenMelon implements Melon {
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.MELON;
     }
 
     @Override

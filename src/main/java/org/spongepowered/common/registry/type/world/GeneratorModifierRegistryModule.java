@@ -34,8 +34,8 @@ import org.spongepowered.api.extra.skylands.SkylandsWorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.gen.WorldGeneratorModifiers;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.AlternateCatalogRegistryModule;
-import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
 
 import java.util.Collection;
@@ -44,14 +44,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier> {
+public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>, AdditionalCatalogRegistryModule<WorldGeneratorModifier> {
 
     public static GeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(WorldGeneratorModifiers.class)
-    private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
+    @RegisterCatalog(WorldGeneratorModifiers.class) private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
 
     @Override
     public Map<String, WorldGeneratorModifier> provideCatalogMap() {
@@ -74,10 +73,16 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public void registerDefaults() {
-        registerModifier(new SkylandsWorldGeneratorModifier());
+        registerAdditionalCatalog(new SkylandsWorldGeneratorModifier());
     }
 
-    public void registerModifier(WorldGeneratorModifier modifier) {
+    @Override
+    public boolean allowsApiRegistration() {
+        return true;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(WorldGeneratorModifier modifier) {
         checkNotNull(modifier, "modifier");
         String id = modifier.getId();
         checkId(id, "World generator ID");
@@ -139,6 +144,8 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         }
         return modifiers;
     }
+
+    private GeneratorModifierRegistryModule() {}
 
     private static final class Holder {
 

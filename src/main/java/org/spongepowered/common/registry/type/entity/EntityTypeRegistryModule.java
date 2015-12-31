@@ -200,6 +200,11 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(EntityType extraCatalog) {
         this.entityTypeMappings.put(extraCatalog.getId(), extraCatalog);
         this.entityClassToTypeMappings.put(((SpongeEntityType) extraCatalog).entityClass, extraCatalog);

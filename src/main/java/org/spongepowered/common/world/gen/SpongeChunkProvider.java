@@ -27,6 +27,8 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -63,16 +65,19 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -266,17 +271,21 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         }
         List<Populator> populators = Lists.newArrayList(this.pop);
         populators.addAll(this.biomeSettings.get(biome).getPopulators());
-        // Non-biome populators come after the biome populators
+
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
-        Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, chunk));
 
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
+            if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
+                continue;
+            }
+            StaticMixinHelper.runningGenerator = populator.getType();
             if (populator instanceof IFlaggedPopulator) {
                 ((IFlaggedPopulator) populator).populate(chunkProvider, chunk, this.rand, flags);
             } else {
                 populator.populate(chunk, this.rand);
             }
+            StaticMixinHelper.runningGenerator = null;
         }
 
         // If we wrapped a custom chunk provider then we should call its
@@ -288,19 +297,20 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         world.setCapturingTerrainGen(false);
         world.setProcessingCaptureCause(false);
 
+        ImmutableMap.Builder<PopulatorType, List<Transaction<BlockSnapshot>>> populatorChanges = ImmutableMap.builder();
+        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : world.getCapturedPopulatorChanges().entrySet()) {
+            populatorChanges.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().values()));
+        }
         PopulateChunkEvent.Post event =
                 SpongeEventFactory.createPopulateChunkEventPost(populateCause,
-                        ImmutableMap.copyOf(world.getCapturedPopulatorChanges()),
+                        populatorChanges.build(),
                         chunk);
         SpongeImpl.postEvent(event);
 
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
             world.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }
-
-        for (List<Transaction<BlockSnapshot>> transactions : world.getCapturedPopulatorChanges().values()) {
-            transactions.clear();
-        }
+        world.getCapturedPopulatorChanges().clear();
 
         BlockFalling.fallInstantly = false;
     }

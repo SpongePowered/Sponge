@@ -32,15 +32,13 @@ public class SpongePopulatorType implements PopulatorType {
 
     public final String populatorName;
     public final String modId;
-    public final Class<? extends net.minecraft.world.gen.feature.WorldGenerator> populatorClass;
 
-    public SpongePopulatorType(String name, Class<? extends net.minecraft.world.gen.feature.WorldGenerator> clazz) {
-        this(name.toLowerCase(), "minecraft", clazz);
+    public SpongePopulatorType(String name) {
+        this(name.toLowerCase(), "minecraft");
     }
 
-    public SpongePopulatorType(String name, String modId, Class<? extends net.minecraft.world.gen.feature.WorldGenerator> clazz) {
+    public SpongePopulatorType(String name, String modId) {
         this.populatorName = name.toLowerCase();
-        this.populatorClass = clazz;
         this.modId = modId.toLowerCase();
     }
 
@@ -58,12 +56,6 @@ public class SpongePopulatorType implements PopulatorType {
         return this.modId;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public Class<? extends org.spongepowered.api.world.gen.Populator> getPopulatorClass() {
-        return (Class<? extends org.spongepowered.api.world.gen.Populator>) this.populatorClass;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (obj == null) {
@@ -74,8 +66,6 @@ public class SpongePopulatorType implements PopulatorType {
         }
         final SpongePopulatorType other = (SpongePopulatorType) obj;
         if (!this.getId().equals(other.getId())) {
-            return false;
-        } else if (!this.populatorClass.equals(other.populatorClass)) {
             return false;
         }
         return true;
@@ -92,7 +82,6 @@ public class SpongePopulatorType implements PopulatorType {
                 .add("id", this.getId())
                 .add("name", this.populatorName)
                 .add("modid", this.modId)
-                .add("class", this.populatorClass.getName())
                 .toString();
     }
 

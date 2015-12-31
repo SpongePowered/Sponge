@@ -33,6 +33,8 @@ import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Vine;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -49,6 +51,11 @@ public abstract class MixinWorldGenVines extends WorldGenerator implements Vine 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(50);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.VINE;
     }
 
     @Override

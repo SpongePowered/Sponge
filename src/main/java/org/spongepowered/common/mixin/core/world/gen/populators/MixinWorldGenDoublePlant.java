@@ -38,6 +38,8 @@ import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -67,6 +69,11 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.count = VariableAmount.fixed(1);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.DOUBLE_PLANT;
     }
 
     @Override

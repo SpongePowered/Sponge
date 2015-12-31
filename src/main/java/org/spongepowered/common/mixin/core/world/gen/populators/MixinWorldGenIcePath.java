@@ -32,6 +32,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenIcePath;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.IcePath;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -54,6 +56,11 @@ public abstract class MixinWorldGenIcePath implements IcePath {
     public void onConstructed(int radius, CallbackInfo ci) {
         this.radius = VariableAmount.baseWithRandomAddition(2, radius > 2 ? radius - 2 : 1);
         this.sections = VariableAmount.fixed(2);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.ICE_PATH;
     }
 
     @Override

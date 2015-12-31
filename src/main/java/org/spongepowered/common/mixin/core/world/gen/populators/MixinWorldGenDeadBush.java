@@ -32,6 +32,8 @@ import net.minecraft.world.gen.feature.WorldGenDeadBush;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DeadBush;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,6 +50,11 @@ public abstract class MixinWorldGenDeadBush extends WorldGenerator implements De
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(128);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.DEAD_BUSH;
     }
 
     @Override

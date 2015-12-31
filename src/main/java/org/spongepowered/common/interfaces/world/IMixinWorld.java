@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -36,7 +37,9 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.gen.SpongeChunkProvider;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -103,8 +106,10 @@ public interface IMixinWorld {
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
-    Map<PopulatorType, List<Transaction<BlockSnapshot>>> getCapturedPopulatorChanges();
+    Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulatorChanges();
 
     void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
+    
+    void setSpongeGenerator(SpongeChunkProvider spongegen);
 
 }

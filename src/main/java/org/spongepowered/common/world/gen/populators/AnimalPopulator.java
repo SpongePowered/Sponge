@@ -30,10 +30,17 @@ import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
 
 public class AnimalPopulator implements Populator {
+
+    @Override
+    public PopulatorType getType() {
+        return InternalPopulatorTypes.ANIMAL;
+    }
 
     @Override
     public void populate(Chunk chunk, Random random) {

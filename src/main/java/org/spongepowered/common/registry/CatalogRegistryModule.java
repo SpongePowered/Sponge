@@ -27,7 +27,6 @@ package org.spongepowered.common.registry;
 import org.spongepowered.api.CatalogType;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
 public interface CatalogRegistryModule<T extends CatalogType> extends RegistryModule {

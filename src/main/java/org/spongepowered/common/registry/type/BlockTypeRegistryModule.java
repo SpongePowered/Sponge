@@ -80,6 +80,11 @@ public class BlockTypeRegistryModule implements AdditionalCatalogRegistryModule<
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(BlockType extraCatalog) {
         this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
         registerBlockTrait(extraCatalog.getId(), extraCatalog);

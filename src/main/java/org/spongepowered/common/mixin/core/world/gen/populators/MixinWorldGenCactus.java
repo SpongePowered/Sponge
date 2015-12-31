@@ -32,6 +32,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenCactus;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Cactus;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -51,6 +53,11 @@ public abstract class MixinWorldGenCactus implements Cactus {
     public void onConstructed(CallbackInfo ci) {
         this.cactiPerChunk = VariableAmount.fixed(10);
         this.height = VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithRandomAddition(1, 3));
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.CACTUS;
     }
 
     @Override

@@ -29,6 +29,9 @@ import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
+import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Random;
@@ -37,13 +40,21 @@ public class WrappedBiomeDecorator implements Populator {
 
     private BiomeDecorator wrapped;
     private BiomeGenBase biome;
+    private final PopulatorType type;
 
     public WrappedBiomeDecorator(BiomeGenBase dec) {
         this.biome = dec;
+        this.type = PopulatorTypeRegistryModule.getInstance().getOrCreateForType(this.biome.getClass());
     }
 
     public WrappedBiomeDecorator(BiomeDecorator dec) {
         this.wrapped = dec;
+        this.type = PopulatorTypeRegistryModule.getInstance().getOrCreateForType(this.wrapped.getClass());
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return this.type;
     }
 
     @Override

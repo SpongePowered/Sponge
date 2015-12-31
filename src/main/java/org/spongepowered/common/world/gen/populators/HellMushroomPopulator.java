@@ -34,6 +34,8 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
@@ -57,6 +59,11 @@ public class HellMushroomPopulator implements Populator, Mushroom {
     public HellMushroomPopulator() {
         this.feature = new GeneratorBushFeature(null);
         this.featureM = (Mushroom) this.feature;
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.MUSHROOM;
     }
 
     @Override

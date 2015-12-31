@@ -65,6 +65,11 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
     @RegisterCatalog(TileEntityTypes.class)
     public final Map<String, TileEntityType> tileEntityTypeMappings = Maps.newHashMap();
 
+    @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
     @SuppressWarnings("unchecked")
     @Override
     public void registerAdditionalCatalog(TileEntityType extraCatalog) {
@@ -107,7 +112,6 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         final String id = NAME_TO_ID_MAPPING.get(name);
         return id == null ? name : id;
     }
-
 
     private TileEntityTypeRegistryModule() { }
 

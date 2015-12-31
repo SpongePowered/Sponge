@@ -82,6 +82,11 @@ public final class ItemTypeRegistryModule implements AdditionalCatalogRegistryMo
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(ItemType extraCatalog) {
         this.itemTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
     }

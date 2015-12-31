@@ -29,5 +29,7 @@ import org.spongepowered.api.CatalogType;
 public interface AdditionalCatalogRegistryModule<T extends CatalogType> extends CatalogRegistryModule<T> {
 
     void registerAdditionalCatalog(T extraCatalog);
+    
+    boolean allowsApiRegistration();
 
 }

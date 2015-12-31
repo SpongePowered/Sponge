@@ -48,6 +48,11 @@ public final class BooleanTraitRegistryModule implements AdditionalCatalogRegist
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
         this.booleanTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
     }

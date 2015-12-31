@@ -34,6 +34,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Glowstone;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -57,6 +59,11 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
         this.attempts = VariableAmount.fixed(1500);
         this.clusterheight = VariableAmount.baseWithRandomAddition(0, 12);
         this.height = VariableAmount.baseWithRandomAddition(4, 120);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.GLOWSTONE;
     }
 
     @Override

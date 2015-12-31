@@ -29,10 +29,17 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
 
 public class EnderDragonPopulator implements Populator {
+
+    @Override
+    public PopulatorType getType() {
+        return InternalPopulatorTypes.ENDER_DRAGON;
+    }
 
     @Override
     public void populate(Chunk chunk, Random random) {

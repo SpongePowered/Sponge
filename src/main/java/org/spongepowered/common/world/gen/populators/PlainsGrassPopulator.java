@@ -34,9 +34,11 @@ import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
 import org.spongepowered.api.world.gen.populator.Flower;
 import org.spongepowered.api.world.gen.populator.Shrub;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
 
@@ -63,6 +65,11 @@ public class PlainsGrassPopulator implements Populator {
         this.plant = DoublePlant.builder()
                 .type(DoublePlantTypes.GRASS, 1)
                 .build();
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return InternalPopulatorTypes.PLAINS_GRASS;
     }
 
     @Override

@@ -28,9 +28,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.base.Optional;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.type.BiomeTreeType;
+
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -77,7 +78,7 @@ public class SpongeBiomeTreeType implements BiomeTreeType {
 
     @Override
     public Optional<PopulatorObject> getLargePopulatorObject() {
-        return Optional.fromNullable(this.largeObject);
+        return Optional.ofNullable(this.largeObject);
     }
 
     @Override

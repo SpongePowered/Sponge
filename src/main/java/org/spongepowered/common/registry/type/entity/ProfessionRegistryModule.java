@@ -58,6 +58,11 @@ public class ProfessionRegistryModule implements AdditionalCatalogRegistryModule
     private final Map<String, Profession> professionMap = new LinkedHashMap<>();
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
         if (extraCatalog.getId().toLowerCase().equals("smith")) {
             return;

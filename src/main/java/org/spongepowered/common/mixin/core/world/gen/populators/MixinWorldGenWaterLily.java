@@ -31,6 +31,8 @@ import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,6 +49,11 @@ public abstract class MixinWorldGenWaterLily extends WorldGenerator implements W
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(4);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.WATER_LILY;
     }
 
     @Override

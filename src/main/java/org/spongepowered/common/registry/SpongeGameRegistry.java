@@ -56,7 +56,6 @@ import org.spongepowered.api.util.ResettableBuilder;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.gamerule.DefaultGameRules;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
@@ -67,7 +66,6 @@ import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.registry.type.block.RotationRegistryModule;
 import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
-import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.registry.util.RegistrationDependency;
 import org.spongepowered.common.registry.util.RegistryModuleLoader;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -164,14 +162,6 @@ public class SpongeGameRegistry implements GameRegistry {
         return (CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass);
     }
 
-    @SuppressWarnings("unchecked")
-    public <T extends CatalogType> void registerAdditionalType(Class<T> catalogClass, T extra) {
-        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClass);
-        if (module instanceof AdditionalCatalogRegistryModule) {
-            ((AdditionalCatalogRegistryModule<T>) module).registerAdditionalCatalog(checkNotNull(extra));
-        }
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     public <TUnknown, T extends CatalogType> boolean isAdditionalRegistered(Class<TUnknown> clazz, Class<T> catalogType) {
         CatalogRegistryModule<T> module = getRegistryModuleFor(catalogType);
@@ -190,7 +180,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Optional<T> getType(Class<T> typeClass, String id) {
-        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass);
         if (registryModule == null) {
             return Optional.empty();
         } else {
@@ -201,7 +191,7 @@ public class SpongeGameRegistry implements GameRegistry {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends CatalogType> Collection<T> getAllOf(Class<T> typeClass) {
-        CatalogRegistryModule<T> registryModule = (CatalogRegistryModule<T>) this.catalogRegistryMap.get(typeClass);
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass);
         if (registryModule == null) {
             return Collections.emptyList();
         } else {
@@ -217,6 +207,23 @@ public class SpongeGameRegistry implements GameRegistry {
         return (T) this.builderSupplierMap.get(builderClass).get();
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T extends CatalogType> void register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
+        CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type);
+        if (registryModule == null) {
+            throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
+        } else {
+            if(registryModule instanceof AdditionalCatalogRegistryModule) {
+                if(((AdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
+                    ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
+                    return;
+                }
+            }
+            throw new UnsupportedOperationException("This catalog type does not support additional registration");
+        }
+    }
+
     @Override
     public List<String> getDefaultGameRules() {
 
@@ -229,11 +236,6 @@ public class SpongeGameRegistry implements GameRegistry {
             }
         }
         return gameruleList;
-    }
-
-    @Override
-    public void registerWorldGeneratorModifier(WorldGeneratorModifier modifier) {
-        GeneratorModifierRegistryModule.getInstance().registerModifier(modifier);
     }
 
     @Override
@@ -315,11 +317,6 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Collection<Statistic> getStatistics(StatisticGroup statisticGroup) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    @Override
-    public void registerStatistic(Statistic stat) {
         throw new UnsupportedOperationException(); // TODO
     }
 

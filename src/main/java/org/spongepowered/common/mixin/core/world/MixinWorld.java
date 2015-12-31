@@ -202,6 +202,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -221,6 +222,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -260,7 +262,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public TileEntity currentTickTileEntity = null;
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     public List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
-    public Map<PopulatorType, List<Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
+    public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
     private boolean keepSpawnLoaded;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
@@ -350,30 +352,21 @@ public abstract class MixinWorld implements World, IMixinWorld {
             BlockSnapshot originalBlockSnapshot = null;
             BlockSnapshot newBlockSnapshot = null;
             Transaction<BlockSnapshot> transaction = null;
-            List<Transaction<BlockSnapshot>> populatorSnapshotList = null;
+            LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
             // Don't capture if we are restoring blocks
             if (!this.isRemote && !this.restoringBlocks) {
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
-                if (StaticMixinHelper.runningGenerator != null && net.minecraft.world.gen.feature.WorldGenerator.class.isAssignableFrom(StaticMixinHelper.runningGenerator)) {
-                    SpongePopulatorType populatorType = null;
-                    populatorType = StaticMixinHelper.populator;
-
-                    if (populatorType == null) {
-                        populatorType = (SpongePopulatorType) SpongeImpl.getRegistry().getTranslated(StaticMixinHelper.runningGenerator, PopulatorType.class);
+                if (StaticMixinHelper.runningGenerator != null) {
+                    if (this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator) == null) {
+                        this.capturedSpongePopulators.put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
                     }
 
-                    if (populatorType != null) {
-                        if (this.capturedSpongePopulators.get(populatorType) == null) {
-                            this.capturedSpongePopulators.put(populatorType, new ArrayList<>());
-                        }
-
-                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                        populatorSnapshotList = this.capturedSpongePopulators.get(populatorType);
-                        populatorSnapshotList.add(transaction);
-                    }
+                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
+                    transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                    populatorSnapshotList = this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator);
+                    populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
                 } else if (this.captureBlockDecay) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
                     this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
@@ -1965,6 +1958,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public void setSpongeGenerator(SpongeChunkProvider spongegen) {
+        this.spongegen = spongegen;
+    }
+
+    @Override
     public WorldGenerator getWorldGenerator() {
         return this.spongegen;
     }
@@ -2549,7 +2547,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Map<PopulatorType, List<Transaction<BlockSnapshot>>> getCapturedPopulatorChanges() {
+    public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulatorChanges() {
         return this.capturedSpongePopulators;
     }
 }

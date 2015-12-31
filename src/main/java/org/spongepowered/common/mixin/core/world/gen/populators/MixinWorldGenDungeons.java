@@ -42,6 +42,8 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.weighted.LootTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -80,6 +82,11 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
 //            this.items.add(new WeightedItem(stack.getItem(), quantity, item.itemWeight, stack.getContainers()));
 //        }
 //        this.items.add(new WeightedEnchantmentBook(VariableAmount.fixed(1), 1));
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.DUNGEON;
     }
 
     @Override

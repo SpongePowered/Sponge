@@ -37,6 +37,8 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.BigMushroom;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -69,6 +71,11 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.BIG_MUSHROOM;
     }
 
     @Override

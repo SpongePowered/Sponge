@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomObject;
 
 import java.util.Random;
@@ -53,6 +55,11 @@ public class RandomObjectPopulator implements RandomObject {
         checkArgument(Double.isInfinite(chance), "Chance cannot be infinite.");
         checkArgument(chance < 0, "Chance cannot be negative.");
         this.chance = chance;
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.GENERIC_OBJECT;
     }
 
     @Override

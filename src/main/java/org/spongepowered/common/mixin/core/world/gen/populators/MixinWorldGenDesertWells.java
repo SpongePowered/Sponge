@@ -33,6 +33,8 @@ import net.minecraft.world.gen.feature.WorldGenDesertWells;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DesertWell;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,6 +56,11 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
     public void onConstructed(CallbackInfo ci) {
         this.spawnProbability = 0.001;
         this.obj = this;
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.DESERT_WELL;
     }
 
     @Override

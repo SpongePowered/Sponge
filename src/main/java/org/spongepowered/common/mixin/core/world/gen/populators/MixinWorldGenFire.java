@@ -33,6 +33,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.NetherFire;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -51,6 +53,11 @@ public class MixinWorldGenFire implements NetherFire {
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.NETHER_FIRE;
     }
 
     @Override

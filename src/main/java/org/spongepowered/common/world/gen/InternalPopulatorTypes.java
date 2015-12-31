@@ -22,40 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen;
+package org.spongepowered.common.world.gen;
 
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.World;
-import net.minecraft.world.gen.structure.MapGenStructure;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
-import java.util.Random;
+public class InternalPopulatorTypes {
 
-/**
- * This mixin is making MapGenStructure be a populator as well as a
- * generationpopulator as the structures are called both from the generation
- * phase and the population phase of chunk creation.
- */
-@Mixin(MapGenStructure.class)
-public abstract class MixinMapGenStructure implements Populator {
+    public static PopulatorType ANIMAL;
+    public static PopulatorType BONUS_CHEST;
+    public static PopulatorType ENDER_DRAGON;
+    public static PopulatorType PLAINS_GRASS;
+    public static PopulatorType SNOW;
+    public static PopulatorType STRUCTURE;
+    public static PopulatorType UNKNOWN;
 
-    @Shadow
-    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkCoordIntPair p_175794_3_);
-    
-    @Override
-    public PopulatorType getType() {
-        return InternalPopulatorTypes.STRUCTURE;
+    private InternalPopulatorTypes() {
     }
-
-    @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        generateStructure(world, random, new ChunkCoordIntPair(chunk.getBlockMin().getX() / 16, chunk.getBlockMin().getZ() / 16));
-    }
-
 }

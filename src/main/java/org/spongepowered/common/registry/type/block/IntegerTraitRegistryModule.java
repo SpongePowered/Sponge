@@ -48,6 +48,11 @@ public final class IntegerTraitRegistryModule implements AdditionalCatalogRegist
     }
 
     @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
     public void registerAdditionalCatalog(IntegerTrait extraCatalog) {
         this.integerTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
     }

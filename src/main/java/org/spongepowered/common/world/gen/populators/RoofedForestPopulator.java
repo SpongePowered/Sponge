@@ -31,6 +31,8 @@ import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
@@ -54,6 +56,11 @@ public class RoofedForestPopulator implements Forest {
         this.trees.add(BiomeTreeTypes.BIRCH.getPopulatorObject(), 1.3);
         this.trees.add(MushroomTypes.BROWN.getPopulatorObject(), 0.5);
         this.trees.add(MushroomTypes.RED.getPopulatorObject(), 0.5);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.FOREST;
     }
 
     @Override

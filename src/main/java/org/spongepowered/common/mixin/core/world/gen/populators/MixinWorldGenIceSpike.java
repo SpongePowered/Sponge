@@ -36,6 +36,8 @@ import net.minecraft.world.gen.feature.WorldGenIceSpike;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.IceSpike;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -59,6 +61,11 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
         this.increase = VariableAmount.baseWithRandomAddition(10, 30);
         this.prob = 0.0166667D; // 1 in 60
         this.count = VariableAmount.fixed(2);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.ICE_SPIKE;
     }
 
     @Override

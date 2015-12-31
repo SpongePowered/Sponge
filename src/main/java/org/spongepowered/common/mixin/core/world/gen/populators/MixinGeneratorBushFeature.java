@@ -35,6 +35,8 @@ import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
@@ -68,6 +70,11 @@ public abstract class MixinGeneratorBushFeature implements Mushroom {
     public void onConstructed(CallbackInfo ci) {
         this.types = new ChanceTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.MUSHROOM;
     }
 
     @Override

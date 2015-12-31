@@ -34,6 +34,8 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,6 +61,11 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
         this.size = VariableAmount.fixed(count);
         this.count = VariableAmount.fixed(16);
         this.height = VariableAmount.baseWithRandomAddition(0, 64);
+    }
+
+    @Override
+    public PopulatorType getType() {
+        return PopulatorTypes.ORE;
     }
 
     @Override
