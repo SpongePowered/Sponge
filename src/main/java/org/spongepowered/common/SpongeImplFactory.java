@@ -42,10 +42,11 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.sink.MessageSink;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
@@ -60,16 +61,18 @@ public class SpongeImplFactory {
         return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
     }
 
-    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventJoin(cause, originalMessage, message, originalSink, sink, targetEntity);
+    public static ClientConnectionEvent.Join createClientConnectionEventJoin(Cause cause, MessageChannel originalChannel, Optional<MessageChannel> channel,
+            Optional<Text> originalMessage, Optional<Text> message, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventJoin(cause, originalChannel, channel, originalMessage, message, targetEntity);
     }
 
     public static RespawnPlayerEvent createRespawnPlayerEvent(Cause cause, Transform<World> fromTransform, Transform<World> toTransform, Player targetEntity, boolean bedSpawn) {
         return SpongeEventFactory.createRespawnPlayerEvent(cause, fromTransform, toTransform, targetEntity, bedSpawn);
     }
 
-    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Cause cause, Text originalMessage, Text message, MessageSink originalSink, MessageSink sink, Player targetEntity) {
-        return SpongeEventFactory.createClientConnectionEventDisconnect(cause, originalMessage, message, originalSink, sink, targetEntity);
+    public static ClientConnectionEvent.Disconnect createClientConnectionEventDisconnect(Cause cause, MessageChannel originalChannel, Optional<MessageChannel> channel,
+            Optional<Text> originalMessage, Optional<Text> message, Player targetEntity) {
+        return SpongeEventFactory.createClientConnectionEventDisconnect(cause, originalChannel, channel, originalMessage, message, targetEntity);
     }
 
     public static boolean blockHasTileEntity(Block block, IBlockState state) {
