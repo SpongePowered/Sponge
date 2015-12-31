@@ -31,6 +31,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.nbt.CompressedStreamTools;
+import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -82,6 +84,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -99,11 +102,15 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
+import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -307,18 +314,28 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Overwrite
-    protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generator) {
+    protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
         StaticMixinHelper.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
         StaticMixinHelper.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
-        List<Integer> idList = new LinkedList<>();
+        if (!getAllowNether()) {
+            SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
+                    + "dimensions besides [" + overworldFolder + "] will be skipped.");
+        }
+
+        WorldMigrator.migrateWorldsTo(Paths.get(overworldFolder));
+
+        registerExistingSpongeDimensions();
+
+        final List<Integer> idList = new LinkedList<>();
         if (getAllowNether()) {
             idList.addAll(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
-            idList.remove(Integer.valueOf(0));
+        } else {
+            idList.add(0);
         }
-        idList.add(0, 0); // load overworld first
+
         for (int dim : idList) {
             WorldProvider provider = WorldProvider.getProviderForDimension(dim);
             String worldFolder;
@@ -342,7 +359,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
             if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                SpongeImpl.getLogger().info("World {} with dimension ID {} is disabled! Skipping world load...", worldFolder, dim);
+                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
                 continue;
             }
 
@@ -371,7 +388,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (worldInfo == null) {
                 newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                newWorldSettings.setWorldName(generator); // setGeneratorOptions
+                newWorldSettings.setWorldName(generatorOptions); // setGeneratorOptions
                 ((IMixinWorldSettings) (Object) newWorldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
@@ -422,6 +439,89 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
+    }
+
+    /**
+     * Handles registering existing Sponge dimensions that are not the root dimension (known as overworld).
+     */
+    private void registerExistingSpongeDimensions() {
+        final File[] worldCandidateFiles = DimensionManager.getCurrentSaveRootDirectory().listFiles();
+        if (worldCandidateFiles == null) {
+            return;
+        }
+
+        for (File worldCandidateFile : worldCandidateFiles) {
+            final File levelData = new File(worldCandidateFile, "level_sponge.dat");
+
+            // This method only handles registering existing Sponge worlds (and in directories for that matter).
+            if (!worldCandidateFile.isDirectory() || !levelData.exists()) {
+                continue;
+            }
+
+            // Skip other dimensions if multi-world is turned off.
+            if (!MinecraftServer.getServer().getAllowNether()) {
+                continue;
+            }
+
+            NBTTagCompound compound;
+            try {
+                compound = CompressedStreamTools.readCompressed(new FileInputStream(levelData));
+            } catch (IOException e) {
+                SpongeImpl.getLogger().error("Failed loading Sponge data for World [" + worldCandidateFile.getName() + "]. This is a critical "
+                        + "problem and should be reported to Sponge ASAP.", e);
+                continue;
+            }
+
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                final NBTTagCompound spongeData = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+
+                if (!spongeData.hasKey("dimensionId")) {
+                    SpongeImpl.getLogger().error("World [{}] has no dimension id. This is a critical error and should be reported to Sponge ASAP.",
+                            worldCandidateFile.getName());
+                    continue;
+                }
+
+                final int dimensionId = spongeData.getInteger("dimensionId");
+                String dimensionType = spongeData.getString("dimensionType");
+
+                // Temporary fix for old data, remove in future build
+                if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderSurface")) {
+                    dimensionType = "overworld";
+                } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderHell")) {
+                    dimensionType = "nether";
+                } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderEnd")) {
+                    dimensionType = "the_end";
+                }
+
+                spongeData.setString("dimensionType", dimensionType);
+                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimensionType, worldCandidateFile.getName());
+
+                if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be registered...",
+                            worldCandidateFile.getName(), dimensionId);
+                    continue;
+                }
+
+                if (spongeData.hasKey("uuid_most") && spongeData.hasKey("uuid_least")) {
+                    final UUID uuid = new UUID(spongeData.getLong("uuid_most"), spongeData.getLong("uuid_least"));
+                    DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldCandidateFile.getName());
+                } else {
+                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
+                            + "to Sponge ASAP.", worldCandidateFile.getName(), dimensionId);
+                    continue;
+                }
+
+                DimensionRegistryModule.getInstance().getAll().forEach(type -> {
+                    if (type.getId().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
+                        DimensionRegistryModule.getInstance().registerWorldDimensionId(dimensionId, worldCandidateFile.getName());
+                        if (!DimensionManager.isDimensionRegistered(dimensionId)) {
+                            DimensionManager.registerDimension(dimensionId,
+                                    ((SpongeDimensionType) type).getDimensionTypeId());
+                        }
+                    }
+                });
+            }
+        }
     }
 
     @Overwrite
@@ -482,7 +582,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         if (!getAllowNether() && !worldName.equals(getFolderName())) {
-            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multiworld is disabled via allow-nether.");
+            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multi-world is disabled via allow-nether.");
             return Optional.empty();
         }
 

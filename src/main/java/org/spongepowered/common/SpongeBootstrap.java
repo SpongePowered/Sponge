@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common;
 
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
@@ -40,9 +38,6 @@ import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.CommandSponge;
 import org.spongepowered.common.command.SpongeHelpCommand;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
@@ -50,13 +45,6 @@ import org.spongepowered.common.service.sql.SqlServiceImpl;
 import org.spongepowered.common.service.user.SpongeUserStorageService;
 import org.spongepowered.common.service.whitelist.SpongeWhitelistService;
 import org.spongepowered.common.text.action.SpongeCallbackHolder;
-import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.SpongeDimensionType;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.UUID;
 
 /**
  * Used to setup the ecosystem.
@@ -84,73 +72,5 @@ public final class SpongeBootstrap {
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
         SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
-    }
-
-    public static void registerWorlds() {
-        final File[] directoryListing = DimensionManager.getCurrentSaveRootDirectory().listFiles();
-        if (directoryListing == null) {
-            return;
-        }
-
-        for (File child : directoryListing) {
-            File levelData = new File(child, "level_sponge.dat");
-            if (!child.isDirectory() || !levelData.exists()) {
-                continue;
-            }
-
-            try {
-                NBTTagCompound nbt = CompressedStreamTools.readCompressed(new FileInputStream(levelData));
-                if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                    NBTTagCompound spongeData = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                    int dimensionId = spongeData.getInteger("dimensionId");
-                    String dimType = spongeData.getString("dimensionType");
-                    // Temporary fix for old data, remove in future build
-                    if (dimType.equalsIgnoreCase("net.minecraft.world.WorldProviderSurface")) {
-                        dimType = "overworld";
-                    } else if (dimType.equalsIgnoreCase("net.minecraft.world.WorldProviderHell")) {
-                        dimType = "nether";
-                    } else if (dimType.equalsIgnoreCase("net.minecraft.world.WorldProviderEnd")) {
-                        dimType = "the_end";
-                    }
-                    spongeData.setString("dimensionType", dimType);
-                    String worldFolder = spongeData.getString("LevelName");
-                    SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimType, worldFolder);
-
-                    if (dimensionId == -1) {
-                        if (!MinecraftServer.getServer().getAllowNether()) {
-                            continue;
-                        }
-                    }
-
-                    if (!activeConfig.getConfig().getWorld().loadOnStartup()) {
-                        SpongeImpl.getLogger().warn("World {} [loadOnStartup] is disabled.. Skipping world load...", child.getName());
-                            continue;
-                    }
-
-                    if (spongeData.hasKey("uuid_most") && spongeData.hasKey("uuid_least")) {
-                        UUID uuid = new UUID(spongeData.getLong("uuid_most"), spongeData.getLong("uuid_least"));
-                        DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, child.getName());
-                    }
-
-                    if (spongeData.hasKey("dimensionId") && activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                        int dimension = spongeData.getInteger("dimensionId");
-                        DimensionRegistryModule.getInstance().getAll().forEach(dimensionType -> {
-                            if (dimensionType.getId().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
-                                DimensionRegistryModule.getInstance().registerWorldDimensionId(dimension, child.getName());
-                                if (!DimensionManager.isDimensionRegistered(dimension)) {
-                                    DimensionManager.registerDimension(dimension,
-                                                                       ((SpongeDimensionType) dimensionType).getDimensionTypeId());
-                                }
-                            }
-                        });
-
-                    } else {
-                        SpongeImpl.getLogger().info("World {} is disabled! Skipping world registration...", child.getName());
-                    }
-                }
-            } catch (Throwable t) {
-                SpongeImpl.getLogger().error("Error during world registration.", t);
-            }
-        }
     }
 }
