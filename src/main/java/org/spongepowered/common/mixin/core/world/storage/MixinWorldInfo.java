@@ -151,9 +151,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.dimensionType = DimensionTypes.OVERWORLD;
         }
         createWorldConfig();
-
-        System.err.println(getWorldName() + " " + this.worldConfig.getConfig().isConfigEnabled() + " " + this.worldConfig.getConfig().getWorld()
-                .getKeepSpawnLoaded());
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
