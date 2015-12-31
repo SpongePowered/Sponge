@@ -71,4 +71,14 @@ public final class GameModeRegistryModule implements CatalogRegistryModule<GameM
             }
         }
     }
+
+    public static WorldSettings.GameType toGameType(GameMode gamemode) {
+        for (WorldSettings.GameType gameType : WorldSettings.GameType.values()) {
+            if (gameType.getName().equalsIgnoreCase(gamemode.getId())) {
+                return gameType;
+            }
+        }
+        return WorldSettings.GameType.SURVIVAL;
+    }
+
 }

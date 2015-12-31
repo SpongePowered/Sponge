@@ -26,16 +26,20 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.Objects;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 public class SpongeEntityType implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
 
+        private final Translation translation = new SpongeTranslation("entity.generic.name");
+
         @Override
         public Translation getTranslation() {
-            throw new UnsupportedOperationException("Unknown entity type has no translation");
+            return this.translation;
         }
 
         @Override
@@ -58,6 +62,7 @@ public class SpongeEntityType implements EntityType {
     public final String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
+    private final Translation translation;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
@@ -72,6 +77,11 @@ public class SpongeEntityType implements EntityType {
         this.entityName = name.toLowerCase();
         this.entityClass = clazz;
         this.modId = modId.toLowerCase();
+        String translationName = (String) EntityList.classToStringMapping.get(clazz);
+        if (translationName == null) {
+            translationName = "generic";
+        }
+        this.translation = new SpongeTranslation("entity." + translationName + ".name");
     }
 
     @Override
@@ -130,6 +140,6 @@ public class SpongeEntityType implements EntityType {
 
     @Override
     public Translation getTranslation() {
-        return null;
+        return this.translation;
     }
 }

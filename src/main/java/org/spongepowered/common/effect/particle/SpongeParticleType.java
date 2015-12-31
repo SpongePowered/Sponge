@@ -111,34 +111,32 @@ public class SpongeParticleType implements ParticleType {
 
     public static class Item extends SpongeParticleType implements ParticleType.Item {
 
-        // TODO: This should change to the sponge item stack type if a clone method available is
-        private net.minecraft.item.ItemStack item;
+        private ItemStack item;
 
         public Item(EnumParticleTypes type, net.minecraft.item.ItemStack item, boolean motion) {
             super(type, motion);
-            this.item = item;
+            this.item = (ItemStack) item;
         }
 
         @Override
         public ItemStack getDefaultItem() {
-            return (ItemStack) this.item.copy();
+            return this.item.copy();
         }
 
     }
 
     public static class Block extends SpongeParticleType implements ParticleType.Block {
 
-        // TODO: This should change to the sponge item stack type if a clone method available is
-        private BlockState item;
+        private BlockState block;
 
-        public Block(EnumParticleTypes type, BlockState item, boolean motion) {
+        public Block(EnumParticleTypes type, BlockState block, boolean motion) {
             super(type, motion);
-            this.item = item;
+            this.block = block;
         }
 
         @Override
         public BlockState getDefaultBlockState() {
-            return this.item;
+            return this.block;
         }
 
     }

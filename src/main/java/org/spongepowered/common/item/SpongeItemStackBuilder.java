@@ -62,7 +62,6 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
-    private int maxQuantity;
     private int damageValue = 0;
     @Nullable private NBTTagCompound compound;
 
@@ -114,7 +113,6 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         // Assumes the item stack's values don't need to be validated
         this.type = itemStack.getItem();
         this.quantity = itemStack.getQuantity();
-        this.maxQuantity = itemStack.getMaxStackQuantity();
         if (itemStack instanceof net.minecraft.item.ItemStack) {
             final NBTTagCompound itemCompound = ((net.minecraft.item.ItemStack) itemStack).getTagCompound();
             if (itemCompound != null) {
@@ -214,18 +212,17 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public ItemStack.Builder reset() {
         this.type = null;
         this.quantity = 1;
-        this.maxQuantity = 64;
         this.itemDataSet = new HashSet<>();
         this.compound = null;
         this.damageValue = 0;
         return this;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
-        checkState(this.quantity <= this.maxQuantity, "Quantity cannot be greater than the max quantity (%s)", this.maxQuantity);
+        int max = this.type.getMaxStackQuantity();
+        checkState(this.quantity <= max, "Quantity cannot be greater than the max quantity (%s)", max);
         final ItemStack stack = (ItemStack) new net.minecraft.item.ItemStack((Item) this.type, this.quantity, this.damageValue);
         if (this.compound != null) {
             ((net.minecraft.item.ItemStack) stack).setTagCompound((NBTTagCompound) this.compound.copy());

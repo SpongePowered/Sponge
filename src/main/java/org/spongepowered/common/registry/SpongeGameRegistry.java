@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
-import net.minecraft.world.WorldSettings;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
@@ -39,7 +38,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
@@ -231,12 +229,6 @@ public class SpongeGameRegistry implements GameRegistry {
             }
         }
         return gameruleList;
-    }
-
-    public WorldSettings.GameType getGameType(GameMode mode) {
-        // TODO: This is client-only
-        //return WorldSettings.GameType.getByName(mode.getTranslation().getId());
-        throw new UnsupportedOperationException();
     }
 
     @Override

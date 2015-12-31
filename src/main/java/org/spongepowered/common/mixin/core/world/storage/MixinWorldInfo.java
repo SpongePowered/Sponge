@@ -67,6 +67,7 @@ import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
@@ -309,7 +310,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setGameMode(GameMode gamemode) {
-        this.theGameType = SpongeImpl.getRegistry().getGameType(gamemode);
+        this.theGameType = GameModeRegistryModule.toGameType(gamemode);
     }
 
     @Override
