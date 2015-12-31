@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.listener;
 
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.cause.First;
@@ -35,6 +36,11 @@ public class FirstLastCauseListener {
     public boolean firstCauseCalled;
     public boolean lastCauseCalled;
 
+    public boolean firstCauseCalledInc;
+    public boolean firstCauseCalledEx;
+    public boolean lastCauseCalledInc;
+    public boolean lastCauseCalledEx;
+
     @Listener
     public void firstCauseListener(EventFilterTest.SubEvent event, @First Player player) {
         this.firstCauseCalled = true;
@@ -43,6 +49,26 @@ public class FirstLastCauseListener {
     @Listener
     public void lastCauseListener(EventFilterTest.SubEvent event, @Last Player player) {
         this.lastCauseCalled = true;
+    }
+
+    @Listener
+    public void firstCauseListenerInclude(EventFilterTest.SubEvent event, @First(typeFilter = Player.class) Player player) {
+        this.firstCauseCalledInc = true;
+    }
+
+    @Listener
+    public void firstCauseListenerExclude(EventFilterTest.SubEvent event, @First(typeFilter = Player.class, inverse = true) Player player) {
+        this.firstCauseCalledEx = true;
+    }
+
+    @Listener
+    public void lastCauseListenerInclude(EventFilterTest.SubEvent event, @Last(typeFilter = Player.class) Entity entity) {
+        this.lastCauseCalledInc = true;
+    }
+
+    @Listener
+    public void lastCauseListenerExclude(EventFilterTest.SubEvent event, @Last(typeFilter = Player.class, inverse = true) Entity entity) {
+        this.lastCauseCalledEx = true;
     }
 
 }

@@ -53,15 +53,12 @@ public abstract class CauseFilterSourceDelegate implements ParameterFilterSource
         int paramLocal = local++;
         mv.visitVarInsn(ASTORE, paramLocal);
 
-        insertCheck(mv, param, targetType, paramLocal);
         insertTransform(mv, param, targetType, paramLocal);
 
         return new Tuple<>(local, paramLocal);
     }
 
     protected abstract void insertCauseCall(MethodVisitor mv, Parameter param, Class<?> targetType);
-
-    protected abstract void insertCheck(MethodVisitor mv, Parameter param, Class<?> targetType, int local);
 
     protected abstract void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local);
 }

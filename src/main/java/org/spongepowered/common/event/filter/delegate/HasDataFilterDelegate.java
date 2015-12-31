@@ -50,6 +50,7 @@ public class HasDataFilterDelegate implements ParameterFilterDelegate {
     public HasDataFilterDelegate(Has anno) {
         this.anno = anno;
     }
+
     @Override
     public void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam) {
         if (!DataHolder.class.isAssignableFrom(param.getType())) {

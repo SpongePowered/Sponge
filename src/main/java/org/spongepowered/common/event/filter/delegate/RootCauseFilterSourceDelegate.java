@@ -27,9 +27,11 @@ package org.spongepowered.common.event.filter.delegate;
 import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
-import static org.objectweb.asm.Opcodes.ASTORE;
+import static org.objectweb.asm.Opcodes.DUP;
+import static org.objectweb.asm.Opcodes.GOTO;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.INSTANCEOF;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 import org.objectweb.asm.Label;
@@ -42,7 +44,10 @@ import java.lang.reflect.Parameter;
 
 public class RootCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
 
+    private final Root anno;
+
     public RootCauseFilterSourceDelegate(Root anno) {
+        this.anno = anno;
     }
 
     @Override
@@ -52,22 +57,40 @@ public class RootCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
     }
 
     @Override
-    protected void insertCheck(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
         Label failure = new Label();
         Label success = new Label();
-        mv.visitLdcInsn(Type.getType(targetType));
+
         mv.visitVarInsn(ALOAD, local);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Object", "getClass", "()Ljava/lang/Class;", false);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/lang/Class", "isAssignableFrom", "(Ljava/lang/Class;)Z", false);
-        mv.visitJumpInsn(IFNE, success);
+        mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(targetType));
+
+        if (this.anno.typeFilter().length != 0) {
+            mv.visitJumpInsn(IFEQ, failure);
+            mv.visitVarInsn(ALOAD, local);
+            // For each type we do an instance check and jump to either failure or success if matched
+            for (int i = 0; i < this.anno.typeFilter().length; i++) {
+                Class<?> filter = this.anno.typeFilter()[i];
+                if (i < this.anno.typeFilter().length - 1) {
+                    mv.visitInsn(DUP);
+                }
+                mv.visitTypeInsn(INSTANCEOF, Type.getInternalName(filter));
+                if (this.anno.inverse()) {
+                    mv.visitJumpInsn(IFNE, failure);
+                } else {
+                    mv.visitJumpInsn(IFNE, success);
+                }
+            }
+            if (this.anno.inverse()) {
+                mv.visitJumpInsn(GOTO, success);
+            }
+            // If the annotation was not reversed then we fall into failure as no types were matched
+        } else {
+            mv.visitJumpInsn(IFNE, success);
+        }
         mv.visitLabel(failure);
         mv.visitInsn(ACONST_NULL);
         mv.visitInsn(ARETURN);
+
         mv.visitLabel(success);
-    }
-
-    @Override
-    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
-
     }
 }

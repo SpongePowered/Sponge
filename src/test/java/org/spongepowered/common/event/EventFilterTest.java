@@ -61,7 +61,7 @@ public class EventFilterTest {
 
     private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
 
     @Test
     public void testSimpleEvent() throws Exception {
@@ -91,8 +91,10 @@ public class EventFilterTest {
         event.setCancelled(true);
         listener.normalListenerWasCalled = false;
 
-        /*normalListener.handle(event);
-        Assert.assertFalse("Un-annotated listener was called when event was cancelled!", listener.normalListenerWasCalled);*/
+        /*
+         * normalListener.handle(event); Assert.assertFalse(
+         * "Un-annotated listener was called when event was cancelled!", listener.normalListenerWasCalled);
+         */
 
         uncalledListener.handle(event);
         Assert.assertFalse("Listener annotated with @IsCancelled(Tristate.FALSE) was called!", listener.uncalledWasCalled);
@@ -141,10 +143,13 @@ public class EventFilterTest {
         FirstLastCauseListener listener = new FirstLastCauseListener();
         AnnotatedEventListener firstCauseListener = this.getListener(listener, "firstCauseListener", SubEvent.class, Player.class);
         AnnotatedEventListener lastCauseListener = this.getListener(listener, "lastCauseListener", SubEvent.class, Player.class);
+        AnnotatedEventListener firstCauseListenerInc = this.getListener(listener, "firstCauseListenerInclude", SubEvent.class, Player.class);
+        AnnotatedEventListener firstCauseListenerEx = this.getListener(listener, "firstCauseListenerExclude", SubEvent.class, Player.class);
+        AnnotatedEventListener lastCauseListenerInc = this.getListener(listener, "lastCauseListenerInclude", SubEvent.class, Entity.class);
+        AnnotatedEventListener lastCauseListenerEx = this.getListener(listener, "lastCauseListenerExclude", SubEvent.class, Entity.class);
 
         Cause cause1 = Cause.of("Foo", 'a');
         Cause cause2 = Cause.of("Foo", mock(Player.class), 7);
-
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -160,6 +165,18 @@ public class EventFilterTest {
 
         lastCauseListener.handle(event2);
         Assert.assertTrue("Listener with @Last parameter was not called when proper Cause was provided!", listener.lastCauseCalled);
+
+        firstCauseListenerInc.handle(event2);
+        Assert.assertTrue("Listener with @First with inclusions was not called when proper Cause was provided!", listener.firstCauseCalledInc);
+
+        firstCauseListenerEx.handle(event2);
+        Assert.assertFalse("Listener with @First with exclusions was called when an improper Cause was provided!", listener.firstCauseCalledEx);
+
+        lastCauseListenerInc.handle(event2);
+        Assert.assertTrue("Listener with @Last with inclusions was not called when proper Cause was provided!", listener.lastCauseCalledInc);
+
+        lastCauseListenerEx.handle(event2);
+        Assert.assertFalse("Listener with @Last with exclusions was called when an improper Cause was provided!", listener.lastCauseCalledEx);
     }
 
     @Test
@@ -255,6 +272,8 @@ public class EventFilterTest {
     public void testRootListener() throws Exception {
         RootListener listener = new RootListener();
         AnnotatedEventListener rootListener = this.getListener(listener, "rootListener", SubEvent.class, Player.class);
+        AnnotatedEventListener rootListenerInc = this.getListener(listener, "rootListenerInclude", SubEvent.class, Object.class);
+        AnnotatedEventListener rootListenerEx = this.getListener(listener, "rootListenerExclude", SubEvent.class, Object.class);
 
         Cause cause1 = Cause.of("Hi", mock(Player.class));
         Cause cause2 = Cause.of(mock(Player.class), 5);
@@ -267,6 +286,18 @@ public class EventFilterTest {
 
         rootListener.handle(event2);
         Assert.assertTrue("Listener with @Root was not called when proper Cause was provided!", listener.rootListenerCalled);
+
+        rootListenerInc.handle(event1);
+        Assert.assertFalse("Listener with @Root with include was called with improper parameter!", listener.rootListenerCalledInc);
+
+        rootListenerInc.handle(event2);
+        Assert.assertTrue("Listener with @Root with include was not called when proper Cause was provided!", listener.rootListenerCalledInc);
+
+        rootListenerEx.handle(event2);
+        Assert.assertFalse("Listener with @Root with exclude was called with improper parameter!", listener.rootListenerCalledEx);
+
+        rootListenerEx.handle(event1);
+        Assert.assertTrue("Listener with @Root with exclude was not called when proper Cause was provided!", listener.rootListenerCalledEx);
     }
 
     @Test
@@ -274,6 +305,10 @@ public class EventFilterTest {
         BeforeAfterCauseListener listener = new BeforeAfterCauseListener();
         AnnotatedEventListener beforeCauseListener = this.getListener(listener, "beforeCauseListener", SubEvent.class, Player.class);
         AnnotatedEventListener afterCauseListener = this.getListener(listener, "afterCauseListener", SubEvent.class, Entity.class);
+        AnnotatedEventListener beforeCauseListenerInc = this.getListener(listener, "beforeCauseListenerInclude", SubEvent.class, Player.class);
+        AnnotatedEventListener beforeCauseListenerEx = this.getListener(listener, "beforeCauseListenerExclude", SubEvent.class, Player.class);
+        AnnotatedEventListener afterCauseListenerInc = this.getListener(listener, "afterCauseListenerInclude", SubEvent.class, Entity.class);
+        AnnotatedEventListener afterCauseListenerEx = this.getListener(listener, "afterCauseListenerExclude", SubEvent.class, Entity.class);
 
         Cause cause1 = Cause.of("Foo", mock(Player.class), mock(Extent.class));
         Cause cause2 = Cause.of("Me", mock(BlockState.class), mock(Entity.class));
@@ -292,12 +327,26 @@ public class EventFilterTest {
 
         afterCauseListener.handle(event2);
         Assert.assertTrue("Listener with @After was not called when proper Cause was provided!", listener.afterCauseCalled);
+
+        beforeCauseListenerInc.handle(event1);
+        Assert.assertTrue("Listener with @Before with inclusions was not called when proper Cause was provided!", listener.beforeCauseCalledInc);
+
+        beforeCauseListenerEx.handle(event1);
+        Assert.assertFalse("Listener with @Before with exclusions was called when an improper Cause was provided!", listener.beforeCauseCalledEx);
+
+        afterCauseListenerInc.handle(event2);
+        Assert.assertFalse("Listener with @After with inclusions was called when an improper Cause was provided!", listener.afterCauseCalledInc);
+
+        afterCauseListenerEx.handle(event2);
+        Assert.assertTrue("Listener with @After with exclusions was not called when proper Cause was provided!", listener.afterCauseCalledEx);
     }
 
     @Test
     public void testNamedCauseListener() throws Exception {
         NamedCauseListener listener = new NamedCauseListener();
         AnnotatedEventListener namedCauseListener = this.getListener(listener, "namedCauseListener", SubEvent.class, BlockState.class);
+        AnnotatedEventListener namedCauseListenerInc = this.getListener(listener, "namedCauseListenerInclude", SubEvent.class, Object.class);
+        AnnotatedEventListener namedCauseListenerEx = this.getListener(listener, "namedCauseListenerExclude", SubEvent.class, Object.class);
 
         Cause cause1 = Cause.of(NamedCause.of(NamedCause.OWNER, Text.of()));
         Cause cause2 = Cause.of(NamedCause.of(NamedCause.OWNER, mock(BlockState.class)));
@@ -310,6 +359,12 @@ public class EventFilterTest {
 
         namedCauseListener.handle(event2);
         Assert.assertTrue("Listener with @Named was not called when proper Cause was provided!", listener.namedCauseListenerCalled);
+
+        namedCauseListenerInc.handle(event2);
+        Assert.assertTrue("Listener with @First with inclusions was not called when proper Cause was provided!", listener.namedCauseListenerCalledInc);
+
+        namedCauseListenerEx.handle(event2);
+        Assert.assertFalse("Listener with @First with exclusions was called when an improper Cause was provided!", listener.namedCauseListenerCalledEx);
     }
 
     public static class TestEvent implements Event, Cancellable {

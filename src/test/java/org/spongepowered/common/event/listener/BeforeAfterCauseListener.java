@@ -38,6 +38,11 @@ public class BeforeAfterCauseListener {
     public boolean beforeCauseCalled;
     public boolean afterCauseCalled;
 
+    public boolean beforeCauseCalledInc;
+    public boolean beforeCauseCalledEx;
+    public boolean afterCauseCalledInc;
+    public boolean afterCauseCalledEx;
+
     @Listener
     public void beforeCauseListener(EventFilterTest.SubEvent event, @Before(Extent.class) Player player) {
         this.beforeCauseCalled = true;
@@ -48,4 +53,23 @@ public class BeforeAfterCauseListener {
         this.afterCauseCalled = true;
     }
 
+    @Listener
+    public void beforeCauseListenerInclude(EventFilterTest.SubEvent event, @Before(value = Extent.class, typeFilter = Player.class) Player player) {
+        this.beforeCauseCalledInc = true;
+    }
+
+    @Listener
+    public void beforeCauseListenerExclude(EventFilterTest.SubEvent event, @Before(value = Extent.class, typeFilter = Player.class, inverse = true) Player player) {
+        this.beforeCauseCalledEx = true;
+    }
+
+    @Listener
+    public void afterCauseListenerInclude(EventFilterTest.SubEvent event, @After(value = BlockState.class, typeFilter = Player.class) Entity entity) {
+        this.afterCauseCalledInc = true;
+    }
+
+    @Listener
+    public void afterCauseListenerExclude(EventFilterTest.SubEvent event, @After(value = BlockState.class, typeFilter = Player.class, inverse = true) Entity entity) {
+        this.afterCauseCalledEx = true;
+    }
 }

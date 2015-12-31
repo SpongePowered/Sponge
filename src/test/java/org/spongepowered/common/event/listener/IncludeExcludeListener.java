@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.listener;
 
-import org.junit.Test;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;

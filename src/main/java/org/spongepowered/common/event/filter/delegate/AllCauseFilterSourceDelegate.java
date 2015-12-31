@@ -63,8 +63,9 @@ public class AllCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
     }
 
     @Override
-    protected void insertCheck(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
+    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
         if (this.anno.ignoreEmpty()) {
+            // Check that the list is not empty
             mv.visitVarInsn(ALOAD, local);
             Label success = new Label();
             mv.visitMethodInsn(INVOKEINTERFACE, "java/util/List", "isEmpty", "()Z", true);
@@ -73,10 +74,7 @@ public class AllCauseFilterSourceDelegate extends CauseFilterSourceDelegate {
             mv.visitInsn(ARETURN);
             mv.visitLabel(success);
         }
-    }
 
-    @Override
-    protected void insertTransform(MethodVisitor mv, Parameter param, Class<?> targetType, int local) {
         mv.visitVarInsn(ALOAD, local);
         mv.visitInsn(ICONST_0);
         mv.visitTypeInsn(ANEWARRAY, Type.getInternalName(targetType.getComponentType()));

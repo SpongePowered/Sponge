@@ -32,10 +32,22 @@ import org.spongepowered.common.event.EventFilterTest;
 public class RootListener {
 
     public boolean rootListenerCalled;
+    public boolean rootListenerCalledInc;
+    public boolean rootListenerCalledEx;
 
     @Listener
     public void rootListener(EventFilterTest.SubEvent event, @Root Player player) {
         this.rootListenerCalled = true;
+    }
+
+    @Listener
+    public void rootListenerInclude(EventFilterTest.SubEvent event, @Root(typeFilter = Player.class) Object player) {
+        this.rootListenerCalledInc = true;
+    }
+
+    @Listener
+    public void rootListenerExclude(EventFilterTest.SubEvent event, @Root(typeFilter = Player.class, inverse = true) Object player) {
+        this.rootListenerCalledEx = true;
     }
 
 }

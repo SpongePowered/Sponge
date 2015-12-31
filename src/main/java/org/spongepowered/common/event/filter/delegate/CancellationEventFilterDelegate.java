@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.event.filter.delegate;
 
-import static org.objectweb.asm.Opcodes.*;
+import static org.objectweb.asm.Opcodes.ACONST_NULL;
+import static org.objectweb.asm.Opcodes.ALOAD;
+import static org.objectweb.asm.Opcodes.ARETURN;
+import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.IFEQ;
+import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
@@ -50,7 +56,7 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
             throw new IllegalStateException(
                     "Attempted to filter a non-cancellable event type by its cancellation status");
         }
-        if(this.anno.value() == Tristate.UNDEFINED) {
+        if (this.anno.value() == Tristate.UNDEFINED) {
             return locals;
         }
         mv.visitVarInsn(ALOAD, 1);
@@ -58,7 +64,7 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Cancellable.class), "isCancelled", "()Z",
                 true);
         Label success = new Label();
-        if(this.anno.value() == Tristate.TRUE) {
+        if (this.anno.value() == Tristate.TRUE) {
             mv.visitJumpInsn(IFNE, success);
         } else {
             mv.visitJumpInsn(IFEQ, success);

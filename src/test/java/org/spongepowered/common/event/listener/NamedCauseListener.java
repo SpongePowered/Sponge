@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.listener;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.filter.cause.Named;
@@ -34,10 +33,22 @@ import org.spongepowered.common.event.EventFilterTest;
 public class NamedCauseListener {
 
     public boolean namedCauseListenerCalled;
+    public boolean namedCauseListenerCalledInc;
+    public boolean namedCauseListenerCalledEx;
 
     @Listener
     public void namedCauseListener(EventFilterTest.SubEvent event, @Named(NamedCause.OWNER) BlockState state) {
         this.namedCauseListenerCalled = true;
+    }
+
+    @Listener
+    public void namedCauseListenerInclude(EventFilterTest.SubEvent event, @Named(value = NamedCause.OWNER, typeFilter=BlockState.class) Object state) {
+        this.namedCauseListenerCalledInc = true;
+    }
+
+    @Listener
+    public void namedCauseListenerExclude(EventFilterTest.SubEvent event, @Named(value = NamedCause.OWNER, typeFilter=BlockState.class, inverse = true) Object state) {
+        this.namedCauseListenerCalledEx = true;
     }
 
 }
