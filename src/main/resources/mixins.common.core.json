@@ -199,7 +199,6 @@
         "entity.ai.MixinEntityMinecartMobSpawner",
         "entity.boss.MixinEntityDragon",
         "entity.boss.MixinEntityDragonPart",
-        "entity.boss.MixinEntityWither",
         "entity.effect.MixinEntityLightningBolt",
         "entity.effect.MixinEntityWeatherEffect",
         "entity.human.MixinEntityHuman",
