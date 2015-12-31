@@ -25,32 +25,27 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeDispenserBuilder extends SpongeLockableBuilder<Dispenser> {
 
-    public SpongeDispenserBuilder(Game game) {
-        super(game);
+    public SpongeDispenserBuilder() {
+        super(Dispenser.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Dispenser> build(DataView container) throws InvalidDataException {
-        Optional<Dispenser> dispenserOptional = super.build(container);
-        if (!dispenserOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Dispenser tile entity!");
-        }
-        Dispenser dispenser = dispenserOptional.get();
-        if (container.contains(new DataQuery("CustomName"))) {
-            ((TileEntityDispenser) dispenser).setCustomName(container.getString(new DataQuery("CustomName")).get());
-        }
-        ((TileEntityDispenser) dispenser).validate();
-        return Optional.of(dispenser);
+    protected Optional<Dispenser> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(dispenser -> {
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                ((TileEntityDispenser) dispenser).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
+            ((TileEntityDispenser) dispenser).validate();
+            return dispenser;
+        });
     }
 }

@@ -25,9 +25,7 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Skull;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 
@@ -35,23 +33,17 @@ import java.util.Optional;
 
 public class SpongeSkullBuilder extends AbstractTileBuilder<Skull> {
 
-    public SpongeSkullBuilder(Game game) {
-        super(game);
+    public SpongeSkullBuilder() {
+        super(Skull.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Skull> build(DataView container) throws InvalidDataException {
-        Optional<Skull> skullOptional = super.build(container);
-        if (!skullOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Skull tile entity!");
-        }
-        if (!container.contains(new DataQuery("Type")) || container.contains(new DataQuery("Rotation"))) {
-            throw new InvalidDataException("The container had insufficient data to create a Skull tile entity!");
-        }
-        Skull skull = skullOptional.get();
-        // TODO Write SkullData
-        ((TileEntitySkull) skull).validate();
-        return Optional.of(skull);
+    protected Optional<Skull> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(skull1 -> {
+            // TODO actually write the skull serialization code and deserialization code.
+            ((TileEntitySkull) skull1).validate();
+            return skull1;
+        });
+
     }
 }

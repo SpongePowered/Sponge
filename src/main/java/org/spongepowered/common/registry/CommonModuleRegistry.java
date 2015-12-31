@@ -94,7 +94,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
-import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
+import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;

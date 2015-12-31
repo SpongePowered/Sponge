@@ -36,11 +36,12 @@ import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
-public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<TradeOffer> {
+public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
     private ItemStack firstItem;
     private ItemStack secondItem;
@@ -50,6 +51,7 @@ public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<
     private boolean allowsExperience;
 
     public SpongeTradeOfferBuilder() {
+        super(TradeOffer.class, 1);
         reset();
     }
 
@@ -130,13 +132,11 @@ public class SpongeTradeOfferBuilder implements TradeOffer.Builder, DataBuilder<
     }
 
     @Override
-    public Optional<TradeOffer> build(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.FIRST_QUERY) || !container.contains(DataQueries.SECOND_QUERY) || !container.contains(
-            DataQueries.BUYING_QUERY) || !container.contains
-                (DataQueries.EXPERIENCE_QUERY) || !container.contains(DataQueries.MAX_QUERY) || !container.contains(DataQueries.USES_QUERY)) {
-            throw new InvalidDataException("Not enough information for constructing a TradeOffer!!");
+    protected Optional<TradeOffer> buildContent(DataView container) throws InvalidDataException {
+        if (!container.contains(DataQueries.FIRST_QUERY, DataQueries.SECOND_QUERY, DataQueries.EXPERIENCE_QUERY, DataQueries.MAX_QUERY,
+                DataQueries.USES_QUERY, DataQueries.BUYING_QUERY)) {
+            return Optional.empty();
         }
-        final DataManager dataManager = SpongeDataManager.getInstance();
         final ItemStack firstItem = container.getSerializable(DataQueries.FIRST_QUERY, ItemStack.class).get();
         final ItemStack buyingItem = container.getSerializable(DataQueries.BUYING_QUERY, ItemStack.class).get();
         final ItemStack secondItem;

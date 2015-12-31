@@ -25,47 +25,41 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityBrewingStand;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
 
-    public static final DataQuery NAME_QUERY = new DataQuery("CustomName");
     public static final DataQuery BREW_TIME_QUERY = new DataQuery("BrewTime");
 
-    public SpongeBrewingStandBuilder(Game game) {
-        super(game);
+    public SpongeBrewingStandBuilder() {
+        super(BrewingStand.class, 1);
     }
 
     @Override
-    public Optional<BrewingStand> build(DataView container) throws InvalidDataException {
-        Optional<BrewingStand> brewingStandOptional = super.build(container);
-        if (!brewingStandOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
-        }
-        if (!container.contains(BREW_TIME_QUERY)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
-        }
+    protected Optional<BrewingStand> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(brewingStand -> {
+            if (!container.contains(BREW_TIME_QUERY)) {
+                throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
+            }
+            // Have to consider custom names as an option
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                ((TileEntityBrewingStand) brewingStand).setName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
 
-        final BrewingStand brewingStand = brewingStandOptional.get();
+            final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
+            brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
+            brewingStand.offer(brewingData);
 
-        // Have to consider custom names as an option
-        if (container.contains(NAME_QUERY)) {
-            ((TileEntityBrewingStand) brewingStand).setName(container.getString(NAME_QUERY).get());
-        }
-
-        final BrewingStandData brewingData = Sponge.getDataManager().getManipulatorBuilder(BrewingStandData.class).get().create();
-        brewingData.remainingBrewTime().set(container.getInt(BREW_TIME_QUERY).get());
-        brewingStand.offer(brewingData);
-
-        ((TileEntityBrewingStand) brewingStand).validate();
-        return Optional.of(brewingStand);
+            ((TileEntityBrewingStand) brewingStand).validate();
+            return brewingStand;
+        });
     }
 }

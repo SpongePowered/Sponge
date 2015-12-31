@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.command.server.CommandBlockLogic;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.text.Texts;
@@ -38,31 +38,28 @@ import java.util.Optional;
 
 public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock> {
 
-    public SpongeCommandBlockBuilder(Game game) {
-        super(game);
+    public SpongeCommandBlockBuilder() {
+        super(CommandBlock.class, 1);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
-    @SuppressWarnings({"unchecked", "deprecation"})
-    public Optional<CommandBlock> build(DataView container) throws InvalidDataException {
-        Optional<CommandBlock> commandblockOptional = super.build(container);
-        if (!commandblockOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a CommandBlock tile entity!");
-        }
-        CommandBlock commandblock = commandblockOptional.get();
-        if (!container.contains(DataQueries.STORED_COMMAND)
-                || !container.contains(DataQueries.SUCCESS_COUNT)
-                || !container.contains(DataQueries.DOES_TRACK_OUTPUT)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a CommandBlock!");
-        }
-        CommandBlockLogic cmdBlockLogic = ((TileEntityCommandBlock) commandblock).getCommandBlockLogic();
-        cmdBlockLogic.setCommand(container.getString(DataQueries.STORED_COMMAND).get());
-        cmdBlockLogic.successCount = container.getInt(DataQueries.SUCCESS_COUNT).get();
-        cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.DOES_TRACK_OUTPUT).get());
-        if (cmdBlockLogic.shouldTrackOutput()) {
-            cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(Texts.legacy().fromUnchecked(container.getString(DataQueries.TRACKED_OUTPUT).get())));
-        }
-        ((TileEntityCommandBlock)commandblock).validate();
-        return Optional.of(commandblock);
+    protected Optional<CommandBlock> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(commandBlock -> {
+            if (!container.contains(DataQueries.STORED_COMMAND, DataQueries.SUCCESS_COUNT, DataQueries.DOES_TRACK_OUTPUT)) {
+                ((TileEntity) commandBlock).invalidate();
+                return Optional.empty();
+            }
+            CommandBlockLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
+            cmdBlockLogic.setCommand(container.getString(DataQueries.STORED_COMMAND).get());
+            cmdBlockLogic.successCount = container.getInt(DataQueries.SUCCESS_COUNT).get();
+            cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.DOES_TRACK_OUTPUT).get());
+            if (cmdBlockLogic.shouldTrackOutput()) {
+                cmdBlockLogic.setLastOutput(SpongeTexts.toComponent(Texts.legacy()
+                        .fromUnchecked(container.getString(DataQueries.TRACKED_OUTPUT).get())));
+            }
+            ((TileEntityCommandBlock)commandBlock).validate();
+            return Optional.of(commandBlock);
+        });
     }
 }

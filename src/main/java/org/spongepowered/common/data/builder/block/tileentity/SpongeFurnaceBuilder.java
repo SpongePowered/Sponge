@@ -24,55 +24,45 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityFurnace;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeFurnaceBuilder extends SpongeLockableBuilder<Furnace> {
 
-    public SpongeFurnaceBuilder(Game game) {
-        super(game);
+    public SpongeFurnaceBuilder() {
+        super(Furnace.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Furnace> build(DataView container) throws InvalidDataException {
-        final Optional<Furnace> furnaceOptional = super.build(container);
+    protected Optional<Furnace> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(furnace -> {
+            final TileEntityFurnace tileEntityFurnace = (TileEntityFurnace) furnace;
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                tileEntityFurnace.setCustomInventoryName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
 
-        if (!furnaceOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Furnace tile entity!");
-        }
-
-        final Furnace furnace = furnaceOptional.get();
-        final TileEntityFurnace tileEntityFurnace = (TileEntityFurnace) furnace;
-        final DataQuery burnTime = new DataQuery("BurnTime");
-        final DataQuery burnTimeTotal = new DataQuery("BurnTimeTotal");
-        final DataQuery cookTime = new DataQuery("CookTime");
-        final DataQuery cookTimeTotal = new DataQuery("CookTimeTotal");
-        final DataQuery customName = new DataQuery("CustomName");
-
-        if (container.contains(customName)) {
-            tileEntityFurnace.setCustomInventoryName(container.getString(customName).get());
-        }
-
-        if (!container.contains(burnTime)
-                || !container.contains(burnTimeTotal)
-                || !container.contains(cookTime)
-                || !container.contains(cookTimeTotal)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Furnace!");
-        }
-
-        tileEntityFurnace.setField(0, container.getInt(burnTime).get());
-        tileEntityFurnace.setField(1, container.getInt(burnTimeTotal).get());
-        tileEntityFurnace.setField(2, container.getInt(cookTime).get());
-        tileEntityFurnace.setField(3, container.getInt(cookTimeTotal).get());
-        tileEntityFurnace.markDirty();
-
-        return Optional.of(furnace);
+            if (!container.contains(Keys.PASSED_BURN_TIME.getQuery(), Keys.MAX_BURN_TIME.getQuery(),
+                    Keys.PASSED_COOK_TIME.getQuery(), Keys.MAX_COOK_TIME.getQuery())) {
+                ((TileEntity) furnace).invalidate();
+                return Optional.empty();
+            }
+            final int burnTime = container.getInt(Keys.PASSED_BURN_TIME.getQuery()).get();
+            final int maxBurnTime = container.getInt(Keys.MAX_BURN_TIME.getQuery()).get();
+            final int passedCookTime = container.getInt(Keys.PASSED_COOK_TIME.getQuery()).get();
+            final int maxCookTime = container.getInt(Keys.MAX_COOK_TIME.getQuery()).get();
+            tileEntityFurnace.setField(0, maxBurnTime - burnTime);
+            tileEntityFurnace.setField(1, maxBurnTime);
+            tileEntityFurnace.setField(2, passedCookTime);
+            tileEntityFurnace.setField(3, maxCookTime);
+            tileEntityFurnace.markDirty();
+            return Optional.of(furnace);
+        });
     }
 }

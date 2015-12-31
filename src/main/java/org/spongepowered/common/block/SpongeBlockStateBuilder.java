@@ -36,13 +36,18 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
-public class SpongeBlockStateBuilder implements BlockState.Builder {
+public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> implements BlockState.Builder {
 
     private BlockState blockState;
+
+    public SpongeBlockStateBuilder() {
+        super(BlockState.class, 1);
+    }
 
     @Override
     public BlockState.Builder blockType(BlockType blockType) {
@@ -83,7 +88,10 @@ public class SpongeBlockStateBuilder implements BlockState.Builder {
     }
 
     @Override
-    public Optional<BlockState> build(DataView container) throws InvalidDataException {
+    protected Optional<BlockState> buildContent(DataView container) throws InvalidDataException {
+        if (!container.contains(DataQueries.BLOCK_TYPE, DataQueries.BLOCK_STATE_UNSAFE_META)) {
+            return Optional.empty();
+        }
         checkDataExists(container, DataQueries.BLOCK_TYPE);
         checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
         /* todo write the deserializers for immutable data....

@@ -26,7 +26,6 @@ package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -39,28 +38,23 @@ import java.util.Optional;
 
 public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
 
-    public SpongeBeaconBuilder(Game game) {
-        super(game);
+    public SpongeBeaconBuilder() {
+        super(Beacon.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Beacon> build(DataView container) throws InvalidDataException {
-        Optional<Beacon> beaconOptional = super.build(container);
-        if (!beaconOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
-        }
-        if (!container.contains(DataQueries.PRIMARY) || !container.contains(DataQueries.SECONDARY)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
-        }
-        final BeaconData beaconData = null;
-        beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.PRIMARY).get()]));
-        beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.SECONDARY).get()]));
+    protected Optional<Beacon> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(beacon -> {
+            if (!container.contains(DataQueries.PRIMARY) || !container.contains(DataQueries.SECONDARY)) {
+                return Optional.empty();
+            }
+            final BeaconData beaconData = null;
+            beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.PRIMARY).get()]));
+            beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.SECONDARY).get()]));
 
-        final Beacon beacon = beaconOptional.get();
-        beacon.offer(beaconData);
-        ((TileEntityBeacon) beacon).validate();
-        return Optional.of(beacon);
+            beacon.offer(beaconData);
+            ((TileEntityBeacon) beacon).validate();
+            return Optional.of(beacon);
+        });
     }
-
 }

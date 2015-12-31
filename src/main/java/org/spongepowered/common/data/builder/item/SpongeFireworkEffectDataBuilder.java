@@ -24,40 +24,32 @@
  */
 package org.spongepowered.common.data.builder.item;
 
-import static org.spongepowered.common.data.util.DataUtil.getData;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.FireworkEffect;
+import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.DataContentUpdater;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 
+import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
-public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnapshot> {
-
+public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffect> {
     private final static int SUPPORTED_VERSION = 1;
 
     @Override
-    public Optional<ItemStackSnapshot> build(DataView container) throws InvalidDataException {
+    public Optional<FireworkEffect> build(DataView container) throws InvalidDataException {
         if (container.contains(Queries.CONTENT_VERSION)) {
             final int contentVersion = DataUtil.getData(container, Queries.CONTENT_VERSION, Integer.class);
             if (contentVersion < SUPPORTED_VERSION) {
                 Optional<DataContentUpdater> updater = SpongeDataManager
-                        .getInstance().getWrappedContentUpdater(ItemStackSnapshot.class, contentVersion, SUPPORTED_VERSION);
+                        .getInstance().getWrappedContentUpdater(FireworkEffect.class, contentVersion, SUPPORTED_VERSION);
                 if (!updater.isPresent()) {
                     throw new InvalidDataException("Could not get an updater for ItemEnchantment data from the version: " + contentVersion
                                                    + " to " + SUPPORTED_VERSION + ". "
@@ -66,24 +58,26 @@ public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnap
                 container = updater.get().update(container);
             }
         }
-        if (container.contains(DataQueries.ITEM_TYPE, DataQueries.ITEM_COUNT)) {
-            final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
-            final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();
-            final int count = getData(container, DataQueries.ITEM_COUNT, Integer.class);
-            final int damage = container.getInt(DataQueries.ITEM_DAMAGE_VALUE).orElse(0);
-            final ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
-            if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-                manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
-            } else {
-                manipulators = ImmutableList.of();
+        if (container.contains(DataQueries.FIREWORK_SHAPE, DataQueries.FIREWORK_COLORS, DataQueries.FIREWORK_FADE_COLORS,
+                DataQueries.FIREWORK_FLICKERS, DataQueries.FIREWORK_TRAILS)) {
+            final String fireworkShapeId = DataUtil.getData(container, DataQueries.FIREWORK_SHAPE, String.class);
+            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getType(FireworkShape.class, fireworkShapeId);
+            if (!shapeOptional.isPresent()) {
+                throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + fireworkShapeId);
             }
-            @Nullable final NBTTagCompound compound;
-            if (container.contains(DataQueries.UNSAFE_NBT)) {
-                compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            } else {
-                compound = null;
-            }
-            return Optional.of(new SpongeItemStackSnapshot(itemType, count, damage, manipulators, compound));
+            final FireworkShape shape = shapeOptional.get();
+            final boolean trails = DataUtil.getData(container, DataQueries.FIREWORK_TRAILS, Boolean.class);
+            final boolean flickers = DataUtil.getData(container, DataQueries.FIREWORK_FLICKERS, Boolean.class);
+            final List<Color> colors = container.getSerializableList(DataQueries.FIREWORK_COLORS, Color.class).get();
+            final List<Color> fadeColors = container.getSerializableList(DataQueries.FIREWORK_FADE_COLORS, Color.class).get();
+            return Optional.of(FireworkEffect.builder()
+                    .colors(colors)
+                    .flicker(flickers)
+                    .fades(fadeColors)
+                    .trail(trails)
+                    .shape(shape)
+                    .build());
+
         }
         return Optional.empty();
     }

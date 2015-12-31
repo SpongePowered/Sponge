@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityEndPortal;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.EndPortal;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
@@ -34,18 +33,15 @@ import java.util.Optional;
 
 public class SpongeEndPortalBuilder extends AbstractTileBuilder<EndPortal> {
 
-    public SpongeEndPortalBuilder(Game game) {
-        super(game);
+    public SpongeEndPortalBuilder() {
+        super(EndPortal.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<EndPortal> build(DataView container) throws InvalidDataException {
-        Optional<EndPortal> endportalOptional = super.build(container);
-        if (!endportalOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a EndPortal tile entity!");
-        }
-        ((TileEntityEndPortal) endportalOptional.get()).validate();
-        return Optional.of(endportalOptional.get());
+    protected Optional<EndPortal> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(endPortal -> {
+            ((TileEntityEndPortal) endPortal).validate();
+            return endPortal;
+        });
     }
 }

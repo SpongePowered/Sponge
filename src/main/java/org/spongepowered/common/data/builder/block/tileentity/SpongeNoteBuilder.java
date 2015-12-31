@@ -24,36 +24,31 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityNote;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Note;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeNoteBuilder extends AbstractTileBuilder<Note> {
 
-    public SpongeNoteBuilder(Game game) {
-        super(game);
+    public SpongeNoteBuilder() {
+        super(Note.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Note> build(DataView container) throws InvalidDataException {
-        Optional<Note> noteOptional = super.build(container);
-        if (!noteOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Note tile entity!");
-        }
-        if (!container.contains(new DataQuery("Note"))) {
-            throw new InvalidDataException("The container had insufficient data to create a Note tile entity!");
-        }
-        Note note = noteOptional.get();
-//        NotePitch pitch = ((List<NotePitch>) this.game.getRegistry().getNotePitches()).get(container.getInt(new DataQuery("Note")).get());
-        // TODO Write NoteData
-//        note.setNoteData(pitch);
-        ((TileEntityNote) note).validate();
-        return Optional.of(note);
+    protected Optional<Note> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(note1 -> {
+            if (!container.contains(DataQueries.TILE_NOTE_ID)) {
+                ((TileEntity) note1).invalidate();
+                return Optional.empty();
+            }
+            ((TileEntityNote) note1).note = container.getInt(DataQueries.TILE_NOTE_ID).get().byteValue();
+            ((TileEntityNote) note1).validate();
+            return Optional.of(note1);
+        });
     }
 }

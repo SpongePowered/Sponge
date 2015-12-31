@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.data;
+package org.spongepowered.common.data.builder.data.meta;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -34,6 +34,7 @@ import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.meta.SpongePatternLayer;
 import org.spongepowered.common.data.util.DataQueries;
 
@@ -42,17 +43,21 @@ import java.util.Optional;
 /**
  * The de-facto builder for a {@link PatternLayer}.
  */
-public class SpongePatternLayerBuilder implements PatternLayer.Builder, DataBuilder<PatternLayer> {
+public class SpongePatternLayerBuilder extends AbstractDataBuilder<PatternLayer> implements PatternLayer.Builder, DataBuilder<PatternLayer> {
 
 
     private DyeColor color;
     private BannerPatternShape shape;
 
+    public SpongePatternLayerBuilder() {
+        super(PatternLayer.class, 1);
+    }
+
     @Override
-    public Optional<PatternLayer> build(final DataView container) throws InvalidDataException {
+    protected Optional<PatternLayer> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
         if (!container.contains(DataQueries.BANNER_SHAPE_ID) || !container.contains(DataQueries.BANNER_COLOR)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a PatternLayer!");
+            return Optional.empty();
         }
         String id = container.getString(DataQueries.BANNER_SHAPE_ID).get();
 

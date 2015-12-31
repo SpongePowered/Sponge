@@ -25,9 +25,7 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityDropper;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Dropper;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
@@ -36,23 +34,18 @@ import java.util.Optional;
 
 public class SpongeDropperBuilder extends SpongeLockableBuilder<Dropper> {
 
-    public SpongeDropperBuilder(Game game) {
-        super(game);
+    public SpongeDropperBuilder() {
+        super(Dropper.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Dropper> build(DataView container) throws InvalidDataException {
-        Optional<Dropper> dropperOptional = super.build(container);
-        if (!dropperOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Dropper tile entity!");
-        }
-        Dropper dropper = dropperOptional.get();
-        if (container.contains(DataQueries.CUSTOM_NAME)) {
-            ((TileEntityDropper) dropper).setCustomName(container.getString(new DataQuery("CustomName")).get());
-        }
-        ((TileEntityDropper) dropper).validate();
-        return Optional.of(dropper);
+    protected Optional<Dropper> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(dropper -> {
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                ((TileEntityDropper) dropper).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
+            ((TileEntityDropper) dropper).validate();
+            return dropper;
+        });
     }
-
 }

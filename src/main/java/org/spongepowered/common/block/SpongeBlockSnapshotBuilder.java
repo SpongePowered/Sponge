@@ -47,6 +47,7 @@ import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -60,7 +61,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
+public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapshot> implements BlockSnapshot.Builder {
 
     BlockState blockState;
     BlockState extendedState;
@@ -69,6 +70,10 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
 
+
+    public SpongeBlockSnapshotBuilder() {
+        super(BlockSnapshot.class, 1);
+    }
 
     @Override
     public SpongeBlockSnapshotBuilder world(WorldProperties worldProperties) {
@@ -178,12 +183,13 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
     }
 
     @Override
-    public Optional<BlockSnapshot> build(DataView container) throws InvalidDataException {
+    protected Optional<BlockSnapshot> buildContent(DataView container) throws InvalidDataException {
+        if (!container.contains(DataQueries.BLOCK_STATE, Queries.WORLD_ID, DataQueries.SNAPSHOT_WORLD_POSITION)) {
+            return Optional.empty();
+        }
         checkDataExists(container, DataQueries.BLOCK_STATE);
         checkDataExists(container, Queries.WORLD_ID);
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-        final DataManager dataManager = Sponge.getDataManager();
-        // this is unused for now
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
         // We now reconstruct the custom data and all extra data.
@@ -196,24 +202,18 @@ public class SpongeBlockSnapshotBuilder implements BlockSnapshot.Builder {
         }
 
         builder.blockState(blockState)
-            .extendedState(extendedState)
-            .position(coordinate)
-            .worldId(worldUuid);
+                .extendedState(extendedState)
+                .position(coordinate)
+                .worldId(worldUuid);
         Optional<DataView> unsafeCompound = container.getView(DataQueries.UNSAFE_NBT);
         final NBTTagCompound compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
         if (compound != null) {
             builder.unsafeNbt(compound);
         }
-        final ImmutableList<ImmutableDataManipulator<?, ?>> extraData;
         if (container.contains(DataQueries.SNAPSHOT_TILE_DATA)) {
             final List<DataView> dataViews = container.getViewList(DataQueries.SNAPSHOT_TILE_DATA).get();
-            extraData = DataUtil.deserializeImmutableManipulatorList(dataViews);
-        } else {
-            extraData = ImmutableList.of();
+            DataUtil.deserializeImmutableManipulatorList(dataViews).stream().forEach(builder::add);
         }
-        for (ImmutableDataManipulator<?, ?> manipulator : extraData) {
-            builder.add(manipulator);
-        }
-        return Optional.<BlockSnapshot>of(new SpongeBlockSnapshot(builder));
+        return Optional.of(new SpongeBlockSnapshot(builder));
     }
 }

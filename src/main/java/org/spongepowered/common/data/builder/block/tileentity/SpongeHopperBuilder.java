@@ -25,37 +25,33 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityHopper;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.carrier.Hopper;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeHopperBuilder extends SpongeLockableBuilder<Hopper> {
 
-    public SpongeHopperBuilder(Game game) {
-        super(game);
+    public SpongeHopperBuilder() {
+        super(Hopper.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Hopper> build(DataView container) throws InvalidDataException {
-        Optional<Hopper> hopperOptional = super.build(container);
-        if (!hopperOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Hopper tile entity!");
-        }
-        Hopper hopper = hopperOptional.get();
-        if (container.contains(new DataQuery("CustomName"))) {
-            ((TileEntityHopper) hopper).setCustomName(container.getString(new DataQuery("CustomName")).get());
-        }
-        if (!container.contains(new DataQuery("TransferCooldown"))) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Hopper!");
-        }
-        // TODO
-//        hopper.setTransferCooldown(container.getInt(new DataQuery("TransferCooldown")).get());
-        ((TileEntityHopper) hopper).validate();
-        return Optional.of(hopper);
+    protected Optional<Hopper> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(hopper -> {
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                ((TileEntityHopper) hopper).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
+            if (!container.contains(Keys.COOLDOWN.getQuery())) {
+                ((TileEntityHopper) hopper).invalidate();
+                return Optional.empty();
+            }
+            ((TileEntityHopper) hopper).setTransferCooldown(container.getInt(Keys.COOLDOWN.getQuery()).get());
+            ((TileEntityHopper) hopper).validate();
+            return Optional.of(hopper);
+        });
     }
 }

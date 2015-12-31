@@ -111,6 +111,7 @@ public final class DataQueries {
     public static final DataQuery BLOCK_ENTITY_ITEM_CONTENTS = of("Contents");
     public static final DataQuery BLOCK_ENTITY_SLOT = of("SlotId");
     public static final DataQuery BLOCK_ENTITY_SLOT_ITEM = of("Item");
+    public static final DataQuery TILE_NOTE_ID = of("Note");
 
     // Entities
     public static final DataQuery ENTITY_CLASS = of("EntityClass");
@@ -137,6 +138,13 @@ public final class DataQueries {
     public static final DataQuery EXPERIENCE_QUERY = of("GrantsExperience");
     public static final DataQuery MAX_QUERY = of("MaxUses");
     public static final DataQuery USES_QUERY = of("Uses");
+
+    // Firework Effects
+    public static final DataQuery FIREWORK_SHAPE = of("Type");
+    public static final DataQuery FIREWORK_COLORS = of("Colors");
+    public static final DataQuery FIREWORK_FADE_COLORS = of("Fades");
+    public static final DataQuery FIREWORK_TRAILS = of("Trails");
+    public static final DataQuery FIREWORK_FLICKERS = of("Flickers");
 
     private DataQueries() { }
 }

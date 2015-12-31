@@ -24,29 +24,19 @@
  */
 package org.spongepowered.common.item;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class SpongeFireworkEffect implements FireworkEffect {
-
-    public static final DataQuery TYPE = of("Type");
-    public static final DataQuery COLORS = of("Colors");
-    public static final DataQuery FADES = of("Fades");
-    public static final DataQuery TRAILS = of("Trails");
-    public static final DataQuery FLICKERS = of("Flickers");
 
     private final boolean flicker;
     private final boolean trails;
@@ -95,12 +85,12 @@ public class SpongeFireworkEffect implements FireworkEffect {
     @Override
     public DataContainer toContainer() {
         return new MemoryDataContainer()
-            .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(TYPE, this.shape.getId())
-                .set(COLORS, this.colors.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))
-                .set(FADES, this.fades.stream().map(color -> color.asJavaColor().getRGB()).collect(Collectors.toList()))
-                .set(TRAILS, this.trails)
-                .set(FLICKERS, this.flicker);
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(DataQueries.FIREWORK_SHAPE, this.shape.getId())
+                .set(DataQueries.FIREWORK_COLORS, this.colors)
+                .set(DataQueries.FIREWORK_FADE_COLORS, this.fades)
+                .set(DataQueries.FIREWORK_TRAILS, this.trails)
+                .set(DataQueries.FIREWORK_FLICKERS, this.flicker);
     }
 
     @Override

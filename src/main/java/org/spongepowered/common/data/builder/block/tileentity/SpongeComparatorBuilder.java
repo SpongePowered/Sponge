@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityComparator;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.Comparator;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
@@ -34,18 +33,15 @@ import java.util.Optional;
 
 public class SpongeComparatorBuilder extends AbstractTileBuilder<Comparator> {
 
-    public SpongeComparatorBuilder(Game game) {
-        super(game);
+    public SpongeComparatorBuilder() {
+        super(Comparator.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Comparator> build(DataView container) throws InvalidDataException {
-        Optional<Comparator> comparatorOptional = super.build(container);
-        if (!comparatorOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
-        }
-        ((TileEntityComparator) comparatorOptional.get()).validate();
-        return Optional.of(comparatorOptional.get());
+    protected Optional<Comparator> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(comparator -> {
+            ((TileEntityComparator) comparator).validate();
+            return comparator;
+        });
     }
 }

@@ -44,6 +44,7 @@ import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.persistence.NbtTranslator;
@@ -55,7 +56,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
+public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
 
     UUID worldId;
     Vector3d position;
@@ -66,6 +67,10 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
     @Nullable UUID entityId;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+
+    public SpongeEntitySnapshotBuilder() {
+        super(EntitySnapshot.class, 1);
+    }
 
     @Override
     public SpongeEntitySnapshotBuilder world(WorldProperties worldProperties) {
@@ -233,30 +238,26 @@ public class SpongeEntitySnapshotBuilder implements EntitySnapshot.Builder {
     }
 
     @Override
-    public Optional<EntitySnapshot> build(DataView container) throws InvalidDataException {
-        checkDataExists(container, Queries.WORLD_ID);
-        checkDataExists(container, DataQueries.SNAPSHOT_WORLD_POSITION);
-        reset();
-        try {
-            this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());
-            this.position = DataUtil.getPosition3d(container);
-            this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
-            this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);
-
-            if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-                this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
-            } else {
-                this.manipulators = ImmutableList.of();
-            }
-            if (container.contains(DataQueries.UNSAFE_NBT)) {
-                this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            }
-            if (container.contains(DataQueries.ENTITY_ID)) {
-                this.entityId = UUID.fromString(container.getString(DataQueries.ENTITY_ID).get());
-            }
-            return Optional.of(build());
-        } catch (Exception e) {
-            throw new InvalidDataException("Could not deserialize the snapshot due to exception!", e);
+    protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
+        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_ROTATION, DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
+            return Optional.empty();
         }
+        this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());
+        this.position = DataUtil.getPosition3d(container);
+        this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
+        this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);
+
+        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
+            this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
+        } else {
+            this.manipulators = ImmutableList.of();
+        }
+        if (container.contains(DataQueries.UNSAFE_NBT)) {
+            this.compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
+        }
+        if (container.contains(DataQueries.ENTITY_ID)) {
+            this.entityId = UUID.fromString(container.getString(DataQueries.ENTITY_ID).get());
+        }
+        return Optional.of(build());
     }
 }

@@ -50,13 +50,15 @@ import net.minecraft.tileentity.TileEntityPiston;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.tileentity.TileEntitySkull;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Map;
@@ -68,13 +70,53 @@ import java.util.Optional;
  *
  * @param <T> The type of sponge tile entity
  */
-public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> implements DataBuilder<T> {
+public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.tileentity.TileEntity> extends AbstractDataBuilder<T> implements DataBuilder<T> {
 
     private static final Map<Class<? extends TileEntity>, BlockType> classToTypeMap = Maps.newHashMap();
-    protected final Game game;
 
-    protected AbstractTileBuilder(Game game) {
-        this.game = game;
+    protected AbstractTileBuilder(Class<T> clazz, int version) {
+        super(clazz, version);
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected Optional<T> buildContent(DataView container) throws InvalidDataException {
+        checkNotNull(container);
+        if (!container.contains(DataQueries.TILE_TYPE, DataQueries.WORLD, Queries.POSITION_X, Queries.POSITION_Y, Queries.POSITION_Z)) {
+            return Optional.empty();
+        }
+        String worldName = container.getString(DataQueries.WORLD).get();
+        Optional<World> worldOptional = Sponge.getGame().getServer().getWorld(worldName);
+        if (!worldOptional.isPresent()) {
+            throw new InvalidDataException("The provided container references a world that does not exist!");
+        }
+
+        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(DataQueries.TILE_TYPE).get());
+        if (clazz == null) {
+            // TODO do we want to throw an InvalidDataException since the class is not registered?
+            return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
+        }
+
+        BlockType type = classToTypeMap.get(clazz);
+        if (type == null) {
+            return Optional.empty(); // TODO throw exception maybe?
+        }
+        // Now we should be ready to actually deserialize the TileEntity with the right block.
+
+        final int x = container.getInt(DataQueries.X_POS).get();
+        final int y = container.getInt(DataQueries.Y_POS).get();
+        final int z = container.getInt(DataQueries.Z_POS).get();
+
+        worldOptional.get().getLocation(x, y, z).setBlockType(type);
+        BlockPos pos = new BlockPos(x, y, z);
+        TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
+        if (tileEntity == null) {
+            return Optional.empty(); // TODO throw exception maybe?
+        } else {
+            // We really need to validate only after the implementing class deems it ready...
+            tileEntity.invalidate();
+            return Optional.of((T) tileEntity);
+        }
     }
 
     // We need these mappings for rebuilding a tile entity at the proper location.
@@ -108,46 +150,4 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         classToTypeMap.put(tileClass, blocktype);
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public Optional<T> build(DataView container) throws InvalidDataException {
-        checkNotNull(container);
-        if (!container.contains(DataQueries.TILE_TYPE) || !container.contains(DataQueries.WORLD) || !container.contains(DataQueries.X_POS) || !container.contains(
-            DataQueries.Y_POS)
-            || !container.contains(DataQueries.Z_POS)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a TileEntity!");
-        }
-        String worldName = container.getString(DataQueries.WORLD).get();
-        Optional<World> worldOptional = this.game.getServer().getWorld(worldName);
-        if (!worldOptional.isPresent()) {
-            throw new InvalidDataException("The provided container references a world that does not exist!");
-        }
-
-        Class<? extends TileEntity> clazz = (Class<? extends TileEntity>) TileEntity.nameToClassMap.get(container.getString(DataQueries.TILE_TYPE).get());
-        if (clazz == null) {
-            // TODO do we want to throw an InvalidDataException since the class is not registered?
-            return Optional.empty(); // basically we didn't manage to find the class and the class isn't even registered with MC
-        }
-
-        BlockType type = classToTypeMap.get(clazz);
-        if (type == null) {
-            return Optional.empty(); // TODO throw exception maybe?
-        }
-        // Now we should be ready to actually deserialize the TileEntity with the right block.
-
-        final int x = container.getInt(DataQueries.X_POS).get();
-        final int y = container.getInt(DataQueries.Y_POS).get();
-        final int z = container.getInt(DataQueries.Z_POS).get();
-
-        worldOptional.get().getLocation(x, y, z).setBlockType(type);
-        BlockPos pos = new BlockPos(x, y, z);
-        TileEntity tileEntity = ((net.minecraft.world.World) worldOptional.get()).getTileEntity(pos);
-        if (tileEntity == null) {
-            return Optional.empty(); // TODO throw exception maybe?
-        } else {
-            // We really need to validate only after the implementing class deems it ready...
-            tileEntity.invalidate();
-            return Optional.of((T) tileEntity);
-        }
-    }
 }

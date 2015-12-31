@@ -50,16 +50,22 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
-import org.spongepowered.common.data.builder.SpongeFireworkEffectDataBuilder;
-import org.spongepowered.common.data.builder.SpongeItemEnchantmentBuilder;
-import org.spongepowered.common.data.builder.block.data.SpongePatternLayerBuilder;
+import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
+import org.spongepowered.common.data.builder.data.meta.*;
 import org.spongepowered.common.data.builder.block.tileentity.*;
-import org.spongepowered.common.data.builder.item.SpongeItemStackDataBuilder;
-import org.spongepowered.common.data.builder.item.SpongeItemStackSnapshotBuilder;
+import org.spongepowered.common.data.builder.item.*;
 import org.spongepowered.common.data.builder.manipulator.immutable.block.ImmutableSpongeTreeDataBuilder;
 import org.spongepowered.common.data.builder.manipulator.immutable.item.ImmutableItemEnchantmentDataBuilder;
+import org.spongepowered.common.data.builder.util.weighted.BaseAndAdditionBuilder;
+import org.spongepowered.common.data.builder.util.weighted.BaseAndVarianceBuilder;
+import org.spongepowered.common.data.builder.util.weighted.FixedBuilder;
+import org.spongepowered.common.data.builder.util.weighted.OptionalVarianceBuilder;
+import org.spongepowered.common.data.builder.world.LocationBuilder;
 import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.*;
 import org.spongepowered.common.data.manipulator.immutable.block.*;
@@ -96,24 +102,24 @@ public class DataRegistrar {
         KeyRegistry.registerKeys();
         SpongeDataManager dataManager = SpongeDataManager.getInstance();
         // TileEntities
-        dataManager.registerBuilder(Banner.class, new SpongeBannerBuilder(game));
+        dataManager.registerBuilder(Banner.class, new SpongeBannerBuilder());
         dataManager.registerBuilder(PatternLayer.class, new SpongePatternLayerBuilder());
-        dataManager.registerBuilder(BrewingStand.class, new SpongeBrewingStandBuilder(game));
-        dataManager.registerBuilder(Chest.class, new SpongeChestBuilder(game));
-        dataManager.registerBuilder(CommandBlock.class, new SpongeCommandBlockBuilder(game));
-        dataManager.registerBuilder(Comparator.class, new SpongeComparatorBuilder(game));
-        dataManager.registerBuilder(DaylightDetector.class, new SpongeDaylightBuilder(game));
-        dataManager.registerBuilder(Dispenser.class, new SpongeDispenserBuilder(game));
-        dataManager.registerBuilder(Dropper.class, new SpongeDropperBuilder(game));
-        dataManager.registerBuilder(EnchantmentTable.class, new SpongeEnchantmentTableBuilder(game));
-        dataManager.registerBuilder(EnderChest.class, new SpongeEnderChestBuilder(game));
-        dataManager.registerBuilder(EndPortal.class, new SpongeEndPortalBuilder(game));
-        dataManager.registerBuilder(Furnace.class, new SpongeFurnaceBuilder(game));
-        dataManager.registerBuilder(Hopper.class, new SpongeHopperBuilder(game));
-        dataManager.registerBuilder(MobSpawner.class, new SpongeMobSpawnerBuilder(game));
-        dataManager.registerBuilder(Note.class, new SpongeNoteBuilder(game));
-        dataManager.registerBuilder(Sign.class, new SpongeSignBuilder(game));
-        dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder(game));
+        dataManager.registerBuilder(BrewingStand.class, new SpongeBrewingStandBuilder());
+        dataManager.registerBuilder(Chest.class, new SpongeChestBuilder());
+        dataManager.registerBuilder(CommandBlock.class, new SpongeCommandBlockBuilder());
+        dataManager.registerBuilder(Comparator.class, new SpongeComparatorBuilder());
+        dataManager.registerBuilder(DaylightDetector.class, new SpongeDaylightBuilder());
+        dataManager.registerBuilder(Dispenser.class, new SpongeDispenserBuilder());
+        dataManager.registerBuilder(Dropper.class, new SpongeDropperBuilder());
+        dataManager.registerBuilder(EnchantmentTable.class, new SpongeEnchantmentTableBuilder());
+        dataManager.registerBuilder(EnderChest.class, new SpongeEnderChestBuilder());
+        dataManager.registerBuilder(EndPortal.class, new SpongeEndPortalBuilder());
+        dataManager.registerBuilder(Furnace.class, new SpongeFurnaceBuilder());
+        dataManager.registerBuilder(Hopper.class, new SpongeHopperBuilder());
+        dataManager.registerBuilder(MobSpawner.class, new SpongeMobSpawnerBuilder());
+        dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
+        dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
+        dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
 
         // Block stuff
         dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
@@ -130,6 +136,14 @@ public class DataRegistrar {
         dataManager.registerBuilderAndImpl(ImmutableEnchantmentData.class, ImmutableSpongeEnchantmentData.class,
                 new ImmutableItemEnchantmentDataBuilder());
         dataManager.registerBuilder(FireworkEffect.class, new SpongeFireworkEffectDataBuilder());
+
+        // Util stuff
+        dataManager.registerBuilder(VariableAmount.BaseAndAddition.class, new BaseAndAdditionBuilder());
+        dataManager.registerBuilder(VariableAmount.BaseAndVariance.class, new BaseAndVarianceBuilder());
+        dataManager.registerBuilder(VariableAmount.Fixed.class, new FixedBuilder());
+        dataManager.registerBuilder(VariableAmount.OptionalAmount.class, new OptionalVarianceBuilder());
+
+        dataManager.registerBuilder((Class<Location<World>>) (Class) Location.class, new LocationBuilder());
 
         // Data Manipulators
 

@@ -37,6 +37,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.persistence.DataBuilder;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
@@ -45,13 +46,17 @@ import org.spongepowered.common.util.persistence.NbtTranslator;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
+public class SpongeItemStackDataBuilder extends AbstractDataBuilder<ItemStack> implements DataBuilder<ItemStack> {
+
+    public SpongeItemStackDataBuilder() {
+        super(ItemStack.class, 1);
+    }
 
     @Override
-    public Optional<ItemStack> build(DataView container) throws InvalidDataException {
+    protected Optional<ItemStack> buildContent(DataView container) throws InvalidDataException {
         checkNotNull(container);
         if (!container.contains(DataQueries.ITEM_TYPE) || !container.contains(DataQueries.ITEM_COUNT) || !container.contains(
-            DataQueries.ITEM_DAMAGE_VALUE)) {
+                DataQueries.ITEM_DAMAGE_VALUE)) {
             return Optional.empty();
         }
         final String itemTypeId = getData(container, DataQueries.ITEM_TYPE, String.class);
@@ -72,4 +77,5 @@ public class SpongeItemStackDataBuilder implements DataBuilder<ItemStack> {
         }
         return Optional.of((ItemStack) itemStack);
     }
+
 }

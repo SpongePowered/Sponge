@@ -25,32 +25,28 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityEnchantmentTable;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.EnchantmentTable;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
 public class SpongeEnchantmentTableBuilder extends AbstractTileBuilder<EnchantmentTable> {
 
-    public SpongeEnchantmentTableBuilder(Game game) {
-        super(game);
+    public SpongeEnchantmentTableBuilder() {
+        super(EnchantmentTable.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<EnchantmentTable> build(DataView container) throws InvalidDataException {
-        Optional<EnchantmentTable> enchantmenttableOptional = super.build(container);
-        if (!enchantmenttableOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a EnchantmentTable tile entity!");
-        }
-        EnchantmentTable enchantmenttable = enchantmenttableOptional.get();
-        if (container.contains(new DataQuery("CustomName"))) {
-            ((TileEntityEnchantmentTable) enchantmenttable).setCustomName(container.getString(new DataQuery("CustomName")).get());
-        }
-        ((TileEntityEnchantmentTable) enchantmenttable).validate();
-        return Optional.of(enchantmenttable);
+    protected Optional<EnchantmentTable> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(enchantmentTable -> {
+            if (container.contains(DataQueries.CUSTOM_NAME)) {
+                ((TileEntityEnchantmentTable) enchantmentTable).setCustomName(container.getString(DataQueries.CUSTOM_NAME).get());
+            }
+            ((TileEntityEnchantmentTable) enchantmentTable).validate();
+            return enchantmentTable;
+        });
+
     }
 }

@@ -25,46 +25,40 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.inventory.IInventory;
-import org.spongepowered.api.Game;
+import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.api.data.DataManager;
+import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
 import java.util.Optional;
 
 public class SpongeLockableBuilder<T extends TileEntityCarrier> extends AbstractTileBuilder<T> {
 
-    public SpongeLockableBuilder(Game game) {
-        super(game);
+    protected SpongeLockableBuilder(Class<T> clazz, int version) {
+        super(clazz, version);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<T> build(DataView container) throws InvalidDataException {
-        Optional<T> lockOptional = super.build(container);
-        if (!lockOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a lockable tile entity!");
-        }
-        TileEntityCarrier lockable = lockOptional.get();
-        if (!container.contains(new DataQuery("Contents"))) {
-            throw new InvalidDataException("The provided container does not contain the data to make a lockable tile entity!");
-        }
-        DataManager service = this.game.getDataManager();
-        List<DataView> contents = container.getViewList(new DataQuery("Contents")).get();
-        for (DataView content: contents) {
-            net.minecraft.item.ItemStack stack =
-                    (net.minecraft.item.ItemStack) content.getSerializable(new DataQuery("Item"), ItemStack.class).get();
-            ((IInventory) lockable).setInventorySlotContents(content.getInt(new DataQuery("Slot")).get(), stack);
-        }
-        if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
-            ((DataHolder) lockable).offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());
-        }
-        return Optional.of((T) lockable);
+    protected Optional<T> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(lockable -> {
+            if (!container.contains(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS)) {
+                ((TileEntity) lockable).invalidate();
+                return Optional.empty();
+            }
+            List<DataView> contents = container.getViewList(DataQueries.BLOCK_ENTITY_ITEM_CONTENTS).get();
+            for (DataView content: contents) {
+                net.minecraft.item.ItemStack stack = (net.minecraft.item.ItemStack) content
+                        .getSerializable(DataQueries.BLOCK_ENTITY_SLOT_ITEM, ItemStack.class).get();
+                ((IInventory) lockable).setInventorySlotContents(content.getInt(DataQueries.BLOCK_ENTITY_SLOT).get(), stack);
+            }
+            if (container.contains(Keys.LOCK_TOKEN.getQuery())) {
+                lockable.offer(Keys.LOCK_TOKEN, container.getString(Keys.LOCK_TOKEN.getQuery()).get());
+            }
+            return Optional.of(lockable);
+        });
     }
 }

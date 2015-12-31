@@ -22,40 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.block.tileentity;
+package org.spongepowered.common.data.builder.util.weighted;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntitySign;
-import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.api.util.weighted.VariableAmount;
+import org.spongepowered.common.data.builder.AbstractDataBuilder;
 
-import java.util.List;
 import java.util.Optional;
 
-public class SpongeSignBuilder extends AbstractTileBuilder<Sign> {
+public class BaseAndAdditionBuilder extends AbstractDataBuilder<VariableAmount.BaseAndAddition> {
 
-    public SpongeSignBuilder() {
-        super(Sign.class, 1);
+    public BaseAndAdditionBuilder() {
+        super(VariableAmount.BaseAndAddition.class, 1);
     }
 
     @Override
-    protected Optional<Sign> buildContent(DataView container) throws InvalidDataException {
-        return super.buildContent(container).flatMap(sign1 -> {
-            if (!container.contains(Keys.SIGN_LINES.getQuery())) {
-                ((TileEntity) sign1).invalidate();
-                return Optional.empty();
-            }
-            List<String> rawLines = container.getStringList(Keys.SIGN_LINES.getQuery()).get();
-            List<Text> textLines = SpongeTexts.fromJson(rawLines);
-            for (int i = 0; i < 4; i++) {
-                ((TileEntitySign) sign1).signText[i] = SpongeTexts.toComponent(textLines.get(i));
-            }
-            ((TileEntitySign) sign1).validate();
-            return Optional.of(sign1);
-        });
+    protected Optional<VariableAmount.BaseAndAddition> buildContent(DataView container) throws InvalidDataException {
+        if (!container.contains(Queries.VARIABLE_BASE, Queries.VARIABLE_VARIANCE)) {
+            return Optional.empty();
+        }
+        final int base = container.getInt(Queries.VARIABLE_BASE).get();
+        final VariableAmount amount = container.getSerializable(Queries.VARIABLE_VARIANCE, VariableAmount.class).get();
+        return Optional.of((VariableAmount.BaseAndAddition) VariableAmount.baseWithRandomAddition(base, amount));
     }
 }

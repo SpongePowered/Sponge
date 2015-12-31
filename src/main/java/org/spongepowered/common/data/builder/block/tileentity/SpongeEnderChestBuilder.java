@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.builder.block.tileentity;
 
 import net.minecraft.tileentity.TileEntityEnderChest;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.block.tileentity.EnderChest;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.util.persistence.InvalidDataException;
@@ -34,18 +33,15 @@ import java.util.Optional;
 
 public class SpongeEnderChestBuilder extends AbstractTileBuilder<EnderChest> {
 
-    public SpongeEnderChestBuilder(Game game) {
-        super(game);
+    public SpongeEnderChestBuilder() {
+        super(EnderChest.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<EnderChest> build(DataView container) throws InvalidDataException {
-        Optional<EnderChest> enderchestOptional = super.build(container);
-        if (!enderchestOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a EnderChest tile entity!");
-        }
-        ((TileEntityEnderChest) enderchestOptional.get()).validate();
-        return Optional.of(enderchestOptional.get());
+    protected Optional<EnderChest> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).map(enderChest -> {
+            ((TileEntityEnderChest) enderChest).validate();
+            return enderChest;
+        });
     }
 }

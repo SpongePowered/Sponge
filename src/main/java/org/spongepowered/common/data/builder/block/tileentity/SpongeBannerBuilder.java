@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityBanner;
-import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.api.data.DataManager;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;
@@ -41,45 +43,36 @@ import java.util.Optional;
 
 public class SpongeBannerBuilder extends AbstractTileBuilder<Banner> {
 
-    public SpongeBannerBuilder(Game game) {
-        super(game);
+    public SpongeBannerBuilder() {
+        super(Banner.class, 1);
     }
 
     @Override
-    @SuppressWarnings("unchecked")
-    public Optional<Banner> build(DataView container) throws InvalidDataException {
-        final Optional<Banner> bannerOptional = super.build(container);
-        if (!bannerOptional.isPresent()) {
-            throw new InvalidDataException("The container had insufficient data to create a Banner tile entity!");
-        }
+    protected Optional<Banner> buildContent(DataView container) throws InvalidDataException {
+        return super.buildContent(container).flatMap(banner1 -> {
+            if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
+                ((TileEntity) banner1).invalidate();
+                return Optional.empty();
+            }
+            final BannerData bannerData = new SpongeBannerData(); // TODO when banner data is implemented.
 
-        if (!container.contains(DataQueries.BASE) || !container.contains(DataQueries.PATTERNS)) {
-            throw new InvalidDataException("The provided container does not contain the data to make a Banner!");
-        }
-        final DataManager service = this.game.getDataManager();
+            String dyeColorId = container.getString(DataQueries.BASE).get();
+            Optional<DyeColor> colorOptional = Sponge.getRegistry().getType(DyeColor.class, dyeColorId);
+            if (!colorOptional.isPresent()) {
+                throw new InvalidDataException("The provided container has an invalid dye color entry!");
+            }
+            bannerData.set(Keys.BANNER_BASE_COLOR, colorOptional.get());
 
-        final BannerData bannerData = null; // TODO when banner data is implemented.
+            // Now we have to get the patterns list
+            final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class).get();
+            final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
+            patternsList.forEach(patternLayers::add);
+            bannerData.set(patternLayers);
+            banner1.offer(bannerData);
+            ((TileEntityBanner) banner1).validate();
+            return Optional.of(banner1);
+        });
 
-        String dyeColorId = container.getString(DataQueries.BASE).get();
-        Optional<DyeColor> colorOptional = this.game.getRegistry().getType(DyeColor.class, dyeColorId);
-        if (!colorOptional.isPresent()) {
-            throw new InvalidDataException("The provided container has an invalid dye color entry!");
-        }
-        bannerData.baseColor().set(colorOptional.get());
 
-        // Now we have to get the patterns list
-        final List<PatternLayer> patternsList = container.getSerializableList(DataQueries.PATTERNS, PatternLayer.class).get();
-        final ListValue<PatternLayer> patternLayers = bannerData.patternsList();
-        patternsList.forEach(patternLayers::add);
-        bannerData.set(patternLayers);
-        final Banner banner = bannerOptional.get();
-        banner.offer(bannerData);
-        ((TileEntityBanner) banner).validate();
-        return Optional.of(banner);
-    }
-
-    @Override
-    public SpongeBannerBuilder reset() {
-        return this;
     }
 }
