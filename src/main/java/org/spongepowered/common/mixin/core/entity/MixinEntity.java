@@ -48,9 +48,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.IgniteableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
@@ -83,6 +85,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
@@ -574,14 +577,17 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.entityUniqueID;
     }
 
+    @Override
     public Optional<Entity> getPassenger() {
         return Optional.ofNullable((Entity) this.riddenByEntity);
     }
 
+    @Override
     public Optional<Entity> getVehicle() {
         return Optional.ofNullable((Entity) this.ridingEntity);
     }
 
+    @Override
     public Entity getBaseVehicle() {
         if (this.ridingEntity == null) {
             return this;
@@ -594,30 +600,45 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return (Entity) baseVehicle;
     }
 
-    public boolean setPassenger(@Nullable Entity entity) {
+    @Override
+    public DataTransactionResult setPassenger(@Nullable Entity entity) {
         net.minecraft.entity.Entity passenger = (net.minecraft.entity.Entity) entity;
-        if (this.riddenByEntity == null) { // no existing passenger
-            if (passenger == null) {
-                return true;
-            }
-
-            Entity thisEntity = this;
-            passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
-        } else { // passenger already exists
-            this.riddenByEntity.mountEntity(null); // eject current passenger
-
-            if (passenger != null) {
-                Entity thisEntity = this;
-                passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
-            }
+        if (this.riddenByEntity == null && entity == null) {
+            return DataTransactionResult.successNoData();
         }
+        Entity thisEntity = this;
+        DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (this.riddenByEntity != null) {
+            final Entity previous = ((Entity) this.riddenByEntity);
+            this.riddenByEntity.mountEntity(null); // eject current passenger
+            builder.replace(new ImmutableSpongeValue<>(Keys.PASSENGER, previous.createSnapshot()));
+        }
+        if (passenger != null) {
+            passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
+            builder.success(new ImmutableSpongeValue<>(Keys.PASSENGER, ((Entity) passenger).createSnapshot()));
+            return builder.build();
+        }
+        return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
-        return true;
     }
 
-    public boolean setVehicle(@Nullable Entity entity) {
-        mountEntity((net.minecraft.entity.Entity) entity);
-        return true;
+    @Override
+    public DataTransactionResult setVehicle(@Nullable Entity entity) {
+        if (this.ridingEntity == null && entity == null) {
+            return DataTransactionResult.successNoData();
+        }
+        DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (this.ridingEntity != null) {
+            Entity formerVehicle = (Entity) this.ridingEntity;
+            mountEntity(null);
+            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, formerVehicle.createSnapshot()));
+        }
+        if (entity != null) {
+            net.minecraft.entity.Entity newVehicle = ((net.minecraft.entity.Entity) entity);
+            mountEntity(newVehicle);
+            builder.success(new ImmutableSpongeValue<>(Keys.VEHICLE, entity.createSnapshot()));
+        }
+        return builder.result(DataTransactionResult.Type.SUCCESS).build();
     }
 
     // for sponge internal use only
