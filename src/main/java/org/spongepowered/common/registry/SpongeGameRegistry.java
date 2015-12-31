@@ -146,13 +146,13 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public <T extends CatalogType> SpongeGameRegistry registerModule(Class<T> catalogClass, CatalogRegistryModule<T> registryModule) {
         checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
+        this.catalogRegistryMap.put(catalogClass, registryModule);
         if (this.phase != RegistrationPhase.PRE_REGISTRY) {
             if (catalogClass.getName().contains("org.spongepowered.api")) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
             syncModules();
         }
-        this.catalogRegistryMap.put(catalogClass, registryModule);
         return this;
     }
 
@@ -183,7 +183,6 @@ public class SpongeGameRegistry implements GameRegistry {
         }
         this.orderedModules.clear();
         this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
-        this.orderedModules.forEach(temp -> SpongeImpl.getLogger().info("Registered: " + temp.getSimpleName()));
     }
 
     @Override
