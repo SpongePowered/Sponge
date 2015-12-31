@@ -198,7 +198,7 @@ public class SpongePaginationService implements PaginationService {
         }
 
         @Override
-        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context, Location<World> location) {
+        public List<String> complete(CommandSource src, CommandArgs args, CommandContext context) {
             SourcePaginations paginations = getPaginationState(src, false);
             if (paginations == null) {
                 return ImmutableList.of();
