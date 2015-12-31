@@ -30,7 +30,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.ProviderExistsException;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -74,8 +73,7 @@ public final class SpongeBootstrap {
         registerService(UserStorageService.class, new SpongeUserStorageService());
         registerService(BanService.class, new SpongeBanService());
         registerService(WhitelistService.class, new SpongeWhitelistService());
-        SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class)
-                .executeWhenPresent(input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
+        SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }
 
     public static void initializeCommands() {
@@ -84,14 +82,8 @@ public final class SpongeBootstrap {
         Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }
 
-    private static <T> boolean registerService(Class<T> serviceClass, T serviceImpl) {
-        try {
-            SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
-            return true;
-        } catch (ProviderExistsException e) {
-            SpongeImpl.getLogger().warn("Non-Sponge {} already registered: {}", serviceClass.getSimpleName(), e.getLocalizedMessage());
-            return false;
-        }
+    private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
+        SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
     }
 
     public static void registerWorlds() {

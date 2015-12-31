@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeInternalListeners;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -69,7 +70,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
         if (SpongeImpl.isInitialized()) {
-            SpongeImpl.getGame().getServiceManager().potentiallyProvide(PermissionService.class).executeWhenPresent(new SubjectSettingCallback(this));
+            SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
         }
     }
 
