@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.FoodStats;
@@ -64,6 +66,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
     private boolean affectsSpawning = true;
+    private BlockPos compassLocation;
 
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
@@ -134,5 +137,25 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Override
     public void setAffectsSpawning(boolean affectsSpawning) {
         this.affectsSpawning = affectsSpawning;
+    }
+
+    @Override
+    public BlockPos getCompassLocation() {
+        return compassLocation;
+    }
+
+    @Override
+    public void setCompassLocation(BlockPos compassLocation) {
+
+        if(compassLocation == null) {
+            compassLocation = worldObj.getSpawnPoint();
+        }
+
+        if(((Object) this) instanceof EntityPlayerMP) {
+            ((EntityPlayerMP) (Object) this).playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(compassLocation));
+        } else if(!worldObj.isRemote) {
+            worldObj.setSpawnPoint(compassLocation);
+        }
+        this.compassLocation = compassLocation;
     }
 }
