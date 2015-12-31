@@ -70,4 +70,5 @@ public class StaticMixinHelper {
     public static Class runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
+    public static boolean convertingMapFormat = false;
 }

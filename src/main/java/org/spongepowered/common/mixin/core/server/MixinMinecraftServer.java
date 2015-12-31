@@ -94,6 +94,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -299,7 +300,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generator) {
+        StaticMixinHelper.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
+        StaticMixinHelper.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
         List<Integer> idList = new LinkedList<>();

@@ -71,6 +71,7 @@ import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.ArrayList;
@@ -154,6 +155,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
+        if (name.equals("MpServer")) {
+            return;
+        }
+
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
         setDimensionType(creationSettings.getDimensionType());
         if (((IMixinWorldSettings)(Object) settings).getDimensionId() != null) {
@@ -175,7 +180,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
-        onConstruction(ci);
+        if (!StaticMixinHelper.convertingMapFormat) {
+            onConstruction(ci);
+        }
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
