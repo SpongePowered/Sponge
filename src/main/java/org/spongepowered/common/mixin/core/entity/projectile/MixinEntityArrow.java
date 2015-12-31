@@ -27,12 +27,15 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+
+import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -55,6 +58,11 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
             return (ProjectileSource) this.shootingEntity;
         }
         return ProjectileSource.UNKNOWN;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        manipulators.add(getKnockbackData());
     }
 
     @Override

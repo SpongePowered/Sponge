@@ -529,7 +529,7 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
                 ImmutableSpongeInvisibilityData.class, invisibilityDataProcessor);
         dataManager.registerValueProcessor(Keys.INVISIBLE, invisibilityDataProcessor);
-        
+
         final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
         dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
@@ -809,6 +809,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
                 ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
         dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
+
+        final KnockbackDualProcessor knockbackDualProcessor = new KnockbackDualProcessor();
+        dataManager.registerDataProcessorAndImpl(KnockbackData.class, SpongeKnockbackData.class, ImmutableKnockbackData.class,
+                ImmutableSpongeKnockbackData.class, knockbackDualProcessor);
+        dataManager.registerValueProcessor(Keys.KNOCKBACK_STRENGTH, knockbackDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
