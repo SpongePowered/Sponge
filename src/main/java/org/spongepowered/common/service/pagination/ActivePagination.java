@@ -66,11 +66,11 @@ abstract class ActivePagination {
         this.header = header;
         this.footer = footer;
         this.padding = padding;
-        this.nextPageText = t("»").builder()
+        this.nextPageText = t("»").toBuilder()
                 .color(TextColors.BLUE)
                 .style(TextStyles.UNDERLINE)
                 .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " next")).build();
-        this.prevPageText = t("«").builder()
+        this.prevPageText = t("«").toBuilder()
                 .color(TextColors.BLUE)
                 .style(TextStyles.UNDERLINE)
                 .onClick(TextActions.runCommand("/pagination " + this.id.toString() + " prev")).build();
