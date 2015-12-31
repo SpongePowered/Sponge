@@ -57,6 +57,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -76,6 +77,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.config.SpongeConfig;
@@ -816,5 +819,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return Optional.of((Scoreboard) world.getScoreboard());
         }
         return Optional.empty();
+    }
+
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir, ArrayList arraylist, String astring[], String s1, String astring1[], int i) {
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender), ImmutableList.copyOf(arraylist), arraylist, input);
+        Sponge.getEventManager().post(event);
+        if (event.isCancelled()) {
+            cir.setReturnValue(new ArrayList<>());
+        } else {
+            cir.setReturnValue(event.getTabCompletions());
+        }
     }
 }

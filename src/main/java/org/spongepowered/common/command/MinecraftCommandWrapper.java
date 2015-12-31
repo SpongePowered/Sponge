@@ -45,9 +45,12 @@ import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -57,6 +60,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -204,11 +209,12 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public List<String> getSuggestions(CommandSource source, String arguments) throws CommandException {
-        if (arguments.length() == 0 || !testPermission(source)) {
+        if (!testPermission(source)) {
             return ImmutableList.of();
         }
+        // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), splitArgs(arguments), null);
+        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), null);
         if (suggestions == null) {
             return ImmutableList.of();
         }
