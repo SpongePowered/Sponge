@@ -108,8 +108,12 @@ public class SpongeCommonEventFactory {
 
     public static ChangeInventoryEvent.Held callChangeInventoryHeldEvent(EntityPlayerMP player,
             C09PacketHeldItemChange packetIn) {
-        Slot sourceSlot = player.openContainer.getSlot(player.inventory.currentItem);
-        Slot targetSlot = player.openContainer.getSlot(packetIn.getSlotId());
+        Slot sourceSlot = player.inventoryContainer.getSlot(player.inventory.currentItem + player.inventory.mainInventory.length);
+        Slot targetSlot = player.inventoryContainer.getSlot(packetIn.getSlotId() + player.inventory.mainInventory.length);
+        if (sourceSlot == null || targetSlot == null) {
+            return null; // should never happen but just in case it does
+        }
+
         ItemStackSnapshot sourceSnapshot =
                 sourceSlot.getStack() != null ? ((org.spongepowered.api.item.inventory.ItemStack) sourceSlot.getStack()).createSnapshot()
                         : ItemStackSnapshot.NONE;
