@@ -332,8 +332,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         final List<Integer> idList = new LinkedList<>();
         if (getAllowNether()) {
             idList.addAll(Arrays.asList(DimensionManager.getStaticDimensionIDs()));
+            // Ensure that we'll load in Vanilla order then plugins
+            idList.remove(Integer.valueOf(0));
+            idList.add(0, 0);
+            if (idList.remove(Integer.valueOf(-1))) {
+                idList.add(1, -1);
+            }
+            if (idList.remove(Integer.valueOf(1))) {
+                idList.add(2, 1);
+            }
         } else {
-            idList.add(0);
+            idList.add(0, 0);
         }
 
         for (int dim : idList) {
@@ -450,16 +459,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
 
+        // Skip other dimensions if multi-world is turned off.
+        if (!getAllowNether()) {
+            return;
+        }
+
         for (File worldCandidateFile : worldCandidateFiles) {
             final File levelData = new File(worldCandidateFile, "level_sponge.dat");
 
             // This method only handles registering existing Sponge worlds (and in directories for that matter).
             if (!worldCandidateFile.isDirectory() || !levelData.exists()) {
-                continue;
-            }
-
-            // Skip other dimensions if multi-world is turned off.
-            if (!MinecraftServer.getServer().getAllowNether()) {
                 continue;
             }
 
@@ -475,25 +484,32 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
                 final NBTTagCompound spongeData = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
 
-                if (!spongeData.hasKey("dimensionId")) {
+                if (!spongeData.hasKey(NbtDataUtil.DIMENSION_ID)) {
                     SpongeImpl.getLogger().error("World [{}] has no dimension id. This is a critical error and should be reported to Sponge ASAP.",
                             worldCandidateFile.getName());
                     continue;
                 }
 
-                final int dimensionId = spongeData.getInteger("dimensionId");
-                String dimensionType = spongeData.getString("dimensionType");
+                final int dimensionId = spongeData.getInteger(NbtDataUtil.DIMENSION_ID);
+                String dimensionType = "overworld";
 
-                // Temporary fix for old data, remove in future build
-                if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderSurface")) {
-                    dimensionType = "overworld";
-                } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderHell")) {
-                    dimensionType = "nether";
-                } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderEnd")) {
-                    dimensionType = "the_end";
+                if (spongeData.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
+                    dimensionType = spongeData.getString(NbtDataUtil.DIMENSION_TYPE);
+
+                    // Temporary fix for old data, remove in future build
+                    if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderSurface")) {
+                        dimensionType = "overworld";
+                    } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderHell")) {
+                        dimensionType = "nether";
+                    } else if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderEnd")) {
+                        dimensionType = "the_end";
+                    }
+                } else {
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [overworld]...",
+                            worldCandidateFile.getName(), dimensionId);
                 }
 
-                spongeData.setString("dimensionType", dimensionType);
+                spongeData.setString(NbtDataUtil.DIMENSION_TYPE, dimensionType);
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimensionType, worldCandidateFile.getName());
 
                 if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
@@ -502,8 +518,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     continue;
                 }
 
-                if (spongeData.hasKey("uuid_most") && spongeData.hasKey("uuid_least")) {
-                    final UUID uuid = new UUID(spongeData.getLong("uuid_most"), spongeData.getLong("uuid_least"));
+                if (spongeData.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeData.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+                    final UUID uuid = new UUID(spongeData.getLong(NbtDataUtil.WORLD_UUID_MOST), spongeData.getLong(NbtDataUtil.WORLD_UUID_LEAST));
                     DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldCandidateFile.getName());
                 } else {
                     SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
@@ -512,7 +528,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 DimensionRegistryModule.getInstance().getAll().forEach(type -> {
-                    if (type.getId().equalsIgnoreCase(spongeData.getString("dimensionType"))) {
+                    if (type.getId().equalsIgnoreCase(spongeData.getString(NbtDataUtil.DIMENSION_TYPE))) {
                         DimensionRegistryModule.getInstance().registerWorldDimensionId(dimensionId, worldCandidateFile.getName());
                         if (!DimensionManager.isDimensionRegistered(dimensionId)) {
                             DimensionManager.registerDimension(dimensionId,
@@ -526,17 +542,36 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Overwrite
     protected void initialWorldChunkLoad() {
-        for (WorldServer worldserver : DimensionManager.getWorlds()) {
-            prepareSpawnArea(worldserver);
+        final List<WorldServer> worldServers = new LinkedList<>(Arrays.asList(DimensionManager.getWorlds()));
+        final WorldServer overworld = DimensionManager.getWorldFromDimId(0);
+
+        if (getAllowNether()) {
+            worldServers.remove(DimensionManager.getWorldFromDimId(0));
+            worldServers.add(0, overworld);
+
+            final WorldServer nether = DimensionManager.getWorldFromDimId(-1);
+
+            if (worldServers.remove(nether)) {
+                worldServers.add(1, nether);
+            }
+
+            final WorldServer the_end = DimensionManager.getWorldFromDimId(1);
+
+            if (worldServers.remove(the_end)) {
+                worldServers.add(2, the_end);
+            }
+        } else {
+            worldServers.add(0, overworld);
         }
 
+        worldServers.forEach(this::prepareSpawnArea);
         this.clearCurrentTask();
     }
 
     protected void prepareSpawnArea(WorldServer world) {
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level " + world.provider.getDimensionId());
+        logger.info("Preparing start region for level {} ({})", world.provider.getDimensionId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -559,18 +594,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<World> loadWorld(UUID uuid) {
-        String worldFolder = DimensionRegistryModule.getInstance().getWorldFolder(uuid);
-        if (worldFolder != null) {
-            return loadWorld(worldFolder);
+        checkNotNull(uuid);
+        final String worldFolder = DimensionRegistryModule.getInstance().getWorldFolder(uuid);
+        if (worldFolder == null) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        return loadWorld(worldFolder);
     }
 
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
-        if (properties == null) {
-            return Optional.empty();
-        }
+        checkNotNull(properties);
         return loadWorld(properties.getWorldName());
     }
 

@@ -57,6 +57,10 @@ public class WorldMigrator {
         final Path oldWorldContainer = getOldWorldContainer();
         final List<Path> migrated = new ArrayList<>();
 
+        if (Files.notExists(oldWorldContainer)) {
+            return;
+        }
+
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(oldWorldContainer,
                 entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")))) {
             for (Path oldWorldPath : stream) {
