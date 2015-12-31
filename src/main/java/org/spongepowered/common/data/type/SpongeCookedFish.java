@@ -29,31 +29,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
+import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeCookedFish implements CookedFish {
+public class SpongeCookedFish extends SpongeCatalogType.Translatable implements CookedFish {
 
-    private final String id;
-    private final String name;
     public final ItemFishFood.FishType fish;
 
-    public SpongeCookedFish(String id, String name, ItemFishFood.FishType fish) {
-        this.id = checkNotNull(id);
-        this.name = checkNotNull(name);
+    public SpongeCookedFish(String id, Translation translation, ItemFishFood.FishType fish) {
+        super("cooked." + id, translation);
         this.fish = checkNotNull(fish);
-    }
-
-    @Override
-    public String getId() {
-        return "cooked." + this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override
     public Fish getRawFish() {
         return (Fish) (Object) this.fish;
     }
+
 }

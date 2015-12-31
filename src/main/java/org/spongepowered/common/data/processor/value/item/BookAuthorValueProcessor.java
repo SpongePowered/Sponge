@@ -33,12 +33,12 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
@@ -69,7 +69,7 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<ItemS
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        container.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, Texts.legacy().to(value));
+        container.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, SpongeTexts.toLegacy(value));
         return true;
     }
 
@@ -79,13 +79,13 @@ public class BookAuthorValueProcessor extends AbstractSpongeValueProcessor<ItemS
             return Optional.empty();
         }
         final String json = container.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
-        final Text author = Texts.json().fromUnchecked(json);
+        final Text author = TextSerializers.JSON.deserialize(json);
         return Optional.of(author);
     }
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Texts.of(), value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
     }
 
 }

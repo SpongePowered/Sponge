@@ -31,7 +31,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.text.SpongeTexts;
@@ -56,7 +55,7 @@ public class EntityLastCommandOutputValueProcessor extends AbstractSpongeValuePr
 
     @Override
     protected boolean set(EntityMinecartCommandBlock container, Optional<Text> value) {
-        container.getCommandBlockLogic().setLastOutput(SpongeTexts.toComponent(value.orElse(Texts.of())));
+        container.getCommandBlockLogic().setLastOutput(SpongeTexts.toComponent(value.orElse(Text.of())));
         return true;
     }
 

@@ -62,7 +62,7 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
@@ -91,6 +91,7 @@ import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.sink.SpongeMessageSinkFactory;
 import org.spongepowered.common.util.ServerUtils;
 import org.spongepowered.common.util.SpongeHooks;
@@ -226,7 +227,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @SuppressWarnings("deprecation")
     @Override
     public Text getMotd() {
-        return Texts.legacy().fromUnchecked(this.motd);
+        return SpongeTexts.fromLegacy(this.motd);
     }
 
     @Override

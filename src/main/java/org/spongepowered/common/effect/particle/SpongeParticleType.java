@@ -24,31 +24,28 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import com.google.common.base.Objects.ToStringHelper;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.common.SpongeCatalogType;
 
-
-public class SpongeParticleType implements ParticleType {
+public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
 
     private EnumParticleTypes type;
     private boolean motion;
 
     public SpongeParticleType(EnumParticleTypes type, boolean motion) {
+        super(type.name());
         this.motion = motion;
         this.type = type;
     }
 
     public EnumParticleTypes getInternalType() {
         return this.type;
-    }
-
-    @Override
-    public String getId() {
-        return this.type.name();
     }
 
     @Override
@@ -59,6 +56,12 @@ public class SpongeParticleType implements ParticleType {
     @Override
     public boolean hasMotion() {
         return this.motion;
+    }
+
+    @Override
+    protected ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("type", this.type);
     }
 
     public static class Colorable extends SpongeParticleType implements ParticleType.Colorable {
@@ -73,6 +76,12 @@ public class SpongeParticleType implements ParticleType {
         @Override
         public Color getDefaultColor() {
             return this.color;
+        }
+
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("color", this.color);
         }
 
     }
@@ -91,6 +100,12 @@ public class SpongeParticleType implements ParticleType {
             return this.size;
         }
 
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("size", this.size);
+        }
+
     }
 
     public static class Note extends SpongeParticleType implements ParticleType.Note {
@@ -105,6 +120,12 @@ public class SpongeParticleType implements ParticleType {
         @Override
         public NotePitch getDefaultNote() {
             return this.note;
+        }
+
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("note", this.note);
         }
 
     }
@@ -123,6 +144,12 @@ public class SpongeParticleType implements ParticleType {
             return this.item.copy();
         }
 
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("item", this.item);
+        }
+
     }
 
     public static class Block extends SpongeParticleType implements ParticleType.Block {
@@ -137,6 +164,12 @@ public class SpongeParticleType implements ParticleType {
         @Override
         public BlockState getDefaultBlockState() {
             return this.block;
+        }
+
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return super.toStringHelper()
+                    .add("block", this.block);
         }
 
     }

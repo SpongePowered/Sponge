@@ -28,8 +28,6 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -46,8 +44,8 @@ import java.util.UUID;
  */
 abstract class ActivePagination {
 
-    private static final Text SLASH_TEXT = Texts.of("/");
-    private static final Text DIVIDER_TEXT = Texts.of(" ");
+    private static final Text SLASH_TEXT = Text.of("/");
+    private static final Text DIVIDER_TEXT = Text.of(" ");
     private final WeakReference<CommandSource> src;
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
@@ -157,16 +155,16 @@ abstract class ActivePagination {
         boolean hasPrevious = hasPrevious(currentPage);
         boolean hasNext = hasNext(currentPage);
 
-        TextBuilder ret = Texts.builder();
+        Text.Builder ret = Text.builder();
         if (hasPrevious) {
             ret.append(this.prevPageText).append(DIVIDER_TEXT);
         } else {
-            ret.append(Texts.of("«")).append(DIVIDER_TEXT);
+            ret.append(Text.of("«")).append(DIVIDER_TEXT);
         }
         boolean needsDiv = false;
         int totalPages = getTotalPages();
         if (totalPages > 1) {
-            ret.append(Texts.of(currentPage)).append(SLASH_TEXT).append(Texts.of(totalPages));
+            ret.append(Text.of(currentPage)).append(SLASH_TEXT).append(Text.of(totalPages));
             needsDiv = true;
         }
         if (hasNext) {
@@ -178,7 +176,7 @@ abstract class ActivePagination {
             if (needsDiv) {
                 ret.append(DIVIDER_TEXT);
             }
-            ret.append(Texts.of("»"));
+            ret.append(Text.of("»"));
         }
         if (this.title != null) {
             ret.color(this.title.getColor());

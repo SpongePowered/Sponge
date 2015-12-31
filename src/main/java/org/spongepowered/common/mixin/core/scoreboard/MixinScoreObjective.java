@@ -28,7 +28,7 @@ import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,6 +39,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinScoreboard;
 import org.spongepowered.common.scoreboard.SpongeObjective;
+import org.spongepowered.common.text.SpongeTexts;
 
 @Mixin(ScoreObjective.class)
 public abstract class MixinScoreObjective implements IMixinScoreObjective {
@@ -68,7 +69,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
             ci.cancel();
             return;
         }
-        this.spongeObjective.setDisplayName(Texts.legacy().fromUnchecked(name));
+        this.spongeObjective.setDisplayName(SpongeTexts.fromLegacy(name));
         ci.cancel();
     }
 

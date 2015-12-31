@@ -26,29 +26,41 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(EnumDyeColor.class)
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
-public abstract class MixinEnumDyeColor {
+public abstract class MixinEnumDyeColor implements DyeColor {
 
-    @Shadow
-    private String name;
+    @Shadow private String name;
+    @Shadow private String unlocalizedName;
+
+    private Translation translation;
 
     public String dye$getName() {
         return this.name;
     }
 
     public String dye$getId() {
-        return this.name;
+        return getName();
     }
 
     public Color dye$getColor() {
         return Color.ofRgb(((EnumDyeColor) (Object) this).getMapColor().colorValue);
+    }
+
+    public Translation dye$getTranslation() {
+        // Maybe move this to a @Inject at the end of the constructor
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("item.dyePowder." + this.unlocalizedName + ".name");
+        }
+        return this.translation;
     }
 
 }

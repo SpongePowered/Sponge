@@ -27,41 +27,37 @@ package org.spongepowered.common.mixin.api.text;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentTranslation;
-import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinChatComponentTranslation;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
 
-@Mixin(value = Text.Translatable.class, remap = false)
+@Mixin(value = TranslatableText.class, remap = false)
 public abstract class MixinTextTranslatable extends MixinText {
 
     @Shadow protected Translation translation;
     @Shadow protected ImmutableList<Object> arguments;
 
     @Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        ChatComponentTranslation ret = new ChatComponentTranslation(this.translation instanceof SpongeTranslation ? this.translation.getId() :
-                this.translation.get(locale), unwrapArguments(this.arguments, locale));
-        ((IMixinChatComponentTranslation) ret).setTranslation(this.translation);
-        return ret;
+    protected ChatComponentStyle createComponent() {
+        return new ChatComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
     }
 
-    private Object[] unwrapArguments(ImmutableList<Object> args, Locale locale) {
-        Object[] ret = new Object[args.size()];
-        for (int i = 0; i < args.size(); ++i) {
+    private Object[] unwrapArguments(ImmutableList<Object> args) {
+        Object[] result = new Object[args.size()];
+        for (int i = 0; i < args.size(); i++) {
             final Object arg = args.get(i);
             if (arg instanceof IMixinText) {
-                ret[i] = ((IMixinText) arg).toComponent(locale);
+                result[i] = ((IMixinText) arg).toComponent();
             } else {
-                ret[i] = arg;
+                result[i] = arg;
             }
         }
-        return ret;
+        return result;
     }
 
 }

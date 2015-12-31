@@ -43,4 +43,5 @@ public abstract class MixinEnumVisible implements Visibility {
     public String getName() {
         return this.field_178830_e;
     }
+
 }

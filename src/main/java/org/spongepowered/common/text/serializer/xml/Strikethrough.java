@@ -22,17 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text.xml;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.text.TextBuilder;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextStyles;
 
 import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlSeeAlso;
 
+@XmlSeeAlso(Strikethrough.S.class)
 @XmlRootElement
-public class I extends Element {
+public class Strikethrough extends Element {
+
     @Override
-    protected void modifyBuilder(TextBuilder builder) {
-        builder.style(TextStyles.ITALIC);
+    protected void modifyBuilder(Text.Builder builder) {
+        builder.style(TextStyles.STRIKETHROUGH);
+    }
+
+    @XmlRootElement
+    public static class S extends Strikethrough {
+
     }
 }

@@ -30,14 +30,14 @@ import java.util.Locale;
 
 public interface IMixinText {
 
-    IChatComponent toComponent(Locale locale);
+    IChatComponent toComponent();
 
-    String toPlain(Locale locale);
+    String toPlain();
 
-    String toJson(Locale locale);
+    String toJson();
 
     String getLegacyFormatting();
 
-    String toLegacy(char code, Locale locale);
+    String toLegacy(char code);
 
 }

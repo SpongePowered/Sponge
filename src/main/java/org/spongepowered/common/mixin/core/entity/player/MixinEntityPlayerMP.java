@@ -57,13 +57,11 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
 import org.spongepowered.api.text.title.Title;
-import org.spongepowered.api.text.title.Titles;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.World;
@@ -172,51 +170,31 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void sendMessage(ChatType type, Text message) {
+        IChatComponent component = SpongeTexts.toComponent(message);
         if (type == ChatTypes.ACTION_BAR) {
-            message = SpongeTexts.fixActionBarFormatting(message);
+            component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(message, getLocale()),
-                ((SpongeChatType) type).getByteId()));
+        this.playerNetServerHandler.sendPacket(new S02PacketChat(component, ((SpongeChatType) type).getByteId()));
     }
 
     @Override
     public void sendMessages(ChatType type, Text... messages) {
         for (Text text : messages) {
-            if (type == ChatTypes.ACTION_BAR) {
-                text = SpongeTexts.fixActionBarFormatting(text);
-            }
-
-            this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
-                    ((SpongeChatType) type).getByteId()));
+            sendMessage(type, text);
         }
     }
 
     @Override
     public void sendMessages(ChatType type, Iterable<Text> messages) {
         for (Text text : messages) {
-            if (type == ChatTypes.ACTION_BAR) {
-                text = SpongeTexts.fixActionBarFormatting(text);
-            }
-
-            this.playerNetServerHandler.sendPacket(new S02PacketChat(SpongeTexts.toComponent(text, getLocale()),
-                    ((SpongeChatType) type).getByteId()));
+            sendMessages(type, text);
         }
     }
 
     @Override
     public void sendTitle(Title title) {
-        ((IMixinTitle) title).send((EntityPlayerMP) (Object) this);
-    }
-
-    @Override
-    public void resetTitle() {
-        sendTitle(Titles.RESET);
-    }
-
-    @Override
-    public void clearTitle() {
-        sendTitle(Titles.CLEAR);
+        ((IMixinTitle) (Object) title).send((EntityPlayerMP) (Object) this);
     }
 
     @Override
@@ -348,7 +326,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Text getTeamRepresentation() {
-        return Texts.of(this.getName());
+        return Text.of(this.getName());
     }
 
     @Override
@@ -382,12 +360,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void kick() {
-        kick(Texts.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
+        kick(Text.of(SpongeImpl.getGame().getRegistry().getTranslationById("disconnect.disconnected").get()));
     }
 
     @Override
     public void kick(Text message) {
-        final IChatComponent component = SpongeTexts.toComponent(message, getLocale());
+        final IChatComponent component = SpongeTexts.toComponent(message);
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
 

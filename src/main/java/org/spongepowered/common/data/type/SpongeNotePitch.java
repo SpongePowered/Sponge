@@ -24,28 +24,17 @@
  */
 package org.spongepowered.common.data.type;
 
-import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.NotePitch;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.data.processor.common.NoteUtils;
 
-public class SpongeNotePitch implements NotePitch {
+public class SpongeNotePitch extends SpongeCatalogType implements NotePitch {
 
     private final byte id;
-    private final String name;
 
     public SpongeNotePitch(byte id, String name) {
+        super(name);
         this.id = id;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     public byte getByteId() {
@@ -57,21 +46,4 @@ public class SpongeNotePitch implements NotePitch {
         return NoteUtils.getNext(this);
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeNotePitch other = (SpongeNotePitch) obj;
-        return Objects.equal(this.id, other.id)
-               && Objects.equal(this.name, other.name);
-    }
 }

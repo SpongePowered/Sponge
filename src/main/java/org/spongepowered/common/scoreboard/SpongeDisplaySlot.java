@@ -24,32 +24,22 @@
  */
 package org.spongepowered.common.scoreboard;
 
-import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.text.format.TextColor;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Optional;
 
-public class SpongeDisplaySlot implements DisplaySlot {
+public class SpongeDisplaySlot extends SpongeCatalogType implements DisplaySlot {
 
-    private String name;
     private Optional<TextColor> textColor;
     private int id;
 
     public SpongeDisplaySlot(String name, TextColor textColor, int id) {
-        this.name = name;
+        super(name);
         this.textColor = Optional.ofNullable(textColor);
         this.id = id;
-    }
-
-    @Override
-    public String getId() {
-        return this.name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override
@@ -60,25 +50,11 @@ public class SpongeDisplaySlot implements DisplaySlot {
     public int getIndex() {
         return this.id;
     }
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        SpongeDisplaySlot other = (SpongeDisplaySlot) obj;
-        if (this.getTeamColor() != other.getTeamColor()) {
-            return false;
-        } else if (!this.name.equals(other.name)) {
-            return false;
-        }
-        return true;
-    }
 
     @Override
-    public int hashCode() {
-        return Objects.hashCode(this.name, this.textColor.orElse(null), this.id);
+    protected ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("color", this.textColor);
     }
+
 }

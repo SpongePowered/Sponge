@@ -33,7 +33,6 @@ import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableOptionalValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeCommandData;
 import org.spongepowered.common.data.util.DataConstants;
@@ -102,7 +101,7 @@ public class ImmutableSpongeCommandData extends AbstractImmutableData<ImmutableC
                 .setSuccessCount(this.success)
                 .setStoredCommand(this.storedCommand)
                 .shouldTrackOutput(this.tracks)
-                .setLastOutput(this.lastOutput == null ? Texts.of() : this.lastOutput);
+                .setLastOutput(this.lastOutput == null ? Text.of() : this.lastOutput);
     }
 
     @Override

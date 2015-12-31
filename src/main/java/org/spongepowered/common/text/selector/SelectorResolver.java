@@ -44,7 +44,6 @@ import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.Argument.Invertible;
 import org.spongepowered.api.text.selector.ArgumentHolder;
@@ -237,7 +236,7 @@ public class SelectorResolver {
             final boolean inverted = nameOpt.get().isInverted();
             filters.add(input -> {
                 Optional<DisplayNameData> dispName = input.get(DisplayNameData.class);
-                return inverted ^ (dispName.isPresent() && name.equals(Texts.toPlain(dispName.get().displayName().get())));
+                return inverted ^ (dispName.isPresent() && name.equals(dispName.get().displayName().get().toPlain()));
             });
         }
     }

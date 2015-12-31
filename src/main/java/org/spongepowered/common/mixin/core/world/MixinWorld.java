@@ -140,7 +140,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.sink.MessageSink;
 import org.spongepowered.api.text.sink.MessageSinks;
@@ -485,16 +484,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
         MessageSink sink = MessageSinks.toNone();
         MessageSink originalSink = MessageSinks.toNone();
-        Text originalMessage = Texts.of();
-        Text message = Texts.of();
+        Text originalMessage = Text.of();
+        Text message = Text.of();
 
         if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
 
             DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalMessage, message,
                 originalSink, sink, (Entity) entityIn);
             SpongeImpl.getGame().getEventManager().post(event);
-            Text returned = Texts.format(event.getMessage());
-            if (returned != Texts.of()) {
+            Text returned = event.getMessage();
+            if (returned != Text.of()) {
                 event.getSink().sendMessage(returned);
             }
         }
@@ -949,10 +948,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     MessageSink originalSink = spongePlayer.getMessageSink();
                     MessageSink sink = spongePlayer.getMessageSink();
 
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, Texts.of(), Texts.of(), originalSink, sink, (Entity) entity);
+                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, Text.of(), Text.of(), originalSink, sink, (Entity) entity);
                     SpongeImpl.getGame().getEventManager().post(event);
-                    Text returned = Texts.format(event.getMessage());
-                    if (returned != Texts.of()) {
+                    Text returned = event.getMessage();
+                    if (returned != Text.of()) {
                         event.getSink().sendMessage(returned);
                     }
 

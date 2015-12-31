@@ -33,6 +33,7 @@ import org.spongepowered.api.data.type.CoalTypes;
 import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.registry.CatalogRegistryModule;
 import org.spongepowered.common.registry.util.RegisterCatalog;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.Map;
@@ -55,7 +56,7 @@ public final class CoalTypeRegistryModule implements CatalogRegistryModule<CoalT
 
     @Override
     public void registerDefaults() {
-        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL"));
-        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL"));
+        this.coaltypeMappings.put("coal", new SpongeCoalType(0, "COAL", new SpongeTranslation("item.coal.name")));
+        this.coaltypeMappings.put("charcoal", new SpongeCoalType(1, "CHARCOAL", new SpongeTranslation("item.charcoal.name")));
     }
 }

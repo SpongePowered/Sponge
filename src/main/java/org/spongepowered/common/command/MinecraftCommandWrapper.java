@@ -38,7 +38,6 @@ import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
@@ -90,7 +89,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public CommandResult process(CommandSource source, String arguments) throws CommandException {
 
         if (!testPermission(source)) {
-            throw new CommandPermissionException(Texts.of(SpongeImpl.getGame().getRegistry()
+            throw new CommandPermissionException(Text.of(SpongeImpl.getGame().getRegistry()
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
@@ -179,7 +178,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (translation == null) {
             return Optional.empty();
         }
-        return Optional.of((Text) Texts.of(new SpongeTranslation(translation)));
+        return Optional.of((Text) Text.of(new SpongeTranslation(translation)));
     }
 
     @Override
@@ -200,7 +199,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
             out.append(s);
             out.append(" ");
         }
-        return Texts.of(out.toString().trim());
+        return Text.of(out.toString().trim());
     }
 
     @Override

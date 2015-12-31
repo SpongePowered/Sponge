@@ -66,12 +66,10 @@ public abstract class MixinTitle implements IMixinTitle {
                 packets[i++] = new S45PacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20));
             }
             if (this.subtitle.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent(((Player) player)
-                        .getLocale()));
+                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent());
             }
             if (this.title.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent(((Player) player)
-                        .getLocale()));
+                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent());
             }
 
             this.packets = i == packets.length ? packets : Arrays.copyOf(packets, i);

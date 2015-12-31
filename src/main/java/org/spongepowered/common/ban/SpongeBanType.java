@@ -30,12 +30,10 @@ import org.spongepowered.common.entity.SpongeEntityMeta;
 
 public final class SpongeBanType extends SpongeEntityMeta implements BanType {
 
-    private String name;
     private Class<? extends Ban> banClass;
 
     public SpongeBanType(int id, String name, Class<? extends Ban> banClass) {
         super(id, name);
-        this.name = name;
         this.banClass = banClass;
     }
 
@@ -44,13 +42,4 @@ public final class SpongeBanType extends SpongeEntityMeta implements BanType {
         return this.banClass;
     }
 
-    @Override
-    public String getId() {
-        return this.name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
 }

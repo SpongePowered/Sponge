@@ -24,54 +24,42 @@
  */
 package org.spongepowered.common.data.type;
 
-import com.google.common.base.Objects;
 import org.spongepowered.api.data.type.SkullType;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeSkullType implements SkullType {
+public class SpongeSkullType extends SpongeCatalogType.Translatable implements SkullType {
 
     private final byte id;
-    private final String name;
 
-    public SpongeSkullType(byte id, String name) {
-        this.id = id;
-        this.name = name;
+    public SpongeSkullType(byte dataId, String name) {
+        this(dataId, name, translate(name));
     }
 
-    @Override
-    public String getId() {
-        return this.name; // todo later
+    public SpongeSkullType(byte dataId, String name, Translation translation) {
+        super(name, translation);
+        this.id = dataId;
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return null;
+    protected static Translation translate(String name) {
+        if (name.equalsIgnoreCase("SKELETON")) {
+            return new SpongeTranslation("item.skull.skeleton.name");
+        } else if (name.equalsIgnoreCase("WITHER_SKELETON")) {
+            return new SpongeTranslation("item.skull.wither.name");
+        } else if (name.equalsIgnoreCase("ZOMBIE")) {
+            return new SpongeTranslation("item.skull.zombie.name");
+        } else if (name.equalsIgnoreCase("PLAYER")) {
+            return new SpongeTranslation("item.skull.char.name");
+        } else if (name.equalsIgnoreCase("CREEPER")) {
+            return new SpongeTranslation("item.skull.creeper.name");
+        } else {
+            throw new IllegalArgumentException("Unsupported Skull Type \"" + name + "\"!");
+        }
     }
 
     public byte getByteId() {
         return this.id;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeSkullType other = (SpongeSkullType) obj;
-        return Objects.equal(this.id, other.id)
-               && Objects.equal(this.name, other.name);
-    }
 }

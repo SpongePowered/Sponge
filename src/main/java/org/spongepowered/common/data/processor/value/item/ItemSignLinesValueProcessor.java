@@ -36,11 +36,12 @@ import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 import java.util.Optional;
@@ -61,10 +62,10 @@ public class ItemSignLinesValueProcessor extends AbstractSpongeValueProcessor<It
         final NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(container);
         final NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
         tileCompound.setString(NbtDataUtil.BLOCK_ENTITY_ID, NbtDataUtil.SIGN);
-        tileCompound.setString("Text1", Texts.json().to(value.get(1)));
-        tileCompound.setString("Text2", Texts.json().to(value.get(2)));
-        tileCompound.setString("Text3", Texts.json().to(value.get(3)));
-        tileCompound.setString("Text4", Texts.json().to(value.get(4)));
+        tileCompound.setString("Text1", TextSerializers.JSON.serialize(value.get(1)));
+        tileCompound.setString("Text2", TextSerializers.JSON.serialize(value.get(2)));
+        tileCompound.setString("Text3", TextSerializers.JSON.serialize(value.get(3)));
+        tileCompound.setString("Text4", TextSerializers.JSON.serialize(value.get(4)));
         return true;
     }
 
@@ -85,10 +86,10 @@ public class ItemSignLinesValueProcessor extends AbstractSpongeValueProcessor<It
                 return Optional.empty();
             }
             final List<Text> texts = Lists.newArrayListWithCapacity(4);
-            texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text1")));
-            texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text2")));
-            texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text3")));
-            texts.add(Texts.legacy().fromUnchecked(tileCompound.getString("Text4")));
+            texts.add(SpongeTexts.fromLegacy(tileCompound.getString("Text1")));
+            texts.add(SpongeTexts.fromLegacy(tileCompound.getString("Text2")));
+            texts.add(SpongeTexts.fromLegacy(tileCompound.getString("Text3")));
+            texts.add(SpongeTexts.fromLegacy(tileCompound.getString("Text4")));
             return Optional.of(texts);
         }
     }

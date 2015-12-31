@@ -25,7 +25,6 @@
 package org.spongepowered.common.util;
 
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.translation.ResourceBundleTranslation;
 
 import java.util.Locale;
@@ -59,7 +58,7 @@ public class SpongeCommonTranslationHelper {
      * @return The translatable text
      */
     public static Text t(String key, Object... args) {
-        return Texts.of(new ResourceBundleTranslation(key, LOOKUP_FUNC), args);
+        return Text.of(new ResourceBundleTranslation(key, LOOKUP_FUNC), args);
     }
 
 }

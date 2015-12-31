@@ -32,7 +32,7 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.Texts;
+import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
@@ -74,7 +74,8 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
     @Override
     public int compareTo(ImmutableDisplayNameData o) {
         return ComparisonChain.start()
-                .compare(Texts.json().to(o.get(Keys.DISPLAY_NAME).get()), Texts.json().to(this.displayName))
+                .compare(TextSerializers.JSON.serialize(o.get(Keys.DISPLAY_NAME).get()),
+                        TextSerializers.JSON.serialize(this.displayName))
                 .compare(o.get(Keys.SHOWS_DISPLAY_NAME).get(), this.displays)
                 .result();
     }
@@ -82,7 +83,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<Immuta
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.DISPLAY_NAME.getQuery(), Texts.json().to(this.displayName))
+            .set(Keys.DISPLAY_NAME.getQuery(), TextSerializers.JSON.serialize(this.displayName))
             .set(Keys.SHOWS_DISPLAY_NAME, this.displays);
     }
 

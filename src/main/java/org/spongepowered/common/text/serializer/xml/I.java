@@ -22,29 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.text.serializer.xml;
 
-import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
-import org.spongepowered.common.text.ChatComponentPlaceholder;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextStyles;
 
-@Mixin(value = ChatComponentPlaceholder.class, remap = false)
-public abstract class MixinChatComponentPlaceholder extends MixinChatComponentStyle {
+import javax.xml.bind.annotation.XmlRootElement;
 
-    @Shadow(remap = false) private String placeholderKey;
-    @Shadow(remap = false) private IChatComponent fallback;
-
+@XmlRootElement
+public class I extends Element {
     @Override
-    protected TextBuilder createBuilder() {
-        TextBuilder.Placeholder ret = Texts.placeholderBuilder(this.placeholderKey);
-        if (this.fallback != null) {
-            ret.fallback(((IMixinChatComponent) this.fallback).toText());
-        }
-        return ret;
+    protected void modifyBuilder(Text.Builder builder) {
+        builder.style(TextStyles.ITALIC);
     }
-
 }

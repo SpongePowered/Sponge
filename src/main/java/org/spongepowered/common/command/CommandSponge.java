@@ -48,8 +48,6 @@ import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
-import org.spongepowered.api.text.Texts;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
@@ -80,8 +78,8 @@ public class CommandSponge {
     private static final String INDENT = "    ";
     private static final String LONG_INDENT = INDENT + INDENT;
 
-    private static final Text NEWLINE_TEXT = Texts.of("\n");
-    private static final Text SEPARATOR_TEXT = Texts.of(", ");
+    private static final Text NEWLINE_TEXT = Text.of("\n");
+    private static final Text SEPARATOR_TEXT = Text.of(", ");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -101,8 +99,8 @@ public class CommandSponge {
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         flagChildren.register(getSaveCommand(), "save");
         return CommandSpec.builder()
-                .description(Texts.of("Text description"))
-                .extendedDescription(Texts.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
+                .description(Text.of("Text description"))
+                .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
                         INDENT, title("chunks"), LONG_INDENT, "Prints chunk data for a specific dimension or world(s)\n",
                         INDENT, title("conf"), LONG_INDENT, "Configure sponge settings\n",
                         INDENT, title("heap"), LONG_INDENT, "Dump live JVM heap\n",
@@ -113,8 +111,8 @@ public class CommandSponge {
                         INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
-                        .valueFlag(world(Texts.of("world")), "-world", "w")
-                        .valueFlag(dimension(Texts.of("dimension")), "-dimension", "d")
+                        .valueFlag(world(Text.of("world")), "-world", "w")
+                        .valueFlag(dimension(Text.of("dimension")), "-dimension", "d")
                         .buildWith(flagChildren)))
                 .executor(nonFlagChildren)
                 .build();
@@ -127,13 +125,13 @@ public class CommandSponge {
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
             int successes = 0;
             if (args.hasAny("global")) {
-                src.sendMessage(Texts.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
+                src.sendMessage(Text.of("Global: ", processGlobal(SpongeImpl.getGlobalConfig(), src, args)));
                 ++successes;
             }
             if (args.hasAny("dimension")) {
                 for (DimensionType dimension : args.<DimensionType>getAll("dimension")) {
                     WorldProvider provider = DimensionManager.getWorldFromDimId(((SpongeDimensionType) dimension).getDimensionTypeId()).provider;
-                    src.sendMessage(Texts.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)
+                    src.sendMessage(Text.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)
                                     .getDimensionConfig(), dimension, src, args)));
                     ++successes;
                 }
@@ -142,15 +140,15 @@ public class CommandSponge {
                 for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
                     Optional<World> world = SpongeImpl.getGame().getServer().getWorld(properties.getUniqueId());
                     if (!world.isPresent()) {
-                        throw new CommandException(Texts.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
+                        throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Texts.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorld) world.get()).getWorldConfig(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorld) world.get()).getWorldConfig(),
                             world.get(), src, args)));
                     ++successes;
                 }
             }
             if (successes == 0) {
-                throw new CommandException(Texts.of("At least one target flag must be specified"));
+                throw new CommandException(Text.of("At least one target flag must be specified"));
             }
             return CommandResult.builder().successCount(successes).build(); // TODO: How do we handle results?
         }
@@ -171,7 +169,7 @@ public class CommandSponge {
         }
 
         protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
-            return Texts.of("Unimplemented");
+            return Text.of("Unimplemented");
         }
     }
 
@@ -179,8 +177,8 @@ public class CommandSponge {
 
     private static CommandSpec getChunksCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Print chunk information, optionally dump"))
-                .arguments(optional(seq(literal(Texts.of("dump"), "dump"), optional(literal(Texts.of("dump-all"), "all")))))
+                .description(Text.of("Print chunk information, optionally dump"))
+                .arguments(optional(seq(literal(Text.of("dump"), "dump"), optional(literal(Text.of("dump-all"), "all")))))
                 .permission("sponge.command.chunks")
                 .executor(new ConfigUsingExecutor() {
                     @Override
@@ -189,9 +187,9 @@ public class CommandSponge {
                         if (args.hasAny("dump")) {
                             File file = new File(new File(new File("."), "chunk-dumps"),
                                 "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(Instant.now()) + "-server.txt");
-                            src.sendMessage(Texts.of("Writing chunk info to: ", file));
+                            src.sendMessage(Text.of("Writing chunk info to: ", file));
                             ChunkSaveHelper.writeChunks(file, args.hasAny("dump-all"));
-                            src.sendMessage(Texts.of("Chunk info complete"));
+                            src.sendMessage(Text.of("Chunk info complete"));
                         }
                         return res;
                     }
@@ -200,10 +198,10 @@ public class CommandSponge {
                     protected Text processGlobal(SpongeConfig<SpongeConfig.GlobalConfig> config, CommandSource source, CommandContext args)
                             throws CommandException {
                         for (World world : SpongeImpl.getGame().getServer().getWorlds()) {
-                            source.sendMessage(Texts.of("World ", Texts.of(TextStyles.BOLD, world.getName()),
+                            source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
                                     getChunksInfo(((WorldServer) world))));
                         }
-                        return Texts.of("Printed chunk info for all worlds ");
+                        return Text.of("Printed chunk info for all worlds ");
                     }
 
                     @Override
@@ -211,9 +209,9 @@ public class CommandSponge {
                             CommandContext args)
                             throws CommandException {
                         SpongeImpl.getGame().getServer().getWorlds().stream().filter(world -> world.getDimension().getType().equals(dim))
-                            .forEach(world -> source.sendMessage(Texts.of("World ", Texts.of(TextStyles.BOLD, world.getName()),
+                            .forEach(world -> source.sendMessage(Text.of("World ", Text.of(TextStyles.BOLD, world.getName()),
                                                                       getChunksInfo(((WorldServer) world)))));
-                        return Texts.of("Printed chunk info for all worlds in dimension ", dim.getName());
+                        return Text.of("Printed chunk info for all worlds in dimension ", dim.getName());
                     }
 
                     @Override
@@ -223,15 +221,15 @@ public class CommandSponge {
                     }
 
                     protected Text key(Object text) {
-                        return Texts.of(TextColors.GOLD, text);
+                        return Text.of(TextColors.GOLD, text);
                     }
 
                     protected Text value(Object text) {
-                        return Texts.of(TextColors.GRAY, text);
+                        return Text.of(TextColors.GRAY, text);
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        return Texts.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionId()), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionId()), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.theChunkProviderServer.getLoadedChunkCount()), NEWLINE_TEXT,
                                 key("Active chunks: "), value(worldserver.activeChunkSet.size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
@@ -246,8 +244,8 @@ public class CommandSponge {
 
     private static CommandSpec getConfigCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Inspect the Sponge config"))
-                .arguments(seq(string(Texts.of("key")), optional(string(Texts.of("value")))))
+                .description(Text.of("Inspect the Sponge config"))
+                .arguments(seq(string(Text.of("key")), optional(string(Text.of("value")))))
                 .permission("sponge.command.config")
                 .executor(new ConfigUsingExecutor() {
                     @Override
@@ -255,17 +253,17 @@ public class CommandSponge {
                         final Optional<String> key = args.getOne("key");
                         final Optional<String> value = args.getOne("value");
                         if (config.getSetting(key.get()) == null || config.getSetting(key.get()).isVirtual()) {
-                            throw new CommandException(Texts.of("Key ", Texts.builder(key.get()).color(TextColors.GREEN).build(), " is not "
+                            throw new CommandException(Text.of("Key ", Text.builder(key.get()).color(TextColors.GREEN).build(), " is not "
                                     + "valid"));
                         }
 
                         if (value.isPresent()) { // Set
                             config.updateSetting(key.get(), value.get());
 
-                            return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" set to "),
+                            return Text.builder().append(Text.of(TextColors.GOLD, key), Text.of(" set to "),
                                     title(value.get())).build();
                         } else {
-                            return Texts.builder().append(Texts.of(TextColors.GOLD, key), Texts.of(" is "),
+                            return Text.builder().append(Text.of(TextColors.GOLD, key), Text.of(" is "),
                                     title(String.valueOf(config.getSetting(key.get()).getValue()))).build();
                         }
                     }
@@ -275,13 +273,13 @@ public class CommandSponge {
 
     private static CommandSpec getReloadCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Reload the Sponge configuration"))
+                .description(Text.of("Reload the Sponge configuration"))
                 .permission("sponge.command.reload")
                 .executor(new ConfigUsingExecutor() {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.reload();
-                        return Texts.of("Reloaded configuration");
+                        return Text.of("Reloaded configuration");
                     }
                 })
                 .build();
@@ -289,13 +287,13 @@ public class CommandSponge {
 
     private static CommandSpec getSaveCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Save the configuration"))
+                .description(Text.of("Save the configuration"))
                 .permission("sponge.command.save")
                 .executor(new ConfigUsingExecutor() {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.save();
-                        return Texts.of("Saved");
+                        return Text.of("Saved");
                     }
                 })
                 .build();
@@ -305,14 +303,14 @@ public class CommandSponge {
 
     private static CommandSpec getHeapCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Generate a dump of the Sponge heap"))
+                .description(Text.of("Generate a dump of the Sponge heap"))
                 .permission("sponge.command.heap")
                 .executor((src, args) -> {
                     File file = new File(new File(new File("."), "dumps"),
                             "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(Instant.now()) + "-server.bin");
-                    src.sendMessage(Texts.of("Writing JVM heap data to: ", file));
+                    src.sendMessage(Text.of("Writing JVM heap data to: ", file));
                     SpongeHooks.dumpHeap(file, true);
-                    src.sendMessage(Texts.of("Heap dump complete"));
+                    src.sendMessage(Text.of("Heap dump complete"));
                     return CommandResult.success();
                 })
                 .build();
@@ -322,10 +320,10 @@ public class CommandSponge {
 
     private static CommandSpec getVersionCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Display Sponge's current version"))
+                .description(Text.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
                 .executor((src, args) -> {
-                    src.sendMessage(Texts.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getImplementation().getVersion()), "\n",
+                    src.sendMessage(Text.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getImplementation().getVersion()), "\n",
                             "SpongeAPI: ", title(SpongeImpl.getGame().getPlatform().getApi().getVersion())));
                     return CommandResult.success();
                 })
@@ -334,7 +332,7 @@ public class CommandSponge {
 
     private static CommandSpec getAuditCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("Audit Mixin classes for implementation"))
+                .description(Text.of("Audit Mixin classes for implementation"))
                 .permission("sponge.command.audit")
                 .executor((src, args) -> {
                     MixinEnvironment.getCurrentEnvironment().audit();
@@ -365,20 +363,20 @@ public class CommandSponge {
     }
 
     private static Text title(String title) {
-        return Texts.of(TextColors.GREEN, title);
+        return Text.of(TextColors.GREEN, title);
     }
 
     private static CommandSpec getPluginsCommand() {
         return CommandSpec.builder()
-                .description(Texts.of("List currently installed plugins"))
+                .description(Text.of("List currently installed plugins"))
                 .permission("sponge.command.plugins")
-                .arguments(optional(new PluginsCommandElement(Texts.of("plugin"))))
+                .arguments(optional(new PluginsCommandElement(Text.of("plugin"))))
                 .executor((src, args) -> {
                     if (args.hasAny("plugin")) {
                         for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
-                            TextBuilder build = Texts.builder().append(title(container.getName()),
-                                    Texts.of(" v" + container.getVersion()), NEWLINE_TEXT)
-                                    .append(Texts.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
+                            Text.Builder build = Text.builder().append(title(container.getName()),
+                                    Text.of(" v" + container.getVersion()), NEWLINE_TEXT)
+                                    .append(Text.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
                                             INDENT, title("Main class: "), !container.getInstance().isPresent() ? " Virtual mod " :
                                                     container.getInstance().get().getClass().getCanonicalName()));
                             // TODO: Provide more metadata once it is exposed
@@ -387,16 +385,16 @@ public class CommandSponge {
                         }
                     } else {
                         Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
-                        TextBuilder build = Texts.builder(String.format("Plugins (%d): ", plugins.size()));
+                        Text.Builder build = Text.builder(String.format("Plugins (%d): ", plugins.size()));
                         boolean first = true;
                         for (PluginContainer next : plugins) {
                             if (!first) {
                                 build.append(SEPARATOR_TEXT);
                             }
                             first = false;
-                            build.append(Texts.builder(next.getName())
+                            build.append(Text.builder(next.getName())
                                     .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()))
-                                    .onHover(TextActions.showText(Texts.of("Version " + next.getVersion())))
+                                    .onHover(TextActions.showText(Text.of("Version " + next.getVersion())))
                                     .color(TextColors.GREEN).build());
                         }
                         src.sendMessage(build.build());
@@ -408,22 +406,22 @@ public class CommandSponge {
     private static CommandCallable getTimingsCommand() {
         return CommandSpec.builder()
                 .permission("sponge.command.timings")
-                .description(Texts.of("Manages Sponge Timings data to see performance of the server."))
+                .description(Text.of("Manages Sponge Timings data to see performance of the server."))
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             if (!Timings.isTimingsEnabled()) {
-                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                src.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.reset();
-                            src.sendMessage(Texts.of("Timings reset"));
+                            src.sendMessage(Text.of("Timings reset"));
                             return CommandResult.success();
                         })
                         .build(), "reset")
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             if (!Timings.isTimingsEnabled()) {
-                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                src.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.generateReport(src);
@@ -433,46 +431,46 @@ public class CommandSponge {
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             Timings.setTimingsEnabled(true);
-                            src.sendMessage(Texts.of("Enabled Timings & Reset"));
+                            src.sendMessage(Text.of("Enabled Timings & Reset"));
                             return CommandResult.success();
                         })
                         .build(), "on")
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             Timings.setTimingsEnabled(false);
-                            src.sendMessage(Texts.of("Disabled Timings"));
+                            src.sendMessage(Text.of("Disabled Timings"));
                             return CommandResult.success();
                         })
                         .build(), "off")
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             if (!Timings.isTimingsEnabled()) {
-                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                src.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(true);
-                            src.sendMessage(Texts.of("Enabled Verbose Timings"));
+                            src.sendMessage(Text.of("Enabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verbon")
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             if (!Timings.isTimingsEnabled()) {
-                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                src.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
                             Timings.setVerboseTimingsEnabled(false);
-                            src.sendMessage(Texts.of("Disabled Verbose Timings"));
+                            src.sendMessage(Text.of("Disabled Verbose Timings"));
                             return CommandResult.success();
                         })
                         .build(), "verboff")
                 .child(CommandSpec.builder()
                         .executor((src, args) -> {
                             if (!Timings.isTimingsEnabled()) {
-                                src.sendMessage(Texts.of("Please enable timings by typing /sponge timings on"));
+                                src.sendMessage(Text.of("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            src.sendMessage(Texts.of("Timings cost: " + SpongeTimingsFactory.getCost()));
+                            src.sendMessage(Text.of("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
                         })
                         .build(), "cost")

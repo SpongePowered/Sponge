@@ -38,7 +38,6 @@ import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.TextBuilder;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,7 +58,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
     @Shadow private ChatStyle style;
     @Shadow protected List<IChatComponent> siblings;
 
-    protected TextBuilder createBuilder() {
+    protected Text.Builder createBuilder() {
         throw new UnsupportedOperationException();
     }
 
@@ -184,7 +183,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
 
     @Override
     public Text toText() {
-        TextBuilder builder = createBuilder();
+        Text.Builder builder = createBuilder();
 
         if (this.style != null) {
             if (this.style.color != null) {
