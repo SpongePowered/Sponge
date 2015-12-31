@@ -1268,6 +1268,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
+        if (!isValid(pos)) {
+            return;
+        }
+
         if (this.nmsWorld.isRemote) {
             for (EnumFacing facing : EnumFacing.values()) {
                 this.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
@@ -1295,6 +1299,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("rawtypes")
     @Overwrite
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
+        if (!isValid(pos)) {
+            return;
+        }
+
         EnumSet directions = EnumSet.allOf(EnumFacing.class);
         directions.remove(skipSide);
 
