@@ -26,9 +26,9 @@ package org.spongepowered.common.service.permission.base;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.context.Context;
 
 import java.util.List;
 import java.util.Set;

@@ -25,10 +25,10 @@
 package org.spongepowered.common.service.permission.base;
 
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.List;

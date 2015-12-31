@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.service.permission.base;
 
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
-import org.spongepowered.api.service.permission.context.Context;
 import org.spongepowered.api.util.Tristate;
 
 import java.util.Collections;
