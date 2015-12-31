@@ -29,11 +29,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.Sets;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
@@ -48,6 +51,7 @@ import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
@@ -59,6 +63,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -68,6 +73,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
@@ -94,11 +100,13 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
+import org.spongepowered.common.util.SkinUtil;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -116,11 +124,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
+    @Shadow public MinecraftServer mcServer;
     @Shadow public ItemInWorldManager theItemInWorldManager;
     @Shadow public int lastExperience;
-    @Shadow public MinecraftServer mcServer;
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
+    @Shadow private EntityPlayer.EnumChatVisibility chatVisibility;
+    @Shadow private boolean chatColours;
+    private Set<SkinPart> skinParts = Sets.newHashSet();
+    private int viewDistance;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
@@ -171,9 +183,44 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.user;
     }
 
+    // Post before the player values are updated
+    @Inject(method = "handleClientSettings", at = @At("HEAD"))
+    public void processClientSettingsEvent(C15PacketClientSettings packet, CallbackInfo ci) {
+        PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
+                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
+                LanguageUtil.LOCALE_CACHE.getUnchecked(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
+        SpongeImpl.postEvent(event);
+    }
+
+    @Inject(method = "handleClientSettings", at = @At("RETURN"))
+    public void processClientSettings(C15PacketClientSettings packet, CallbackInfo ci) {
+        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
+        this.viewDistance = packet.view;
+    }
+
     @Override
     public Locale getLocale() {
         return LanguageUtil.LOCALE_CACHE.getUnchecked(this.translator);
+    }
+
+    @Override
+    public int getViewDistance() {
+        return this.viewDistance;
+    }
+
+    @Override
+    public ChatVisibility getChatVisibility() {
+        return (ChatVisibility) (Object) this.chatVisibility;
+    }
+
+    @Override
+    public boolean isChatColorsEnabled() {
+        return this.chatColours;
+    }
+
+    @Override
+    public Set<SkinPart> getDisplayedSkinParts() {
+        return this.skinParts;
     }
 
     @Override

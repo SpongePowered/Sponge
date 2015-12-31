@@ -72,6 +72,7 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.selector.SelectorType;
 import org.spongepowered.api.util.ban.Ban;
@@ -312,6 +313,8 @@ public final class CommonModuleRegistry {
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
             .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
+            .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
+            .registerModule(SkinPart.class, new SkinPartRegistryModule())
             ;
     }
 
