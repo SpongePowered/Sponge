@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,9 +37,6 @@ import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Disabled due to mixin bug: https://github.com/SpongePowered/Mixin/issues/87
- */
 @Mixin(EntityWither.class)
 public abstract class MixinEntityWither extends MixinEntityMob implements Wither {
 
