@@ -158,7 +158,7 @@ public final class SpongeDataManager implements DataManager {
                 builder.add(updater);
             }
         }
-        if (version < toVersion || version < toVersion) { // There wasn't a registered updater for the version being requested
+        if (version < toVersion || version > toVersion) { // There wasn't a registered updater for the version being requested
             Exception e = new IllegalStateException("The requested content version for: " + clazz.getSimpleName() + " was requested, "
                                                     + "\nhowever, the versions supplied: from "+ fromVersion + " to " + toVersion + " is impossible"
                                                     + "\nas the latest version registered is: " + version+". Please notify the developer of"
