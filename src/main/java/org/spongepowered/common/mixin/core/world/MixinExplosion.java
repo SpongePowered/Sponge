@@ -73,6 +73,13 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         }
     }
 
+    @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true)
+    public void onDoExplosionA(CallbackInfo ci) {
+        if (!shouldBreakBlocks) {
+            ci.cancel();
+        }
+    }
+
     @Override
     public World getWorld() {
         return (World) this.worldObj;
