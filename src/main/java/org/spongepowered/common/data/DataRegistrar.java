@@ -810,6 +810,11 @@ public class DataRegistrar {
                 ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
         dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
 
+        final SprintDataProcessor sprintDataProcessor = new SprintDataProcessor();
+        dataManager.registerDataProcessorAndImpl(SprintData.class, SpongeSprintData.class, ImmutableSprintData.class,
+                ImmutableSpongeSprintData.class, sprintDataProcessor);
+        dataManager.registerValueProcessor(Keys.IS_SPRINTING, sprintDataProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
