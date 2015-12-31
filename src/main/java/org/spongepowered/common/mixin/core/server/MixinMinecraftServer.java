@@ -332,7 +332,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 levelName = worldFolder;
             }
 
-            SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
+            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
             if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
                 SpongeImpl.getLogger().info("World {} with dimension ID {} is disabled! Skipping world load...", worldFolder, dim);
                 continue;

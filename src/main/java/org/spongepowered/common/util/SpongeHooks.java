@@ -63,6 +63,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.CaptureType;
 
 import java.io.File;
@@ -161,7 +162,7 @@ public class SpongeHooks {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName() + "(" + world.provider.getDimensionId() + ")",
-                    ((BlockType)block).getId(),
+                    ((BlockType) block).getId(),
                     pos);
             logStack(config);
         } else if (config.getConfig().getLogging().blockTrackLogging() && !allowed) {
@@ -169,7 +170,7 @@ public class SpongeHooks {
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
                     world.provider.getDimensionId(),
-                    ((BlockType)block).getId(),
+                    ((BlockType) block).getId(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
     }
@@ -412,7 +413,6 @@ public class SpongeHooks {
     }
 
 
-
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void dumpHeap(File file, boolean live) {
         try {
@@ -450,24 +450,68 @@ public class SpongeHooks {
         }
     }
 
-    public static SpongeConfig<?> getActiveConfig(String dimFolder, String worldFolder) {
-        if (dimFolder == null) {
+    public static SpongeConfig<?> getActiveConfig(String dimensionType, String worldFolder) {
+        if (dimensionType == null) {
+            // If no dimension type, go global
             return SpongeImpl.getGlobalConfig();
         }
-        Path dimFolderPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimFolder);
-        Path dimConfPath = dimFolderPath.resolve("dimension.conf");
 
         if (worldFolder != null) {
-            Path worldConfPath = dimFolderPath.resolve(worldFolder).resolve("world.conf");
-            SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
+            final Optional<org.spongepowered.api.world.World> optWorld = SpongeImpl.getGame().getServer().getWorld(worldFolder);
+
+            // If this is a loaded world then we only return configs on the loaded objects. Don't go to disk.
+            if (optWorld.isPresent()) {
+                final World world = (World) optWorld.get();
+                final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
+
+                if (worldConfig != null) {
+                    // Return world config if its present and enabled
+                    if (worldConfig.getConfig().isConfigEnabled()) {
+                        return worldConfig;
+                    }
+
+                    // If we've gotten here, see if this world's dimension's config is enabled.
+                    final SpongeConfig<DimensionConfig> dimensionConfig =
+                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionId());
+                    if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
+                        return dimensionConfig;
+                    }
+
+                    // Default to global
+                    return SpongeImpl.getGlobalConfig();
+                } else {
+                    // If we've gotten here, we have no world config so see if this world's dimension's config is enabled.
+                    final SpongeConfig<DimensionConfig> dimensionConfig =
+                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionId());
+                    if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
+                        return dimensionConfig;
+                    }
+
+                    // Default to global
+                    return SpongeImpl.getGlobalConfig();
+                }
+            }
+        }
+
+        // No in-memory config objects, lookup from disk.
+        final Path dimFolderPath = SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType);
+        final Path dimConfPath = dimFolderPath.resolve("dimension.conf");
+
+        if (worldFolder != null) {
+            final Path worldConfPath = dimFolderPath.resolve(worldFolder).resolve("world.conf");
+
+            final SpongeConfig<WorldConfig> worldConfig = new SpongeConfig<>(SpongeConfig.Type.WORLD, worldConfPath, SpongeImpl.ECOSYSTEM_ID);
             if (worldConfig.getConfig().isConfigEnabled()) {
                 return worldConfig;
             }
         }
-        SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID);
+
+        final SpongeConfig<DimensionConfig> dimConfig = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, dimConfPath, SpongeImpl.ECOSYSTEM_ID);
         if (dimConfig.getConfig().isConfigEnabled()) {
             return dimConfig;
         }
+
+        // Neither in-memory or on-disk enabled configs. Go global.
         return SpongeImpl.getGlobalConfig();
     }
 
