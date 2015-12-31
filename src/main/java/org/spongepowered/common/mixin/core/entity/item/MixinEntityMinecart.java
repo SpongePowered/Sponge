@@ -46,7 +46,7 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     private Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
 
     // this method overwrites vanilla behavior to allow for a custom deceleration rate when derailed
-    @Inject(method = "moveDerailedMinecart()V", at = @At(value = "INVOKE", target = "net.minecraft.entity.Entity.moveEntity(DDD)V"))
+    @Inject(method = "moveDerailedMinecart()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;moveEntity(DDD)V"))
     public void implementCustomDerailedDeceleration(CallbackInfo ci) {
         if (this.isOnGround()) {
             this.motionX /= 0.5D;

@@ -70,4 +70,8 @@ public class StaticMixinHelper {
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
+
+    // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
+    // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
+    public static boolean lastPlayerInteractCancelled = false;
 }

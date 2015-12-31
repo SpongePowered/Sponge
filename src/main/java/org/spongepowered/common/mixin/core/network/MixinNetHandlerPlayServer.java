@@ -101,6 +101,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -332,7 +333,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 // Correct the new rotation to match the old rotation
                 torot = fromrot;
             }
-            
+
             ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(to.getPosition().sub(from.getPosition()));
 
             double deltaSquared = to.getPosition().distanceSquared(from.getPosition());
@@ -469,6 +470,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     public boolean onActivateBlockOrUseItem(ItemInWorldManager itemManager, EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
         boolean result = itemManager.activateBlockOrUseItem(player, worldIn, stack, pos, side, hitX, hitY, hitZ);
         if (stack != null && !result) {
+            // Don't run item use part of hook if PlayerInteractEvent was cancelled.
+            // This is only set in SpongeForge, so it's safe to put here
+            if (StaticMixinHelper.lastPlayerInteractCancelled) {
+                return false;
+            }
             itemManager.tryUseItem(player, worldIn, stack);
         }
         return result;

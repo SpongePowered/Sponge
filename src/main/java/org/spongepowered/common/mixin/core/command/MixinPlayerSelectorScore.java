@@ -35,7 +35,7 @@ import java.util.UUID;
 @Mixin(targets = "net.minecraft.command.PlayerSelector$6")
 public class MixinPlayerSelectorScore {
 
-    @Redirect(method = "func_179603_a", at = @At(value = "INVOKE", args = "log=true", target = "Ljava/util/UUID;toString()Ljava/lang/String;"))
+    @Redirect(method = "func_179603_a", at = @At(value = "INVOKE", target = "Ljava/util/UUID;toString()Ljava/lang/String;"))
     public String onUUIDToString(UUID uuid, Entity entity) {
         if (entity instanceof EntityHuman) {
             return entity.getCustomNameTag();

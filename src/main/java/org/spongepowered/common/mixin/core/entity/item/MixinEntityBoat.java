@@ -51,7 +51,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     private double tempSpeedMultiplier;
     private double initialDisplacement;
 
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "net.minecraft.entity.Entity.moveEntity(DDD)V"))
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"))
     public void implementLandBoats(CallbackInfo ci) {
         if (this.onGround && this.moveOnLand) {
             this.motionX /= 0.5;
@@ -72,7 +72,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
         this.tempSpeedMultiplier = this.speedMultiplier;
     }
 
-    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "net.minecraft.entity.Entity.onGround:Z", ordinal = 1))
+    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1))
     public void afterLimitSpeed(CallbackInfo ci) {
         this.motionX = this.tempMotionX;
         this.motionZ = this.tempMotionZ;
@@ -96,7 +96,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     }
 
     @Inject(method = "onUpdate()V",
-            at = @At(value = "FIELD", target = "net.minecraft.entity.Entity.riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0))
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0))
     public void implementCustomDeceleration(CallbackInfo ci) {
         if (!(this.riddenByEntity instanceof EntityLivingBase)) {
             double decel = this.riddenByEntity == null ? this.unoccupiedDecelerationSpeed : this.occupiedDecelerationSpeed;
