@@ -101,7 +101,6 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
 
     @Override
     public boolean canPlaceAt(org.spongepowered.api.world.World world, int x, int y, int z) {
-        System.out.println("Checking " + x + " " + y + " " + z);
         World worldIn = (World) world;
         BlockPos position = new BlockPos(x, y, z);
         while (worldIn.isAirBlock(position) && position.getY() > 2)
@@ -109,7 +108,6 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
             position = position.down();
         }
         if (!field_175913_a.matchesState(worldIn.getBlockState(position))) {
-            System.out.println("Check failed not sand");
             return false;
         }
         int i;
@@ -117,12 +115,10 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
         for (i = -2; i <= 2; ++i) {
             for (j = -2; j <= 2; ++j) {
                 if (worldIn.isAirBlock(position.add(i, -1, j)) && worldIn.isAirBlock(position.add(i, -2, j))) {
-                    System.out.println("Check failed too much air");
                     return false;
                 }
             }
         }
-        System.out.println("Check passes");
         return true;
     }
 
