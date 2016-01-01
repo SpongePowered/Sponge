@@ -70,7 +70,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public String getName() {
-        return this.field_174804_a.getCommandSenderName();
+        return this.field_174804_a.getName();
     }
 
     @Override

@@ -73,6 +73,6 @@ public abstract class MixinBlockPrismarine extends MixinBlock {
 
     private ImmutablePrismarineData getPrismarineTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePrismarineData.class,
-                (PrismarineType) blockState.getValue(BlockPrismarine.VARIANT));
+                (PrismarineType) (Object) blockState.getValue(BlockPrismarine.VARIANT));
     }
 }

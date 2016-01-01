@@ -87,12 +87,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public String getId() {
-        return Block.blockRegistry.getNameForObject(this).toString();
+        return Block.blockRegistry.getNameForObject((Block) (Object) this).toString();
     }
 
     @Override
     public String getName() {
-        return Block.blockRegistry.getNameForObject(this).toString();
+        return Block.blockRegistry.getNameForObject((Block) (Object) this).toString();
     }
 
     @Override
@@ -155,7 +155,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public BlockState getDefaultBlockState() {
         return getDefaultState();
     }
-    
+
     @Override
     public boolean forceUpdateBlockState() {
         return false;

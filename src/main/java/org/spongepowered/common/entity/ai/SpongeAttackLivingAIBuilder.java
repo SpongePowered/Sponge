@@ -70,9 +70,10 @@ public final class SpongeAttackLivingAIBuilder implements AttackLivingAITask.Bui
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public AttackLivingAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetClass);
-        return (AttackLivingAITask) new EntityAIAttackOnCollide((EntityCreature) owner, this.targetClass, this.speed, this.longMemory);
+        return (AttackLivingAITask) new EntityAIAttackOnCollide((EntityCreature) owner, (Class) this.targetClass, this.speed, this.longMemory);
     }
 }

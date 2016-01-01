@@ -72,6 +72,7 @@ public abstract class MixinBlockQuartz extends MixinBlock {
     }
 
     private ImmutableQuartzData getQuartzTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class, (QuartzType) blockState.getValue(BlockQuartz.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeQuartzData.class,
+                (QuartzType) (Object) blockState.getValue(BlockQuartz.VARIANT));
     }
 }

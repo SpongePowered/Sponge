@@ -80,7 +80,7 @@ public abstract class MixinBlockDirt extends MixinBlock {
     }
 
     private ImmutableDirtData getDirtTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) blockState.getValue(BlockDirt.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirtData.class, (DirtType) (Object) blockState.getValue(BlockDirt.VARIANT));
     }
 
     private ImmutableSnowedData getIsSnowedFor(IBlockState blockState) {

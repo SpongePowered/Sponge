@@ -87,7 +87,7 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlockDirectional
 
     private ImmutableComparatorData getComparatorTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeComparatorData.class,
-                (ComparatorType) blockState.getValue(BlockRedstoneComparator.MODE));
+                (ComparatorType) (Object) blockState.getValue(BlockRedstoneComparator.MODE));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {

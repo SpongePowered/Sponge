@@ -50,7 +50,7 @@ public abstract class MixinCommandSource implements IMixinCommandSource, Command
 
     @Override
     public String getName() {
-        return this.asICommandSender().getCommandSenderName();
+        return this.asICommandSender().getName();
     }
 
     @Override

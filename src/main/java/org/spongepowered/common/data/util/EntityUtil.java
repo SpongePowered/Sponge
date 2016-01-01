@@ -134,7 +134,7 @@ public final class EntityUtil {
             }
             EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
 
-            for (EntityPlayerMP playerMP : (List<EntityPlayerMP>) MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+            for (EntityPlayerMP playerMP : (List<EntityPlayerMP>) MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
                 if (entity != playerMP) { // don't remove ourselves
                     if (entity instanceof EntityPlayerMP) {
                         Packet packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) entity);

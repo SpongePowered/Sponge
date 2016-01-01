@@ -389,13 +389,13 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @SuppressWarnings("unchecked")
     @Override
     public ImmutableMap<BlockTrait<?>, ?> getTraitMap() {
-        return getProperties();
+        return (ImmutableMap) getProperties();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<BlockTrait<?>> getTraits() {
-        return getProperties().keySet();
+        return (Collection) getProperties().keySet();
     }
 
     @Override

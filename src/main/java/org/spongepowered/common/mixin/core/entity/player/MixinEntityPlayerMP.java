@@ -250,7 +250,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void reset() {
         float experience = 0;
-        boolean keepInventory = this.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory");
+        boolean keepInventory = this.worldObj.getGameRules().getBoolean("keepInventory");
 
         if (this.keepsLevel || keepInventory) {
             experience = this.experience;
@@ -311,7 +311,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public MessageChannel getDeathMessageChannel() {
         EntityPlayerMP player = (EntityPlayerMP) (Object) this;
-        if (player.worldObj.getGameRules().getGameRuleBooleanValue("showDeathMessages")) {
+        if (player.worldObj.getGameRules().getBoolean("showDeathMessages")) {
             @Nullable Team team = player.getTeam();
 
             if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {

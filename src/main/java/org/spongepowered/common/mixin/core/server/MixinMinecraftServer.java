@@ -216,10 +216,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Player> getOnlinePlayers() {
-        if (getConfigurationManager() == null || getConfigurationManager().playerEntityList == null) {
+        if (getConfigurationManager() == null || getConfigurationManager().getPlayerList() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List<Player>) getConfigurationManager().playerEntityList);
+        return ImmutableList.copyOf((List) getConfigurationManager().getPlayerList());
     }
 
     @Override

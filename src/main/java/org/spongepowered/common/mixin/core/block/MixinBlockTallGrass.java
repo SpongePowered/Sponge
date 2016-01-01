@@ -75,7 +75,7 @@ public abstract class MixinBlockTallGrass extends MixinBlock {
 
 
     private ImmutableShrubData getPlantData(IBlockState blockState) {
-        final ShrubType shrubType = (ShrubType) blockState.getValue(BlockTallGrass.TYPE);
+        final ShrubType shrubType = (ShrubType) (Object) blockState.getValue(BlockTallGrass.TYPE);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeShrubData.class, shrubType);
     }
 }
