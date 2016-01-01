@@ -70,7 +70,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     @Inject(method = "<init>", at = @At("RETURN"), remap = false)
     public void subjectConstructor(CallbackInfo ci) {
         if (SpongeImpl.isInitialized()) {
-            SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
+            SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));
         }
     }
 
@@ -84,7 +84,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
         if (this.thisSubject == null) {
             Optional<PermissionService> serv = SpongeImpl.getGame().getServiceManager().provide(PermissionService.class);
             if (serv.isPresent()) {
-                new SubjectSettingCallback(this).accept(serv.get());
+                new SubjectSettingCallback(this).test(serv.get());
             }
         }
         return this.thisSubject;
