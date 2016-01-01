@@ -34,4 +34,9 @@ public interface IMixinEntityPlayer {
     boolean affectsSpawning();
 
     void setAffectsSpawning(boolean affectsSpawning);
+
+    BlockPos getCompassLocation();
+
+    void setCompassLocation(BlockPos blockPos);
+
 }
