@@ -424,6 +424,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
             ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
+
+            if (((IMixinWorldInfo) worldInfo).getWorldConfig() == null) {
+                ((IMixinWorldInfo) worldInfo).createWorldConfig();
+            }
             final UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
@@ -678,10 +682,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             world.getWorldInfo().setGameType(getGameType());
         }
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        if (((WorldProperties) worldInfo).doesKeepSpawnLoaded()) {
-            this.prepareSpawnArea(world);
-        }
-
+        this.prepareSpawnArea(world);
         return Optional.of((World) world);
     }
 
@@ -736,6 +737,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
         ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
+        ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
+        ((IMixinWorldInfo) worldInfo).getWorldConfig().reload();
         WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
         DimensionRegistryModule.getInstance().registerWorldDimensionId(dim, worldName);
         DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldName);

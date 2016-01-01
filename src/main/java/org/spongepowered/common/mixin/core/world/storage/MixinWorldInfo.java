@@ -147,10 +147,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.playerUniqueIdNbt = new NBTTagList();
         this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
         this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+
         if (this.dimensionType == null) {
             this.dimensionType = DimensionTypes.OVERWORLD;
         }
-        createWorldConfig();
     }
 
     @Inject(method = "<init>*", at = @At("RETURN") )
@@ -167,6 +167,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // make sure to set dimensionType and dimension id before attempting to generate world config
         setDimensionType(creationSettings.getDimensionType());
         onConstruction(ci);
+        createWorldConfig();
         this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
         this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
         this.worldConfig.getConfig().getWorld().setLoadOnStartup(creationSettings.loadOnStartup());
