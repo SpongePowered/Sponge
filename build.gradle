@@ -54,3 +54,7 @@ dependencies {
     runtime 'com.h2database:h2:1.4.190'
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
+
+task sortAccessTransformers(type: org.spongepowered.gradle.TaskSortAccessTransformers) {
+    process(sourceSets.main)
+}
