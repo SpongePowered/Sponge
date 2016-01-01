@@ -5,7 +5,7 @@ ext.common = project(':SpongeCommon')
 // Apply shared ForgeGradle configuration
 apply from: common.file('gradle/minecraft.gradle')
 
-ext.apiVersion = (api.version - '-SNAPSHOT') + '-DEV'
+ext.apiVersion = (api.version - '-SNAPSHOT') + '-BETA'
 
 dependencies {
     compile common
