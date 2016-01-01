@@ -55,10 +55,12 @@ public final class SpongeTexts {
         return ((IMixinChatComponent) component).toPlain();
     }
 
+    @SuppressWarnings("deprecation")
     public static Text fromLegacy(String legacy) {
         return TextSerializers.LEGACY_FORMATTING_CODE.deserialize(legacy);
     }
 
+    @SuppressWarnings("deprecation")
     public static String toLegacy(Text text) {
         return TextSerializers.LEGACY_FORMATTING_CODE.serialize(text);
     }
@@ -105,7 +107,6 @@ public final class SpongeTexts {
         return list;
     }
 
-    @SuppressWarnings("deprecation")
     public static List<Text> fromNbtLegacy(NBTTagList legacy) {
         List<Text> list = Lists.newArrayList();
         for (int i = 0; i < legacy.tagCount(); i++) {

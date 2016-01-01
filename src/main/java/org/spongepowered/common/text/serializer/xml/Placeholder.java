@@ -22,27 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.text.serializer.xml;
 
-import org.spongepowered.api.scoreboard.Score;
-import org.spongepowered.api.text.ScoreText;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.text.PlaceholderText;
+import org.spongepowered.api.text.Text;
 
-import java.util.Optional;
+import javax.xml.bind.annotation.XmlAttribute;
+import javax.xml.bind.annotation.XmlRootElement;
 
-@Mixin(value = ScoreText.class, remap = false)
-public abstract class MixinTextScore extends MixinText {
+@XmlRootElement
+public class Placeholder extends Span {
 
-    @Shadow protected Score score;
-    @Shadow protected Optional<String> override;
+    @XmlAttribute(required = true) private String key;
 
-    /*@Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        ChatComponentScore component = new ChatComponentScore(null, null); // TODO
-        if (this.override.isPresent()) {
-            component.setValue(this.override.get());
+    public Placeholder() {
+    }
+
+    public Placeholder(String key) {
+        this.key = key;
+    }
+
+    @Override
+    protected void modifyBuilder(Text.Builder builder) {
+        // TODO: get rid of this
+    }
+
+    @Override
+    public PlaceholderText.Builder toText() throws Exception {
+        PlaceholderText.Builder builder = Text.placeholderBuilder(this.key);
+        if (!this.mixedContent.isEmpty()) {
+            builder.fallback(super.toText().build());
         }
-        return component;
-    }*/
+        applyTextActions(builder);
+        return builder;
+    }
 }

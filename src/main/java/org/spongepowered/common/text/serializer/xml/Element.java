@@ -27,6 +27,7 @@ package org.spongepowered.common.text.serializer.xml;
 import net.minecraft.event.ClickEvent;
 import net.minecraft.event.HoverEvent;
 import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.api.text.PlaceholderText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.action.ClickAction;
@@ -35,6 +36,8 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.api.text.transformer.Transformer;
+import org.spongepowered.api.text.transformer.ValueForKeyTransformer;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.interfaces.text.IMixinClickEvent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
@@ -61,6 +64,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
         I.class,
         Obfuscated.class,
         Strikethrough.class,
+        Placeholder.class,
         Span.class,
         Tr.class,
         U.class
@@ -232,7 +236,19 @@ public abstract class Element {
             currentElement.onShiftClick = "insert_text('" + action.getResult() + ')';
         }
 
-        if (text instanceof LiteralText) {
+        if (text instanceof PlaceholderText) {
+            final PlaceholderText placeholderText = (PlaceholderText) text;
+            final Transformer<?> transformer = placeholderText.getTransformer();
+            final String key;
+            if (transformer instanceof ValueForKeyTransformer) {
+                key = ((ValueForKeyTransformer<?>) transformer).getKey();
+            } else {
+                key = transformer.toString();
+            }
+            final Placeholder placeholder = new Placeholder(key);
+            placeholderText.getFallback().ifPresent(fallback -> placeholder.mixedContent.add(Element.fromText(fallback)));
+            update(fixedRoot, currentElement, placeholder);
+        } else if (text instanceof LiteralText) {
             currentElement.mixedContent.add(((LiteralText) text).getContent());
         } else if (text instanceof TranslatableText) {
             Translation transl = ((TranslatableText) text).getTranslation();

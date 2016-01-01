@@ -1,3 +1,4 @@
+
 /*
  * This file is part of Sponge, licensed under the MIT License (MIT).
  *
@@ -22,40 +23,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 package org.spongepowered.common.mixin.api.text;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentTranslation;
-import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.text.PlaceholderText;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.transformer.Transformer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
-@Mixin(value = TranslatableText.class, remap = false)
-public abstract class MixinTextTranslatable extends MixinText {
+import java.util.Optional;
 
-    @Shadow @Final protected Translation translation;
-    @Shadow @Final protected ImmutableList<Object> arguments;
+@Mixin(value = PlaceholderText.class, remap = false)
+public class MixinTextPlaceholder extends MixinText {
+
+    @Shadow protected Transformer<?> transformer;
+    @Shadow private Optional<Text> fallback;
 
     @Override
     protected ChatComponentStyle createComponent() {
-        return new ChatComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
-    }
-
-    private Object[] unwrapArguments(ImmutableList<Object> args) {
-        Object[] result = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            final Object arg = args.get(i);
-            if (arg instanceof IMixinText) {
-                result[i] = ((IMixinText) arg).toComponent();
-            } else {
-                result[i] = arg;
-            }
+        if (this.fallback.isPresent()) {
+            return new ChatComponentPlaceholder(this.transformer, ((IMixinText) this.fallback.get()).toComponent());
+        } else {
+            return new ChatComponentPlaceholder(this.transformer);
         }
-        return result;
     }
 
 }
