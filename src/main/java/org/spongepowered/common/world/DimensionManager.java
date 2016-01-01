@@ -46,8 +46,10 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 
@@ -148,7 +150,21 @@ public class DimensionManager {
     }
 
     public static boolean shouldLoadSpawn(int dim) {
-        int id = getProviderType(dim);
+        final WorldServer worldServer = getWorldFromDimId(dim);
+        final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
+
+        if (worldConfig.getConfig().isConfigEnabled()) {
+            return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
+        } else {
+            final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
+                    .getDimensionConfig();
+            if (dimensionConfig.getConfig().isConfigEnabled()) {
+                return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();
+            }
+        }
+
+        // Don't use configs at this point, use spawn settings in the provider type
+        int id = DimensionManager.getProviderType(dim);
         return spawnSettings.containsKey(id) && spawnSettings.get(id);
     }
 
