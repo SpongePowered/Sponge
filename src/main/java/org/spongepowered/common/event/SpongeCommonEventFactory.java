@@ -68,6 +68,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -120,9 +121,9 @@ public class SpongeCommonEventFactory {
         ItemStackSnapshot targetSnapshot = targetSlot.getStack() != null
                 ? ((org.spongepowered.api.item.inventory.ItemStack) targetSlot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
         SlotTransaction sourceTransaction =
-                new SlotTransaction((org.spongepowered.api.item.inventory.Slot) sourceSlot, sourceSnapshot, sourceSnapshot);
+                new SlotTransaction(new SlotAdapter(sourceSlot), sourceSnapshot, sourceSnapshot);
         SlotTransaction targetTransaction =
-                new SlotTransaction((org.spongepowered.api.item.inventory.Slot) targetSlot, targetSnapshot, targetSnapshot);
+                new SlotTransaction(new SlotAdapter(targetSlot), targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction> transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
         ChangeInventoryEvent.Held event =
@@ -237,7 +238,7 @@ public class SpongeCommonEventFactory {
                 Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
                 if (slot != null) {
                     SlotTransaction slotTransaction =
-                            new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                            new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                     ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
                 }
             }
@@ -309,7 +310,7 @@ public class SpongeCommonEventFactory {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null) {
                 SlotTransaction slotTransaction =
-                        new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                        new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }

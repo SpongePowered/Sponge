@@ -52,8 +52,7 @@ public abstract class MixinEnchantment implements Enchantment {
     @Shadow public abstract int getMinEnchantability(int level);
     @Shadow public abstract int getMaxEnchantability(int level);
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
-    @Override
-    @Shadow public abstract String getName();
+    @Shadow public abstract String shadow$getName();
 
     private String id = "";
 
@@ -104,13 +103,13 @@ public abstract class MixinEnchantment implements Enchantment {
 
     @Intrinsic
     public String enchantment$getName() {
-        return getName();
+        return shadow$getName();
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper("Enchantment")
-                .add("Name", getName())
+                .add("Name", shadow$getName())
                 .add("Id", getId())
                 .toString();
     }

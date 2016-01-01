@@ -30,7 +30,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.BlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
-import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
@@ -42,15 +41,6 @@ import java.util.Set;
 
 
 public final class ItemsHelper {
-
-    public static NBTTagCompound getTagCompound(net.minecraft.item.ItemStack itemStack) {
-        NBTTagCompound compound = itemStack.getTagCompound();
-        if (compound == null) {
-            compound = new NBTTagCompound();
-            itemStack.setTagCompound(compound);
-        }
-        return compound;
-    }
 
     private ItemsHelper() { // No sub-classing for you!
     }

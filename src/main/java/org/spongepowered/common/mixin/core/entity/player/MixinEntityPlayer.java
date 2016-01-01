@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
 import net.minecraft.scoreboard.Scoreboard;
@@ -53,6 +54,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public int experienceTotal;
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
+    @Shadow public InventoryPlayer inventory;
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();

@@ -24,34 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
-import com.google.common.base.Objects;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.inventory.slot.InventorySlot;
+import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 
 @Mixin(Slot.class)
-public abstract class MixinSlot implements InventorySlot {
+public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot {
 
-    @Shadow public IInventory inventory;
-    @Shadow public int slotNumber;
-
+    @Shadow private int slotIndex;
+    
     @Override
-    public IInventory getNMSInventory() {
-        return this.inventory;
+    public int getSlotIndex() {
+        return this.slotIndex;
     }
-
-    @Override
-    public int getSlotNumber() {
-        return this.slotNumber;
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("parent", this.inventory)
-                .add("slotNumber", this.slotNumber)
-                .toString();
-    }
+    
 }

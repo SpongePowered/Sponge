@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -105,7 +106,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                     ItemStackSnapshot newItem = itemstack == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
                     SlotTransaction slotTransaction =
-                            new SlotTransaction((org.spongepowered.api.item.inventory.Slot) this.inventorySlots.get(i), originalItem, newItem);
+                            new SlotTransaction(new SlotAdapter(this.inventorySlots.get(i)), originalItem, newItem);
                     this.capturedSlotTransactions.add(slotTransaction);
                 }
 
@@ -128,7 +129,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                         : ((org.spongepowered.api.item.inventory.ItemStack) slot.getStack()).createSnapshot();
                 ItemStackSnapshot newItem =
                         itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
-                SlotTransaction slotTransaction = new SlotTransaction((org.spongepowered.api.item.inventory.Slot) slot, originalItem, newItem);
+                SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), originalItem, newItem);
                 this.capturedSlotTransactions.add(slotTransaction);
             }
         }

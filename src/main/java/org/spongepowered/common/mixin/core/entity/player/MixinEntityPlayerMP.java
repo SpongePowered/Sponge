@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
+import static com.google.common.base.Preconditions.*;
+import static org.spongepowered.common.entity.CombatHelper.*;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.ICommandSender;
@@ -51,6 +50,8 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -427,4 +428,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void setVelocityOverride(@Nullable Vector3d velocity) {
         this.velocityOverride = velocity;
     }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public CarriedInventory<? extends Carrier> getInventory() {
+        return (CarriedInventory<? extends Carrier>) this.inventory;
+    }
+    
 }
