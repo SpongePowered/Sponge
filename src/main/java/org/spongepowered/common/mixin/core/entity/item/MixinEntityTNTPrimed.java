@@ -27,23 +27,36 @@ package org.spongepowered.common.mixin.core.entity.item;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
+import com.google.common.collect.Lists;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+import org.spongepowered.common.util.StaticMixinHelper;
 
+import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityTNTPrimed.class)
 public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT {
 
     @Shadow private int fuse;
-    @Shadow private EntityLivingBase tntPlacedBy;
+    @Nullable @Shadow private EntityLivingBase tntPlacedBy;
     @Shadow public abstract void explode();
 
 
@@ -78,4 +91,42 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     public Optional<Living> getDetonator() {
         return Optional.ofNullable((Living) this.tntPlacedBy);
     }
+
+    @Inject(method = "explode", at = @At(value = "HEAD"), cancellable = true)
+    public void processPreExplosion(CallbackInfo ci) {
+        List<Object> cause = Lists.newArrayList();
+
+        if (StaticMixinHelper.explosionCauseBuilder != null) {
+            if (StaticMixinHelper.explosionCauseBuilderRootSet) {
+                cause.addAll(StaticMixinHelper.explosionCauseBuilder);
+                if (this.tntPlacedBy != null) {
+                    cause.add(this.tntPlacedBy);
+                }
+            } else {
+                if (this.tntPlacedBy != null) {
+                    cause.add(NamedCause.owner(this.tntPlacedBy));
+                }
+
+                cause.addAll(StaticMixinHelper.explosionCauseBuilder);
+            }
+
+            cause.add(this);
+        } else {
+            if (this.tntPlacedBy != null) {
+                cause.add(NamedCause.owner(this.tntPlacedBy));
+            }
+
+            cause.add(NamedCause.source(this));
+        }
+
+        // Reset state
+        StaticMixinHelper.explosionCauseBuilder = null;
+        StaticMixinHelper.explosionCauseBuilderRootSet = false;
+
+        ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Cause.of(cause), (org.spongepowered.api.world.World) this.worldObj);
+        if (SpongeImpl.postEvent(event)) {
+            ci.cancel();
+        }
+    }
+
 }

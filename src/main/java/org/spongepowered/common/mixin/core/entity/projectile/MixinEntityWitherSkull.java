@@ -24,13 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import com.google.common.collect.Lists;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityWitherSkull.class)
 public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkull {
@@ -78,6 +92,26 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         } else {
             compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
         }
+    }
+
+    @Nullable
+    @Redirect(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+            + "newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;"))
+    public Explosion processExplosion(World world, Entity entity, double x, double y, double z, float strength, boolean flaming, boolean smoking) {
+        List<Object> cause = Lists.newArrayList();
+
+        if (this.shootingEntity != null) {
+            cause.add(NamedCause.igniter(this.shootingEntity));
+        }
+
+        cause.add(NamedCause.source(this));
+
+        ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Cause.of(cause), (org.spongepowered.api.world.World) this.worldObj);
+        if (!SpongeImpl.postEvent(event)) {
+            world.newExplosion(entity, x, y, z, strength, flaming, smoking);
+        }
+
+        return null;
     }
 
 }
