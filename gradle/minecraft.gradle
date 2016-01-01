@@ -18,7 +18,7 @@ ext {
 }
 
 minecraft {
-    mappings = 'stable_18'
+    mappings = 'stable_20'
     runDir = 'run'
 }
 
