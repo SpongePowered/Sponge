@@ -56,4 +56,5 @@ public interface IMixinWorldSettings {
 
     void setActualWorldName(String name);
 
+    String getActualWorldName();
 }

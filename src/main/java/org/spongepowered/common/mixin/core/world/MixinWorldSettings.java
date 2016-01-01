@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -89,17 +88,17 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
 
     @Intrinsic
     public String settings$getWorldName() {
-        return getWorldName();
-    }
-
-    @Overwrite
-    public String getWorldName() {
         return this.actualWorldName;
     }
 
     @Override
     public void setActualWorldName(String name) {
         this.actualWorldName = name;
+    }
+
+    @Override
+    public String getActualWorldName() {
+        return this.actualWorldName;
     }
 
     @Override

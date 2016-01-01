@@ -348,10 +348,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         for (int dim : idList) {
             WorldProvider provider = WorldProvider.getProviderForDimension(dim);
             String worldFolder;
-            String levelName;
             if (dim == 0) {
                 worldFolder = overworldFolder;
-                levelName = worldName;
             } else {
                 worldFolder = DimensionRegistryModule.getInstance().getWorldFolder(dim);
                 if (worldFolder != null) {
@@ -363,7 +361,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     worldFolder = ((IMixinWorldProvider) provider).getSaveFolder();
                     DimensionRegistryModule.getInstance().registerWorldDimensionId(dim, worldFolder);
                 }
-                levelName = worldFolder;
             }
 
             final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
@@ -414,7 +411,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
                 }
-                worldInfo.setWorldName(levelName);
                 newWorldSettings = new WorldSettings(worldInfo);
             }
 
@@ -688,7 +684,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<WorldProperties> createWorldProperties(WorldCreationSettings settings) {
-        String worldName = settings.getWorldName();
+        final String worldName = ((IMixinWorldSettings) settings).getActualWorldName();
         final Optional<World> optExisting = getWorld(worldName);
         if (optExisting.isPresent()) {
             return Optional.of(optExisting.get().getProperties());
@@ -725,12 +721,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             dim = ((IMixinWorldSettings)settings).getDimensionId();
         } else {
             dim = DimensionManager.getNextFreeDimId();
+            ((IMixinWorldSettings) settings).setDimensionId(dim);
         }
 
-        // set dim id before creating world info
-        ((IMixinWorldSettings) settings).setDimensionId(dim);
-        worldInfo = new WorldInfo((WorldSettings) (Object) settings, settings.getWorldName());
-        UUID uuid = UUID.randomUUID();
+        worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
+        final UUID uuid = UUID.randomUUID();
         ((IMixinWorldInfo) worldInfo).getWorldConfig().getConfig().setConfigEnabled(true);
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
