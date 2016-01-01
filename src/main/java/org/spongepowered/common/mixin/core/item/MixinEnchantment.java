@@ -52,7 +52,8 @@ public abstract class MixinEnchantment implements Enchantment {
     @Shadow public abstract int getMinEnchantability(int level);
     @Shadow public abstract int getMaxEnchantability(int level);
     @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
-    public abstract String getName();
+    @Override
+    @Shadow public abstract String getName();
 
     private String id = "";
 
