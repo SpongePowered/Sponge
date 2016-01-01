@@ -500,6 +500,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
                 ImmutableSpongeVehicleData.class, vehicleDataProcessor);
 
+        final TargetedLocationDataProcessor targetedLocationDataProcessor = new TargetedLocationDataProcessor();
+        dataManager.registerDataProcessorAndImpl(TargetedLocationData.class, SpongeTargetedLocationData.class,
+                ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, targetedLocationDataProcessor);
+
         dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
                 ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());
         dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
