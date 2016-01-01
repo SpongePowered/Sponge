@@ -33,10 +33,10 @@ import java.util.Optional;
 
 public class FakeBuilder implements DataBuilder<FakeSerializable> {
 
-    private static final DataQuery fooQuery = new DataQuery("foo");
-    private static final DataQuery intQuery = new DataQuery("myInt");
-    private static final DataQuery doubleQuery = new DataQuery("theDouble");
-    private static final DataQuery nestedQuery = new DataQuery("nested", "compound");
+    private static final DataQuery fooQuery = DataQuery.of("foo");
+    private static final DataQuery intQuery = DataQuery.of("myInt");
+    private static final DataQuery doubleQuery = DataQuery.of("theDouble");
+    private static final DataQuery nestedQuery = DataQuery.of("nested", "compound");
 
     @Override
     public Optional<FakeSerializable> build(DataView container) throws InvalidDataException {

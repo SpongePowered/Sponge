@@ -37,7 +37,7 @@ import java.util.Optional;
 
 public class SpongeBrewingStandBuilder extends SpongeLockableBuilder<BrewingStand> {
 
-    public static final DataQuery BREW_TIME_QUERY = new DataQuery("BrewTime");
+    public static final DataQuery BREW_TIME_QUERY = DataQuery.of("BrewTime");
 
     public SpongeBrewingStandBuilder() {
         super(BrewingStand.class, 1);

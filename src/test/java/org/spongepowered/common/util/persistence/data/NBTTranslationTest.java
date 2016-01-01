@@ -47,9 +47,9 @@ public class NBTTranslationTest {
         DataBuilder<FakeSerializable> builder = new FakeBuilder();
         Mockito.stub(service.getBuilder(FakeSerializable.class)).toReturn(Optional.of(builder));
         DataContainer container = new MemoryDataContainer();
-        container.set(new DataQuery("foo"), "bar");
+        container.set(DataQuery.of("foo"), "bar");
         FakeSerializable temp = new FakeSerializable("bar", 7, 10.0D, "nested");
-        container.set(new DataQuery("myFake"), temp);
+        container.set(DataQuery.of("myFake"), temp);
         NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
         DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
         assertTrue(container.equals(translatedContainer));
