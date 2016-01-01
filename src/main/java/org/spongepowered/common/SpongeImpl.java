@@ -113,6 +113,12 @@ public class SpongeImpl {
         return getGame().getRegistry();
     }
 
+    /**
+     * Calls a {@link Event} to all listeners that listen to it.
+     *
+     * @param event The event
+     * @return True if cancelled, false if not
+     */
     public static boolean postEvent(Event event) {
         return getGame().getEventManager().post(event);
     }

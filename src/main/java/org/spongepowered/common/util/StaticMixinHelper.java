@@ -41,6 +41,8 @@ import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Arrays;
 
+import javax.annotation.Nullable;
+
 public class StaticMixinHelper {
 
     public static final ImmutableList<EnumFacing> VALID_HANGING_FACES = ImmutableList.copyOf(Arrays.asList(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST));
@@ -74,4 +76,12 @@ public class StaticMixinHelper {
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
     // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
     public static boolean lastPlayerInteractCancelled = false;
+
+    // The source BlockPos of a block neighbour notification
+    @Nullable public static BlockPos neighborNotifySourceBlockPos = null;
+    // The BlockPos which redstone power is coming from
+    // WARNING: This is NOT reset to null unless:
+    // - this variable is manually set to null
+    // - this variable is set to null before potentially setting it to a present value again
+    @Nullable public static BlockPos powerProvidingBlockPos = null;
 }
