@@ -150,17 +150,17 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SET_CONTAINS))
     public boolean onUpdateObjective(Set set, Object object) {
         return true;
     }
 
-    @Redirect(method = "func_96533_c", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "onScoreObjectiveRemoved", at = @At(value = "INVOKE", target = SET_CONTAINS))
     public boolean onSendDisplayPackets(Set set, Object object) {
         return true;
     }
@@ -188,8 +188,8 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "getPlayerIterator", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
-            false))
+    @Redirect(method = "sendDisplaySlotRemovalPackets", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;",
+            ordinal = 0, remap = false))
     public Iterator onGetPlayerIterator(List list) {
         return this.players.iterator();
     }

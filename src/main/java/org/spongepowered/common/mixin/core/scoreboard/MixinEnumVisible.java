@@ -32,16 +32,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(Team.EnumVisible.class)
 public abstract class MixinEnumVisible implements Visibility {
 
-    @Shadow public String field_178830_e; // internalName
+    @Shadow public String internalName;
 
     @Override
     public String getId() {
-        return this.field_178830_e;
+        return this.internalName;
     }
 
     @Override
     public String getName() {
-        return this.field_178830_e;
+        return this.internalName;
     }
 
 }

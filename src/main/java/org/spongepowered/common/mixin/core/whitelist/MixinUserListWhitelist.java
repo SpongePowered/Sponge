@@ -77,7 +77,7 @@ public abstract class MixinUserListWhitelist extends UserList {
     }
 
     @Overwrite
-    public com.mojang.authlib.GameProfile func_152706_a(String username) { // isUsernameWhitelisted
+    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
         for (GameProfile profile: Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
             if (profile.getName().equals(username)) {
                 return (com.mojang.authlib.GameProfile) profile;

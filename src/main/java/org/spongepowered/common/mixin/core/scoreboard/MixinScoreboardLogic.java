@@ -73,7 +73,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = org.spongepowered.api.scoreboard.Scoreboard.class, prefix = "scoreboard$"))
 public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinServerScoreboard {
 
-    @Shadow public abstract void func_96551_b(); // mark ScoreboardSaveData dirty
+    @Shadow public abstract void markSaveDataDirty();
 
     // Get Objective
 
@@ -199,7 +199,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         }
 
         // We deliberately don't call func_96533_c, because there's no need
-        this.func_96551_b();
+        this.markSaveDataDirty();
 
         ((SpongeObjective) objective).removeObjectiveFor(this);
     }
