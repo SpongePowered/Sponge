@@ -268,7 +268,7 @@ public final class NbtDataUtil {
     }
 
     public static void setPagesToNBT(ItemStack stack, List<Text> pages){
-        final NBTTagList list = SpongeTexts.asLegacy(pages);
+        final NBTTagList list = SpongeTexts.asJsonNBT(pages);
         final NBTTagCompound compound = getOrCreateCompound(stack);
         compound.setTag(ITEM_BOOK_PAGES, list);
         if (!compound.hasKey(ITEM_BOOK_TITLE)) {

@@ -89,6 +89,14 @@ public final class SpongeTexts {
         return json;
     }
 
+    public static NBTTagList asJsonNBT(List<Text> list) {
+        final NBTTagList legacy = new NBTTagList();
+        for (Text line : list) {
+            legacy.appendTag(new NBTTagString(TextSerializers.JSON.serialize(line)));
+        }
+        return legacy;
+    }
+
     public static List<Text> fromJson(List<String> json) {
         List<Text> list = Lists.newArrayList();
         for (String line : json) {
@@ -106,10 +114,11 @@ public final class SpongeTexts {
         return list;
     }
 
+    @SuppressWarnings({"ConstantConditions", "deprecation"})
     public static NBTTagList asLegacy(List<Text> list) {
         final NBTTagList legacy = new NBTTagList();
         for (Text line : list) {
-            legacy.appendTag(new NBTTagString(TextSerializers.JSON.serialize(line)));
+            legacy.appendTag(new NBTTagString(TextSerializers.LEGACY_FORMATTING_CODE.serialize(line)));
         }
         return legacy;
     }
