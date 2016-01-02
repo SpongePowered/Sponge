@@ -274,6 +274,7 @@ public class KeyRegistry {
         keyMap.put("generation", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Generation")));
         keyMap.put("passenger", makeSingleKey(EntitySnapshot.class, Value.class, of("PassengerSnapshot")));
         keyMap.put("knockback_strength", makeSingleKey(Integer.class, MutableBoundedValue.class, of("KnockbackStrength")));
+        keyMap.put("persists", makeSingleKey(Boolean.class, Value.class, of("Persists")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

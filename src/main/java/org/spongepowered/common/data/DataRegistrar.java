@@ -815,6 +815,11 @@ public class DataRegistrar {
                 ImmutableSpongeKnockbackData.class, knockbackDualProcessor);
         dataManager.registerValueProcessor(Keys.KNOCKBACK_STRENGTH, knockbackDualProcessor);
 
+        final PersistingDataDualProcessor persistingDataDualProcessor = new PersistingDataDualProcessor();
+        dataManager.registerDataProcessorAndImpl(PersistingData.class, SpongePersistingData.class, ImmutablePersistingData.class,
+                ImmutableSpongePersistingData.class, persistingDataDualProcessor);
+        dataManager.registerValueProcessor(Keys.PERSISTS, persistingDataDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
