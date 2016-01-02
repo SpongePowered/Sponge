@@ -55,6 +55,6 @@ dependencies {
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
 
-task sortAccessTransformers(type: org.spongepowered.gradle.TaskSortAccessTransformers) {
+/*task sortAccessTransformers(type: org.spongepowered.gradle.TaskSortAccessTransformers) {
     process(sourceSets.main)
-}
+}*/
