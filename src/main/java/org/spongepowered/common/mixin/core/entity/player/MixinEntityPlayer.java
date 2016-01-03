@@ -31,6 +31,7 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -39,10 +40,15 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
+import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
 
 @Mixin(EntityPlayer.class)
@@ -66,10 +72,9 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow protected FoodStats foodStats;
     private boolean affectsSpawning = true;
 
-    // This is "implemented" here so we can reference it in the EntityPlayerMP mixin as super method
-    @Shadow
-    public IChatComponent getDisplayName() {
-        return null;
+    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onGetDisplayName(CallbackInfoReturnable<IChatComponent> ci, ChatComponentText component) {
+        ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
     }
 
     // utility method for getting the total experience at an arbitrary level

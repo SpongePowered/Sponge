@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.*;
 import static org.spongepowered.common.entity.CombatHelper.*;
-import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.ICommandSender;
@@ -40,7 +39,6 @@ import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
@@ -87,7 +85,6 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
-import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.LanguageUtil;
 
 import java.util.Collection;
@@ -141,11 +138,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)),
                 (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
         }
-    }
-
-    @Override
-    public IChatComponent getDisplayName() {
-        return LegacyTexts.parseComponent((ChatComponentText) super.getDisplayName(), COLOR_CHAR);
     }
 
     @Override

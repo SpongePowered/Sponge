@@ -36,6 +36,7 @@ import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -164,63 +165,83 @@ public final class LegacyTexts {
         return false;
     }
 
-    public static ChatComponentText parseComponent(String input, char code) {
-        return parseComponent(new ChatComponentText(input), code);
-    }
-
     public static ChatComponentText parseComponent(ChatComponentText component, char code) {
-        final String input = component.text;
-        int next = input.lastIndexOf(code, input.length() - 2);
-        if (next == -1) {
-            return component;
-        }
+        String text = component.text;
+        int next = text.lastIndexOf(code, text.length() - 2);
 
-        List<IChatComponent> parts = Lists.newArrayList();
+        List<IChatComponent> parsed = null;
+        if (next >= 0) {
+            parsed = new ArrayList<>();
 
-        ChatComponentText current = null;
-        boolean reset = false;
+            ChatComponentText current = null;
+            boolean reset = false;
 
-        int pos = input.length();
-        do {
-            EnumChatFormatting format = getFormat(input.charAt(next + 1));
-            if (format != null) {
-                int from = next + 2;
-                if (from != pos) {
-                    if (current != null) {
-                        if (reset) {
-                            parts.add(current);
-                            current.getChatStyle().setParentStyle(component.getChatStyle());
-                            reset = false;
-                            current = new ChatComponentText("");
+            int pos = text.length();
+            do {
+                EnumChatFormatting format = getFormat(text.charAt(next + 1));
+                if (format != null) {
+                    int from = next + 2;
+                    if (from != pos) {
+                        if (current != null) {
+                            if (reset) {
+                                parsed.add(current);
+                                current.getChatStyle().setParentStyle(component.getChatStyle());
+                                reset = false;
+                                current = new ChatComponentText("");
+                            } else {
+                                ChatComponentText old = current;
+                                current = new ChatComponentText("");
+                                current.appendSibling(old);
+                            }
                         } else {
-                            ChatComponentText old = current;
                             current = new ChatComponentText("");
-                            current.appendSibling(old);
                         }
-                    } else {
+
+                        current.text = text.substring(from, pos);
+                    } else if (current == null) {
                         current = new ChatComponentText("");
                     }
 
-                    current.text = input.substring(from, pos);
-                } else if (current == null) {
-                    current = new ChatComponentText("");
+                    reset |= applyStyle(current.getChatStyle(), format);
+                    pos = next;
                 }
 
-                reset |= applyStyle(current.getChatStyle(), format);
-                pos = next;
+                next = text.lastIndexOf(code, next - 1);
+            } while (next != -1);
+
+            if (current != null) {
+                parsed.add(current);
+                current.getChatStyle().setParentStyle(component.getChatStyle());
             }
 
-            next = input.lastIndexOf(code, next - 1);
-        } while (next != -1);
-
-        if (current != null) {
-            parts.add(current);
+            Collections.reverse(parsed);
+            text = pos > 0 ? text.substring(0, pos) : "";
+            if (component.getSiblings().isEmpty()) {
+                ChatComponentText newComponent = new ChatComponentText(text);
+                newComponent.getSiblings().addAll(parsed);
+                newComponent.setChatStyle(component.getChatStyle());
+                return newComponent;
+            }
+        } else if (component.getSiblings().isEmpty()) {
+            return component;
         }
 
-        Collections.reverse(parts);
-        component.text = pos > 0 ? input.substring(0, pos) : "";
-        component.getSiblings().addAll(parts);
-        return component;
+        ChatComponentText newComponent = new ChatComponentText(text);
+        if (parsed != null) {
+            newComponent.getSiblings().addAll(parsed);
+        }
+
+        newComponent.setChatStyle(component.getChatStyle());
+        for (IChatComponent child : (List<IChatComponent>) component.getSiblings()) {
+            if (child instanceof ChatComponentText) {
+                child = parseComponent((ChatComponentText) child, code);
+            } else {
+                child = child.createCopy();
+            }
+            newComponent.appendSibling(child);
+        }
+
+        return newComponent;
     }
 
     private static boolean applyStyle(ChatStyle style, EnumChatFormatting formatting) {
