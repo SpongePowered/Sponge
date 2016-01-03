@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import static com.google.common.base.Preconditions.*;
 import static org.spongepowered.common.entity.CombatHelper.*;
+import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.ICommandSender;
@@ -86,6 +87,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.LanguageUtil;
 
 import java.util.Collection;
@@ -143,15 +145,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public IChatComponent getDisplayName() {
-        ChatComponentText component = (ChatComponentText) super.getDisplayName();
-        String text = component.getChatComponentText_TextValue();
-        if (text.indexOf(SpongeTexts.COLOR_CHAR) >= 0) {
-            IChatComponent newComponent = SpongeTexts.toComponent(SpongeTexts.fromLegacy(text));
-            newComponent.setChatStyle(component.getChatStyle());
-            return newComponent;
-        } else {
-            return component;
-        }
+        return LegacyTexts.parseComponent((ChatComponentText) super.getDisplayName(), COLOR_CHAR);
     }
 
     @Override

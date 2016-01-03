@@ -25,7 +25,10 @@
 package org.spongepowered.common.text.serializer;
 
 import com.google.common.collect.Lists;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
@@ -35,7 +38,6 @@ import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import javax.annotation.Nullable;
 
@@ -155,6 +157,94 @@ public final class LegacyTexts {
             default:
                 if (builder.getColor() == TextColors.NONE) {
                     builder.color(SpongeTextColor.of(formatting));
+                }
+                return true;
+        }
+
+        return false;
+    }
+
+    public static ChatComponentText parseComponent(String input, char code) {
+        return parseComponent(new ChatComponentText(input), code);
+    }
+
+    public static ChatComponentText parseComponent(ChatComponentText component, char code) {
+        final String input = component.text;
+        int next = input.lastIndexOf(code, input.length() - 2);
+        if (next == -1) {
+            return component;
+        }
+
+        List<IChatComponent> parts = Lists.newArrayList();
+
+        ChatComponentText current = null;
+        boolean reset = false;
+
+        int pos = input.length();
+        do {
+            EnumChatFormatting format = getFormat(input.charAt(next + 1));
+            if (format != null) {
+                int from = next + 2;
+                if (from != pos) {
+                    if (current != null) {
+                        if (reset) {
+                            parts.add(current);
+                            current.getChatStyle().setParentStyle(component.getChatStyle());
+                            reset = false;
+                            current = new ChatComponentText("");
+                        } else {
+                            ChatComponentText old = current;
+                            current = new ChatComponentText("");
+                            current.appendSibling(old);
+                        }
+                    } else {
+                        current = new ChatComponentText("");
+                    }
+
+                    current.text = input.substring(from, pos);
+                } else if (current == null) {
+                    current = new ChatComponentText("");
+                }
+
+                reset |= applyStyle(current.getChatStyle(), format);
+                pos = next;
+            }
+
+            next = input.lastIndexOf(code, next - 1);
+        } while (next != -1);
+
+        if (current != null) {
+            parts.add(current);
+        }
+
+        Collections.reverse(parts);
+        component.text = pos > 0 ? input.substring(0, pos) : "";
+        component.getSiblings().addAll(parts);
+        return component;
+    }
+
+    private static boolean applyStyle(ChatStyle style, EnumChatFormatting formatting) {
+        switch (formatting) {
+            case BOLD:
+                style.bold = true;
+                break;
+            case ITALIC:
+                style.italic = true;
+                break;
+            case UNDERLINE:
+                style.underlined = true;
+                break;
+            case STRIKETHROUGH:
+                style.strikethrough = true;
+                break;
+            case OBFUSCATED:
+                style.obfuscated = true;
+                break;
+            case RESET:
+                return true;
+            default:
+                if (style.color == null) {
+                    style.color = formatting;
                 }
                 return true;
         }
