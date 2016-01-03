@@ -825,6 +825,11 @@ public class DataRegistrar {
                 ImmutableStoredEnchantmentData.class, ImmutableSpongeStoredEnchantmentData.class, storedEnchantmentDualProcessor);
         dataManager.registerValueProcessor(Keys.STORED_ENCHANTMENTS, storedEnchantmentDualProcessor);
 
+        final SprintDataProcessor sprintDataProcessor = new SprintDataProcessor();
+        dataManager.registerDataProcessorAndImpl(SprintData.class, SpongeSprintData.class, ImmutableSprintData.class,
+                ImmutableSpongeSprintData.class, sprintDataProcessor);
+        dataManager.registerValueProcessor(Keys.IS_SPRINTING, sprintDataProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 
