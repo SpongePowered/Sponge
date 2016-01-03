@@ -420,10 +420,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
             ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
-
-            if (((IMixinWorldInfo) worldInfo).getWorldConfig() == null) {
-                ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            }
+            ((IMixinWorldInfo) worldInfo).createWorldConfig();
             final UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
             DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
@@ -709,6 +706,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         WorldInfo worldInfo = savehandler.loadWorldInfo();
 
         if (worldInfo != null) {
+            ((IMixinWorldInfo) worldInfo).createWorldConfig();
             if (!WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getUniqueId())) {
                 WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
                 return Optional.of((WorldProperties) worldInfo);

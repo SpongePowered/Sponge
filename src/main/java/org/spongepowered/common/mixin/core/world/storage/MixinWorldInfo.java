@@ -568,11 +568,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public void setWorldConfig(SpongeConfig<WorldConfig> config) {
-        this.worldConfig = config;
-    }
-
-    @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
         return GeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
     }

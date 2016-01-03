@@ -65,8 +65,6 @@ public interface IMixinWorldInfo {
 
     void setIsMod(boolean isMod);
 
-    void setWorldConfig(SpongeConfig<WorldConfig> config);
-
     void createWorldConfig();
 
     void setScoreboard(ServerScoreboard scoreboard);
