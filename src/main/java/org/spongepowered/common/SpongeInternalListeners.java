@@ -29,9 +29,10 @@ import com.google.common.collect.Multimap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.service.ChangeServiceProviderEvent;
-import org.spongepowered.api.service.permission.PermissionService;
 
+import java.util.Iterator;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 public class SpongeInternalListeners {
 
@@ -39,18 +40,28 @@ public class SpongeInternalListeners {
         return Holder.INSTANCE;
     }
 
-    private Multimap<Class<?>, Consumer<Object>> serviceCallbacks = HashMultimap.create();
+    private Multimap<Class<?>, Predicate<Object>> serviceCallbacks = HashMultimap.create();
 
     @SuppressWarnings("unchecked")
+    public <T> void registerExpirableServiceCallback(Class<T> service, Predicate<T> callback) {
+        Sponge.getServiceManager().provide(service).ifPresent(callback::test);
+        this.serviceCallbacks.put(service, (Predicate<Object>) callback);
+    }
+
     public <T> void registerServiceCallback(Class<T> service, Consumer<T> callback) {
-        Sponge.getServiceManager().provide(service).ifPresent(callback::accept);
-        this.serviceCallbacks.put(service, (Consumer<Object>) callback);
+        this.registerExpirableServiceCallback(service, o -> {
+            callback.accept(o);
+            return true;
+        });
     }
 
     @Listener
     public void onServiceChange(ChangeServiceProviderEvent event) {
-        for (Consumer<Object> consumer: this.serviceCallbacks.get(event.getService())) {
-            consumer.accept(event.getNewProvider());
+        Iterator<Predicate<Object>> it = this.serviceCallbacks.get(event.getService()).iterator();
+        while (it.hasNext()) {
+            if (!it.next().test(event.getNewProvider())) {
+                it.remove();
+            }
         }
     }
 

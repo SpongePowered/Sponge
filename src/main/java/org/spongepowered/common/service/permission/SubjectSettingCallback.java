@@ -32,7 +32,8 @@ import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.mixin.core.command.MixinSubject;
 
-import java.util.function.Consumer;
+import java.lang.ref.WeakReference;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -40,31 +41,35 @@ import javax.annotation.Nullable;
  * {@link MixinSubject} helper class to apply the appropriate subject to the
  * mixin.
  */
-public class SubjectSettingCallback implements Consumer<PermissionService> {
+public class SubjectSettingCallback implements Predicate<PermissionService> {
 
-    private final IMixinSubject ref;
+    private final WeakReference<IMixinSubject> ref;
 
     public SubjectSettingCallback(IMixinSubject ref) {
-        this.ref = ref;
+        this.ref = new WeakReference<>(ref);
     }
 
     @Override
-    public void accept(@Nullable PermissionService input) {
-        if (input == null) {
-            return;
+    public boolean test(@Nullable PermissionService input) {
+        IMixinSubject ref = this.ref.get();
+        if (ref == null) {
+            return false;
         }
-        SubjectCollection userSubjects = input.getSubjects(this.ref.getSubjectCollectionIdentifier());
+        if (input == null) {
+            return true;
+        }
+        SubjectCollection userSubjects = input.getSubjects(ref.getSubjectCollectionIdentifier());
         if (userSubjects != null) {
             Subject subject;
-            if (this.ref instanceof User && userSubjects instanceof UserCollection) {
+            if (ref instanceof User && userSubjects instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
-                subject = ((UserCollection) userSubjects).get((GameProfile) ((User) this.ref).getProfile());
+                subject = ((UserCollection) userSubjects).get((GameProfile) ((User) ref).getProfile());
             } else {
-                subject = userSubjects.get(((Subject) this.ref).getIdentifier());
+                subject = userSubjects.get(((Subject) ref).getIdentifier());
             }
-            this.ref.setSubject(subject);
+            ref.setSubject(subject);
         }
-        return;
+        return true;
     }
 
 }
