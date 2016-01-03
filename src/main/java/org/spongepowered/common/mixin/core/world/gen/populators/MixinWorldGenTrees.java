@@ -88,7 +88,7 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
         }
         BlockPos down = new BlockPos(x, y - 1, z);
         Block block = worldIn.getBlockState(down).getBlock();
-        if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) || y >= 256 - i - 1) {
+        if (!canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) || y >= 256 - i - 1) {
             return false;
         }
         return true;
