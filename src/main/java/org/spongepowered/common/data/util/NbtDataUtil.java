@@ -67,6 +67,7 @@ public final class NbtDataUtil {
     public static final String TILE_ENTITY_POSITION_Z = "z";
 
     public static final String ITEM_ENCHANTMENT_LIST = "ench";
+    public static final String ITEM_STORED_ENCHANTMENTS_LIST = "StoredEnchantments";
     public static final String ITEM_ENCHANTMENT_ID = "id";
     public static final String ITEM_ENCHANTMENT_LEVEL = "lvl";
 
