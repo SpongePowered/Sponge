@@ -54,7 +54,7 @@ public class ItemEnchantmentValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected boolean set(ItemStack container, List<ItemEnchantment> value) {
         NbtDataUtil.setItemEnchantments(container, value);
-        return false;
+        return true;
     }
 
     @Override

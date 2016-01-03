@@ -98,6 +98,7 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public DataTransactionResult offerToStore(ValueContainer<?> container, E value) {
         for (ValueProcessor<E, V> processor : this.processors) {
@@ -108,15 +109,17 @@ public final class ValueProcessorDelegate<E, V extends BaseValue<E>> implements 
                 }
             }
         }
-        final ImmutableValue<?> immutable;
-        if (value instanceof Value) {
-            immutable = ((Value) value).asImmutable();
-        } else if (value instanceof ImmutableValue) {
-            immutable = (ImmutableValue) value;
-        } else {
-            throw new IllegalArgumentException("Cannot parse over a BaseValue that is not either a Value or ImmutableValue!");
+        for (ValueProcessor<E, V> processor : this.processors) {
+            if (processor.supports(container)) {
+                final Optional<V> optional = processor.getApiValueFromContainer(container);
+                if (optional.isPresent()) {
+                    V mutable = optional.get();
+                    ((Value<E>) mutable).set(value);
+                    return DataTransactionResult.failResult(((Value<E>) mutable).asImmutable());
+                }
+            }
         }
-        return DataTransactionResult.failResult(immutable);
+        return DataTransactionResult.failNoData();
     }
 
     @Override
