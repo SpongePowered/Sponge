@@ -71,7 +71,9 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
         }
         IBlockState block = this.worldObj.getBlockState(this.pos);
         if (block.getBlock() == Blocks.jukebox) {
-            ((BlockJukebox) block.getBlock()).insertRecord(this.worldObj, this.pos, block, itemStack);
+            // Don't use BlockJukebox#insertRecord - it looses item data
+            this.setRecord(itemStack);
+            this.worldObj.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, true), 2);
         }
     }
 
