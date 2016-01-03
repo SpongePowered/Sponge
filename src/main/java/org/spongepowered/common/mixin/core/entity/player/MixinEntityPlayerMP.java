@@ -39,6 +39,7 @@ import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
@@ -137,6 +138,19 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (world.getCapturedEntityItems().size() > 0) {
             world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)),
                 (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
+        }
+    }
+
+    @Override
+    public IChatComponent getDisplayName() {
+        ChatComponentText component = (ChatComponentText) super.getDisplayName();
+        String text = component.getChatComponentText_TextValue();
+        if (text.indexOf(SpongeTexts.COLOR_CHAR) >= 0) {
+            IChatComponent newComponent = SpongeTexts.toComponent(SpongeTexts.fromLegacy(text));
+            newComponent.setChatStyle(component.getChatStyle());
+            return newComponent;
+        } else {
+            return component;
         }
     }
 
@@ -428,11 +442,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void setVelocityOverride(@Nullable Vector3d velocity) {
         this.velocityOverride = velocity;
     }
-    
+
     @SuppressWarnings("unchecked")
     @Override
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory<? extends Carrier>) this.inventory;
     }
-    
+
 }

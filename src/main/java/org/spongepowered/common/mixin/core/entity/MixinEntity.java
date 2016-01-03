@@ -173,8 +173,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
-    @Shadow(prefix = "shadow$")
-    public abstract IChatComponent shadow$getDisplayName();
     @Shadow public abstract void setSize(float width, float height);
 
 

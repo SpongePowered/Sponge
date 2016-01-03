@@ -58,7 +58,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
-    @Shadow public abstract IChatComponent getDisplayName();
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
@@ -66,6 +65,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
     private boolean affectsSpawning = true;
+
+    // This is "implemented" here so we can reference it in the EntityPlayerMP mixin as super method
+    @Shadow
+    public IChatComponent getDisplayName() {
+        return null;
+    }
 
     // utility method for getting the total experience at an arbitrary level
     // the formulas here are basically (slightly modified) integrals of those of EntityPlayer#xpBarCap()
@@ -114,7 +119,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public void setFlying(boolean flying) {
         this.capabilities.isFlying = flying;
     }
-    
+
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
