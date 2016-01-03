@@ -830,6 +830,11 @@ public class DataRegistrar {
                 ImmutableSpongeSprintData.class, sprintDataProcessor);
         dataManager.registerValueProcessor(Keys.IS_SPRINTING, sprintDataProcessor);
 
+        final StuckArrowsDataDualProcessor stuckArrowsDataDualProcessor = new StuckArrowsDataDualProcessor();
+        dataManager.registerDataProcessorAndImpl(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
+                ImmutableSpongeStuckArrowsData.class, stuckArrowsDataDualProcessor);
+        dataManager.registerValueProcessor(Keys.STUCK_ARROWS, stuckArrowsDataDualProcessor);
+
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
 

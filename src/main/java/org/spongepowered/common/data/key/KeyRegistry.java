@@ -277,6 +277,7 @@ public class KeyRegistry {
         keyMap.put("persists", makeSingleKey(Boolean.class, Value.class, of("Persists")));
         keyMap.put("stored_enchantments", makeListKey(ItemEnchantment.class, of("StoredEnchantments")));
         keyMap.put("is_sprinting", makeSingleKey(Boolean.class, Value.class, of("Sprinting")));
+        keyMap.put("stuck_arrows", makeSingleKey(Integer.class, MutableBoundedValue.class, of("StuckArrows")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
