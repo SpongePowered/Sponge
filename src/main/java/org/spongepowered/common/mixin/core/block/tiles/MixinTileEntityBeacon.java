@@ -43,6 +43,12 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
 
     @Shadow private int primaryEffect;
     @Shadow private int secondaryEffect;
+    @Shadow private int levels;
+
+    @Override
+    public int getCompletedLevels() {
+        return this.levels < 0 ? 0 : this.levels;
+    }
 
     @Override
     public DataContainer toContainer() {
