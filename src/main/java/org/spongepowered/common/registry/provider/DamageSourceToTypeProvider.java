@@ -48,7 +48,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
         this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
-        this.damageSourceToTypeMappings.put("fall", DamageTypes.CONTACT);
+        this.damageSourceToTypeMappings.put("fall", DamageTypes.FALL);
         this.damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
         this.damageSourceToTypeMappings.put("indirectmagic", DamageTypes.MAGIC);
