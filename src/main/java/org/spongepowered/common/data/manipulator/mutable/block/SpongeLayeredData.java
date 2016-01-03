@@ -44,7 +44,11 @@ public class SpongeLayeredData extends AbstractBoundedComparableData<Integer, La
     }
 
     public SpongeLayeredData(int value, int lowerBound, int upperBound) {
-        super(LayeredData.class, value, Keys.LAYER, intComparator(), ImmutableSpongeLayeredData.class, lowerBound, upperBound, 0);
+        this(value, lowerBound, upperBound, 0);
+    }
+
+    public SpongeLayeredData(int value, int lowerBound, int upperBound, int defaultValue) {
+        super(LayeredData.class, value, Keys.LAYER, intComparator(), ImmutableSpongeLayeredData.class, lowerBound, upperBound, defaultValue);
     }
 
     @Override
