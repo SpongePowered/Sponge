@@ -46,6 +46,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -60,6 +61,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.SpongeVersion;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -317,14 +319,20 @@ public class CommandSponge {
 
     }
 
+    private static final Text IMPLEMENTATION_NAME = Text.of(TextColors.YELLOW, TextStyles.BOLD, Sponge.getPlatform().getImplementation().getName());
 
     private static CommandSpec getVersionCommand() {
         return CommandSpec.builder()
                 .description(Text.of("Display Sponge's current version"))
                 .permission("sponge.command.version")
                 .executor((src, args) -> {
-                    src.sendMessage(Text.of("SpongeMod: ", title(SpongeImpl.getGame().getPlatform().getImplementation().getVersion()), "\n",
-                            "SpongeAPI: ", title(SpongeImpl.getGame().getPlatform().getApi().getVersion())));
+                    Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
+
+                    for (PluginContainer container : SpongeVersion.getComponents()) {
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion()));
+                    }
+
+                    src.sendMessage(builder.build());
                     return CommandResult.success();
                 })
                 .build();

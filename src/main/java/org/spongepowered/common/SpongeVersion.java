@@ -26,11 +26,19 @@ package org.spongepowered.common;
 
 import static com.google.common.base.Objects.firstNonNull;
 
-import org.spongepowered.api.MinecraftVersion;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.plugin.PluginContainer;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public final class SpongeVersion {
+
+    private SpongeVersion() {
+    }
 
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
@@ -41,11 +49,22 @@ public final class SpongeVersion {
     public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
     public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
 
-    private SpongeVersion() {
-    }
-
     private static Package getPackage() {
         return SpongeVersion.class.getPackage();
+    }
+
+    @Nullable
+    private static List<PluginContainer> components;
+
+    public static List<PluginContainer> getComponents() {
+        if (components == null) {
+            components = new ArrayList<>(6);
+            components.add(SpongeImpl.getMinecraftPlugin());
+            components.add(Sponge.getPlatform().getApi());
+            components.add(Sponge.getPlatform().getImplementation());
+        }
+
+        return components;
     }
 
 }
