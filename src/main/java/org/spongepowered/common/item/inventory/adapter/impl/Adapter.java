@@ -167,10 +167,10 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
 
         private static InventoryTransactionResult insertStack(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            Builder result = InventoryTransactionResult.builder();
+            Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
             
-            int maxStackSize = lens.getMaxStackSize(inv);
+            int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
             int remaining = stack.getQuantity();
             
             for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
@@ -194,10 +194,10 @@ public class Adapter implements MinecraftInventoryAdapter {
         }
         
         public static InventoryTransactionResult appendSequential(Fabric<IInventory> inv, Lens<IInventory, net.minecraft.item.ItemStack> lens, ItemStack stack) {
-            Builder result = InventoryTransactionResult.builder();
+            Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
             net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
             
-            int maxStackSize = lens.getMaxStackSize(inv);
+            int maxStackSize = Math.min(lens.getMaxStackSize(inv), nativeStack.getMaxStackSize());
             int remaining = stack.getQuantity();
             
             for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
@@ -340,7 +340,7 @@ public class Adapter implements MinecraftInventoryAdapter {
     protected final SlotCollection slots;
     protected final Lens<IInventory, net.minecraft.item.ItemStack> lens;
     protected final List<Inventory> children = new ArrayList<Inventory>();
-    protected Iterable<Slot> slotAdapter; 
+    protected Iterable<Slot> slotIterator; 
     
     public Adapter(Fabric<IInventory> inventory) {
         this(inventory, null, null);
@@ -353,8 +353,19 @@ public class Adapter implements MinecraftInventoryAdapter {
     public Adapter(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
         this.inventory = inventory;
         this.parent = parent != null ? parent : this;
-        this.slots = new SlotCollection(inventory.getSize());
+        this.slots = this.initSlots(inventory, root, parent);
         this.lens = root != null ? root : checkNotNull(this.initRootLens(), "root lens");
+    }
+
+    protected SlotCollection initSlots(Fabric<IInventory> inventory, Lens<IInventory, net.minecraft.item.ItemStack> root, Inventory parent) {
+        if (parent instanceof InventoryAdapter) {
+            @SuppressWarnings("unchecked")
+            SlotProvider<IInventory, net.minecraft.item.ItemStack> slotProvider = ((InventoryAdapter<IInventory, net.minecraft.item.ItemStack>)parent).getSlotProvider();
+            if (slotProvider instanceof SlotCollection) {
+                return (SlotCollection) slotProvider;
+            }
+        }
+        return new SlotCollection(inventory.getSize());
     }
 
     @Override
@@ -441,10 +452,10 @@ public class Adapter implements MinecraftInventoryAdapter {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> Iterable<T> slots() {
-        if (this.slotAdapter == null) {
-            this.slotAdapter = this.slots.getAdapter(this.inventory);
+        if (this.slotIterator == null) {
+            this.slotIterator = this.slots.getIterator(this);
         }
-        return (Iterable<T>) this.slotAdapter;
+        return (Iterable<T>) this.slotIterator;
     }
     
     @Override

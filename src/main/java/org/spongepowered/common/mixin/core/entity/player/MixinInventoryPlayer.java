@@ -38,8 +38,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
+import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
 import org.spongepowered.common.item.inventory.lens.impl.minecraft.HumanInventoryLens;
@@ -60,7 +62,7 @@ public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter,
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
         this.inventory = new DefaultInventoryFabric(this);
-        this.slots = new SlotCollection(this.inventory.getSize());
+        this.slots = new SlotCollection.Builder().add(36).add(4, EquipmentSlotAdapter.class).build();
         this.lens = new HumanInventoryLens(this, this.slots);
         this.carrier = playerIn instanceof Humanoid ? (Humanoid) playerIn : null;
     }
@@ -97,4 +99,9 @@ public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter,
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
     
+    @Override
+    public SlotProvider<IInventory, ItemStack> getSlotProvider() {
+        return this.slots;
+    }
+
 }

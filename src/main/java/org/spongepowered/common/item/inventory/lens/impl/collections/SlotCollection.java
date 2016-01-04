@@ -24,24 +24,78 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.collections;
 
+import static com.google.common.base.Preconditions.*;
+
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionAdapter;
+import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.inventory.adapter.impl.SlotCollectionIterator;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.slots.SlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SlotCollection extends DynamicLensCollectionImpl<IInventory, ItemStack> implements SlotProvider<IInventory, ItemStack> {
     
+    public static class Builder {
+        
+        private List<Class<? extends SlotAdapter>> slotTypes = new ArrayList<Class<? extends SlotAdapter>>();
+        
+        public Builder add() {
+            return this.add(SlotAdapter.class);
+        }
+        
+        public Builder add(Class<? extends SlotAdapter> type) {
+            this.slotTypes.add(checkNotNull(type));
+            return this;
+        }
+        
+        public Builder add(int count) {
+            return this.add(count, SlotAdapter.class);
+        }
+        
+        public Builder add(int count, Class<? extends SlotAdapter> type) {
+            checkNotNull(type);
+            for (int i = 0; i < count; i++) {
+                this.slotTypes.add(type);
+            }
+            
+            return this;
+        }
+        
+        public int size() {
+            return this.slotTypes.size();
+        }
+        
+        Class<? extends Inventory> getType(int index) {
+            return this.slotTypes.get(index);
+        }
+        
+        public SlotCollection build() {
+            return new SlotCollection(this.size(), this);
+        }
+
+    }
+    
+    private Builder builder;
+
     public SlotCollection(int size) {
-        super(size);
-        this.populate();
+        this(size, null);
     }
 
+    SlotCollection(int size, Builder builder) {
+        super(size);
+        this.builder = builder;
+        this.populate();
+    }
+    
     private void populate() {
         for (int index = 0; index < this.size(); index++) {
             this.lenses[index] = this.createSlotLens(index);
@@ -53,7 +107,11 @@ public class SlotCollection extends DynamicLensCollectionImpl<IInventory, ItemSt
     }
 
     protected Class<? extends Inventory> getSlotAdapterType(int slotIndex) {
-        return SlotAdapter.class;
+        try {
+            return this.builder != null ? this.builder.getType(slotIndex) : SlotAdapter.class;
+        } catch (IndexOutOfBoundsException ex) {
+            return SlotAdapter.class;
+        }
     }
 
     @Override
@@ -61,8 +119,16 @@ public class SlotCollection extends DynamicLensCollectionImpl<IInventory, ItemSt
         return (SlotLens<IInventory, ItemStack>) this.get(index);
     }
 
-    public Iterable<Slot> getAdapter(Fabric<IInventory> inv) {
-        return new SlotCollectionAdapter(inv, this);
+    public Iterable<Slot> getIterator(InventoryAdapter<IInventory, ItemStack> adapter) {
+        return this.getIterator(adapter, adapter.getInventory(), adapter.getRootLens());
+    }
+    
+    public Iterable<Slot> getIterator(Inventory parent, InventoryAdapter<IInventory, ItemStack> adapter) {
+        return this.getIterator(parent, adapter.getInventory(), adapter.getRootLens());
+    }
+    
+    public Iterable<Slot> getIterator(Inventory parent, Fabric<IInventory> inv, Lens<IInventory, ItemStack> lens) {
+        return new SlotCollectionIterator(parent, inv, lens, this);
     }
 
 }

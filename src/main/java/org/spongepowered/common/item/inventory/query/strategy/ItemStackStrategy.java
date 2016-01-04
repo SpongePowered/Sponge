@@ -52,6 +52,9 @@ public class ItemStackStrategy<TInventory> extends QueryStrategy<TInventory, Ite
         
         if (lens instanceof SlotLens) {
             ItemStack stack = ((SlotLens<TInventory, ItemStack>)lens).getStack(inventory);
+            if (stack == null) {
+                return false;
+            }
             for (ItemStack candidate : this.stacks) {
                 if (ItemStackUtil.compare(stack, candidate)) {
                     return true;

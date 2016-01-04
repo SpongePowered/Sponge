@@ -28,29 +28,42 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
+import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 import java.util.Iterator;
 import java.util.List;
 
-public class SlotCollectionAdapter implements Iterable<Slot> {
+public class SlotCollectionIterator implements Iterable<Slot> {
     
+    private Inventory parent;
+
     private final Fabric<IInventory> inv;
     
-    private final List<Slot> slots; 
+    private final List<Slot> slots;
 
-    public SlotCollectionAdapter(Fabric<IInventory> inv, SlotCollection slots) {
+    public SlotCollectionIterator(Inventory parent, Fabric<IInventory> inv, Lens<IInventory, ItemStack> lens, SlotCollection slots) {
+        this.parent = parent;
         this.inv = inv;
-        Builder<Slot> builder = ImmutableList.<Slot>builder();
-        for (Lens<IInventory, ItemStack> lens : slots) {
-            builder.add((Slot)lens.getAdapter(inv, null));
-        }
-        this.slots = builder.build();
+        this.slots = this.traverseSpanningTree(inv, lens, slots, ImmutableList.<Slot>builder()).build();
     }
     
+    private Builder<Slot> traverseSpanningTree(Fabric<IInventory> inv, Lens<IInventory, ItemStack> lens, SlotCollection slots, Builder<Slot> list) {
+        for (Lens<IInventory, ItemStack> child : lens.getSpanningChildren()) {
+            if (child instanceof SlotLens) {
+                list.add((SlotAdapter) child.getAdapter(inv, this.parent));
+            } else if (child.getSpanningChildren().size() > 0) {
+                this.traverseSpanningTree(inv, child, slots, list);
+            }
+        }
+        return list;
+    }
+
     public Fabric<IInventory> getFabric() {
         return this.inv;
     }

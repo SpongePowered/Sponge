@@ -58,13 +58,13 @@ public abstract class ItemStackUtil {
     }
     
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
-        // TODO fix
-        return new net.minecraft.item.ItemStack(stack.getItem(), stack.stackSize, stack.getItemDamage());
+        return net.minecraft.item.ItemStack.copyItemStack(stack);
     }
     
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack, int newSize) {
-        // TODO fix
-        return new net.minecraft.item.ItemStack(stack.getItem(), newSize, stack.getItemDamage());
+        net.minecraft.item.ItemStack clone = net.minecraft.item.ItemStack.copyItemStack(stack);
+        clone.stackSize = newSize;
+        return clone;
     }
     
     public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack) {

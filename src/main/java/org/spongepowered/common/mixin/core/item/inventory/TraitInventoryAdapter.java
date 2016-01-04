@@ -29,6 +29,9 @@ import net.minecraft.inventory.IInventory;
 import org.spongepowered.api.item.inventory.EmptyInventory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
@@ -42,6 +45,7 @@ import java.util.List;
     net.minecraft.inventory.Slot.class,
     InventoryPlayer.class
 })
+@Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {
 
     protected EmptyInventory empty;  
@@ -49,7 +53,7 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     protected Inventory next;
     protected SlotCollection slots;
     protected List<Inventory> children = new ArrayList<Inventory>();
-    protected Iterable<Slot> slotAdapter; 
+    protected Iterable<Slot> slotIterator; 
     
     @Override
     public Inventory parent() {
@@ -99,14 +103,14 @@ public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter
     @SuppressWarnings("unchecked")
     @Override
     public <T extends Inventory> Iterable<T> slots() {
-        if (this.slotAdapter == null) {
-            this.slotAdapter = this.slots.getAdapter(this.getInventory());
+        if (this.slotIterator == null) {
+            this.slotIterator = this.slots.getIterator(this);
         }
-        return (Iterable<T>) this.slotAdapter;
+        return (Iterable<T>) this.slotIterator;
     }
-    
-    @Override
-    public void clear() {
+
+    @Intrinsic
+    public void inventory$clear() {
         this.getInventory().clear();
     }
     

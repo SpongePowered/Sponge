@@ -99,11 +99,13 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
     protected void init(SlotProvider<IInventory, ItemStack> slots, boolean spanning) {
         for (int y = 0, ord = 0, slot = this.base; y < this.height; y++, slot += (this.stride - this.width)) {
             for (int x = 0; x < this.width; x++, slot++, ord++) {
-//                System.err.printf(">> %s ord: %-4d x: %-4d y: %-4d slot: %-4d\n", this.getClass().getSimpleName(), ord, x, y, slot);
+                SlotLens<IInventory, ItemStack> slotLens = slots.getSlot(slot);
+//                System.err.printf(">> %s ord: %-4d x: %-4d y: %-4d slot: %-4d => %s\n",
+//                        this.getClass().getSimpleName(), ord, x, y, slot, slotLens.getClass().getSimpleName());
                 if (spanning) {
-                    this.addSpanningChild(slots.getSlot(slot), new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
+                    this.addSpanningChild(slotLens, new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
                 } else {
-                    this.addChild(slots.getSlot(slot), new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
+                    this.addChild(slotLens, new SlotIndex(ord), new SlotPos(this.xBase + x, this.yBase + y));
                 }
             }
         }
