@@ -44,8 +44,7 @@ public abstract class MixinPropertyHelper<T extends Comparable<T>> implements Bl
     protected String idString;
 
     @Shadow private String name;
-    @Shadow(prefix = "shadow$")
-    public abstract Class<T> shadow$getValueClass();
+    @Shadow public abstract Class<T> shadow$getValueClass();
 
     @Override
     public String getId() {

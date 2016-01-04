@@ -35,6 +35,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
+import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S01PacketJoinGame;
 import net.minecraft.network.play.server.S03PacketTimeUpdate;
@@ -45,6 +46,7 @@ import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S1DPacketEntityEffect;
 import net.minecraft.network.play.server.S1FPacketSetExperience;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.network.play.server.S39PacketPlayerAbilities;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.network.play.server.S40PacketDisconnect;
@@ -93,6 +95,7 @@ import org.spongepowered.common.SpongeImplFactory;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -122,7 +125,8 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
-    @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
+    @Shadow public abstract void sendPacketToAllPlayers(Packet packetIn);
+    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
@@ -500,6 +504,37 @@ public abstract class MixinServerConfigurationManager {
     private void onSaveAllPlayerData(CallbackInfo ci) {
         for (SpongeUser user : SpongeUser.dirtyUsers) {
             user.save();
+        }
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This prevents the server incorrectly sending invisible players to the actual player
+     * @param playerIn
+     */
+    @SuppressWarnings("unchecked")
+    @Overwrite
+    public void playerLoggedIn(EntityPlayerMP playerIn) {
+        this.playerEntityList.add(playerIn);
+        this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);
+        // Sponge Start - check invisibility from plugins
+        if (!((IMixinEntity) playerIn).isReallyREALLYInvisible()) {
+            this.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerIn));
+        }
+        // Sponge End
+        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
+        worldserver.spawnEntityInWorld(playerIn);
+        this.preparePlayer(playerIn, (WorldServer) null);
+
+        for (int i = 0; i < this.playerEntityList.size(); ++i) {
+            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) this.playerEntityList.get(i);
+            // Sponge Start - check invisibility for plugins so we don't send invisible players
+            if (!((IMixinEntity) entityplayermp1).isReallyREALLYInvisible()) {
+                playerIn.playerNetServerHandler
+                        .sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, entityplayermp1));
+            }
+            // Sponge End
         }
     }
 

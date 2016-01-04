@@ -29,13 +29,18 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -106,13 +111,41 @@ public final class EntityUtil {
         return true;
     }
 
-    public static boolean removeEntityFromPlayerTracking(Entity entity) {
-        final EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
-        EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
-        for (EntityPlayerMP player : (Set<EntityPlayerMP>) entry.trackingPlayers) {
-            S13PacketDestroyEntities packet = new S13PacketDestroyEntities(entity.getEntityId());
-            player.playerNetServerHandler.sendPacket(packet);
+    @SuppressWarnings("unchecked")
+    public static boolean toggleInvisibility(Entity entity, boolean vanish) {
+        EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
+        if (vanish) {
+            EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
+            Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>((Set<EntityPlayerMP>) entry.trackingPlayers);
+            entityPlayerMPs.forEach(player -> {
+                if (player != entity) { // don't remove ourselves
+                    entry.removeFromTrackedPlayers(player);
+                    if (entity instanceof EntityPlayerMP) { // have to remove from the tab list, otherwise they still show up!
+                        player.playerNetServerHandler.sendPacket(
+                                new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) entity));
+                    }
+                }
+            });
+        } else {
+            if (!entityTracker.trackedEntityHashTable.containsItem(entity.getEntityId())) {
+                entityTracker.trackEntity(entity);
+            }
+            EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
+
+            for (EntityPlayerMP playerMP : (List<EntityPlayerMP>) MinecraftServer.getServer().getConfigurationManager().playerEntityList) {
+                if (entity != playerMP) { // don't remove ourselves
+                    if (entity instanceof EntityPlayerMP) {
+                        Packet packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) entity);
+                        playerMP.playerNetServerHandler.sendPacket(packet);
+                    }
+                    Packet newPacket = entry.func_151260_c(); // creates the spawn packet for us
+                    playerMP.playerNetServerHandler.sendPacket(newPacket);
+                }
+            }
+            entityTracker.updateTrackedEntities();
         }
+        entity.setInvisible(vanish);
+        ((IMixinEntity) entity).setReallyInvisible(vanish);
         return true;
     }
 

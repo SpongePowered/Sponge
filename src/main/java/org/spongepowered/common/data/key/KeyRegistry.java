@@ -278,6 +278,8 @@ public class KeyRegistry {
         keyMap.put("stored_enchantments", makeListKey(ItemEnchantment.class, of("StoredEnchantments")));
         keyMap.put("is_sprinting", makeSingleKey(Boolean.class, Value.class, of("Sprinting")));
         keyMap.put("stuck_arrows", makeSingleKey(Integer.class, MutableBoundedValue.class, of("StuckArrows")));
+        keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
+        keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

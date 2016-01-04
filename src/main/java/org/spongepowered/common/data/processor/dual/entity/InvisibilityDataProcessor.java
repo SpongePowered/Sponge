@@ -24,10 +24,19 @@
  */
 package org.spongepowered.common.data.processor.dual.entity;
 
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
@@ -35,22 +44,23 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.util.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public class InvisibilityDataProcessor
-        extends AbstractSingleTargetDualProcessor<Entity, Boolean, Value<Boolean>, InvisibilityData, ImmutableInvisibilityData> {
+        extends AbstractMultiDataSingleTargetProcessor<Entity, InvisibilityData, ImmutableInvisibilityData> {
 
     public InvisibilityDataProcessor() {
-        super(Entity.class, Keys.INVISIBLE);
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.INVISIBLE, false, actualValue);
+        super(Entity.class);
     }
 
     @Override
@@ -59,38 +69,45 @@ public class InvisibilityDataProcessor
     }
 
     @Override
-    protected boolean set(Entity entity, Boolean value) {
-        if (!entity.worldObj.isRemote) {
-            EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
-            if (value) {
-                entityTracker.untrackEntity(entity);
-                entityTracker.updateTrackedEntities();
+    protected boolean doesDataExist(Entity dataHolder) {
+        return true;
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    protected boolean set(Entity dataHolder, Map<Key<?>, Object> keyValues) {
+        if (!dataHolder.worldObj.isRemote) {
+            final boolean invis = (Boolean) keyValues.get(Keys.INVISIBLE);
+            final boolean collision = (Boolean) keyValues.get(Keys.INVISIBILITY_IGNORES_COLLISION);
+            final boolean untargetable = (Boolean) keyValues.get(Keys.INVISIBILITY_PREVENTS_TARGETING);
+            dataHolder.setInvisible(invis);
+            if (invis) {
+                EntityUtil.toggleInvisibility(dataHolder, invis);
+                ((IMixinEntity) dataHolder).setIgnoresCollision(collision);
+                ((IMixinEntity) dataHolder).setUntargetable(untargetable);
             } else {
-                if (!entityTracker.trackedEntityHashTable.containsItem(entity.getEntityId())) {
-                    entityTracker.trackEntity(entity);
-                    entityTracker.updateTrackedEntities();
-                }
+                return EntityUtil.toggleInvisibility(dataHolder, invis);
             }
-            entity.setInvisible(value);
             return true;
-        } else {
-            return false;
         }
-
+        return false;
     }
 
     @Override
-    protected Optional<Boolean> getVal(Entity entity) {
-        return Optional.of(entity.isInvisible());
+    protected Map<Key<?>, ?> getValues(Entity dataHolder) {
+        return ImmutableMap.of(Keys.INVISIBLE, ((IMixinEntity) dataHolder).isReallyREALLYInvisible(),
+                Keys.INVISIBILITY_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
+                Keys.INVISIBILITY_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.INVISIBLE, false, value);
+    public Optional<InvisibilityData> fill(DataContainer container, InvisibilityData invisibilityData) {
+
+        return Optional.empty();
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public DataTransactionResult remove(DataHolder dataHolder) {
         return DataTransactionResult.failNoData();
     }
 }

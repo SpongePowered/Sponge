@@ -80,4 +80,16 @@ public interface IMixinEntity {
     
     void setVelocity(Vector3d velocity);
 
+    boolean isReallyREALLYInvisible();
+
+    void setReallyInvisible(boolean invisible);
+
+    boolean ignoresCollision();
+
+    void setIgnoresCollision(boolean prevents);
+
+    boolean isUntargetable();
+
+    void setUntargetable(boolean untargetable);
+
 }

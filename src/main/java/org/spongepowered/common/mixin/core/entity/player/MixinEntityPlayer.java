@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
@@ -32,12 +33,15 @@ import net.minecraft.inventory.Container;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.world.World;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -46,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -54,6 +59,9 @@ import org.spongepowered.common.util.VecHelper;
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer {
 
+    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World.spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final String WORLD_PLAY_SOUND_AT =
+            "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
     @Shadow public int experienceLevel;
@@ -136,6 +144,30 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             return true;
         }
         return false;
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
+     */
+    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
+            double yOffset, double zOffset, int ... p_175688_14_) {
+        if (!this.isReallyREALLYInvisible()) {
+            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+        }
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This prevents sounds from being sent to the server by players who are invisible.
+     */
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
+    public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
+        if (!this.isReallyREALLYInvisible()) {
+            world.playSoundToNearExcept(player, name, volume, pitch);
+        }
     }
 
     @Override

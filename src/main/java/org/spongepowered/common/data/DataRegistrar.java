@@ -528,7 +528,6 @@ public class DataRegistrar {
         final InvisibilityDataProcessor invisibilityDataProcessor = new InvisibilityDataProcessor();
         dataManager.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
                 ImmutableSpongeInvisibilityData.class, invisibilityDataProcessor);
-        dataManager.registerValueProcessor(Keys.INVISIBLE, invisibilityDataProcessor);
 
         final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
         dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
@@ -537,7 +536,6 @@ public class DataRegistrar {
         final FlowerPotDataProcessor flowerPotDataProcessor = new FlowerPotDataProcessor();
         dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
                 ImmutableSpongeRepresentedItemData.class, flowerPotDataProcessor);
-
 
         final FallingBlockDataProcessor fallingBlockDataProcessor = new FallingBlockDataProcessor();
         dataManager.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
@@ -715,6 +713,9 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.SUCCESS_COUNT, new TileEntitySuccessCountValueProcessor());
         dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new EntityTracksOutputValueProcessor());
         dataManager.registerValueProcessor(Keys.TRACKS_OUTPUT, new TileEntityTracksOutputValueProcessor());
+        dataManager.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
+        dataManager.registerValueProcessor(Keys.INVISIBILITY_IGNORES_COLLISION, new InvisibilityCollisionValueProcessor());
+        dataManager.registerValueProcessor(Keys.INVISIBILITY_PREVENTS_TARGETING, new InvisibilityTargetValueProcessor());
 
         // Dual Processors
         final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();

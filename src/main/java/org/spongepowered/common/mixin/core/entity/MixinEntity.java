@@ -45,6 +45,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
@@ -78,6 +79,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -118,6 +120,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;lava:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
+    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World.spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
@@ -174,6 +177,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow(prefix = "shadow$")
     protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
+    @Shadow public abstract boolean isSilent();
 
 
     // @formatter:on
@@ -987,6 +991,68 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public Translation getTranslation() {
         return getType().getTranslation();
+    }
+
+    private boolean collision = false;
+    private boolean untargetable = false;
+    private boolean isReallyInvisible = false;
+
+    @Override
+    public boolean isReallyREALLYInvisible() {
+        return this.isReallyInvisible;
+    }
+
+    @Override
+    public void setReallyInvisible(boolean invisible) {
+        this.isReallyInvisible = invisible;
+    }
+
+    @Override
+    public boolean ignoresCollision() {
+        return this.collision;
+    }
+
+    @Override
+    public void setIgnoresCollision(boolean prevents) {
+        this.collision = prevents;
+    }
+
+    @Override
+    public boolean isUntargetable() {
+        return this.untargetable;
+    }
+
+    @Override
+    public void setUntargetable(boolean untargetable) {
+        this.untargetable = untargetable;
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This prevents sounds from being sent to the server by entities that are invisible
+     */
+    @Overwrite
+    public void playSound(String name, float volume, float pitch) {
+        if (!this.isReallyInvisible || !this.isSilent()) {
+            this.worldObj.playSoundAtEntity((net.minecraft.entity.Entity) (Object) this, name, volume, pitch);
+        }
+    }
+
+    @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
+            double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
+        if (!this.isReallyInvisible) {
+            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+        }
+    }
+
+    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    public void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
+            double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
+        if (!this.isReallyInvisible) {
+            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+        }
     }
 
 }

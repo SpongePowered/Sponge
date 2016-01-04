@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.boss.EntityDragon;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -38,10 +35,7 @@ import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -66,8 +60,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
@@ -108,104 +100,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
 
-    public void setLastAttacker(@Nullable Living lastAttacker) {
-        setLastAttacker((EntityLivingBase) lastAttacker);
-    }
-
-    public void setMaxHealth(double maxHealth) {
-        getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth);
-
-        if (getHealth() > maxHealth) {
-            setHealth((float) maxHealth);
-        }
-    }
-
-    public void damageD(double amount) {
-        Living thisEntity = (Living) this;
-        DamageSource source = DamageSource.generic;
-        if (thisEntity instanceof Humanoid) {
-            source = DamageSource.causePlayerDamage((EntityPlayer) thisEntity);
-        } else {
-            source = DamageSource.causeMobDamage((EntityLivingBase) thisEntity);
-        }
-
-        if (thisEntity instanceof EntityDragon) {
-            ((EntityDragon) thisEntity).attackEntityFrom(source, (float) amount);
-        } else {
-            attackEntityFrom(source, (float) amount);
-        }
-    }
-
-    public double getHealthD() {
-        return getHealth();
-    }
-
-    public void setHealthD(double health) {
-        Living thisEntity = (Living) this;
-        setHealth((float) health);
-
-        if (thisEntity instanceof EntityPlayer && health == 0) {
-            ((EntityPlayer) thisEntity).onDeath(DamageSource.generic);
-        }
-    }
-
-    public double getMaxHealthD() {
-        return getMaxHealth();
-    }
-
-    public void addPotionEffect(PotionEffect potionEffect, boolean force) {
-        if (hasPotionEffect(potionEffect.getType())) {
-            if (!force) {
-                return;
-            }
-            removePotionEffect(potionEffect.getType());
-        }
-
-        addPotionEffect(new net.minecraft.potion.PotionEffect((net.minecraft.potion.PotionEffect) potionEffect));
-    }
-
-    public void addPotionEffects(Collection<PotionEffect> potionEffects, boolean force) {
-        for (PotionEffect effect : potionEffects) {
-            addPotionEffect(effect, force);
-        }
-    }
-
-    public void removePotionEffect(PotionEffectType potionEffectType) {
-        removePotionEffect(((Potion) potionEffectType).getId());
-    }
-
-    public boolean hasPotionEffect(PotionEffectType potionEffectType) {
-        return isPotionActive((Potion) potionEffectType);
-    }
-
-    public List<PotionEffect> getPotionEffects() {
-        List<PotionEffect> potionEffects = new ArrayList<>();
-        for (Object obj : getActivePotionEffects()) {
-            potionEffects.add((PotionEffect) obj);
-        }
-        return potionEffects;
-    }
-
-    public Optional<Living> getLastAttackerAPI() {
-        return Optional.ofNullable((Living) getLastAttacker());
-    }
-
-    public double getEyeHeightD() {
-        return getEyeHeight();
-    }
-
-    public Vector3d getEyeLocation() {
-        return ((Living) this).getLocation().getPosition().add(0, getEyeHeight(), 0);
-    }
-
-    public int getRemainingAir() {
-        return getAir();
-    }
-
-    public void setRemainingAir(int air) {
-        setAir(air);
-    }
-
     @Override
     public int getMaxAir() {
         return this.maxAir;
@@ -225,56 +119,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void setLastDamage(double damage) {
         this.lastDamage = (float) damage;
     }
-
-    public int getInvulnerabilityTicks() {
-        return this.hurtResistantTime;
-    }
-
-    public void setInvulnerabilityTicks(int ticks) {
-        this.hurtResistantTime = ticks;
-    }
-
-    public int getMaxInvulnerabilityTicks() {
-        return this.maxHurtResistantTime;
-    }
-
-    public void setMaxInvulnerabilityTicks(int ticks) {
-        this.maxHurtResistantTime = ticks;
-    }
-
-    public String getCustomName() {
-        return getCustomNameTag();
-    }
-
-    public void setCustomName(String name) {
-        if (name == null) {
-            name = "";
-        }
-
-        if (name.length() > 64) {
-            name = name.substring(0, 64);
-        }
-
-        setCustomNameTag(name);
-    }
-
-    public boolean isCustomNameVisible() {
-        return getAlwaysRenderNameTag();
-    }
-
-    public void setCustomNameVisible(boolean visible) {
-        setAlwaysRenderNameTag(visible);
-    }
-
-    public boolean isAPIInvisible() {
-        return this.getFlag(5);
-    }
-
-    public void setAPIInvisible(boolean invisible) {
-        this.setFlag(5, invisible);
-    }
-
-
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
@@ -571,6 +415,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public boolean hookModAttack(EntityLivingBase entityLivingBase, DamageSource source, float amount) {
         return true;
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This allows invisiblity to ignore entity collisions.
+     */
+    @Overwrite
+    public boolean canBeCollidedWith() {
+        return !(this.isReallyREALLYInvisible() && this.ignoresCollision()) && !this.isDead;
     }
 
 }

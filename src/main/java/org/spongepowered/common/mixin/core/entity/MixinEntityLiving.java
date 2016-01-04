@@ -42,6 +42,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -51,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.Optional;
@@ -163,5 +165,40 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         } else {
             this.attackTarget = null;
         }
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This is to instill the check that if the entity is invisible, check whether they're untargetable
+     * as well.
+     *
+     * @param entitylivingbaseIn The entity living base coming in
+     */
+    @Overwrite
+    public void setAttackTarget(EntityLivingBase entitylivingbaseIn) {
+        if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isReallyREALLYInvisible()
+            && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
+            this.attackTarget = null;
+            return;
+        }
+        this.attackTarget = entitylivingbaseIn;
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     *
+     * This will still check if the current attack target is invisible and is untargetable.
+     *
+     * @return The current attack target, if not null
+     */
+    @Overwrite
+    public EntityLivingBase getAttackTarget() {
+        if (this.attackTarget != null) {
+            if (((IMixinEntity) this.attackTarget).isReallyREALLYInvisible() && ((IMixinEntity) this.attackTarget).isUntargetable()) {
+                this.attackTarget = null;
+            }
+        }
+        return this.attackTarget;
     }
 }

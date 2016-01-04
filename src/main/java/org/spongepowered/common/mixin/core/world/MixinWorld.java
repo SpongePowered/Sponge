@@ -38,6 +38,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
@@ -238,6 +239,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector2i BIOME_MIN = BLOCK_MIN.toVector2(true);
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
     private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
+    private static final String CHECK_NO_ENTITY_COLLISION = "checkNoEntityCollision(Lnet/minecraft/util/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
+    private static final String GET_ENTITIES_WITHIN_AABB = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;";
     public boolean processingCaptureCause = false;
     public boolean captureEntitySpawns = true;
     public boolean captureBlockDecay = false;
@@ -302,6 +305,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
+    @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     private final net.minecraft.world.World nmsWorld = (net.minecraft.world.World)(Object) this;
 
@@ -2545,5 +2549,50 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulatorChanges() {
         return this.capturedSpongePopulators;
+    }
+
+    // For invisibility
+    @Redirect(method = CHECK_NO_ENTITY_COLLISION, at = @At(value = "INVOKE", target = GET_ENTITIES_WITHIN_AABB))
+    public List<net.minecraft.entity.Entity> filterInvisibile(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn,
+            AxisAlignedBB axisAlignedBB) {
+        List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);
+        Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
+        while (iterator.hasNext()) {
+            net.minecraft.entity.Entity entity = iterator.next();
+            if (((IMixinEntity) entity).isReallyREALLYInvisible() && ((IMixinEntity) entity).ignoresCollision()) {
+                iterator.remove();
+            }
+        }
+        return entities;
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @param z
+     * @param distance
+     * @return
+     */
+    @Overwrite
+    public EntityPlayer getClosestPlayer(double x, double y, double z, double distance) {
+        double d4 = -1.0D;
+        EntityPlayer entityplayer = null;
+
+        for (int i = 0; i < this.playerEntities.size(); ++i) {
+            EntityPlayer entityplayer1 = (EntityPlayer) this.playerEntities.get(i);
+
+            // Sponge - add mixin really is invisible check
+            if (IEntitySelector.NOT_SPECTATING.apply(entityplayer1) && !((IMixinEntity) entityplayer1).isReallyREALLYInvisible()) {
+                double d5 = entityplayer1.getDistanceSq(x, y, z);
+
+                if ((distance < 0.0D || d5 < distance * distance) && (d4 == -1.0D || d5 < d4)) {
+                    d4 = d5;
+                    entityplayer = entityplayer1;
+                }
+            }
+        }
+
+        return entityplayer;
     }
 }
