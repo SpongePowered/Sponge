@@ -10,6 +10,10 @@ buildscript {
             name = 'minecrell'
             url = 'http://repo.minecrell.net/releases'
         }
+        maven {
+            name = 'sponge'
+            url = 'http://repo.spongepowered.org/maven'
+        }
     }
 
     dependencies {
@@ -19,6 +23,7 @@ buildscript {
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
+        classpath 'org.spongepowered:spongegradle:0.2-SNAPSHOT'
     }
 }
 
@@ -55,6 +60,8 @@ dependencies {
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
 
-/*task sortAccessTransformers(type: org.spongepowered.gradle.TaskSortAccessTransformers) {
-    process(sourceSets.main)
-}*/
+apply plugin: 'org.spongepowered.gradle'
+
+sortAccessTransformers {
+    add sourceSets.main
+}
