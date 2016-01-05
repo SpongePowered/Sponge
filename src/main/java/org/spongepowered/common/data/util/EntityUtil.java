@@ -116,16 +116,18 @@ public final class EntityUtil {
         EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
         if (vanish) {
             EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
-            Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>((Set<EntityPlayerMP>) entry.trackingPlayers);
-            entityPlayerMPs.forEach(player -> {
-                if (player != entity) { // don't remove ourselves
-                    entry.removeFromTrackedPlayers(player);
-                    if (entity instanceof EntityPlayerMP) { // have to remove from the tab list, otherwise they still show up!
-                        player.playerNetServerHandler.sendPacket(
-                                new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) entity));
+            if (entry != null) {
+                Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>((Set<EntityPlayerMP>) entry.trackingPlayers);
+                entityPlayerMPs.forEach(player -> {
+                    if (player != entity) { // don't remove ourselves
+                        entry.removeFromTrackedPlayers(player);
+                        if (entity instanceof EntityPlayerMP) { // have to remove from the tab list, otherwise they still show up!
+                            player.playerNetServerHandler.sendPacket(
+                                    new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) entity));
+                        }
                     }
-                }
-            });
+                });
+            }
         } else {
             if (!entityTracker.trackedEntityHashTable.containsItem(entity.getEntityId())) {
                 entityTracker.trackEntity(entity);

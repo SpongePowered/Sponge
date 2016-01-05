@@ -238,28 +238,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public String getCustomName() {
-        return this.getGameProfile().getName();
-    }
-
-    @Override
-    public void setCustomName(String name) {
-        throw new UnsupportedOperationException("Cannot set the custom name of a player");
-    }
-
-    @Override
-    public boolean isCustomNameVisible() {
-        return true;
-    }
-
-    @Override
-    public void setCustomNameVisible(boolean visible) {
-        if (!visible) {
-            throw new UnsupportedOperationException("Cannot hide the name of a player");
-        }
-    }
-
-    @Override
     public String getIdentifier() {
         return this.user.getIdentifier();
     }
