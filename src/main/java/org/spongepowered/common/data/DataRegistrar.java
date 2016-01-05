@@ -178,6 +178,9 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
                 ImmutableSpongeHealthData.class, new HealthDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(SizeData.class, SpongeSizeData.class, ImmutableSizeData.class, 
+                ImmutableSpongeSizeData.class, new SizeDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(IgniteableData.class, SpongeIgniteableData.class, ImmutableIgniteableData.class,
                 ImmutableSpongeIgniteableData.class, new IgniteableDataProcessor());
 
@@ -689,6 +692,9 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.RIGHT_LEG_ROTATION, new RightLegRotationValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_PRIMARY_EFFECT, new BeaconPrimaryEffectValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_SECONDARY_EFFECT, new BeaconSecondaryEffectValueProcessor());
+        dataManager.registerValueProcessor(Keys.HEIGHT, new HeightValueProcessor());
+        dataManager.registerValueProcessor(Keys.BASE_SIZE, new BaseSizeValueProcessor());
+        dataManager.registerValueProcessor(Keys.SCALE, new ScaleValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

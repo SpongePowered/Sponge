@@ -1143,6 +1143,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.untargetable = untargetable;
     }
 
+    @Override
+    public void setSpongeSize(float width, float height, float scale) {
+        Entity spongeEntity = this;
+        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
+        thisEntity.width = width;
+        thisEntity.height = height;
+        thisEntity.setEntityBoundingBox(
+                new AxisAlignedBB(thisEntity.getEntityBoundingBox().minX, thisEntity.getEntityBoundingBox().minY, thisEntity.getEntityBoundingBox().minZ,
+                        thisEntity.getEntityBoundingBox().minX + (double) thisEntity.width, thisEntity.getEntityBoundingBox().minY + (double) thisEntity.height,
+                        thisEntity.getEntityBoundingBox().minZ + (double) thisEntity.width));
+    }
+
     /**
      * @author gabizou - January 4th, 2016
      * @updated gabizou - January 27th, 2016 - Rewrite to a redirect

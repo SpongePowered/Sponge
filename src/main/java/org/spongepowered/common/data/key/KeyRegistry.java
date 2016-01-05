@@ -275,6 +275,9 @@ public class KeyRegistry {
         keyMap.put("affects_spawning", makeSingleKey(Boolean.class, Value.class, of("AffectsSpawning")));
         keyMap.put("critical_hit", makeSingleKey(Boolean.class, Value.class, of("CriticalHit")));
         keyMap.put("generation", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Generation")));
+        keyMap.put("height", makeSingleKey(Float.class, MutableBoundedValue.class, of("Height")));
+        keyMap.put("base_size", makeSingleKey(Float.class, MutableBoundedValue.class, of("BaseSize")));
+        keyMap.put("scale", makeSingleKey(Float.class, MutableBoundedValue.class, of("Scale")));
         keyMap.put("passenger", makeSingleKey(EntitySnapshot.class, Value.class, of("PassengerSnapshot")));
         keyMap.put("knockback_strength", makeSingleKey(Integer.class, MutableBoundedValue.class, of("KnockbackStrength")));
         keyMap.put("persists", makeSingleKey(Boolean.class, Value.class, of("Persists")));
