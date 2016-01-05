@@ -57,6 +57,8 @@ public abstract class MixinDataHolder implements DataHolder {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
             if (optional.isPresent()) {
                 return (Optional<T>) optional.get().from(this);
+            } else if (this instanceof IMixinCustomDataHolder) {
+                return ((IMixinCustomDataHolder) this).getCustom(containerClass);
             }
             return Optional.empty();
         }
@@ -113,6 +115,9 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
+        if (Thread.currentThread().getName().contains("Client Thread")) {
+            return DataTransactionResult.failNoData();
+        }
         try (Timing timing = SpongeTimings.dataOfferMultiManipulators.startTiming()) {
             DataTransactionResult.Builder builder = DataTransactionResult.builder();
             for (DataManipulator<?, ?> manipulator : valueContainers) {

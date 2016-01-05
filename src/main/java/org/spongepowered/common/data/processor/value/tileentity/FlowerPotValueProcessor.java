@@ -39,7 +39,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
 

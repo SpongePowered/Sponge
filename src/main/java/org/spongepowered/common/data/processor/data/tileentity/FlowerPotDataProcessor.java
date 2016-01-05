@@ -41,7 +41,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
 

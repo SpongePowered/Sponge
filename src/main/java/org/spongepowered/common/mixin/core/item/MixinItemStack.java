@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.inventory;
+package org.spongepowered.common.mixin.core.item;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,7 +38,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -46,8 +45,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.persistence.InvalidDataException;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,7 +58,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
-import org.spongepowered.common.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -87,10 +84,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract NBTTagCompound getTagCompound();
     @Shadow public abstract NBTTagCompound getSubCompound(String key, boolean create);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
-    @Shadow(prefix = "shadow$")
-    public abstract net.minecraft.item.ItemStack shadow$copy();
-    @Shadow(prefix = "shadow$")
-    public abstract Item shadow$getItem();
+    @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
+    @Shadow public abstract Item shadow$getItem();
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
