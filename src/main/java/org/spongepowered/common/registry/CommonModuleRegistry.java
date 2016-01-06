@@ -111,7 +111,7 @@ import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
