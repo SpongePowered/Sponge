@@ -44,8 +44,8 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -59,8 +59,8 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.text.translation.SpongeTranslation;
+import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -174,6 +174,12 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = (NBTTagCompound) getTagCompound().copy();
+            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                }
+            }
             NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
             if (!compound.hasNoTags()) {
                 final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
