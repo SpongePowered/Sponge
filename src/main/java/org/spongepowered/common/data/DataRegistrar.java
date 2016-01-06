@@ -576,7 +576,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new ItemDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
-        dataManager.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
         dataManager.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
         dataManager.registerValueProcessor(Keys.SKULL_TYPE, new TileEntitySkullValueProcessor());
         dataManager.registerValueProcessor(Keys.SKULL_TYPE, new ItemSkullValueProcessor());
@@ -840,6 +839,11 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
                 ImmutableSpongeStuckArrowsData.class, stuckArrowsDataDualProcessor);
         dataManager.registerValueProcessor(Keys.STUCK_ARROWS, stuckArrowsDataDualProcessor);
+
+        final CustomNameVisibleDualProcessor customNameVisibleDualProcessor = new CustomNameVisibleDualProcessor();
+        dataManager.registerDataProcessorAndImpl(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class,
+                ImmutableCustomNameVisibleData.class, ImmutableSpongeCustomNameVisibleData.class, customNameVisibleDualProcessor);
+        dataManager.registerValueProcessor(Keys.CUSTOM_NAME_VISIBLE, customNameVisibleDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

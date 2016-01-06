@@ -29,10 +29,13 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.text.Text;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public interface IMixinEntity {
 
@@ -91,5 +94,10 @@ public interface IMixinEntity {
     boolean isUntargetable();
 
     void setUntargetable(boolean untargetable);
+
+    @Nullable
+    Text getDisplayName();
+
+    void setDisplayName(@Nullable Text displayName);
 
 }

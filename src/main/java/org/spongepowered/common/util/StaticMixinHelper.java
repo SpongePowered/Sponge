@@ -74,4 +74,6 @@ public class StaticMixinHelper {
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
     // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
     public static boolean lastPlayerInteractCancelled = false;
+
+    public static boolean setCustomNameTagSkip = false;
 }

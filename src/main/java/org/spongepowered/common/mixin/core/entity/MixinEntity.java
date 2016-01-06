@@ -46,7 +46,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -69,6 +68,7 @@ import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
@@ -98,6 +98,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -128,6 +129,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private float origWidth;
     private float origHeight;
     @Nullable private DamageSource originalLava;
+    @Nullable private Text displayName;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -1052,6 +1054,33 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isReallyInvisible) {
             this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
+        }
+    }
+
+    @Nullable
+    @Override
+    public Text getDisplayName() {
+        return this.displayName;
+    }
+
+    @Override
+    public void setDisplayName(@Nullable Text displayName) {
+        this.displayName = displayName;
+
+        StaticMixinHelper.setCustomNameTagSkip = true;
+        if (this.displayName == null) {
+            this.setCustomNameTag("");
+        } else {
+            this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
+        }
+
+        StaticMixinHelper.setCustomNameTagSkip = false;
+    }
+
+    @Inject(method = "setCustomNameTag", at = @At("RETURN"))
+    public void onSetCustomNameTag(String name, CallbackInfo ci) {
+        if (!StaticMixinHelper.setCustomNameTagSkip) {
+            this.displayName = SpongeTexts.fromLegacy(name);
         }
     }
 

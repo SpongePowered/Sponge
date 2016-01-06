@@ -118,7 +118,6 @@ public class KeyRegistry {
         keyMap.put("color", makeSingleKey(Color.class, Value.class, of("Color")));
         keyMap.put("health", makeSingleKey(Double.class, MutableBoundedValue.class, of("Health")));
         keyMap.put("max_health", makeSingleKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
-        keyMap.put("shows_display_name", makeSingleKey(Boolean.class, Value.class, of("ShowDisplayName")));
         keyMap.put("display_name", makeSingleKey(Text.class, Value.class, of("DisplayName")));
         keyMap.put("career", makeSingleKey(Career.class, Value.class, of("Career")));
         keyMap.put("sign_lines", makeListKey(Text.class, of("SignLines")));
@@ -280,6 +279,7 @@ public class KeyRegistry {
         keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
         keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
         keyMap.put("is_aflame", makeSingleKey(Boolean.class, Value.class, of("IsAflame")));
+        keyMap.put("custom_name_visible", makeSingleKey(Boolean.class, Value.class, of("CustomNameVisible")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
