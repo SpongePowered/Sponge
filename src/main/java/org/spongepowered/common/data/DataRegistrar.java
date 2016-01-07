@@ -317,6 +317,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
                 ImmutableSpongeStuckArrowsData.class, new StuckArrowsDataProcessor());
 
+        dataManager.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
+                ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,

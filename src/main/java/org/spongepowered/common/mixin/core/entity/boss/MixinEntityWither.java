@@ -26,12 +26,18 @@ package org.spongepowered.common.mixin.core.entity.boss;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityWither;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.monster.Wither;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.mixin.core.entity.monster.MixinEntityMob;
 
 import java.util.ArrayList;
@@ -61,5 +67,17 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
         for (int i = 0; i < 2; i++) {
             updateWatchedTargetId(i, targets.size() > i ? ((EntityLivingBase) targets.get(i)).getEntityId() : 0);
         }
+    }
+
+    @Redirect(method = "updateAITasks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    }
+
+    @ModifyArg(method = "launchWitherSkullToCoords", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld"
+            + "(Lnet/minecraft/entity/Entity;)Z"))
+    protected Entity onSpawnWitherSkull(Entity entity) {
+        ((IMixinGriefer) entity).setCanGrief(((IMixinGriefer) this).canGrief());
+        return entity;
     }
 }

@@ -22,26 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.interfaces.entity;
 
-import net.minecraft.entity.monster.EntitySnowman;
-import org.spongepowered.api.entity.living.golem.SnowGolem;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import net.minecraft.entity.player.EntityPlayerMP;
 
-@Mixin(EntitySnowman.class)
-public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
+public interface IMixinGriefer {
 
-    // This behavior will have to be changed in 1.9
-    // then there will also be a "mobGriefing" rule check (says the changelog)
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MathHelper;floor_double(D)I", ordinal = 3),
-            cancellable = true)
-    private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
-            ci.cancel();
-        }
+    boolean canGrief();
+
+    void setCanGrief(boolean grief);
+
+    default boolean isGriefer() {
+        return !(this instanceof EntityPlayerMP);
     }
+
 }

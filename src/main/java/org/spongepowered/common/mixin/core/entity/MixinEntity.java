@@ -96,6 +96,7 @@ import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
@@ -780,6 +781,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
             }
         }
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+            ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        }
     }
 
     /**
@@ -799,6 +803,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
                 compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
+        }
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
+            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
     }
 

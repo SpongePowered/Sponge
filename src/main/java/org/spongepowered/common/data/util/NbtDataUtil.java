@@ -126,6 +126,7 @@ public final class NbtDataUtil {
     public static final String LEVEL_NAME = "LevelName";
     public static final String WORLD_UUID_MOST = "uuid_most";
     public static final String WORLD_UUID_LEAST = "uuid_least";
+    public static final String CAN_GRIEF = "CanGrief";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA_TAG = "ForgeData";
