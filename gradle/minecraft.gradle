@@ -50,10 +50,9 @@ if (!plugins.hasPlugin('net.minecraftforge.forge')) {
     minecraft {
         atSource sourceSets.main
     }
-
-    afterEvaluate {
-        reobfJar.primarySrg = minecraftPlugin.delayedFile('{SRG_DIR}/mcp-srg.srg')
-    }
+    reobf.jar.mappingType = 'SEARGE'
+} else {
+    reobf.jar.mappingType = 'NOTCH'
 }
 
 // Set manifest entries

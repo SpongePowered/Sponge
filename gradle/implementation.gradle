@@ -55,7 +55,8 @@ shadowJar {
     exclude 'net/minecraftforge/**'
 
     from sourceSets.java6.output
-
+    from jar.refMaps
+   
     dependencies {
         // SpongeCommon and Mixin
         include project(common.path)

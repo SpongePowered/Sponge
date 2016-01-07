@@ -24,7 +24,7 @@ buildscript {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
         classpath 'org.spongepowered:spongegradle:0.2-SNAPSHOT'
-        classpath 'org.spongepowered:mixingradle:0.1-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.2-SNAPSHOT'
     }
 }
 
