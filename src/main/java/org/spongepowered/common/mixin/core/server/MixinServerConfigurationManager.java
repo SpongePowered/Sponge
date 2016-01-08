@@ -164,7 +164,7 @@ public abstract class MixinServerConfigurationManager {
         GameProfile gameprofile = playerIn.getGameProfile();
         PlayerProfileCache playerprofilecache = this.mcServer.getPlayerProfileCache();
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
-        String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
+        String previousName = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
         // Sponge - save changes to offline User before reading player data
         SpongeUser user = (SpongeUser) ((IMixinEntityPlayerMP) playerIn).getUserObject();
@@ -261,6 +261,11 @@ public abstract class MixinServerConfigurationManager {
         playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
 
+        // Sponge start - fire ClientConnectionEvent.Prepare
+        ClientConnectionEvent.Prepare prepareEvent = SpongeEventFactory.createClientConnectionEventPrepare(Cause.of(NamedCause.source(player)), player);
+        SpongeImpl.postEvent(prepareEvent);
+        // Sponge end
+
         this.playerLoggedIn(playerIn);
         handler.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
         this.updateTimeAndWeatherForPlayer(playerIn, worldserver);
@@ -277,42 +282,35 @@ public abstract class MixinServerConfigurationManager {
 
         // Sponge Start
 
-        // Move logic for creating join message up here
-        //
         // This sends the objective/score creation packets
         // to the player, without attempting to remove them from their
         // previous scoreboard (which is set in a field initializer).
         // This allows #getWorldScoreboard to function
         // as normal, without causing issues when it is initialized on the client.
-
         ((IMixinEntityPlayerMP) playerIn).initScoreboard();
-
-        ChatComponentTranslation chatcomponenttranslation;
-
-        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
-        {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
-        }
-        else
-        {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", new Object[] {playerIn.getDisplayName()});
-        }
-
-        chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
             handler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
 
-        // Fire PlayerJoinEvent
-        Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(chatcomponenttranslation));
+        // fire ClientConnectionEvent.Join
+        ChatComponentTranslation joinMessage;
+
+        if (!playerIn.getCommandSenderName().equalsIgnoreCase(previousName)) {
+            joinMessage = new ChatComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), previousName);
+        } else {
+            joinMessage = new ChatComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
+        }
+
+        joinMessage.getChatStyle().setColor(EnumChatFormatting.YELLOW);
+
+        Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(joinMessage));
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
+        final ClientConnectionEvent.Join joinEvent = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
                 Optional.of(originalChannel), originalMessage, originalMessage, player);
-        SpongeImpl.postEvent(event);
-        // Send to the channel
-        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+        SpongeImpl.postEvent(joinEvent);
+        joinEvent.getMessage().ifPresent(text -> joinEvent.getChannel().ifPresent(channel -> channel.send(text)));
         // Sponge end
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
