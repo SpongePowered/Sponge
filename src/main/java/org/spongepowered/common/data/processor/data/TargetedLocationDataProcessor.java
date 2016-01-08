@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.item.EntityEnderEye;
@@ -44,6 +45,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.entity.IMixinEntityEnderEye;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
@@ -65,7 +67,8 @@ public class TargetedLocationDataProcessor extends AbstractEntitySingleDataProce
             entity.getNavigator().setPath(new PathEntity(new PathPoint[]{new PathPoint(value.getBlockX(), value.getBlockY(), value.getBlockZ())}), entity.getAIMoveSpeed());
             return true;
         } else if(dataHolder instanceof EntityEnderEye) {
-            // TODO
+            ((IMixinEntityEnderEye) dataHolder).setTargetLoc(value.getX(), value.getY(), value.getZ());
+            return true;
         }
         return false;
     }
@@ -86,7 +89,8 @@ public class TargetedLocationDataProcessor extends AbstractEntitySingleDataProce
             }
             return Optional.of(new Location<>((World) entity.getEntityWorld(), path.xCoord, path.yCoord, path.zCoord));
         } else if(dataHolder instanceof EntityEnderEye) {
-            // TODO
+            Vector3d vec = ((IMixinEntityEnderEye) dataHolder).getTargetLoc();
+            return Optional.of(new Location<>((World) dataHolder.getEntityWorld(), vec.getX(), vec.getY(), vec.getZ()));
         }
         return Optional.empty();
     }

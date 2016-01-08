@@ -24,16 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.interfaces.entity.IMixinEntityEnderEye;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityEnderEye.class)
-public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder {
+public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder, IMixinEntityEnderEye {
+
+    @Shadow private double targetX;
+    @Shadow private double targetY;
+    @Shadow private double targetZ;
 
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
@@ -59,4 +66,15 @@ public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEn
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
     }
 
+    @Override
+    public Vector3d getTargetLoc() {
+        return new Vector3d(targetX, targetY, targetZ);
+    }
+
+    @Override
+    public void setTargetLoc(double x, double y, double z) {
+        this.targetX = x;
+        this.targetY = y;
+        this.targetZ = z;
+    }
 }
