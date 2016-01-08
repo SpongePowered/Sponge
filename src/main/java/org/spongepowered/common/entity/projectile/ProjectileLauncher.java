@@ -174,14 +174,14 @@ public class ProjectileLauncher {
         if (logic == null) {
             return Optional.empty();
         }
-        Optional<T> projectile = logic.launch(source);
-        if (projectile.isPresent()) {
+        Optional<T> projectileOptional = logic.launch(source);
+        projectileOptional.ifPresent(projectile -> {
             if (vel != null) {
-                projectile.get().offer(Keys.VELOCITY, vel);
+                projectile.setVelocity(vel);
             }
-            projectile.get().setShooter(source);
-        }
-        return projectile;
+            projectile.setShooter(source);
+        });
+        return projectileOptional;
     }
 
     // From EntityThrowable constructor
