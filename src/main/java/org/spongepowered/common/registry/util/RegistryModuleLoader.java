@@ -34,12 +34,15 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.CustomCatalogRegistration;
 import org.spongepowered.api.registry.util.DelayedRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.util.annotation.CatalogedBy;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Map;
 
 public final class RegistryModuleLoader {
@@ -95,6 +98,21 @@ public final class RegistryModuleLoader {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
                 return true;
+            }
+        }
+        if (module instanceof AlternateCatalogRegistryModule) {
+            try {
+                final Type type = module.getClass().getGenericSuperclass();
+                Class<?> catalogClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+                CatalogedBy catalogedBy = catalogClass.getAnnotation(CatalogedBy.class);
+                if (catalogedBy != null) {
+                    Class<?>[] catalogedBys = catalogedBy.value();
+                    if (catalogedBys.length > 0) {
+                        return true;
+                    }
+                }
+            } catch (Exception e) {
+                // Something went wrong
             }
         }
         return false;
@@ -157,6 +175,21 @@ public final class RegistryModuleLoader {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
                 return annotation.value();
+            }
+        }
+        if (module instanceof AlternateCatalogRegistryModule) {
+            try {
+                final Type type = module.getClass().getGenericSuperclass();
+                Class<?> catalogClass = (Class<?>) ((ParameterizedType) type).getActualTypeArguments()[0];
+                CatalogedBy catalogedBy = catalogClass.getAnnotation(CatalogedBy.class);
+                if (catalogedBy != null) {
+                    Class<?>[] catalogedBys = catalogedBy.value();
+                    if (catalogedBys.length > 0) {
+                        return catalogedBys[0];
+                    }
+                }
+            } catch (Exception e) {
+                // Something went wrong
             }
         }
         throw new IllegalArgumentException("The module does not have a registry to register! " + module.getClass().getCanonicalName());
