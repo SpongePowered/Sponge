@@ -38,6 +38,9 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Shadow private String name;
 
+    // getName() end up replacing a method with the same signature in ArmorMaterial
+    // at dev time. Since it's capitalized, the client becomes unable to retrieve
+    // the texture, as the resource location is wrong.
     private String capitalizedName;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -52,6 +55,6 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
 
     @Override
     public String getName() {
-        return this.capitalizedName;
+        return this.name;
     }
 }
