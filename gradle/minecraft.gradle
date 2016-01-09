@@ -18,7 +18,7 @@ ext {
 }
 
 minecraft {
-    mappings = 'stable_20'
+    mappings = 'snapshot_20160109'
     runDir = 'run'
 }
 
