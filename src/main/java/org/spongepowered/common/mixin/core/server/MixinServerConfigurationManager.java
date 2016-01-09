@@ -69,7 +69,6 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -77,7 +76,6 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -195,8 +193,8 @@ public abstract class MixinServerConfigurationManager {
         Transform<World> fromTransform = player.getTransform().setLocation(location);
 
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-            Cause.of(NamedCause.source(user)), disconnectMessage, disconnectMessage, fromTransform, fromTransform,
-            (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile, (User) user);
+            Cause.of(NamedCause.source(player)), disconnectMessage, disconnectMessage, fromTransform, fromTransform,
+            (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile, player);
 
         if (kickReason != null) {
             loginEvent.setCancelled(true);
