@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.common.base.Objects;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
@@ -39,6 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCatalogType;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
@@ -109,9 +109,8 @@ public abstract class MixinEnchantment implements Enchantment {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("Enchantment")
-                .add("Name", shadow$getName())
-                .add("Id", getId())
+        return SpongeCatalogType.toStringHelperTranslatable(this)
                 .toString();
     }
+
 }

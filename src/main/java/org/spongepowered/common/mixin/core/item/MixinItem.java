@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -124,4 +125,11 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     public ItemStack createDictionaryStack(int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
+
+    @Override
+    public String toString() {
+        return SpongeCatalogType.toStringHelperTranslatable(this)
+                .toString();
+    }
+
 }

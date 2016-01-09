@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -179,4 +180,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             return;
         }
     }
+
+    @Override
+    public String toString() {
+        return SpongeCatalogType.toStringHelperTranslatable(this)
+                .add("class", getClass().getName())
+                .toString();
+    }
+
 }
