@@ -66,9 +66,34 @@ public abstract class SpongeCatalogType implements CatalogType {
     }
 
     protected ToStringHelper toStringHelper() {
-        return Objects.toStringHelper(this)
-                .add("id", getId())
-                .add("name", getName());
+        return toStringHelper(this);
+    }
+
+    public static ToStringHelper toStringHelper(CatalogType type) {
+        return Objects.toStringHelper(type)
+                .add("id", type.getId())
+                .add("name", type.getName());
+    }
+
+    public static <T extends CatalogType & org.spongepowered.api.text.translation.Translatable> ToStringHelper toStringHelperTranslatable(T type) {
+        return toStringHelper(type)
+                .add("translation", type.getTranslation());
+    }
+
+    public static abstract class Named extends SpongeCatalogType {
+
+        private final String name;
+
+        public Named(String id, String name) {
+            super(id);
+            this.name = checkNotNull(name, "name");
+        }
+
+        @Override
+        public final String getName() {
+            return this.name;
+        }
+
     }
 
     public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
@@ -92,8 +117,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
         @Override
         protected ToStringHelper toStringHelper() {
-            return super.toStringHelper()
-                    .add("translation", getTranslation());
+            return toStringHelperTranslatable(this);
         }
 
     }

@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
 public class SpongeEntityMeta extends SpongeCatalogType {
@@ -48,6 +50,33 @@ public class SpongeEntityMeta extends SpongeCatalogType {
     protected ToStringHelper toStringHelper() {
         return super.toStringHelper()
                 .add("type", this.type);
+    }
+
+    public static abstract class Translatable extends SpongeEntityMeta implements org.spongepowered.api.text.translation.Translatable {
+
+        private final Translation translation;
+
+        public Translatable(int type, String name, Translation translation) {
+            super(type, name);
+            this.translation = checkNotNull(translation, "translation");
+        }
+
+        @Override
+        public String getName() {
+            return getTranslation().get();
+        }
+
+        @Override
+        public final Translation getTranslation() {
+            return this.translation;
+        }
+
+        @Override
+        protected ToStringHelper toStringHelper() {
+            return toStringHelperTranslatable(this)
+                    .add("type", this.type);
+        }
+
     }
 
 }
