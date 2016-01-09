@@ -57,14 +57,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     @Override
     public final boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CatalogType other = (CatalogType) obj;
-        return getId().equals(other.getId());
+        return this == obj;
     }
 
     @Override
