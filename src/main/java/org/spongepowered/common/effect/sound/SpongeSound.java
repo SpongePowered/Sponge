@@ -27,18 +27,11 @@ package org.spongepowered.common.effect.sound;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeSound extends SpongeCatalogType implements SoundType {
-
-    private final String name;
+public class SpongeSound extends SpongeCatalogType.Named implements SoundType {
 
     public SpongeSound(String name, String id) {
-        super(id);
-        this.name = name;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+        // Flipped order!
+        super(id, name);
     }
 
 }

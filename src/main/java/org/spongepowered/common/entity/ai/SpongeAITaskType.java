@@ -24,42 +24,30 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import com.google.common.base.Objects;
+import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
+import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeAITaskType implements AITaskType {
-    private final String id, name;
+public final class SpongeAITaskType extends SpongeCatalogType.Named implements AITaskType {
+
     private final Class<? extends AITask<? extends Agent>> aiClass;
 
     public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
         this.aiClass = aiClass;
     }
 
     @Override
     public Class<? extends AITask<? extends Agent>> getAIClass() {
-        return aiClass;
+        return this.aiClass;
     }
 
     @Override
-    public String getId() {
-        return id;
+    protected ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("aiClass", this.aiClass);
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .addValue(id)
-                .addValue(name)
-                .add("aiClass", aiClass)
-                .toString();
-    }
 }
