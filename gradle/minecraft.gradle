@@ -14,7 +14,7 @@ minecraftPlugin.replacer.putReplacement('SRG_DIR', "$DIR_MCP_MAPPINGS/srgs")
 // Mixins
 sourceSets {
     main {
-        refMap = "mixins.${implementation.toLowerCase()}.refmap.json" 
+        refMap = "mixins.${implementation.toLowerCase()}.refmap.json"
     }
 }
 
@@ -51,8 +51,6 @@ if (!plugins.hasPlugin('net.minecraftforge.forge')) {
         atSource sourceSets.main
     }
     reobf.jar.mappingType = 'SEARGE'
-} else {
-    reobf.jar.mappingType = 'NOTCH'
 }
 
 // Set manifest entries
