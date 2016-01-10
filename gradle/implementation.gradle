@@ -53,8 +53,9 @@ shadowJar {
     // Exclude ForgeGradle classes from shaded JAR
     exclude 'GradleStart**'
     exclude 'net/minecraftforge/**'
+    exclude 'dummyThing'
 
-    from project.mixinRefMap
+    from jar.refMaps
     from sourceSets.java6.output
 
     dependencies {

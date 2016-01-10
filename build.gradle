@@ -24,6 +24,7 @@ buildscript {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
         classpath 'org.spongepowered:spongegradle:0.2-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.2-SNAPSHOT'
     }
 }
 
@@ -31,6 +32,7 @@ buildscript {
 // Compared to the regular tweaker-server plugin, SpongeCommon has all run tasks disabled
 // and the Minecraft workspace defined as "provided" so they won't conflict with the implementation
 apply plugin: 'net.minecrell.vanilla.server.library'
+apply plugin: 'org.spongepowered.mixin'
 ext.minecraftPlugin = plugins.getPlugin('net.minecrell.vanilla.server.library')
 ext.DIR_MCP_MAPPINGS = net.minecraftforge.gradle.common.Constants.DIR_MCP_MAPPINGS
 
@@ -47,7 +49,7 @@ minecraft {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.4.7-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.4.10-SNAPSHOT') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
