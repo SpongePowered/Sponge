@@ -34,7 +34,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public interface IMixinEntity {
+public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     boolean isTeleporting();
 
@@ -75,8 +75,6 @@ public interface IMixinEntity {
      * @param compound The SpongeData compound to write to
      */
     void writeToNbt(NBTTagCompound compound);
-    
-    Vector3d getVelocity();
     
     void setImplVelocity(Vector3d velocity);
 
