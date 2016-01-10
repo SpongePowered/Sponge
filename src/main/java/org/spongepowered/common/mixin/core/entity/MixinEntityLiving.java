@@ -103,7 +103,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         this.canPickUpLoot = canPickupItems;
     }
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    @Inject(method = "<init>", at = @At(value = "RETURN"), require = 1)
     public void onConstruct(CallbackInfo ci) {
         ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
@@ -111,7 +111,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
     }
 
-    @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true, require = 1)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
@@ -123,7 +123,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true)
+    @Inject(method = "clearLeashed", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/EntityLiving;isLeashed:Z", opcode = Opcodes.PUTFIELD), cancellable = true, require = 1)
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.worldObj.isRemote) {
@@ -148,7 +148,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return Optional.empty();
     }
 
-    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
+    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"), require = 1)
     public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }

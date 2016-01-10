@@ -58,7 +58,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @SuppressWarnings("rawtypes")
     @Shadow public List affectedBlockPositions;
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"), require = 1)
     public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,
             double originZ, float radius, boolean isFlaming, boolean isSmoking,
             CallbackInfo ci) {
@@ -66,7 +66,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         this.shouldBreakBlocks = true; // by default, all explosions do this can be changed by the explosion builder
     }
 
-    @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true, require = 1)
     public void onDoExplosionA(CallbackInfo ci) {
         if (!this.shouldBreakBlocks) {
             ci.cancel();

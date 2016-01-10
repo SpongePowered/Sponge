@@ -38,11 +38,11 @@ import java.util.Collection;
 public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
 
     @SuppressWarnings("rawtypes")
-    @Shadow 
+    @Shadow
     public abstract Collection getAllowedValues();
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstructed(String name, Class valueClass, Collection allowedValues, CallbackInfo ci) {
         this.propertyName = name;
     }

@@ -308,7 +308,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         initiateShutdown();
     }
 
-    @Inject(method = "stopServer()V", at = @At("HEAD"))
+    @Inject(method = "stopServer()V", at = @At("HEAD"), require = 1)
     public void onServerStopping(CallbackInfo ci) {
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
     }
@@ -913,7 +913,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.ofNullable(this.resourcePack);
     }
 
-    @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") )
+    @Inject(method = "setResourcePack(Ljava/lang/String;Ljava/lang/String;)V", at = @At("HEAD") , require = 1)
     public void onSetResourcePack(String url, String hash, CallbackInfo ci) {
         if (url.length() == 0) {
             this.resourcePack = null;
@@ -931,7 +931,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         this.enableSaving = enabled;
     }
 
-    @Inject(method = "saveAllWorlds(Z)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "saveAllWorlds(Z)V", at = @At("HEAD"), cancellable = true, require = 1)
     private void onSaveWorlds(boolean dontLog, CallbackInfo ci) {
         if (!this.enableSaving) {
             ci.cancel();
@@ -948,7 +948,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir, ArrayList arraylist, String astring[], String s1, String astring1[], int i) {
         TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender), ImmutableList.copyOf(arraylist), arraylist, input);
         Sponge.getEventManager().post(event);

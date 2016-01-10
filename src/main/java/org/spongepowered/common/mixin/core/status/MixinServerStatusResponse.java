@@ -60,7 +60,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     private ServerStatusResponse.PlayerCountData playerBackup;
     private Favicon faviconHandle;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onInit(CallbackInfo ci) {
         setServerDescription(null);
     }

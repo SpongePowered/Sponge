@@ -45,7 +45,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 @Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
 public class MixinPacketThreadUtil {
 
-    @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
+    @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") , require = 1)
     public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
@@ -71,7 +71,7 @@ public class MixinPacketThreadUtil {
                     resetStaticData();
                     return;
                 }
-                
+
                 long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                 if (packetDiff < 100) {
@@ -91,7 +91,7 @@ public class MixinPacketThreadUtil {
                         return;
                     }
                 }
-                
+
             }*/
 
             //System.out.println("RECEIVED PACKET " + packetIn);

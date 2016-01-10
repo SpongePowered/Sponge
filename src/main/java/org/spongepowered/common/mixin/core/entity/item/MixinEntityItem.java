@@ -63,7 +63,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     private boolean infiniteDespawnDelay;
 
     @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;delayBeforeCanPickup:I",
-            opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER))
+            opcode = Opcodes.PUTFIELD, shift = At.Shift.AFTER), require = 1)
     private void onOnUpdate(CallbackInfo ci) {
         if (this.delayBeforeCanPickup == MAGIC_INFINITE_PICKUP_DELAY && !this.infinitePickupDelay && this.pluginPickupSet) {
             this.delayBeforeCanPickup--;
@@ -71,7 +71,7 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     }
 
     @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityItem;age:I", opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
+            shift = At.Shift.AFTER), require = 1)
     private void onOnUpdateAge(CallbackInfo ci) {
         if (this.delayBeforeCanPickup == MAGIC_INFINITE_DESPAWN_TIME && !this.infiniteDespawnDelay && this.pluginDespawnSet) {
             this.delayBeforeCanPickup--;

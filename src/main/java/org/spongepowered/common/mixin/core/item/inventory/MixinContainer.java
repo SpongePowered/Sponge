@@ -91,7 +91,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      * Purpose: All player inventory changes that need to be synced to
      * client flow through this method. Overwrite is used as no mod
      * should be touching this method.
-     * 
+     *
      */
     @Overwrite
     public void detectAndSendChanges() {
@@ -120,7 +120,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
     }
 
-    @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
+    @Inject(method = "putStackInSlot", at = @At(value = "HEAD") , require = 1)
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
             Slot slot = getSlot(slotId);

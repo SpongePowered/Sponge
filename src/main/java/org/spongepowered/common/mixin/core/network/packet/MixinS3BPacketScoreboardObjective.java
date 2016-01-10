@@ -38,7 +38,7 @@ public class MixinS3BPacketScoreboardObjective {
 
     @Shadow public IScoreObjectiveCriteria.EnumRenderType type;
 
-    @Inject(method = "<init>(Lnet/minecraft/scoreboard/ScoreObjective;I)V", at = @At("RETURN"), remap = false)
+    @Inject(method = "<init>(Lnet/minecraft/scoreboard/ScoreObjective;I)V", at = @At("RETURN"), remap = false, require = 1)
     public void onInit(ScoreObjective objective, int i, CallbackInfo ci) {
         this.type = objective.getRenderType();
     }

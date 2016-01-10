@@ -56,7 +56,7 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
     private VariableAmount count;
     private VariableAmount height;
 
-    @Inject(method = "<init>(Lnet/minecraft/block/state/IBlockState;ILcom/google/common/base/Predicate;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/state/IBlockState;ILcom/google/common/base/Predicate;)V", at = @At("RETURN") , require = 1)
     public void onConstructed(IBlockState ore, int count, Predicate condition, CallbackInfo ci) {
         this.size = VariableAmount.fixed(count);
         this.count = VariableAmount.fixed(16);

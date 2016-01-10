@@ -36,14 +36,14 @@ public abstract class MixinWorldServer extends MixinWorld {
     // ESS - endStartSection
     private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickPending") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickPending") , require = 1)
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.scheduledBlocks.startTiming();
         }
     }
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickBlocks") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=tickBlocks") , require = 1)
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.scheduledBlocks.stopTiming();
@@ -51,7 +51,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
     }
 
-    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=chunkMap") )
+    @Inject(method = "tick()V", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=chunkMap") , require = 1)
     private void onBeginUpdateBlocks(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.chunkTicks.stopTiming();

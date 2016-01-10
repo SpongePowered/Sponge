@@ -51,7 +51,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     private double tempSpeedMultiplier;
     private double initialDisplacement;
 
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"))
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"), require = 1)
     public void implementLandBoats(CallbackInfo ci) {
         if (this.onGround && this.moveOnLand) {
             this.motionX /= 0.5;
@@ -60,19 +60,19 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
         }
     }
 
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 0))
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 0), require = 1)
     public void beforeModifyMotion(CallbackInfo ci) {
         this.initialDisplacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
     }
 
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 1))
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 1), require = 1)
     public void beforeLimitSpeed(CallbackInfo ci) {
         this.tempMotionX = this.motionX;
         this.tempMotionZ = this.motionZ;
         this.tempSpeedMultiplier = this.speedMultiplier;
     }
 
-    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1))
+    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1), require = 1)
     public void afterLimitSpeed(CallbackInfo ci) {
         this.motionX = this.tempMotionX;
         this.motionZ = this.tempMotionZ;
@@ -96,7 +96,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     }
 
     @Inject(method = "onUpdate()V",
-            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0))
+            at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0), require = 1)
     public void implementCustomDeceleration(CallbackInfo ci) {
         if (!(this.riddenByEntity instanceof EntityLivingBase)) {
             double decel = this.riddenByEntity == null ? this.unoccupiedDecelerationSpeed : this.occupiedDecelerationSpeed;

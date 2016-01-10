@@ -50,7 +50,7 @@ public class MixinWorldGenPumpkin implements Pumpkin {
     private VariableAmount count;
     private double chance;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
         this.chance = 0.1;
@@ -75,7 +75,7 @@ public class MixinWorldGenPumpkin implements Pumpkin {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: This is overwritten in order to use our custom patch size.
      */
     @Overwrite

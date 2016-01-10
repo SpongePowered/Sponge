@@ -182,7 +182,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     // @formatter:on
 
-    @Inject(method = "setSize", at = @At("RETURN"))
+    @Inject(method = "setSize", at = @At("RETURN"), require = 1)
     public void onSetSize(float width, float height, CallbackInfo ci) {
         if (this.origWidth == 0 || this.origHeight == 0) {
             this.origWidth = this.width;
@@ -190,14 +190,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Inject(method = "moveEntity(DDD)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "moveEntity(DDD)V", at = @At("HEAD"), cancellable = true, require = 1)
     public void onMoveEntity(double x, double y, double z, CallbackInfo ci) {
         if (!this.worldObj.isRemote && !SpongeHooks.checkEntitySpeed(((net.minecraft.entity.Entity) (Object) this), x, y, z)) {
             ci.cancel();
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "FIELD", target = LAVA_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC), require = 1)
     public void preSetOnFire(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
             this.originalLava = DamageSource.lava;
@@ -208,7 +208,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Inject(method = "setOnFireFromLava()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    @Inject(method = "setOnFireFromLava()V", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD), require = 1)
     public void postSetOnFire(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
             if (this.originalLava == null) {
@@ -221,7 +221,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     private DamageSource originalInFire;
 
-    @Inject(method = "dealFireDamage", at = @At(value = "FIELD", target = FIRE_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC))
+    @Inject(method = "dealFireDamage", at = @At(value = "FIELD", target = FIRE_DAMAGESOURCE_FIELD, opcode = Opcodes.GETSTATIC), require = 1)
     public void preFire(CallbackInfo callbackInfo) {
         // Sponge Start - Find the fire block!
         if (!this.worldObj.isRemote) {
@@ -233,7 +233,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Inject(method = "dealFireDamage", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD))
+    @Inject(method = "dealFireDamage", at = @At(value = "INVOKE_ASSIGN", target = ATTACK_ENTITY_FROM_METHOD), require = 1)
     public void postDealFireDamage(CallbackInfo callbackInfo) {
         if (!this.worldObj.isRemote) {
             if (this.originalInFire == null) {
@@ -722,7 +722,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      *        to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"), require = 1)
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfo ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -737,7 +737,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      *        from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"), require = 1)
     public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
         this.readFromNbt(this.getSpongeData());
     }
@@ -917,7 +917,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
-    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"), require = 1)
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         if (block == Blocks.air) {
             return;
@@ -940,7 +940,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         StaticMixinHelper.collidePlayer = null;
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"), require = 1)
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         if (block == Blocks.air) {
             return;
@@ -964,7 +964,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         StaticMixinHelper.collidePlayer = null;
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"), require = 1)
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
         if (block == Blocks.air) {
             return;
@@ -1038,7 +1038,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE), require = 1)
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isReallyInvisible) {
@@ -1046,7 +1046,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE), require = 1)
     public void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isReallyInvisible) {

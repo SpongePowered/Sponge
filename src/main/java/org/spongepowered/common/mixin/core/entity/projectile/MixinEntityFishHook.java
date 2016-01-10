@@ -105,8 +105,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     }
 
     @Redirect(method = "onUpdate()V", at =
-            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
-        )
+            @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"),
+        require = 1)
     public boolean onAttackEntityFrom(net.minecraft.entity.Entity entity, DamageSource damageSource, float damage) {
         EntitySnapshot fishHookSnapshot = this.createSnapshot();
         FishingEvent.HookEntity event = SpongeEventFactory.createFishingEventHookEntity(

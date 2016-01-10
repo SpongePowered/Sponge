@@ -80,7 +80,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
 
-    @Inject(method = "registerBlock", at = @At("RETURN"))
+    @Inject(method = "registerBlock", at = @At("RETURN"), require = 1)
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
         BlockTypeRegistryModule.getInstance().registerFromGameData(location.getResourcePath(), (BlockType) block);
     }
@@ -121,7 +121,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         this.needsRandomTick = tickRandomly;
     }
 
-    @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true, require = 1)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
         BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
         final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Cause.of(NamedCause.source(world)), blockSnapshot);
@@ -155,7 +155,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     public BlockState getDefaultBlockState() {
         return getDefaultState();
     }
-    
+
     @Override
     public boolean forceUpdateBlockState() {
         return false;
@@ -171,14 +171,14 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
-    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"))
+    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), require = 1)
     public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
         if (((IMixinWorld) worldIn).restoringBlocks()) {
             return;
         }
     }
 
-    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
+    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"), require = 1)
     private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
         if (((IMixinWorld) worldIn).restoringBlocks()) {
             return;

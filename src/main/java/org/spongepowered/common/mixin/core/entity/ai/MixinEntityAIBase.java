@@ -48,7 +48,7 @@ public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
     private AITaskType type;
     private Optional<Goal<?>> owner = Optional.empty();
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    @Inject(method = "<init>", at = @At(value = "RETURN"), require = 1)
     public void assignAITaskType(CallbackInfo ci) {
         final Optional<AITaskType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(getClass());
         if (optAiTaskType.isPresent()) {

@@ -73,14 +73,14 @@ public abstract class MixinSpawnerAnimals {
     private static EntityType spawnerEntityType;
     private static Class<? extends Entity> spawnerEntityClass;
 
-    @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
+    @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"), require = 1)
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         ((IMixinWorld) worldServer).setWorldSpawnerRunning(true);
         ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
         spawnerStart = true;
     }
 
-    @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
+    @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"), require = 1)
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
         ((IMixinWorld) worldServer).setWorldSpawnerRunning(false);
@@ -92,14 +92,14 @@ public abstract class MixinSpawnerAnimals {
         }
     }
 
-    @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
+    @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"), require = 1)
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         ((IMixinWorld) worldServer).setChunkSpawnerRunning(true);
         ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
         spawnerStart = true;
     }
 
-    @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
+    @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"), require = 1)
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
         ((IMixinWorld) worldServer).setChunkSpawnerRunning(false);
@@ -111,7 +111,7 @@ public abstract class MixinSpawnerAnimals {
         }
     }
 
-    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"), require = 1)
     public boolean onFindChunksForSpawningEligiblePlayer(EntityPlayer player) {
         // We treat players who do not affect spawning as "spectators"
         return !((IMixinEntityPlayer) player).affectsSpawning() || player.isSpectator();
@@ -131,7 +131,7 @@ public abstract class MixinSpawnerAnimals {
      * @return True if the worldserver check was valid and if our event wasn't cancelled
      */
     @SuppressWarnings("unchecked")
-    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_CAN_SPAWN_CREATURE))
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_CAN_SPAWN_CREATURE), require = 1)
     public boolean onCanSpawn(WorldServer worldServer, EnumCreatureType creatureType, BiomeGenBase.SpawnListEntry spawnListEntry, BlockPos pos) {
         setEntityType(spawnListEntry.entityClass);
         return worldServer.canCreatureTypeSpawnHere(creatureType, spawnListEntry, pos) && check(pos, worldServer);
@@ -145,7 +145,7 @@ public abstract class MixinSpawnerAnimals {
      * @param pos
      * @return
      */
-    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = BIOME_CAN_SPAWN_ANIMAL))
+    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = BIOME_CAN_SPAWN_ANIMAL), require = 1)
     private static boolean onCanGenerate(EntityLiving.SpawnPlacementType type, World worldIn, BlockPos pos) {
         return SpawnerAnimals.canCreatureTypeSpawnAtLocation(type, worldIn, pos) && check(pos, worldIn);
     }
@@ -159,7 +159,7 @@ public abstract class MixinSpawnerAnimals {
      * @return
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET))
+    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET), require = 1)
     private static WeightedRandom.Item onGetRandom(Random random, Collection collection) {
         BiomeGenBase.SpawnListEntry entry = (BiomeGenBase.SpawnListEntry) WeightedRandom.getRandomItem(random, collection);
         setEntityType(entry.entityClass);

@@ -490,7 +490,7 @@ public abstract class MixinServerConfigurationManager {
         }
     }
 
-    @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
+    @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"), require = 1)
     private void onPlayerLogOut(EntityPlayerMP player, CallbackInfo ci) {
         // Synchronise with user object
         NBTTagCompound nbt = new NBTTagCompound();
@@ -498,7 +498,7 @@ public abstract class MixinServerConfigurationManager {
         ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
     }
 
-    @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))
+    @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"), require = 1)
     private void onSaveAllPlayerData(CallbackInfo ci) {
         for (SpongeUser user : SpongeUser.dirtyUsers) {
             user.save();

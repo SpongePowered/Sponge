@@ -55,7 +55,7 @@ public class MixinWorldGenSpikes implements EnderCrystalPlatform {
     private VariableAmount height;
     private VariableAmount radius;
 
-    @Inject(method = "<init>(Lnet/minecraft/block/Block;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/Block;)V", at = @At("RETURN") , require = 1)
     public void onConstructed(Block block, CallbackInfo ci) {
         this.probability = 0.2;
         this.radius = VariableAmount.baseWithRandomAddition(1, 4);

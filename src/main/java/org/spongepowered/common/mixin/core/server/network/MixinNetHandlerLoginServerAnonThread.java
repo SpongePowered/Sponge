@@ -42,7 +42,7 @@ public class MixinNetHandlerLoginServerAnonThread extends Thread {
     private IMixinNetHandlerLoginServer outerRef = (IMixinNetHandlerLoginServer) this.field_180221_a;
 
     @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
-            remap = false, cancellable = true)
+            remap = false, cancellable = true, require = 1)
     public void fireAuthEvent(CallbackInfo ci) {
         if (this.outerRef.fireAuthEvent()) {
             ci.cancel();

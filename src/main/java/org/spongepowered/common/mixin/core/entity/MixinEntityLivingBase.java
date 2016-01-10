@@ -141,7 +141,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
-            "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
+            "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"), require = 1)
     public void onDeathSendEntityState(World world, net.minecraft.entity.Entity self, byte state) {
         // Don't send the state if this is a human. Fixes ghost items on client.
         if (!((net.minecraft.entity.Entity) (Object) this instanceof EntityHuman)) {
@@ -149,12 +149,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         }
     }
 
-    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
+    @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") , require = 1)
     public boolean onIsPotionActive(EntityLivingBase entityIn, Potion potion) {
         return false; // handled in our damageEntityHook
     }
 
-    @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") )
+    @Redirect(method = "applyArmorCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;damageArmor(F)V") , require = 1)
     protected void onDamageArmor(EntityLivingBase entityIn, float damage) {
         // do nothing as this is handled in our damageEntityHook
     }

@@ -48,7 +48,7 @@ import org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSou
 @Mixin(AbstractIndirectEntityDamageSource.class)
 public abstract class MixinAbstractIndirectEntityDamageSource implements IndirectEntityDamageSource {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstruct(CallbackInfo callbackInfo) {
         ((SpongeCommonIndirectEntityDamageSource) (Object) this).setDamageType(getType().getId());
         ((SpongeCommonIndirectEntityDamageSource) (Object) this).setEntitySource((Entity) getSource());

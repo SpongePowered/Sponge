@@ -50,7 +50,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Shadow private NetworkManager networkManager;
 
-    @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true, require = 1)
     public void onProcessHandshakeStart(C00Handshake packetIn, CallbackInfo ci) {
         if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
             String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data

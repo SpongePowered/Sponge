@@ -49,7 +49,7 @@ public abstract class MixinWorldGenCactus implements Cactus {
     private VariableAmount cactiPerChunk;
     private VariableAmount height;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.cactiPerChunk = VariableAmount.fixed(10);
         this.height = VariableAmount.baseWithRandomAddition(1, VariableAmount.baseWithRandomAddition(1, 3));
@@ -77,7 +77,7 @@ public abstract class MixinWorldGenCactus implements Cactus {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Overwritten to be less random. This method was completely rewritten.
      */
     @Overwrite

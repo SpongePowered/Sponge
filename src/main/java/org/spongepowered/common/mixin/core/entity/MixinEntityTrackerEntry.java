@@ -74,14 +74,14 @@ public abstract class MixinEntityTrackerEntry {
     }
 
     // The spawn packet for a human is a player
-    @Inject(method = "func_151260_c", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "func_151260_c", at = @At("HEAD"), cancellable = true, require = 1)
     public void onGetSpawnPacket(CallbackInfoReturnable<Packet> cir) {
         if (this.trackedEntity instanceof EntityHuman) {
             cir.setReturnValue(((EntityHuman) this.trackedEntity).createSpawnPacket());
         }
     }
 
-    @Inject(method = "sendMetadataToAllAssociatedPlayers", at = @At("HEAD"))
+    @Inject(method = "sendMetadataToAllAssociatedPlayers", at = @At("HEAD"), require = 1)
     public void onSendMetadata(CallbackInfo ci) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             return;

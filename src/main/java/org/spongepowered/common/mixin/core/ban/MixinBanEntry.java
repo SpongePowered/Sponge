@@ -63,7 +63,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     private Optional<CommandSource> commandSource = Optional.empty();
 
     @SuppressWarnings("deprecation")
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onInit(CallbackInfo ci) {
         this.spongeReason = Text.of();
         this.source = Text.of();

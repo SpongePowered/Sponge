@@ -66,7 +66,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     private Function<Location<Chunk>, ShrubType> override = null;
     private VariableAmount count;
 
-    @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN") , require = 1)
     public void onConstructed(BlockTallGrass.EnumType type, CallbackInfo ci) {
         this.types = new WeightedTable<ShrubType>();
         this.types.add(new WeightedObject<ShrubType>((ShrubType) (Object) type, 1));

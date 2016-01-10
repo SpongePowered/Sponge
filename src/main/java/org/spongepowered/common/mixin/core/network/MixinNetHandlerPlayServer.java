@@ -158,7 +158,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @param tileentity Injected tilentity param
      * @param tileentitysign Injected tileentitysign param
      */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT, require = 1)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
 
@@ -295,12 +295,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return input;
     }
 
-    @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"))
+    @Inject(method = "setPlayerLocation(DDDFFLjava/util/Set;)V", at = @At(value = "RETURN"), require = 1)
     public void setPlayerLocation(double x, double y, double z, float yaw, float pitch, Set<?> relativeSet, CallbackInfo ci) {
         this.justTeleported = true;
     }
 
-    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
+    @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true, require = 1)
     public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
@@ -379,7 +379,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
     }
 
-    @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
+    @Inject(method = "handleResourcePackStatus", at = @At("HEAD"), require = 1)
     public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
         String hash = packet.hash;
         ResourcePackStatusEvent.ResourcePackStatus status;
@@ -407,7 +407,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             (Player)this.playerEntity, status));
     }
 
-    @Inject(method = "sendPacket", at = @At("HEAD"))
+    @Inject(method = "sendPacket", at = @At("HEAD"), require = 1)
     public void onResourcePackSend(Packet packet, CallbackInfo ci) {
         if (packet instanceof IMixinPacketResourcePackSend) {
             IMixinPacketResourcePackSend p = (IMixinPacketResourcePackSend) packet;
@@ -415,7 +415,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true, require = 1)
     public void injectBlockPlacement(C08PacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
         // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
         // aimed at a block. We shouldn't need to get the second packet if the data is handled
@@ -437,7 +437,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Redirect(method = "processPlayerBlockPlacement", at = @At(value = "INVOKE", target="Lnet/minecraft/server/management/ItemInWorldManager;activateBlockOrUseItem(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z"))
+    @Redirect(method = "processPlayerBlockPlacement", at = @At(value = "INVOKE", target="Lnet/minecraft/server/management/ItemInWorldManager;activateBlockOrUseItem(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z"), require = 1)
     public boolean onActivateBlockOrUseItem(ItemInWorldManager itemManager, EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
         boolean result = itemManager.activateBlockOrUseItem(player, worldIn, stack, pos, side, hitX, hitY, hitZ);
         if (stack != null && !result) {
@@ -451,38 +451,38 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return result;
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0), require = 1)
     public void onBeforeSlotClick(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER))
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER), require = 1)
     public void onAfterSecondUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
+    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1), require = 1)
     public void onThirdUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"))
+    @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"), require = 1)
     public void onProcessCreativeInventoryActionHead(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
     }
 
-    @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
+    @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"), require = 1)
     public void onProcessCreativeInventoryActionReturn(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
+    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true, require = 1)
     public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();
     }
 
-    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"), require = 1)
     public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
         if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
             return; // PVP is disabled, ignore

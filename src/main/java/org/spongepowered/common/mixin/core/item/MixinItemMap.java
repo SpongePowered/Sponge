@@ -42,7 +42,7 @@ public class MixinItemMap extends ItemMapBase {
         return DimensionManager.getWorldFromDimId(0).loadItemData(clazz, dataId);
     }
 
-    @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"), require = 1)
     private int getOverworldUniqueDataId(World worldIn, String key) {
         return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
     }
@@ -53,7 +53,7 @@ public class MixinItemMap extends ItemMapBase {
         DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
     }
 
-    @Redirect(method = "onCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    @Redirect(method = "onCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"), require = 1)
     private int onCreatedGetOverworldUniqueDataId(World worldIn, String key) {
         return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
     }

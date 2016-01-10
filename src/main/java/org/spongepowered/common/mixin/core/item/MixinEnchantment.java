@@ -56,7 +56,7 @@ public abstract class MixinEnchantment implements Enchantment {
 
     private String id = "";
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
         this.id = resLoc.toString();
     }

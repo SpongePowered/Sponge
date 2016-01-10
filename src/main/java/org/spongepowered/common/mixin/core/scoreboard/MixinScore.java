@@ -55,7 +55,7 @@ public abstract class MixinScore implements IMixinScore {
         this.spongeScore = score;
     }
 
-    @Inject(method = "setScorePoints", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setScorePoints", at = @At("HEAD"), cancellable = true, require = 1)
     public void onSetScorePoints(int points, CallbackInfo ci) {
         if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
             return; // Let the normal logic take over.

@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public class MixinBootstrapAnonInner7 {
 
     @Redirect(method = "dispenseStack(Lnet/minecraft/dispenser/IBlockSource;Lnet/minecraft/item/ItemStack;)Lnet/minecraft/item/ItemStack;",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"), require = 1)
     public boolean onSpawnEntityInWorld(World world, Entity firework, IBlockSource source, ItemStack stack) {
         ((Firework) firework).setShooter((ProjectileSource) source.getBlockTileEntity());
         return world.spawnEntityInWorld(firework);

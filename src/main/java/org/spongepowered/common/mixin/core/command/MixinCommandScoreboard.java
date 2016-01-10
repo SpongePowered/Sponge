@@ -58,22 +58,22 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
 
     private String realName;
 
-    @Inject(method = "joinTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "joinTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID), locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onGetUUIDJoin(ICommandSender p_147190_1_, String[] p_147190_2_, int p_147190_3_, CallbackInfo ci, Scoreboard scoreboard, String s, HashSet hashset, HashSet hashset1, String s1, List list, Iterator iterator, Entity entity) {
         this.onGetUUID(entity);
     }
 
-    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0), require = 1)
     public String onGetEntityNameJoin(ICommandSender sender, String string) throws EntityNotFoundException {
         return this.onGetEntityName(sender, string);
     }
 
-    @Inject(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     private void onGetUUIDLeave(ICommandSender p_147199_1_, String[] p_147199_2_, int p_147199_3_, CallbackInfo ci, Scoreboard scoreboard, HashSet hashset, HashSet hashset1, String s, List list, Iterator iterator, Entity entity) {
         this.onGetUUID(entity);
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0), require = 1)
     public String onGetEntityNameLeaveFirst(ICommandSender sender, String string) throws EntityNotFoundException {
         return this.onGetEntityName(sender, string);
     }
@@ -94,7 +94,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         return CommandBase.getEntityName(sender, string);
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0), require = 1)
     public String onGetEntityNameLeaveSecond(ICommandSender sender, String string) throws EntityNotFoundException {
         String entityName = CommandBase.getEntityName(sender, string);
         if (this.isExpandedSelector()) {

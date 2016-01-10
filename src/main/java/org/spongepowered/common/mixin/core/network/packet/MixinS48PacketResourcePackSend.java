@@ -43,7 +43,7 @@ public abstract class MixinS48PacketResourcePackSend implements IMixinPacketReso
     @Shadow private String hash;
     private ResourcePack pack;
 
-    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN") , remap = false)
+    @Inject(method = "<init>(Ljava/lang/String;Ljava/lang/String;)V", at = @At("RETURN") , remap = false, require = 1)
     public void setResourcePack(String url, String hash, CallbackInfo ci) {
         try {
             this.pack = SpongeResourcePack.create(url, hash);

@@ -80,7 +80,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow public abstract void markDirty();
 
-    @Inject(method = "markDirty", at = @At(value = "HEAD"))
+    @Inject(method = "markDirty", at = @At(value = "HEAD"), require = 1)
     public void onMarkDirty(CallbackInfo ci) {
         if (this.worldObj != null && !this.worldObj.isRemote) {
             IMixinWorld world = (IMixinWorld) this.worldObj;
@@ -93,7 +93,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
+    @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"), require = 1)
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id);
@@ -173,7 +173,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param compound The compound vanilla writes to (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"))
+    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"), require = 1)
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfo ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -186,7 +186,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param compound The compound vanilla reads from (unused because we read from SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
+    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"), require = 1)
     public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
         this.readFromNbt(this.getSpongeData());
     }

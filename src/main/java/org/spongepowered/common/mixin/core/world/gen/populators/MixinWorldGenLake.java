@@ -60,7 +60,7 @@ public abstract class MixinWorldGenLake implements Lake {
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 
-    @Inject(method = "<init>(Lnet/minecraft/block/Block;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/Block;)V", at = @At("RETURN") , require = 1)
     public void onConstructed(Block block, CallbackInfo ci) {
         this.prob = 0.25D;
         this.height = VariableAmount.baseWithRandomAddition(0, 256);

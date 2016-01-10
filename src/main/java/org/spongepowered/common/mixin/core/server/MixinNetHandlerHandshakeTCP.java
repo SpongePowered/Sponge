@@ -39,7 +39,7 @@ public abstract class MixinNetHandlerHandshakeTCP {
 
     @Shadow private NetworkManager networkManager;
 
-    @Inject(method = "processHandshake", at = @At("HEAD"))
+    @Inject(method = "processHandshake", at = @At("HEAD"), require = 1)
     public void onProcessHandshake(C00Handshake packetIn, CallbackInfo ci) {
         IMixinNetworkManager info = (IMixinNetworkManager) this.networkManager;
         info.setVersion(packetIn.getProtocolVersion());

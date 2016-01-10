@@ -47,7 +47,7 @@ public abstract class MixinWorldGenDeadBush extends WorldGenerator implements De
 
     private VariableAmount count;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(128);
     }
@@ -69,7 +69,7 @@ public abstract class MixinWorldGenDeadBush extends WorldGenerator implements De
             generate(world, random, pos);
         }
     }
-    
+
     @Override
     public VariableAmount getShrubsPerChunk() {
         return this.count;

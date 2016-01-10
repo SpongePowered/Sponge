@@ -52,7 +52,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
 
     @Shadow private Block block;
 
-    @Inject(method = "<init>(I)V", at = @At("RETURN") )
+    @Inject(method = "<init>(I)V", at = @At("RETURN") , require = 1)
     public void onConstructed(int radius, CallbackInfo ci) {
         this.radius = VariableAmount.baseWithRandomAddition(2, radius > 2 ? radius - 2 : 1);
         this.sections = VariableAmount.fixed(2);
@@ -79,7 +79,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Overwritten to replace the path radius with one dependent on
      * our variable amount.
      */

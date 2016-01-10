@@ -87,21 +87,21 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
 
-    @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
+    @Inject(method = "writeToNBT", at = @At(value = "HEAD"), require = 1)
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
         if (this.hasManipulators()) {
             writeToNbt(incoming);
         }
     }
 
-    @Inject(method = "readFromNBT", at = @At("RETURN"))
+    @Inject(method = "readFromNBT", at = @At("RETURN"), require = 1)
     private void onRead(NBTTagCompound compound, CallbackInfo info) {
         if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
         }
     }
 
-    @Inject(method = "copy", at = @At("RETURN"))
+    @Inject(method = "copy", at = @At("RETURN"), require = 1)
     private void onCopy(CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (hasManipulators()) { // no manipulators? no problem.
@@ -111,7 +111,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         }
     }
 
-    @Inject(method = "splitStack", at = @At("RETURN"))
+    @Inject(method = "splitStack", at = @At("RETURN"), require = 1)
     private void onSplit(int amount, CallbackInfoReturnable<net.minecraft.item.ItemStack> info) {
         final net.minecraft.item.ItemStack itemStack = info.getReturnValue();
         if (hasManipulators()) {

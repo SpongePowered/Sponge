@@ -43,7 +43,7 @@ public abstract class MixinItemArmorMaterial implements ArmorType {
     // the texture, as the resource location is wrong.
     private String capitalizedName;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstruct(CallbackInfo ci) {
         this.capitalizedName = StringUtils.capitalize(this.name);
     }

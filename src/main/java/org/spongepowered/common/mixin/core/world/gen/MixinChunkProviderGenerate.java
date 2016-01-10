@@ -99,7 +99,7 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
     @Shadow private BiomeGenBase[] biomesForGeneration;
     private BiomeGenerator biomegen;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     private void onConstruct(net.minecraft.world.World worldIn, long p_i45636_2_, boolean p_i45636_4_, String p_i45636_5_, CallbackInfo ci) {
         if (this.settings == null) {
             this.settings = new ChunkProviderSettings.Factory().func_177864_b();

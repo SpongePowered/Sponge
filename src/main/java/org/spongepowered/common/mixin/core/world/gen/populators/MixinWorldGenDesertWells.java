@@ -52,7 +52,7 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
     private double spawnProbability;
     private PopulatorObject obj;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.spawnProbability = 0.001;
         this.obj = this;

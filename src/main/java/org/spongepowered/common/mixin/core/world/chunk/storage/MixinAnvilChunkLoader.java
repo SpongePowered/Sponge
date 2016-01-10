@@ -44,7 +44,7 @@ import java.util.Map;
 @Mixin(AnvilChunkLoader.class)
 public class MixinAnvilChunkLoader {
 
-    @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
+    @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"), require = 1)
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
         IMixinChunk chunk = (IMixinChunk) chunkIn;
 
@@ -87,7 +87,7 @@ public class MixinAnvilChunkLoader {
         }
     }
 
-    @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX, int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
         if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
             Map<Integer, PlayerTracker> trackedIntPlayerPositions = Maps.newHashMap();

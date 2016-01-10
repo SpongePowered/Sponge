@@ -75,7 +75,7 @@ public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
      * Cancel the call to place the terrain blocks as this is instead handled
      * through our custom genpop.
      */
-    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true)
+    @Inject(method = "genTerrainBlocks(Lnet/minecraft/world/World;Ljava/util/Random;Lnet/minecraft/world/chunk/ChunkPrimer;IID)V", at = @At("HEAD") , cancellable = true, require = 1)
     public void genTerrainBlocks(World world, Random rand, ChunkPrimer chunk, int x, int z, double stoneNoise, CallbackInfo ci) {
         ci.cancel();
     }
