@@ -67,7 +67,7 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
     @Nullable
     private Subject thisSubject;
 
-    @Inject(method = "<init>", at = @At("RETURN"), remap = false)
+    @Inject(method = "<init>", at = @At("RETURN"), remap = false, require = 1)
     public void subjectConstructor(CallbackInfo ci) {
         if (SpongeImpl.isInitialized()) {
             SpongeInternalListeners.getInstance().registerExpirableServiceCallback(PermissionService.class, new SubjectSettingCallback(this));

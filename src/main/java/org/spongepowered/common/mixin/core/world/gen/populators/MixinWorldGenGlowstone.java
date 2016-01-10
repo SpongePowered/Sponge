@@ -53,7 +53,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
     private VariableAmount count;
     private VariableAmount attempts;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.baseWithRandomAddition(1, 10);
         this.attempts = VariableAmount.fixed(1500);
@@ -83,7 +83,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Change the number of iterations and the height of the cluster
      * depending on the respective variable amounts.
      */

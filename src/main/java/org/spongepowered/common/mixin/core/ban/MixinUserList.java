@@ -37,7 +37,7 @@ public abstract class MixinUserList {
 
     @Shadow public abstract String getObjectKey(Object obj);
 
-    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"))
+    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"), require = 1)
     public boolean onAdd(ArrayList<Object> list, Object object) {
         return list.add(this.getObjectKey(object)); // Mojang didn't implement this correctly, so we'll fix it
     }

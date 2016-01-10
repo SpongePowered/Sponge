@@ -67,7 +67,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     private Function<Location<Chunk>, PopulatorObject> override = null;
     private VariableAmount mushroomsPerChunk;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);

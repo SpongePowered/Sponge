@@ -55,7 +55,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
     private VariableAmount count;
     private double prob;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.height = VariableAmount.baseWithRandomAddition(7, 4);
         this.increase = VariableAmount.baseWithRandomAddition(10, 30);
@@ -84,7 +84,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: overwritten to make use of populator parameters
      */
     @Override
@@ -102,9 +102,9 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
             // rand.nextInt(4) + 7;
             int height = this.height.getFlooredAmount(rand);
             int width = height / 4 + rand.nextInt(2);
-         
+
             // rand.nextInt(60) == 0)
-            if (width > 1 && rand.nextDouble() < this.prob) 
+            if (width > 1 && rand.nextDouble() < this.prob)
             {
                 // position.up(10 + rand.nextInt(30));
                 position = position.up(this.increase.getFlooredAmount(rand));

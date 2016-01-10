@@ -56,7 +56,7 @@ public abstract class MixinDamageSource implements DamageSource {
 
     private DamageType apiDamageType;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstructed(String damageTypeIn, CallbackInfo ci) {
         final Optional<DamageType> damageType = DamageSourceToTypeProvider.getInstance().get(damageTypeIn);
         if (!damageType.isPresent()) {

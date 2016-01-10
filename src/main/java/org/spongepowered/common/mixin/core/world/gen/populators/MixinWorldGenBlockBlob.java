@@ -54,7 +54,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
     private VariableAmount radius;
     private VariableAmount count;
 
-    @Inject(method = "<init>(Lnet/minecraft/block/Block;I)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/Block;I)V", at = @At("RETURN") , require = 1)
     public void onConstructed(Block block, int radius, CallbackInfo ci) {
         this.block = (BlockState) block.getDefaultState();
         this.radius = VariableAmount.fixed(radius);
@@ -83,7 +83,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: This overwrite is to replace the usages of Block with BlockState as well
      * as to modify the radii calculations to use our VariableAmount.
      */

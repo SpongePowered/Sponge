@@ -65,7 +65,7 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
     @Shadow
     public abstract void setGeneratedBlock(BlockFlower p_175914_1_, BlockFlower.EnumFlowerType p_175914_2_);
 
-    @Inject(method = "<init>(Lnet/minecraft/block/BlockFlower;Lnet/minecraft/block/BlockFlower$EnumFlowerType;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/BlockFlower;Lnet/minecraft/block/BlockFlower$EnumFlowerType;)V", at = @At("RETURN") , require = 1)
     public void onConstructed(BlockFlower block, BlockFlower.EnumFlowerType type, CallbackInfo ci) {
         this.flowers = new WeightedTable<PlantType>();
         this.count = VariableAmount.fixed(2);

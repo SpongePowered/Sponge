@@ -58,7 +58,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
         this.spongeObjective = spongeObjective;
     }
 
-    @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setDisplayName", at = @At("HEAD"), cancellable = true, require = 1)
     public void onSetDisplayName(String name, CallbackInfo ci) {
         if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
             return; // Let the normal logic take over.
@@ -73,7 +73,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
         ci.cancel();
     }
 
-    @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true, require = 1)
     public void onSetRenderType(IScoreObjectiveCriteria.EnumRenderType type, CallbackInfo ci) {
         if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
             return; // Let the normal logic take over.

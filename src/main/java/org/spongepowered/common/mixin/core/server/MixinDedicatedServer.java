@@ -63,7 +63,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         this.guiIsEnabled = false;
     }
 
-    @Inject(method = "systemExitNow", at = @At("HEAD"))
+    @Inject(method = "systemExitNow", at = @At("HEAD"), require = 1)
     public void postGameStoppingEvent(CallbackInfo ci) {
         SpongeImpl.postShutdownEvents();
     }

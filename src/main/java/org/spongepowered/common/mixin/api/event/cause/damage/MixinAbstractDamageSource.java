@@ -44,7 +44,7 @@ import org.spongepowered.common.event.damage.SpongeCommonDamageSource;
 @Mixin(AbstractDamageSource.class)
 public abstract class MixinAbstractDamageSource implements DamageSource {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstruct(CallbackInfo callbackInfo) {
         ((SpongeCommonDamageSource) (Object) this).setDamageType(getType().getId());
         if (isAbsolute()) {

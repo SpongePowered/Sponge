@@ -39,7 +39,7 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     private boolean damageSet = false;
 
     @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"), require = 1)
     protected float onAttackEntityFrom(float amount) {
         return (float) getDamage();
     }

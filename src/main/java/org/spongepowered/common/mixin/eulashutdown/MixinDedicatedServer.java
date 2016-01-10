@@ -42,7 +42,7 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
         super(workDir, proxy, profileCacheDir);
     }
 
-    @Redirect(method = "startServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerEula;hasAcceptedEULA()Z"))
+    @Redirect(method = "startServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerEula;hasAcceptedEULA()Z"), require = 1)
     public boolean onHasAcceptedEULA(ServerEula eula) {
         boolean hasAcceptedEULA = eula.hasAcceptedEULA();
         if (!hasAcceptedEULA && SpongeImpl.getGlobalConfig().getConfig().getEulaShutdown().shouldShutdownServer()) {

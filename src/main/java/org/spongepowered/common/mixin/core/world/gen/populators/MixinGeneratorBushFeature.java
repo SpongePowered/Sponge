@@ -66,7 +66,7 @@ public abstract class MixinGeneratorBushFeature implements Mushroom {
     private Function<Location<Chunk>, MushroomType> override = null;
     private VariableAmount mushroomsPerChunk;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.types = new ChanceTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);

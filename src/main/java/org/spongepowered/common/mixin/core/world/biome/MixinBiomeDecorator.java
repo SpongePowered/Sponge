@@ -36,7 +36,7 @@ public class MixinBiomeDecorator {
 
     // Cancel genDecorations just in case this does get called as all of these
     // are handled already by populators.
-    @Inject(method = "genDecorations(Lnet/minecraft/world/biome/BiomeGenBase;)V", at = @At("HEAD") , cancellable = true)
+    @Inject(method = "genDecorations(Lnet/minecraft/world/biome/BiomeGenBase;)V", at = @At("HEAD") , cancellable = true, require = 1)
     protected void genDecorations(BiomeGenBase biomeGenBaseIn, CallbackInfo ci) {
         ci.cancel();
     }

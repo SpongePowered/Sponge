@@ -78,7 +78,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Shadow private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
 
-    @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true, require = 1)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
         GeneratorType generatorType = (GeneratorType) settings.getTerrainType();
         if (generatorType != null && generatorType.equals(GeneratorTypes.THE_END)) {
@@ -87,12 +87,12 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
     }
 
-    @Inject(method = "init", at = @At("HEAD"))
+    @Inject(method = "init", at = @At("HEAD"), require = 1)
     public void beforeInit(CallbackInfoReturnable<World> cir) {
         updateWorldGenerator();
     }
 
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
+    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), require = 1)
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (this.isRemote || this.currentTickBlock != null) {
             block.randomTick(worldIn, pos, state, rand);
@@ -107,7 +107,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
+    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), require = 1)
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (this.isRemote || this.currentTickBlock != null) {
             block.updateTick(worldIn, pos, state, rand);
@@ -123,7 +123,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;"
-            + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
+            + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), require = 1)
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (this.isRemote || this.currentTickBlock != null) {
             block.updateTick(worldIn, pos, state, rand);
@@ -138,7 +138,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
+    @Inject(method = "addBlockEvent", at = @At(value = "HEAD"), require = 1)
     public void onAddBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
         if (StaticMixinHelper.packetPlayer != null) {
             // Add player to block event position
@@ -179,7 +179,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     // special handling for Pistons since they use their own event system
-    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
+    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"), require = 1)
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         this.processingCaptureCause = true;
@@ -214,13 +214,13 @@ public abstract class MixinWorldServer extends MixinWorld {
     private NextTickListEntry tmpScheduledObj;
 
     @Redirect(method = "updateBlockTick(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"), require = 1)
     private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
         this.onCreateScheduledBlockUpdate(sbu, priority);
     }
 
     @Redirect(method = "scheduleBlockUpdate(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"), require = 1)
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         sbu.setPriority(priority);
         ((IMixinBlockUpdate) sbu).setWorld((WorldServer) (Object) this);
@@ -250,7 +250,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "updateAllPlayersSleepingFlag()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"), require = 1)
     public boolean isSpectatorOrIgnored(EntityPlayer entityPlayer) {
         // spectators are excluded from the sleep tally in vanilla
         // this redirect expands that check to include sleep-ignored players as well
@@ -259,7 +259,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerFullyAsleep()Z"), require = 1)
     public boolean isPlayerFullyAsleep(EntityPlayer entityPlayer) {
         // if isPlayerFullyAsleep() returns false areAllPlayerAsleep() breaks its loop and returns false
         // this redirect forces it to return true if the player is sleep-ignored even if they're not sleeping
@@ -268,7 +268,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     }
 
     @Redirect(method = "areAllPlayersAsleep()Z", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))
+            target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"), require = 1)
     public boolean isSpectatorAndNotIgnored(EntityPlayer entityPlayer) {
         // if a player is marked as a spectator areAllPlayersAsleep() breaks its loop and returns false
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator

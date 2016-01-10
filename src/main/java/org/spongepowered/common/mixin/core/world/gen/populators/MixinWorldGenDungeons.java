@@ -67,7 +67,7 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
     @Shadow
     public abstract String pickMobSpawner(Random p_76543_1_);
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.attempts = VariableAmount.fixed(8);
         // TODO data impl of MobSpawnerData
@@ -108,10 +108,10 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Overwritten to leverage the data manipulator while creating the
      * tile entity and the weighted table while filling chests.
-     * 
+     *
      * TODO can possibly be changed to a pair of injections
      * TODO could we represent this with a populator object to allow plguin
      * modification of the structure
@@ -285,7 +285,7 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
     public MobSpawnerData getSpawnerData() {
         return this.data;
     }
-    
+
     @Override
     public void setSpawnerData(MobSpawnerData data) {
         this.data = data;

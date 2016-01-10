@@ -146,7 +146,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow(prefix = "shadow$")
     public abstract Block shadow$getBlock(int x, int y, int z);
 
-    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
+    @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false, require = 1)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
         this.chunkPos = new Vector3i(x, 0, z);
         this.blockMin = SpongeChunkLayout.instance.toWorld(this.chunkPos).get();
@@ -160,14 +160,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
-    @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
+    @Inject(method = "onChunkLoad()V", at = @At("RETURN"), require = 1)
     public void onChunkLoadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
     }
 
-    @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
+    @Inject(method = "onChunkUnload()V", at = @At("RETURN"), require = 1)
     public void onChunkUnloadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
@@ -364,7 +364,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @SuppressWarnings({"unchecked"})
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
+    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"), require = 1)
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_, CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;
@@ -385,7 +385,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
+    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"), require = 1)
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_, CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;

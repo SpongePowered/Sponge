@@ -57,7 +57,7 @@ import java.util.Optional;
 @Mixin(BlockLeaves.class)
 public abstract class MixinBlockLeaves extends MixinBlock {
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
+    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"), require = 1)
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         spongeWorld.setCapturingBlockDecay(true);
@@ -66,7 +66,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         return result;
     }
 
-    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/BlockPos;)Z") )
+    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/BlockPos;)Z") , require = 1)
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         spongeWorld.setCapturingBlockDecay(true);

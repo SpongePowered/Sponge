@@ -38,10 +38,10 @@ import java.util.Collection;
 public abstract class MixinPropertyBoolean extends MixinPropertyHelper<Boolean> implements BooleanTrait {
 
     @SuppressWarnings("rawtypes")
-    @Shadow 
+    @Shadow
     public abstract Collection getAllowedValues();
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstructed(String name, CallbackInfo ci) {
         this.propertyName = name;
     }

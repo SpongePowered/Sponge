@@ -83,7 +83,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     @Redirect(method = "run", at = @At(value = "INVOKE", target = "net.minecraft.network.rcon.IServer.handleRConCommand(Ljava/lang/String;)"
-            + "Ljava/lang/String;"))
+            + "Ljava/lang/String;"), require = 1)
     public String commandExecutionHook(IServer server, String commandStr) {
         try {
             synchronized (this.clientSocket) {
@@ -99,7 +99,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     @Inject(method = "run", at = @At(value = "INVOKE", target = "net.minecraft.network.rcon.RConThreadClient.sendResponse(IILjava/lang/String;)V",
-            shift = At.Shift.BEFORE))
+            shift = At.Shift.BEFORE), require = 1)
     public void rconLoginCallback(CallbackInfo ci) throws IOException {
         if (this.source == null) {
             initSource();
@@ -113,7 +113,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
         }
     }
 
-    @Inject(method = "closeSocket", at = @At("HEAD"))
+    @Inject(method = "closeSocket", at = @At("HEAD"), require = 1)
     public void rconLogoutCallback(CallbackInfo ci){
         if (this.source == null) {
             initSource();

@@ -38,7 +38,7 @@ import java.util.Optional;
 @Mixin(net.minecraft.item.ItemBlock.class)
 public abstract class MixinItemBlock extends MixinItem {
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    @Inject(method = "<init>", at = @At(value = "RETURN"), require = 1)
     public void onConstructed(Block block, CallbackInfo ci) {
         this.blockType = Optional.of((BlockType) block);
     }

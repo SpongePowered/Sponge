@@ -37,7 +37,7 @@ public abstract class MixinScoreboardClientCheck implements IMixinScoreboard {
 
     private boolean isClient;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onInit(CallbackInfo ci) {
         this.isClient = !(((Object) this) instanceof ServerScoreboard);
     }

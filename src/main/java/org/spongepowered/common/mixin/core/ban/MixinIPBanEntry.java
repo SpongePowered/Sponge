@@ -48,12 +48,12 @@ public abstract class MixinIPBanEntry extends BanEntry implements Ban.Ip {
 
     private InetAddress address;
 
-    @Inject(method = "<init>(Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;Ljava/util/Date;Ljava/lang/String;)V", at = @At("RETURN"), require = 1)
     public void onInit(CallbackInfo ci) {
         this.setAddress();
     }
 
-    @Inject(method = "<init>(Lcom/google/gson/JsonObject;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Lcom/google/gson/JsonObject;)V", at = @At("RETURN"), require = 1)
     public void onInit(JsonObject object, CallbackInfo ci) {
         this.setAddress();
     }

@@ -311,7 +311,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     // @formatter:on
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
@@ -424,7 +424,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V") )
+    @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V") , require = 1)
     public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         if (this.isRemote || this.currentTickBlock != null || ((IMixinWorld) worldIn).capturingTerrainGen()) {
             block.updateTick(worldIn, pos, state, rand);
@@ -439,7 +439,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V") )
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V") , require = 1)
     public void onUpdateEntities(net.minecraft.entity.Entity entityIn) {
         if (this.isRemote || this.currentTickEntity != null) {
             entityIn.onUpdate();
@@ -454,7 +454,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/gui/IUpdatePlayerListBox;update()V") )
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/gui/IUpdatePlayerListBox;update()V") , require = 1)
     public void onUpdateTileEntities(IUpdatePlayerListBox tile) {
         if (this.isRemote || this.currentTickTileEntity != null) {
             tile.update();
@@ -469,7 +469,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V") )
+    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V") , require = 1)
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         if (this.isRemote || this.currentTickEntity != null || StaticMixinHelper.packetPlayer != null) {
             entity.onUpdate();
@@ -484,7 +484,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
+    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"), require = 1)
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
         if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
             MessageChannel originalChannel = MessageChannel.TO_NONE;
@@ -1517,7 +1517,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public abstract int getLightFor(EnumSkyBlock type, BlockPos pos);
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD") , cancellable = true)
+    @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD") , cancellable = true, require = 1)
     public
             void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
                     CallbackInfoReturnable<List> cir) {
@@ -1823,7 +1823,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    @Inject(method = "updateWeather", at = @At(value = "RETURN"))
+    @Inject(method = "updateWeather", at = @At(value = "RETURN"), require = 1)
     public void onUpdateWeatherReturn(CallbackInfo ci) {
         Weather weather = getWeather();
         int duration = (int) getRemainingDuration();
@@ -2536,7 +2536,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return result;
     }
 
-    @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target="Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z"))
+    @Redirect(method = "isAnyPlayerWithinRangeAt", at = @At(value = "INVOKE", target="Lcom/google/common/base/Predicate;apply(Ljava/lang/Object;)Z"), require = 1)
     public boolean onIsAnyPlayerWithinRangePredicate(com.google.common.base.Predicate<EntityPlayer> predicate, Object object) {
         EntityPlayer player = (EntityPlayer) object;
         if (player.isDead || !((IMixinEntityPlayer) player).affectsSpawning()) {
@@ -2552,7 +2552,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     // For invisibility
-    @Redirect(method = CHECK_NO_ENTITY_COLLISION, at = @At(value = "INVOKE", target = GET_ENTITIES_WITHIN_AABB))
+    @Redirect(method = CHECK_NO_ENTITY_COLLISION, at = @At(value = "INVOKE", target = GET_ENTITIES_WITHIN_AABB), require = 1)
     public List<net.minecraft.entity.Entity> filterInvisibile(net.minecraft.world.World world, net.minecraft.entity.Entity entityIn,
             AxisAlignedBB axisAlignedBB) {
         List<net.minecraft.entity.Entity> entities = world.getEntitiesWithinAABBExcludingEntity(entityIn, axisAlignedBB);

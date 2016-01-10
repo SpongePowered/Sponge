@@ -34,12 +34,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(MinecraftServer.class)
 public class MixinMinecraftServer {
 
-    @Inject(method = "tick()V", at = @At("HEAD") )
+    @Inject(method = "tick()V", at = @At("HEAD") , require = 1)
     private void onTickBegin(CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.startTiming();
     }
 
-    @Inject(method = "tick()V", at = @At("RETURN") )
+    @Inject(method = "tick()V", at = @At("RETURN") , require = 1)
     private void onTickEnd(CallbackInfo ci) {
         TimingsManager.FULL_SERVER_TICK.stopTiming();
     }

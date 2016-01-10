@@ -51,19 +51,19 @@ public class MixinWorld {
 
     protected WorldTimingsHandler timings;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     private void onInit(CallbackInfo ci) {
         this.timings = new WorldTimingsHandler((World) (Object) this);
     }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=remove", shift = At.Shift.AFTER) )
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=remove", shift = At.Shift.AFTER) , require = 1)
     private void onEntityRemovalBegin(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.entityRemoval.startTiming();
         }
     }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=regular", shift = At.Shift.AFTER) )
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=regular", shift = At.Shift.AFTER) , require = 1)
     private void onEntityRemovalEnd(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.entityRemoval.stopTiming();
@@ -72,7 +72,7 @@ public class MixinWorld {
         }
     }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V") )
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;updateEntity(Lnet/minecraft/entity/Entity;)V") , require = 1)
     private void onBeginEntityTick(CallbackInfo ci) {
         if (!this.isRemote) {
             SpongeTimings.tickEntityTimer.startTiming();
@@ -90,7 +90,7 @@ public class MixinWorld {
         }
     }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=blockEntities", shift = At.Shift.AFTER) )
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = ESS, args = "ldc=blockEntities", shift = At.Shift.AFTER) , require = 1)
     private void onTileEntityTickBegin(CallbackInfo ci) {
         if (!this.isRemote) {
             this.timings.entityTick.stopTiming();
@@ -98,14 +98,14 @@ public class MixinWorld {
         }
     }
 
-    @Inject(method = "updateEntities", at = @At("RETURN") )
+    @Inject(method = "updateEntities", at = @At("RETURN") , require = 1)
     private void addTileEntityTicks(CallbackInfo ci) {
         if (!this.isRemote) {
             TimingHistory.tileEntityTicks += this.loadedTileEntityList.size();
         }
     }
 
-    @Inject(method = "updateEntityWithOptionalForce", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ticksExisted:I", opcode = Opcodes.GETFIELD) )
+    @Inject(method = "updateEntityWithOptionalForce", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;ticksExisted:I", opcode = Opcodes.GETFIELD) , require = 1)
     private void incrementActivatedEntityTicks(CallbackInfo ci) {
         if (!this.isRemote) {
             TimingHistory.activatedEntityTicks++;

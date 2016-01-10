@@ -40,7 +40,7 @@ public abstract class MixinEntityTracker {
     @Shadow
     public abstract void trackEntity(Entity entityIn, int trackingRange, int updateFrequency);
 
-    @Inject(method = "trackEntity", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "trackEntity", at = @At("HEAD"), cancellable = true, require = 1)
     public void onTrackEntity(Entity entityIn, CallbackInfo ci) {
         if (entityIn instanceof EntityHuman) {
             this.trackEntity(entityIn, 512, 2);

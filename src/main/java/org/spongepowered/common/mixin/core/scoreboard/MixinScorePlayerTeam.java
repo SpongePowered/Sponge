@@ -87,7 +87,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         }
     }
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onInit(CallbackInfo ci) {
         // Initialize cached values
         this.displayName = SpongeTexts.fromLegacy(this.teamNameSPT);
@@ -226,63 +226,63 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         return true;
     }
 
-    @Redirect(method = "setTeamName", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setTeamName", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetTeamName(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setTeamName", at = @At("HEAD"))
+    @Inject(method = "setTeamName", at = @At("HEAD"), require = 1)
     public void onSetTeamName(String name, CallbackInfo ci) {
         if (name != null) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
     }
 
-    @Redirect(method = "setNamePrefix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setNamePrefix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetNamePrefix(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setNamePrefix", at = @At("HEAD"))
+    @Inject(method = "setNamePrefix", at = @At("HEAD"), require = 1)
     public void onSetNamePrefix(String prefix, CallbackInfo ci) {
         if (prefix != null) {
             this.prefix = SpongeTexts.fromLegacy(prefix);
         }
     }
 
-    @Redirect(method = "setNameSuffix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setNameSuffix", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetNameSuffix(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setNameSuffix", at = @At("HEAD"))
+    @Inject(method = "setNameSuffix", at = @At("HEAD"), require = 1)
     public void onSetNameSuffix(String suffix, CallbackInfo ci) {
         if (suffix != null) {
             this.suffix = SpongeTexts.fromLegacy(suffix);
         }
     }
 
-    @Redirect(method = "setAllowFriendlyFire", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setAllowFriendlyFire", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetAllowFriendlyFire(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Redirect(method = "setSeeFriendlyInvisiblesEnabled", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setSeeFriendlyInvisiblesEnabled", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetSeeFriendlyInvisiblesEnabled(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Redirect(method = "setNameTagVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setNameTagVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetNameTagVisibility(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Redirect(method = "setDeathMessageVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE))
+    @Redirect(method = "setDeathMessageVisibility", at = @At(value = "INVOKE", target = TEAM_UPDATE_SIGNATURE), require = 1)
     private void onSetDeathMessageVisibility(Scoreboard scoreboard, ScorePlayerTeam team) {
         this.doTeamUpdate();
     }
 
-    @Inject(method = "setChatFormat", at = @At("RETURN"))
+    @Inject(method = "setChatFormat", at = @At("RETURN"), require = 1)
     private void onSetChatFormat(EnumChatFormatting format, CallbackInfo ci) {
         this.color = TextColorRegistryModule.enumChatColor.get(format);
         // This isn't called by Vanilla, so we inject the call ourselves.

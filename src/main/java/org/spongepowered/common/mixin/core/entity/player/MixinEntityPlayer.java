@@ -80,7 +80,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow protected FoodStats foodStats;
     private boolean affectsSpawning = true;
 
-    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onGetDisplayName(CallbackInfoReturnable<IChatComponent> ci, ChatComponentText component) {
         ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
     }
@@ -133,7 +133,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.capabilities.isFlying = flying;
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"), require = 1)
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
             if (!this.worldObj.isRemote) {
@@ -150,7 +150,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @author gabizou - January 4th, 2016
      * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
      */
-    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE), require = 1)
     public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isReallyREALLYInvisible()) {
@@ -163,7 +163,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * This prevents sounds from being sent to the server by players who are invisible.
      */
-    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT), require = 1)
     public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
         if (!this.isReallyREALLYInvisible()) {
             world.playSoundToNearExcept(player, name, volume, pitch);

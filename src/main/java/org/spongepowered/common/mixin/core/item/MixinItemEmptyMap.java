@@ -36,7 +36,7 @@ import org.spongepowered.common.world.DimensionManager;
 @Mixin(ItemEmptyMap.class)
 public class MixinItemEmptyMap extends ItemMapBase {
 
-    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"), require = 1)
     private int getOverworldUniqueDataId(World worldIn, String key) {
         return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
     }

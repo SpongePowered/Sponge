@@ -115,22 +115,22 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         }
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onUpdateScoreValue(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS), require = 1)
     public boolean onUpdateScoreValue(Set set, Object object) {
         return true;
     }
 
-    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onRemoveScore(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
@@ -140,56 +140,56 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }*/
 
-    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "func_96532_b", at = @At(value = "INVOKE", target = SET_CONTAINS), require = 1)
     public boolean onUpdateObjective(Set set, Object object) {
         return true;
     }
 
-    @Redirect(method = "func_96533_c", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "func_96533_c", at = @At(value = "INVOKE", target = SET_CONTAINS), require = 1)
     public boolean onSendDisplayPackets(Set set, Object object) {
         return true;
     }
 
-    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onSendTeamUpdate(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD), require = 1)
     public void onRemoveTeam(ServerConfigurationManager manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @SuppressWarnings("rawtypes")
     @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
-            false))
+            false), require = 1)
     public Iterator onGetPlayerIteratorForObjectives(List list) {
         return this.players.iterator();
     }
 
     @SuppressWarnings("rawtypes")
     @Redirect(method = "getPlayerIterator", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
-            false))
+            false), require = 1)
     public Iterator onGetPlayerIterator(List list) {
         return this.players.iterator();
     }

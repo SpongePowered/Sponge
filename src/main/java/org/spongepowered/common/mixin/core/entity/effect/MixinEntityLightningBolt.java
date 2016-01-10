@@ -83,13 +83,13 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"), require = 1)
     public boolean onStrikeBlockInit(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         return onStrikeBlock(world, pos, blockState);
     }
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"), require = 1)
     public boolean onStrikeBlockUpdate(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         return onStrikeBlock(world, pos, blockState);
     }
@@ -109,7 +109,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/EntityLightningBolt;)V"))
+            target = "Lnet/minecraft/entity/Entity;onStruckByLightning(Lnet/minecraft/entity/effect/EntityLightningBolt;)V"), require = 1)
     public void onStrikeEntity(net.minecraft.entity.Entity mcEntity, EntityLightningBolt lightningBolt) {
         if (!this.effect) {
             Entity entity = (Entity) mcEntity;
@@ -120,7 +120,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         }
     }
 
-    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
+    @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"), require = 1)
     public void onSetDead(CallbackInfo ci) {
         if (this.isDead) {
             return;

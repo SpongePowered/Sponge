@@ -39,7 +39,7 @@ public abstract class MixinItemToolMaterial implements ToolType {
     private String name;
     private String capitalizedName;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     public void onConstruct(CallbackInfo ci) {
         // This is a giant workaround due to being unable to refer to synthetic
         // methods provided by Enum and the base enum itself does not

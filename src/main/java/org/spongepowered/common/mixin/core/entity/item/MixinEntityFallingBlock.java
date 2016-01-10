@@ -53,7 +53,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
     private DamageSource original;
     private boolean isAnvil;
 
-    @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1))
+    @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1), require = 1)
     public void beforeFall(float distance, float damageMultipleier, CallbackInfo callbackInfo) {
         this.isAnvil = this.fallTile.getBlock() == Blocks.anvil;
         this.original = this.isAnvil ? DamageSource.anvil : DamageSource.fallingBlock;
@@ -64,7 +64,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
         }
     }
 
-    @Inject(method = "fall(FF)V", at = @At("RETURN"))
+    @Inject(method = "fall(FF)V", at = @At("RETURN"), require = 1)
     public void afterFall(float distance, float damageMultiplier, CallbackInfo ci) {
         if (this.original == null) {
             return;

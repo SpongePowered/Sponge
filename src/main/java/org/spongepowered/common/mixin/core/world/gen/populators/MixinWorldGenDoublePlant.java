@@ -65,7 +65,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
 
     @Shadow private BlockDoublePlant.EnumPlantType field_150549_a;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.count = VariableAmount.fixed(1);
@@ -100,7 +100,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Completely changes the method to leverage the WeightedTable
      * types. This method was almost completely rewritten.
      */

@@ -48,7 +48,7 @@ public abstract class MixinWorldGenVines extends WorldGenerator implements Vine 
 
     private VariableAmount count;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(50);
     }

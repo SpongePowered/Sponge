@@ -112,7 +112,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         ((SpongeObjective) objective).updateScores(this);
     }
 
-    @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"))
+    @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"), require = 1)
     public void onOnScoreObjectiveAdded(ScoreObjective objective, CallbackInfo ci) {
         this.sendToPlayers(new S3BPacketScoreboardObjective(objective, SpongeScoreboardConstants.OBJECTIVE_PACKET_ADD));
     }

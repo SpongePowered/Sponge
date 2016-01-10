@@ -48,7 +48,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
 
     private Optional<User> owner;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"), require = 1)
     private void onConstruct(CallbackInfo callbackInfo) {
         this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
     }

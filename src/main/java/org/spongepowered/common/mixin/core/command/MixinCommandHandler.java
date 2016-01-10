@@ -46,7 +46,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     private boolean expandedSelector;
 
-    @Inject(method = "tryExecute", at = @At(value = "HEAD"))
+    @Inject(method = "tryExecute", at = @At(value = "HEAD"), require = 1)
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
@@ -55,7 +55,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
     }
 
-    @Inject(method = "tryExecute", at = @At(value = "RETURN"))
+    @Inject(method = "tryExecute", at = @At(value = "RETURN"), require = 1)
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();

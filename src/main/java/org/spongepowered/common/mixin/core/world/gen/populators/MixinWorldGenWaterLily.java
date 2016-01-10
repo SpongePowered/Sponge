@@ -46,7 +46,7 @@ public abstract class MixinWorldGenWaterLily extends WorldGenerator implements W
 
     private VariableAmount count;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(4);
     }

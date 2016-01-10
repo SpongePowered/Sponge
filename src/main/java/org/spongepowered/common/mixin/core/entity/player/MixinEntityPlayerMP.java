@@ -135,13 +135,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
+    @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"), require = 1)
     public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreObjectiveCriteria criteria) {
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
     @SuppressWarnings("unchecked")
-    @Inject(method = "onDeath", at = @At(value = "RETURN"))
+    @Inject(method = "onDeath", at = @At(value = "RETURN"), require = 1)
     public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths

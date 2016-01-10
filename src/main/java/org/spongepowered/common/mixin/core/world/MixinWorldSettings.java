@@ -75,13 +75,13 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"), require = 1)
     private void onConstructed(long seedIn, WorldSettings.GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn,
             CallbackInfo ci) {
         this.actualWorldName = "";
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
+    @Inject(method = "<init>*", at = @At("RETURN"), require = 1)
     private void onConstructed(WorldInfo info, CallbackInfo ci) {
         this.actualWorldName = info.getWorldName();
     }

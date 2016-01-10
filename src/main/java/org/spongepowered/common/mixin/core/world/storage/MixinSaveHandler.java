@@ -56,35 +56,35 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     @Shadow private long initializationTime;
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 0, remap = false))
+            , ordinal = 0, remap = false), require = 1)
     public String modifyMinecraftExceptionOutputIfNotInitializationTime(String message) {
         return "The save folder for world " + this.worldDirectory + " is being accessed from another location, aborting";
     }
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
-            , ordinal = 1, remap = false))
+            , ordinal = 1, remap = false), require = 1)
     public String modifyMinecraftExceptionOutputIfIOException(String message) {
         return "Failed to check session lock for world " + this.worldDirectory + ", aborting";
     }
 
     @Inject(method = "saveWorldInfoWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
-            + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+            + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onSaveWorldInfoWithPlayerAfterTagSet(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci, NBTTagCompound nbttagcompound1, NBTTagCompound nbttagcompound2) {
         saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound2);
     }
 
-    @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"))
+    @Inject(method = "saveWorldInfoWithPlayer", at = @At("RETURN"), require = 1)
     public void onSaveWorldInfoWithPlayerEnd(WorldInfo worldInformation, NBTTagCompound tagCompound, CallbackInfo ci) {
         saveSpongeDatData(worldInformation);
     }
 
     @Inject(method = "saveWorldInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
-            + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD)
+            + "Lnet/minecraft/nbt/NBTBase;)V", shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILHARD, require = 1)
     public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbttagcompound, NBTTagCompound nbttagcompound1) {
         saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound1);
     }
 
-    @Inject(method = "saveWorldInfo", at = @At("RETURN"))
+    @Inject(method = "saveWorldInfo", at = @At("RETURN"), require = 1)
     public void onSaveWorldInfoEnd(WorldInfo worldInformation, CallbackInfo ci) {
         if (!StaticMixinHelper.convertingMapFormat) {
             saveSpongeDatData(worldInformation);

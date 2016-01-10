@@ -50,7 +50,7 @@ public class MixinWorldGenFire implements NetherFire {
     private VariableAmount count;
     private VariableAmount cluster;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN") , require = 1)
     public void onConstructed(CallbackInfo ci) {
         this.count = VariableAmount.fixed(10);
     }
@@ -74,7 +74,7 @@ public class MixinWorldGenFire implements NetherFire {
 
     /*
      * Author: Deamon - December 12th, 2015
-     * 
+     *
      * Purpose: Overwritten to use our custom cluster size.
      */
     @Overwrite
@@ -112,7 +112,7 @@ public class MixinWorldGenFire implements NetherFire {
     public void setClustersPerChunk(VariableAmount count) {
         this.count = checkNotNull(count);
     }
-    
+
     @Override
     public String toString() {
     	return Objects.toStringHelper(this)
