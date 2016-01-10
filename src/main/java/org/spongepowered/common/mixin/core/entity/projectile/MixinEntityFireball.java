@@ -35,13 +35,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityFireball.class)
 public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
 
-    @Shadow public EntityLivingBase shootingEntity;
+    @Nullable @Shadow public EntityLivingBase shootingEntity;
     @Shadow protected abstract void onImpact(MovingObjectPosition p_70227_1_);
 
-    private ProjectileSource projectileSource = null;
+    @Nullable private ProjectileSource projectileSource = null;
 
     @Override
     public ProjectileSource getShooter() {

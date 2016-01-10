@@ -90,6 +90,7 @@
         "block.MixinBlockStoneBrick",
         "block.MixinBlockStoneSlab",
         "block.MixinBlockTallGrass",
+        "block.MixinBlockTNT",
         "block.MixinBlockTorch",
         "block.MixinBlockTrapDoor",
         "block.MixinBlockTripWire",
