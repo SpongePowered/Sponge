@@ -78,7 +78,7 @@ public interface IMixinEntity {
     
     Vector3d getVelocity();
     
-    void setVelocity(Vector3d velocity);
+    void setImplVelocity(Vector3d velocity);
 
     boolean isReallyREALLYInvisible();
 

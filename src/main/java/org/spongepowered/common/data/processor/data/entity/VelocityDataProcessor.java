@@ -64,7 +64,7 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
 
     @Override
     protected boolean set(Entity entity, Map<Key<?>, Object> keyValues) {
-        ((IMixinEntity) entity).setVelocity((Vector3d) keyValues.get(Keys.VELOCITY));
+        ((IMixinEntity) entity).setImplVelocity((Vector3d) keyValues.get(Keys.VELOCITY));
         return true;
     }
 

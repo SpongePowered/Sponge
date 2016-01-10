@@ -51,7 +51,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity,
 
     @Override
     protected boolean set(Entity container, Vector3d value) {
-        ((IMixinEntity) container).setVelocity(value);
+        ((IMixinEntity) container).setImplVelocity(value);
         return true;
     }
 
