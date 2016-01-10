@@ -171,6 +171,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
                 ImmutableSpongeSkullData.class, skullDataProcessor);
 
+        final VelocityDataProcessor velocityDataProcessor = new VelocityDataProcessor();
+        dataManager.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
+                ImmutableSpongeVelocityData.class, velocityDataProcessor);
+
         final FoodDataProcessor foodDataProcessor = new FoodDataProcessor();
         dataManager.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
                 ImmutableSpongeFoodData.class, foodDataProcessor);
@@ -576,6 +580,7 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
         dataManager.registerValueProcessor(Keys.SKULL_TYPE, new TileEntitySkullValueProcessor());
         dataManager.registerValueProcessor(Keys.SKULL_TYPE, new ItemSkullValueProcessor());
+        dataManager.registerValueProcessor(Keys.VELOCITY, new VelocityValueProcessor());
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
