@@ -55,6 +55,11 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
@@ -110,6 +115,13 @@ import org.spongepowered.common.event.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
+import org.spongepowered.common.event.spawn.SpongeBlockSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCause;
+import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeSpawnCause;
+import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -227,6 +239,12 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
             .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
             .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
+            .registerBuilderSupplier(SpawnCause.Builder.class, SpongeSpawnCauseBuilder::new)
+            .registerBuilderSupplier(EntitySpawnCause.Builder.class, SpongeEntitySpawnCauseBuilder::new)
+            .registerBuilderSupplier(BreedingSpawnCause.Builder.class, SpongeBreedingSpawnCauseBuilder::new)
+            .registerBuilderSupplier(BlockSpawnCause.Builder.class, SpongeBlockSpawnCauseBuilder::new)
+            .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
+            .registerBuilderSupplier()
         ;
     }
 
