@@ -70,7 +70,7 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
 
     @Override
     protected Map<Key<?>, ?> getValues(Entity entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.VELOCITY, ((IMixinEntity) entity).getVelocity());
+        return ImmutableMap.<Key<?>, Object>of(Keys.VELOCITY, ((org.spongepowered.api.entity.Entity) entity).getVelocity());
     }
 
     @Override

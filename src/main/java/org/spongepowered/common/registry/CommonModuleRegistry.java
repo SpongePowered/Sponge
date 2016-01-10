@@ -116,11 +116,9 @@ import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
 import org.spongepowered.common.event.spawn.SpongeBlockSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCause;
 import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
-import org.spongepowered.common.event.spawn.SpongeSpawnCause;
 import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
@@ -244,7 +242,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BreedingSpawnCause.Builder.class, SpongeBreedingSpawnCauseBuilder::new)
             .registerBuilderSupplier(BlockSpawnCause.Builder.class, SpongeBlockSpawnCauseBuilder::new)
             .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
-            .registerBuilderSupplier()
         ;
     }
 

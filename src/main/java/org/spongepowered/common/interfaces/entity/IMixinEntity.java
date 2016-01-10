@@ -78,9 +78,7 @@ public interface IMixinEntity {
      * @param compound The SpongeData compound to write to
      */
     void writeToNbt(NBTTagCompound compound);
-    
-    Vector3d getVelocity();
-    
+
     void setImplVelocity(Vector3d velocity);
 
     boolean isReallyREALLYInvisible();

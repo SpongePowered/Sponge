@@ -57,7 +57,7 @@ public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity,
 
     @Override
     protected Optional<Vector3d> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).getVelocity());
+        return Optional.of(((org.spongepowered.api.entity.Entity) container).getVelocity());
     }
 
     @Override
