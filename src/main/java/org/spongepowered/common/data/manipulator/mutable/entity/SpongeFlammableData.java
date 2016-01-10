@@ -22,39 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item;
+package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import net.minecraft.item.ItemArmor;
-import org.apache.commons.lang3.StringUtils;
-import org.spongepowered.api.data.type.ArmorType;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlammableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeFlammableData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
 
-@Mixin(ItemArmor.ArmorMaterial.class)
-public abstract class MixinItemArmorMaterial implements ArmorType {
+public final class SpongeFlammableData extends AbstractBooleanData<FlammableData, ImmutableFlammableData> implements FlammableData {
 
-    @Shadow private String name;
+    public SpongeFlammableData() {
+        this(false);
+    }
 
-    // getName() end up replacing a method with the same signature in ArmorMaterial
-    // at dev time. Since it's capitalized, the client becomes unable to retrieve
-    // the texture, as the resource location is wrong.
-    private String capitalizedName;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(CallbackInfo ci) {
-        this.capitalizedName = StringUtils.capitalize(this.name);
+    public SpongeFlammableData(boolean value) {
+        super(FlammableData.class, value, Keys.IS_AFLAME, ImmutableSpongeFlammableData.class, false);
     }
 
     @Override
-    public String getId() {
-        return this.name;
+    public Value<Boolean> flammable() {
+        return this.getValueGetter();
     }
 
-    @Override
-    public String getName() {
-        return this.name;
-    }
 }

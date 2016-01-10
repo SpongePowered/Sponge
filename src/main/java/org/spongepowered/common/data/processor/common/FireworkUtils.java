@@ -41,7 +41,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.SpongeFireworkShape;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 
 import java.util.List;
 import java.util.Optional;

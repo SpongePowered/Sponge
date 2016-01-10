@@ -906,16 +906,15 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Vector3d getVelocity() {
-        return new Vector3d(this.motionX, this.motionY, this.motionZ);
+    public void setImplVelocity(Vector3d velocity) {
+        this.motionX = checkNotNull(velocity).getX();
+        this.motionY = velocity.getY();
+        this.motionZ = velocity.getZ();
     }
 
     @Override
-    public void setVelocity(Vector3d velocity) {
-        this.motionX = velocity.getX();
-        this.motionY = velocity.getY();
-        this.motionZ = velocity.getZ();
-        this.velocityChanged = true;
+    public Vector3d getVelocity() {
+        return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
     @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))

@@ -33,6 +33,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import com.google.common.reflect.TypeToken;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
@@ -68,6 +69,7 @@ public class SpongeEventManager implements EventManager {
     private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
             new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent = HashMultimap.create();
+    private final Set<Object> registeredListeners = Sets.newHashSet();
 
     /**
      * A cache of all the handlers for an event type for quick event posting.
@@ -140,6 +142,13 @@ public class SpongeEventManager implements EventManager {
         checkNotNull(plugin, "plugin");
         checkNotNull(listenerObject, "listener");
 
+        if (this.registeredListeners.contains(listenerObject)) {
+            SpongeImpl.getLogger().warn("Plugin {} attempted to register an already registered listener ({})", plugin.getId(),
+                    listenerObject.getClass().getName());
+            Thread.dumpStack();
+            return;
+        }
+
         List<RegisteredListener<?>> handlers = Lists.newArrayList();
 
         Class<?> handle = listenerObject.getClass();
@@ -165,6 +174,7 @@ public class SpongeEventManager implements EventManager {
             }
         }
 
+        this.registeredListeners.add(listenerObject);
         register(handlers);
     }
 
@@ -228,6 +238,7 @@ public class SpongeEventManager implements EventManager {
     public void unregisterListeners(final Object listener) {
         checkNotNull(listener, "listener");
         unregister(handler -> listener.equals(handler.getHandle()));
+        this.registeredListeners.remove(listener);
     }
 
     @Override

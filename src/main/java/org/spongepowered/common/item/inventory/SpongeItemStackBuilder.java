@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.item;
+package org.spongepowered.common.item.inventory;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -48,7 +48,6 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
-import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.HashSet;

@@ -83,7 +83,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.Living;
@@ -280,6 +279,7 @@ public class KeyRegistry {
         keyMap.put("stuck_arrows", makeSingleKey(Integer.class, MutableBoundedValue.class, of("StuckArrows")));
         keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
         keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
+        keyMap.put("is_aflame", makeSingleKey(Boolean.class, Value.class, of("IsAflame")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

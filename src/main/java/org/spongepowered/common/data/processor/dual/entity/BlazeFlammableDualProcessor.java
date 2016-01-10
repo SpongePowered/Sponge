@@ -22,51 +22,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value.entity;
+package org.spongepowered.common.data.processor.dual.entity;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.Entity;
+import net.minecraft.entity.monster.EntityBlaze;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFlammableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FlammableData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
-public class VelocityValueProcessor extends AbstractSpongeValueProcessor<Entity, Vector3d, Value<Vector3d>> {
+public final class BlazeFlammableDualProcessor extends AbstractSingleTargetDualProcessor<EntityBlaze, Boolean, Value<Boolean>, FlammableData, ImmutableFlammableData> {
 
-    public VelocityValueProcessor() {
-        super(Entity.class, Keys.VELOCITY);
-    }
-
-    @Override
-    public Value<Vector3d> constructValue(Vector3d defaultValue) {
-        return new SpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, defaultValue);
-    }
-
-    @Override
-    protected boolean set(Entity container, Vector3d value) {
-        ((IMixinEntity) container).setImplVelocity(value);
-        return true;
-    }
-
-    @Override
-    protected Optional<Vector3d> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).getVelocity());
-    }
-
-    @Override
-    protected ImmutableValue<Vector3d> constructImmutableValue(Vector3d value) {
-        return new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
+    public BlazeFlammableDualProcessor() {
+        super(EntityBlaze.class, Keys.IS_AFLAME);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.IS_AFLAME, false, actualValue);
+    }
+
+    @Override
+    protected boolean set(EntityBlaze dataHolder, Boolean value) {
+        dataHolder.setOnFire(value);
+        return true;
+    }
+
+    @Override
+    protected Optional<Boolean> getVal(EntityBlaze dataHolder) {
+        return Optional.of(dataHolder.isBurning());
+    }
+
+    @Override
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(Keys.IS_AFLAME, false, value);
+    }
+
+    @Override
+    protected FlammableData createManipulator() {
+        return new SpongeFlammableData();
+    }
+
 }

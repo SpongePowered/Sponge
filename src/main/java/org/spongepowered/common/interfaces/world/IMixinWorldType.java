@@ -39,5 +39,8 @@ public interface IMixinWorldType {
 
     int getMinimumSpawnHeight(net.minecraft.world.World world);
 
-    int getSpawnFuzz();
+    default int getSpawnFuzz() {
+        return Math.max(5, net.minecraft.server.MinecraftServer.getServer().getSpawnProtectionSize() - 6);
+    }
+
 }
