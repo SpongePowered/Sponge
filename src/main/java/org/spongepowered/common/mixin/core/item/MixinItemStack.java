@@ -366,4 +366,28 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         }
         return DataTransactionResult.failNoData();
     }
+
+    @Override
+    public boolean supportsCustom(Key<?> key) {
+        return this.manipulators.stream()
+                .filter(manipulator -> manipulator.supports(key))
+                .findFirst()
+                .isPresent();
+    }
+
+    @Override
+    public <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key) {
+        return this.manipulators.stream()
+                .filter(manipulator -> manipulator.supports(key))
+                .findFirst()
+                .flatMap(supported -> supported.get(key));
+    }
+
+    @Override
+    public <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key) {
+        return this.manipulators.stream()
+                .filter(manipulator -> manipulator.supports(key))
+                .findFirst()
+                .flatMap(supported -> supported.getValue(key));
+    }
 }
