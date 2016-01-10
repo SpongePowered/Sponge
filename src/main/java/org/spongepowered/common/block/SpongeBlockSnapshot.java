@@ -339,7 +339,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         if (this.keyValueMap.containsKey(key)) {
             return Optional.of((E) this.keyValueMap.get(key).get());
         } else if (this.blockKeyValueMap.containsKey(key)) {
-            return Optional.of((E) this.keyValueMap.get(key).get());
+            return Optional.of((E) this.blockKeyValueMap.get(key).get());
         }
         return Optional.empty();
     }
