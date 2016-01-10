@@ -22,29 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.dual.entity;
 
 import net.minecraft.entity.Entity;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCustomNameVisibleData;
+import org.spongepowered.api.data.manipulator.mutable.entity.CustomNameVisibleData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
+import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCustomNameVisibleData;
+import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
+public final class CustomNameVisibleDualProcessor extends AbstractSingleTargetDualProcessor<Entity, Boolean, Value<Boolean>, CustomNameVisibleData, ImmutableCustomNameVisibleData> {
 
-    public DisplayNameVisibleValueProcessor() {
-        super(Entity.class, Keys.SHOWS_DISPLAY_NAME);
+    public CustomNameVisibleDualProcessor() {
+        super(Entity.class, Keys.CUSTOM_NAME_VISIBLE);
     }
 
     @Override
-    public Value<Boolean> constructValue(Boolean defaultValue) {
-        return new SpongeValue<>(Keys.SHOWS_DISPLAY_NAME, false, defaultValue);
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, false, actualValue);
     }
 
     @Override
@@ -60,11 +65,27 @@ public class DisplayNameVisibleValueProcessor extends AbstractSpongeValueProcess
 
     @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, value);
+        return ImmutableSpongeValue.cachedOf(this.key, false, value);
+    }
+
+    @Override
+    protected CustomNameVisibleData createManipulator() {
+        return new SpongeCustomNameVisibleData();
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
+    @Override
+    protected boolean supports(Entity container) {
+        return !(container instanceof Humanoid);
+    }
+
+    @Override
+    public boolean supports(DataHolder container) {
+        return !(container instanceof Humanoid);
+    }
+
 }

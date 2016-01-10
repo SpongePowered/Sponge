@@ -26,81 +26,52 @@ package org.spongepowered.common.data.manipulator.immutable;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeDisplayNameData extends AbstractImmutableData<ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
+public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<Text, ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
 
-    private final Text displayName;
-    private final boolean displays;
+    public ImmutableSpongeDisplayNameData() {
+        this(Text.of());
+    }
 
-    private final ImmutableValue<Text> nameValue;
-    private final ImmutableValue<Boolean> displaysValue;
-
-    public ImmutableSpongeDisplayNameData(Text displayName, boolean displays) {
-        super(ImmutableDisplayNameData.class);
-        this.displayName = displayName;
-        this.displays = displays;
-
-        this.nameValue = new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, this.displayName);
-        this.displaysValue = ImmutableSpongeValue.cachedOf(Keys.SHOWS_DISPLAY_NAME, false, this.displays);
-
-        registerGetters();
+    public ImmutableSpongeDisplayNameData(Text value) {
+        super(ImmutableDisplayNameData.class, value, Keys.DISPLAY_NAME);
     }
 
     @Override
-    public ImmutableValue<Text> displayName() {
-        return this.nameValue;
-    }
-
-    @Override
-    public ImmutableValue<Boolean> customNameVisible() {
-        return this.displaysValue;
+    protected ImmutableValue<?> getValueGetter() {
+        return this.displayName();
     }
 
     @Override
     public DisplayNameData asMutable() {
-        return new SpongeDisplayNameData(this.displayName, this.displays);
+        return new SpongeDisplayNameData(this.getValue());
+    }
+
+    @Override
+    public ImmutableValue<Text> displayName() {
+        return new ImmutableSpongeValue<>(this.usedKey, Text.of(), this.getValue());
     }
 
     @Override
     public int compareTo(ImmutableDisplayNameData o) {
         return ComparisonChain.start()
-                .compare(TextSerializers.JSON.serialize(o.get(Keys.DISPLAY_NAME).get()),
-                        TextSerializers.JSON.serialize(this.displayName))
-                .compare(o.get(Keys.SHOWS_DISPLAY_NAME).get(), this.displays)
+                .compare(TextSerializers.JSON.serialize(o.displayName().get()), TextSerializers.JSON.serialize(this.getValue()))
                 .result();
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.DISPLAY_NAME.getQuery(), TextSerializers.JSON.serialize(this.displayName))
-            .set(Keys.SHOWS_DISPLAY_NAME, this.displays);
+                .set(Keys.DISPLAY_NAME.getQuery(), TextSerializers.JSON.serialize(this.getValue()));
     }
 
-    public Text getDisplayName() {
-        return this.displayName;
-    }
-
-    public boolean isDisplays() {
-        return this.displays;
-    }
-
-    @Override
-    protected void registerGetters() {
-        registerFieldGetter(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::getDisplayName);
-        registerKeyValue(Keys.DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::displayName);
-
-        registerFieldGetter(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::isDisplays);
-        registerKeyValue(Keys.SHOWS_DISPLAY_NAME, ImmutableSpongeDisplayNameData.this::customNameVisible);
-    }
 }
