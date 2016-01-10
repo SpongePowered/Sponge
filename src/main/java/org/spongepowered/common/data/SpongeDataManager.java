@@ -176,11 +176,15 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "SuspiciousMethodCalls"})
     public <T extends DataSerializable> Optional<DataBuilder<T>> getBuilder(Class<T> clazz) {
         checkNotNull(clazz);
         if (this.builders.containsKey(clazz)) {
             return Optional.of((DataBuilder<T>) this.builders.get(clazz));
+        } else if (this.builderMap.containsKey(clazz)) {
+            return Optional.of((DataBuilder<T>) this.builderMap.get(clazz));
+        } else if (this.immutableDataBuilderMap.containsKey(clazz)) {
+            return Optional.of((DataBuilder<T>) this.immutableDataBuilderMap.get(clazz));
         } else {
             return Optional.empty();
         }
