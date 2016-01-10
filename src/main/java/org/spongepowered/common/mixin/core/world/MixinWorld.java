@@ -202,6 +202,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
+import org.spongepowered.common.world.SpongeProxyBlockAccess;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
@@ -1187,6 +1188,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause) {
+        // We have to use a proxy so that our pending changes are notified such that any accessors from block
+        // classes do not fail on getting the incorrect block state from the IBlockAccess
+        SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess((IBlockAccess) this, transactions);
         for (Transaction<BlockSnapshot> transaction : transactions) {
             // Handle custom replacements
             if (transaction.isValid() && transaction.getCustom().isPresent()) {
@@ -1204,7 +1208,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             if (newState != null && !SpongeImplFactory.blockHasTileEntity(newState.getBlock(), newState)) {
-                this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, (IBlockAccess) this, pos), pos, updateFlag);
+                this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
                     Cause blockCause = Cause.of(NamedCause.source(this.currentTickOnBlockAdded));
@@ -1229,7 +1233,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 this.currentTickOnBlockAdded = null;
             }
-
+            proxyBlockAccess.proceed();
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
         }
     }
