@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
-import static com.google.common.base.Preconditions.*;
-import static org.spongepowered.common.entity.CombatHelper.*;
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.ICommandSender;
@@ -35,21 +36,27 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.ItemInWorldManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -64,6 +71,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -108,8 +116,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
+    @Shadow public ItemInWorldManager theItemInWorldManager;
     @Shadow public int lastExperience;
     @Shadow public MinecraftServer mcServer;
+    @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
+    @Shadow public abstract void sendPlayerAbilities();
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
@@ -413,4 +424,39 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return (CarriedInventory<? extends Carrier>) this.inventory;
     }
 
+    /**
+     * We overwrite this method to call the ChangeGameModeEvent.TargetPlayer event.
+     *
+     * <p>This does not use another injection annotation because we set the {@code gameType}
+     * variable, and to do so using other annotations would result in a mess.</p>
+     *
+     * @author kashike - 30/12/2015
+     */
+    @Overwrite
+    public void setGameType(WorldSettings.GameType gameType) {
+        // Sponge start
+        ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
+                (GameMode) (Object) this.theItemInWorldManager.getGameType(), (GameMode) (Object) gameType, this);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        gameType = (WorldSettings.GameType) (Object) event.getGameMode();
+        // Sponge end
+        this.theItemInWorldManager.setGameType(gameType);
+        this.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(3, (float) gameType.getID()));
+
+        if (gameType == WorldSettings.GameType.SPECTATOR)
+        {
+            this.mountEntity((Entity)null);
+        }
+        else
+        {
+            this.setSpectatingEntity((Entity) (Object) this);
+        }
+
+        this.sendPlayerAbilities();
+        this.markPotionsDirty();
+    }
 }
