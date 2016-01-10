@@ -289,6 +289,10 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
     }
 
+    public Optional<DataManipulatorBuilder<?, ?>> getWildManipulatorBuilder(Class<? extends DataManipulator<?, ?>> manipulatorClass) {
+        return Optional.ofNullable(this.builderMap.get(checkNotNull(manipulatorClass)));
+    }
+
     public Optional<DataManipulatorBuilder<?, ?>> getWildBuilderForImmutable(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
         return Optional.ofNullable(this.immutableBuilderMap.get(checkNotNull(immutable)));
     }

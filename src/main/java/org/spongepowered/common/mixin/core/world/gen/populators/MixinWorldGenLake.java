@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
@@ -98,8 +99,10 @@ public abstract class MixinWorldGenLake implements Lake {
 
     @Override
     public void setLiquidType(BlockState liquid) {
+        checkNotNull(liquid, "Must provide a non-null BlockState!");
         Optional<MatterProperty> matter = liquid.getType().getProperty(MatterProperty.class);
-        checkArgument(matter.isPresent() && matter.get().getValue() == Matter.LIQUID);
+        checkArgument(matter.isPresent(), "For some reason, the property is not returning correctly!");
+        checkArgument(matter.get().getValue() == Matter.LIQUID, "Must use a liquid property based BlockState!");
         this.block = (Block) liquid.getType();
     }
 

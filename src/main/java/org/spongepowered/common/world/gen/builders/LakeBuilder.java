@@ -31,9 +31,12 @@ import net.minecraft.block.Block;
 import net.minecraft.world.gen.feature.WorldGenLakes;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.api.world.gen.populator.Lake.Builder;
+
+import java.util.Optional;
 
 public class LakeBuilder implements Lake.Builder {
 
@@ -48,6 +51,9 @@ public class LakeBuilder implements Lake.Builder {
     @Override
     public Builder liquidType(BlockState liquid) {
         this.liquid = checkNotNull(liquid, "liquid");
+        Optional<MatterProperty> matter = liquid.getType().getProperty(MatterProperty.class);
+        checkArgument(matter.isPresent(), "For some reason, the property is not returning correctly!");
+        checkArgument(matter.get().getValue() == MatterProperty.Matter.LIQUID, "Must use a liquid property based BlockState!");
         return this;
     }
 
