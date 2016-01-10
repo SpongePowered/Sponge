@@ -52,4 +52,9 @@ public class ImmutableSpongeCooldownData extends AbstractImmutableIntData<Immuta
     public ImmutableBoundedValue<Integer> cooldown() {
         return getValueGetter();
     }
+
+    @Override
+    public CooldownData asMutable() {
+        return new SpongeCooldownData(this.value);
+    }
 }

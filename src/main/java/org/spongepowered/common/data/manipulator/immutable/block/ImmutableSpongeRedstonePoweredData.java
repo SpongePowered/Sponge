@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.block;
 
-import static org.spongepowered.common.data.util.ComparatorUtil.intComparator;
-
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRedstonePoweredData;
 import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 
@@ -52,5 +49,10 @@ public class ImmutableSpongeRedstonePoweredData extends AbstractImmutableIntData
     @Override
     public ImmutableBoundedValue<Integer> power() {
         return getValueGetter();
+    }
+
+    @Override
+    public RedstonePoweredData asMutable() {
+        return new SpongeRedstonePoweredData(this.value);
     }
 }

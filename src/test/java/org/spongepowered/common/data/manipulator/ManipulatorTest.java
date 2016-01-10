@@ -105,6 +105,31 @@ public class ManipulatorTest {
     }
 
     @Test
+    public void testMutableImmutable() {
+        try {
+            final Constructor<?> ctor = this.manipulatorClass.getConstructor();
+            final DataManipulator<?, ?> manipulator = (DataManipulator<?, ?>) ctor.newInstance();
+            final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
+            final DataManipulator<?, ?> newManipulator = immutableDataManipulator.asMutable();
+
+            assertThat("The DataManipulator constructed by ImmutableDataManipulator#asMutable is not "
+                            + "equal to original DataManipulator!\n"
+                            + "This shouldn't be the case, as aDataManipulator constructed from an ImmutableDataManipulator "
+                            + "should store exactly the same keys and values as the original DataManipulator, and therefore "
+                            + "be equal to it.\n"
+                            + "The mutable manipulator in question: " + this.dataName + "\n"
+                            + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
+                    manipulator.equals(newManipulator), is(true));
+        } catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
+                    + "If the manipulator needs to be parametarized, please understand that there needs to "
+                    + "be a default at the least.", e);
+        } catch (InstantiationException | InvocationTargetException | IllegalAccessException e) {
+            throw new IllegalStateException("Failed to construct manipulator: " + this.dataName, e);
+        }
+    }
+
+    @Test
     public void testSameKeys() {
         try {
             final Constructor<?> ctor = this.manipulatorClass.getConstructor();

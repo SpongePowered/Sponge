@@ -31,7 +31,6 @@ import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
-import org.spongepowered.common.data.util.ComparatorUtil;
 
 public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedComparableData<Float, ImmutableFallDistanceData, FallDistanceData>
         implements ImmutableFallDistanceData {
@@ -52,6 +51,11 @@ public class ImmutableSpongeFallDistanceData extends AbstractImmutableBoundedCom
     @Override
     public ImmutableBoundedValue<Float> fallDistance() {
         return this.getValueGetter();
+    }
+
+    @Override
+    public FallDistanceData asMutable() {
+        return new SpongeFallDistanceData(this.value);
     }
 
     @Override
