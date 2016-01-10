@@ -37,11 +37,6 @@ public class MutableBiomeViewTransform extends AbstractBiomeViewTransform<Mutabl
     }
 
     @Override
-    public void setBiome(Vector2i position, BiomeType biome) {
-        setBiome(position.getX(), position.getY(), biome);
-    }
-
-    @Override
     public void setBiome(int x, int z, BiomeType biome) {
         this.area.setBiome(this.inverseTransform.transformX(x, z), this.inverseTransform.transformY(x, z), biome);
     }
@@ -54,11 +49,6 @@ public class MutableBiomeViewTransform extends AbstractBiomeViewTransform<Mutabl
     @Override
     public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new MutableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
-    }
-
-    @Override
-    public MutableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.min.negate()));
     }
 
     @Override

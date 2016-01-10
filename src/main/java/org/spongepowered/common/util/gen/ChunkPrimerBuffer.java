@@ -30,7 +30,6 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
@@ -46,7 +45,6 @@ import java.util.Optional;
 
 /**
  * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
- *
  */
 @NonnullByDefault
 public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
@@ -71,21 +69,6 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
-    }
-
-    @Override
-    public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
-    }
-
-    @Override
-    public void setBlockType(int x, int y, int z, BlockType type) {
-        setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkRange(x, y, z);
         this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
@@ -101,11 +84,6 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new MutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.start.negate()));
     }
 
     @Override

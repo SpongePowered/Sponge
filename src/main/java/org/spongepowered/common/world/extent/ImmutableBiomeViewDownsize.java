@@ -27,7 +27,6 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
 
 public class ImmutableBiomeViewDownsize extends AbstractBiomeViewDownsize<ImmutableBiomeArea> implements ImmutableBiomeArea {
 
@@ -45,16 +44,6 @@ public class ImmutableBiomeViewDownsize extends AbstractBiomeViewDownsize<Immuta
     @Override
     public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new ImmutableBiomeViewTransform(this, transform);
-    }
-
-    @Override
-    public ImmutableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
     }
 
 }

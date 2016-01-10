@@ -45,17 +45,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
     }
 
     @Override
-    public MutableBiomeArea createBiomeBuffer(int xSize, int zSize) {
-        return createBiomeBuffer(new Vector2i(xSize, zSize));
-    }
-
-    @Override
     public MutableBiomeArea createThreadSafeBiomeBuffer(Vector2i size) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MutableBiomeArea createThreadSafeBiomeBuffer(int xSize, int zSize) {
         throw new UnsupportedOperationException();
     }
 
@@ -65,17 +55,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
     }
 
     @Override
-    public MutableBlockVolume createBlockBuffer(int xSize, int ySize, int zSize) {
-        return createBlockBuffer(new Vector3i(xSize, ySize, zSize));
-    }
-
-    @Override
     public MutableBlockVolume createThreadSafeBlockBuffer(Vector3i size) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public MutableBlockVolume createThreadSafeBlockBuffer(int xSize, int ySize, int zSize) {
         throw new UnsupportedOperationException();
     }
 

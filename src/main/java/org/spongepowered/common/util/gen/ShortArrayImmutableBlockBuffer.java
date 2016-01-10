@@ -74,11 +74,6 @@ public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public ImmutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.start.negate()));
-    }
-
-    @Override
     public UnmodifiableBlockVolume getUnmodifiableBlockView() {
         return this;
     }

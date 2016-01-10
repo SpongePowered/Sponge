@@ -224,7 +224,6 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -2146,17 +2145,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
         checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
         checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
-        return ExtentViewDownsize.newInstance(this, newMin, newMax);
+        return new ExtentViewDownsize(this, newMin, newMax);
     }
 
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
-        return ExtentViewTransform.newInstance(this, transform);
-    }
-
-    @Override
-    public Extent getRelativeExtentView() {
-        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
+        return new ExtentViewTransform(this, transform);
     }
 
     @Override
@@ -2273,16 +2267,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public <E> E getOrNull(int x, int y, int z, Key<? extends BaseValue<E>> key) {
-        return get(x, y, z, key).orElse(null);
-    }
-
-    @Override
-    public <E> E getOrElse(int x, int y, int z, Key<? extends BaseValue<E>> key, E defaultValue) {
-        return get(x, y, z, key).orElse(defaultValue);
-    }
-
-    @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
         final BlockState blockState = getBlock(x, y, z);
         if (blockState.supports(key)) {
@@ -2303,11 +2287,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         final boolean tileEntitySupports = tileEntity.isPresent() && tileEntity.get().supports(key);
         return blockSupports || tileEntitySupports;
-    }
-
-    @Override
-    public boolean supports(int x, int y, int z, BaseValue<?> value) {
-        return supports(x, y, z, value.getKey());
     }
 
     @Override
@@ -2334,12 +2313,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return true;
     }
 
-    @SuppressWarnings("unchecked")
-    @Override
-    public boolean supports(int x, int y, int z, DataManipulator<?, ?> manipulator) {
-        return supports(x, y, z, (Class<DataManipulator<?, ?>>) manipulator.getClass());
-    }
-
     @Override
     public Set<Key<?>> getKeys(int x, int y, int z) {
         final ImmutableSet.Builder<Key<?>> builder = ImmutableSet.builder();
@@ -2364,15 +2337,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return builder.build();
     }
 
-    @Override
-    public <E> DataTransactionResult transform(int x, int y, int z, Key<? extends BaseValue<E>> key, Function<E, E> function) {
-        if (supports(x, y, z, key)) {
-            final Optional<E> optional = get(x, y, z, key);
-            return offer(x, y, z, key, function.apply(optional.get()));
-        }
-        return DataTransactionResult.failNoData();
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
@@ -2388,16 +2352,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return tileEntity.get().offer(key, value);
         }
         return DataTransactionResult.failNoData();
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(int x, int y, int z, BaseValue<E> value) {
-        return offer(x, y, z, value.getKey(), value.get());
-    }
-
-    @Override
-    public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator) {
-        return offer(x, y, z, manipulator, MergeFunction.IGNORE_ALL);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -2418,15 +2372,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
         return DataTransactionResult.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public DataTransactionResult offer(int x, int y, int z, Iterable<DataManipulator<?, ?>> manipulators) {
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (DataManipulator<?, ?> manipulator : manipulators) {
-            builder.absorbResult(offer(x, y, z, manipulator));
-        }
-        return builder.build();
     }
 
     @Override
@@ -2455,11 +2400,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, DataHolder from) {
         return copyFrom(xTo, yTo, zTo, from, MergeFunction.IGNORE_ALL);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(int xTo, int yTo, int zTo, int xFrom, int yFrom, int zFrom) {
-        return copyFrom(xTo, yTo, zTo, new Location<World>(this, xFrom, yFrom, zFrom));
     }
 
     @Override
@@ -2570,14 +2510,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return entities;
     }
 
-    /**
-     *
-     * @param x
-     * @param y
-     * @param z
-     * @param distance
-     * @return
-     */
     @Overwrite
     public EntityPlayer getClosestPlayer(double x, double y, double z, double distance) {
         double d4 = -1.0D;

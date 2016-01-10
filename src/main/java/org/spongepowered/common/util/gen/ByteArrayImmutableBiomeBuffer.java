@@ -66,11 +66,6 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public BiomeType getBiome(Vector2i position) {
-        return getBiome(position.getX(), position.getY());
-    }
-
-    @Override
     public ImmutableBiomeArea getBiomeView(Vector2i newMin, Vector2i newMax) {
         checkRange(newMin.getX(), newMin.getY());
         checkRange(newMax.getX(), newMax.getY());
@@ -80,11 +75,6 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new ImmutableBiomeViewTransform(this, transform);
-    }
-
-    @Override
-    public ImmutableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.start.negate()));
     }
 
     @Override

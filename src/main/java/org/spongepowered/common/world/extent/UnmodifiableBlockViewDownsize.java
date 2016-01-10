@@ -47,14 +47,4 @@ public class UnmodifiableBlockViewDownsize extends AbstractBlockViewDownsize<Blo
         return new UnmodifiableBlockViewTransform(this, transform);
     }
 
-    @Override
-    public UnmodifiableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return this;
-    }
-
 }

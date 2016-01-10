@@ -45,14 +45,4 @@ public class UnmodifiableBlockViewTransform extends AbstractBlockViewTransform<U
         return new UnmodifiableBlockViewTransform(this.volume, this.transform.withTransformation(transform));
     }
 
-    @Override
-    public UnmodifiableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return this;
-    }
-
 }
