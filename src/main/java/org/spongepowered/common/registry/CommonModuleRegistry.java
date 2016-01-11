@@ -32,6 +32,7 @@ import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.effect.particle.*;
 import org.spongepowered.api.effect.potion.*;
@@ -126,6 +127,7 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
+import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.effect.*;
 import org.spongepowered.common.registry.type.entity.*;
 import org.spongepowered.common.registry.type.event.*;
@@ -268,6 +270,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageModifierType.class, new DamageModifierTypeRegistryModule())
             .registerModule(new DamageSourceRegistryModule())
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
+            .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(Difficulty.class, new DifficultyRegistryModule())
             .registerModule(DimensionType.class, DimensionRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())

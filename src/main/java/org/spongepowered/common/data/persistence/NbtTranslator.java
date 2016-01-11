@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util.persistence;
+package org.spongepowered.common.data.persistence;
 
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -240,6 +240,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case NbtDataUtil.TAG_INT_ARRAY:
                 view.set(of('.', key), ((NBTTagIntArray) base).getIntArray());
                 break;
+            default:
+                throw new IllegalArgumentException("Unknown NBT type " + type);
         }
     }
 

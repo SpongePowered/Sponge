@@ -134,7 +134,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
     public void registerAdditional() {
         BiomeGenBase[] biomeArray = BiomeGenBase.getBiomeGenArray();
         for (BiomeGenBase biome : biomeArray) {
-            if (biome != null && !this.biomeTypes.contains((BiomeType) biome)) {
+            if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
                 this.biomeTypeMappings.put(biome.biomeName.toLowerCase(), (BiomeType) biome);
             }
