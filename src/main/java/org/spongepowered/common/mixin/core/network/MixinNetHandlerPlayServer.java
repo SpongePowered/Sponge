@@ -437,20 +437,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Redirect(method = "processPlayerBlockPlacement", at = @At(value = "INVOKE", target="Lnet/minecraft/server/management/ItemInWorldManager;activateBlockOrUseItem(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;FFF)Z"))
-    public boolean onActivateBlockOrUseItem(ItemInWorldManager itemManager, EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, BlockPos pos, EnumFacing side, float hitX, float hitY, float hitZ) {
-        boolean result = itemManager.activateBlockOrUseItem(player, worldIn, stack, pos, side, hitX, hitY, hitZ);
-        if (stack != null && !result) {
-            // Don't run item use part of hook if PlayerInteractEvent was cancelled.
-            // This is only set in SpongeForge, so it's safe to put here
-            if (StaticMixinHelper.lastPlayerInteractCancelled) {
-                return false;
-            }
-            itemManager.tryUseItem(player, worldIn, stack);
-        }
-        return result;
-    }
-
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onBeforeSlotClick(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
