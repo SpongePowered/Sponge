@@ -26,10 +26,8 @@ package org.spongepowered.common;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 
-@NonnullByDefault
-public class SpongeMinecraftVersion implements ProtocolMinecraftVersion {
+public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion {
 
     private final String name;
     private final int protocol;

@@ -89,7 +89,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -306,7 +306,7 @@ public abstract class MixinServerConfigurationManager {
         // Fire PlayerJoinEvent
         Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(chatcomponenttranslation));
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
+        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
                 Optional.of(originalChannel), originalMessage, originalMessage, player);
         SpongeImpl.postEvent(event);
         // Send to the channel
@@ -373,7 +373,7 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
+                SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
                     (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);

@@ -175,7 +175,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
@@ -1206,7 +1206,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
-            if (newState != null && !SpongeImplFactory.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
@@ -1397,7 +1397,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplFactory.updateComparatorOutputLevel(this.nmsWorld, pos, blockIn);
+        SpongeImplHooks.updateComparatorOutputLevel(this.nmsWorld, pos, blockIn);
     }
 
     @Override

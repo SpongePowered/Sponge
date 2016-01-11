@@ -36,7 +36,7 @@ import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.command.CommandSponge;
+import org.spongepowered.common.command.SpongeCommand;
 import org.spongepowered.common.command.SpongeHelpCommand;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
@@ -65,7 +65,7 @@ public final class SpongeBootstrap {
     }
 
     public static void initializeCommands() {
-        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), CommandSponge.getCommand(), "sponge", "sp");
+        Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCommand.getCommand(), "sponge", "sp");
         Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeHelpCommand.create(), "help");
         Sponge.getCommandManager().register(SpongeImpl.getPlugin(), SpongeCallbackHolder.getInstance().createCommand(), SpongeCallbackHolder.CALLBACK_COMMAND);
     }

@@ -74,7 +74,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -444,7 +444,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             flag = j >= i1;
         }
 
-        int j1 = SpongeImplFactory.getBlockLightOpacity(block, this.worldObj, pos);
+        int j1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
 
         extendedblockstorage.set(i, j & 15, k, newState);
 
@@ -456,12 +456,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     block1.breakBlock(this.worldObj, pos, currentState);
                 }
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
+                if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
                 }
-            } else if (SpongeImplFactory.blockHasTileEntity(block1, currentState)) {
+            } else if (SpongeImplHooks.blockHasTileEntity(block1, currentState)) {
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplFactory.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
+                if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
                 }
             }
@@ -473,7 +473,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             if (flag) {
                 this.generateSkylightMap();
             } else {
-                int k1 = SpongeImplFactory.getBlockLightOpacity(block, this.worldObj, pos);
+                int k1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
 
                 if (j1 > 0) {
                     if (j >= i1) {
@@ -494,7 +494,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                if (!((IMixinWorld)this.worldObj).capturingBlocks() || SpongeImplFactory.blockHasTileEntity(block, newState)) {
+                if (!((IMixinWorld)this.worldObj).capturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     if (newBlockSnapshot == null) {
                         block.onBlockAdded(this.worldObj, pos, newState);
                     }
@@ -502,11 +502,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge end
             }
 
-            if (SpongeImplFactory.blockHasTileEntity(block, newState)) {
+            if (SpongeImplHooks.blockHasTileEntity(block, newState)) {
                 tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
 
                 if (tileentity == null) {
-                    tileentity = SpongeImplFactory.createTileEntity(block, this.worldObj, newState);
+                    tileentity = SpongeImplHooks.createTileEntity(block, this.worldObj, newState);
                     this.worldObj.setTileEntity(pos, tileentity);
                 }
 

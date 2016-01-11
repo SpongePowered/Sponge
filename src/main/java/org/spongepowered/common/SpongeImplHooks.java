@@ -55,7 +55,7 @@ import java.util.Optional;
  * called themselves in SpongeVanilla but when it can't really occur, we fix
  * this issue with Sponge by overwriting this class
  */
-public class SpongeImplFactory {
+public final class SpongeImplHooks {
 
     public static LoadWorldEvent createLoadWorldEvent(World world) {
         return SpongeEventFactory.createLoadWorldEvent(Cause.of(NamedCause.source(SpongeImpl.getGame().getServer())), world);
