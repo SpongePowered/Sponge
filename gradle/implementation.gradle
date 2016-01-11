@@ -1,5 +1,17 @@
 // Shared Gradle configuration for the Sponge implementation projects
+buildscript {
+    repositories {
+        maven {
+            name = 'plugins'
+            url = 'https://plugins.gradle.org/m2'
+        }
+    }
 
+    dependencies {
+        // TODO: keep this version synced with SpongeAPI somehow
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.2'
+    }
+}
 ext.common = project(':SpongeCommon')
 
 // Apply shared ForgeGradle configuration
@@ -25,14 +37,15 @@ eclipse {
     }
 }
 
-jar {
-    classifier = 'deobf'
-}
+// Nothing comes out of the regular jar task: we shadow both
+configurations.runtime.artifacts.removeAll { it.archiveTask.is jar }
 
+ext.ats = ['common_at.cfg']
 // The version can change until we're done configuring the project, so delay setting the manifest entries until that is final
 afterEvaluate {
     manifest {
         attributes(
+                'FMLAT': project.ats.join(' '),
                 'Implementation-Version': "$version+$ciSystem-b${buildNumber}.git-$commit"
         )
     }
@@ -43,6 +56,42 @@ evaluationDependsOn common.path
 
 // Apply shadow plugin to include the dependencies in the JAR
 apply plugin: 'com.github.johnrengelman.shadow'
+
+// Shared dependency config
+ext.shadowDependencies = {
+    // SpongeCommon and Mixin
+    include project(common.path)
+    include dependency('org.spongepowered:mixin')
+
+    // SpongeAPI and event generation
+    include project(api.path)
+    include dependency('org.spongepowered:event-gen-core')
+
+    // Include all other dependencies
+    include dependency('org.slf4j:slf4j-api')
+    include dependency('org.apache.logging.log4j:log4j-slf4j-impl')
+
+    include dependency('com.google.inject:guice')
+    include dependency('javax.inject:javax.inject')
+    include dependency('aopalliance:aopalliance')
+
+    include dependency('com.flowpowered:flow-math')
+    include dependency('com.flowpowered:flow-noise')
+
+    include dependency('ninja.leaping.configurate:configurate-core')
+    include dependency('ninja.leaping.configurate:configurate-hocon')
+    include dependency('ninja.leaping.configurate:configurate-gson')
+    include dependency('ninja.leaping.configurate:configurate-yaml')
+
+    include dependency('org.yaml:snakeyaml')
+
+    include dependency('com.zaxxer:HikariCP')
+    include dependency('org.javassist:javassist')
+
+    include dependency('org.mariadb.jdbc:mariadb-java-client')
+    include dependency('com.h2database:h2')
+    include dependency('org.xerial:sqlite-jdbc')
+}
 
 shadowJar {
     // Make sure SpongeCommon was actually reobfuscated before shading it
@@ -58,40 +107,7 @@ shadowJar {
     from jar.refMaps
     from sourceSets.java6.output
 
-    dependencies {
-        // SpongeCommon and Mixin
-        include project(common.path)
-        include dependency('org.spongepowered:mixin')
-
-        // SpongeAPI and event generation
-        include project(api.path)
-        include dependency('org.spongepowered:event-gen-core')
-
-        // Include all other dependencies
-        include dependency('org.slf4j:slf4j-api')
-        include dependency('org.apache.logging.log4j:log4j-slf4j-impl')
-
-        include dependency('com.google.inject:guice')
-        include dependency('javax.inject:javax.inject')
-        include dependency('aopalliance:aopalliance')
-
-        include dependency('com.flowpowered:flow-math')
-        include dependency('com.flowpowered:flow-noise')
-
-        include dependency('ninja.leaping.configurate:configurate-core')
-        include dependency('ninja.leaping.configurate:configurate-hocon')
-        include dependency('ninja.leaping.configurate:configurate-gson')
-        include dependency('ninja.leaping.configurate:configurate-yaml')
-
-        include dependency('org.yaml:snakeyaml')
-
-        include dependency('com.zaxxer:HikariCP')
-        include dependency('org.javassist:javassist')
-
-        include dependency('org.mariadb.jdbc:mariadb-java-client')
-        include dependency('com.h2database:h2')
-        include dependency('org.xerial:sqlite-jdbc')
-    }
+    dependencies shadowDependencies
 
     // We include multiple JDBC drivers, so we need to merge the service file to enable them all
     mergeServiceFiles()
@@ -113,16 +129,51 @@ minecraft {
     atSource common.sourceSets.main
 }
 
-// Deployment stuff
-task deobfJar(type: Jar, dependsOn: [classes, api.tasks.classes, common.tasks.classes]) {
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar;
+task shadowDeobfJar(type: ShadowJar, dependsOn: [classes, api.tasks.classes, common.tasks.classes]) {
+    classifier = 'deobf'
+    configurations = [project.configurations.runtime]
+
+    // Exclude ForgeGradle classes from shaded JAR
+    exclude 'GradleStart**'
+    exclude 'net/minecraftforge/**'
+
+    exclude '**refmap.json'
     from api.sourceSets.main.output
     from common.sourceSets.main.output
     from sourceSets.main.output
+    from sourceSets.java6.output
+
+    // Some conventional config normally applied for shadowJar {}
+    manifest.inheritFrom project.tasks.jar.manifest
+    doFirst {
+        def files = project.configurations.findByName('shadow').files
+        if (files) {
+            def libs = [project.tasks.jar.manifest.attributes.get('Class-Path')]
+            libs.addAll files.collect { "${it.name}" }
+            manifest.attributes 'Class-Path': libs.findAll { it }.join(' ')
+        }
+    }
+    exclude 'META-INF/INDEX.LIST', 'META-INF/*.SF', 'META-INF/*.DSA', 'META-INF/*.RSA'
+
+    dependencies shadowDependencies
+
+    // We include multiple JDBC drivers, so we need to merge the service file to enable them all
+    mergeServiceFiles()
+
+    // Prevent other dependencies replacing our license file
+    exclude 'LICENSE', 'NOTICE'
+}
+
+// Forget about having common as a dep, we shade it
+uploadArchives.repositories.mavenDeployer.pom*.whenConfigured { pom ->
+    pom.dependencies.removeAll { it.artifactId == 'spongecommon' }
 }
 
 sourceJar {
     from api.sourceSets.main.allSource
     from common.sourceSets.main.allSource
+    from sourceSets.java6.allSource
 }
 
 javadocJar {
@@ -155,7 +206,8 @@ task sdkZip(type: Zip) {
 }
 
 artifacts {
-    archives deobfJar
+    archives shadowJar
+    archives shadowDeobfJar
     // Include sdk ZIP only if it's actually supported for the implementation
     if (sdkZip.enabled) {
         archives sdkZip
