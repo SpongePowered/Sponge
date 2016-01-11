@@ -97,7 +97,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
-
     private ServerScoreboard scoreboard;
 
     @Shadow private long randomSeed;
@@ -136,9 +135,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int borderWarningDistance;
     @Shadow private int borderWarningTime;
     @Shadow private GameRules theGameRules;
-
-    @Shadow
-    public abstract NBTTagCompound getNBTTagCompound();
+    @Shadow public abstract NBTTagCompound getNBTTagCompound();
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
@@ -530,11 +527,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public boolean isPVPEnabled() {
-        if (!this.worldConfig.getConfig().isConfigEnabled()) {
-            return true;
-        }
-
-        return this.worldConfig.getConfig().getWorld().getPVPEnabled();
+        return !this.worldConfig.getConfig().isConfigEnabled() || this.worldConfig.getConfig().getWorld().getPVPEnabled();
     }
 
     @Override
@@ -583,7 +576,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public DataContainer getGeneratorSettings() {
         // Minecraft uses a String, we want to return a fancy DataContainer
-
         // Parse the world generator settings as JSON
         try {
             NBTTagCompound nbt = JsonToNBT.getTagFromJson(this.generatorOptions);
@@ -659,18 +651,15 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        this.dimension = nbt.getInteger("dimensionId");
-        this.uuid = new UUID(nbt.getLong("uuid_most"), nbt.getLong("uuid_least"));
-        this.isMod = nbt.getBoolean("isMod");
-        for (DimensionType type : DimensionRegistryModule.getInstance().getAll()) {
-            if (type.getId().equalsIgnoreCase(nbt.getString("dimensionType"))) {
-                this.dimensionType = type;
-            }
-        }
+        this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
+        this.uuid = new UUID(nbt.getLong(NbtDataUtil.WORLD_UUID_MOST), nbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
+        DimensionRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
+                .forEach(type -> this.dimensionType = type);
         this.trackedUniqueIdCount = 0;
         for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
             NBTTagCompound valueNbt = this.playerUniqueIdNbt.getCompoundTagAt(i);
-            UUID uuid = new UUID(valueNbt.getLong("uuid_most"), valueNbt.getLong("uuid_least"));
+            UUID uuid = new UUID(valueNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), valueNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
             this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
             this.trackedUniqueIdCount++;
         }
@@ -678,32 +667,30 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private void writeSpongeNbt() {
         if (this.levelName != null) {
-            this.spongeNbt.setString("LevelName", this.levelName);
+            this.spongeNbt.setString(NbtDataUtil.LEVEL_NAME, this.levelName);
         }
-        this.spongeNbt.setInteger("dimensionId", this.dimension);
+        this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
         if (this.dimensionType != null) {
-            this.spongeNbt.setString("dimensionType", this.dimensionType.getId());
+            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
         }
         if (this.uuid != null) {
-            this.spongeNbt.setLong("uuid_most", this.uuid.getMostSignificantBits());
-            this.spongeNbt.setLong("uuid_least", this.uuid.getLeastSignificantBits());
+            this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
+            this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
         }
 
         if (this.isMod) {
-            this.spongeNbt.setBoolean("isMod", this.isMod);
+            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, true);
         }
 
         Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
         while (iterator.hasNext()) {
             UUID uuidToAdd = iterator.next();
             NBTTagCompound valueNbt = new NBTTagCompound();
-            valueNbt.setLong("uuid_most", uuidToAdd.getMostSignificantBits());
-            valueNbt.setLong("uuid_least", uuidToAdd.getLeastSignificantBits());
+            valueNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, uuidToAdd.getMostSignificantBits());
+            valueNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, uuidToAdd.getLeastSignificantBits());
             this.playerUniqueIdNbt.appendTag(valueNbt);
             iterator.remove();
         }
-
-        //this.scoreboard.fie
     }
 
     @Override

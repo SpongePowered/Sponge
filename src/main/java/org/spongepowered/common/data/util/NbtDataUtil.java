@@ -123,6 +123,7 @@ public final class NbtDataUtil {
     public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
+    public static final String LEVEL_NAME = "LevelName";
     public static final String WORLD_UUID_MOST = "uuid_most";
     public static final String WORLD_UUID_LEAST = "uuid_least";
 
@@ -133,6 +134,7 @@ public final class NbtDataUtil {
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
     public static final String INVALID_TITLE = "invalid";
+    public static final String IS_MOD = "isMod";
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 

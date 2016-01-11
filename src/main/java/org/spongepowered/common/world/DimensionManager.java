@@ -230,9 +230,9 @@ public class DimensionManager {
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().put(id, new long[100]);
             SpongeImpl.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
-            worlds.remove(id);
+            final WorldServer server = worlds.remove(id);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
-            SpongeImpl.getLogger().info("Unloading dimension {}", id);
+            SpongeImpl.getLogger().info("Unloading dimension {} ({})", id, server.getWorldInfo().getWorldName());
         }
 
         ArrayList<WorldServer> tmp = new ArrayList<>();

@@ -958,4 +958,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             cir.setReturnValue(event.getTabCompletions());
         }
     }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
+    }
 }
