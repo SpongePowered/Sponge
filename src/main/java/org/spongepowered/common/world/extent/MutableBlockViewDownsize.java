@@ -26,7 +26,6 @@ package org.spongepowered.common.world.extent;
 
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -35,21 +34,6 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
 
     public MutableBlockViewDownsize(MutableBlockVolume volume, Vector3i min, Vector3i max) {
         super(volume, min, max);
-    }
-
-    @Override
-    public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
-    }
-
-    @Override
-    public void setBlockType(int x, int y, int z, BlockType type) {
-        setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
     }
 
     @Override
@@ -68,11 +52,6 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
     @Override
     public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new MutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.min.negate()));
     }
 
     @Override

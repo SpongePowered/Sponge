@@ -57,28 +57,13 @@ public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
     }
 
     @Override
-    public boolean containsBlock(Vector3i position) {
-        return this.volume.containsBlock(position);
-    }
-
-    @Override
     public boolean containsBlock(int x, int y, int z) {
         return this.volume.containsBlock(x, y, z);
     }
 
     @Override
-    public BlockType getBlockType(Vector3i position) {
-        return this.volume.getBlockType(position);
-    }
-
-    @Override
     public BlockType getBlockType(int x, int y, int z) {
         return this.volume.getBlockType(x, y, z);
-    }
-
-    @Override
-    public BlockState getBlock(Vector3i position) {
-        return this.volume.getBlock(position);
     }
 
     @Override
@@ -94,21 +79,6 @@ public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
     @Override
     public UnmodifiableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new UnmodifiableBlockVolumeWrapper(this.volume.getBlockView(transform));
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getRelativeBlockView() {
-        return new UnmodifiableBlockVolumeWrapper(this.volume.getRelativeBlockView());
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return this;
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy() {
-        return this.volume.getBlockCopy();
     }
 
     @Override

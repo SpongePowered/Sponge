@@ -33,6 +33,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 /**
  * Wraps a {@link MutableBlockVolume} within a ChunkPrimer in order to be able
  * to pass the block buffer to vanilla populators.
+ * TODO: this should be a mixin
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 

@@ -73,19 +73,9 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
     }
 
     @Override
-    public boolean containsBlock(Vector3i position) {
-        return containsBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public boolean containsBlock(int x, int y, int z) {
         return this.volume.containsBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
             .transformZ(x, y, z));
-    }
-
-    @Override
-    public BlockType getBlockType(Vector3i position) {
-        return getBlockType(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -94,19 +84,9 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
     }
 
     @Override
-    public BlockState getBlock(Vector3i position) {
-        return getBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public BlockState getBlock(int x, int y, int z) {
         return this.volume.getBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
             .transformZ(x, y, z));
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy() {
-        return getBlockCopy(StorageType.STANDARD);
     }
 
     @Override

@@ -27,7 +27,6 @@ package org.spongepowered.common.util.gen;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -56,21 +55,6 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     }
 
     @Override
-    public void setBlock(Vector3i position, BlockState block) {
-        setBlock(position.getX(), position.getY(), position.getZ(), block);
-    }
-
-    @Override
-    public void setBlockType(Vector3i position, BlockType type) {
-        setBlockType(position.getX(), position.getY(), position.getZ(), type);
-    }
-
-    @Override
-    public void setBlockType(int x, int y, int z, BlockType type) {
-        setBlock(x, y, z, type.getDefaultState());
-    }
-
-    @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkRange(x, y, z);
         this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get(block);
@@ -93,11 +77,6 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     @Override
     public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new MutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.start.negate()));
     }
 
     @Override

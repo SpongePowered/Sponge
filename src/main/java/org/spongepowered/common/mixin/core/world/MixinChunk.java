@@ -350,17 +350,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public Extent getExtentView(Vector3i newMin, Vector3i newMax) {
         checkBlockBounds(newMin.getX(), newMin.getY(), newMin.getZ());
         checkBlockBounds(newMax.getX(), newMax.getY(), newMax.getZ());
-        return ExtentViewDownsize.newInstance(this, newMin, newMax);
+        return new ExtentViewDownsize(this, newMin, newMax);
     }
 
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
-        return ExtentViewTransform.newInstance(this, transform);
-    }
-
-    @Override
-    public Extent getRelativeExtentView() {
-        return getExtentView(DiscreteTransform3.fromTranslation(getBlockMin().negate()));
+        return new ExtentViewTransform(this, transform);
     }
 
     @SuppressWarnings({"unchecked"})

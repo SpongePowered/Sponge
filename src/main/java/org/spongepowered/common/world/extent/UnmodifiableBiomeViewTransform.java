@@ -44,14 +44,4 @@ public class UnmodifiableBiomeViewTransform extends AbstractBiomeViewTransform<U
         return new UnmodifiableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
     }
 
-    @Override
-    public UnmodifiableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
-    }
-
 }

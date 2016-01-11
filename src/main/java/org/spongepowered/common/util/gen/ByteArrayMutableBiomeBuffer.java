@@ -70,21 +70,11 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     @Override
-    public void setBiome(Vector2i position, BiomeType biome) {
-        setBiome(position.getX(), position.getY(), biome);
-    }
-
-    @Override
     public void setBiome(int x, int z, BiomeType biome) {
         checkOpen();
         checkRange(x, z);
 
         this.biomes[getIndex(x, z)] = (byte) ((BiomeGenBase) biome).biomeID;
-    }
-
-    @Override
-    public BiomeType getBiome(Vector2i position) {
-        return getBiome(position.getX(), position.getY());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -148,11 +138,6 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     @Override
     public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new MutableBiomeViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.start.negate()));
     }
 
     @Override

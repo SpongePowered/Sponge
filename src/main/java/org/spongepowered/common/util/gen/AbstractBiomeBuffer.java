@@ -29,8 +29,6 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.BiomeArea;
-import org.spongepowered.api.world.extent.MutableBiomeArea;
-import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
 
 /**
@@ -79,18 +77,8 @@ public abstract class AbstractBiomeBuffer implements BiomeArea {
     }
 
     @Override
-    public boolean containsBiome(Vector2i position) {
-        return containsBiome(position.getX(), position.getY());
-    }
-
-    @Override
     public boolean containsBiome(int x, int z) {
         return VecHelper.inBounds(x, z, this.start, this.end);
-    }
-
-    @Override
-    public MutableBiomeArea getBiomeCopy() {
-        return getBiomeCopy(StorageType.STANDARD);
     }
 
     @Override

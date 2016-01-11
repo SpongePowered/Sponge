@@ -47,14 +47,4 @@ public class UnmodifiableBiomeViewDownsize extends AbstractBiomeViewDownsize<Bio
         return new UnmodifiableBiomeViewTransform(this, transform);
     }
 
-    @Override
-    public UnmodifiableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
-    }
-
 }

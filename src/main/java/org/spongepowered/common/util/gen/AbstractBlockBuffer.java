@@ -26,13 +26,10 @@ package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.BlockVolume;
-import org.spongepowered.api.world.extent.MutableBlockVolume;
-import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
 
 /**
@@ -83,33 +80,13 @@ public abstract class AbstractBlockBuffer implements BlockVolume {
     }
 
     @Override
-    public boolean containsBlock(Vector3i position) {
-        return containsBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public boolean containsBlock(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, this.start, this.end);
     }
 
     @Override
-    public BlockState getBlock(Vector3i position) {
-        return getBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
-    public BlockType getBlockType(Vector3i position) {
-        return getBlockType(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public BlockType getBlockType(int x, int y, int z) {
         return getBlock(x, y, z).getType();
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy() {
-        return getBlockCopy(StorageType.STANDARD);
     }
 
     @Override

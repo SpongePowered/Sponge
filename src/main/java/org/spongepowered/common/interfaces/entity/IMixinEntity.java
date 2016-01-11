@@ -37,7 +37,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntity {
+public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     boolean isTeleporting();
 

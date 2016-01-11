@@ -56,18 +56,8 @@ public class UnmodifiableBiomeAreaWrapper implements UnmodifiableBiomeArea {
     }
 
     @Override
-    public boolean containsBiome(Vector2i position) {
-        return this.area.containsBiome(position);
-    }
-
-    @Override
     public boolean containsBiome(int x, int z) {
         return this.area.containsBiome(x, z);
-    }
-
-    @Override
-    public BiomeType getBiome(Vector2i position) {
-        return this.area.getBiome(position);
     }
 
     @Override
@@ -83,21 +73,6 @@ public class UnmodifiableBiomeAreaWrapper implements UnmodifiableBiomeArea {
     @Override
     public UnmodifiableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new UnmodifiableBiomeAreaWrapper(this.area.getBiomeView(transform));
-    }
-
-    @Override
-    public UnmodifiableBiomeArea getRelativeBiomeView() {
-        return new UnmodifiableBiomeAreaWrapper(this.area.getRelativeBiomeView());
-    }
-
-    @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
-    }
-
-    @Override
-    public MutableBiomeArea getBiomeCopy() {
-        return this.area.getBiomeCopy();
     }
 
     @Override

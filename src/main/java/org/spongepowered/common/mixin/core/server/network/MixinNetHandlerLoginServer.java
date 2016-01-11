@@ -106,6 +106,11 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
             + "currentLoginState:Lnet/minecraft/server/network/NetHandlerLoginServer$LoginState;",
             opcode = Opcodes.PUTFIELD, ordinal = 1), cancellable = true)
     public void fireAuthEventOffline(CallbackInfo ci) {
+        // Move this check up here, so that the UUID isn't null when we fire the event
+        if (!this.loginGameProfile.isComplete()) {
+            this.loginGameProfile = this.getOfflineProfile(this.loginGameProfile);
+        }
+
         if (this.fireAuthEvent()) {
             ci.cancel();
         }

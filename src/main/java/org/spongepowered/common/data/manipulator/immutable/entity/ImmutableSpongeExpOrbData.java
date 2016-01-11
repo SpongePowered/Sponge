@@ -48,4 +48,9 @@ public class ImmutableSpongeExpOrbData extends AbstractImmutableIntData<Immutabl
     public ImmutableValue<Integer> experience() {
         return getValueGetter();
     }
+
+    @Override
+    public ExpOrbData asMutable() {
+        return new SpongeExpOrbData(this.value);
+    }
 }

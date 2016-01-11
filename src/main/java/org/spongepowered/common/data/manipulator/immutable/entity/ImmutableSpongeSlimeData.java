@@ -48,4 +48,9 @@ public class ImmutableSpongeSlimeData extends AbstractImmutableIntData<Immutable
     public ImmutableValue<Integer> size() {
         return getValueGetter();
     }
+
+    @Override
+    public SlimeData asMutable() {
+        return new SpongeSlimeData(this.value);
+    }
 }

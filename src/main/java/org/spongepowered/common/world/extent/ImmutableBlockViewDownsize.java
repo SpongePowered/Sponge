@@ -27,7 +27,6 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 
 public class ImmutableBlockViewDownsize extends AbstractBlockViewDownsize<ImmutableBlockVolume> implements ImmutableBlockVolume {
 
@@ -45,16 +44,6 @@ public class ImmutableBlockViewDownsize extends AbstractBlockViewDownsize<Immuta
     @Override
     public ImmutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new ImmutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public ImmutableBlockVolume getRelativeBlockView() {
-        return getBlockView(DiscreteTransform3.fromTranslation(this.min.negate()));
-    }
-
-    @Override
-    public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return this;
     }
 
 }

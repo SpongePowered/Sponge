@@ -42,4 +42,9 @@ public class ImmutableSpongeStuckArrowsData extends AbstractImmutableIntData<Imm
         return this.getValueGetter();
     }
 
+    @Override
+    public StuckArrowsData asMutable() {
+        return new SpongeStuckArrowsData(this.value);
+    }
+
 }

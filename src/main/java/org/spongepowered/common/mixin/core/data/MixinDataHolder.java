@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
@@ -35,6 +36,7 @@ import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -72,7 +74,17 @@ public abstract class MixinDataHolder implements DataHolder {
             if (optional.isPresent()) {
                 return (Optional<T>) optional.get().createFrom(this);
             } else if (this instanceof IMixinCustomDataHolder) {
-                return ((IMixinCustomDataHolder) this).getCustom(containerClass);
+                Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
+                if (custom.isPresent()) {
+                    return custom;
+                } else { // Try to construct it from the DataManipulatorBuilder
+                    Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(containerClass);
+                    checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
+                                                    + containerClass.getName());
+                    T manipulator = (T) builder.get().create();
+                    // Basically at this point, it's up to plugins to validate whether it's supported
+                    return manipulator.fill(this).map(customManipulator -> (T) customManipulator);
+                }
             }
             return Optional.empty();
         }
@@ -82,7 +94,23 @@ public abstract class MixinDataHolder implements DataHolder {
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
         try (Timing timing = SpongeTimings.dataSupportsManipulator.startTiming()) {
             final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(holderClass);
-            return optional.isPresent() && optional.get().supports(this);
+            if (optional.isPresent()) {
+                return optional.get().supports(this);
+            }
+            if (this instanceof IMixinCustomDataHolder) {
+                Optional<?> custom = ((IMixinCustomDataHolder) this).getCustom(holderClass);
+                if (custom.isPresent()) {
+                    return true;
+                } else { // Try to construct it from the DataManipulatorBuilder
+                    Optional<DataManipulatorBuilder<?, ?>> builder = SpongeDataManager.getInstance().getWildManipulatorBuilder(holderClass);
+                    checkState(builder.isPresent(), "A DataManipulatorBuilder is not registered for the manipulator class: "
+                                                    + holderClass.getName());
+                    DataManipulator<?, ?> manipulator = builder.get().create();
+                    // Basically at this point, it's up to plugins to validate whether it's supported
+                    return manipulator.fill(this).isPresent();
+                }
+            }
+            return false;
         }
     }
 
@@ -202,6 +230,8 @@ public abstract class MixinDataHolder implements DataHolder {
                 SpongeDataManager.getInstance().getBaseValueProcessor(checkNotNull(key));
             if (optional.isPresent()) {
                 return optional.get().getValueFromContainer(this);
+            } else if (this instanceof IMixinCustomDataHolder) {
+                return ((IMixinCustomDataHolder) this).getCustom(key);
             }
             return Optional.empty();
         }
@@ -213,6 +243,8 @@ public abstract class MixinDataHolder implements DataHolder {
             final Optional<ValueProcessor<E, V>> optional = SpongeDataManager.getInstance().getValueProcessor(checkNotNull(key));
             if (optional.isPresent()) {
                 return optional.get().getApiValueFromContainer(this);
+            } else if (this instanceof IMixinCustomDataHolder) {
+                return ((IMixinCustomDataHolder) this).getCustomValue(key);
             }
             return Optional.empty();
         }
@@ -222,7 +254,8 @@ public abstract class MixinDataHolder implements DataHolder {
     public boolean supports(Key<?> key) {
         try (Timing timing = SpongeTimings.dataSupportsKey.startTiming()) {
             final Optional<ValueProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildValueProcessor(checkNotNull(key));
-            return optional.isPresent() && optional.get().supports(this);
+            return (optional.isPresent() && optional.get().supports(this))
+                   || (this instanceof IMixinCustomDataHolder && ((IMixinCustomDataHolder) this).supportsCustom(key));
         }
     }
 

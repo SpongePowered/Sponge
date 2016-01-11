@@ -28,10 +28,8 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBoundedComparableData;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableIntData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
-import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataConstants;
 
 public class ImmutableSpongeGenerationData extends AbstractImmutableIntData<ImmutableGenerationData, GenerationData>
@@ -44,6 +42,11 @@ public class ImmutableSpongeGenerationData extends AbstractImmutableIntData<Immu
     @Override
     public ImmutableBoundedValue<Integer> generation() {
         return this.getValueGetter();
+    }
+
+    @Override
+    public GenerationData asMutable() {
+        return new SpongeGenerationData(this.value);
     }
 
 }

@@ -49,4 +49,9 @@ public class ImmutableSpongeExpirableData extends AbstractImmutableIntData<Immut
             .build()
             .asImmutable();
     }
+
+    @Override
+    public ExpirableData asMutable() {
+        return new SpongeExpirableData(this.value, this.upperBound);
+    }
 }

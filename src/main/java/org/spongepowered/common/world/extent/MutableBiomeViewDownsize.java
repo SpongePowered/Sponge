@@ -37,11 +37,6 @@ public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableB
     }
 
     @Override
-    public void setBiome(Vector2i position, BiomeType biome) {
-        setBiome(position.getX(), position.getY(), biome);
-    }
-
-    @Override
     public void setBiome(int x, int z, BiomeType biome) {
         checkRange(x, z);
         this.area.setBiome(x, z, biome);
@@ -57,11 +52,6 @@ public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableB
     @Override
     public MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new MutableBiomeViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBiomeArea getRelativeBiomeView() {
-        return getBiomeView(DiscreteTransform2.fromTranslation(this.min.negate()));
     }
 
     @Override

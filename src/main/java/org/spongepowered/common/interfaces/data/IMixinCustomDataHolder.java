@@ -47,6 +47,12 @@ public interface IMixinCustomDataHolder {
 
     boolean hasManipulators();
 
+    boolean supportsCustom(Key<?> key);
+
+    <E> Optional<E> getCustom(Key<? extends BaseValue<E>> key);
+
+    <E, V extends BaseValue<E>> Optional<V> getCustomValue(Key<V> key);
+
     List<DataManipulator<?, ?>> getCustomManipulators();
 
     <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value);

@@ -66,11 +66,6 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
     }
 
     @Override
-    public boolean containsBlock(Vector3i position) {
-        return containsBlock(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public boolean containsBlock(int x, int y, int z) {
         return VecHelper.inBounds(x, y, z, this.min, this.max);
     }
@@ -82,29 +77,14 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
     }
 
     @Override
-    public BlockType getBlockType(Vector3i position) {
-        return getBlockType(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public BlockType getBlockType(int x, int y, int z) {
         return getBlock(x, y, z).getType();
-    }
-
-    @Override
-    public BlockState getBlock(Vector3i position) {
-        return getBlock(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
         return this.volume.getBlock(x, y, z);
-    }
-
-    @Override
-    public MutableBlockVolume getBlockCopy() {
-        return getBlockCopy(StorageType.STANDARD);
     }
 
     @Override

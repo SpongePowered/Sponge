@@ -362,8 +362,6 @@
         "world.biome.MixinWorldChunkManager",
         "world.chunk.storage.MixinAnvilChunkLoader",
         "world.extent.MixinExtent",
-        "world.extent.MixinExtentViewDownsize",
-        "world.extent.MixinExtentViewTransform",
         "world.gen.MixinChunkProviderEnd",
         "world.gen.MixinChunkProviderFlat",
         "world.gen.MixinChunkProviderGenerate",
