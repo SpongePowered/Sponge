@@ -126,9 +126,9 @@ public class PacketUtil {
         StaticMixinHelper.ignoreCreativeInventoryPacket = false;
     }
 
-    public static void processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
+    public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
-            return;
+            return true;
         }
         // Sign command exploit fix
         for (int i = 0; i < packetIn.getLines().length; ++i) {
@@ -142,12 +142,13 @@ public class PacketUtil {
                         SpongeHooks.logExploitSignCommandUpdates(playerEntity, tileentitysign, clickevent.getValue());
                         playerEntity.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
                         ci.cancel();
-                        return;
+                        return false;
                     }
                 }
             }
             packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
         }
+        return true;
 
     }
 }

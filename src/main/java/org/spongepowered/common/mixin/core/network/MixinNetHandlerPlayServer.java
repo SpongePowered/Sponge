@@ -153,8 +153,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
-        System.err.println("Derp");
-        PacketUtil.processSignPacket(packetIn, ci, tileentitysign, this.playerEntity);
+        if (!PacketUtil.processSignPacket(packetIn, ci, tileentitysign, this.playerEntity)) {
+            return;
+        }
         final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...
