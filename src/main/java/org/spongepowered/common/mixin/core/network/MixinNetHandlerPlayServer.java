@@ -30,11 +30,8 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -48,16 +45,12 @@ import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ItemInWorldManager;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.world.WorldServer;
@@ -97,9 +90,8 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.text.SpongeTexts;
-import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -161,25 +153,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
-
-        // Sign command exploit fix
-        for (int i = 0; i < packetIn.getLines().length; ++i) {
-            ChatStyle chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
-
-            if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
-                ClickEvent clickevent = chatstyle.getChatClickEvent();
-
-                if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-                    if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(this.playerEntity.getGameProfile())) {
-                       SpongeHooks.logExploitSignCommandUpdates(this.playerEntity, tileentitysign, clickevent.getValue());
-                       this.playerEntity.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
-                       return;
-                    }
-                }
-            }
-            packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
-        }
-
+        System.err.println("Derp");
+        PacketUtil.processSignPacket(packetIn, ci, tileentitysign, this.playerEntity);
         final Optional<SignData> existingSignData = ((Sign) tileentitysign).get(SignData.class);
         if (!existingSignData.isPresent()) {
             // TODO Unsure if this is the best to do here...

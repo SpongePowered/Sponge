@@ -253,6 +253,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(MODULE_SHUTDOWN_ON_EULA)
         private ShutdownOnEulaCategory eulaShutdown = new ShutdownOnEulaCategory();
 
+        @Setting
+        private ExploitCategory exploits = new ExploitCategory();
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
         }
@@ -281,6 +284,11 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                     return Predicates.and(input);
                 }
             }));
+        }
+
+
+        public ExploitCategory getExploits() {
+            return this.exploits;
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
@@ -385,6 +393,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public TimingsCategory getTimings() {
             return this.timings;
         }
+
     }
 
     @ConfigSerializable
@@ -788,6 +797,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("timings")
         private boolean pluginTimings = true;
 
+        @Setting("exploits")
+        private boolean enableExploitPatches = true;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -810,6 +822,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPluginTimings(boolean state) {
             this.pluginTimings = state;
+        }
+
+        public boolean useExploitPatches() {
+            return this.enableExploitPatches;
+        }
+
+        public void setExploitPatches(boolean enableExploitPatches) {
+            this.enableExploitPatches = enableExploitPatches;
         }
     }
 
@@ -958,6 +978,31 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.historyLength = historyLength;
         }
 
+    }
+
+    @ConfigSerializable
+    public static class ExploitCategory extends Category {
+
+        @Setting("prevent-creative-itemstack-name-exploit")
+        private boolean preventItemNameOverflow = true;
+        @Setting("prevent-sign-command-exploit")
+        private boolean preventSignExploit = true;
+
+        public boolean isPreventItemNameOverflow() {
+            return this.preventItemNameOverflow;
+        }
+
+        public void setPreventItemNameOverflow(boolean preventItemNameOverflow) {
+            this.preventItemNameOverflow = preventItemNameOverflow;
+        }
+
+        public boolean isPreventSignExploit() {
+            return this.preventSignExploit;
+        }
+
+        public void setPreventSignExploit(boolean preventSignExploit) {
+            this.preventSignExploit = preventSignExploit;
+        }
     }
 
     @ConfigSerializable
