@@ -48,6 +48,8 @@ public interface IMixinWorldSettings {
 
     void setKeepSpawnLoaded(boolean keepSpawnLoaded);
 
+    void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad);
+
     void setDimensionId(int id);
 
     void setIsMod(boolean isMod);
@@ -57,4 +59,8 @@ public interface IMixinWorldSettings {
     void setActualWorldName(String name);
 
     String getActualWorldName();
+
+    void fromBuilder(boolean builder);
+
+    boolean isFromBuilder();
 }

@@ -364,18 +364,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (dim != 0) {
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
-                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD)) {
-                    final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = (SpongeConfig<SpongeConfig.WorldConfig>) activeConfig;
-
-                    if (worldConfig.getConfig().isConfigEnabled() && !worldConfig.getConfig().getWorld().isWorldEnabled()) {
+                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                    if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
                         SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
-                        continue;
-                    }
-                } else if (activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
-                    final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = (SpongeConfig<SpongeConfig.DimensionConfig>) activeConfig;
-                    if (dimensionConfig.getConfig().isConfigEnabled() && !dimensionConfig.getConfig().getWorld().isWorldEnabled()) {
-                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled in dimension [{}]. World will not be loaded...", worldFolder,
-                                dim, ((Dimension) provider).getName());
                         continue;
                     }
                 }
@@ -527,10 +518,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 spongeData.setString(NbtDataUtil.DIMENSION_TYPE, dimensionType);
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimensionType, worldCandidateFile.getName());
 
-                if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be registered...",
-                            worldCandidateFile.getName(), dimensionId);
-                    continue;
+                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                    if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
+                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be registered...",
+                                worldCandidateFile.getName(), dimensionId);
+                        continue;
+                    }
                 }
 
                 if (spongeData.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeData.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
@@ -579,7 +572,18 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldServers.add(0, overworld);
         }
 
-        worldServers.forEach(this::prepareSpawnArea);
+        for (WorldServer worldServer : worldServers) {
+            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+
+            if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                if (!activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+                    continue;
+                }
+            }
+
+            this.prepareSpawnArea(worldServer);
+        }
+
         this.clearCurrentTask();
     }
 
@@ -678,19 +682,28 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
-        WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+        WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
 
-        world.initialize(settings);
-        ((IMixinWorldProvider) world.provider).setDimension(dim);
+        worldServer.initialize(settings);
+        ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
 
-        world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
-        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) world));
+        worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         if (!isSinglePlayer()) {
-            world.getWorldInfo().setGameType(getGameType());
+            worldServer.getWorldInfo().setGameType(getGameType());
         }
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        this.prepareSpawnArea(world);
-        return Optional.of((World) world);
+
+        final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+        if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+            if (activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+                this.prepareSpawnArea(worldServer);
+            }
+        } else {
+            this.prepareSpawnArea(worldServer);
+        }
+
+        return Optional.of((World) worldServer);
     }
 
     @Override
@@ -738,7 +751,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
         final UUID uuid = UUID.randomUUID();
-        ((IMixinWorldInfo) worldInfo).getWorldConfig().getConfig().setConfigEnabled(true);
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());

@@ -74,6 +74,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -158,12 +159,17 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
         WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
         setDimensionType(creationSettings.getDimensionType());
-        if (((IMixinWorldSettings)(Object) settings).getDimensionId() != null) {
-            this.dimension = ((IMixinWorldSettings)(Object) settings).getDimensionId();
+        if (((IMixinWorldSettings) (Object) settings).getDimensionId() != null) {
+            this.dimension = ((IMixinWorldSettings) (Object) settings).getDimensionId();
         }
         // make sure to set dimensionType and dimension id before attempting to generate world config
         setDimensionType(creationSettings.getDimensionType());
         onConstruction(ci);
+        boolean configPreviouslyExisted = Files.exists(SpongeImpl.getSpongeConfigDir()
+                .resolve("worlds")
+                .resolve(this.dimensionType.getId())
+                .resolve(this.levelName)
+                .resolve("world.conf"));
         createWorldConfig();
         this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
         this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
@@ -172,6 +178,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.worldConfig.getConfig().getWorldGenModifiers().clear();
             this.worldConfig.getConfig().getWorldGenModifiers()
                     .addAll(GeneratorModifierRegistryModule.getInstance().toIds(creationSettings.getGeneratorModifiers()));
+        }
+
+        // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
+        if (!configPreviouslyExisted && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
+            this.worldConfig.getConfig().setConfigEnabled(true);
         }
         this.worldConfig.save();
     }
@@ -523,6 +534,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setKeepSpawnLoaded(boolean loaded) {
         this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(loaded);
+    }
+
+    @Override
+    public boolean doesGenerateSpawnOnLoad() {
+        return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
+    }
+
+    @Override
+    public void setGenerateSpawnOnLoad(boolean state) {
+        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(state);
     }
 
     @Override

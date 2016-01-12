@@ -59,6 +59,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean worldEnabled = true;
     private boolean loadOnStartup = true;
     private boolean keepSpawnLoaded = true;
+    private boolean generateSpawnOnLoad = true;
     private boolean pvpEnabled = true;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
     // MCP's worldName is actually the generatorOptions
@@ -66,6 +67,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     // internal use only
     private int dimId;
     private boolean isMod;
+    private boolean fromBuilder;
 
     @Shadow private long seed;
     @Shadow private WorldSettings.GameType theGameType;
@@ -99,6 +101,16 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Override
     public String getActualWorldName() {
         return this.actualWorldName;
+    }
+
+    @Override
+    public void fromBuilder(boolean builder) {
+        this.fromBuilder = builder;
+    }
+
+    @Override
+    public boolean isFromBuilder() {
+        return this.fromBuilder;
     }
 
     @Override
@@ -183,7 +195,17 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
 
     @Override
     public void setKeepSpawnLoaded(boolean keepSpawnLoaded) {
-        this.keepSpawnLoaded = keepSpawnLoaded;
+        this.generateSpawnOnLoad = keepSpawnLoaded;
+    }
+
+    @Override
+    public boolean doesGenerateSpawnOnLoad() {
+        return this.generateSpawnOnLoad;
+    }
+
+    @Override
+    public void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad) {
+        this.generateSpawnOnLoad = generateSpawnOnLoad;
     }
 
     @Override
