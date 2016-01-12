@@ -46,8 +46,8 @@ public class MushroomTypeRegistryModule implements CatalogRegistryModule<Mushroo
 
     @RegisterCatalog(MushroomTypes.class)
     private final Map<String, MushroomType> mushroomTypeMap = ImmutableMap.<String, MushroomType>builder()
-        .put("brown", new SpongeMushroomType("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom)))
-        .put("red", new SpongeMushroomType("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom)))
+        .put("brown", new SpongeMushroomType("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom_block)))
+        .put("red", new SpongeMushroomType("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom_block)))
         .build();
 
     @Override
