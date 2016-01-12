@@ -55,16 +55,23 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
 
     // The static method's owner is CommandScoreboard for some odd reason, despite it coming from CommandBase
     private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;getEntityName(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
-    private static final String GET_UNIQUE_ID = "Lnet/minecraft/entity/Entity;getUniqueID()Ljava/util/UUID;";
+
+    private static final String ITERATOR_NEXT = "Ljava/util/Iterator;next()Ljava/lang/Object;";
 
     private String realName;
 
-    // TODO: Enable again when https://github.com/SpongePowered/Mixin/issues/88 is fixed
-
-    /*@Inject(method = "joinTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onGetUUIDJoin(ICommandSender p_147190_1_, String[] p_147190_2_, int p_147190_3_, CallbackInfo ci, Scoreboard scoreboard, String s,
-            Set<String> set, Set<String> set1, String s1, String s2, Entity entity) {
+    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    public Object onGetUUIDJoin(Iterator<Entity> iterator) {
+        Entity entity = iterator.next();
         this.onGetUUID(entity);
+        return entity;
+    }
+
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    private Object onGetUUIDLeave(Iterator<Entity> iterator) {
+        Entity entity = iterator.next();
+        this.onGetUUID(entity);
+        return entity;
     }
 
     @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
@@ -72,17 +79,10 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         return this.onGetEntityName(sender, string);
     }
 
-    @Inject(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_UNIQUE_ID, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onGetUUIDLeave(ICommandSender p_147199_1_, String[] p_147199_2_, int p_147199_3_, CallbackInfo ci, Scoreboard scoreboard,
-            Set<String> set, Set<String> set1, String s, String s1, Entity entity) {
-        this.onGetUUID(entity);
-    }
-
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
     public String onGetEntityNameLeaveFirst(ICommandSender sender, String string) throws EntityNotFoundException {
         return this.onGetEntityName(sender, string);
-    }*/
-
+    }
 
     private void onGetUUID(Entity entity) {
         if (entity instanceof EntityHuman) {
