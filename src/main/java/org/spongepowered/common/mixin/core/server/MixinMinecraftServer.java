@@ -798,6 +798,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
+    public String getDefaultWorldName() {
+        return getFolderName();
+    }
+
+    @Override
     public Collection<WorldProperties> getUnloadedWorlds() {
         File rootDir = DimensionManager.getCurrentSaveRootDirectory();
         if (rootDir == null) {
