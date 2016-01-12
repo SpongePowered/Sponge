@@ -49,6 +49,7 @@ import org.spongepowered.common.registry.SpongeGameRegistry;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -65,6 +66,9 @@ public final class SpongeImpl {
     public static final String ECOSYSTEM_NAME = "Sponge";
     public static final String ECOSYSTEM_ID = "sponge";
 
+    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
+    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+    
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 
     @Nullable
