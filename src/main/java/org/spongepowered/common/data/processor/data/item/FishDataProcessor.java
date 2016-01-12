@@ -27,18 +27,19 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.FishData;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.Fishes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeFishData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -65,12 +66,18 @@ public class FishDataProcessor extends AbstractItemSingleDataProcessor<Fish, Val
     }
 
     @Override
+    protected Value<Fish> constructValue(Fish actualValue) {
+        return new SpongeValue<>(Keys.FISH_TYPE, Fishes.COD, actualValue);
+    }
+
+    @Override
     protected ImmutableValue<Fish> constructImmutableValue(Fish value) {
         return ImmutableSpongeValue.cachedOf(Keys.FISH_TYPE, Fishes.COD, value);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

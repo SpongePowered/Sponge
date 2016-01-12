@@ -24,24 +24,25 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCoalData;
 import org.spongepowered.api.data.manipulator.mutable.item.CoalData;
 import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.data.type.CoalTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeCoalData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.SpongeCoalType;
 
+import java.util.List;
 import java.util.Optional;
 
 public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType, Value<CoalType>, CoalData, ImmutableCoalData> {
@@ -63,7 +64,14 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
 
     @Override
     protected Optional<CoalType> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(CoalType.class), itemStack.getMetadata()));
+        final int coalmeta = itemStack.getItemDamage();
+        final List<CoalType> coalTypes = (List<CoalType>) SpongeImpl.getRegistry().getAllOf(CoalType.class);
+        return Optional.ofNullable(coalTypes.get(coalmeta));
+    }
+
+    @Override
+    protected Value<CoalType> constructValue(CoalType actualValue) {
+        return new SpongeValue<>(Keys.COAL_TYPE, CoalTypes.COAL, actualValue);
     }
 
     @Override
@@ -72,7 +80,8 @@ public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType,
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

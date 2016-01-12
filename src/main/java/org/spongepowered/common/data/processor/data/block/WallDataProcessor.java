@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeWallData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Value<WallType>, WallData, ImmutableWallData> {
 
@@ -60,4 +61,10 @@ public class WallDataProcessor extends AbstractCatalogDataProcessor<WallType, Va
     protected WallType getDefaultValue() {
         return WallTypes.NORMAL;
     }
+
+    @Override
+    protected Value<WallType> constructValue(WallType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

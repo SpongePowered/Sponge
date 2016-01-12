@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePrismarineData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class PrismarineDataProcessor extends
         AbstractCatalogDataProcessor<PrismarineType, Value<PrismarineType>, PrismarineData, ImmutablePrismarineData> {
@@ -61,4 +62,10 @@ public class PrismarineDataProcessor extends
     protected PrismarineType getDefaultValue() {
         return PrismarineTypes.BRICKS;
     }
+
+    @Override
+    protected Value<PrismarineType> constructValue(PrismarineType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

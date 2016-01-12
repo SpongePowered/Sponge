@@ -30,7 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.SuspendedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSuspendedData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SuspendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, SuspendedData, ImmutableSuspendedData> {
 
@@ -46,6 +46,11 @@ public class SuspendedDataProcessor extends AbstractBlockOnlyDataProcessor<Boole
     @Override
     protected SuspendedData createManipulator() {
         return new SpongeSuspendedData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

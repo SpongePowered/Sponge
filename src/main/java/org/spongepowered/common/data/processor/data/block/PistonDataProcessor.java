@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePistonData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType, Value<PistonType>, PistonData, ImmutablePistonData> {
 
@@ -77,4 +78,10 @@ public class PistonDataProcessor extends AbstractCatalogDataProcessor<PistonType
     protected PistonType getDefaultValue() {
         return PistonTypes.NORMAL;
     }
+
+    @Override
+    protected Value<PistonType> constructValue(PistonType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

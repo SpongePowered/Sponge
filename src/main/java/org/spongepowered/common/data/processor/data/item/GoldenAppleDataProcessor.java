@@ -26,23 +26,25 @@ package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableGoldenAppleData;
 import org.spongepowered.api.data.manipulator.mutable.item.GoldenAppleData;
 import org.spongepowered.api.data.type.GoldenApple;
 import org.spongepowered.api.data.type.GoldenApples;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGoldenAppleData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.GoldenAppleUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
+public class GoldenAppleDataProcessor
+        extends AbstractItemSingleDataProcessor<GoldenApple, Value<GoldenApple>, GoldenAppleData, ImmutableGoldenAppleData> {
 
     public GoldenAppleDataProcessor() {
         super(input -> input.getItem().equals(Items.golden_apple), Keys.GOLDEN_APPLE_TYPE);
@@ -65,12 +67,18 @@ public class GoldenAppleDataProcessor extends AbstractItemSingleDataProcessor<Go
     }
 
     @Override
+    protected Value<GoldenApple> constructValue(GoldenApple actualValue) {
+        return new SpongeValue<>(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, actualValue);
+    }
+
+    @Override
     protected ImmutableValue<GoldenApple> constructImmutableValue(GoldenApple value) {
         return ImmutableSpongeValue.cachedOf(Keys.GOLDEN_APPLE_TYPE, GoldenApples.GOLDEN_APPLE, value);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

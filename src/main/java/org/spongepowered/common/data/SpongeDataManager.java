@@ -35,6 +35,7 @@ import com.google.common.collect.Maps;
 import com.google.common.reflect.TypeToken;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.ImmutableDataBuilder;
@@ -45,10 +46,10 @@ import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.persistence.DataBuilder;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.util.persistence.DataContentUpdater;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
@@ -346,6 +347,12 @@ public final class SpongeDataManager implements DataManager {
         immutableProcessorList.add(processor);
     }
 
+    public <E, V extends BaseValue<E>, T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> void
+    registerDualProcessor(Class<T> manipulatorClass, Class<? extends T> implClass, Class<I> immutableDataManipulator,
+                                 Class<? extends I> implImClass, AbstractSingleDataSingleTargetProcessor<?, E, V, T, I> processor) {
+        registerDataProcessorAndImpl(manipulatorClass, implClass, immutableDataManipulator, implImClass, processor);
+        registerValueProcessor(processor.getKey(), processor);
+    }
     /**
      * Gets the {@link DataProcessorDelegate} for the provided
      * {@link DataManipulator} class.

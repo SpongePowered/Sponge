@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDoublePlantData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class DoublePlantDataProcessor extends
         AbstractCatalogDataProcessor<DoublePlantType, Value<DoublePlantType>, DoublePlantData, ImmutableDoublePlantData> {
@@ -61,4 +62,10 @@ public class DoublePlantDataProcessor extends
     protected DoublePlantType getFromMeta(int meta) {
         return (DoublePlantType) (Object) BlockDoublePlant.EnumPlantType.byMetadata(meta);
     }
+
+    @Override
+    protected Value<DoublePlantType> constructValue(DoublePlantType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

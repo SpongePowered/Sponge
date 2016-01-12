@@ -25,20 +25,22 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntityZombie;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class VillagerZombieProcessor extends AbstractEntitySingleDataProcessor<EntityZombie, Boolean, Value<Boolean>, VillagerZombieData, ImmutableVillagerZombieData> {
+public class VillagerZombieProcessor
+        extends AbstractEntitySingleDataProcessor<EntityZombie, Boolean, Value<Boolean>, VillagerZombieData, ImmutableVillagerZombieData> {
 
     public VillagerZombieProcessor() {
         super(EntityZombie.class, Keys.IS_VILLAGER_ZOMBIE);
@@ -56,6 +58,11 @@ public class VillagerZombieProcessor extends AbstractEntitySingleDataProcessor<E
     }
 
     @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.IS_VILLAGER_ZOMBIE, false, actualValue);
+    }
+
+    @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_VILLAGER_ZOMBIE, false, value);
     }
@@ -66,7 +73,8 @@ public class VillagerZombieProcessor extends AbstractEntitySingleDataProcessor<E
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.google.common.base.Preconditions;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.entity.EntityLivingBase;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallDistanceData;
 import org.spongepowered.api.data.manipulator.mutable.entity.FallDistanceData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFallDistanceData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
@@ -39,8 +40,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class FallDistanceDataProcessor extends AbstractEntitySingleDataProcessor<EntityLivingBase, Float, MutableBoundedValue<Float>,
-        FallDistanceData, ImmutableFallDistanceData> {
+public class FallDistanceDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityLivingBase, Float, MutableBoundedValue<Float>, FallDistanceData, ImmutableFallDistanceData> {
 
     public FallDistanceDataProcessor() {
         super(EntityLivingBase.class, Keys.FALL_DISTANCE);
@@ -48,7 +49,7 @@ public class FallDistanceDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected boolean set(EntityLivingBase entity, Float value) {
-        entity.fallDistance = Preconditions.checkNotNull(value);
+        entity.fallDistance = checkNotNull(value);
         return true;
     }
 
@@ -58,14 +59,18 @@ public class FallDistanceDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    protected ImmutableBoundedValue<Float> constructImmutableValue(Float value) {
-        return SpongeValueFactory.boundedBuilder(Keys.FALL_DISTANCE)
+    protected MutableBoundedValue<Float> constructValue(Float value) {
+        return SpongeValueFactory.boundedBuilder(this.key)
                 .actualValue(value)
                 .defaultValue(0F)
                 .minimum(0F)
                 .maximum(Float.MAX_VALUE)
-                .build()
-                .asImmutable();
+                .build();
+    }
+
+    @Override
+    protected ImmutableValue<Float> constructImmutableValue(Float value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override
@@ -74,7 +79,8 @@ public class FallDistanceDataProcessor extends AbstractEntitySingleDataProcessor
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

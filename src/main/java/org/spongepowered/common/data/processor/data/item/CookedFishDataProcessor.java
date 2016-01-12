@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import com.google.common.collect.Iterables;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemFishFood;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableCookedFishData;
 import org.spongepowered.api.data.manipulator.mutable.item.CookedFishData;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.CookedFishes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.SpongeImpl;
@@ -41,6 +41,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeCookedFishDa
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.type.SpongeCookedFish;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -63,7 +64,13 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
 
     @Override
     protected Optional<CookedFish> getVal(ItemStack itemStack) {
-        return Optional.of(Iterables.get(SpongeImpl.getRegistry().getAllOf(CookedFish.class), itemStack.getMetadata()));
+        final ItemFishFood.FishType fishType = ItemFishFood.FishType.byMetadata(itemStack.getMetadata());
+        return SpongeImpl.getRegistry().getType(CookedFish.class, fishType.name());
+    }
+
+    @Override
+    protected Value<CookedFish> constructValue(CookedFish actualValue) {
+        return new SpongeValue<>(Keys.COOKED_FISH, CookedFishes.COD, actualValue);
     }
 
     @Override
@@ -72,7 +79,8 @@ public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<Coo
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

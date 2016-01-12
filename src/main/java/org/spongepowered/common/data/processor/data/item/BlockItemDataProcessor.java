@@ -29,17 +29,18 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBlockItemData;
 import org.spongepowered.api.data.manipulator.mutable.item.BlockItemData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBlockItemData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
@@ -71,6 +72,11 @@ public class BlockItemDataProcessor extends AbstractItemSingleDataProcessor<Bloc
         final Block block = ((ItemBlock) stack.getItem()).getBlock();
         final int blockMeta = stack.getItem().getMetadata(stack.getItemDamage());
         return Optional.of((BlockState) block.getStateFromMeta(blockMeta));
+    }
+
+    @Override
+    protected Value<BlockState> constructValue(BlockState actualValue) {
+        return new SpongeValue<>(Keys.ITEM_BLOCKSTATE, DataConstants.Catalog.DEFAULT_BLOCK_STATE, actualValue);
     }
 
     @Override

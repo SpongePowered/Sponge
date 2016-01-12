@@ -30,7 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.PoweredData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongePoweredData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class PoweredDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, PoweredData, ImmutablePoweredData> {
 
@@ -46,6 +46,11 @@ public class PoweredDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean
     @Override
     protected PoweredData createManipulator() {
         return new SpongePoweredData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

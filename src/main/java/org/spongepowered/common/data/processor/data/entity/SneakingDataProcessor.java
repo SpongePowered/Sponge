@@ -25,16 +25,17 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSneakingData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SneakingData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSneakingData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -61,12 +62,18 @@ public class SneakingDataProcessor extends AbstractEntitySingleDataProcessor<Ent
     }
 
     @Override
+    protected Value<Boolean> constructValue(Boolean sneaking) {
+        return new SpongeValue<>(Keys.IS_SNEAKING, false, sneaking);
+    }
+
+    @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
         return ImmutableSpongeValue.cachedOf(Keys.IS_SNEAKING, false, value);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

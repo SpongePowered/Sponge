@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStoneData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class StoneDataProcessor extends AbstractCatalogDataProcessor<StoneType, Value<StoneType>, StoneData, ImmutableStoneData> {
 
@@ -60,4 +61,10 @@ public class StoneDataProcessor extends AbstractCatalogDataProcessor<StoneType, 
     protected StoneType getDefaultValue() {
         return StoneTypes.STONE;
     }
+
+    @Override
+    protected Value<StoneType> constructValue(StoneType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

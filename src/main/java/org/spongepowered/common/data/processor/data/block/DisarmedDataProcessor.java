@@ -30,9 +30,9 @@ import org.spongepowered.api.data.manipulator.mutable.block.DisarmedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisarmedData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-
-public class DisarmedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, DisarmedData, ImmutableDisarmedData>{
+public class DisarmedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, DisarmedData, ImmutableDisarmedData> {
 
     public DisarmedDataProcessor() {
         super(Keys.DISARMED);
@@ -46,6 +46,11 @@ public class DisarmedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     @Override
     protected DisarmedData createManipulator() {
         return new SpongeDisarmedData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

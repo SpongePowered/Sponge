@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSandData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Value<SandType>, SandData, ImmutableSandData> {
 
@@ -60,4 +61,10 @@ public class SandDataProcessor extends AbstractCatalogDataProcessor<SandType, Va
     protected SandType getDefaultValue() {
         return SandTypes.NORMAL;
     }
+
+    @Override
+    protected Value<SandType> constructValue(SandType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

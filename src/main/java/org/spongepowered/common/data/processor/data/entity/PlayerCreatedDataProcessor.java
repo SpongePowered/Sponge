@@ -25,21 +25,22 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntityIronGolem;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutablePlayerCreatedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.PlayerCreatedData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePlayerCreatedData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class PlayerCreatedDataProcessor extends AbstractEntitySingleDataProcessor<EntityIronGolem, Boolean, Value<Boolean>, PlayerCreatedData,
-        ImmutablePlayerCreatedData> {
+public class PlayerCreatedDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityIronGolem, Boolean, Value<Boolean>, PlayerCreatedData, ImmutablePlayerCreatedData> {
 
     public PlayerCreatedDataProcessor() {
         super(EntityIronGolem.class, Keys.PLAYER_CREATED);
@@ -57,8 +58,13 @@ public class PlayerCreatedDataProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
+    protected Value<Boolean> constructValue(Boolean value) {
+        return new SpongeValue<>(this.key, false, value);
+    }
+
+    @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.PLAYER_CREATED, false, value);
+        return ImmutableSpongeValue.cachedOf(this.key, false, value);
     }
 
     @Override
@@ -67,7 +73,8 @@ public class PlayerCreatedDataProcessor extends AbstractEntitySingleDataProcesso
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

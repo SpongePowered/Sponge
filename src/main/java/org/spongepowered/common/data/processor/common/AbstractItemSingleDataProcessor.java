@@ -33,9 +33,8 @@ import org.spongepowered.api.data.value.BaseValue;
 
 import java.util.function.Predicate;
 
-
 public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    extends AbstractSingleDataSingleTargetProcessor<ItemStack, T, V, M, I> {
+        extends AbstractSingleDataSingleTargetProcessor<ItemStack, T, V, M, I> {
 
     private final Predicate<ItemStack> predicate;
 
@@ -44,10 +43,14 @@ public abstract class AbstractItemSingleDataProcessor<T, V extends BaseValue<T>,
         this.predicate = predicate;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public boolean supports(DataHolder dataHolder) {
+    public final boolean supports(DataHolder dataHolder) {
         return dataHolder instanceof ItemStack && this.predicate.test((ItemStack) dataHolder);
+    }
+
+    @Override
+    protected final boolean supports(ItemStack itemStack) {
+        return this.predicate.test(itemStack);
     }
 
 }

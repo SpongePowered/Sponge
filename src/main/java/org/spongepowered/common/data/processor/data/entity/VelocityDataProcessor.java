@@ -28,28 +28,29 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVelocityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VelocityData;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVelocityData;
-import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
-import java.util.Map;
 import java.util.Optional;
 
-public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, VelocityData, ImmutableVelocityData> {
+public class VelocityDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Vector3d, Value<Vector3d>, VelocityData, ImmutableVelocityData> {
 
     public VelocityDataProcessor() {
-        super(Entity.class);
+        super(Entity.class, Keys.VELOCITY);
     }
 
     @Override
@@ -58,19 +59,14 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
     }
 
     @Override
-    protected boolean doesDataExist(Entity entity) {
-        return entity.isEntityAlive();
-    }
-
-    @Override
-    protected boolean set(Entity entity, Map<Key<?>, Object> keyValues) {
-        ((IMixinEntity) entity).setImplVelocity((Vector3d) keyValues.get(Keys.VELOCITY));
+    protected boolean set(Entity entity, Vector3d value) {
+        ((IMixinEntity) entity).setImplVelocity(value);
         return true;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(Entity entity) {
-        return ImmutableMap.<Key<?>, Object>of(Keys.VELOCITY, ((IMixinEntity) entity).getVelocity());
+    protected Optional<Vector3d> getVal(Entity entity) {
+        return Optional.of(((IMixinEntity) entity).getVelocity());
     }
 
     @Override
@@ -84,8 +80,18 @@ public class VelocityDataProcessor extends AbstractEntityDataProcessor<Entity, V
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
+    }
+
+    @Override
+    protected Value<Vector3d> constructValue(Vector3d actualValue) {
+        return new SpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, actualValue);
+    }
+
+    @Override
+    protected ImmutableValue<Vector3d> constructImmutableValue(Vector3d value) {
+        return new ImmutableSpongeValue<>(Keys.VELOCITY, Vector3d.ZERO, value);
     }
 
 }

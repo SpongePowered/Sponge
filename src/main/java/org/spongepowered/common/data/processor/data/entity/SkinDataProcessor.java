@@ -32,7 +32,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkinData;
-import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class SkinDataProcessor extends
-        AbstractSingleTargetDualProcessor<EntityHuman, UUID, Value<UUID>, SkinData, ImmutableSkinData> {
+        AbstractEntitySingleDataProcessor<EntityHuman, UUID, Value<UUID>, SkinData, ImmutableSkinData> {
 
     public SkinDataProcessor() {
         super(EntityHuman.class, Keys.SKIN_UNIQUE_ID);
