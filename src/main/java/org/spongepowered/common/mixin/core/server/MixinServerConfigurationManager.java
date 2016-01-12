@@ -227,7 +227,7 @@ public abstract class MixinServerConfigurationManager {
             s1 = netManager.getRemoteAddress().toString();
         }
 
-        logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+        logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
@@ -248,7 +248,7 @@ public abstract class MixinServerConfigurationManager {
 
         handler.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
                 .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
-                .getTerrainType(), worldserver.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
+                .getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
         handler.sendPacket(new S3FPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
                 .getServerInstance().getServerModName())));
         handler.sendPacket(new S41PacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
@@ -287,7 +287,7 @@ public abstract class MixinServerConfigurationManager {
 
         ChatComponentTranslation chatcomponenttranslation;
 
-        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
+        if (!playerIn.getName().equalsIgnoreCase(s))
         {
             chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
         }
@@ -481,7 +481,7 @@ public abstract class MixinServerConfigurationManager {
         WorldBorder worldborder = worldIn.getWorldBorder();
         playerIn.playerNetServerHandler.sendPacket(new S44PacketWorldBorder(worldborder, S44PacketWorldBorder.Action.INITIALIZE));
         playerIn.playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(worldIn.getTotalWorldTime(), worldIn.getWorldTime(), worldIn
-                .getGameRules().getGameRuleBooleanValue("doDaylightCycle")));
+                .getGameRules().getBoolean("doDaylightCycle")));
 
         if (worldIn.isRaining()) {
             playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0.0F));

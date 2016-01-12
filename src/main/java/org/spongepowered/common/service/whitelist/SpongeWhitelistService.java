@@ -57,7 +57,7 @@ public class SpongeWhitelistService implements WhitelistService {
         UserListWhitelist whitelist = this.getWhitelist();
 
         whitelist.removeExpired();
-        return whitelist.getValues().containsKey(whitelist.getObjectKey(profile));
+        return whitelist.getValues().containsKey(whitelist.getObjectKey((com.mojang.authlib.GameProfile) profile));
     }
 
     @Override

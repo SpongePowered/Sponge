@@ -88,7 +88,7 @@ public final class SpongeParticleHelper {
             int data = 0;
 
             if (internal == EnumParticleTypes.ITEM_CRACK) {
-                id = Item.itemRegistry.getIDForObject(itemType);
+                id = Item.itemRegistry.getIDForObject((Item) itemType);
                 data = ((net.minecraft.item.ItemStack) item).getItemDamage();
             }
 

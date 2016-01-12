@@ -39,6 +39,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -66,14 +67,14 @@ public class SpongeBanService implements BanService {
     @Override
     public Collection<Ban.Profile> getProfileBans() {
         this.getUserBanList().removeExpired();
-        return new ArrayList<>(this.getUserBanList().getValues().values());
+        return new ArrayList<>((List) this.getUserBanList().getValues().values());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Ban.Ip> getIpBans() {
         this.getIPBanList().removeExpired();
-        return new ArrayList<>(this.getIPBanList().getValues().values());
+        return new ArrayList<>((List) this.getIPBanList().getValues().values());
     }
 
     @Override
@@ -81,7 +82,7 @@ public class SpongeBanService implements BanService {
         UserListBans bans = this.getUserBanList();
 
         bans.removeExpired();
-        return Optional.ofNullable((Ban.Profile) bans.getValues().get(bans.getObjectKey(profile)));
+        return Optional.ofNullable((Ban.Profile) bans.getValues().get(bans.getObjectKey((com.mojang.authlib.GameProfile) profile)));
     }
 
     @Override
@@ -97,7 +98,7 @@ public class SpongeBanService implements BanService {
         UserListBans bans = this.getUserBanList();
 
         bans.removeExpired();
-        return bans.values.containsKey(bans.getObjectKey(profile));
+        return bans.values.containsKey(bans.getObjectKey((com.mojang.authlib.GameProfile) profile));
     }
 
     @Override

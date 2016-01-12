@@ -51,7 +51,7 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public String getCommandSenderName() {
+    public String getName() {
         return this.source.getName();
     }
 

@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
+import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -44,8 +46,8 @@ public class MushroomTypeRegistryModule implements CatalogRegistryModule<Mushroo
 
     @RegisterCatalog(MushroomTypes.class)
     private final Map<String, MushroomType> mushroomTypeMap = ImmutableMap.<String, MushroomType>builder()
-        .put("brown", new SpongeMushroomType("brown", (PopulatorObject) new WorldGenBigMushroom(0)))
-        .put("red", new SpongeMushroomType("red", (PopulatorObject) new WorldGenBigMushroom(1)))
+        .put("brown", new SpongeMushroomType("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom)))
+        .put("red", new SpongeMushroomType("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom)))
         .build();
 
     @Override

@@ -70,7 +70,7 @@ public abstract class MixinBlockLog extends MixinBlock {
     }
 
     protected ImmutableLogAxisData getLogAxisData(IBlockState blockState) {
-        final LogAxis logAxis = (LogAxis) blockState.getValue(BlockLog.LOG_AXIS);
+        final LogAxis logAxis = (LogAxis) (Object) blockState.getValue(BlockLog.LOG_AXIS);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLogAxisData.class, logAxis);
     }
 

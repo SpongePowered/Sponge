@@ -58,8 +58,6 @@ import javax.annotation.Nullable;
 @Mixin(WorldGenBigMushroom.class)
 public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator implements BigMushroom, PopulatorObject {
 
-    @Shadow public int mushroomType;
-
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 

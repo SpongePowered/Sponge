@@ -73,9 +73,9 @@ public class SpongeScore implements Score {
             int j = score.scorePoints;
             score.scorePoints = this.score;
 
-            if (j != this.score || score.field_178818_g)
+            if (j != this.score || score.forceUpdate)
             {
-                score.field_178818_g = false;
+                score.forceUpdate = false;
                 score.getScoreScoreboard().func_96536_a(score);
             }
         }

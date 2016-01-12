@@ -216,14 +216,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
                             if (tileentity instanceof TileEntityCommandBlock) {
                                 commandblocklogic = ((TileEntityCommandBlock) tileentity).getCommandBlockLogic();
-                                permissionCheck = "minecraft.commandblock.edit.block." + commandblocklogic.getCommandSenderName(); // Sponge
+                                permissionCheck = "minecraft.commandblock.edit.block." + commandblocklogic.getName(); // Sponge
                             }
                         } else if (b0 == 1) {
                             Entity entity = this.playerEntity.worldObj.getEntityByID(packetbuffer.readInt());
 
                             if (entity instanceof EntityMinecartCommandBlock) {
                                 commandblocklogic = ((EntityMinecartCommandBlock) entity).getCommandBlockLogic();
-                                permissionCheck = "minecraft.commandblock.edit.minecart." + commandblocklogic.getCommandSenderName(); // Sponge
+                                permissionCheck = "minecraft.commandblock.edit.minecart." + commandblocklogic.getName(); // Sponge
                             }
                             // Sponge begin
                         } else {

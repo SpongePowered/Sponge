@@ -84,7 +84,7 @@ public abstract class MixinBlockWall extends MixinBlock {
     }
 
     private ImmutableWallData getWallTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) blockState.getValue(BlockWall.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeWallData.class, (WallType) (Object) blockState.getValue(BlockWall.VARIANT));
     }
 
     @Override

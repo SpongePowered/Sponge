@@ -22,38 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.gen.populators;
+package org.spongepowered.common.interfaces.command;
 
-import java.util.Random;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 
-import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.asm.mixin.Mixin;
-
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.gen.feature.WorldGenHugeTrees;
-import net.minecraft.world.gen.feature.WorldGenMegaJungle;
-
-@Mixin(WorldGenMegaJungle.class)
-public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implements PopulatorObject {
-
-    public MixinWorldGenMegaJungle(boolean a, int b, int c, IBlockState d, IBlockState e) {
-        super(a, b, c, d, e);
-    }
+public interface IMixinCommandSourceName extends IMixinCommandSource, CommandSource {
 
     @Override
-    public boolean canPlaceAt(World world, int x, int y, int z) {
-        return this.func_175929_a((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
-    }
-
-    @Override
-    public void placeObject(World world, Random random, int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
-        if (generate((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
-        }
+    default String getName() {
+        return asICommandSender().getName();
     }
 
 }

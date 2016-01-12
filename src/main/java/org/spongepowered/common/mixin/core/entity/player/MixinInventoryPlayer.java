@@ -50,43 +50,43 @@ import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
-public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter, HumanInventory, IInventory {
-    
+public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter, HumanInventory {
+
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
     protected HumanInventoryLens lens;
-    
+
     private Humanoid carrier;
     private HotbarAdapter hotbar;
-    
+
     @Inject(method = "<init>*", at = @At("RETURN"), remap = false)
     private void onConstructed(EntityPlayer playerIn, CallbackInfo ci) {
-        this.inventory = new DefaultInventoryFabric(this);
+        this.inventory = new DefaultInventoryFabric((IInventory) this);
         this.slots = new SlotCollection.Builder().add(36).add(4, EquipmentSlotAdapter.class).build();
         this.lens = new HumanInventoryLens(this, this.slots);
         this.carrier = playerIn instanceof Humanoid ? (Humanoid) playerIn : null;
     }
-    
+
     @Override
     public Lens<IInventory, net.minecraft.item.ItemStack> getRootLens() {
         return this.lens;
     }
-    
+
     @Override
     public Fabric<IInventory> getInventory() {
         return this.inventory;
     }
-    
+
     @Override
     public Inventory getChild(Lens<IInventory, ItemStack> lens) {
         return null;
     }
-    
+
     @Override
     public Optional<Humanoid> getCarrier() {
         return Optional.ofNullable(this.carrier);
     }
-    
+
     @Override
     public Hotbar getHotbar() {
         if (this.hotbar == null) {
@@ -98,7 +98,7 @@ public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter,
     @Override
     public void notify(Object source, InventoryEventArgs eventArgs) {
     }
-    
+
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;

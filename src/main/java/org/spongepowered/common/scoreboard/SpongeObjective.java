@@ -83,7 +83,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayName() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.displayName = SpongeTexts.toLegacy(this.displayName);
-            objective.theScoreboard.func_96532_b(objective); // onObjectiveModified
+            objective.theScoreboard.onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -107,7 +107,7 @@ public class SpongeObjective implements Objective {
     private void updateDisplayMode() {
         for (ScoreObjective objective: this.objectives.values()) {
             objective.renderType = (IScoreObjectiveCriteria.EnumRenderType) (Object) this.displayMode;
-            objective.theScoreboard.func_96532_b(objective); // onObjectiveModified
+            objective.theScoreboard.onObjectiveDisplayNameChanged(objective);
         }
     }
 
@@ -159,7 +159,7 @@ public class SpongeObjective implements Objective {
         scoreMap.put(score.theScoreObjective, score);
 
         // Trigger refresh
-        score.field_178818_g = true;
+        score.forceUpdate = true;
         score.setScorePoints(score.scorePoints);
     }
 

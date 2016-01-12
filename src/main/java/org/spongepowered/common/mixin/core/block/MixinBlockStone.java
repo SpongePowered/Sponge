@@ -72,6 +72,6 @@ public abstract class MixinBlockStone extends MixinBlock {
     }
 
     private ImmutableStoneData getStoneTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (StoneType) blockState.getValue(BlockStone.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStoneData.class, (StoneType) (Object) blockState.getValue(BlockStone.VARIANT));
     }
 }

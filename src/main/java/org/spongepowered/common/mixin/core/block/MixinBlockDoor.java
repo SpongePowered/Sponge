@@ -106,7 +106,7 @@ public abstract class MixinBlockDoor extends MixinBlock {
     }
 
     private ImmutableHingeData getHingeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) blockState.getValue(BlockDoor.HINGE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeHingeData.class, (Hinge) (Object) blockState.getValue(BlockDoor.HINGE));
     }
 
     private ImmutableOpenData getIsOpenFor(IBlockState blockState) {

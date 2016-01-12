@@ -113,13 +113,13 @@ public abstract class MixinBlockRailBase extends MixinBlock {
     private ImmutableRailDirectionData getRailDirectionFor(IBlockState blockState) {
         if (blockState.getBlock() instanceof BlockRail) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    (RailDirection) blockState.getValue(BlockRail.SHAPE));
+                    (RailDirection) (Object) blockState.getValue(BlockRail.SHAPE));
         } else if (blockState.getBlock() instanceof BlockRailPowered) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    (RailDirection) blockState.getValue(BlockRailPowered.SHAPE));
+                    (RailDirection) (Object) blockState.getValue(BlockRailPowered.SHAPE));
         } else if (blockState.getBlock() instanceof BlockRailDetector) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
-                    (RailDirection) blockState.getValue(BlockRailDetector.SHAPE));
+                    (RailDirection) (Object) blockState.getValue(BlockRailDetector.SHAPE));
         }
         return null;
     }

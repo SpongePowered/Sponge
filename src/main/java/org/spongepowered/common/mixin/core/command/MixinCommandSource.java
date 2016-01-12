@@ -37,21 +37,16 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.interfaces.command.IMixinCommandSourceName;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class, MinecraftServer.class, RConConsoleSource.class},
         targets = IMixinCommandSender.SIGN_CLICK_SENDER)
-public abstract class MixinCommandSource implements IMixinCommandSource, CommandSource {
+public abstract class MixinCommandSource implements IMixinCommandSourceName {
 
     private MessageChannel channel = MessageChannel.TO_ALL;
-
-    @Override
-    public String getName() {
-        return this.asICommandSender().getCommandSenderName();
-    }
 
     @Override
     public void sendMessage(Text message) {

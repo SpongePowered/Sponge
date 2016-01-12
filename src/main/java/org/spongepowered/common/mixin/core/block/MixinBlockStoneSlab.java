@@ -126,9 +126,9 @@ public abstract class MixinBlockStoneSlab extends MixinBlock {
     private ImmutableSlabData getSlabTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSlabData.class,
                 blockState.getBlock() instanceof BlockStoneSlab
-                        ? (SlabType) blockState.getValue(BlockStoneSlab.VARIANT)
+                        ? (SlabType) (Object) blockState.getValue(BlockStoneSlab.VARIANT)
                         : blockState.getBlock() instanceof BlockStoneSlabNew
-                                ? (SlabType) blockState.getValue(BlockStoneSlabNew.VARIANT)
+                                ? (SlabType) (Object) blockState.getValue(BlockStoneSlabNew.VARIANT)
                                 : SlabTypes.COBBLESTONE);
     }
 

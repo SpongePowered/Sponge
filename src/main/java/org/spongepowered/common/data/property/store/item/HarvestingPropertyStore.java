@@ -45,7 +45,7 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
     protected Optional<HarvestingProperty> getFor(ItemStack itemStack) {
         final Item item = itemStack.getItem();
         if (item instanceof ItemTool) {
-            final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set<BlockType>) ((ItemTool) item).effectiveBlocks);
+            final ImmutableSet<BlockType> blocks = ImmutableSet.copyOf((Set) ((ItemTool) item).effectiveBlocks);
             return Optional.of(new HarvestingProperty(blocks));
         } else {
             final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);

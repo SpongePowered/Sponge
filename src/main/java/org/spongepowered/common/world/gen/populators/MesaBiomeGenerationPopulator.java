@@ -83,13 +83,14 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
             int xo = buffer.getBlockMin().getX() + x;
             for (int z = 0; z < 16; z++) {
                 int zo = buffer.getBlockMin().getZ() + z;
-                performOnColumn(rand, buffer, xo, zo, this.stoneNoise[x + z * 16]);
+                performOnColumn(rand, buffer, world, xo, zo, this.stoneNoise[x + z * 16]);
             }
         }
 
     }
 
-    public void performOnColumn(Random p_180622_2_, MutableBlockVolume p_180622_3_, int p_180622_4_, int p_180622_5_, double p_180622_6_) {
+    public void performOnColumn(Random p_180622_2_, MutableBlockVolume p_180622_3_, World world, int p_180622_4_, int p_180622_5_,
+            double p_180622_6_) {
         double d5 = 0.0D;
         int k;
         int l;
@@ -115,6 +116,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
 
         k = p_180622_5_;
         l = p_180622_4_;
+        int seaLevel = ((net.minecraft.world.World) world).getSeaLevel();
         IBlockState iblockstate = Blocks.stained_hardened_clay.getDefaultState();
         IBlockState iblockstate3 = Blocks.stained_hardened_clay.getDefaultState();
         int i1 = (int) (p_180622_6_ / 3.0D + 3.0D + p_180622_2_.nextDouble() * 0.25D);
@@ -143,18 +145,18 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                         if (i1 <= 0) {
                             iblockstate = null;
                             iblockstate3 = Blocks.stone.getDefaultState();
-                        } else if (k1 >= 59 && k1 <= 64) {
+                        } else if (k1 >= seaLevel - 4 && k1 <= seaLevel + 1) {
                             iblockstate = Blocks.stained_hardened_clay.getDefaultState();
                             iblockstate3 = Blocks.stained_hardened_clay.getDefaultState();
                         }
 
-                        if (k1 < 63 && (iblockstate == null || iblockstate.getBlock().getMaterial() == Material.air)) {
+                        if (k1 < seaLevel && (iblockstate == null || iblockstate.getBlock().getMaterial() == Material.air)) {
                             iblockstate = Blocks.water.getDefaultState();
                         }
 
-                        j1 = i1 + Math.max(0, k1 - 63);
+                        j1 = i1 + Math.max(0, k1 - seaLevel);
 
-                        if (k1 >= 62) {
+                        if (k1 >= seaLevel - 1) {
                             if (this.hasTrees && k1 > 86 + i1 * 2) {
                                 if (flag1) {
                                     p_180622_3_.setBlock(l, k1, k,
@@ -163,7 +165,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                                 } else {
                                     p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.grass.getDefaultState());
                                 }
-                            } else if (k1 > 66 + i1) {
+                            } else if (k1 > seaLevel + 3 + i1) {
                                 if (k1 >= 64 && k1 <= 127) {
                                     if (flag1) {
                                         iblockstate2 = Blocks.hardened_clay.getDefaultState();
@@ -193,13 +195,8 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                         --j1;
 
                         if (flag2) {
-                            p_180622_3_
-                                    .setBlock(
-                                            l,
-                                            k1,
-                                            k,
-                                            (BlockState) Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR,
-                                                    EnumDyeColor.ORANGE));
+                            IBlockState clay = Blocks.stained_hardened_clay.getDefaultState().withProperty(BlockColored.COLOR, EnumDyeColor.ORANGE);
+                            p_180622_3_ .setBlock(l, k1, k, (BlockState) clay);
                         } else {
                             iblockstate2 = this.func_180629_a(p_180622_4_, k1, p_180622_5_);
                             p_180622_3_.setBlock(l, k1, k, (BlockState) iblockstate2);

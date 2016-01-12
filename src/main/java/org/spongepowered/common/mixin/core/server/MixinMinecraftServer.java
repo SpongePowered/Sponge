@@ -215,10 +215,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Player> getOnlinePlayers() {
-        if (getConfigurationManager() == null || getConfigurationManager().playerEntityList == null) {
+        if (getConfigurationManager() == null || getConfigurationManager().getPlayerList() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List<Player>) getConfigurationManager().playerEntityList);
+        return ImmutableList.copyOf((List) getConfigurationManager().getPlayerList());
     }
 
     @Override
@@ -980,8 +980,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir, ArrayList arraylist, String astring[], String s1, String astring1[], int i) {
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender), ImmutableList.copyOf(arraylist), arraylist, input);
+    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
+            List<String> list, String astring[], String s) {
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
+                ImmutableList.copyOf(list), list, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
             cir.setReturnValue(new ArrayList<>());

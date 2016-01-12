@@ -38,7 +38,7 @@ public class MixinItemMap extends ItemMapBase {
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "loadItemData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/WorldSavedData;"))
-    private WorldSavedData loadOverworldMapData(World worldIn, Class<?> clazz, String dataId) {
+    private WorldSavedData loadOverworldMapData(World worldIn, Class <? extends WorldSavedData> clazz, String dataId) {
         return DimensionManager.getWorldFromDimId(0).loadItemData(clazz, dataId);
     }
 

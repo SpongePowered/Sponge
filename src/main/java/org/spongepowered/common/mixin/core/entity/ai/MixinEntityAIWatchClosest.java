@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.entity.ai.EntityAIBase;
 import net.minecraft.entity.ai.EntityAIWatchClosest;
 import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -95,7 +95,8 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
         net.minecraft.entity.Entity entity1 = null;
         double d0 = Double.MAX_VALUE;
 
-        for (net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass, IEntitySelector.NOT_SPECTATING)) {
+        for (net.minecraft.entity.Entity foundEntity: (List< net.minecraft.entity.Entity>) world.getEntities(this.watchedClass,
+                EntitySelectors.NOT_SPECTATING)) {
             if (foundEntity.getEntityBoundingBox().intersectsWith(aabb) && foundEntity != entity) {
                 double d1 = entity.getDistanceSqToEntity(foundEntity);
 

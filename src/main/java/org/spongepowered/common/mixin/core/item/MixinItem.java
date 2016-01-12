@@ -69,7 +69,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
         if ((Object) this == ItemTypeRegistryModule.NONE_ITEM) {
             return "NONE";
         }
-        return Item.itemRegistry.getNameForObject(this).toString();
+        return Item.itemRegistry.getNameForObject((Item) (Object) this).toString();
     }
 
     @Override
@@ -119,7 +119,7 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {
         return ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(manipulatorClass).get();
     }
-    
+
     @Override
     public ItemStack createDictionaryStack(int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);

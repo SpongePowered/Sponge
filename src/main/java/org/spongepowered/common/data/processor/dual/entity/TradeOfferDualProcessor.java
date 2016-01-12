@@ -26,6 +26,7 @@ package org.spongepowered.common.data.processor.dual.entity;
 
 import com.google.common.collect.Lists;
 import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -60,7 +61,7 @@ public class TradeOfferDualProcessor
     public static MerchantRecipeList toMerchantRecipeList(List<TradeOffer> offers) {
         MerchantRecipeList list = new MerchantRecipeList();
         for (TradeOffer offer : offers) {
-            list.add(offer);
+            list.add((MerchantRecipe) offer);
         }
         return list;
     }
