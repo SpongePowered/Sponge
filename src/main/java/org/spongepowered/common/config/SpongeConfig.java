@@ -321,13 +321,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(
                 value = CONFIG_ENABLED,
                 comment = "Enabling config will override Dimension and Global.")
-        protected boolean configEnabled = true;
+        protected boolean configEnabled = false;
 
         @Setting(value = WORLD_GEN_MODIFIERS, comment = "World Generation Modifiers to apply to the world")
         private List<String> worldModifiers = new ArrayList<>();
 
         public WorldConfig() {
-            this.configEnabled = false;
         }
 
         public boolean isConfigEnabled() {

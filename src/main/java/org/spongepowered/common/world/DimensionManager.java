@@ -153,13 +153,15 @@ public class DimensionManager {
         final WorldServer worldServer = getWorldFromDimId(dim);
         final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
 
-        if (worldConfig.getConfig().isConfigEnabled()) {
-            return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
-        } else {
-            final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
-                    .getDimensionConfig();
-            if (dimensionConfig.getConfig().isConfigEnabled()) {
-                return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();
+        if (dim != 0) {
+            if (worldConfig.getConfig().isConfigEnabled()) {
+                return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
+            } else {
+                final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
+                        .getDimensionConfig();
+                if (dimensionConfig.getConfig().isConfigEnabled()) {
+                    return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();
+                }
             }
         }
 

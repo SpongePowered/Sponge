@@ -362,10 +362,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
             }
 
-            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
-            if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
-                continue;
+            if (dim != 0) {
+                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
+                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD)) {
+                    final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = (SpongeConfig<SpongeConfig.WorldConfig>) activeConfig;
+
+                    if (worldConfig.getConfig().isConfigEnabled() && !worldConfig.getConfig().getWorld().isWorldEnabled()) {
+                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
+                        continue;
+                    }
+                } else if (activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                    final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = (SpongeConfig<SpongeConfig.DimensionConfig>) activeConfig;
+                    if (dimensionConfig.getConfig().isConfigEnabled() && !dimensionConfig.getConfig().getWorld().isWorldEnabled()) {
+                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled in dimension [{}]. World will not be loaded...", worldFolder,
+                                dim, ((Dimension) provider).getName());
+                        continue;
+                    }
+                }
             }
 
             final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
@@ -487,6 +500,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 final int dimensionId = spongeData.getInteger(NbtDataUtil.DIMENSION_ID);
+
+                // Nether and The End are handled above
+                if (dimensionId == -1 || dimensionId == 1) {
+                    continue;
+                }
+
                 String dimensionType = "overworld";
 
                 if (spongeData.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
@@ -545,16 +564,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldServers.remove(DimensionManager.getWorldFromDimId(0));
             worldServers.add(0, overworld);
 
+            final WorldServer the_end = DimensionManager.getWorldFromDimId(1);
+
+            if (worldServers.remove(the_end)) {
+                worldServers.add(1, the_end);
+            }
+
             final WorldServer nether = DimensionManager.getWorldFromDimId(-1);
 
             if (worldServers.remove(nether)) {
                 worldServers.add(1, nether);
-            }
-
-            final WorldServer the_end = DimensionManager.getWorldFromDimId(1);
-
-            if (worldServers.remove(the_end)) {
-                worldServers.add(2, the_end);
             }
         } else {
             worldServers.add(0, overworld);
@@ -634,7 +653,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (worldInfo != null) {
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
-                SpongeImpl.getLogger().error("World {} cannot be loaded as it is disabled.", worldName);
+                SpongeImpl.getLogger().error("World [{}] cannot be loaded as it is disabled.", worldName);
                 return Optional.empty();
             }
 

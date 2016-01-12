@@ -56,10 +56,10 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
 
     private DimensionType dimensionType;
     private DataContainer generatorSettings;
-    private boolean worldEnabled;
-    private boolean loadOnStartup;
-    private boolean keepSpawnLoaded;
-    private boolean pvpEnabled;
+    private boolean worldEnabled = true;
+    private boolean loadOnStartup = true;
+    private boolean keepSpawnLoaded = true;
+    private boolean pvpEnabled = true;
     private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
     // MCP's worldName is actually the generatorOptions
     private String actualWorldName;
