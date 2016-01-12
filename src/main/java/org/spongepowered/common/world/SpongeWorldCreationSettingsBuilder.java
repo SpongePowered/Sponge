@@ -61,7 +61,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     private boolean generateSpawnOnLoad;
     private boolean isMod;
     private boolean pvpEnabled;
-    private int providerId; // internal use only
+    private int dimensionId; // internal use only
     private DataContainer generatorSettings;
     private ImmutableList<WorldGeneratorModifier> generatorModifiers;
 
@@ -218,7 +218,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     }
 
     public SpongeWorldCreationSettingsBuilder dimensionId(int id) {
-        this.providerId = id;
+        this.dimensionId = id;
         return this;
     }
 
@@ -254,7 +254,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.generatorSettings = value.getGeneratorSettings().copy();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
-        this.providerId = ((IMixinWorldSettings) value).getDimensionId();
+        this.dimensionId = ((IMixinWorldSettings) value).getDimensionId();
         this.isMod = ((IMixinWorldSettings) value).getIsMod();
         this.pvpEnabled = value.isPVPEnabled();
         return this;
@@ -275,7 +275,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.generateSpawnOnLoad = true;
         this.generatorSettings = new MemoryDataContainer();
         this.generatorModifiers = ImmutableList.of();
-        this.providerId = 0;
+        this.dimensionId = 0;
         this.isMod = false;
         this.pvpEnabled = true;
         return this;
@@ -295,8 +295,8 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         ((IMixinWorldSettings) (Object) settings).setKeepSpawnLoaded(this.keepSpawnLoaded);
         ((IMixinWorldSettings) (Object) settings).setGenerateSpawnOnLoad(this.generateSpawnOnLoad);
         ((IMixinWorldSettings) (Object) settings).setLoadOnStartup(this.loadOnStartup);
-        if (this.providerId != 0) {
-            ((IMixinWorldSettings) (Object) settings).setDimensionId(this.providerId);
+        if (this.dimensionId != 0) {
+            ((IMixinWorldSettings) (Object) settings).setDimensionId(this.dimensionId);
             ((IMixinWorldSettings) (Object) settings).setIsMod(this.isMod);
         }
         ((IMixinWorldSettings) (Object) settings).setPVPEnabled(this.pvpEnabled);
