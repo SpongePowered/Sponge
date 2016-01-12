@@ -409,6 +409,7 @@
     ],
     "server": [
         "server.MixinDedicatedServer",
+        "server.dedicated.MixinServerHangWatchdog",
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient"
     ]
