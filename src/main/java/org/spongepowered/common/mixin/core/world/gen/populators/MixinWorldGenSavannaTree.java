@@ -78,12 +78,11 @@ public abstract class MixinWorldGenSavannaTree extends MixinWorldGenAbstractTree
 
             if (!flag) {
                 return false;
-            } else {
-                BlockPos down = new BlockPos(x, y - 1, z);
-                Block block = worldIn.getBlockState(down).getBlock();
-                if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
-                    return true;
-                }
+            }
+            BlockPos down = new BlockPos(x, y - 1, z);
+            Block block = worldIn.getBlockState(down).getBlock();
+            if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
+                return true;
             }
         }
         return false;

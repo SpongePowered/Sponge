@@ -22,24 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.ban;
+package org.spongepowered.common.interfaces.command;
 
-import net.minecraft.server.management.UserList;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 
-import java.util.List;
+public interface IMixinCommandSourceName extends IMixinCommandSource, CommandSource {
 
-@Mixin(UserList.class)
-public abstract class MixinUserList {
-
-    @Shadow public abstract String getObjectKey(Object obj);
-
-    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
-    public boolean onAdd(List<Object> list, Object object) {
-        return list.add(this.getObjectKey(object)); // Mojang didn't implement this correctly, so we'll fix it
+    @Override
+    default String getName() {
+        return asICommandSender().getName();
     }
 
 }

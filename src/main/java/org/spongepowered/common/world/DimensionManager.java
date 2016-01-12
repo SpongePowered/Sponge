@@ -45,7 +45,7 @@ import org.apache.logging.log4j.Level;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -150,16 +150,18 @@ public class DimensionManager {
     }
 
     public static boolean shouldLoadSpawn(int dim) {
-        final WorldServer worldServer = getWorldFromDimId(dim);
-        final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
+        if (dim != 0) {
+            final WorldServer worldServer = getWorldFromDimId(dim);
+            final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
 
-        if (worldConfig.getConfig().isConfigEnabled()) {
-            return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
-        } else {
-            final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
-                    .getDimensionConfig();
-            if (dimensionConfig.getConfig().isConfigEnabled()) {
-                return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();
+            if (worldConfig.getConfig().isConfigEnabled()) {
+                return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
+            } else {
+                final SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig = ((IMixinWorldProvider) worldServer.provider)
+                        .getDimensionConfig();
+                if (dimensionConfig.getConfig().isConfigEnabled()) {
+                    return dimensionConfig.getConfig().getWorld().getKeepSpawnLoaded();
+                }
             }
         }
 
@@ -230,9 +232,9 @@ public class DimensionManager {
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().put(id, new long[100]);
             SpongeImpl.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
-            worlds.remove(id);
+            final WorldServer server = worlds.remove(id);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
-            SpongeImpl.getLogger().info("Unloading dimension {}", id);
+            SpongeImpl.getLogger().info("Unloading dimension {} ({})", id, server.getWorldInfo().getWorldName());
         }
 
         ArrayList<WorldServer> tmp = new ArrayList<>();
@@ -320,7 +322,7 @@ public class DimensionManager {
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
         world.addWorldAccess(new WorldManager(mcServer, world));
-        SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent((org.spongepowered.api.world.World) world));
+        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());
         }

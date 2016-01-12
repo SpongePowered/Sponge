@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.server.MinecraftServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
-import org.spongepowered.api.Server;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
@@ -39,7 +36,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Used to migrate Worlds from Bukkit -> Sponge
@@ -63,12 +59,12 @@ public class WorldMigrator {
                     try {
                         worldContainer = Paths.get(worldContainer.toString()).resolve(containerCandidate);
                     } catch (InvalidPathException ipe) {
-                        SpongeImpl.getLogger().warn("Cannot use path [" + containerCandidate + "] specified under [world-container] in bukkit"
-                                + ".yml. Will use [" + worldContainer.toString() + "] instead.", ipe);
+                        SpongeImpl.getLogger().warn("Cannot use path [{}] specified under [world-container] in bukkit"
+                                + ".yml. Will use [{}] instead.", containerCandidate, worldContainer, ipe);
                     }
                 }
             } catch (IOException ioe) {
-                SpongeImpl.getLogger().warn("Cannot load bukkit.yml. Will use [" + worldContainer.toString() + "] instead.", ioe);
+                SpongeImpl.getLogger().warn("Cannot load bukkit.yml. Will use [{}] instead.", worldContainer, ioe);
             }
         }
 
@@ -92,7 +88,7 @@ public class WorldMigrator {
 
                 // Only copy over the old world files if we don't have it already.
                 if (Files.notExists(worldPath)) {
-                    SpongeImpl.getLogger().info("Migrating [" + oldWorldPath.getFileName() + "] from [" + oldWorldContainer + "].");
+                    SpongeImpl.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
                     try {
                         worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
                         com.google.common.io.Files.move(oldWorldPath.toFile(), worldPath.toFile());
@@ -102,21 +98,19 @@ public class WorldMigrator {
                         }
                         migrated.add(worldPath);
                     } catch (IOException ioe) {
-                        SpongeImpl.getLogger().warn("Failed to migrate [" + oldWorldPath.getFileName() + "] from [" + oldWorldContainer + "] to ["
-                                + worldContainer + "].", ioe);
+                        SpongeImpl.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
+                                worldPath, ioe);
                     }
+
+                    SpongeImpl.getLogger().info("Migrated world [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer, worldPath);
                 }
             }
-        } catch (Exception ignore) {
-            ignore.printStackTrace();
-        }
+        } catch (Exception ignore) {}
 
-        for (Path newWorldPath : migrated) {
-            final Optional<World> optWorld = ((Server) MinecraftServer.getServer()).getWorld(newWorldPath.getFileName().toString());
-            // We need to ask the server to load Bukkit plugin worlds
-            if (!optWorld.isPresent()) {
-                DimensionManager.registerDimension(DimensionManager.getNextFreeDimId(), 0);
-            }
+        if (migrated.size() > 0) {
+            SpongeImpl.getLogger().info("[{}] worlds have been migrated back to Vanilla's format.", migrated.size());
+        } else {
+            SpongeImpl.getLogger().info("No worlds were found in need of migration.");
         }
     }
 
@@ -196,8 +190,6 @@ public class WorldMigrator {
         // world_nether/world_the_end
         try {
             Files.delete(worldPath.resolve(worldPath.getFileName().toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException ignore) {}
     }
 }

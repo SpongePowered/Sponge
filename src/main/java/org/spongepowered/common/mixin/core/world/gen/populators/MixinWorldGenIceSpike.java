@@ -96,99 +96,97 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
 
         if (worldIn.getBlockState(position).getBlock() != Blocks.snow) {
             return false;
-        } else {
-            position = position.up(rand.nextInt(4));
-            // Sponge start
-            // rand.nextInt(4) + 7;
-            int height = this.height.getFlooredAmount(rand);
-            int width = height / 4 + rand.nextInt(2);
-         
-            // rand.nextInt(60) == 0)
-            if (width > 1 && rand.nextDouble() < this.prob) 
-            {
-                // position.up(10 + rand.nextInt(30));
-                position = position.up(this.increase.getFlooredAmount(rand));
-            }
-            // Sponge end
-            int k;
-            int l;
+        }
+        position = position.up(rand.nextInt(4));
+        // Sponge start
+        // rand.nextInt(4) + 7;
+        int height = this.height.getFlooredAmount(rand);
+        int width = height / 4 + rand.nextInt(2);
 
-            for (k = 0; k < height; ++k) {
-                float f = (1.0F - (float) k / (float) height) * (float) width;
-                l = MathHelper.ceiling_float_int(f);
+        // rand.nextInt(60) == 0)
+        if (width > 1 && rand.nextDouble() < this.prob) {
+            // position.up(10 + rand.nextInt(30));
+            position = position.up(this.increase.getFlooredAmount(rand));
+        }
+        // Sponge end
+        int k;
+        int l;
 
-                for (int i1 = -l; i1 <= l; ++i1) {
-                    float f1 = (float) MathHelper.abs_int(i1) - 0.25F;
+        for (k = 0; k < height; ++k) {
+            float f = (1.0F - (float) k / (float) height) * width;
+            l = MathHelper.ceiling_float_int(f);
 
-                    for (int j1 = -l; j1 <= l; ++j1) {
-                        float f2 = (float) MathHelper.abs_int(j1) - 0.25F;
+            for (int i1 = -l; i1 <= l; ++i1) {
+                float f1 = MathHelper.abs_int(i1) - 0.25F;
 
-                        if ((i1 == 0 && j1 == 0 || f1 * f1 + f2 * f2 <= f * f)
-                                && (i1 != -l && i1 != l && j1 != -l && j1 != l || rand.nextFloat() <= 0.75F)) {
-                            Block block = worldIn.getBlockState(position.add(i1, k, j1)).getBlock();
+                for (int j1 = -l; j1 <= l; ++j1) {
+                    float f2 = MathHelper.abs_int(j1) - 0.25F;
+
+                    if ((i1 == 0 && j1 == 0 || f1 * f1 + f2 * f2 <= f * f)
+                            && (i1 != -l && i1 != l && j1 != -l && j1 != l || rand.nextFloat() <= 0.75F)) {
+                        Block block = worldIn.getBlockState(position.add(i1, k, j1)).getBlock();
+
+                        if (block.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
+                            this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.packed_ice.getDefaultState());
+                        }
+
+                        if (k != 0 && l > 1) {
+                            block = worldIn.getBlockState(position.add(i1, -k, j1)).getBlock();
 
                             if (block.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
-                                this.setBlock(worldIn, position.add(i1, k, j1), Blocks.packed_ice);
-                            }
-
-                            if (k != 0 && l > 1) {
-                                block = worldIn.getBlockState(position.add(i1, -k, j1)).getBlock();
-
-                                if (block.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
-                                    this.setBlock(worldIn, position.add(i1, -k, j1), Blocks.packed_ice);
-                                }
+                                this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.packed_ice.getDefaultState());
                             }
                         }
                     }
                 }
             }
-
-            k = width - 1;
-
-            if (k < 0) {
-                k = 0;
-            } else if (k > 1) {
-                k = 1;
-            }
-
-            for (int k1 = -k; k1 <= k; ++k1) {
-                l = -k;
-
-                while (l <= k) {
-                    BlockPos blockpos1 = position.add(k1, -1, l);
-                    int l1 = 50;
-
-                    if (Math.abs(k1) == 1 && Math.abs(l) == 1) {
-                        l1 = rand.nextInt(5);
-                    }
-
-                    while (true) {
-                        if (blockpos1.getY() > 50) {
-                            Block block1 = worldIn.getBlockState(blockpos1).getBlock();
-
-                            if (block1.getMaterial() == Material.air || block1 == Blocks.dirt || block1 == Blocks.snow || block1 == Blocks.ice
-                                    || block1 == Blocks.packed_ice) {
-                                this.setBlock(worldIn, blockpos1, Blocks.packed_ice);
-                                blockpos1 = blockpos1.down();
-                                --l1;
-
-                                if (l1 <= 0) {
-                                    blockpos1 = blockpos1.down(rand.nextInt(5) + 1);
-                                    l1 = rand.nextInt(5);
-                                }
-
-                                continue;
-                            }
-                        }
-
-                        ++l;
-                        break;
-                    }
-                }
-            }
-
-            return true;
         }
+
+        k = width - 1;
+
+        if (k < 0) {
+            k = 0;
+        } else if (k > 1) {
+            k = 1;
+        }
+
+        for (int k1 = -k; k1 <= k; ++k1) {
+            l = -k;
+
+            while (l <= k) {
+                BlockPos blockpos1 = position.add(k1, -1, l);
+                int l1 = 50;
+
+                if (Math.abs(k1) == 1 && Math.abs(l) == 1) {
+                    l1 = rand.nextInt(5);
+                }
+
+                while (true) {
+                    if (blockpos1.getY() > 50) {
+                        Block block1 = worldIn.getBlockState(blockpos1).getBlock();
+
+                        if (block1.getMaterial() == Material.air || block1 == Blocks.dirt || block1 == Blocks.snow || block1 == Blocks.ice
+                                || block1 == Blocks.packed_ice) {
+                            this.setBlockAndNotifyAdequately(worldIn, blockpos1, Blocks.packed_ice.getDefaultState());
+                            blockpos1 = blockpos1.down();
+                            --l1;
+
+                            if (l1 <= 0) {
+                                blockpos1 = blockpos1.down(rand.nextInt(5) + 1);
+                                l1 = rand.nextInt(5);
+                            }
+
+                            continue;
+                        }
+                    }
+
+                    ++l;
+                    break;
+                }
+            }
+        }
+
+        return true;
     }
 
     @Override

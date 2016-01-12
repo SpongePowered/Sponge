@@ -27,7 +27,13 @@ package org.spongepowered.common.registry.type.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
 import net.minecraft.block.BlockPlanks;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import net.minecraft.world.gen.feature.WorldGenForest;
@@ -80,13 +86,16 @@ public class BiomeTreeTypeRegistryModule implements CatalogRegistryModule<BiomeT
         this.biomeTreeTypeMappings.put("pointy_taiga",
                                        new SpongeBiomeTreeType("pointy_taiga", (PopulatorObject) new WorldGenTaiga1(), (PopulatorObject) megapine));
 
-        IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, BlockPlanks.EnumType.JUNGLE.getMetadata(), BlockPlanks.EnumType.JUNGLE.getMetadata(), true);
+        IBlockState jlog = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        IBlockState jleaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
-        WorldGenMegaJungle mega = new WorldGenMegaJungle(false, 10, 20, BlockPlanks.EnumType.JUNGLE.getMetadata(), BlockPlanks.EnumType.JUNGLE.getMetadata());
+        WorldGenMegaJungle mega = new WorldGenMegaJungle(false, 10, 20, jlog, jleaf);
 
         this.biomeTreeTypeMappings.put("jungle", new SpongeBiomeTreeType("jungle", (PopulatorObject) trees, (PopulatorObject) mega));
 
-        WorldGenShrub bush = new WorldGenShrub(BlockPlanks.EnumType.JUNGLE.getMetadata(), BlockPlanks.EnumType.OAK.getMetadata());
+        WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
 
         this.biomeTreeTypeMappings.put("jungle_bush", new SpongeBiomeTreeType("jungle_bush", (PopulatorObject) bush, null));
         this.biomeTreeTypeMappings.put("savanna", new SpongeBiomeTreeType("savanna", (PopulatorObject) new WorldGenSavannaTree(false), null));

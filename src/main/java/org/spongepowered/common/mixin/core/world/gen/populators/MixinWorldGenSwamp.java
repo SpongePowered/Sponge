@@ -49,9 +49,7 @@ public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree imple
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i;
         BlockPos position = new BlockPos(x, y, z);
-        for (i = 5; worldIn.getBlockState(position.down()).getBlock().getMaterial() == Material.water; position = position.down()) {
-            ;
-        }
+        for (i = 5; worldIn.getBlockState(position.down()).getBlock().getMaterial() == Material.water; position = position.down());
 
         boolean flag = true;
 
@@ -91,13 +89,12 @@ public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree imple
 
             if (!flag) {
                 return false;
-            } else {
-                BlockPos down = new BlockPos(x, y - 1, z);
-                Block block = worldIn.getBlockState(down).getBlock();
-                if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
+            }
+            BlockPos down = new BlockPos(x, y - 1, z);
+            Block block = worldIn.getBlockState(down).getBlock();
+            if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
 
-                    return true;
-                }
+                return true;
             }
         }
         return false;

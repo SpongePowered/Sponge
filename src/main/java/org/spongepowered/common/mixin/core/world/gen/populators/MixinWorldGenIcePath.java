@@ -91,32 +91,31 @@ public abstract class MixinWorldGenIcePath implements IcePath {
 
         if (worldIn.getBlockState(position).getBlock() != Blocks.snow) {
             return false;
-        } else {
-            // Sponge start
-            int i = this.radius.getFlooredAmount(rand);
-            // Sponge end
-            byte b0 = 1;
+        }
+        // Sponge start
+        int i = this.radius.getFlooredAmount(rand);
+        // Sponge end
+        byte b0 = 1;
 
-            for (int j = position.getX() - i; j <= position.getX() + i; ++j) {
-                for (int k = position.getZ() - i; k <= position.getZ() + i; ++k) {
-                    int l = j - position.getX();
-                    int i1 = k - position.getZ();
+        for (int j = position.getX() - i; j <= position.getX() + i; ++j) {
+            for (int k = position.getZ() - i; k <= position.getZ() + i; ++k) {
+                int l = j - position.getX();
+                int i1 = k - position.getZ();
 
-                    if (l * l + i1 * i1 <= i * i) {
-                        for (int j1 = position.getY() - b0; j1 <= position.getY() + b0; ++j1) {
-                            BlockPos blockpos1 = new BlockPos(j, j1, k);
-                            Block block = worldIn.getBlockState(blockpos1).getBlock();
+                if (l * l + i1 * i1 <= i * i) {
+                    for (int j1 = position.getY() - b0; j1 <= position.getY() + b0; ++j1) {
+                        BlockPos blockpos1 = new BlockPos(j, j1, k);
+                        Block block = worldIn.getBlockState(blockpos1).getBlock();
 
-                            if (block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
-                                worldIn.setBlockState(blockpos1, this.block.getDefaultState(), 2);
-                            }
+                        if (block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
+                            worldIn.setBlockState(blockpos1, this.block.getDefaultState(), 2);
                         }
                     }
                 }
             }
-
-            return true;
         }
+
+        return true;
     }
 
     @Override

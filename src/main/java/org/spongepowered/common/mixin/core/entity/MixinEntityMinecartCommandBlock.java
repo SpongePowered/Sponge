@@ -50,5 +50,5 @@ public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecar
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         manipulators.add(getCommandData());
     }
- 
+
 }

@@ -38,7 +38,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.IEntitySelector;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
@@ -76,12 +75,13 @@ import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.gui.IUpdatePlayerListBox;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.EnumDifficulty;
@@ -175,7 +175,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
@@ -454,8 +454,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
-    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/gui/IUpdatePlayerListBox;update()V") )
-    public void onUpdateTileEntities(IUpdatePlayerListBox tile) {
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V") )
+    public void onUpdateTileEntities(ITickable tile) {
         if (this.isRemote || this.currentTickTileEntity != null) {
             tile.update();
             return;
@@ -615,8 +615,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 // Special case for Tameables
                 else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTameable) {
                     EntityTameable tameable = (EntityTameable) entityIn;
-                    if (tameable.getOwnerEntity() != null) {
-                        specialCause = tameable.getOwnerEntity();
+                    if (tameable.getOwner() != null) {
+                        specialCause = tameable.getOwner();
                         causeName = NamedCause.OWNER;
                     }
                 }
@@ -710,8 +710,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 Entity entity = cause.first(Entity.class).get();
                 if (entity instanceof EntityTameable) {
                     EntityTameable tameable = (EntityTameable) entity;
-                    if (tameable.getOwnerEntity() != null) {
-                        cause = cause.with(NamedCause.owner(tameable.getOwnerEntity()));
+                    if (tameable.getOwner() != null) {
+                        cause = cause.with(NamedCause.owner(tameable.getOwner()));
                     }
                 } else {
                     Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -1057,7 +1057,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             for (Player causePlayer : cause.allOf(Player.class)) {
                 EntityPlayerMP playermp = (EntityPlayerMP) causePlayer;
                 if (playermp.getHealth() <= 0 || playermp.isDead) {
-                    if (!playermp.worldObj.getGameRules().getGameRuleBooleanValue("keepInventory")) {
+                    if (!playermp.worldObj.getGameRules().getBoolean("keepInventory")) {
                         playermp.inventory.clear();
                     } else {
                         // don't drop anything if keepInventory is enabled
@@ -1206,7 +1206,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
-            if (newState != null && !SpongeImplFactory.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
@@ -1397,7 +1397,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplFactory.updateComparatorOutputLevel(this.nmsWorld, pos, blockIn);
+        SpongeImplHooks.updateComparatorOutputLevel(this.nmsWorld, pos, blockIn);
     }
 
     @Override
@@ -1896,7 +1896,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return ((ChunkProviderServer) this.getChunkProvider()).loadedChunks;
+        return (List) ((ChunkProviderServer) this.getChunkProvider()).loadedChunks;
     }
 
     @Override
@@ -2057,7 +2057,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @SuppressWarnings("unchecked")
     private List<Player> getPlayers() {
-        return ((net.minecraft.world.World) (Object) this).getPlayers(Player.class, Predicates.alwaysTrue());
+        return (List) ((net.minecraft.world.World) (Object) this).getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue());
     }
 
     @Override
@@ -2519,7 +2519,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             EntityPlayer entityplayer1 = (EntityPlayer) this.playerEntities.get(i);
 
             // Sponge - add mixin really is invisible check
-            if (IEntitySelector.NOT_SPECTATING.apply(entityplayer1) && !((IMixinEntity) entityplayer1).isReallyREALLYInvisible()) {
+            if (EntitySelectors.NOT_SPECTATING.apply(entityplayer1) && !((IMixinEntity) entityplayer1).isReallyREALLYInvisible()) {
                 double d5 = entityplayer1.getDistanceSq(x, y, z);
 
                 if ((distance < 0.0D || d5 < distance * distance) && (d4 == -1.0D || d5 < d4)) {

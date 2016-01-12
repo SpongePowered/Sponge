@@ -128,8 +128,8 @@ public class MixinWorldGenSpikes implements EnderCrystalPlatform {
             // BEGIN sponge
             // add one to the height to fix MC bug if the EnderCrystal removing
             // the bedrock block
-            entityendercrystal.setLocationAndAngles((double) ((float) position.getX() + 0.5F), (double) (position.getY() + yHeight + 1),
-                    (double) ((float) position.getZ() + 0.5F), rand.nextFloat() * 360.0F, 0.0F);
+            entityendercrystal.setLocationAndAngles(position.getX() + 0.5F, position.getY() + yHeight + 1,
+                    position.getZ() + 0.5F, rand.nextFloat() * 360.0F, 0.0F);
 //            entityendercrystal.setLocationAndAngles((double) ((float) position.getX() + 0.5F), (double) (position.getY() + yHeight),
 //                    (double) ((float) position.getZ() + 0.5F), rand.nextFloat() * 360.0F, 0.0F);
             // END sponge

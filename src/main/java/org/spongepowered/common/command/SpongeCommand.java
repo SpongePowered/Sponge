@@ -61,7 +61,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.SpongeVersion;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -76,7 +75,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-public class CommandSponge {
+public class SpongeCommand {
     private static final String INDENT = "    ";
     private static final String LONG_INDENT = INDENT + INDENT;
 
@@ -328,7 +327,7 @@ public class CommandSponge {
                 .executor((src, args) -> {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
-                    for (PluginContainer container : SpongeVersion.getComponents()) {
+                    for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
                         builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion()));
                     }
 

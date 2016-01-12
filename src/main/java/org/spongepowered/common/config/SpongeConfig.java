@@ -138,6 +138,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String WORLD_INFINITE_WATER_SOURCE = "infinite-water-source";
     public static final String WORLD_KEEP_SPAWN_LOADED = "keep-spawn-loaded";
     public static final String WORLD_LOAD_ON_STARTUP = "load-on-startup";
+    public static final String WORLD_GENERATE_SPAWN_ON_LOAD = "generate-spawn-on-load";
     public static final String WORLD_GEN_MODIFIERS = "world-generation-modifiers";
 
     private static final String HEADER = "1.0\n"
@@ -301,10 +302,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(
                 value = CONFIG_ENABLED,
                 comment = "Enabling config will override Global.")
-        protected boolean configEnabled = true;
+        protected boolean configEnabled = false;
 
         public DimensionConfig() {
-            this.configEnabled = false;
         }
 
         public boolean isConfigEnabled() {
@@ -321,13 +321,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(
                 value = CONFIG_ENABLED,
                 comment = "Enabling config will override Dimension and Global.")
-        protected boolean configEnabled = true;
+        protected boolean configEnabled = false;
 
         @Setting(value = WORLD_GEN_MODIFIERS, comment = "World Generation Modifiers to apply to the world")
         private List<String> worldModifiers = new ArrayList<>();
 
         public WorldConfig() {
-            this.configEnabled = false;
         }
 
         public boolean isConfigEnabled() {
@@ -864,11 +863,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed")
         private boolean flowingLavaDecay = false;
 
-        @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be allowed to load.")
+        @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be registered.")
         protected boolean worldEnabled = true;
 
-        @Setting(value = WORLD_LOAD_ON_STARTUP, comment = "Enable if this world should load on startup.")
+        @Setting(value = WORLD_LOAD_ON_STARTUP, comment = "Enable if this world should be loaded on startup.")
         protected boolean loadOnStartup = true;
+
+        @Setting(value = WORLD_GENERATE_SPAWN_ON_LOAD, comment = "Enable if you want the world to generate spawn the moment its loaded.")
+        protected boolean generateSpawnOnLoad = true;
 
         @Setting(value = WORLD_KEEP_SPAWN_LOADED, comment = "Enable if this world's spawn should remain loaded with no players.")
         protected boolean keepSpawnLoaded = true;
@@ -922,6 +924,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPVPEnabled(boolean allow) {
             this.pvpEnabled = allow;
+        }
+
+        public boolean getGenerateSpawnOnLoad() {
+            return this.generateSpawnOnLoad;
+        }
+
+        public void setGenerateSpawnOnLoad(boolean allow) {
+            this.generateSpawnOnLoad = allow;
         }
     }
 

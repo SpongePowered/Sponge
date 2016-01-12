@@ -72,6 +72,6 @@ public abstract class MixinBlockSand extends MixinBlock {
     }
 
     private ImmutableSandData getSandTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) blockState.getValue(BlockSand.VARIANT));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSandData.class, (SandType) (Object) blockState.getValue(BlockSand.VARIANT));
     }
 }

@@ -73,6 +73,6 @@ public abstract class MixinBlockStoneBrick extends MixinBlock {
 
     private ImmutableBrickData getStoneBrickTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBrickData.class,
-                (BrickType) blockState.getValue(BlockStoneBrick.VARIANT));
+                (BrickType) (Object) blockState.getValue(BlockStoneBrick.VARIANT));
     }
 }

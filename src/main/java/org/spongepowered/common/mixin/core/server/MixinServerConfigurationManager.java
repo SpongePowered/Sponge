@@ -89,7 +89,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -227,7 +227,7 @@ public abstract class MixinServerConfigurationManager {
             s1 = netManager.getRemoteAddress().toString();
         }
 
-        logger.info(playerIn.getCommandSenderName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+        logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
@@ -248,7 +248,7 @@ public abstract class MixinServerConfigurationManager {
 
         handler.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
                 .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
-                .getTerrainType(), worldserver.getGameRules().getGameRuleBooleanValue("reducedDebugInfo")));
+                .getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
         handler.sendPacket(new S3FPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
                 .getServerInstance().getServerModName())));
         handler.sendPacket(new S41PacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
@@ -287,7 +287,7 @@ public abstract class MixinServerConfigurationManager {
 
         ChatComponentTranslation chatcomponenttranslation;
 
-        if (!playerIn.getCommandSenderName().equalsIgnoreCase(s))
+        if (!playerIn.getName().equalsIgnoreCase(s))
         {
             chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
         }
@@ -306,7 +306,7 @@ public abstract class MixinServerConfigurationManager {
         // Fire PlayerJoinEvent
         Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(chatcomponenttranslation));
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplFactory.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
+        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
                 Optional.of(originalChannel), originalMessage, originalMessage, player);
         SpongeImpl.postEvent(event);
         // Send to the channel
@@ -373,7 +373,7 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
+                SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
                     (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
@@ -481,7 +481,7 @@ public abstract class MixinServerConfigurationManager {
         WorldBorder worldborder = worldIn.getWorldBorder();
         playerIn.playerNetServerHandler.sendPacket(new S44PacketWorldBorder(worldborder, S44PacketWorldBorder.Action.INITIALIZE));
         playerIn.playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(worldIn.getTotalWorldTime(), worldIn.getWorldTime(), worldIn
-                .getGameRules().getGameRuleBooleanValue("doDaylightCycle")));
+                .getGameRules().getBoolean("doDaylightCycle")));
 
         if (worldIn.isRaining()) {
             playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0.0F));

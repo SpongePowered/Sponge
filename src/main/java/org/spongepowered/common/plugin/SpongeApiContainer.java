@@ -28,7 +28,6 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeVersion;
 
 import java.util.Optional;
 
@@ -50,12 +49,12 @@ public final class SpongeApiContainer extends SpongePluginContainer {
 
     @Override
     public String getName() {
-        return SpongeVersion.API_NAME;
+        return SpongeImpl.API_NAME;
     }
 
     @Override
     public String getVersion() {
-        return SpongeVersion.API_VERSION;
+        return SpongeImpl.API_VERSION;
     }
 
     @Override

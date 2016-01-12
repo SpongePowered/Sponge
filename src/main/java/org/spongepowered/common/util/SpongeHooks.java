@@ -135,7 +135,7 @@ public class SpongeHooks {
             return;
         }
 
-        String spawnName = entity.getCommandSenderName();
+        String spawnName = entity.getName();
         if (entity instanceof EntityItem) {
             spawnName = ((EntityItem) entity).getEntityItem().getDisplayName();
         }
@@ -232,7 +232,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(player.worldObj);
         if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
-                    player.getCommandSenderName(),
+                    player.getName(),
                     te.getWorld().getWorldInfo().getWorldName(),
                     te.getPos().getX() + ", " + te.getPos().getY() + ", " + te.getPos().getZ(),
                     command);
@@ -248,7 +248,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(player.worldObj);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
-                    player.getCommandSenderName(),
+                    player.getName(),
                     length);
             logStack(config);
         }
@@ -262,7 +262,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(player.worldObj);
         if (config.getConfig().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
-                    player.getCommandSenderName());
+                    player.getName());
             logStack(config);
         }
     }
@@ -557,7 +557,7 @@ public class SpongeHooks {
         }
         else if (rootCause instanceof Entity) {
             Entity causeEntity = (Entity) rootCause;
-            causedBy = causeEntity.getCommandSenderName();
+            causedBy = causeEntity.getName();
         }else if (rootCause instanceof BlockSnapshot) {
             BlockSnapshot snapshot = (BlockSnapshot) rootCause;
             causedBy = snapshot.getState().getType().getId();

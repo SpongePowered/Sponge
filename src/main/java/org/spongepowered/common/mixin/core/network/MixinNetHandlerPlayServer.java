@@ -83,7 +83,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -216,14 +216,14 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
                             if (tileentity instanceof TileEntityCommandBlock) {
                                 commandblocklogic = ((TileEntityCommandBlock) tileentity).getCommandBlockLogic();
-                                permissionCheck = "minecraft.commandblock.edit.block." + commandblocklogic.getCommandSenderName(); // Sponge
+                                permissionCheck = "minecraft.commandblock.edit.block." + commandblocklogic.getName(); // Sponge
                             }
                         } else if (b0 == 1) {
                             Entity entity = this.playerEntity.worldObj.getEntityByID(packetbuffer.readInt());
 
                             if (entity instanceof EntityMinecartCommandBlock) {
                                 commandblocklogic = ((EntityMinecartCommandBlock) entity).getCommandBlockLogic();
-                                permissionCheck = "minecraft.commandblock.edit.minecart." + commandblocklogic.getCommandSenderName(); // Sponge
+                                permissionCheck = "minecraft.commandblock.edit.minecart." + commandblocklogic.getName(); // Sponge
                             }
                             // Sponge begin
                         } else {
@@ -349,7 +349,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final Player player = ((Player) this.playerEntity);
         final Optional<Text> message = Optional.ofNullable(SpongeTexts.toText(component));
         final MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Disconnect event = SpongeImplFactory.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)),
+        final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)),
                 originalChannel, Optional.of(originalChannel), message, message, player);
         SpongeImpl.postEvent(event);
         event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));

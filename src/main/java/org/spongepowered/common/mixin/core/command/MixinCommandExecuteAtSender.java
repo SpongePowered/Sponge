@@ -50,8 +50,8 @@ import java.util.Set;
 @NonnullByDefault
 public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixinCommandSource, IMixinCommandSender {
 
-    @Shadow(aliases = "val$entity") private Entity field_174804_a;
-    @Shadow(aliases = "val$sender") private ICommandSender field_174802_b;
+    @Shadow(aliases = {"field_174804_a", "val$entity"}) private Entity entity;
+    @Shadow(aliases = {"field_174802_b", "val$sender"}) private ICommandSender sender;
 
     @Override
     public void sendMessage(Text message) {
@@ -70,7 +70,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public String getName() {
-        return this.field_174804_a.getCommandSenderName();
+        return this.entity.getName();
     }
 
     @Override
@@ -150,7 +150,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public CommandSource getOriginalSource() {
-        return WrapperCommandSource.of(this.field_174802_b);
+        return WrapperCommandSource.of(this.sender);
     }
 
     @Override

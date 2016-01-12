@@ -303,7 +303,7 @@ public final class CommonModuleRegistry {
             .registerModule(PopulatorObject.class, new PopulatorObjectRegistryModule())
             .registerModule(PopulatorType.class, PopulatorTypeRegistryModule.getInstance())
             .registerModule(PortionType.class, new PortionTypeRegistryModule())
-            .registerModule(PotionEffectType.class, new PotionEffectTypeRegistryModule())
+            .registerModule(PotionEffectType.class, PotionEffectTypeRegistryModule.getInstance())
             .registerModule(PrismarineType.class, new PrismarineRegistryModule())
             .registerModule(Profession.class, ProfessionRegistryModule.getInstance())
             .registerModule(QuartzType.class, new QuartzTypeRegistryModule())

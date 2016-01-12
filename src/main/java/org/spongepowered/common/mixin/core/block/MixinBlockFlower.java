@@ -79,6 +79,6 @@ public abstract class MixinBlockFlower extends MixinBlock {
 
     private ImmutablePlantData getFlowerTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePlantData.class,
-                                                       (PlantType) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
+                (PlantType) (Object) blockState.getValue(((BlockFlower) blockState.getBlock()).getTypeProperty()));
     }
 }

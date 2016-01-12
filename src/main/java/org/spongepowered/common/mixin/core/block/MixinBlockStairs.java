@@ -98,7 +98,8 @@ public abstract class MixinBlockStairs extends MixinBlock {
     }
 
     private ImmutableStairShapeData getStairShapeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStairShapeData.class, (StairShape) blockState.getValue(BlockStairs.SHAPE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeStairShapeData.class,
+                (StairShape) (Object) blockState.getValue(BlockStairs.SHAPE));
     }
 
     private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {

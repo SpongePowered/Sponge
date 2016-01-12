@@ -86,7 +86,8 @@ public abstract class MixinBlockPistonExtension extends MixinBlock {
     }
 
     private ImmutablePistonData getPistonTypeFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class, (PistonType) blockState.getValue(BlockPistonExtension.TYPE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePistonData.class,
+                (PistonType) (Object) blockState.getValue(BlockPistonExtension.TYPE));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {

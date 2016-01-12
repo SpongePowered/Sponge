@@ -27,6 +27,7 @@ package org.spongepowered.common.world.gen.builders;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
@@ -96,7 +97,8 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
 
     @Override
     public BigMushroom build() throws IllegalStateException {
-        BigMushroom populator = (BigMushroom) new WorldGenBigMushroom(1);
+        BigMushroom populator = (BigMushroom) new WorldGenBigMushroom(Blocks.brown_mushroom);
+        populator.getTypes().clear();
         populator.getTypes().addAll(this.types);
         populator.setMushroomsPerChunk(this.count);
         populator.setSupplierOverride(this.override);

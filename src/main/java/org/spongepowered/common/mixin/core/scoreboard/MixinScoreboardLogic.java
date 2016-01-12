@@ -73,7 +73,7 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = org.spongepowered.api.scoreboard.Scoreboard.class, prefix = "scoreboard$"))
 public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinServerScoreboard {
 
-    @Shadow public abstract void func_96551_b(); // mark ScoreboardSaveData dirty
+    @Shadow public abstract void markSaveDataDirty();
 
     // Get Objective
 
@@ -102,7 +102,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         List<ScoreObjective> objectives = (List) this.scoreObjectiveCriterias.get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            this.scoreObjectiveCriterias.put(objective.getCriterion(), objectives);
+            this.scoreObjectiveCriterias.put((IScoreObjectiveCriteria) objective.getCriterion(), objectives);
         }
 
         objectives.add(scoreObjective);
@@ -157,8 +157,9 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     @SuppressWarnings("unchecked")
     public Set<Objective> scoreboard$getObjectives() {
-        return (Set<Objective>) this.scoreObjectives.values().stream().map(objective -> ((IMixinScoreObjective) objective).getSpongeObjective()).collect(
-                Collectors.toSet());
+        return this.scoreObjectives.values().stream()
+                .map(objective -> ((IMixinScoreObjective) objective).getSpongeObjective())
+                .collect(Collectors.toSet());
     }
 
     // Remove objective
@@ -190,7 +191,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             list.remove(scoreObjective);
         }
 
-        for (Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap: (Collection<Map>) this.entitiesScoreObjectives.values()) {
+        for (Map<ScoreObjective, net.minecraft.scoreboard.Score> scoreMap : this.entitiesScoreObjectives.values()) {
             Score score = scoreMap.remove(scoreObjective);
             if (score != null) {
                 ((IMixinScore) score).getSpongeScore().removeScoreFor(scoreObjective);
@@ -198,7 +199,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         }
 
         // We deliberately don't call func_96533_c, because there's no need
-        this.func_96551_b();
+        this.markSaveDataDirty();
 
         ((SpongeObjective) objective).removeObjectiveFor(this);
     }
@@ -214,7 +215,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     @SuppressWarnings("unchecked")
     public Set<Team> scoreboard$getTeams() {
-        return new HashSet<>(this.teams.values());
+        return new HashSet<>((Set) this.teams.values());
     }
 
     public Optional<Team> scoreboard$getMemberTeam(Text member) {

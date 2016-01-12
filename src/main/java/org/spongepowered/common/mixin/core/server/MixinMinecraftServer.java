@@ -82,7 +82,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplFactory;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -110,7 +110,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -216,10 +215,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Player> getOnlinePlayers() {
-        if (getConfigurationManager() == null || getConfigurationManager().playerEntityList == null) {
+        if (getConfigurationManager() == null || getConfigurationManager().getPlayerList() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List<Player>) getConfigurationManager().playerEntityList);
+        return ImmutableList.copyOf((List) getConfigurationManager().getPlayerList());
     }
 
     @Override
@@ -322,10 +321,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         if (!getAllowNether()) {
             SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
-                    + "dimensions besides [" + overworldFolder + "] will be skipped.");
+                    + "dimensions besides [{}}] will be skipped.", overworldFolder);
         }
 
-        WorldMigrator.migrateWorldsTo(Paths.get(overworldFolder));
+        WorldMigrator.migrateWorldsTo(SpongeImpl.getGame().getSavesDirectory().resolve(overworldFolder));
 
         registerExistingSpongeDimensions();
 
@@ -363,69 +362,69 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
             }
 
-            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
-            if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
-                continue;
+            if (dim != 0) {
+                final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((Dimension) provider).getType().getId(), worldFolder);
+                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                    if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
+                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be loaded...", worldFolder, dim);
+                        continue;
+                    }
+                }
             }
 
+            final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
+                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
             WorldInfo worldInfo;
-            WorldSettings newWorldSettings ;
-            AnvilSaveHandler worldsavehandler;
+            WorldSettings worldSettings;
 
-            if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
-                worldsavehandler =
-                        new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
-                                             SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
-                if (dim == 0) {
-                    // overworld uses the client set world name
-                    if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {
-                        worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldFolder).get();
-                    } else {
-                        worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName).get(); // client copied world
-                    }
+            if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT && dim == 0) {
+                // overworld uses the client set world name
+                if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {
+                    worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldFolder).get();
                 } else {
-                    worldInfo = worldsavehandler.loadWorldInfo();
+                    worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName).get(); // client copied world
                 }
             } else {
-                worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
                 worldInfo = worldsavehandler.loadWorldInfo();
             }
 
             if (worldInfo == null) {
-                newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                newWorldSettings.setWorldName(generatorOptions); // setGeneratorOptions
-                ((IMixinWorldSettings) (Object) newWorldSettings).setActualWorldName(worldFolder);
+                worldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+                worldSettings.setWorldName(generatorOptions); // setGeneratorOptions
+                ((IMixinWorldSettings) (Object) worldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
-                    newWorldSettings.enableBonusChest();
+                    worldSettings.enableBonusChest();
                 }
 
-                ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionId(dim);
-                ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionType(((Dimension) provider).getType());
+                ((IMixinWorldSettings)(Object) worldSettings).setDimensionId(dim);
+                ((IMixinWorldSettings)(Object) worldSettings).setDimensionType(((Dimension) provider).getType());
 
-                worldInfo = new WorldInfo(newWorldSettings, worldFolder);
+                worldInfo = new WorldInfo(worldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
+
+                SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
+                        (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
+
             } else {
                 if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
                         (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
                 }
-                newWorldSettings = new WorldSettings(worldInfo);
+
+                ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
+                ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
+                worldSettings = new WorldSettings(worldInfo);
             }
 
             if (dim == 0) {
                 this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
             }
 
-            ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
-            ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            final UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
-            DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
+            DimensionRegistryModule.getInstance().registerWorldUniqueId(((WorldProperties) worldInfo).getUniqueId(), worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
-                (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+
 
             if (!((WorldProperties) worldInfo).loadOnStartup()) {
                 SpongeImpl.getLogger().warn("World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
@@ -433,17 +432,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 continue;
             }
 
-            final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
+            final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
-            world.initialize(newWorldSettings);
-            world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
+            worldServer.initialize(worldSettings);
+            worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
             if (!this.isSinglePlayer()) {
-                world.getWorldInfo().setGameType(this.getGameType());
+                worldServer.getWorldInfo().setGameType(this.getGameType());
             }
 
-            SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent((World) world));
+            SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         }
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
@@ -477,8 +476,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             try {
                 compound = CompressedStreamTools.readCompressed(new FileInputStream(levelData));
             } catch (IOException e) {
-                SpongeImpl.getLogger().error("Failed loading Sponge data for World [" + worldCandidateFile.getName() + "]. This is a critical "
-                        + "problem and should be reported to Sponge ASAP.", e);
+                SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. This is a critical "
+                        + "problem and should be reported to Sponge ASAP.", worldCandidateFile.getName(), e);
                 continue;
             }
 
@@ -492,6 +491,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 final int dimensionId = spongeData.getInteger(NbtDataUtil.DIMENSION_ID);
+
+                // Nether and The End are handled above
+                if (dimensionId == -1 || dimensionId == 1) {
+                    continue;
+                }
+
                 String dimensionType = "overworld";
 
                 if (spongeData.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
@@ -513,10 +518,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 spongeData.setString(NbtDataUtil.DIMENSION_TYPE, dimensionType);
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimensionType, worldCandidateFile.getName());
 
-                if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be registered...",
-                            worldCandidateFile.getName(), dimensionId);
-                    continue;
+                if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                    if (!activeConfig.getConfig().getWorld().isWorldEnabled()) {
+                        SpongeImpl.getLogger().warn("World [{}] (DIM{}) is disabled. World will not be registered...",
+                                worldCandidateFile.getName(), dimensionId);
+                        continue;
+                    }
                 }
 
                 if (spongeData.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeData.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
@@ -550,22 +557,33 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldServers.remove(DimensionManager.getWorldFromDimId(0));
             worldServers.add(0, overworld);
 
+            final WorldServer the_end = DimensionManager.getWorldFromDimId(1);
+
+            if (worldServers.remove(the_end)) {
+                worldServers.add(1, the_end);
+            }
+
             final WorldServer nether = DimensionManager.getWorldFromDimId(-1);
 
             if (worldServers.remove(nether)) {
                 worldServers.add(1, nether);
             }
-
-            final WorldServer the_end = DimensionManager.getWorldFromDimId(1);
-
-            if (worldServers.remove(the_end)) {
-                worldServers.add(2, the_end);
-            }
         } else {
             worldServers.add(0, overworld);
         }
 
-        worldServers.forEach(this::prepareSpawnArea);
+        for (WorldServer worldServer : worldServers) {
+            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+
+            if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+                if (!activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+                    continue;
+                }
+            }
+
+            this.prepareSpawnArea(worldServer);
+        }
+
         this.clearCurrentTask();
     }
 
@@ -639,7 +657,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (worldInfo != null) {
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
-                SpongeImpl.getLogger().error("World {} cannot be loaded as it is disabled.", worldName);
+                SpongeImpl.getLogger().error("World [{}] cannot be loaded as it is disabled.", worldName);
                 return Optional.empty();
             }
 
@@ -664,19 +682,28 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
-        WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+        WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
 
-        world.initialize(settings);
-        ((IMixinWorldProvider) world.provider).setDimension(dim);
+        worldServer.initialize(settings);
+        ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
 
-        world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
-        SpongeImpl.postEvent(SpongeImplFactory.createLoadWorldEvent((World) world));
+        worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         if (!isSinglePlayer()) {
-            world.getWorldInfo().setGameType(getGameType());
+            worldServer.getWorldInfo().setGameType(getGameType());
         }
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        this.prepareSpawnArea(world);
-        return Optional.of((World) world);
+
+        final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+        if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+            if (activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+                this.prepareSpawnArea(worldServer);
+            }
+        } else {
+            this.prepareSpawnArea(worldServer);
+        }
+
+        return Optional.of((World) worldServer);
     }
 
     @Override
@@ -724,7 +751,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
         final UUID uuid = UUID.randomUUID();
-        ((IMixinWorldInfo) worldInfo).getWorldConfig().getConfig().setConfigEnabled(true);
         ((IMixinWorldInfo) worldInfo).setUUID(uuid);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
@@ -800,6 +826,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return Optional.of(((World) DimensionManager.getWorldFromDimId(0)).getProperties());
         }
         return Optional.empty();
+    }
+
+    @Override
+    public String getDefaultWorldName() {
+        return getFolderName();
     }
 
     @Override
@@ -949,13 +980,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir, ArrayList arraylist, String astring[], String s1, String astring1[], int i) {
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender), ImmutableList.copyOf(arraylist), arraylist, input);
+    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
+            List<String> list, String astring[], String s) {
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
+                ImmutableList.copyOf(list), list, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
             cir.setReturnValue(new ArrayList<>());
         } else {
             cir.setReturnValue(event.getTabCompletions());
         }
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 }

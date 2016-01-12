@@ -74,6 +74,6 @@ public abstract class MixinBlockDoublePlant extends MixinBlock {
 
     private ImmutableDoublePlantData getDoublePlantTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDoublePlantData.class,
-                (DoublePlantType) blockState.getValue(BlockDoublePlant.VARIANT));
+                (DoublePlantType) (Object) blockState.getValue(BlockDoublePlant.VARIANT));
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -57,7 +58,7 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkRange(x, y, z);
-        this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get(block);
+        this.blocks[getIndex(x, y, z)] = (short) Block.BLOCK_STATE_IDS.get((IBlockState) block);
     }
 
     @Override

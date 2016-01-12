@@ -19,7 +19,7 @@ sourceSets {
 }
 
 minecraft {
-    mappings = 'stable_18'
+    mappings = 'snapshot_20160109'
     runDir = 'run'
 }
 

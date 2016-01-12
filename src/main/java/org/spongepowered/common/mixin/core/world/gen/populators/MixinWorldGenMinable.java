@@ -50,14 +50,14 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
 
     @Shadow private IBlockState oreBlock;
     @Shadow private int numberOfBlocks;
-    @Shadow private Predicate predicate;
+    @Shadow private Predicate<?> predicate;
 
     private VariableAmount size;
     private VariableAmount count;
     private VariableAmount height;
 
     @Inject(method = "<init>(Lnet/minecraft/block/state/IBlockState;ILcom/google/common/base/Predicate;)V", at = @At("RETURN") )
-    public void onConstructed(IBlockState ore, int count, Predicate condition, CallbackInfo ci) {
+    public void onConstructed(IBlockState ore, int count, Predicate<IBlockState> condition, CallbackInfo ci) {
         this.size = VariableAmount.fixed(count);
         this.count = VariableAmount.fixed(16);
         this.height = VariableAmount.baseWithRandomAddition(0, 64);
@@ -121,8 +121,9 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Predicate<BlockState> getPlacementCondition() {
-        return this.predicate;
+        return (Predicate<BlockState>) this.predicate;
     }
 
     @Override

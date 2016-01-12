@@ -38,7 +38,7 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     Predicate<Entity> targetSelector;
     float searchDistance;
     double closeRangeSpeed, farRangeSpeed;
-    
+
     @Override
     public AvoidEntityAITask.Builder targetSelector(Predicate<Entity> predicate) {
         this.targetSelector = predicate;
@@ -80,11 +80,11 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, GuavaJavaUtils.asGuavaPredicate(this.targetSelector),
-            this.searchDistance,
-            this.closeRangeSpeed, this.farRangeSpeed);
+        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class, GuavaJavaUtils.asGuavaPredicate(this.targetSelector),
+                this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }
 }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common;
 
+import static com.google.common.base.Objects.firstNonNull;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
@@ -33,6 +34,7 @@ import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactoryUtils;
 import org.spongepowered.api.event.game.state.GameStateEvent;
@@ -45,6 +47,9 @@ import org.spongepowered.common.launch.SpongeLaunch;
 import org.spongepowered.common.registry.SpongeGameRegistry;
 
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 import javax.inject.Inject;
@@ -52,13 +57,19 @@ import javax.inject.Named;
 import javax.inject.Singleton;
 
 @Singleton
-public class SpongeImpl {
+public final class SpongeImpl {
 
     public static final String API_NAME = "SpongeAPI";
     public static final String API_ID = "spongeapi";
+    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
 
     public static final String ECOSYSTEM_NAME = "Sponge";
     public static final String ECOSYSTEM_ID = "sponge";
+
+    public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
+    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+    
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 
     @Nullable
     private static SpongeImpl instance;
@@ -69,6 +80,24 @@ public class SpongeImpl {
     private static final Path spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
 
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
+    // TODO: Keep up to date
+    private static Package getPackage() {
+        return SpongeImpl.class.getPackage();
+    }
+
+    @Nullable
+    private static List<PluginContainer> components;
+
+    public static List<PluginContainer> getInternalPlugins() {
+        if (components == null) {
+            components = new ArrayList<>(6);
+            components.add(SpongeImpl.getMinecraftPlugin());
+            components.add(Sponge.getPlatform().getApi());
+            components.add(Sponge.getPlatform().getImplementation());
+        }
+
+        return components;
+    }
 
     private final Injector injector;
     private final Game game;

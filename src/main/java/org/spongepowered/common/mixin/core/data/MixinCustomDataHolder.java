@@ -76,7 +76,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
     public <T extends DataManipulator<?, ?>> Optional<T> getCustom(Class<T> customClass) {
         for (DataManipulator<?, ?> existing : this.manipulators) {
             if (customClass.isInstance(existing)) {
-                return Optional.of((T) existing);
+                return Optional.of((T) existing.copy());
             }
         }
         return Optional.empty();

@@ -74,7 +74,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public String getIdentifier() {
-        return this.sender.getCommandSenderName();
+        return this.sender.getName();
     }
 
     @Override
@@ -95,7 +95,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
     @Override
     public String getName() {
-        return this.sender.getCommandSenderName();
+        return this.sender.getName();
     }
 
     @Override

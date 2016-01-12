@@ -53,7 +53,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenDungeons;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -193,11 +192,7 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
 
                             if (worldIn.isAirBlock(blockpos2)) {
                                 int k2 = 0;
-                                Iterator iterator = EnumFacing.Plane.HORIZONTAL.iterator();
-
-                                while (iterator.hasNext()) {
-                                    EnumFacing enumfacing = (EnumFacing) iterator.next();
-
+                                for(EnumFacing enumfacing: EnumFacing.Plane.HORIZONTAL.facings()) {
                                     if (worldIn.getBlockState(blockpos2.offset(enumfacing)).getBlock().getMaterial().isSolid()) {
                                         ++k2;
                                     }
@@ -213,7 +208,7 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
 //                                    {
 //                                        fillChest((TileEntityChest) tileentity1, rand);
 //                                    }
-                                    List list = WeightedRandomChestContent.func_177629_a(WorldGenDungeons.CHESTCONTENT, new WeightedRandomChestContent[] {Items.enchanted_book.getRandom(rand)});
+                                    List<WeightedRandomChestContent> list = WeightedRandomChestContent.func_177629_a(WorldGenDungeons.CHESTCONTENT, new WeightedRandomChestContent[] {Items.enchanted_book.getRandom(rand)});
 
                                     if (tileentity1 instanceof TileEntityChest) {
                                         WeightedRandomChestContent.generateChestContents(rand, list, (TileEntityChest) tileentity1, 8);

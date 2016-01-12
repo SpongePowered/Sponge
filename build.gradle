@@ -7,8 +7,8 @@ buildscript {
             url = 'http://files.minecraftforge.net/maven'
         }
         maven {
-            name = 'minecrell'
-            url = 'http://repo.minecrell.net/releases'
+            name = 'minecrell-snapshots'
+            url = 'http://repo.minecrell.net/snapshots'
         }
         maven {
             name = 'sponge'
@@ -18,8 +18,8 @@ buildscript {
 
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
-        classpath 'net.minecrell:VanillaGradle:2.0.2_2'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.0-20151205.212842-160'
+        classpath 'net.minecrell:VanillaGradle:2.0.3-SNAPSHOT'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-SNAPSHOT'
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
@@ -44,10 +44,13 @@ apply from: 'gradle/minecraft.gradle'
 version = api.version
 
 minecraft {
-    version = '1.8'
+    version = '1.8.9'
 }
 
 dependencies {
+    // TODO: trove4j was removed in 1.8.8
+    compile 'net.sf.trove4j:trove4j:3.0.3'
+
     compile api
     compile('org.spongepowered:mixin:0.4.10-SNAPSHOT') {
         exclude module: 'launchwrapper'
