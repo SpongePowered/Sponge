@@ -37,13 +37,17 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
 /**
- * The xtent interface with extra defaults that are only available in the implementation.
+ * The Extent interface with extra defaults that are only available in the implementation.
  */
 public interface DefaultedExtent extends Extent {
 
@@ -62,7 +66,6 @@ public interface DefaultedExtent extends Extent {
     default MutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new MutableBiomeViewTransform(this, transform);
     }
-
 
     @Override
     default UnmodifiableBiomeArea getUnmodifiableBiomeView() {
@@ -124,6 +127,16 @@ public interface DefaultedExtent extends Extent {
     default ImmutableBlockVolume getImmutableBlockCopy() {
         return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
             getBlockMin(), getBlockSize());
+    }
+
+    @Override
+    default MutableBiomeAreaWorker<? extends Extent> getBiomeWorker() {
+        return new SpongeMutableBiomeAreaWorker<>(this);
+    }
+
+    @Override
+    default MutableBlockVolumeWorker<? extends Extent> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
 }

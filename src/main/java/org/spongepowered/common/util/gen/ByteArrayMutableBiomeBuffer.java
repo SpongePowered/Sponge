@@ -37,15 +37,17 @@ import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.MutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.MutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 
 import java.util.Arrays;
 
 /**
  * Mutable biome area backed by a byte array. Reusable.
-
+ *
  * <p>Using {@link #detach()} the underlying byte array can be accessed.
  * The byte array can then be reused by calling {@link #reuse(Vector2i)}.</p>
  */
@@ -87,7 +89,6 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         BiomeType biomeType = (BiomeType) this.biomeById[biomeId & 0xff];
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
-
 
     /**
      * Gets the internal byte array, and prevents further of it through this
@@ -141,6 +142,11 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     @Override
+    public MutableBiomeAreaWorker<? extends MutableBiomeArea> getBiomeWorker() {
+        return new SpongeMutableBiomeAreaWorker<>(this);
+    }
+
+    @Override
     public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
         return new UnmodifiableBiomeAreaWrapper(this);
     }
@@ -162,4 +168,5 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkOpen();
         return new ByteArrayImmutableBiomeBuffer(this.biomes, this.start, this.size);
     }
+
 }

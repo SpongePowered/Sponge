@@ -27,8 +27,12 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 
 public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableBiomeArea> implements MutableBiomeArea {
 
@@ -55,7 +59,19 @@ public class MutableBiomeViewDownsize extends AbstractBiomeViewDownsize<MutableB
     }
 
     @Override
+    public MutableBiomeAreaWorker<? extends MutableBiomeArea> getBiomeWorker() {
+        return new SpongeMutableBiomeAreaWorker<>(this);
+    }
+
+    @Override
     public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
         return new UnmodifiableBiomeAreaWrapper(this);
     }
+
+    @Override
+    public ImmutableBiomeArea getImmutableBiomeCopy() {
+        return ByteArrayImmutableBiomeBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
+            this.size);
+    }
+
 }

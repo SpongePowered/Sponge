@@ -34,7 +34,6 @@ import org.spongepowered.common.util.VecHelper;
 
 /**
  * Base class for block buffers.
- *
  */
 @NonnullByDefault
 public abstract class AbstractBlockBuffer implements BlockVolume {

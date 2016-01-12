@@ -28,10 +28,8 @@ import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.BiomeArea;
-import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 
 public abstract class AbstractBiomeViewTransform<A extends BiomeArea> implements BiomeArea {
@@ -90,12 +88,6 @@ public abstract class AbstractBiomeViewTransform<A extends BiomeArea> implements
             default:
                 throw new UnsupportedOperationException(type.name());
         }
-    }
-
-    @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
-        return ByteArrayImmutableBiomeBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
-            this.size);
     }
 
 }

@@ -32,6 +32,8 @@ import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 
 public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
 
@@ -82,6 +84,11 @@ public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
     }
 
     @Override
+    public BlockVolumeWorker<? extends UnmodifiableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
+    }
+
+    @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         return this.volume.getBlockCopy(type);
     }
@@ -90,4 +97,5 @@ public class UnmodifiableBlockVolumeWrapper implements UnmodifiableBlockVolume {
     public ImmutableBlockVolume getImmutableBlockCopy() {
         return this.volume.getImmutableBlockCopy();
     }
+
 }

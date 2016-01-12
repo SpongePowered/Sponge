@@ -35,9 +35,11 @@ import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
 @NonnullByDefault
 public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
@@ -78,6 +80,11 @@ public class ShortArrayMutableBlockBuffer extends AbstractBlockBuffer implements
     @Override
     public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new MutableBlockViewTransform(this, transform);
+    }
+
+    @Override
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override

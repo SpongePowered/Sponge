@@ -88,4 +88,5 @@ public abstract class AbstractBiomeBuffer implements BiomeArea {
             .add("max", this.getBiomeMax())
             .toString();
     }
+
 }
