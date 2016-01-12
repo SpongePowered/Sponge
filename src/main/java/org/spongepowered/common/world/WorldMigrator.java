@@ -190,8 +190,6 @@ public class WorldMigrator {
         // world_nether/world_the_end
         try {
             Files.delete(worldPath.resolve(worldPath.getFileName().toString()));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (IOException ignore) {}
     }
 }

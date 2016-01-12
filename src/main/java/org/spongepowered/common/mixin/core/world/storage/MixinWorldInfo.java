@@ -666,9 +666,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
-        if (this.levelName != null) {
-            this.spongeNbt.setString(NbtDataUtil.LEVEL_NAME, this.levelName);
-        }
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
         if (this.dimensionType != null) {
             this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
@@ -677,7 +674,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
         }
-
         if (this.isMod) {
             this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, true);
         }

@@ -110,7 +110,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -322,10 +321,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         if (!getAllowNether()) {
             SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
-                    + "dimensions besides [" + overworldFolder + "] will be skipped.");
+                    + "dimensions besides [{}}] will be skipped.", overworldFolder);
         }
 
-        WorldMigrator.migrateWorldsTo(Paths.get(overworldFolder));
+        WorldMigrator.migrateWorldsTo(SpongeImpl.getGame().getSavesDirectory().resolve(overworldFolder));
 
         registerExistingSpongeDimensions();
 
@@ -369,63 +368,59 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 continue;
             }
 
+            final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
+                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
             WorldInfo worldInfo;
-            WorldSettings newWorldSettings ;
-            AnvilSaveHandler worldsavehandler;
+            WorldSettings worldSettings;
 
-            if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
-                worldsavehandler =
-                        new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
-                                             SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
-                if (dim == 0) {
-                    // overworld uses the client set world name
-                    if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {
-                        worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldFolder).get();
-                    } else {
-                        worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName).get(); // client copied world
-                    }
+            if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT && dim == 0) {
+                // overworld uses the client set world name
+                if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldFolder)) {
+                    worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldFolder).get();
                 } else {
-                    worldInfo = worldsavehandler.loadWorldInfo();
+                    worldInfo = (WorldInfo) WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName).get(); // client copied world
                 }
             } else {
-                worldsavehandler = new AnvilSaveHandler(new File(dim == 0 ? "." : getFolderName()), worldFolder, true);
                 worldInfo = worldsavehandler.loadWorldInfo();
             }
 
             if (worldInfo == null) {
-                newWorldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                newWorldSettings.setWorldName(generatorOptions); // setGeneratorOptions
-                ((IMixinWorldSettings) (Object) newWorldSettings).setActualWorldName(worldFolder);
+                worldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+                worldSettings.setWorldName(generatorOptions); // setGeneratorOptions
+                ((IMixinWorldSettings) (Object) worldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
-                    newWorldSettings.enableBonusChest();
+                    worldSettings.enableBonusChest();
                 }
 
-                ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionId(dim);
-                ((IMixinWorldSettings)(Object) newWorldSettings).setDimensionType(((Dimension) provider).getType());
+                ((IMixinWorldSettings)(Object) worldSettings).setDimensionId(dim);
+                ((IMixinWorldSettings)(Object) worldSettings).setDimensionType(((Dimension) provider).getType());
 
-                worldInfo = new WorldInfo(newWorldSettings, worldFolder);
+                worldInfo = new WorldInfo(worldSettings, worldFolder);
                 ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
+
+                SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
+                        (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
+
             } else {
                 if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
                         (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
                     ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
                 }
-                newWorldSettings = new WorldSettings(worldInfo);
+
+                ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
+                ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
+                worldSettings = new WorldSettings(worldInfo);
             }
 
             if (dim == 0) {
                 this.setResourcePackFromWorld(this.getFolderName(), worldsavehandler);
             }
 
-            ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
-            ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            final UUID uuid = ((WorldProperties) worldInfo).getUniqueId();
-            DimensionRegistryModule.getInstance().registerWorldUniqueId(uuid, worldFolder);
+            DimensionRegistryModule.getInstance().registerWorldUniqueId(((WorldProperties) worldInfo).getUniqueId(), worldFolder);
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)),
-                (WorldCreationSettings)(Object) newWorldSettings, (WorldProperties) worldInfo));
+
 
             if (!((WorldProperties) worldInfo).loadOnStartup()) {
                 SpongeImpl.getLogger().warn("World [{}] (DIM{}) is set to not load on startup. To load it later, enable [load-on-startup] in config "
@@ -433,17 +428,17 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 continue;
             }
 
-            final WorldServer world = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
+            final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
 
-            world.initialize(newWorldSettings);
-            world.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, world));
+            worldServer.initialize(worldSettings);
+            worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
             if (!this.isSinglePlayer()) {
-                world.getWorldInfo().setGameType(this.getGameType());
+                worldServer.getWorldInfo().setGameType(this.getGameType());
             }
 
-            SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) world));
+            SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         }
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
@@ -477,8 +472,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             try {
                 compound = CompressedStreamTools.readCompressed(new FileInputStream(levelData));
             } catch (IOException e) {
-                SpongeImpl.getLogger().error("Failed loading Sponge data for World [" + worldCandidateFile.getName() + "]. This is a critical "
-                        + "problem and should be reported to Sponge ASAP.", e);
+                SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. This is a critical "
+                        + "problem and should be reported to Sponge ASAP.", worldCandidateFile.getName(), e);
                 continue;
             }
 
