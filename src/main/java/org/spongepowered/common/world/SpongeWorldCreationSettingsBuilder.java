@@ -81,7 +81,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = settings.doesGenerateSpawnOnLoad();
         this.pvpEnabled = settings.isPVPEnabled();
     }
 
@@ -97,7 +96,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
         this.pvpEnabled = properties.isPVPEnabled();
     }
 
@@ -114,7 +112,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = settings.doesGenerateSpawnOnLoad();
         this.pvpEnabled = settings.isPVPEnabled();
         return this;
     }
@@ -132,7 +129,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
         this.pvpEnabled = properties.isPVPEnabled();
         return this;
     }
@@ -198,12 +194,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     }
 
     @Override
-    public WorldCreationSettings.Builder generateSpawnOnLoad(boolean state) {
-        this.generateSpawnOnLoad = state;
-        return this;
-    }
-
-    @Override
     public SpongeWorldCreationSettingsBuilder generatorSettings(DataContainer settings) {
         this.generatorSettings = settings;
         return this;
@@ -251,7 +241,6 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = value.isEnabled();
         this.loadOnStartup = value.loadOnStartup();
         this.keepSpawnLoaded = value.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         this.generatorSettings = value.getGeneratorSettings().copy();
         this.generatorModifiers = ImmutableList.copyOf(value.getGeneratorModifiers());
         this.dimensionId = ((IMixinWorldSettings) value).getDimensionId();
@@ -283,7 +272,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
 
     @Override
     public WorldCreationSettings build() {
-        checkNotNull(name, "Building the settings to make a world requires a non-null name!");
+        checkNotNull(this.name, "Building the settings to make a world requires a non-null name!");
         final WorldSettings settings =
                 new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);

@@ -537,16 +537,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public boolean doesGenerateSpawnOnLoad() {
-        return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
-    }
-
-    @Override
-    public void setGenerateSpawnOnLoad(boolean state) {
-        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(state);
-    }
-
-    @Override
     public boolean isPVPEnabled() {
         return !this.worldConfig.getConfig().isConfigEnabled() || this.worldConfig.getConfig().getWorld().getPVPEnabled();
     }

@@ -199,11 +199,6 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Override
-    public boolean doesGenerateSpawnOnLoad() {
-        return this.generateSpawnOnLoad;
-    }
-
-    @Override
     public void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad) {
         this.generateSpawnOnLoad = generateSpawnOnLoad;
     }
