@@ -150,10 +150,10 @@ public class DimensionManager {
     }
 
     public static boolean shouldLoadSpawn(int dim) {
-        final WorldServer worldServer = getWorldFromDimId(dim);
-        final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
-
         if (dim != 0) {
+            final WorldServer worldServer = getWorldFromDimId(dim);
+            final SpongeConfig<SpongeConfig.WorldConfig> worldConfig = ((IMixinWorld) worldServer).getWorldConfig();
+
             if (worldConfig.getConfig().isConfigEnabled()) {
                 return worldConfig.getConfig().getWorld().getKeepSpawnLoaded();
             } else {
