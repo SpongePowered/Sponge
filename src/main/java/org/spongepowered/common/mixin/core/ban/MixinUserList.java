@@ -30,15 +30,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(UserList.class)
 public abstract class MixinUserList {
 
     @Shadow public abstract String getObjectKey(Object obj);
 
-    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/ArrayList;add(Ljava/lang/Object;)Z"))
-    public boolean onAdd(ArrayList<Object> list, Object object) {
+    @Redirect(method = "removeExpired", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    public boolean onAdd(List<Object> list, Object object) {
         return list.add(this.getObjectKey(object)); // Mojang didn't implement this correctly, so we'll fix it
     }
 
