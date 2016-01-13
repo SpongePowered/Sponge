@@ -22,75 +22,64 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
+package org.spongepowered.common.data.processor.multi.entity;
 
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableHealthData;
-import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableBreathingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.BreathingData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBreathingData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 
 import java.util.Map;
 import java.util.Optional;
 
-public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, HealthData, ImmutableHealthData> {
+public class BreathingDataProcessor extends AbstractEntityDataProcessor<EntityLivingBase, BreathingData, ImmutableBreathingData> {
 
-    public HealthDataProcessor() {
+    public BreathingDataProcessor() {
         super(EntityLivingBase.class);
     }
 
     @Override
-    protected HealthData createManipulator() {
-        return new SpongeHealthData(20, 20);
+    protected BreathingData createManipulator() {
+        return new SpongeBreathingData(300, 300);
     }
 
     @Override
     protected boolean doesDataExist(EntityLivingBase entity) {
-        return true;
+        return entity.isInWater();
     }
 
     @Override
     protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
-        entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
-        float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
-        entity.setHealth(health);
-        if (health == 0) {
-            entity.onDeath(DamageSource.generic);
-        }
+        final int maxAir = (Integer) keyValues.get(Keys.MAX_AIR);
+        final int air = (Integer) keyValues.get(Keys.REMAINING_AIR);
+        entity.setAir(air);
         return true;
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityLivingBase entity) {
-        final double health = entity.getHealth();
-        final double maxHealth = entity.getMaxHealth();
-        return ImmutableMap.<Key<?>, Object>of(Keys.HEALTH, health,
-                                               Keys.MAX_HEALTH, maxHealth);
+        return ImmutableMap.<Key<?>, Object>of(Keys.MAX_AIR, ((IMixinEntityLivingBase) entity).getMaxAir(), Keys.REMAINING_AIR, entity.getAir());
     }
 
     @Override
-    public Optional<HealthData> fill(DataContainer container, HealthData healthData) {
-        if (!container.contains(Keys.MAX_HEALTH.getQuery()) || !container.contains(Keys.HEALTH.getQuery())) {
-            return Optional.empty();
-        }
-        healthData.set(Keys.MAX_HEALTH, getData(container, Keys.MAX_HEALTH));
-        healthData.set(Keys.HEALTH, getData(container, Keys.HEALTH));
-        return Optional.of(healthData);
+    public Optional<BreathingData> fill(DataContainer container, BreathingData breathingData) {
+        breathingData.set(Keys.MAX_AIR, getData(container, Keys.MAX_AIR));
+        breathingData.set(Keys.REMAINING_AIR, getData(container, Keys.REMAINING_AIR));
+        return Optional.of(breathingData);
     }
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
+        return DataTransactionResult.failNoData();
     }
-
 }

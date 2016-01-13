@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.tileentity;
+package org.spongepowered.common.data.processor.multi.block;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
-import net.minecraft.tileentity.TileEntityChest;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -36,29 +36,21 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnected
 import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeConnectedDirectionData;
-import org.spongepowered.common.data.processor.common.AbstractTileEntityDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
-public class TileConnectedDirectionDataProcessor
-        extends AbstractTileEntityDataProcessor<TileEntityChest, ConnectedDirectionData, ImmutableConnectedDirectionData> {
+public class ConnectedDirectionDataProcessor extends
+        AbstractMultiDataSingleTargetProcessor<ItemStack, ConnectedDirectionData, ImmutableConnectedDirectionData> {
 
-    public TileConnectedDirectionDataProcessor() {
-        super(TileEntityChest.class);
+    public ConnectedDirectionDataProcessor() {
+        super(ItemStack.class);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<ConnectedDirectionData> fill(DataContainer container, ConnectedDirectionData m) {
-        Optional<List<?>> dirs = container.getList(Keys.CONNECTED_DIRECTIONS.getQuery());
-        if (dirs.isPresent()) {
-            m.set(Keys.CONNECTED_DIRECTIONS, Sets.newHashSet((List<Direction>) dirs.get()));
-            return Optional.of(m);
-        }
-        return Optional.empty();
+        return Optional.of(m);
     }
 
     @Override
@@ -67,42 +59,23 @@ public class TileConnectedDirectionDataProcessor
     }
 
     @Override
-    protected boolean doesDataExist(TileEntityChest chest) {
-        chest.checkForAdjacentChests();
-        return chest.adjacentChestXNeg != null || chest.adjacentChestXPos != null
-                || chest.adjacentChestZNeg != null || chest.adjacentChestZPos != null;
-    }
-
-    @Override
-    protected boolean set(TileEntityChest chest, Map<Key<?>, Object> keyValues) {
+    protected boolean doesDataExist(ItemStack entity) {
         return false;
     }
 
     @Override
-    protected Map<Key<?>, ?> getValues(TileEntityChest chest) {
-        Map<Key<?>, Object> values = Maps.newHashMap();
-        Set<Direction> directions = Sets.newHashSet();
-        values.put(Keys.CONNECTED_DIRECTIONS, directions);
+    protected boolean set(ItemStack entity, Map<Key<?>, Object> keyValues) {
+        return false;
+    }
 
-        chest.checkForAdjacentChests();
-        if (chest.adjacentChestZNeg != null) {
-            values.put(Keys.CONNECTED_NORTH, true);
-            directions.add(Direction.NORTH);
-        }
-        if (chest.adjacentChestXPos != null) {
-            values.put(Keys.CONNECTED_EAST, true);
-            directions.add(Direction.EAST);
-        }
-        if (chest.adjacentChestZPos != null) {
-            values.put(Keys.CONNECTED_SOUTH, true);
-            directions.add(Direction.SOUTH);
-        }
-        if (chest.adjacentChestXNeg != null) {
-            values.put(Keys.CONNECTED_WEST, true);
-            directions.add(Direction.WEST);
-        }
-
-        return values;
+    @Override
+    protected Map<Key<?>, ?> getValues(ItemStack entity) {
+        return ImmutableMap.<Key<?>, Object>of(
+                Keys.CONNECTED_DIRECTIONS, ImmutableSet.<Direction>of(),
+                Keys.CONNECTED_EAST, false,
+                Keys.CONNECTED_NORTH, false,
+                Keys.CONNECTED_SOUTH, false,
+                Keys.CONNECTED_WEST, false);
     }
 
     @Override

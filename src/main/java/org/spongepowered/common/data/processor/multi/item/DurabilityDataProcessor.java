@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.item;
+package org.spongepowered.common.data.processor.multi.item;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.item.ItemStack;

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.tileentity;
+package org.spongepowered.common.data.processor.multi.tileentity;
 
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.tileentity.TileEntityBanner;
