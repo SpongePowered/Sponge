@@ -83,6 +83,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.Living;
@@ -294,6 +295,8 @@ public class KeyRegistry {
         keyMap.put("hide_can_destroy", makeSingleKey(Boolean.class, Value.class, of("HideCanDestroy")));
         keyMap.put("hide_can_place", makeSingleKey(Boolean.class, Value.class, of("HideCanPlace")));
         keyMap.put("hide_miscellaneous", makeSingleKey(Boolean.class, Value.class, of("HideMiscellaneous")));
+        keyMap.put("beacon_primary_effect", makeSingleKey(PotionEffectType.class, OptionalValue.class, of("BeaconPrimaryEffect")));
+        keyMap.put("beacon_secondary_effect", makeSingleKey(PotionEffectType.class, OptionalValue.class, of("BeaconSecondaryEffect")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

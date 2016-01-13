@@ -129,6 +129,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
         dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
+        dataManager.registerBuilder(Beacon.class, new SpongeBeaconBuilder());
 
         // Block stuff
         dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
@@ -585,6 +586,10 @@ public class DataRegistrar {
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
+				
+        final BeaconDataProcessor beaconDataProcessor = new BeaconDataProcessor();
+        dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class, ImmutableBeaconData.class, ImmutableSpongeBeaconData.class,
+                beaconDataProcessor);
 
         // Values
 
@@ -656,6 +661,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
+        dataManager.registerValueProcessor(Keys.BEACON_PRIMARY_EFFECT, new BeaconPrimaryEffectValueProcessor());
+        dataManager.registerValueProcessor(Keys.BEACON_SECONDARY_EFFECT, new BeaconSecondaryEffectValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

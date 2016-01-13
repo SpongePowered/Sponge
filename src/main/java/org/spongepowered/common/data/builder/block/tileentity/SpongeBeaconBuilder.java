@@ -32,6 +32,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BeaconData;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBeaconData;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
@@ -48,7 +49,7 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
             if (!container.contains(DataQueries.PRIMARY) || !container.contains(DataQueries.SECONDARY)) {
                 return Optional.empty();
             }
-            final BeaconData beaconData = null;
+            final BeaconData beaconData = new SpongeBeaconData();
             beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.PRIMARY).get()]));
             beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.SECONDARY).get()]));
 
