@@ -33,16 +33,16 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSprintData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class SprintDataProcessor extends AbstractSingleDataSingleTargetProcessor<Entity, Boolean, Value<Boolean>, SprintData, ImmutableSprintData> {
+public class SprintDataProcessor extends AbstractEntitySingleDataProcessor<Entity, Boolean, Value<Boolean>, SprintData, ImmutableSprintData> {
 
     public SprintDataProcessor() {
-        super(Keys.IS_SPRINTING, Entity.class);
+        super(Entity.class, Keys.IS_SPRINTING);
     }
 
     @Override

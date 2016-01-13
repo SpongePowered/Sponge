@@ -39,7 +39,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeStoredEnchantmentData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
@@ -47,15 +47,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class StoredEnchantmentDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<ItemStack, List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
+        AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
-        super(Keys.STORED_ENCHANTMENTS, ItemStack.class);
-    }
-
-    @Override
-    protected boolean supports(ItemStack entity) {
-        return entity.getItem().equals(Items.enchanted_book);
+        super(stack -> stack.getItem().equals(Items.enchanted_book), Keys.STORED_ENCHANTMENTS);
     }
 
     @Override

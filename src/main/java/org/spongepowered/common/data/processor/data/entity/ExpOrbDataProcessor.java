@@ -33,17 +33,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 
 import java.util.Optional;
 
 public class ExpOrbDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
+        AbstractEntitySingleDataProcessor<EntityXPOrb, Integer, MutableBoundedValue<Integer>, ExpOrbData, ImmutableExpOrbData> {
 
     public ExpOrbDataProcessor() {
-        super(Keys.CONTAINED_EXPERIENCE, EntityXPOrb.class);
+        super(EntityXPOrb.class, Keys.CONTAINED_EXPERIENCE);
     }
 
     @Override

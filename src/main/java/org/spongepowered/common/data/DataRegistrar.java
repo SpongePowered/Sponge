@@ -413,7 +413,7 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(SandstoneData.class, SpongeSandstoneData.class, ImmutableSandstoneData.class,
                 ImmutableSpongeSandstoneData.class, new SandstoneDataProcessor());
 
-        dataManager.registerDataProcessorAndImpl(ComparatorData.class, SpongeComparatorData.class, ImmutableComparatorData.class,
+        dataManager.registerDualProcessor(ComparatorData.class, SpongeComparatorData.class, ImmutableComparatorData.class,
                 ImmutableSpongeComparatorData.class, new ComparatorDataProcessor());
 
         dataManager.registerDualProcessor(TreeData.class, SpongeTreeData.class, ImmutableTreeData.class,

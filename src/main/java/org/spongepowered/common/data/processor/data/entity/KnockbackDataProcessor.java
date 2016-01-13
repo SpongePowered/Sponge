@@ -33,17 +33,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeKnockbackData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Optional;
 
 public class KnockbackDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityArrow, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
+        extends AbstractEntitySingleDataProcessor<EntityArrow, Integer, MutableBoundedValue<Integer>, KnockbackData, ImmutableKnockbackData> {
 
     public KnockbackDataProcessor() {
-        super(Keys.KNOCKBACK_STRENGTH, EntityArrow.class);
+        super(EntityArrow.class, Keys.KNOCKBACK_STRENGTH);
     }
 
     @Override

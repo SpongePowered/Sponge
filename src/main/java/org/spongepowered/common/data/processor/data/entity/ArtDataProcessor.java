@@ -35,17 +35,17 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ArtDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
+public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPainting, Art, Value<Art>, ArtData, ImmutableArtData> {
 
     public ArtDataProcessor() {
-        super(Keys.ART, EntityPainting.class);
+        super(EntityPainting.class, Keys.ART);
     }
 
     @Override

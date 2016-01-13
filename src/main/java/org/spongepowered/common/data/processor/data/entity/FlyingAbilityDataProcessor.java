@@ -33,17 +33,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlyingAbilityData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 public class FlyingAbilityDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityPlayer, Boolean, Value<Boolean>, FlyingAbilityData, ImmutableFlyingAbilityData> {
+        AbstractEntitySingleDataProcessor<EntityPlayer, Boolean, Value<Boolean>, FlyingAbilityData, ImmutableFlyingAbilityData> {
 
     public FlyingAbilityDataProcessor() {
-        super(Keys.CAN_FLY, EntityPlayer.class);
+        super(EntityPlayer.class, Keys.CAN_FLY);
     }
 
     @Override

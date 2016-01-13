@@ -33,16 +33,16 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCriticalHitData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
 public class CriticalHitDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityArrow, Boolean, Value<Boolean>, CriticalHitData, ImmutableCriticalHitData> {
+        extends AbstractEntitySingleDataProcessor<EntityArrow, Boolean, Value<Boolean>, CriticalHitData, ImmutableCriticalHitData> {
 
     public CriticalHitDataProcessor() {
-        super(Keys.CRITICAL_HIT, EntityArrow.class);
+        super(EntityArrow.class, Keys.CRITICAL_HIT);
     }
 
     @Override

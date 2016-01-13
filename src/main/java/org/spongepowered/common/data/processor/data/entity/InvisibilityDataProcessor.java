@@ -34,7 +34,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibilityData;
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
-import org.spongepowered.common.data.processor.common.AbstractMultiDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.data.util.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
@@ -42,7 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class InvisibilityDataProcessor
-        extends AbstractMultiDataSingleTargetProcessor<Entity, InvisibilityData, ImmutableInvisibilityData> {
+        extends AbstractEntityDataProcessor<Entity, InvisibilityData, ImmutableInvisibilityData> {
 
     public InvisibilityDataProcessor() {
         super(Entity.class);
@@ -58,7 +58,6 @@ public class InvisibilityDataProcessor
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     protected boolean set(Entity dataHolder, Map<Key<?>, Object> keyValues) {
         if (!dataHolder.worldObj.isRemote) {

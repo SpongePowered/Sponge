@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -45,10 +45,10 @@ import org.spongepowered.common.entity.SpongeOcelotType;
 import java.util.Optional;
 
 public class OcelotDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
+        AbstractEntitySingleDataProcessor<EntityOcelot, OcelotType, Value<OcelotType>, OcelotData, ImmutableOcelotData> {
 
     public OcelotDataProcessor() {
-        super(Keys.OCELOT_TYPE, EntityOcelot.class);
+        super(EntityOcelot.class, Keys.OCELOT_TYPE);
     }
 
     @Override

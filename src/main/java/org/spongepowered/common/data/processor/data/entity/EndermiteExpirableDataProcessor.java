@@ -35,16 +35,16 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
 public class EndermiteExpirableDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityEndermite, Integer, MutableBoundedValue<Integer>, ExpirableData, ImmutableExpirableData> {
+        AbstractEntitySingleDataProcessor<EntityEndermite, Integer, MutableBoundedValue<Integer>, ExpirableData, ImmutableExpirableData> {
 
     public EndermiteExpirableDataProcessor() {
-        super(Keys.EXPIRATION_TICKS, EntityEndermite.class);
+        super(EntityEndermite.class, Keys.EXPIRATION_TICKS);
     }
 
     @Override

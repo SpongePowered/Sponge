@@ -38,7 +38,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
@@ -48,10 +48,10 @@ import java.util.List;
 import java.util.Optional;
 
 public class FireworkEffectDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityFireworkRocket, List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
+        AbstractEntitySingleDataProcessor<EntityFireworkRocket, List<FireworkEffect>, ListValue<FireworkEffect>, FireworkEffectData, ImmutableFireworkEffectData> {
 
     public FireworkEffectDataProcessor() {
-        super(Keys.FIREWORK_EFFECTS, EntityFireworkRocket.class);
+        super(EntityFireworkRocket.class, Keys.FIREWORK_EFFECTS);
     }
 
     @Override

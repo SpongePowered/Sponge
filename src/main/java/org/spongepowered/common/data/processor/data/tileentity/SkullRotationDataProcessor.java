@@ -37,17 +37,17 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 public class SkullRotationDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
+        extends AbstractTileEntitySingleDataProcessor<TileEntitySkull, Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
     public SkullRotationDataProcessor() {
-        super(Keys.DIRECTION, TileEntitySkull.class);
+        super(TileEntitySkull.class, Keys.DIRECTION);
     }
 
     @Override

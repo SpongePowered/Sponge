@@ -33,7 +33,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
@@ -41,10 +41,10 @@ import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 import java.util.Optional;
 
 public class AggressiveDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityPigZombie, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
+        extends AbstractEntitySingleDataProcessor<EntityPigZombie, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
 
     public AggressiveDataProcessor() {
-        super(Keys.ANGRY, EntityPigZombie.class);
+        super(EntityPigZombie.class, Keys.ANGRY);
     }
 
     @Override

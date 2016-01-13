@@ -34,7 +34,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeGenerationData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
@@ -43,10 +43,10 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue
 import java.util.Optional;
 
 public final class GenerationDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<ItemStack, Integer, MutableBoundedValue<Integer>, GenerationData, ImmutableGenerationData> {
+        extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, GenerationData, ImmutableGenerationData> {
 
     public GenerationDataProcessor() {
-        super(Keys.GENERATION, ItemStack.class);
+        super(stack -> stack.getItem().equals(Items.written_book), Keys.GENERATION);
     }
 
     @Override
@@ -83,11 +83,6 @@ public final class GenerationDataProcessor
     @Override
     protected GenerationData createManipulator() {
         return new SpongeGenerationData();
-    }
-
-    @Override
-    protected boolean supports(ItemStack stack) {
-        return stack.getItem().equals(Items.written_book);
     }
 
 }

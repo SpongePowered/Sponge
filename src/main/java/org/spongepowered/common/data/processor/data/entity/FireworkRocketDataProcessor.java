@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkRocketData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.FireworkUtils;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
@@ -47,10 +47,10 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 import java.util.Optional;
 
 public class FireworkRocketDataProcessor extends
-        AbstractSingleDataSingleTargetProcessor<EntityFireworkRocket, Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
+        AbstractEntitySingleDataProcessor<EntityFireworkRocket, Integer, MutableBoundedValue<Integer>, FireworkRocketData, ImmutableFireworkRocketData> {
 
     public FireworkRocketDataProcessor() {
-        super(Keys.FIREWORK_FLIGHT_MODIFIER, EntityFireworkRocket.class);
+        super(EntityFireworkRocket.class, Keys.FIREWORK_FLIGHT_MODIFIER);
     }
 
     @Override

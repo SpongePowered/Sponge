@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRotationalData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.RotationalUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -43,10 +43,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Optional;
 
 public class RotationalDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityItemFrame, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
+        extends AbstractEntitySingleDataProcessor<EntityItemFrame, Rotation, Value<Rotation>, RotationalData, ImmutableRotationalData> {
 
     public RotationalDataProcessor() {
-        super(Keys.ROTATION, EntityItemFrame.class);
+        super(EntityItemFrame.class, Keys.ROTATION);
     }
 
     @Override

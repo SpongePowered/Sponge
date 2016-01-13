@@ -33,17 +33,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeFlammableData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 public final class BlazeFlammableDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityBlaze, Boolean, Value<Boolean>, FlammableData, ImmutableFlammableData> {
+        extends AbstractEntitySingleDataProcessor<EntityBlaze, Boolean, Value<Boolean>, FlammableData, ImmutableFlammableData> {
 
     public BlazeFlammableDataProcessor() {
-        super(Keys.IS_AFLAME, EntityBlaze.class);
+        super(EntityBlaze.class, Keys.IS_AFLAME);
     }
 
     @Override

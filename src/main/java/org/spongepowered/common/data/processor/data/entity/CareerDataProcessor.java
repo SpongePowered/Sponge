@@ -35,7 +35,7 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
@@ -43,10 +43,10 @@ import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import java.util.Optional;
 
 public class CareerDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
+        extends AbstractEntitySingleDataProcessor<EntityVillager, Career, Value<Career>, CareerData, ImmutableCareerData> {
 
     public CareerDataProcessor() {
-        super(Keys.CAREER, EntityVillager.class);
+        super(EntityVillager.class, Keys.CAREER);
     }
 
     @Override

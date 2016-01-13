@@ -35,18 +35,18 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeStuckArrowsData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeBoundedValue;
 
 import java.util.Optional;
 
-public class StuckArrowsDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>, StuckArrowsData,
-        ImmutableStuckArrowsData> {
+public class StuckArrowsDataProcessor extends
+        AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
 
     public StuckArrowsDataProcessor() {
-        super(Keys.STUCK_ARROWS, EntityLivingBase.class);
+        super(EntityLivingBase.class, Keys.STUCK_ARROWS);
     }
 
     @Override

@@ -33,16 +33,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongePersistingData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class PersistingDataProcessor extends AbstractSingleDataSingleTargetProcessor<EntityLiving, Boolean, Value<Boolean>, PersistingData, ImmutablePersistingData> {
+public class PersistingDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityLiving, Boolean, Value<Boolean>, PersistingData, ImmutablePersistingData> {
 
     public PersistingDataProcessor() {
-        super(Keys.PERSISTS, EntityLiving.class);
+        super(EntityLiving.class, Keys.PERSISTS);
     }
 
     @Override

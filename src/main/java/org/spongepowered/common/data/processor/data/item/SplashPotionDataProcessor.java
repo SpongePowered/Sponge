@@ -35,17 +35,17 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSplashPotionData;
-import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
+import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 public class SplashPotionDataProcessor
-        extends AbstractSingleDataSingleTargetProcessor<ItemStack, Boolean, Value<Boolean>, SplashPotionData, ImmutableSplashPotionData> {
+        extends AbstractItemSingleDataProcessor<Boolean, Value<Boolean>, SplashPotionData, ImmutableSplashPotionData> {
 
     public SplashPotionDataProcessor() {
-        super(Keys.IS_SPLASH_POTION, ItemStack.class);
+        super(stack -> stack.getItem().equals(Items.potionitem), Keys.IS_SPLASH_POTION);
     }
 
     @Override
@@ -102,8 +102,4 @@ public class SplashPotionDataProcessor
         return new SpongeSplashPotionData();
     }
 
-    @Override
-    protected boolean supports(ItemStack entity) {
-        return entity.getItem().equals(Items.potionitem);
-    }
 }
