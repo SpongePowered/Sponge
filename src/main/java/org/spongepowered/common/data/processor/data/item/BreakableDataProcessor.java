@@ -27,19 +27,19 @@ package org.spongepowered.common.data.processor.data.item;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableData;
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
 import org.spongepowered.api.data.value.mutable.SetValue;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeBreakableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.BreakablePlaceableUtils;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeSetValue;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 
 import java.util.Optional;
 import java.util.Set;
@@ -67,29 +67,28 @@ public class BreakableDataProcessor
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (supports(dataHolder)) {
-            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<BreakableData> old = from(dataHolder);
-            try {
-                if (set((ItemStack) dataHolder, ImmutableSet.<BlockType>of())) {
-                    if (old.isPresent()) {
-                        builder.replace(old.get().getValues());
-                    }
-                    return builder.result(DataTransactionResult.Type.SUCCESS).build();
-                } else {
-                    return builder.result(DataTransactionResult.Type.FAILURE).build();
-                }
-            } catch (Exception e) {
-                SpongeImpl.getLogger().debug("An exception occurred when removing data: ", e);
-                return builder.result(DataTransactionResult.Type.ERROR).build();
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            ItemStack stack = (ItemStack) container;
+            Optional<Set<BlockType>> old = getVal(stack);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
             }
+            if (set((ItemStack) container, ImmutableSet.<BlockType>of())) {
+                return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            }
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    protected ImmutableValue<Set<BlockType>> constructImmutableValue(Set<BlockType> value) {
+    protected SetValue<BlockType> constructValue(Set<BlockType> actualValue) {
+        return new SpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, actualValue);
+    }
+
+    @Override
+    protected ImmutableSetValue<BlockType> constructImmutableValue(Set<BlockType> value) {
         return new ImmutableSpongeSetValue<>(Keys.BREAKABLE_BLOCK_TYPES, value);
     }
 

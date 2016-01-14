@@ -30,6 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.SeamlessData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSeamlessData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SeamlessDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, SeamlessData, ImmutableSeamlessData> {
 
@@ -45,6 +46,11 @@ public class SeamlessDataProcessor extends AbstractBlockOnlyDataProcessor<Boolea
     @Override
     protected SeamlessData createManipulator() {
         return new SpongeSeamlessData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

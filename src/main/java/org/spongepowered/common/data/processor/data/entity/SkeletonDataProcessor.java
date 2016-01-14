@@ -25,31 +25,33 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntitySkeleton;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableSkeletonData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SkeletonData;
 import org.spongepowered.api.data.type.SkeletonType;
 import org.spongepowered.api.data.type.SkeletonTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.entity.SpongeSkeletonType;
 
 import java.util.Optional;
 
-public class SkeletonDataProcessor extends AbstractEntitySingleDataProcessor<EntitySkeleton, SkeletonType, Value<SkeletonType>, SkeletonData, ImmutableSkeletonData> {
+public class SkeletonDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntitySkeleton, SkeletonType, Value<SkeletonType>, SkeletonData, ImmutableSkeletonData> {
 
     public SkeletonDataProcessor() {
         super(EntitySkeleton.class, Keys.SKELETON_TYPE);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> entity) {
         return DataTransactionResult.failNoData();
     }
 
@@ -65,6 +67,11 @@ public class SkeletonDataProcessor extends AbstractEntitySingleDataProcessor<Ent
     @Override
     protected Optional<SkeletonType> getVal(EntitySkeleton entity) {
         return Optional.ofNullable(SpongeEntityConstants.SKELETON_IDMAP.get(entity.getSkeletonType()));
+    }
+
+    @Override
+    protected Value<SkeletonType> constructValue(SkeletonType actualValue) {
+        return new SpongeValue<>(Keys.SKELETON_TYPE, SkeletonTypes.NORMAL, actualValue);
     }
 
     @Override

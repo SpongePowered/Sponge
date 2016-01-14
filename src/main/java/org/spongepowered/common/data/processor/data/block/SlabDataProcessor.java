@@ -38,6 +38,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSlabData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Value<SlabType>, SlabData, ImmutableSlabData> {
 
@@ -86,4 +87,10 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
     protected SlabType getDefaultValue() {
         return SlabTypes.COBBLESTONE;
     }
+
+    @Override
+    protected Value<SlabType> constructValue(SlabType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

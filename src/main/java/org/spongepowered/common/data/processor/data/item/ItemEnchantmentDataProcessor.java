@@ -29,25 +29,25 @@ import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.Optional;
 
-public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
+public class ItemEnchantmentDataProcessor
+        extends AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, EnchantmentData, ImmutableEnchantmentData> {
 
     public ItemEnchantmentDataProcessor() {
         super(input -> true, Keys.ITEM_ENCHANTMENTS);
@@ -66,11 +66,16 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
 
     @Override
     protected Optional<List<ItemEnchantment>> getVal(ItemStack itemStack) {
-        if (!itemStack.isItemEnchanted()) {
-            return Optional.empty();
-        } else {
+        if (itemStack.isItemEnchanted()) {
             return Optional.of(NbtDataUtil.getItemEnchantments(itemStack));
+        } else {
+            return Optional.empty();
         }
+    }
+
+    @Override
+    protected ListValue<ItemEnchantment> constructValue(List<ItemEnchantment> actualValue) {
+        return new SpongeListValue<>(Keys.ITEM_ENCHANTMENTS, actualValue);
     }
 
     @Override
@@ -78,14 +83,10 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
         return new ImmutableSpongeListValue<>(Keys.ITEM_ENCHANTMENTS, ImmutableList.copyOf(value));
     }
 
-
     @Override
     public Optional<EnchantmentData> fill(DataContainer container, EnchantmentData enchantmentData) {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        DataManager dataManager = SpongeDataManager.getInstance();
-        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
-                                                                                 ItemEnchantment.class
-        ).get();
+        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), ItemEnchantment.class).get();
         final ListValue<ItemEnchantment> existing = enchantmentData.enchantments();
         existing.addAll(enchantments);
         enchantmentData.set(existing);
@@ -93,16 +94,17 @@ public class ItemEnchantmentDataProcessor extends AbstractItemSingleDataProcesso
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof ItemStack) {
-            if (((ItemStack) dataHolder).isItemEnchanted()) {
-                final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-                builder.replace(constructImmutableValue(getVal((ItemStack) dataHolder).get()));
-                ((ItemStack) dataHolder).getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
-                return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof ItemStack) {
+            ItemStack stack = (ItemStack) container;
+            Optional<List<ItemEnchantment>> old = getVal(stack);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
             }
-            return DataTransactionResult.successNoData();
+            stack.getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
+
 }

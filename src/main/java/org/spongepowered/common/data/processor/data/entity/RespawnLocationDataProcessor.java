@@ -26,17 +26,18 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
+import org.spongepowered.common.data.value.mutable.SpongeMapValue;
 import org.spongepowered.common.entity.player.ISpongeUser;
 
 import java.util.Map;
@@ -51,12 +52,12 @@ public class RespawnLocationDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof ISpongeUser) {
-            ImmutableMap<UUID, Vector3d> removed = ((ISpongeUser) dataHolder).removeAllBeds();
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof ISpongeUser) {
+            ImmutableMap<UUID, Vector3d> removed = ((ISpongeUser) container).removeAllBeds();
             if (!removed.isEmpty()) {
                 return DataTransactionResult
-                    .builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(removed)).build();
+                        .builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(removed)).build();
             } else {
                 return DataTransactionResult.successNoData();
             }
@@ -78,6 +79,11 @@ public class RespawnLocationDataProcessor extends
             return Optional.of(((ISpongeUser) user).getBedlocations());
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected MapValue<UUID, Vector3d> constructValue(Map<UUID, Vector3d> actualValue) {
+        return new SpongeMapValue<>(Keys.RESPAWN_LOCATIONS, actualValue);
     }
 
     @Override

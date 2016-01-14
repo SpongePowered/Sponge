@@ -30,6 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.SnowedData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeSnowedData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class SnowedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, SnowedData, ImmutableSnowedData> {
 
@@ -45,6 +46,11 @@ public class SnowedDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean,
     @Override
     protected SnowedData createManipulator() {
         return new SpongeSnowedData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

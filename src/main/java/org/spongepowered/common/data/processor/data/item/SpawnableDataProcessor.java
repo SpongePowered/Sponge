@@ -27,11 +27,11 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableSpawnableData;
 import org.spongepowered.api.data.manipulator.mutable.item.SpawnableData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
@@ -40,6 +40,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeSpawnableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -53,7 +54,7 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     public boolean set(ItemStack itemStack, EntityType value) {
         final String name = (String) EntityList.classToStringMapping.get(value.getEntityClass());
         final int id = (int) EntityList.stringToIDMapping.get(name);
-        if(EntityList.entityEggs.containsKey(id)) {
+        if (EntityList.entityEggs.containsKey(id)) {
             itemStack.setItemDamage(id);
             return true;
         }
@@ -62,13 +63,18 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
 
     @Override
     public Optional<EntityType> getVal(ItemStack itemStack) {
-        final Class entity = EntityList.getClassFromID(itemStack.getItemDamage());
+        final Class<?> entity = EntityList.getClassFromID(itemStack.getItemDamage());
         for (EntityType type : SpongeImpl.getRegistry().getAllOf(EntityType.class)) {
             if (type.getEntityClass().equals(entity)) {
                 return Optional.of(type);
             }
         }
         return Optional.empty();
+    }
+
+    @Override
+    protected Value<EntityType> constructValue(EntityType actualValue) {
+        return new SpongeValue<>(Keys.SPAWNABLE_ENTITY_TYPE, EntityTypes.CREEPER, actualValue);
     }
 
     @Override
@@ -82,11 +88,17 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (this.supports(dataHolder)) {
-            ((ItemStack) dataHolder).setItemDamage(0);
-            return DataTransactionResult.successNoData();
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            ItemStack stack = (ItemStack) container;
+            Optional<EntityType> old = getVal(stack);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
+            }
+            stack.setItemDamage(0);
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
+
 }

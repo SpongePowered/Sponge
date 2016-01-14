@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeAxisData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class AxisDataProcessor extends AbstractBlockOnlyDataProcessor<Axis, Value<Axis>, AxisData, ImmutableAxisData> {
 
@@ -47,6 +47,11 @@ public class AxisDataProcessor extends AbstractBlockOnlyDataProcessor<Axis, Valu
     @Override
     protected AxisData createManipulator() {
         return new SpongeAxisData();
+    }
+
+    @Override
+    protected Value<Axis> constructValue(Axis actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

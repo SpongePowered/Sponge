@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.ComparatorTypes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeComparatorData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class ComparatorDataProcessor extends
         AbstractBlockOnlyDataProcessor<ComparatorType, Value<ComparatorType>, ComparatorData, ImmutableComparatorData> {
@@ -49,4 +50,10 @@ public class ComparatorDataProcessor extends
     protected ComparatorType getDefaultValue() {
         return ComparatorTypes.COMPARE;
     }
+
+    @Override
+    protected Value<ComparatorType> constructValue(ComparatorType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

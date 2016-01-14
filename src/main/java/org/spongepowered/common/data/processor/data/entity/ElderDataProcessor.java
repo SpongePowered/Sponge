@@ -25,21 +25,22 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntityGuardian;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableElderData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ElderData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeElderData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
 public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<EntityGuardian, Boolean, Value<Boolean>, ElderData, ImmutableElderData> {
-
 
     public ElderDataProcessor() {
         super(EntityGuardian.class, Keys.ELDER_GUARDIAN);
@@ -62,12 +63,18 @@ public class ElderDataProcessor extends AbstractEntitySingleDataProcessor<Entity
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.ELDER_GUARDIAN, false, value);
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, DataConstants.ELDER_GUARDIAN_DEFAULT, actualValue);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
+        return ImmutableSpongeValue.cachedOf(this.key, DataConstants.ELDER_GUARDIAN_DEFAULT, value);
+    }
+
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

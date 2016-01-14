@@ -33,17 +33,18 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityLockable;
 import net.minecraft.world.LockCode;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableLockableData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.LockableData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeLockableData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -61,13 +62,13 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
             }
             TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null, item.getMetadata(stack.getItemDamage()));
             return tile instanceof TileEntityLockable;
-        }, Keys.LOCK_TOKEN);
+        } , Keys.LOCK_TOKEN);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder holder) {
-        if (supports(holder)) {
-            set((ItemStack) holder, "");
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            set((ItemStack) container, "");
             return DataTransactionResult.successNoData();
         }
         return DataTransactionResult.failNoData();
@@ -97,6 +98,11 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
             return Optional.empty();
         }
         return Optional.of(code.getLock());
+    }
+
+    @Override
+    protected Value<String> constructValue(String actualValue) {
+        return new SpongeValue<String>(Keys.LOCK_TOKEN, "", actualValue);
     }
 
     @Override

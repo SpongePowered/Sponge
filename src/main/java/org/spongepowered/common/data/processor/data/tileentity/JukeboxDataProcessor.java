@@ -25,21 +25,22 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.block.BlockJukebox;
+import net.minecraft.block.BlockJukebox.TileEntityJukebox;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.ItemRecord;
 import org.spongepowered.api.block.tileentity.Jukebox;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -57,9 +58,7 @@ public class JukeboxDataProcessor extends
             if (jukebox.getRecord() == null) {
                 return true;
             }
-            ((Jukebox) jukebox).ejectRecord();
-            block = jukebox.getWorld().getBlockState(jukebox.getPos());
-            return block.getBlock() instanceof BlockJukebox && !(Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+            return remove(jukebox);
         }
         if (!(stackSnapshot.getType() instanceof ItemRecord)) {
             return false;
@@ -77,22 +76,26 @@ public class JukeboxDataProcessor extends
         return Optional.of(((org.spongepowered.api.item.inventory.ItemStack) jukebox.getRecord()).createSnapshot());
     }
 
+    private boolean remove(BlockJukebox.TileEntityJukebox jukebox) {
+        ((Jukebox) jukebox).ejectRecord();
+        IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
+        return block.getBlock() instanceof BlockJukebox && !(Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+    }
+
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (!(dataHolder instanceof BlockJukebox.TileEntityJukebox)) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (!(container instanceof BlockJukebox.TileEntityJukebox)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<ItemStackSnapshot> oldValue = getVal((BlockJukebox.TileEntityJukebox) dataHolder);
-        if (!oldValue.isPresent()) {
+        BlockJukebox.TileEntityJukebox jukebox = (TileEntityJukebox) container;
+        Optional<ItemStackSnapshot> old = getVal(jukebox);
+        if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        try {
-            ((Jukebox) dataHolder).ejectRecord();
-            return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
-        } catch (Exception e) {
-            SpongeImpl.getLogger().error("There was an issue removing the repesented item from an Jukebox!", e);
-            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
+        if (remove(jukebox)) {
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
+        return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
     }
 
     @Override
@@ -101,7 +104,13 @@ public class JukeboxDataProcessor extends
     }
 
     @Override
+    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
+    }
+
+    @Override
     protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
         return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
     }
+
 }

@@ -30,6 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.RedstonePoweredData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeRedstonePoweredData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class RedstonePoweredDataProcessor extends
         AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, RedstonePoweredData, ImmutableRedstonePoweredData> {
@@ -46,6 +47,16 @@ public class RedstonePoweredDataProcessor extends
     @Override
     protected RedstonePoweredData createManipulator() {
         return new SpongeRedstonePoweredData();
+    }
+
+    @Override
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+        return SpongeValueFactory.boundedBuilder(this.key)
+                .defaultValue(getDefaultValue())
+                .minimum(0)
+                .maximum(15)
+                .actualValue(actualValue)
+                .build();
     }
 
 }

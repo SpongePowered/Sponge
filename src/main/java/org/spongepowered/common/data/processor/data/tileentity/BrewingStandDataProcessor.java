@@ -25,11 +25,11 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntityBrewingStand;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBrewingStandData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBrewingStandData;
@@ -38,8 +38,8 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class BrewingStandDataProcessor extends AbstractTileEntitySingleDataProcessor<TileEntityBrewingStand, Integer,
-        MutableBoundedValue<Integer>, BrewingStandData, ImmutableBrewingStandData> {
+public class BrewingStandDataProcessor extends
+        AbstractTileEntitySingleDataProcessor<TileEntityBrewingStand, Integer, MutableBoundedValue<Integer>, BrewingStandData, ImmutableBrewingStandData> {
 
     public BrewingStandDataProcessor() {
         super(TileEntityBrewingStand.class, Keys.REMAINING_BREW_TIME);
@@ -61,14 +61,18 @@ public class BrewingStandDataProcessor extends AbstractTileEntitySingleDataProce
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
         return SpongeValueFactory.boundedBuilder(Keys.REMAINING_BREW_TIME)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(400)
-                .actualValue(value)
-                .build()
-                .asImmutable();
+                .actualValue(actualValue)
+                .build();
+    }
+
+    @Override
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override
@@ -77,7 +81,8 @@ public class BrewingStandDataProcessor extends AbstractTileEntitySingleDataProce
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        return DataTransactionResult.failNoData(); //cannot be removed
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        return DataTransactionResult.failNoData(); // cannot be removed
     }
+
 }

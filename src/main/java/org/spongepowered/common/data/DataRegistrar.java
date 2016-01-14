@@ -82,9 +82,10 @@ import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
-import org.spongepowered.common.data.processor.dual.entity.*;
-import org.spongepowered.common.data.processor.dual.item.*;
-import org.spongepowered.common.data.processor.dual.tile.*;
+import org.spongepowered.common.data.processor.multi.block.*;
+import org.spongepowered.common.data.processor.multi.entity.*;
+import org.spongepowered.common.data.processor.multi.item.*;
+import org.spongepowered.common.data.processor.multi.tileentity.*;
 import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
@@ -101,6 +102,7 @@ public class DataRegistrar {
     public static void setupSerialization(Game game) {
         KeyRegistry.registerKeys();
         SpongeDataManager dataManager = SpongeDataManager.getInstance();
+
         // TileEntities
         dataManager.registerBuilder(Banner.class, new SpongeBannerBuilder());
         dataManager.registerBuilder(PatternLayer.class, new SpongePatternLayerBuilder());
@@ -147,428 +149,419 @@ public class DataRegistrar {
 
         // Data Manipulators
 
-        final HealthDataProcessor healthProcessor = new HealthDataProcessor();
-        dataManager.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
-                ImmutableSpongeHealthData.class, healthProcessor);
-
-        final IgniteableDataProcessor igniteableProcessor = new IgniteableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(IgniteableData.class, SpongeIgniteableData.class, ImmutableIgniteableData.class,
-                ImmutableSpongeIgniteableData.class, igniteableProcessor);
-
         final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         dataManager.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
                 ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
 
-        final ColoredDataProcessor coloredDataProcessor = new ColoredDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ColoredData.class, SpongeColoredData.class,
-                ImmutableColoredData.class, ImmutableSpongeColoredData.class, coloredDataProcessor);
+        // Entity Processors
 
-        final SignDataProcessor signDataProcessor = new SignDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SignData.class, SpongeSignData.class,
-                ImmutableSignData.class, ImmutableSpongeSignData.class, signDataProcessor);
+        dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
+                ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, new FireworkEffectDataProcessor());
 
-        final SkullDataProcessor skullDataProcessor = new SkullDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
-                ImmutableSpongeSkullData.class, skullDataProcessor);
+        dataManager.registerDualProcessor(FireworkRocketData.class, SpongeFireworkRocketData.class,
+                ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, new FireworkRocketDataProcessor());
 
-        final VelocityDataProcessor velocityDataProcessor = new VelocityDataProcessor();
-        dataManager.registerDataProcessorAndImpl(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
-                ImmutableSpongeVelocityData.class, velocityDataProcessor);
+        dataManager.registerDataProcessorAndImpl(HealthData.class, SpongeHealthData.class, ImmutableHealthData.class,
+                ImmutableSpongeHealthData.class, new HealthDataProcessor());
 
-        final FoodDataProcessor foodDataProcessor = new FoodDataProcessor();
+        dataManager.registerDataProcessorAndImpl(IgniteableData.class, SpongeIgniteableData.class, ImmutableIgniteableData.class,
+                ImmutableSpongeIgniteableData.class, new IgniteableDataProcessor());
+
+        dataManager.registerDualProcessor(VelocityData.class, SpongeVelocityData.class, ImmutableVelocityData.class,
+                ImmutableSpongeVelocityData.class, new VelocityDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(FoodData.class, SpongeFoodData.class, ImmutableFoodData.class,
-                ImmutableSpongeFoodData.class, foodDataProcessor);
+                ImmutableSpongeFoodData.class, new FoodDataProcessor());
 
-        final BreathingDataProcessor breathingDataProcessor = new BreathingDataProcessor();
         dataManager.registerDataProcessorAndImpl(BreathingData.class, SpongeBreathingData.class, ImmutableBreathingData.class,
-                ImmutableSpongeBreathingData.class, breathingDataProcessor);
+                ImmutableSpongeBreathingData.class, new BreathingDataProcessor());
 
-        final ScreamingDataProcessor screamingDataProcessor = new ScreamingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
-                ImmutableSpongeScreamingData.class, screamingDataProcessor);
+        dataManager.registerDualProcessor(ScreamingData.class, SpongeScreamingData.class, ImmutableScreamingData.class,
+                ImmutableSpongeScreamingData.class, new ScreamingDataProcessor());
 
-        final RepresentedItemDataProcessor representedItemDataProcessor = new RepresentedItemDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
-                ImmutableSpongeRepresentedItemData.class, representedItemDataProcessor);
+        dataManager.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, new RepresentedItemDataProcessor());
 
-        final ItemEnchantmentDataProcessor itemEnchantmentDataProcessor = new ItemEnchantmentDataProcessor();
-        dataManager.registerDataProcessorAndImpl(EnchantmentData.class, SpongeEnchantmentData.class, ImmutableEnchantmentData.class,
-                ImmutableSpongeEnchantmentData.class, itemEnchantmentDataProcessor);
-
-        final ItemLoreDataProcessor itemLoreDataProcessor = new ItemLoreDataProcessor();
-        dataManager.registerDataProcessorAndImpl(LoreData.class, SpongeLoreData.class, ImmutableLoreData.class, ImmutableSpongeLoreData.class,
-                itemLoreDataProcessor);
-
-        final ItemPagedDataProcessor itemPagedDataProcessor = new ItemPagedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
-                itemPagedDataProcessor);
-
-        final HorseDataProcessor horseDataProcessor = new HorseDataProcessor();
         dataManager.registerDataProcessorAndImpl(HorseData.class, SpongeHorseData.class, ImmutableHorseData.class,
-                ImmutableSpongeHorseData.class, horseDataProcessor);
+                ImmutableSpongeHorseData.class, new HorseDataProcessor());
 
-        final SneakingDataProcessor sneakingDataProcessor = new SneakingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
-                ImmutableSpongeSneakingData.class, sneakingDataProcessor);
+        dataManager.registerDualProcessor(SneakingData.class, SpongeSneakingData.class, ImmutableSneakingData.class,
+                ImmutableSpongeSneakingData.class, new SneakingDataProcessor());
 
-        final GoldenAppleDataProcessor goldenAppleDataProcessor = new GoldenAppleDataProcessor();
-        dataManager.registerDataProcessorAndImpl(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
-                ImmutableSpongeGoldenAppleData.class, goldenAppleDataProcessor);
-
-        final ExperienceHolderDataProcessor experienceHolderDataProcessor = new ExperienceHolderDataProcessor();
         dataManager.registerDataProcessorAndImpl(ExperienceHolderData.class, SpongeExperienceHolderData.class, ImmutableExperienceHolderData.class,
-                ImmutableSpongeExperienceHolderData.class, experienceHolderDataProcessor);
+                ImmutableSpongeExperienceHolderData.class, new ExperienceHolderDataProcessor());
 
-        final ItemAuthorDataProcessor itemAuthorDataProcessor = new ItemAuthorDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
-                ImmutableSpongeAuthorData.class, itemAuthorDataProcessor);
-
-        final BreakableDataProcessor breakableDataProcessor = new BreakableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BreakableData.class, SpongeBreakableData.class, ImmutableBreakableData.class,
-                ImmutableSpongeBreakableData.class, breakableDataProcessor);
-
-        final PlaceableDataProcessor placeableDataProcessor = new PlaceableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PlaceableData.class, SpongePlaceableData.class, ImmutablePlaceableData.class,
-                ImmutableSpongePlaceableData.class, placeableDataProcessor);
-
-        final MovementSpeedDataProcessor movementSpeedDataProcessor = new MovementSpeedDataProcessor();
         dataManager.registerDataProcessorAndImpl(MovementSpeedData.class, SpongeMovementSpeedData.class, ImmutableMovementSpeedData.class,
-                ImmutableSpongeMovementSpeedData.class, movementSpeedDataProcessor);
+                ImmutableSpongeMovementSpeedData.class, new MovementSpeedDataProcessor());
 
-        final SlimeDataProcessor slimeDataProcessor = new SlimeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
-                slimeDataProcessor);
+        dataManager.registerDualProcessor(SlimeData.class, SpongeSlimeData.class, ImmutableSlimeData.class, ImmutableSpongeSlimeData.class,
+                new SlimeDataProcessor());
 
-        final VillagerZombieProcessor villagerZombieProcessor = new VillagerZombieProcessor();
-        dataManager.registerDataProcessorAndImpl(VillagerZombieData.class, SpongeVillagerZombieData.class, ImmutableVillagerZombieData.class,
-                ImmutableSpongeVillagerZombieData.class, villagerZombieProcessor);
+        dataManager.registerDualProcessor(VillagerZombieData.class, SpongeVillagerZombieData.class, ImmutableVillagerZombieData.class,
+                ImmutableSpongeVillagerZombieData.class, new VillagerZombieProcessor());
 
-        final PlayingDataProcessor playingDataProcessor = new PlayingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PlayingData.class, SpongePlayingData.class, ImmutablePlayingData.class,
-                ImmutableSpongePlayingData.class, playingDataProcessor);
+        dataManager.registerDualProcessor(PlayingData.class, SpongePlayingData.class, ImmutablePlayingData.class,
+                ImmutableSpongePlayingData.class, new PlayingDataProcessor());
 
-        final SittingDataProcessor sittingDataProcessor = new SittingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SittingData.class, SpongeSittingData.class, ImmutableSittingData.class,
-                ImmutableSpongeSittingData.class, sittingDataProcessor);
+        dataManager.registerDualProcessor(SittingData.class, SpongeSittingData.class, ImmutableSittingData.class,
+                ImmutableSpongeSittingData.class, new SittingDataProcessor());
 
-        final ShearedDataProcessor shearedDataProcessor = new ShearedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
-                ImmutableSpongeShearedData.class, shearedDataProcessor);
+        dataManager.registerDualProcessor(ShearedData.class, SpongeShearedData.class, ImmutableShearedData.class,
+                ImmutableSpongeShearedData.class, new ShearedDataProcessor());
 
-        final PigSaddleDataProcessor pigSaddleDataProcessor = new PigSaddleDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PigSaddleData.class, SpongePigSaddleData.class, ImmutablePigSaddleData.class,
-                ImmutableSpongePigSaddleData.class, pigSaddleDataProcessor);
+        dataManager.registerDualProcessor(PigSaddleData.class, SpongePigSaddleData.class, ImmutablePigSaddleData.class,
+                ImmutableSpongePigSaddleData.class, new PigSaddleDataProcessor());
 
-        final TameableDataProcessor tameableDataProcessor = new TameableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(TameableData.class, SpongeTameableData.class, ImmutableTameableData.class,
-                ImmutableSpongeTameableData.class, tameableDataProcessor);
+        dataManager.registerDualProcessor(TameableData.class, SpongeTameableData.class, ImmutableTameableData.class,
+                ImmutableSpongeTameableData.class, new TameableDataProcessor());
 
-        final WolfWetDataProcessor wolfWetDataProcessor = new WolfWetDataProcessor();
-        final ItemWetDataProcessor itemWetDataProcessor = new ItemWetDataProcessor();
-        dataManager.registerDataProcessorAndImpl(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
-                wolfWetDataProcessor);
-        dataManager.registerDataProcessorAndImpl(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
-                itemWetDataProcessor);
+        dataManager.registerDualProcessor(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
+                new WolfWetDataProcessor());
 
-        final ElderDataProcessor elderDataProcessor = new ElderDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ElderData.class, SpongeElderData.class, ImmutableElderData.class, ImmutableSpongeElderData.class,
-                elderDataProcessor);
+        dataManager.registerDualProcessor(ElderData.class, SpongeElderData.class, ImmutableElderData.class, ImmutableSpongeElderData.class,
+                new ElderDataProcessor());
 
-        final CoalDataProcessor coalDataProcessor = new CoalDataProcessor();
-        dataManager.registerDataProcessorAndImpl(CoalData.class, SpongeCoalData.class, ImmutableCoalData.class,
-                ImmutableSpongeCoalData.class, coalDataProcessor);
+        dataManager.registerDualProcessor(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
+                ImmutableSpongeAgentData.class, new AgentDataProcessor());
 
-        final CookedFishDataProcessor cookedFishDataProcessor = new CookedFishDataProcessor();
-        dataManager.registerDataProcessorAndImpl(CookedFishData.class, SpongeCookedFishData.class, ImmutableCookedFishData.class,
-                ImmutableSpongeCookedFishData.class, cookedFishDataProcessor);
+        dataManager.registerDualProcessor(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
+                ImmutableSpongeChargedData.class, new ChargedDataProcessor());
 
-        final FishDataProcessor fishDataProcessor = new FishDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FishData.class, SpongeFishData.class, ImmutableFishData.class,
-                ImmutableSpongeFishData.class, fishDataProcessor);
+        dataManager.registerDualProcessor(FallDistanceData.class, SpongeFallDistanceData.class,
+                ImmutableFallDistanceData.class, ImmutableSpongeFallDistanceData.class, new FallDistanceDataProcessor());
 
-        dataManager.registerDataProcessorAndImpl(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class,
-                ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
-                new SkullRepresentedPlayerDataProcessor());
-
-        dataManager.registerDataProcessorAndImpl(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class,
-                ImmutableRepresentedPlayerData.class, ImmutableSpongeRepresentedPlayerData.class,
-                new ItemSkullRepresentedPlayerDataProcessor());
-
-        final FurnaceDataProcessor furnaceDataProcessor = new FurnaceDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FurnaceData.class, SpongeFurnaceData.class,
-                ImmutableFurnaceData.class, ImmutableSpongeFurnaceData.class, furnaceDataProcessor);
-
-        final DirtDataProcessor dirtDataProcessor = new DirtDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DirtData.class, SpongeDirtData.class, ImmutableDirtData.class,
-                ImmutableSpongeDirtData.class, dirtDataProcessor);
-
-        final StoneDataProcessor stoneDataProcessor = new StoneDataProcessor();
-        dataManager.registerDataProcessorAndImpl(StoneData.class, SpongeStoneData.class, ImmutableStoneData.class,
-                ImmutableSpongeStoneData.class, stoneDataProcessor);
-
-        final PrismarineDataProcessor prismarineDataProcessor = new PrismarineDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PrismarineData.class, SpongePrismarineData.class, ImmutablePrismarineData.class,
-                ImmutableSpongePrismarineData.class, prismarineDataProcessor);
-
-        final BrickDataProcessor brickDataProcessor = new BrickDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BrickData.class, SpongeBrickData.class, ImmutableBrickData.class,
-                ImmutableSpongeBrickData.class, brickDataProcessor);
-
-        final QuartzDataProcessor quartzDataProcessor = new QuartzDataProcessor();
-        dataManager.registerDataProcessorAndImpl(QuartzData.class, SpongeQuartzData.class, ImmutableQuartzData.class,
-                ImmutableSpongeQuartzData.class, quartzDataProcessor);
-
-        final SandDataProcessor sandDataProcessor = new SandDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SandData.class, SpongeSandData.class, ImmutableSandData.class,
-                ImmutableSpongeSandData.class, sandDataProcessor);
-
-        final SlabDataProcessor slabDataProcessor = new SlabDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SlabData.class, SpongeSlabData.class, ImmutableSlabData.class,
-                ImmutableSpongeSlabData.class, slabDataProcessor);
-
-        final SandstoneDataProcessor sandstoneDataProcessor = new SandstoneDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SandstoneData.class, SpongeSandstoneData.class, ImmutableSandstoneData.class,
-                ImmutableSpongeSandstoneData.class, sandstoneDataProcessor);
-
-        final ComparatorDataProcessor comparatorDataProcessor = new ComparatorDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ComparatorData.class, SpongeComparatorData.class, ImmutableComparatorData.class,
-                ImmutableSpongeComparatorData.class, comparatorDataProcessor);
-
-        final TreeDataProcessor treeDataProcessor = new TreeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(TreeData.class, SpongeTreeData.class, ImmutableTreeData.class,
-                ImmutableSpongeTreeData.class, treeDataProcessor);
-
-        final DisguisedBlockDataProcessor disguisedBlockDataProcessor = new DisguisedBlockDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DisguisedBlockData.class, SpongeDisguisedBlockData.class, ImmutableDisguisedBlockData.class,
-                ImmutableSpongeDisguisedBlockData.class, disguisedBlockDataProcessor);
-
-        final HingeDataProcessor hingeDataProcessor = new HingeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(HingeData.class, SpongeHingeData.class, ImmutableHingeData.class,
-                ImmutableSpongeHingeData.class, hingeDataProcessor);
-
-        final PistonDataProcessor pistonDataProcessor = new PistonDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PistonData.class, SpongePistonData.class, ImmutablePistonData.class,
-                ImmutableSpongePistonData.class, pistonDataProcessor);
-
-        final PortionDataProcessor portionDataProcessor = new PortionDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PortionData.class, SpongePortionData.class, ImmutablePortionData.class,
-                ImmutableSpongePortionData.class, portionDataProcessor);
-
-        final RailDirectionDataProcessor railDirectionDataProcessor = new RailDirectionDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RailDirectionData.class, SpongeRailDirectionData.class, ImmutableRailDirectionData.class,
-                ImmutableSpongeRailDirectionData.class, railDirectionDataProcessor);
-
-        final StairShapeDataProcessor stairShapeDataProcessor = new StairShapeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(StairShapeData.class, SpongeStairShapeData.class, ImmutableStairShapeData.class,
-                ImmutableSpongeStairShapeData.class, stairShapeDataProcessor);
-
-        final WallDataProcessor wallDataProcessor = new WallDataProcessor();
-        dataManager.registerDataProcessorAndImpl(WallData.class, SpongeWallData.class, ImmutableWallData.class,
-                ImmutableSpongeWallData.class, wallDataProcessor);
-
-        final ShrubDataProcessor shrubDataProcessor = new ShrubDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ShrubData.class, SpongeShrubData.class, ImmutableShrubData.class,
-                ImmutableSpongeShrubData.class, shrubDataProcessor);
-
-        final PlantDataProcessor plantDataProcessor = new PlantDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PlantData.class, SpongePlantData.class, ImmutablePlantData.class,
-                ImmutableSpongePlantData.class, plantDataProcessor);
-
-        final DoublePlantDataProcessor doublePlantDataProcessor = new DoublePlantDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DoublePlantData.class, SpongeDoublePlantData.class, ImmutableDoublePlantData.class,
-                ImmutableSpongeDoublePlantData.class, doublePlantDataProcessor);
-
-        final BigMushroomDataProcessor bigMushroomDataProcessor = new BigMushroomDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BigMushroomData.class, SpongeBigMushroomData.class, ImmutableBigMushroomData.class,
-                ImmutableSpongeBigMushroomData.class, bigMushroomDataProcessor);
-
-
-        final BrewingStandDataProcessor brewingStandDataProcessor = new BrewingStandDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BrewingStandData.class, SpongeBrewingStandData.class, ImmutableBrewingStandData.class,
-                ImmutableSpongeBrewingStandData.class, brewingStandDataProcessor);
-
-        final AttachedDataProcessor attachedDataProcessor = new AttachedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AttachedData.class, SpongeAttachedData.class, ImmutableAttachedData.class,
-                ImmutableSpongeAttachedData.class, attachedDataProcessor);
-
-        final ConnectedDirectionDataProcessor connectedDirectionDataProcessor = new ConnectedDirectionDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class, ImmutableConnectedDirectionData.class,
-                ImmutableSpongeConnectedDirectionData.class, connectedDirectionDataProcessor);
-
-        final TileConnectedDirectionDataProcessor tileConnectedDirectionDataProcessor = new TileConnectedDirectionDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class,
-                ImmutableConnectedDirectionData.class, ImmutableSpongeConnectedDirectionData.class, tileConnectedDirectionDataProcessor);
-
-        final DirectionalDataProcessor directionalDataProcessor = new DirectionalDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
-                ImmutableSpongeDirectionalData.class, directionalDataProcessor);
-
-        final DisarmedDataProcessor disarmedDataProcessor = new DisarmedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DisarmedData.class, SpongeDisarmedData.class, ImmutableDisarmedData.class,
-                ImmutableSpongeDisarmedData.class, disarmedDataProcessor);
-
-        final DropDataProcessor dropDataProcessor = new DropDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DropData.class, SpongeDropData.class, ImmutableDropData.class,
-                ImmutableSpongeDropData.class, dropDataProcessor);
-
-        final ExtendedDataProcessor extendedDataProcessor = new ExtendedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ExtendedData.class, SpongeExtendedData.class, ImmutableExtendedData.class,
-                ImmutableSpongeExtendedData.class, extendedDataProcessor);
-
-        final GrowthDataProcessor growthDataProcessor = new GrowthDataProcessor();
-        dataManager.registerDataProcessorAndImpl(GrowthData.class, SpongeGrowthData.class, ImmutableGrowthData.class,
-                ImmutableSpongeGrowthData.class, growthDataProcessor);
-
-        final OpenDataProcessor openDataProcessor = new OpenDataProcessor();
-        dataManager.registerDataProcessorAndImpl(OpenData.class, SpongeOpenData.class, ImmutableOpenData.class,
-                ImmutableSpongeOpenData.class, openDataProcessor);
-
-        final PoweredDataProcessor poweredDataProcessor = new PoweredDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PoweredData.class, SpongePoweredData.class, ImmutablePoweredData.class,
-                ImmutableSpongePoweredData.class, poweredDataProcessor);
-
-        final RedstonePoweredDataProcessor redstonePoweredDataProcessor = new RedstonePoweredDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RedstonePoweredData.class, SpongeRedstonePoweredData.class,
-                ImmutableRedstonePoweredData.class, ImmutableSpongeRedstonePoweredData.class,
-                redstonePoweredDataProcessor);
-
-        final SeamlessDataProcessor seamlessDataProcessor = new SeamlessDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SeamlessData.class, SpongeSeamlessData.class, ImmutableSeamlessData.class,
-                ImmutableSpongeSeamlessData.class, seamlessDataProcessor);
-
-        final SnowedDataProcessor snowedDataProcessor = new SnowedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
-                ImmutableSpongeSnowedData.class, snowedDataProcessor);
-
-        final SuspendedDataProcessor suspendedDataProcessor = new SuspendedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
-                ImmutableSpongeSuspendedData.class, suspendedDataProcessor);
-
-        final OccupiedDataProcessor occupiedDataProcessor = new OccupiedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
-                ImmutableSpongeOccupiedData.class, occupiedDataProcessor);
-
-        final InWallDataProcessor inWallDataProcessor = new InWallDataProcessor();
-        dataManager.registerDataProcessorAndImpl(InWallData.class, SpongeInWallData.class, ImmutableInWallData.class,
-                ImmutableSpongeInWallData.class, inWallDataProcessor);
-
-        final LayeredDataProcessor layeredDataProcessor = new LayeredDataProcessor();
-        dataManager.registerDataProcessorAndImpl(LayeredData.class, SpongeLayeredData.class, ImmutableLayeredData.class,
-                ImmutableSpongeLayeredData.class, layeredDataProcessor);
-
-        final DecayableDataProcessor decayableDataProcessor = new DecayableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DecayableData.class, SpongeDecayableData.class, ImmutableDecayableData.class,
-                ImmutableSpongeDecayableData.class, decayableDataProcessor);
-
-        final AxisDataProcessor axisDataProcessor = new AxisDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AxisData.class, SpongeAxisData.class, ImmutableAxisData.class,
-                ImmutableSpongeAxisData.class, axisDataProcessor);
-
-        final DelayableDataProcessor delayableDataProcessor = new DelayableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DelayableData.class, SpongeDelayableData.class, ImmutableDelayableData.class,
-                ImmutableSpongeDelayableData.class, delayableDataProcessor);
-
-        final AgentDataProcessor agentDataProcessor = new AgentDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AgentData.class, SpongeAgentData.class, ImmutableAgentData.class,
-                ImmutableSpongeAgentData.class, agentDataProcessor);
-
-        final ChargedDataProcessor chargedDataProcessor = new ChargedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ChargedData.class, SpongeChargedData.class, ImmutableChargedData.class,
-                ImmutableSpongeChargedData.class, chargedDataProcessor);
-
-        final DurabilityDataProcessor durabilityDataProcessor = new DurabilityDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DurabilityData.class, SpongeDurabilityData.class, ImmutableDurabilityData.class,
-                ImmutableSpongeDurabilityData.class, durabilityDataProcessor);
-
-        final SpawnableDataProcessor spawnableDataProcessor = new SpawnableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SpawnableData.class, SpongeSpawnableData.class, ImmutableSpawnableData.class,
-                ImmutableSpongeSpawnableData.class, spawnableDataProcessor);
-
-        final FallDistanceDataProcessor fallDistanceDataProcessor = new FallDistanceDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FallDistanceData.class, SpongeFallDistanceData.class,
-                ImmutableFallDistanceData.class, ImmutableSpongeFallDistanceData.class, fallDistanceDataProcessor);
-
-        final CooldownDataProcessor cooldownDataProcessor = new CooldownDataProcessor();
-        dataManager.registerDataProcessorAndImpl(CooldownData.class, SpongeCooldownData.class, ImmutableCooldownData.class,
-                ImmutableSpongeCooldownData.class, cooldownDataProcessor);
-
-        final NoteDataProcessor noteDataProcessor = new NoteDataProcessor();
-        dataManager.registerDataProcessorAndImpl(NoteData.class, SpongeNoteData.class, ImmutableNoteData.class,
-                ImmutableSpongeNoteData.class, noteDataProcessor);
-
-        final VehicleDataProcessor vehicleDataProcessor = new VehicleDataProcessor();
         dataManager.registerDataProcessorAndImpl(VehicleData.class, SpongeVehicleData.class, ImmutableVehicleData.class,
-                ImmutableSpongeVehicleData.class, vehicleDataProcessor);
+                ImmutableSpongeVehicleData.class, new VehicleDataProcessor());
 
-        dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
-                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());
-        dataManager.registerDataProcessorAndImpl(LockableData.class, SpongeLockableData.class,
+        dataManager.registerDataProcessorAndImpl(MinecartBlockData.class, SpongeMinecartBlockData.class,
+                ImmutableMinecartBlockData.class, ImmutableSpongeMinecartBlockData.class, new MinecartBlockDataProcessor());
+
+        dataManager.registerDualProcessor(PlayerCreatedData.class, SpongePlayerCreatedData.class, ImmutablePlayerCreatedData.class,
+                ImmutableSpongePlayerCreatedData.class, new PlayerCreatedDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
+                ImmutableSpongeInvisibilityData.class, new InvisibilityDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
+                ImmutableSpongeFallingBlockData.class, new FallingBlockDataProcessor());
+
+        dataManager.registerDualProcessor(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
+                ImmutableSpongeSkeletonData.class, new SkeletonDataProcessor());
+
+        dataManager.registerDualProcessor(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class,
+                ImmutableSpongeRabbitData.class, new RabbitDataProcessor());
+
+        dataManager.registerDualProcessor(RespawnLocationData.class, SpongeRespawnLocationData.class, ImmutableRespawnLocation.class,
+                ImmutableSpongeRespawnLocation.class, new RespawnLocationDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
+                ImmutableSpongeCommandData.class, new EntityCommandDataProcessor());
+
+        dataManager.registerDualProcessor(ExpirableData.class, SpongeExpirableData.class, ImmutableExpirableData.class,
+                ImmutableSpongeExpirableData.class, new EndermiteExpirableDataProcessor());
+
+        dataManager.registerDualProcessor(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
+                new ArtDataProcessor());
+
+        dataManager.registerDualProcessor(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
+                ImmutableSpongeCareerData.class, new CareerDataProcessor());
+
+        dataManager.registerDualProcessor(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
+                ImmutableSpongeSkinData.class, new SkinDataProcessor());
+
+        dataManager.registerDualProcessor(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
+                ImmutableSpongeExpOrbData.class, new ExpOrbDataProcessor());
+
+        dataManager.registerDualProcessor(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
+                ImmutableSpongeFlyingData.class, new FlyingDataProcessor());
+
+        dataManager.registerDualProcessor(FlyingAbilityData.class, SpongeFlyingAbilityData.class, ImmutableFlyingAbilityData.class,
+                ImmutableSpongeFlyingAbilityData.class, new FlyingAbilityDataProcessor());
+
+        dataManager.registerDualProcessor(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class,
+                ImmutableSpongeOcelotData.class, new OcelotDataProcessor());
+
+        dataManager.registerDualProcessor(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
+                ImmutableSpongeGameModeData.class, new GameModeDataProcessor());
+
+        dataManager.registerDualProcessor(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class,
+                ImmutableSpongeAggressiveData.class, new AggressiveDataProcessor());
+
+        dataManager.registerDualProcessor(AngerableData.class, SpongeAngerableData.class, ImmutableAngerableData.class,
+                ImmutableSpongeAngerableData.class, new AngerableDataProcessor());
+
+        dataManager.registerDualProcessor(RotationalData.class, SpongeRotationalData.class, ImmutableRotationalData.class,
+                ImmutableSpongeRotationalData.class, new RotationalDataProcessor());
+
+        dataManager.registerDualProcessor(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
+                ImmutableSpongeAffectsSpawningData.class, new AffectsSpawningDataProcessor());
+
+        dataManager.registerDualProcessor(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
+                ImmutableSpongeCriticalHitData.class, new CriticalHitDataProcessor());
+
+        dataManager.registerDualProcessor(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
+                ImmutableSpongeTradeOfferData.class, new TradeOfferDataProcessor());
+
+        dataManager.registerDualProcessor(KnockbackData.class, SpongeKnockbackData.class, ImmutableKnockbackData.class,
+                ImmutableSpongeKnockbackData.class, new KnockbackDataProcessor());
+
+        dataManager.registerDualProcessor(FlammableData.class, SpongeFlammableData.class,
+                ImmutableFlammableData.class, ImmutableSpongeFlammableData.class, new BlazeFlammableDataProcessor());
+
+        dataManager.registerDualProcessor(PersistingData.class, SpongePersistingData.class, ImmutablePersistingData.class,
+                ImmutableSpongePersistingData.class, new PersistingDataProcessor());
+
+        dataManager.registerDualProcessor(SprintData.class, SpongeSprintData.class, ImmutableSprintData.class,
+                ImmutableSpongeSprintData.class, new SprintDataProcessor());
+
+        dataManager.registerDualProcessor(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
+                ImmutableSpongeStuckArrowsData.class, new StuckArrowsDataProcessor());
+
+        // Item Processors
+
+        dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
+                ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, new ItemFireworkEffectDataProcessor());
+
+        dataManager.registerDualProcessor(FireworkRocketData.class, SpongeFireworkRocketData.class,
+                ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, new ItemFireworkRocketDataProcessor());
+
+        dataManager.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
+                ImmutableSpongeSkullData.class, new ItemSkullDataProcessor());
+
+        dataManager.registerDualProcessor(SignData.class, SpongeSignData.class,
+                ImmutableSignData.class, ImmutableSpongeSignData.class, new ItemSignDataProcessor());
+
+        dataManager.registerDualProcessor(WetData.class, SpongeWetData.class, ImmutableWetData.class, ImmutableSpongeWetData.class,
+                new ItemWetDataProcessor());
+
+        dataManager.registerDualProcessor(ColoredData.class, SpongeColoredData.class,
+                ImmutableColoredData.class, ImmutableSpongeColoredData.class, new ColoredDataProcessor());
+
+        dataManager.registerDualProcessor(EnchantmentData.class, SpongeEnchantmentData.class, ImmutableEnchantmentData.class,
+                ImmutableSpongeEnchantmentData.class, new ItemEnchantmentDataProcessor());
+
+        dataManager.registerDualProcessor(LoreData.class, SpongeLoreData.class, ImmutableLoreData.class, ImmutableSpongeLoreData.class,
+                new ItemLoreDataProcessor());
+
+        dataManager.registerDualProcessor(PagedData.class, SpongePagedData.class, ImmutablePagedData.class, ImmutableSpongePagedData.class,
+                new ItemPagedDataProcessor());
+
+        dataManager.registerDualProcessor(GoldenAppleData.class, SpongeGoldenAppleData.class, ImmutableGoldenAppleData.class,
+                ImmutableSpongeGoldenAppleData.class, new GoldenAppleDataProcessor());
+
+        dataManager.registerDualProcessor(AuthorData.class, SpongeAuthorData.class, ImmutableAuthorData.class,
+                ImmutableSpongeAuthorData.class, new ItemAuthorDataProcessor());
+
+        dataManager.registerDualProcessor(BreakableData.class, SpongeBreakableData.class, ImmutableBreakableData.class,
+                ImmutableSpongeBreakableData.class, new BreakableDataProcessor());
+
+        dataManager.registerDualProcessor(PlaceableData.class, SpongePlaceableData.class, ImmutablePlaceableData.class,
+                ImmutableSpongePlaceableData.class, new PlaceableDataProcessor());
+
+        dataManager.registerDualProcessor(CoalData.class, SpongeCoalData.class, ImmutableCoalData.class,
+                ImmutableSpongeCoalData.class, new CoalDataProcessor());
+
+        dataManager.registerDualProcessor(CookedFishData.class, SpongeCookedFishData.class, ImmutableCookedFishData.class,
+                ImmutableSpongeCookedFishData.class, new CookedFishDataProcessor());
+
+        dataManager.registerDualProcessor(FishData.class, SpongeFishData.class, ImmutableFishData.class,
+                ImmutableSpongeFishData.class, new FishDataProcessor());
+
+        dataManager.registerDualProcessor(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class, ImmutableRepresentedPlayerData.class,
+                ImmutableSpongeRepresentedPlayerData.class, new ItemSkullRepresentedPlayerDataProcessor());
+
+        dataManager.registerDualProcessor(LockableData.class, SpongeLockableData.class,
                 ImmutableLockableData.class, ImmutableSpongeLockableData.class, new ItemLockableDataProcessor());
 
-        final FireworkEffectDataProcessor fireworkEffectDataProcessor = new FireworkEffectDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FireworkEffectData.class, SpongeFireworkEffectData.class,
-                ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, fireworkEffectDataProcessor);
+        dataManager.registerDataProcessorAndImpl(DurabilityData.class, SpongeDurabilityData.class, ImmutableDurabilityData.class,
+                ImmutableSpongeDurabilityData.class, new DurabilityDataProcessor());
 
-        final BlockItemDataProcessor blockItemDataProcessor = new BlockItemDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BlockItemData.class, SpongeBlockItemData.class, ImmutableBlockItemData.class,
-                ImmutableSpongeBlockItemData.class, blockItemDataProcessor);
+        dataManager.registerDualProcessor(SpawnableData.class, SpongeSpawnableData.class, ImmutableSpawnableData.class,
+                ImmutableSpongeSpawnableData.class, new SpawnableDataProcessor());
 
-        final FireworkRocketDataProcessor fireworkRocketDataProcessor = new FireworkRocketDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FireworkRocketData.class, SpongeFireworkRocketData.class,
-                ImmutableFireworkRocketData.class, ImmutableSpongeFireworkRocketData.class, fireworkRocketDataProcessor);
+        dataManager.registerDualProcessor(BlockItemData.class, SpongeBlockItemData.class, ImmutableBlockItemData.class,
+                ImmutableSpongeBlockItemData.class, new BlockItemDataProcessor());
 
-        final MinecartBlockDataProcessor minecartBlockDataProcessor = new MinecartBlockDataProcessor();
-        dataManager.registerDataProcessorAndImpl(MinecartBlockData.class, SpongeMinecartBlockData.class,
-                ImmutableMinecartBlockData.class, ImmutableSpongeMinecartBlockData.class, minecartBlockDataProcessor);
+        dataManager.registerDualProcessor(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,
+                ImmutableSpongeSplashPotionData.class, new SplashPotionDataProcessor());
 
-        final PlayerCreatedDataProcessor playerCreatedDataProcessor = new PlayerCreatedDataProcessor();
-        dataManager.registerDataProcessorAndImpl(PlayerCreatedData.class, SpongePlayerCreatedData.class, ImmutablePlayerCreatedData.class,
-                ImmutableSpongePlayerCreatedData.class, playerCreatedDataProcessor);
+        dataManager.registerDualProcessor(GenerationData.class, SpongeGenerationData.class,
+                ImmutableGenerationData.class, ImmutableSpongeGenerationData.class, new GenerationDataProcessor());
 
-        final InvisibilityDataProcessor invisibilityDataProcessor = new InvisibilityDataProcessor();
-        dataManager.registerDataProcessorAndImpl(InvisibilityData.class, SpongeInvisibilityData.class, ImmutableInvisibilityData.class,
-                ImmutableSpongeInvisibilityData.class, invisibilityDataProcessor);
+        dataManager.registerDualProcessor(StoredEnchantmentData.class, SpongeStoredEnchantmentData.class,
+                ImmutableStoredEnchantmentData.class, ImmutableSpongeStoredEnchantmentData.class, new StoredEnchantmentDataProcessor());
 
-        final JukeboxDataProcessor jukeboxDataProcessor = new JukeboxDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
-                ImmutableSpongeRepresentedItemData.class, jukeboxDataProcessor);
+        // Block Processors
 
-        final FlowerPotDataProcessor flowerPotDataProcessor = new FlowerPotDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
-                ImmutableSpongeRepresentedItemData.class, flowerPotDataProcessor);
+        dataManager.registerDualProcessor(DirtData.class, SpongeDirtData.class, ImmutableDirtData.class,
+                ImmutableSpongeDirtData.class, new DirtDataProcessor());
 
-        final FallingBlockDataProcessor fallingBlockDataProcessor = new FallingBlockDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FallingBlockData.class, SpongeFallingBlockData.class, ImmutableFallingBlockData.class,
-                                                  ImmutableSpongeFallingBlockData.class, fallingBlockDataProcessor);
+        dataManager.registerDualProcessor(StoneData.class, SpongeStoneData.class, ImmutableStoneData.class,
+                ImmutableSpongeStoneData.class, new StoneDataProcessor());
 
-        final SkeletonDataProcessor skeletonDataProcessor = new SkeletonDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SkeletonData.class, SpongeSkeletonData.class, ImmutableSkeletonData.class,
-                ImmutableSpongeSkeletonData.class, skeletonDataProcessor);
+        dataManager.registerDualProcessor(PrismarineData.class, SpongePrismarineData.class, ImmutablePrismarineData.class,
+                ImmutableSpongePrismarineData.class, new PrismarineDataProcessor());
 
-        final RabbitDataProcessor rabbitDataProcessor = new RabbitDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RabbitData.class, SpongeRabbitData.class, ImmutableRabbitData.class,
-                ImmutableSpongeRabbitData.class, rabbitDataProcessor);
+        dataManager.registerDualProcessor(BrickData.class, SpongeBrickData.class, ImmutableBrickData.class,
+                ImmutableSpongeBrickData.class, new BrickDataProcessor());
 
-        final TileEntityBannerDataProcessor bannerDataProcessor = new TileEntityBannerDataProcessor();
+        dataManager.registerDualProcessor(QuartzData.class, SpongeQuartzData.class, ImmutableQuartzData.class,
+                ImmutableSpongeQuartzData.class, new QuartzDataProcessor());
+
+        dataManager.registerDualProcessor(SandData.class, SpongeSandData.class, ImmutableSandData.class,
+                ImmutableSpongeSandData.class, new SandDataProcessor());
+
+        dataManager.registerDualProcessor(SlabData.class, SpongeSlabData.class, ImmutableSlabData.class,
+                ImmutableSpongeSlabData.class, new SlabDataProcessor());
+
+        dataManager.registerDualProcessor(SandstoneData.class, SpongeSandstoneData.class, ImmutableSandstoneData.class,
+                ImmutableSpongeSandstoneData.class, new SandstoneDataProcessor());
+
+        dataManager.registerDualProcessor(ComparatorData.class, SpongeComparatorData.class, ImmutableComparatorData.class,
+                ImmutableSpongeComparatorData.class, new ComparatorDataProcessor());
+
+        dataManager.registerDualProcessor(TreeData.class, SpongeTreeData.class, ImmutableTreeData.class,
+                ImmutableSpongeTreeData.class, new TreeDataProcessor());
+
+        dataManager.registerDualProcessor(DisguisedBlockData.class, SpongeDisguisedBlockData.class, ImmutableDisguisedBlockData.class,
+                ImmutableSpongeDisguisedBlockData.class, new DisguisedBlockDataProcessor());
+
+        dataManager.registerDualProcessor(HingeData.class, SpongeHingeData.class, ImmutableHingeData.class,
+                ImmutableSpongeHingeData.class, new HingeDataProcessor());
+
+        dataManager.registerDualProcessor(PistonData.class, SpongePistonData.class, ImmutablePistonData.class,
+                ImmutableSpongePistonData.class, new PistonDataProcessor());
+
+        dataManager.registerDualProcessor(PortionData.class, SpongePortionData.class, ImmutablePortionData.class,
+                ImmutableSpongePortionData.class, new PortionDataProcessor());
+
+        dataManager.registerDualProcessor(RailDirectionData.class, SpongeRailDirectionData.class, ImmutableRailDirectionData.class,
+                ImmutableSpongeRailDirectionData.class, new RailDirectionDataProcessor());
+
+        dataManager.registerDualProcessor(StairShapeData.class, SpongeStairShapeData.class, ImmutableStairShapeData.class,
+                ImmutableSpongeStairShapeData.class, new StairShapeDataProcessor());
+
+        dataManager.registerDualProcessor(WallData.class, SpongeWallData.class, ImmutableWallData.class,
+                ImmutableSpongeWallData.class, new WallDataProcessor());
+
+        dataManager.registerDualProcessor(ShrubData.class, SpongeShrubData.class, ImmutableShrubData.class,
+                ImmutableSpongeShrubData.class, new ShrubDataProcessor());
+
+        dataManager.registerDualProcessor(PlantData.class, SpongePlantData.class, ImmutablePlantData.class,
+                ImmutableSpongePlantData.class, new PlantDataProcessor());
+
+        dataManager.registerDualProcessor(DoublePlantData.class, SpongeDoublePlantData.class, ImmutableDoublePlantData.class,
+                ImmutableSpongeDoublePlantData.class, new DoublePlantDataProcessor());
+
+        dataManager.registerDualProcessor(BigMushroomData.class, SpongeBigMushroomData.class, ImmutableBigMushroomData.class,
+                ImmutableSpongeBigMushroomData.class, new BigMushroomDataProcessor());
+
+        dataManager.registerDualProcessor(AttachedData.class, SpongeAttachedData.class, ImmutableAttachedData.class,
+                ImmutableSpongeAttachedData.class, new AttachedDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class,
+                ImmutableConnectedDirectionData.class, ImmutableSpongeConnectedDirectionData.class, new ConnectedDirectionDataProcessor());
+
+        dataManager.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
+                ImmutableSpongeDirectionalData.class, new DirectionalDataProcessor());
+
+        dataManager.registerDualProcessor(DisarmedData.class, SpongeDisarmedData.class, ImmutableDisarmedData.class,
+                ImmutableSpongeDisarmedData.class, new DisarmedDataProcessor());
+
+        dataManager.registerDualProcessor(DropData.class, SpongeDropData.class, ImmutableDropData.class,
+                ImmutableSpongeDropData.class, new DropDataProcessor());
+
+        dataManager.registerDualProcessor(ExtendedData.class, SpongeExtendedData.class, ImmutableExtendedData.class,
+                ImmutableSpongeExtendedData.class, new ExtendedDataProcessor());
+
+        dataManager.registerDualProcessor(GrowthData.class, SpongeGrowthData.class, ImmutableGrowthData.class,
+                ImmutableSpongeGrowthData.class, new GrowthDataProcessor());
+
+        dataManager.registerDualProcessor(OpenData.class, SpongeOpenData.class, ImmutableOpenData.class,
+                ImmutableSpongeOpenData.class, new OpenDataProcessor());
+
+        dataManager.registerDualProcessor(PoweredData.class, SpongePoweredData.class, ImmutablePoweredData.class,
+                ImmutableSpongePoweredData.class, new PoweredDataProcessor());
+
+        dataManager.registerDualProcessor(RedstonePoweredData.class, SpongeRedstonePoweredData.class, ImmutableRedstonePoweredData.class,
+                ImmutableSpongeRedstonePoweredData.class, new RedstonePoweredDataProcessor());
+
+        dataManager.registerDualProcessor(SeamlessData.class, SpongeSeamlessData.class, ImmutableSeamlessData.class,
+                ImmutableSpongeSeamlessData.class, new SeamlessDataProcessor());
+
+        dataManager.registerDualProcessor(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
+                ImmutableSpongeSnowedData.class, new SnowedDataProcessor());
+
+        dataManager.registerDualProcessor(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
+                ImmutableSpongeSuspendedData.class, new SuspendedDataProcessor());
+
+        dataManager.registerDualProcessor(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
+                ImmutableSpongeOccupiedData.class, new OccupiedDataProcessor());
+
+        dataManager.registerDualProcessor(InWallData.class, SpongeInWallData.class, ImmutableInWallData.class,
+                ImmutableSpongeInWallData.class, new InWallDataProcessor());
+
+        dataManager.registerDualProcessor(LayeredData.class, SpongeLayeredData.class, ImmutableLayeredData.class,
+                ImmutableSpongeLayeredData.class, new LayeredDataProcessor());
+
+        dataManager.registerDualProcessor(DecayableData.class, SpongeDecayableData.class, ImmutableDecayableData.class,
+                ImmutableSpongeDecayableData.class, new DecayableDataProcessor());
+
+        dataManager.registerDualProcessor(AxisData.class, SpongeAxisData.class, ImmutableAxisData.class,
+                ImmutableSpongeAxisData.class, new AxisDataProcessor());
+
+        dataManager.registerDualProcessor(DelayableData.class, SpongeDelayableData.class, ImmutableDelayableData.class,
+                ImmutableSpongeDelayableData.class, new DelayableDataProcessor());
+
+        dataManager.registerDualProcessor(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
+                ImmutableSpongeMoistureData.class, new MoistureDataProcessor());
+
+        // TileEntity Processors
+
+        dataManager.registerDualProcessor(SkullData.class, SpongeSkullData.class, ImmutableSkullData.class,
+                ImmutableSpongeSkullData.class, new TileEntitySkullDataProcessor());
+
+        dataManager.registerDualProcessor(RepresentedPlayerData.class, SpongeRepresentedPlayerData.class, ImmutableRepresentedPlayerData.class,
+                ImmutableSpongeRepresentedPlayerData.class, new SkullRepresentedPlayerDataProcessor());
+
+        dataManager.registerDualProcessor(SignData.class, SpongeSignData.class,
+                ImmutableSignData.class, ImmutableSpongeSignData.class, new TileEntitySignDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(FurnaceData.class, SpongeFurnaceData.class,
+                ImmutableFurnaceData.class, ImmutableSpongeFurnaceData.class, new FurnaceDataProcessor());
+
+        dataManager.registerDualProcessor(BrewingStandData.class, SpongeBrewingStandData.class, ImmutableBrewingStandData.class,
+                ImmutableSpongeBrewingStandData.class, new BrewingStandDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(ConnectedDirectionData.class, SpongeConnectedDirectionData.class,
+                ImmutableConnectedDirectionData.class, ImmutableSpongeConnectedDirectionData.class, new TileConnectedDirectionDataProcessor());
+
+        dataManager.registerDualProcessor(CooldownData.class, SpongeCooldownData.class, ImmutableCooldownData.class,
+                ImmutableSpongeCooldownData.class, new CooldownDataProcessor());
+
+        dataManager.registerDualProcessor(NoteData.class, SpongeNoteData.class, ImmutableNoteData.class,
+                ImmutableSpongeNoteData.class, new NoteDataProcessor());
+
+        dataManager.registerDualProcessor(LockableData.class, SpongeLockableData.class,
+                ImmutableLockableData.class, ImmutableSpongeLockableData.class, new TileEntityLockableDataProcessor());
+
+        dataManager.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, new JukeboxDataProcessor());
+
+        dataManager.registerDualProcessor(RepresentedItemData.class, SpongeRepresentedItemData.class, ImmutableRepresentedItemData.class,
+                ImmutableSpongeRepresentedItemData.class, new FlowerPotDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(BannerData.class, SpongeBannerData.class, ImmutableBannerData.class,
-                ImmutableSpongeBannerData.class, bannerDataProcessor);
+                ImmutableSpongeBannerData.class, new TileEntityBannerDataProcessor());
 
-        final RespawnLocationDataProcessor respawnLocationDataProcessor = new RespawnLocationDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RespawnLocationData.class, SpongeRespawnLocationData.class, ImmutableRespawnLocation.class,
-                ImmutableSpongeRespawnLocation.class, respawnLocationDataProcessor);
-
-        final MoistureDataProcessor moistureDataProcessor = new MoistureDataProcessor();
-        dataManager.registerDataProcessorAndImpl(MoistureData.class, SpongeMoistureData.class, ImmutableMoistureData.class,
-                ImmutableSpongeMoistureData.class, moistureDataProcessor);
-
-        final EntityCommandDataProcessor entityCommandDataProcessor = new EntityCommandDataProcessor();
-        final TileEntityCommandDataProcessor tileEntityCommandDataProcessor = new TileEntityCommandDataProcessor();
         dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
-                ImmutableSpongeCommandData.class, entityCommandDataProcessor);
-        dataManager.registerDataProcessorAndImpl(CommandData.class, SpongeCommandData.class, ImmutableCommandData.class,
-                ImmutableSpongeCommandData.class, tileEntityCommandDataProcessor);
+                ImmutableSpongeCommandData.class, new TileEntityCommandDataProcessor());
+
+        dataManager.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
+                ImmutableSpongeDirectionalData.class, new SkullRotationDataProcessor());
 
         // Values
+
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
         dataManager.registerValueProcessor(Keys.FIRE_TICKS, new FireTicksValueProcessor());
@@ -577,93 +570,30 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
-        dataManager.registerValueProcessor(Keys.SIGN_LINES, new SignLinesValueProcessor());
-        dataManager.registerValueProcessor(Keys.SKULL_TYPE, new TileEntitySkullValueProcessor());
-        dataManager.registerValueProcessor(Keys.SKULL_TYPE, new ItemSkullValueProcessor());
-        dataManager.registerValueProcessor(Keys.VELOCITY, new VelocityValueProcessor());
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_AIR, new MaxAirValueProcessor());
         dataManager.registerValueProcessor(Keys.REMAINING_AIR, new RemainingAirValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_SCREAMING, new ScreamingValueProcessor());
-        dataManager.registerValueProcessor(Keys.ITEM_ENCHANTMENTS, new ItemEnchantmentValueProcessor());
         dataManager.registerValueProcessor(Keys.HORSE_COLOR, new HorseColorValueProcessor());
         dataManager.registerValueProcessor(Keys.HORSE_STYLE, new HorseStyleValueProcessor());
         dataManager.registerValueProcessor(Keys.HORSE_VARIANT, new HorseVariantValueProcessor());
-        dataManager.registerValueProcessor(Keys.ITEM_LORE, new ItemLoreValueProcessor());
-        dataManager.registerValueProcessor(Keys.BOOK_PAGES, new BookPagesValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_SNEAKING, new SneakingValueProcessor());
-        dataManager.registerValueProcessor(Keys.GOLDEN_APPLE_TYPE, new GoldenAppleValueProcessor());
         dataManager.registerValueProcessor(Keys.EXPERIENCE_LEVEL, new ExperienceLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.TOTAL_EXPERIENCE, new TotalExperienceValueProcessor());
         dataManager.registerValueProcessor(Keys.EXPERIENCE_SINCE_LEVEL, new ExperienceSinceLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.EXPERIENCE_FROM_START_OF_LEVEL, new ExperienceFromStartOfLevelValueProcessor());
-        dataManager.registerValueProcessor(Keys.BOOK_AUTHOR, new BookAuthorValueProcessor());
-        dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new RepresentedItemValueProcessor());
-        dataManager.registerValueProcessor(Keys.BREAKABLE_BLOCK_TYPES, new BreakableValueProcessor());
-        dataManager.registerValueProcessor(Keys.PLACEABLE_BLOCKS, new PlaceableValueProcessor());
         dataManager.registerValueProcessor(Keys.WALKING_SPEED, new WalkingSpeedValueProcessor());
         dataManager.registerValueProcessor(Keys.FLYING_SPEED, new FlyingSpeedValueProcessor());
-        dataManager.registerValueProcessor(Keys.SLIME_SIZE, new SlimeValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_VILLAGER_ZOMBIE, new VillagerZombieValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_PLAYING, new PlayingValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_SITTING, new IsSittingValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_SHEARED, new IsShearedValueProcessor());
-        dataManager.registerValueProcessor(Keys.PIG_SADDLE, new PigSaddleValueProcessor());
-        dataManager.registerValueProcessor(Keys.TAMED_OWNER, new TameableOwnerValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_WET, new ItemWetValueProcessor());
-        dataManager.registerValueProcessor(Keys.IS_WET, new EntityWetValueProcessor());
-        dataManager.registerValueProcessor(Keys.ELDER_GUARDIAN, new ElderValueProcessor());
-        dataManager.registerValueProcessor(Keys.COAL_TYPE, new CoalValueProcessor());
-        dataManager.registerValueProcessor(Keys.COOKED_FISH, new CookedFishValueProcessor());
-        dataManager.registerValueProcessor(Keys.FISH_TYPE, new FishValueProcessor());
-        dataManager.registerValueProcessor(Keys.REPRESENTED_PLAYER, new SkullRepresentedPlayerProcessor());
-        dataManager.registerValueProcessor(Keys.REPRESENTED_PLAYER, new ItemSkullRepresentedPlayerValueProcessor());
         dataManager.registerValueProcessor(Keys.PASSED_BURN_TIME, new PassedBurnTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_BURN_TIME, new MaxBurnTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.PASSED_COOK_TIME, new PassedCookTimeValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_COOK_TIME, new MaxCookTimeValueProcessor());
-        dataManager.registerValueProcessor(Keys.REMAINING_BREW_TIME, new RemainingBrewTimeValueProcessor());
-        dataManager.registerValueProcessor(Keys.DIRT_TYPE, new DirtTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.STONE_TYPE, new StoneTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.BRICK_TYPE, new BrickTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.PRISMARINE_TYPE, new PrismarineTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.QUARTZ_TYPE, new QuartzTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.SAND_TYPE, new SandTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.SLAB_TYPE, new SlabTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.SANDSTONE_TYPE, new SandstoneTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.COMPARATOR_TYPE, new ComparatorTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.TREE_TYPE, new TreeTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.HINGE_POSITION, new HingePositionValueProcessor());
-        dataManager.registerValueProcessor(Keys.PISTON_TYPE, new PistonTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.PORTION_TYPE, new PortionTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.RAIL_DIRECTION, new RailDirectionValueProcessor());
-        dataManager.registerValueProcessor(Keys.STAIR_SHAPE, new StairShapeValueProcessor());
-        dataManager.registerValueProcessor(Keys.WALL_TYPE, new WallTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.SHRUB_TYPE, new ShrubTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.PLANT_TYPE, new PlantTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.DOUBLE_PLANT_TYPE, new DoublePlantTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.BIG_MUSHROOM_TYPE, new BigMushroomTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.DISGUISED_BLOCK_TYPE, new DisguisedBlockTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.COLOR, new ItemColorValueProcessor());
-        dataManager.registerValueProcessor(Keys.AI_ENABLED, new IsAiEnabledValueProcessor());
-        dataManager.registerValueProcessor(Keys.CREEPER_CHARGED, new ChargedValueProcessor());
         dataManager.registerValueProcessor(Keys.UNBREAKABLE, new UnbreakableValueProcessor());
         dataManager.registerValueProcessor(Keys.ITEM_DURABILITY, new ItemDurabilityValueProcessor());
-        dataManager.registerValueProcessor(Keys.SPAWNABLE_ENTITY_TYPE, new SpawnableEntityTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.FALL_DISTANCE, new FallDistanceValueProcessor());
-        dataManager.registerValueProcessor(Keys.COOLDOWN, new CooldownValueProcessor());
-        dataManager.registerValueProcessor(Keys.NOTE_PITCH, new NoteValueProcessor());
         dataManager.registerValueProcessor(Keys.VEHICLE, new VehicleValueProcessor());
         dataManager.registerValueProcessor(Keys.BASE_VEHICLE, new BaseVehicleValueProcessor());
-        dataManager.registerValueProcessor(Keys.FIREWORK_EFFECTS, new EntityFireworkEffectsValueProcessor());
-        dataManager.registerValueProcessor(Keys.FIREWORK_EFFECTS, new ItemFireworkEffectsValueProcessor());
-        dataManager.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new EntityFireworkRocketValueProcessor());
-        dataManager.registerValueProcessor(Keys.FIREWORK_FLIGHT_MODIFIER, new ItemFireworkRocketValueProcessor());
         dataManager.registerValueProcessor(Keys.REPRESENTED_BLOCK, new RepresentedBlockValueProcessor());
         dataManager.registerValueProcessor(Keys.OFFSET, new OffsetValueProcessor());
-        dataManager.registerValueProcessor(Keys.ATTACHED, new AttachedValueProcessor());
         dataManager.registerValueProcessor(Keys.FALL_DAMAGE_PER_BLOCK, new FallHurtAmountValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_FALL_DAMAGE, new MaxFallDamageValueProcessor());
         dataManager.registerValueProcessor(Keys.FALLING_BLOCK_STATE, new FallingBlockStateValueProcessor());
@@ -676,35 +606,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.CONNECTED_NORTH, new ConnectedNorthValueProcessor());
         dataManager.registerValueProcessor(Keys.CONNECTED_SOUTH, new ConnectedSouthValueProcessor());
         dataManager.registerValueProcessor(Keys.CONNECTED_WEST, new ConnectedWestValueProcessor());
-        dataManager.registerValueProcessor(Keys.DIRECTION, new DirectionValueProcessor());
-        dataManager.registerValueProcessor(Keys.DISARMED, new DisarmedValueProcessor());
-        dataManager.registerValueProcessor(Keys.SHOULD_DROP, new ShouldDropValueProcessor());
-        dataManager.registerValueProcessor(Keys.EXTENDED, new ExtendedValueProcessor());
-        dataManager.registerValueProcessor(Keys.GROWTH_STAGE, new GrowthStageValueProcessor());
-        dataManager.registerValueProcessor(Keys.OPEN, new OpenValueProcessor());
-        dataManager.registerValueProcessor(Keys.POWERED, new PoweredValueProcessor());
-        dataManager.registerValueProcessor(Keys.POWER, new PowerValueProcessor());
-        dataManager.registerValueProcessor(Keys.SEAMLESS, new SeamlessValueProcessor());
-        dataManager.registerValueProcessor(Keys.SNOWED, new SnowedValueProcessor());
-        dataManager.registerValueProcessor(Keys.SUSPENDED, new SuspendedValueProcessor());
-        dataManager.registerValueProcessor(Keys.OCCUPIED, new OccupiedValueProcessor());
-        dataManager.registerValueProcessor(Keys.LAYER, new LayerValueProcessor());
-        dataManager.registerValueProcessor(Keys.DECAYABLE, new DecayableValueProcessor());
-        dataManager.registerValueProcessor(Keys.IN_WALL, new InWallValueProcessor());
-        dataManager.registerValueProcessor(Keys.AXIS, new AxisValueProcessor());
-        dataManager.registerValueProcessor(Keys.DELAY, new DelayValueProcessor());
-        dataManager.registerValueProcessor(Keys.PLAYER_CREATED, new PlayerCreatedValueProcessor());
-        dataManager.registerValueProcessor(Keys.ITEM_BLOCKSTATE, new BlockItemValueProcessor());
-        dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new JukeboxValueProcessor());
-        dataManager.registerValueProcessor(Keys.REPRESENTED_ITEM, new FlowerPotValueProcessor());
-        dataManager.registerValueProcessor(Keys.SKELETON_TYPE, new SkeletonTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.RABBIT_TYPE, new RabbitTypeValueProcessor());
-        dataManager.registerValueProcessor(Keys.LOCK_TOKEN, new LockTokenValueProcessor());
-        dataManager.registerValueProcessor(Keys.LOCK_TOKEN, new ItemLockTokenValueProcessor());
         dataManager.registerValueProcessor(Keys.BANNER_BASE_COLOR, new TileBannerBaseColorValueProcessor());
         dataManager.registerValueProcessor(Keys.BANNER_PATTERNS, new TileBannerPatternLayersValueProcessor());
-        dataManager.registerValueProcessor(Keys.RESPAWN_LOCATIONS, new RespawnLocationValueProcessor());
-        dataManager.registerValueProcessor(Keys.MOISTURE, new MoistureValueProcessor());
         dataManager.registerValueProcessor(Keys.LAST_COMMAND_OUTPUT, new EntityLastCommandOutputValueProcessor());
         dataManager.registerValueProcessor(Keys.LAST_COMMAND_OUTPUT, new TileEntityLastCommandOutputValueProcessor());
         dataManager.registerValueProcessor(Keys.COMMAND, new EntityCommandValueProcessor());
@@ -716,130 +619,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_IGNORES_COLLISION, new InvisibilityCollisionValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_PREVENTS_TARGETING, new InvisibilityTargetValueProcessor());
-
-        // Dual Processors
-        final EndermiteExpirableDualProcessor expirableDataProcessor = new EndermiteExpirableDualProcessor();
-        dataManager.registerDataProcessorAndImpl(ExpirableData.class, SpongeExpirableData.class, ImmutableExpirableData.class,
-            ImmutableSpongeExpirableData.class, expirableDataProcessor);
-        dataManager.registerValueProcessor(Keys.EXPIRATION_TICKS, expirableDataProcessor);
-
-        final ArtDualProcessor artDualProcessor = new ArtDualProcessor();
-        dataManager.registerDataProcessorAndImpl(ArtData.class, SpongeArtData.class, ImmutableArtData.class, ImmutableSpongeArtData.class,
-            artDualProcessor);
-        dataManager.registerValueProcessor(Keys.ART, artDualProcessor);
-
-        final CareerDualProcessor careerDualProcessor = new CareerDualProcessor();
-        dataManager.registerDataProcessorAndImpl(CareerData.class, SpongeCareerData.class, ImmutableCareerData.class,
-            ImmutableSpongeCareerData.class, careerDualProcessor);
-        dataManager.registerValueProcessor(Keys.CAREER, careerDualProcessor);
-
-        final SkinDataProcessor skinDataProcessor = new SkinDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SkinData.class, SpongeSkinData.class, ImmutableSkinData.class,
-            ImmutableSpongeSkinData.class, skinDataProcessor);
-        dataManager.registerValueProcessor(Keys.SKIN_UNIQUE_ID, skinDataProcessor);
-
-        final ExpOrbDataProcessor expOrbDataProcessor = new ExpOrbDataProcessor();
-        dataManager.registerDataProcessorAndImpl(ExpOrbData.class, SpongeExpOrbData.class, ImmutableExpOrbData.class,
-            ImmutableSpongeExpOrbData.class, expOrbDataProcessor);
-        dataManager.registerValueProcessor(Keys.CONTAINED_EXPERIENCE, expOrbDataProcessor);
-
-        final FlyingDataProcessor flyingDataProcessor = new FlyingDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FlyingData.class, SpongeFlyingData.class, ImmutableFlyingData.class,
-            ImmutableSpongeFlyingData.class, flyingDataProcessor);
-        dataManager.registerValueProcessor(Keys.IS_FLYING, flyingDataProcessor);
-
-        final FlyingAbilityDataProcessor flyingAbilityDataProcessor = new FlyingAbilityDataProcessor();
-        dataManager.registerDataProcessorAndImpl(FlyingAbilityData.class, SpongeFlyingAbilityData.class, ImmutableFlyingAbilityData.class,
-            ImmutableSpongeFlyingAbilityData.class, flyingAbilityDataProcessor);
-        dataManager.registerValueProcessor(Keys.CAN_FLY, flyingAbilityDataProcessor);
-
-        final OcelotDataProcessor ocelotDataProcessor = new OcelotDataProcessor();
-        dataManager.registerDataProcessorAndImpl(OcelotData.class, SpongeOcelotData.class, ImmutableOcelotData.class,
-            ImmutableSpongeOcelotData.class, ocelotDataProcessor);
-
-        dataManager.registerValueProcessor(Keys.OCELOT_TYPE, ocelotDataProcessor);
-
-        final GameModeDataProcessor gameModeDataProcessor = new GameModeDataProcessor();
-        dataManager.registerDataProcessorAndImpl(GameModeData.class, SpongeGameModeData.class, ImmutableGameModeData.class,
-            ImmutableSpongeGameModeData.class, gameModeDataProcessor);
-        dataManager.registerValueProcessor(Keys.GAME_MODE, gameModeDataProcessor);
-
-        final AggressiveDataProcessor aggressiveDataProcessor = new AggressiveDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AggressiveData.class, SpongeAggressiveData.class, ImmutableAggressiveData.class,
-            ImmutableSpongeAggressiveData.class, aggressiveDataProcessor);
-        dataManager.registerValueProcessor(Keys.ANGRY, aggressiveDataProcessor);
-
-
-        final AngerableDataProcessor angerableDataProcessor = new AngerableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AngerableData.class, SpongeAngerableData.class, ImmutableAngerableData.class,
-            ImmutableSpongeAngerableData.class, angerableDataProcessor);
-        dataManager.registerValueProcessor(Keys.ANGER, angerableDataProcessor);
-
-
-        final RotationalDataProcessor rotationalDataProcessor = new RotationalDataProcessor();
-        dataManager.registerDataProcessorAndImpl(RotationalData.class, SpongeRotationalData.class, ImmutableRotationalData.class,
-            ImmutableSpongeRotationalData.class, rotationalDataProcessor);
-        dataManager.registerValueProcessor(Keys.ROTATION, rotationalDataProcessor);
-
-        final SkullRotationDataProcessor skullRotationDataProcessor = new SkullRotationDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
-            ImmutableSpongeDirectionalData.class, skullRotationDataProcessor);
-        dataManager.registerValueProcessor(Keys.DIRECTION, skullRotationDataProcessor);
-
-        final SplashPotionDualProcessor splashPotionDualProcessor = new SplashPotionDualProcessor();
-        dataManager.registerDataProcessorAndImpl(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,
-                ImmutableSpongeSplashPotionData.class, splashPotionDualProcessor);
-        dataManager.registerValueProcessor(Keys.IS_SPLASH_POTION, splashPotionDualProcessor);
-
-        final AffectsSpawningDataProcessor affectsSpawningDataProcessor = new AffectsSpawningDataProcessor();
-        dataManager.registerDataProcessorAndImpl(AffectsSpawningData.class, SpongeAffectsSpawningData.class, ImmutableAffectsSpawningData.class,
-            ImmutableSpongeAffectsSpawningData.class, affectsSpawningDataProcessor);
-        dataManager.registerValueProcessor(Keys.AFFECTS_SPAWNING, affectsSpawningDataProcessor);
-
-        final GenerationDualProcessor generationDualProcessor = new GenerationDualProcessor();
-        dataManager.registerDataProcessorAndImpl(GenerationData.class, SpongeGenerationData.class,
-                ImmutableGenerationData.class, ImmutableSpongeGenerationData.class, generationDualProcessor);
-        dataManager.registerValueProcessor(Keys.GENERATION, generationDualProcessor);
-
-        final CriticalHitDualProcessor criticalHitDualProcessor = new CriticalHitDualProcessor();
-        dataManager.registerDataProcessorAndImpl(CriticalHitData.class, SpongeCriticalHitData.class, ImmutableCriticalHitData.class,
-                ImmutableSpongeCriticalHitData.class, criticalHitDualProcessor);
-        dataManager.registerValueProcessor(Keys.CRITICAL_HIT, criticalHitDualProcessor);
-
-        final TradeOfferDualProcessor tradeOfferDualProcessor = new TradeOfferDualProcessor();
-        dataManager.registerDataProcessorAndImpl(TradeOfferData.class, SpongeTradeOfferData.class, ImmutableTradeOfferData.class,
-                ImmutableSpongeTradeOfferData.class, tradeOfferDualProcessor);
-        dataManager.registerValueProcessor(Keys.TRADE_OFFERS, tradeOfferDualProcessor);
-
-        final KnockbackDualProcessor knockbackDualProcessor = new KnockbackDualProcessor();
-        dataManager.registerDataProcessorAndImpl(KnockbackData.class, SpongeKnockbackData.class, ImmutableKnockbackData.class,
-                ImmutableSpongeKnockbackData.class, knockbackDualProcessor);
-        dataManager.registerValueProcessor(Keys.KNOCKBACK_STRENGTH, knockbackDualProcessor);
-
-        final BlazeFlammableDualProcessor blazeFlammableDualProcessor = new BlazeFlammableDualProcessor();
-        dataManager.registerDataProcessorAndImpl(FlammableData.class, SpongeFlammableData.class,
-                ImmutableFlammableData.class, ImmutableSpongeFlammableData.class, blazeFlammableDualProcessor);
-        dataManager.registerValueProcessor(Keys.IS_AFLAME, blazeFlammableDualProcessor);
-
-        final PersistingDataDualProcessor persistingDataDualProcessor = new PersistingDataDualProcessor();
-        dataManager.registerDataProcessorAndImpl(PersistingData.class, SpongePersistingData.class, ImmutablePersistingData.class,
-                ImmutableSpongePersistingData.class, persistingDataDualProcessor);
-        dataManager.registerValueProcessor(Keys.PERSISTS, persistingDataDualProcessor);
-
-        final StoredEnchantmentDualProcessor storedEnchantmentDualProcessor = new StoredEnchantmentDualProcessor();
-        dataManager.registerDataProcessorAndImpl(StoredEnchantmentData.class, SpongeStoredEnchantmentData.class,
-                ImmutableStoredEnchantmentData.class, ImmutableSpongeStoredEnchantmentData.class, storedEnchantmentDualProcessor);
-        dataManager.registerValueProcessor(Keys.STORED_ENCHANTMENTS, storedEnchantmentDualProcessor);
-
-        final SprintDataProcessor sprintDataProcessor = new SprintDataProcessor();
-        dataManager.registerDataProcessorAndImpl(SprintData.class, SpongeSprintData.class, ImmutableSprintData.class,
-                ImmutableSpongeSprintData.class, sprintDataProcessor);
-        dataManager.registerValueProcessor(Keys.IS_SPRINTING, sprintDataProcessor);
-
-        final StuckArrowsDataDualProcessor stuckArrowsDataDualProcessor = new StuckArrowsDataDualProcessor();
-        dataManager.registerDataProcessorAndImpl(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
-                ImmutableSpongeStuckArrowsData.class, stuckArrowsDataDualProcessor);
-        dataManager.registerValueProcessor(Keys.STUCK_ARROWS, stuckArrowsDataDualProcessor);
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

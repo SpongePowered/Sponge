@@ -25,25 +25,25 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.Collections;
 import java.util.Optional;
 
 public class SkullRepresentedPlayerDataProcessor extends
-AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+        AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public SkullRepresentedPlayerDataProcessor() {
         super(TileEntitySkull.class, Keys.REPRESENTED_PLAYER);
@@ -55,18 +55,17 @@ AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GamePr
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (this.supports(dataHolder)) {
-            final TileEntitySkull skull = (TileEntitySkull) dataHolder;
-            final Optional<GameProfile> oldData = getVal(skull);
-            if (SkullUtils.setProfile(skull, null)) {
-                if (oldData.isPresent()) {
-                    return DataTransactionResult.successReplaceResult(Collections.emptySet(),
-                                                                      Collections.singleton(constructImmutableValue(oldData.get())));
-                } else {
-                    return DataTransactionResult.successNoData();
-                }
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            TileEntitySkull skull = (TileEntitySkull) container;
+            Optional<GameProfile> old = getVal(skull);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
             }
+            if (SkullUtils.setProfile(skull, null)) {
+                return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            }
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }
         return DataTransactionResult.failNoData();
     }
@@ -84,6 +83,11 @@ AbstractTileEntitySingleDataProcessor<TileEntitySkull, GameProfile, Value<GamePr
     @Override
     protected ImmutableValue<GameProfile> constructImmutableValue(GameProfile value) {
         return new ImmutableSpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, value);
+    }
+
+    @Override
+    protected Value<GameProfile> constructValue(GameProfile actualValue) {
+        return new SpongeValue<>(Keys.REPRESENTED_PLAYER, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 
     @Override

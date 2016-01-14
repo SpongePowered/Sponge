@@ -31,6 +31,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Direction, Value<Direction>, DirectionalData, ImmutableDirectionalData> {
 
@@ -46,6 +47,11 @@ public class DirectionalDataProcessor extends AbstractBlockOnlyDataProcessor<Dir
     @Override
     protected DirectionalData createManipulator() {
         return new SpongeDirectionalData();
+    }
+
+    @Override
+    protected Value<Direction> constructValue(Direction actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }
