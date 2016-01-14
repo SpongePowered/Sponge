@@ -135,6 +135,7 @@ public final class NbtDataUtil {
     public static final String DIMENSION_ID = "dimensionId";
     public static final String INVALID_TITLE = "invalid";
     public static final String IS_MOD = "isMod";
+    public static final String FORGE_ENTITY_TYPE = "entity_name";
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 

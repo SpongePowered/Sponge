@@ -24,57 +24,43 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTameableData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TameableData;
-import org.spongepowered.api.data.merge.MergeFunction;
-import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTameableData;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeTameableData;
-import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeOptionalValue;
+import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
+public class TameableDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityTameable, Optional<UUID>, OptionalValue<UUID>, TameableData, ImmutableTameableData> {
 
-public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableData, ImmutableTameableData> {
-
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof EntityTameable;
+    public TameableDataProcessor() {
+        super(EntityTameable.class, Keys.TAMED_OWNER);
     }
 
     @Override
-    public Optional<TameableData> from(DataHolder dataHolder) {
-        if (dataHolder instanceof EntityTameable) {
-            final Optional<UUID> uuidOptional = getTamer(((EntityTameable) dataHolder));
-            return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orElse(null)));
-        } else {
-            return Optional.empty();
+    protected Optional<Optional<UUID>> getVal(EntityTameable tameable) {
+        UUID uuid = null;
+        String ownerId = tameable.getOwnerId();
+        if (ownerId != null) {
+            try {
+                uuid = UUIDTypeAdapter.fromString(ownerId);
+            } catch (RuntimeException ignored) {
+                // Don't care
+            }
         }
-    }
-
-    @Override
-    public Optional<TameableData> fill(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
-        if (dataHolder instanceof EntityTameable) {
-            final TameableData
-                merged =
-                checkNotNull(overlap, "MergeFunction cannot be null!").merge(checkNotNull(manipulator).copy(), from(dataHolder).orElse(null));
-            manipulator.set(Keys.TAMED_OWNER, merged.owner().get());
-            return Optional.of(manipulator);
-        }
-        return Optional.empty();
+        return Optional.of(Optional.ofNullable(uuid));
     }
 
     @Override
@@ -92,78 +78,34 @@ public class TameableDataProcessor extends AbstractSpongeDataProcessor<TameableD
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, TameableData manipulator, MergeFunction overlap) {
-        if (dataHolder instanceof EntityTameable) {
-            final EntityTameable entityTameable = (EntityTameable) dataHolder;
-            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final String sPrevTamer = entityTameable.getOwnerId();
-            final Optional<UUID> prevTamer = TameableDataProcessor.asUUID(sPrevTamer);
-            final TameableData
-                newdata =
-                checkNotNull(overlap, "MergeFunction must not be null").merge(from(dataHolder).orElse(null), checkNotNull(manipulator));
-            final ImmutableSpongeOptionalValue<UUID> prevValue = ImmutableSpongeTameableData.createValue(prevTamer);
-            final ImmutableValue<Optional<UUID>> newValue = newdata.owner().asImmutable();
-            try {
-                builder.replace(prevValue);
-                entityTameable.setOwnerId(asString(newdata.owner().get()));
-                builder.success(newValue)
-                    .result(DataTransactionResult.Type.SUCCESS);
-                return builder.build();
-            } catch (Exception e) {
-                entityTameable.setOwnerId(sPrevTamer);
-                builder.reject(newValue)
-                    .result(DataTransactionResult.Type.ERROR);
-                return builder.build();
-            }
-        }
-        return DataTransactionResult.failResult(manipulator.getValues());
-    }
-
-    @Override
-    public Optional<ImmutableTameableData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableTameableData immutable) {
-        //TODO: Health returns empty, investigate solutions.
-        return Optional.empty();
-    }
-
-    @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        //Fail to remove data, at this stage untameable tameables are not supported.
-        return DataTransactionResult.builder().result(DataTransactionResult.Type.FAILURE).build();
-    }
-
-    @Override
-    public Optional<TameableData> createFrom(DataHolder dataHolder) {
-        if (dataHolder instanceof EntityTameable) {
-            final Optional<UUID> uuidOptional = getTamer((EntityTameable) dataHolder);
-            return Optional.<TameableData>of(new SpongeTameableData(uuidOptional.orElse(null)));
-        }
-        return Optional.empty();
-    }
-
-    public static String asString(final Optional<UUID> uuidOptional) {
+    protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
+        String ownerId = "";
         if (uuidOptional.isPresent()) {
-            return UUIDTypeAdapter.fromUUID(uuidOptional.get());
+            ownerId = UUIDTypeAdapter.fromUUID(uuidOptional.get());
         }
-        return "";
+        tameable.setOwnerId(ownerId);
+        return true;
     }
 
-    public static Optional<UUID> getTamer(@Nullable final EntityTameable tameable) {
-        if (tameable == null) {
-            return Optional.empty();
-        }
-        return asUUID(tameable.getOwnerId());
+    @Override
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        // Untameable tameables are not supported.
+        return DataTransactionResult.failNoData();
     }
 
-    public static Optional<UUID> asUUID(@Nullable final String sUUID) {
-        if (sUUID == null) {
-            return Optional.empty();
-        }
-        @Nullable UUID uuid;
-        try {
-            uuid = UUIDTypeAdapter.fromString(sUUID);
-        } catch (final RuntimeException ignored) {
-            uuid = null;
-        }
-        return Optional.ofNullable(uuid);
+    @Override
+    protected OptionalValue<UUID> constructValue(Optional<UUID> defaultValue) {
+        return new SpongeOptionalValue<>(this.getKey(), defaultValue);
     }
+
+    @Override
+    protected ImmutableValue<Optional<UUID>> constructImmutableValue(Optional<UUID> value) {
+        return new ImmutableSpongeValue<>(Keys.TAMED_OWNER, Optional.empty(), value);
+    }
+
+    @Override
+    protected TameableData createManipulator() {
+        return new SpongeTameableData();
+    }
+
 }

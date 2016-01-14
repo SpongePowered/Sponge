@@ -82,7 +82,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
-        BlockTypeRegistryModule.getInstance().registerFromGameData(location.getResourcePath(), (BlockType) block);
+        BlockTypeRegistryModule.getInstance().registerFromGameData(location.toString(), (BlockType) block);
     }
 
     @Override

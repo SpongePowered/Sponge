@@ -30,7 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.OpenData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeOpenData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
-
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class OpenDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, Value<Boolean>, OpenData, ImmutableOpenData> {
 
@@ -46,6 +46,11 @@ public class OpenDataProcessor extends AbstractBlockOnlyDataProcessor<Boolean, V
     @Override
     protected OpenData createManipulator() {
         return new SpongeOpenData();
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
     }
 
 }

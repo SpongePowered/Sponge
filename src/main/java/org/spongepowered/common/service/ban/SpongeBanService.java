@@ -67,14 +67,14 @@ public class SpongeBanService implements BanService {
     @Override
     public Collection<Ban.Profile> getProfileBans() {
         this.getUserBanList().removeExpired();
-        return new ArrayList<>((List) this.getUserBanList().getValues().values());
+        return new ArrayList<>((Collection<Ban.Profile>) (Object) this.getUserBanList().getValues().values());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Ban.Ip> getIpBans() {
         this.getIPBanList().removeExpired();
-        return new ArrayList<>((List) this.getIPBanList().getValues().values());
+        return new ArrayList<>((Collection<Ban.Ip>) (Object) this.getIPBanList().getValues().values());
     }
 
     @Override

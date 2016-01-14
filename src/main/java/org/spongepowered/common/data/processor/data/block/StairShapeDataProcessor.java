@@ -32,6 +32,7 @@ import org.spongepowered.api.data.type.StairShapes;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeStairShapeData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class StairShapeDataProcessor extends
         AbstractBlockOnlyDataProcessor<StairShape, Value<StairShape>, StairShapeData, ImmutableStairShapeData> {
@@ -49,4 +50,10 @@ public class StairShapeDataProcessor extends
     protected StairShape getDefaultValue() {
         return StairShapes.STRAIGHT;
     }
+
+    @Override
+    protected Value<StairShape> constructValue(StairShape actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

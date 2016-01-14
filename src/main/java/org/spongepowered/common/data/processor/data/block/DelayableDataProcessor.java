@@ -30,6 +30,7 @@ import org.spongepowered.api.data.manipulator.mutable.block.DelayableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDelayableData;
 import org.spongepowered.common.data.processor.common.AbstractBlockOnlyDataProcessor;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 
 public class DelayableDataProcessor extends
         AbstractBlockOnlyDataProcessor<Integer, MutableBoundedValue<Integer>, DelayableData, ImmutableDelayableData> {
@@ -46,6 +47,16 @@ public class DelayableDataProcessor extends
     @Override
     protected DelayableData createManipulator() {
         return new SpongeDelayableData();
+    }
+
+    @Override
+    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
+        return SpongeValueFactory.boundedBuilder(this.key)
+                .defaultValue(getDefaultValue())
+                .minimum(1)
+                .maximum(4)
+                .actualValue(actualValue)
+                .build();
     }
 
 }

@@ -25,17 +25,18 @@
 package org.spongepowered.common.data.processor.data.item;
 
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableWetData;
 import org.spongepowered.api.data.manipulator.mutable.WetData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.SpongeWetData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
@@ -47,17 +48,18 @@ public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolea
 
     @Override
     protected boolean set(ItemStack itemStack, Boolean value) {
-        if (value) {
-            itemStack.setItemDamage(1);
-        } else {
-            itemStack.setItemDamage(0);
-        }
+        itemStack.setItemDamage(value ? 1 : 0);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(ItemStack itemStack) {
         return Optional.of(itemStack.getItemDamage() == 1);
+    }
+
+    @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(Keys.IS_WET, false, actualValue);
     }
 
     @Override
@@ -71,7 +73,7 @@ public class ItemWetDataProcessor extends AbstractItemSingleDataProcessor<Boolea
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 

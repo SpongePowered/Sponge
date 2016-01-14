@@ -28,21 +28,20 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.DataTransactionResult.Type;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableLoreData;
 import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeLoreData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
+import org.spongepowered.common.data.value.mutable.SpongeListValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
@@ -62,28 +61,22 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (supports(dataHolder)) {
-            final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<LoreData> data = from(dataHolder);
-            if (data.isPresent()) {
-                try {
-                    NbtDataUtil.removeLoreFromNBT((ItemStack) dataHolder);
-                    return builder.replace(data.get().getValues()).result(Type.SUCCESS).build();
-                } catch (Exception e) {
-                    SpongeImpl.getLogger().error("There was an issue removing the lore from an itemstack!", e);
-                    return builder.result(Type.ERROR).build();
-                }
-            } else {
-                return builder.result(Type.SUCCESS).build();
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            ItemStack stack = (ItemStack) container;
+            Optional<List<Text>> old = getVal(stack);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
             }
+            NbtDataUtil.removeLoreFromNBT(stack);
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
 
     @Override
     protected LoreData createManipulator() {
-      return new SpongeLoreData();
+        return new SpongeLoreData();
     }
 
     @Override
@@ -105,8 +98,13 @@ public class ItemLoreDataProcessor extends AbstractItemSingleDataProcessor<List<
     }
 
     @Override
+    protected ListValue<Text> constructValue(List<Text> defaultValue) {
+        return new SpongeListValue<>(Keys.ITEM_LORE, defaultValue);
+    }
+
+    @Override
     protected ImmutableValue<List<Text>> constructImmutableValue(List<Text> value) {
-       return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
+        return new ImmutableSpongeListValue<>(Keys.ITEM_LORE, ImmutableList.copyOf(value));
     }
 
 }

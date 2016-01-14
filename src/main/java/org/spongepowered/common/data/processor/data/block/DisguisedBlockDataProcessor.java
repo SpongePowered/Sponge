@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDisguisedBlockData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class DisguisedBlockDataProcessor extends
         AbstractCatalogDataProcessor<DisguisedBlockType, Value<DisguisedBlockType>, DisguisedBlockData, ImmutableDisguisedBlockData> {
@@ -61,4 +62,10 @@ public class DisguisedBlockDataProcessor extends
     protected DisguisedBlockType getDefaultValue() {
         return DisguisedBlockTypes.COBBLESTONE;
     }
+
+    @Override
+    protected Value<DisguisedBlockType> constructValue(DisguisedBlockType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

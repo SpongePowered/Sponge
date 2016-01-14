@@ -27,11 +27,11 @@ package org.spongepowered.common.data.processor.data.item;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableAuthorData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
@@ -40,6 +40,7 @@ import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -51,7 +52,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
@@ -60,7 +61,6 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         return new SpongeAuthorData();
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(ItemStack itemStack, Text value) {
         if (!itemStack.hasTagCompound()) {
@@ -81,8 +81,13 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
     }
 
     @Override
+    protected Value<Text> constructValue(Text actualValue) {
+        return new SpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), actualValue);
+    }
+
+    @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, value);
+        return new ImmutableSpongeValue<>(Keys.BOOK_AUTHOR, Text.of(), value);
     }
 
 }

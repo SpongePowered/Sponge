@@ -24,48 +24,47 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
-import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.type.SkullTypes;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayerData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.processor.common.SkullUtils;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-import java.util.Collections;
 import java.util.Optional;
 
-public class ItemSkullRepresentedPlayerDataProcessor extends AbstractItemSingleDataProcessor<GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
+public class ItemSkullRepresentedPlayerDataProcessor
+        extends AbstractItemSingleDataProcessor<GameProfile, Value<GameProfile>, RepresentedPlayerData, ImmutableRepresentedPlayerData> {
 
     public ItemSkullRepresentedPlayerDataProcessor() {
         super(ItemSkullRepresentedPlayerDataProcessor::isSupportedItem, Keys.REPRESENTED_PLAYER);
     }
 
-    private static boolean isSupportedItem(ItemStack item) {
-        return item.getItem().equals(Items.skull) && SkullUtils.getSkullType(item).equals(SkullTypes.PLAYER);
+    private static boolean isSupportedItem(ItemStack stack) {
+        return SkullUtils.isValidItemStack(stack) && SkullUtils.getSkullType(stack).equals(SkullTypes.PLAYER);
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (this.supports(dataHolder)) {
-            final ItemStack skull = (ItemStack) dataHolder;
-            final Optional<GameProfile> oldData = getVal(skull);
-            if (SkullUtils.setProfile(skull, null)) {
-                if (oldData.isPresent()) {
-                    return DataTransactionResult.successReplaceResult(Collections.emptySet(),
-                                                                      Collections.singleton(constructImmutableValue(oldData.get())));
-                } else {
-                    return DataTransactionResult.successNoData();
-                }
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (supports(container)) {
+            ItemStack stack = (ItemStack) container;
+            Optional<GameProfile> old = getVal(stack);
+            if (!old.isPresent()) {
+                return DataTransactionResult.successNoData();
             }
+            if (SkullUtils.setProfile(stack, null)) {
+                return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
+            }
+            return DataTransactionResult.builder().result(DataTransactionResult.Type.ERROR).build();
         }
         return DataTransactionResult.failNoData();
     }
@@ -78,6 +77,11 @@ public class ItemSkullRepresentedPlayerDataProcessor extends AbstractItemSingleD
     @Override
     protected Optional<GameProfile> getVal(ItemStack itemStack) {
         return SkullUtils.getProfile(itemStack);
+    }
+
+    @Override
+    protected Value<GameProfile> constructValue(GameProfile actualValue) {
+        return new SpongeValue<>(this.key, SpongeRepresentedPlayerData.NULL_PROFILE, actualValue);
     }
 
     @Override

@@ -25,12 +25,12 @@
 package org.spongepowered.common.data.processor.data.tileentity;
 
 import net.minecraft.tileentity.TileEntityHopper;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableCooldownData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.CooldownData;
-import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
+import org.spongepowered.api.data.value.ValueContainer;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeCooldownData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
@@ -60,14 +60,18 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public ImmutableBoundedValue<Integer> constructImmutableValue(Integer value) {
+    protected MutableBoundedValue<Integer> constructValue(Integer value) {
         return SpongeValueFactory.boundedBuilder(Keys.COOLDOWN)
                 .minimum(1)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(8)
                 .actualValue(value)
-                .build()
-                .asImmutable();
+                .build();
+    }
+
+    @Override
+    public ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return constructValue(value).asImmutable();
     }
 
     @Override
@@ -76,15 +80,17 @@ public class CooldownDataProcessor
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof TileEntityHopper) {
-            int cooldown = ((TileEntityHopper) dataHolder).transferCooldown;
-            if (cooldown < 1) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (container instanceof TileEntityHopper) {
+            TileEntityHopper hopper = (TileEntityHopper) container;
+            Optional<Integer> old = getVal(hopper);
+            if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            ((TileEntityHopper) dataHolder).transferCooldown = -1;
-            return DataTransactionResult.successRemove(constructImmutableValue(cooldown));
+            hopper.transferCooldown = -1;
+            return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();
     }
+
 }

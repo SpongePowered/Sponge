@@ -30,17 +30,18 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityFlowerPot;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedItemData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
 
 import java.util.Optional;
@@ -53,17 +54,18 @@ public class FlowerPotDataProcessor extends
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (!(dataHolder instanceof TileEntityFlowerPot)) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+        if (!(container instanceof TileEntityFlowerPot)) {
             return DataTransactionResult.failNoData();
         }
-        Optional<ItemStackSnapshot> snapshot = getVal((TileEntityFlowerPot) dataHolder);
-        if (!snapshot.isPresent()) {
+        TileEntityFlowerPot flowerPot = (TileEntityFlowerPot) container;
+        Optional<ItemStackSnapshot> old = getVal(flowerPot);
+        if (!old.isPresent()) {
             return DataTransactionResult.successNoData();
         }
-        ((TileEntityFlowerPot) dataHolder).setFlowerPotData(null, 0);
-        ((TileEntityFlowerPot) dataHolder).markDirty();
-        return DataTransactionResult.successRemove(constructImmutableValue(snapshot.get()));
+        flowerPot.setFlowerPotData(null, 0);
+        flowerPot.markDirty();
+        return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
     }
 
     @Override
@@ -93,8 +95,13 @@ public class FlowerPotDataProcessor extends
     }
 
     @Override
+    protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
+    }
+
+    @Override
     protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
-        return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
     }
 
     @Override

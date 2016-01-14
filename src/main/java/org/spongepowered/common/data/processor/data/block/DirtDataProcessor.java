@@ -34,6 +34,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirtData;
 import org.spongepowered.common.data.processor.common.AbstractCatalogDataProcessor;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Value<DirtType>, DirtData, ImmutableDirtData> {
 
@@ -60,4 +61,10 @@ public class DirtDataProcessor extends AbstractCatalogDataProcessor<DirtType, Va
     protected DirtType getDefaultValue() {
         return DirtTypes.DIRT;
     }
+
+    @Override
+    protected Value<DirtType> constructValue(DirtType actualValue) {
+        return new SpongeValue<>(this.key, getDefaultValue(), actualValue);
+    }
+
 }

@@ -25,20 +25,22 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.monster.EntityCreeper;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableChargedData;
 import org.spongepowered.api.data.manipulator.mutable.entity.ChargedData;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public class ChargedDataProcessor extends AbstractEntitySingleDataProcessor<EntityCreeper, Boolean, Value<Boolean>, ChargedData, ImmutableChargedData> {
+public class ChargedDataProcessor
+        extends AbstractEntitySingleDataProcessor<EntityCreeper, Boolean, Value<Boolean>, ChargedData, ImmutableChargedData> {
 
     public ChargedDataProcessor() {
         super(EntityCreeper.class, Keys.CREEPER_CHARGED);
@@ -46,7 +48,7 @@ public class ChargedDataProcessor extends AbstractEntitySingleDataProcessor<Enti
 
     @Override
     protected boolean set(EntityCreeper entity, Boolean value) {
-        entity.getDataWatcher().updateObject(17, (value ? (byte)1 : (byte)0));
+        entity.getDataWatcher().updateObject(17, (value ? (byte) 1 : (byte) 0));
         return true;
     }
 
@@ -56,8 +58,13 @@ public class ChargedDataProcessor extends AbstractEntitySingleDataProcessor<Enti
     }
 
     @Override
+    protected Value<Boolean> constructValue(Boolean actualValue) {
+        return new SpongeValue<>(this.key, false, actualValue);
+    }
+
+    @Override
     protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.CREEPER_CHARGED, false, value);
+        return ImmutableSpongeValue.cachedOf(this.key, false, value);
     }
 
     @Override
@@ -66,7 +73,7 @@ public class ChargedDataProcessor extends AbstractEntitySingleDataProcessor<Enti
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
+    public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
 
