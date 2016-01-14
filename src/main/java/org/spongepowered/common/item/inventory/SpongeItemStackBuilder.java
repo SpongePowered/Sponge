@@ -37,8 +37,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -51,6 +53,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,6 +65,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     private ItemType type;
     private int quantity;
     private int damageValue = 0;
+    private LinkedHashMap<Key<?>, Object> keyValues;
     @Nullable private NBTTagCompound compound;
 
     public SpongeItemStackBuilder() {
@@ -79,6 +83,15 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public ItemStack.Builder quantity(int quantity) throws IllegalArgumentException {
         checkArgument(quantity > 0, "Quantity must be greater than 0");
         this.quantity = quantity;
+        return this;
+    }
+
+    @Override
+    public <E> ItemStack.Builder keyValue(Key<? extends BaseValue<E>> key, E value) {
+        if (this.keyValues == null) {
+            this.keyValues = new LinkedHashMap<>();
+        }
+        this.keyValues.put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
         return this;
     }
 

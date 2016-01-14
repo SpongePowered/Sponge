@@ -39,6 +39,7 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
@@ -137,6 +138,7 @@ public class SpongeGameRegistry implements GameRegistry {
         this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
 
         registerModulePhase();
+        SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
     }
 
@@ -377,6 +379,11 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public ValueFactory getValueFactory() {
         return SpongeValueFactory.getInstance();
+    }
+
+    @Override
+    public VillagerRegistry getVillagerRegistry() {
+        return SpongeVillagerRegistry.getInstance();
     }
 
     @Override

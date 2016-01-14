@@ -22,23 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
-
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
-import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
-import org.spongepowered.api.util.RespawnLocation;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;
-
-import java.util.Map;
-import java.util.UUID;
-
-public class ImmutableSpongeRespawnLocation extends AbstractImmutableMappedData<UUID, RespawnLocation, ImmutableRespawnLocation, RespawnLocationData>
-        implements ImmutableRespawnLocation {
-
-    public ImmutableSpongeRespawnLocation(Map<UUID, RespawnLocation> locations) {
-        super(ImmutableRespawnLocation.class, locations, Keys.RESPAWN_LOCATIONS, SpongeRespawnLocationData.class);
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.item.inventory.generation;

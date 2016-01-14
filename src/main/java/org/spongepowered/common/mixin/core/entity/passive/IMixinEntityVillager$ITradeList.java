@@ -22,23 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.entity;
+package org.spongepowered.common.mixin.core.entity.passive;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
-import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
-import org.spongepowered.api.util.RespawnLocation;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;
+import net.minecraft.entity.passive.EntityVillager;
+import net.minecraft.village.MerchantRecipe;
+import net.minecraft.village.MerchantRecipeList;
+import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.item.merchant.TradeOfferListMutator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.item.inventory.util.TradeOfferUtil;
 
-import java.util.Map;
-import java.util.UUID;
+import java.util.List;
+import java.util.Random;
 
-public class ImmutableSpongeRespawnLocation extends AbstractImmutableMappedData<UUID, RespawnLocation, ImmutableRespawnLocation, RespawnLocationData>
-        implements ImmutableRespawnLocation {
+@Mixin(EntityVillager.ITradeList.class)
+public interface IMixinEntityVillager$ITradeList extends TradeOfferListMutator, EntityVillager.ITradeList {
 
-    public ImmutableSpongeRespawnLocation(Map<UUID, RespawnLocation> locations) {
-        super(ImmutableRespawnLocation.class, locations, Keys.RESPAWN_LOCATIONS, SpongeRespawnLocationData.class);
+    @Override
+    default void accept(List<TradeOffer> tradeOffers, Random random) {
+        MerchantRecipeList tempList = new MerchantRecipeList();
+        for (TradeOffer offer : tradeOffers) {
+            tempList.add(TradeOfferUtil.toNative(offer));
+        }
+        modifyMerchantRecipeList(tempList, random);
+        tradeOffers.clear();
+        for (MerchantRecipe recipe : tempList) {
+            tradeOffers.add(TradeOfferUtil.fromNative(recipe));
+        }
     }
 
 }

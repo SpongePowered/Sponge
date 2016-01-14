@@ -71,7 +71,9 @@ import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -132,7 +134,9 @@ import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
@@ -258,6 +262,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
             .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
             .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
+            .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
+            .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
         ;
     }
 
@@ -352,11 +358,11 @@ public final class CommonModuleRegistry {
             ;
     }
 
-    private CommonModuleRegistry() { }
+    CommonModuleRegistry() { }
 
     private static final class Holder {
 
-        private static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
+        static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
     }
 
 }
