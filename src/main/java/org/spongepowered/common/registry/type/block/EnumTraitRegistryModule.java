@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.EnumTraits;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
@@ -38,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>> {
+public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<EnumTrait<?>>, AlternateCatalogRegistryModule<EnumTrait<?>> {
 
     @RegisterCatalog(EnumTraits.class)
     private Map<String, EnumTrait<?>> enumTraitMap = new HashMap<>();
@@ -75,6 +76,15 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
     }
 
     private EnumTraitRegistryModule() { }
+
+    @Override
+    public Map<String, EnumTrait<?>> provideCatalogMap() {
+        Map<String, EnumTrait<?>> map = new HashMap<>();
+        for (Map.Entry<String, EnumTrait<?>> enumTraitEntry : this.enumTraitMap.entrySet()) {
+            map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
+        }
+        return map;
+    }
 
     private static final class Holder {
         private final static EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();

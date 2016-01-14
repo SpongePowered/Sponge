@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
@@ -38,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<BooleanTrait> {
+public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<BooleanTrait>, AlternateCatalogRegistryModule<BooleanTrait> {
 
     @RegisterCatalog(BooleanTraits.class)
     private Map<String, BooleanTrait> booleanTraitMap = new HashMap<>();
@@ -75,6 +76,15 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
     }
 
     private BooleanTraitRegistryModule() { }
+
+    @Override
+    public Map<String, BooleanTrait> provideCatalogMap() {
+        Map<String, BooleanTrait> map = new HashMap<>();
+        for (Map.Entry<String, BooleanTrait> enumTraitEntry : this.booleanTraitMap.entrySet()) {
+            map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
+        }
+        return map;
+    }
 
     private static final class Holder {
         private final static BooleanTraitRegistryModule INSTANCE = new BooleanTraitRegistryModule();
