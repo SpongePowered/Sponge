@@ -560,6 +560,11 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
                 ImmutableSpongeDirectionalData.class, new SkullRotationDataProcessor());
 
+        final DyeableDataProcessor dyeableDataProcessor = new DyeableDataProcessor();
+        dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
+                ImmutableSpongeDyeableData.class, dyeableDataProcessor);
+
+
         // Values
 
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -619,6 +624,9 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.INVISIBLE, new InvisibilityValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_IGNORES_COLLISION, new InvisibilityCollisionValueProcessor());
         dataManager.registerValueProcessor(Keys.INVISIBILITY_PREVENTS_TARGETING, new InvisibilityTargetValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
