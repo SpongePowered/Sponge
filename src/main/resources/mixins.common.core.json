@@ -5,9 +5,11 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
     "mixins": [
-        "MixinGameProfile",
         "MixinBootstrapAnonInner7",
         "MixinBootstrapAnonInner8",
+        "authlib.MixinGameProfile",
+        "authlib.MixinProperty",
+        "authlib.MixinPropertyMap",
         "ban.MixinBanEntry",
         "ban.MixinIPBanEntry",
         "ban.MixinIPBanList",
