@@ -35,16 +35,17 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCustomNameVisibleData;
-import org.spongepowered.common.data.processor.dual.common.AbstractSingleTargetDualProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class CustomNameVisibleDualProcessor extends AbstractSingleTargetDualProcessor<Entity, Boolean, Value<Boolean>, CustomNameVisibleData, ImmutableCustomNameVisibleData> {
+public final class CustomNameVisibleDualProcessor extends
+        AbstractSingleDataSingleTargetProcessor<Entity, Boolean, Value<Boolean>, CustomNameVisibleData, ImmutableCustomNameVisibleData> {
 
     public CustomNameVisibleDualProcessor() {
-        super(Entity.class, Keys.CUSTOM_NAME_VISIBLE);
+        super(Keys.CUSTOM_NAME_VISIBLE, Entity.class);
     }
 
     @Override

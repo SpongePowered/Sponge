@@ -82,6 +82,7 @@ import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
+import org.spongepowered.common.data.processor.dual.entity.CustomNameVisibleDualProcessor;
 import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
@@ -560,6 +561,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
                 ImmutableSpongeDirectionalData.class, new SkullRotationDataProcessor());
 
+        dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
+                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleDualProcessor());
+
         // Values
 
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -569,7 +573,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new ItemDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
-        dataManager.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());

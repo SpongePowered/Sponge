@@ -113,6 +113,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
         this.pvpEnabled = settings.isPVPEnabled();
+        this.generateSpawnOnLoad = settings.doesGenerateSpawnOnLoad();
         return this;
     }
 
@@ -130,6 +131,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
         this.pvpEnabled = properties.isPVPEnabled();
+        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
         return this;
     }
 
@@ -194,6 +196,12 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     }
 
     @Override
+    public SpongeWorldCreationSettingsBuilder generateSpawnOnLoad(boolean state) {
+        this.generateSpawnOnLoad = state;
+        return this;
+    }
+
+    @Override
     public SpongeWorldCreationSettingsBuilder generatorSettings(DataContainer settings) {
         this.generatorSettings = settings;
         return this;
@@ -246,6 +254,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.dimensionId = ((IMixinWorldSettings) value).getDimensionId();
         this.isMod = ((IMixinWorldSettings) value).getIsMod();
         this.pvpEnabled = value.isPVPEnabled();
+        this.generateSpawnOnLoad = value.doesGenerateSpawnOnLoad();
         return this;
     }
 
