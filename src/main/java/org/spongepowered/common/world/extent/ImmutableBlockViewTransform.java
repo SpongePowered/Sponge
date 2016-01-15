@@ -27,6 +27,8 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
+import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 
 public class ImmutableBlockViewTransform extends AbstractBlockViewTransform<ImmutableBlockVolume> implements ImmutableBlockVolume {
 
@@ -43,6 +45,11 @@ public class ImmutableBlockViewTransform extends AbstractBlockViewTransform<Immu
     @Override
     public ImmutableBlockVolume getBlockView(DiscreteTransform3 transform) {
         return new ImmutableBlockViewTransform(this.volume, this.transform.withTransformation(transform));
+    }
+
+    @Override
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
     }
 
 }

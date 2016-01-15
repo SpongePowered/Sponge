@@ -34,8 +34,10 @@ import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 
 @NonnullByDefault
 public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
@@ -79,6 +81,11 @@ public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
+    }
+
+    @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
@@ -87,11 +94,6 @@ public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implemen
             default:
                 throw new UnsupportedOperationException(type.name());
         }
-    }
-
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return this;
     }
 
     /**

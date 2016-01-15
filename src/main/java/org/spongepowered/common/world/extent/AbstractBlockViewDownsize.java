@@ -29,11 +29,9 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.extent.BlockVolume;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
 
 public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implements BlockVolume {
@@ -96,12 +94,6 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
             default:
                 throw new UnsupportedOperationException(type.name());
         }
-    }
-
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
-            this.size);
     }
 
 }

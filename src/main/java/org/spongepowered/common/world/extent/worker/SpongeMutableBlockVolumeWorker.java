@@ -22,35 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.extent;
+package org.spongepowered.common.world.extent.worker;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.util.DiscreteTransform3;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
-import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
-import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeFiller;
 
-public class ImmutableBlockViewDownsize extends AbstractBlockViewDownsize<ImmutableBlockVolume> implements ImmutableBlockVolume {
+/**
+ *
+ */
+public class SpongeMutableBlockVolumeWorker<V extends MutableBlockVolume> extends SpongeBlockVolumeWorker<V> implements MutableBlockVolumeWorker<V> {
 
-    public ImmutableBlockViewDownsize(ImmutableBlockVolume volume, Vector3i min, Vector3i max) {
-        super(volume, min, max);
+    public SpongeMutableBlockVolumeWorker(V volume) {
+        super(volume);
     }
 
     @Override
-    public ImmutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
-        checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
-        checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
-        return new ImmutableBlockViewDownsize(this.volume, newMin, newMax);
+    public void fill(BlockVolumeFiller filler) {
+        final int xMin = this.volume.getBlockMin().getX();
+        final int yMin = this.volume.getBlockMin().getY();
+        final int zMin = this.volume.getBlockMin().getZ();
+        final int xMax = this.volume.getBlockMax().getX();
+        final int yMax = this.volume.getBlockMax().getY();
+        final int zMax = this.volume.getBlockMax().getZ();
+        for (int z = zMin; z <= zMax; z++) {
+            for (int y = yMin; y <= yMax; y++) {
+                for (int x = xMin; x <= xMax; x++) {
+                    final BlockState block = filler.produce(x, y, z);
+                    this.volume.setBlock(x, y, z, block);
+                }
+            }
+        }
     }
-
-    @Override
-    public ImmutableBlockVolume getBlockView(DiscreteTransform3 transform) {
-        return new ImmutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
-        return new SpongeBlockVolumeWorker<>(this);
-    }
-
 }

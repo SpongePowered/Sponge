@@ -22,27 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable;
+package org.spongepowered.common.world.extent.worker;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.procedure.BiomeAreaFiller;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
-import org.spongepowered.api.data.manipulator.mutable.DyeableData;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDyeableData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
-import org.spongepowered.common.data.util.ImplementationRequiredForTest;
+/**
+ *
+ */
+public class SpongeMutableBiomeAreaWorker<A extends MutableBiomeArea> extends SpongeBiomeAreaWorker<A> implements MutableBiomeAreaWorker<A> {
 
-@ImplementationRequiredForTest
-public class SpongeDyeableData extends AbstractSingleCatalogData<DyeColor, DyeableData, ImmutableDyeableData> implements DyeableData {
-
-    public SpongeDyeableData(DyeColor dyeColor) {
-        super(DyeableData.class, checkNotNull(dyeColor), Keys.DYE_COLOR, ImmutableSpongeDyeableData.class);
+    public SpongeMutableBiomeAreaWorker(A area) {
+        super(area);
     }
 
-    public SpongeDyeableData() {
-        this(DyeColors.BLACK);
+    @Override
+    public void fill(BiomeAreaFiller filler) {
+        final int xMin = this.area.getBiomeMin().getX();
+        final int zMin = this.area.getBiomeMin().getY();
+        final int xMax = this.area.getBiomeMax().getX();
+        final int zMax = this.area.getBiomeMax().getY();
+        for (int z = zMin; z <= zMax; z++) {
+            for (int x = xMin; x <= xMax; x++) {
+                final BiomeType biome = filler.produce(x, z);
+                this.area.setBiome(x, z, biome);
+            }
+        }
     }
 }

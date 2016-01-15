@@ -32,9 +32,10 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 /**
  * Mutable view of a {@link BiomeGenBase} array.
@@ -53,7 +54,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * Creates a new instance.
      *
      * @param biomes The biome array. The array is not copied, so changes made
-     *        by this object will write through.
+     * by this object will write through.
      * @param start The start position
      * @param size The size
      */
@@ -81,8 +82,8 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
+    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
+        return new SpongeBiomeAreaWorker<>(this);
     }
 
     @Override
@@ -100,4 +101,5 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     public ImmutableBiomeArea getImmutableBiomeCopy() {
         return this;
     }
+
 }

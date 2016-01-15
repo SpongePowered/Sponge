@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.block.trait.IntegerTraits;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
@@ -38,7 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<IntegerTrait> {
+public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalogRegistryModule<IntegerTrait>, AlternateCatalogRegistryModule<IntegerTrait> {
 
     @RegisterCatalog(IntegerTraits.class)
     private Map<String, IntegerTrait> integerTraitMap = new HashMap<>();
@@ -75,6 +76,15 @@ public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalog
     }
 
     private IntegerTraitRegistryModule() { }
+
+    @Override
+    public Map<String, IntegerTrait> provideCatalogMap() {
+        Map<String, IntegerTrait> map = new HashMap<>();
+        for (Map.Entry<String, IntegerTrait> enumTraitEntry : this.integerTraitMap.entrySet()) {
+            map.put(enumTraitEntry.getKey().replace("minecraft:", ""), enumTraitEntry.getValue());
+        }
+        return map;
+    }
 
     private static final class Holder {
         private final static IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();

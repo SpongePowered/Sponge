@@ -36,9 +36,11 @@ import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Optional;
@@ -87,6 +89,11 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
+    }
+
+    @Override
     public UnmodifiableBlockVolume getUnmodifiableBlockView() {
         return new UnmodifiableBlockVolumeWrapper(this);
     }
@@ -106,4 +113,5 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     public ImmutableBlockVolume getImmutableBlockCopy() {
         return new ShortArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
     }
+
 }

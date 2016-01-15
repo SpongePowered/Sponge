@@ -31,6 +31,8 @@ import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 public class UnmodifiableBiomeAreaWrapper implements UnmodifiableBiomeArea {
 
@@ -76,6 +78,11 @@ public class UnmodifiableBiomeAreaWrapper implements UnmodifiableBiomeArea {
     }
 
     @Override
+    public BiomeAreaWorker<? extends UnmodifiableBiomeArea> getBiomeWorker() {
+        return new SpongeBiomeAreaWorker<>(this);
+    }
+
+    @Override
     public MutableBiomeArea getBiomeCopy(StorageType type) {
         return this.area.getBiomeCopy(type);
     }
@@ -84,4 +91,5 @@ public class UnmodifiableBiomeAreaWrapper implements UnmodifiableBiomeArea {
     public ImmutableBiomeArea getImmutableBiomeCopy() {
         return this.area.getImmutableBiomeCopy();
     }
+
 }

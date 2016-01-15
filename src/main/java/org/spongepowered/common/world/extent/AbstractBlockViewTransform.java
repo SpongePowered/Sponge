@@ -29,10 +29,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.world.extent.BlockVolume;
-import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
 import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
 
 public abstract class AbstractBlockViewTransform<V extends BlockVolume> implements BlockVolume {
@@ -98,12 +96,6 @@ public abstract class AbstractBlockViewTransform<V extends BlockVolume> implemen
             default:
                 throw new UnsupportedOperationException(type.name());
         }
-    }
-
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
-            this.size);
     }
 
 }

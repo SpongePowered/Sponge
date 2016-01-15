@@ -27,6 +27,8 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector2i;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
+import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<ImmutableBiomeArea> implements ImmutableBiomeArea {
 
@@ -42,6 +44,11 @@ public class ImmutableBiomeViewTransform extends AbstractBiomeViewTransform<Immu
     @Override
     public ImmutableBiomeArea getBiomeView(DiscreteTransform2 transform) {
         return new ImmutableBiomeViewTransform(this.area, this.transform.withTransformation(transform));
+    }
+
+    @Override
+    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
+        return new SpongeBiomeAreaWorker<>(this);
     }
 
 }

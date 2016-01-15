@@ -27,8 +27,12 @@ package org.spongepowered.common.world.extent;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.DiscreteTransform3;
+import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
 public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableBlockVolume> implements MutableBlockVolume {
 
@@ -55,7 +59,19 @@ public class MutableBlockViewDownsize extends AbstractBlockViewDownsize<MutableB
     }
 
     @Override
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
+    }
+
+    @Override
     public UnmodifiableBlockVolume getUnmodifiableBlockView() {
         return new UnmodifiableBlockVolumeWrapper(this);
     }
+
+    @Override
+    public ImmutableBlockVolume getImmutableBlockCopy() {
+        return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min,
+            this.size);
+    }
+
 }

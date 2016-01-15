@@ -33,9 +33,10 @@ import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.StorageType;
-import org.spongepowered.api.world.extent.UnmodifiableBiomeArea;
+import org.spongepowered.api.world.extent.worker.BiomeAreaWorker;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 /**
  * Immutable biome area, backed by a byte array. The array passed to the
@@ -78,8 +79,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public UnmodifiableBiomeArea getUnmodifiableBiomeView() {
-        return this;
+    public BiomeAreaWorker<? extends ImmutableBiomeArea> getBiomeWorker() {
+        return new SpongeBiomeAreaWorker<>(this);
     }
 
     @Override
@@ -91,11 +92,6 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
             default:
                 throw new UnsupportedOperationException(type.name());
         }
-    }
-
-    @Override
-    public ImmutableBiomeArea getImmutableBiomeCopy() {
-        return this;
     }
 
     /**
@@ -110,4 +106,5 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     public static ImmutableBiomeArea newWithoutArrayClone(byte[] biomes, Vector2i start, Vector2i size) {
         return new ByteArrayImmutableBiomeBuffer(start, size, biomes);
     }
+
 }
