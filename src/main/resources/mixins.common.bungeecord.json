@@ -9,5 +9,8 @@
         "network.MixinNetHandlerLoginServer",
         "network.MixinNetworkManager",
         "network.packet.MixinC00Handshake"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }
