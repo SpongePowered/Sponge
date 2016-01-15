@@ -22,14 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable.common.collection;
+package org.spongepowered.common.data.manipulator.immutable.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableMappedData;
+import org.spongepowered.api.data.manipulator.mutable.MappedData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
@@ -38,14 +41,16 @@ import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
-public abstract class AbstractImmutableSingleMapData<K, V, I extends ImmutableDataManipulator<I, M>, M extends DataManipulator<M, I>>
-    extends AbstractImmutableSingleData<Map<K, V>, I, M> {
+public abstract class AbstractImmutableMappedData<K, V, I extends ImmutableMappedData<K, V, I, M>, M extends MappedData<K, V, M, I>>
+    extends AbstractImmutableSingleData<Map<K, V>, I, M> implements ImmutableMappedData<K, V, I, M> {
 
     private final Class<? extends M> mutableClass;
     private final ImmutableMapValue<K, V> mapValue;
 
-    public AbstractImmutableSingleMapData(Class<I> immutableClass, Map<K, V> value,
+    public AbstractImmutableMappedData(Class<I> immutableClass, Map<K, V> value,
                                           Key<? extends BaseValue<Map<K, V>>> usedKey,
                                           Class<? extends M> manipulatorClass) {
         super(immutableClass, ImmutableMap.copyOf(value), usedKey);
@@ -61,6 +66,11 @@ public abstract class AbstractImmutableSingleMapData<K, V, I extends ImmutableDa
     }
 
     @Override
+    public Map<K, V> getValue() {
+        return ImmutableMap.copyOf(super.getValue());
+    }
+
+    @Override
     public M asMutable() {
         return ReflectionUtil.createInstance(this.mutableClass, this.value);
     }
@@ -68,5 +78,20 @@ public abstract class AbstractImmutableSingleMapData<K, V, I extends ImmutableDa
     @Override
     public int compareTo(I o) {
         return 0;
+    }
+
+    @Override
+    public Optional<V> get(K key) {
+        return Optional.ofNullable(super.getValue().get(checkNotNull(key, "Key cannot be null!")));
+    }
+
+    @Override
+    public Set<K> getMapKeys() {
+        return super.getValue().keySet();
+    }
+
+    @Override
+    public ImmutableMapValue<K, V> getMapValue() {
+        return this.mapValue;
     }
 }

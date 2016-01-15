@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableBreakableD
 import org.spongepowered.api.data.manipulator.mutable.item.BreakableData;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeBreakableData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
 import java.util.Set;
 import java.util.stream.Collectors;

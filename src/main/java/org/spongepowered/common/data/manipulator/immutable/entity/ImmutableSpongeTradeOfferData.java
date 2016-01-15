@@ -25,23 +25,21 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTradeOfferData;
 
 import java.util.List;
 
-public class ImmutableSpongeTradeOfferData extends AbstractImmutableSingleListData<TradeOffer, ImmutableTradeOfferData, TradeOfferData>
+public class ImmutableSpongeTradeOfferData extends AbstractImmutableListData<TradeOffer, ImmutableTradeOfferData, TradeOfferData>
         implements ImmutableTradeOfferData {
 
     public ImmutableSpongeTradeOfferData(List<TradeOffer> offers) {
         super(ImmutableTradeOfferData.class, offers, Keys.TRADE_OFFERS, SpongeTradeOfferData.class);
-        registerGetters();
     }
 
     @Override
@@ -50,8 +48,4 @@ public class ImmutableSpongeTradeOfferData extends AbstractImmutableSingleListDa
                 .set(Keys.TRADE_OFFERS, getValue());
     }
 
-    @Override
-    public ImmutableListValue<TradeOffer> tradeOffers() {
-        return getValueGetter();
-    }
 }

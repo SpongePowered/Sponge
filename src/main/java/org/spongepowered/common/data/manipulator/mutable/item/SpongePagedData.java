@@ -25,23 +25,19 @@
 package org.spongepowered.common.data.manipulator.mutable.item;
 
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Booleans;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePagedData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData> implements PagedData {
+public class SpongePagedData extends AbstractListData<Text, PagedData, ImmutablePagedData> implements PagedData {
 
     private List<Text> pages;
 
@@ -50,30 +46,8 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
     }
 
     public SpongePagedData(List<Text> pages) {
-        super(PagedData.class);
+        super(PagedData.class, pages, Keys.BOOK_PAGES, ImmutableSpongePagedData.class);
         this.pages = Lists.newArrayList(pages);
-        registerGettersAndSetters();
-    }
-
-    @Override
-    public ListValue<Text> pages() {
-        return new SpongeListValue<>(Keys.BOOK_PAGES, this.pages);
-    }
-
-    @Override
-    public PagedData copy() {
-        return new SpongePagedData(this.pages);
-    }
-
-    @Override
-    public ImmutablePagedData asImmutable() {
-        return new ImmutableSpongePagedData(this.pages);
-    }
-
-    @Override
-    public int compareTo(PagedData o) {
-        return Booleans.compare(o.pages().containsAll(this.pages),
-                this.pages.containsAll(o.pages().get()));
     }
 
     @Override
@@ -82,20 +56,5 @@ public class SpongePagedData extends AbstractData<PagedData, ImmutablePagedData>
             .set(Keys.BOOK_PAGES.getQuery(), SpongeTexts.asJson(this.pages));
     }
 
-    public List<Text> getPages() {
-        return this.pages;
-    }
-
-    public void setPages(List<Text> pages) {
-        this.pages = Lists.newArrayList(pages);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.BOOK_PAGES, SpongePagedData.this::getPages);
-        registerFieldSetter(Keys.BOOK_PAGES, SpongePagedData.this::setPages);
-        registerKeyValue(Keys.BOOK_PAGES, SpongePagedData.this::pages);
-    }
 
 }

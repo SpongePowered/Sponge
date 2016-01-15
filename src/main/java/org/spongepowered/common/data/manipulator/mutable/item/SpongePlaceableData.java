@@ -33,7 +33,7 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableD
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.value.mutable.SetValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongePlaceableData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleSetData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleSetData;
 
 import java.util.Set;
 import java.util.stream.Collectors;

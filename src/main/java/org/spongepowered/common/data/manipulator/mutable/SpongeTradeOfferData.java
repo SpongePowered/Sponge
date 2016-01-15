@@ -26,18 +26,16 @@ package org.spongepowered.common.data.manipulator.mutable;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableTradeOfferData;
 import org.spongepowered.api.data.manipulator.mutable.entity.TradeOfferData;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeTradeOfferData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
 import java.util.List;
 
-public class SpongeTradeOfferData extends AbstractSingleListData<TradeOffer, TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
+public class SpongeTradeOfferData extends AbstractListData<TradeOffer, TradeOfferData, ImmutableTradeOfferData> implements TradeOfferData {
 
     private List<TradeOffer> offers = Lists.newArrayList();
 
@@ -50,18 +48,9 @@ public class SpongeTradeOfferData extends AbstractSingleListData<TradeOffer, Tra
     }
 
     @Override
-    public int compareTo(TradeOfferData o) {
-        return 0; // todo
-    }
-
-    @Override
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.TRADE_OFFERS.getQuery(), this.offers);
     }
 
-    @Override
-    public ListValue<TradeOffer> tradeOffers() {
-        return getValueGetter();
-    }
 }

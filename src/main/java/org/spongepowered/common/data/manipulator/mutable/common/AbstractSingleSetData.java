@@ -22,50 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.mutable.common.collection;
+package org.spongepowered.common.data.manipulator.mutable.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
-import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.value.mutable.SpongeSetValue;
 import org.spongepowered.common.util.ReflectionUtil;
 
 import java.lang.reflect.Modifier;
-import java.util.Map;
+import java.util.Set;
 
-public abstract class AbstractSingleMapData<K, V, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
-    extends AbstractSingleData<Map<K, V>, M, I> {
+public abstract class AbstractSingleSetData<E, M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>>
+    extends AbstractSingleData<Set<E>, M, I> {
 
     private final Class<? extends I> immutableClass;
 
-    public AbstractSingleMapData(Class<M> manipulatorClass, Map<K, V> value,
-                                 Key<? extends BaseValue<Map<K, V>>> usedKey,
-                                 Class<? extends I> immutableClass) {
-        super(manipulatorClass, Maps.newHashMap(value), usedKey);
+    public AbstractSingleSetData(Class<M> manipulatorClass, Set<E> value,
+                                  Key<? extends BaseValue<Set<E>>> usedKey,
+                                  Class<? extends I> immutableClass) {
+        super(manipulatorClass, Sets.newHashSet(value), usedKey);
         checkArgument(!Modifier.isAbstract(immutableClass.getModifiers()), "The immutable class cannot be abstract!");
         checkArgument(!Modifier.isInterface(immutableClass.getModifiers()), "The immutable class cannot be an interface!");
         this.immutableClass = immutableClass;
     }
 
     @Override
-    public Map<K, V> getValue() {
-        return Maps.newHashMap(super.getValue());
+    public Set<E> getValue() {
+        return Sets.newHashSet(super.getValue());
     }
 
     @Override
-    public M setValue(Map<K, V> value) {
-        return super.setValue(Maps.newHashMap(value));
+    public M setValue(Set<E> value) {
+        return super.setValue(Sets.newHashSet(value));
     }
 
     @Override
     protected Value<?> getValueGetter() {
-        return new SpongeMapValue<>(this.usedKey, getValue());
+        return new SpongeSetValue<>(this.usedKey, getValue());
     }
 
     @SuppressWarnings("unchecked")

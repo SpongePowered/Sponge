@@ -30,12 +30,12 @@ import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmen
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeEnchantmentData;
 
 import java.util.List;
 
-public class ImmutableSpongeEnchantmentData extends AbstractImmutableSingleListData<ItemEnchantment, ImmutableEnchantmentData, EnchantmentData>
+public class ImmutableSpongeEnchantmentData extends AbstractImmutableListData<ItemEnchantment, ImmutableEnchantmentData, EnchantmentData>
     implements ImmutableEnchantmentData {
 
     public ImmutableSpongeEnchantmentData(List<ItemEnchantment> enchantments) {
