@@ -121,6 +121,13 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
         }
     }
 
+    @Inject(method = "setTagCompound", at = @At("RETURN"))
+    private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
+        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+        }
+    }
+
     @Override
     public ItemType getItem() {
         return (ItemType) shadow$getItem();

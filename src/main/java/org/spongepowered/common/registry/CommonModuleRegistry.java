@@ -55,6 +55,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.extra.fluid.FluidStack;
+import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
+import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
@@ -111,6 +114,8 @@ import org.spongepowered.common.event.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeFallingBlockDamgeSourceBuilder;
 import org.spongepowered.common.event.SpongeIndirectEntityDamageSourceBuilder;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
@@ -121,6 +126,7 @@ import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryMod
 import org.spongepowered.common.registry.type.effect.*;
 import org.spongepowered.common.registry.type.entity.*;
 import org.spongepowered.common.registry.type.event.*;
+import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.*;
 import org.spongepowered.common.registry.type.text.*;
@@ -229,6 +235,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Vine.Builder.class, VineBuilder::new)
             .registerBuilderSupplier(WaterLily.Builder.class, WaterLilyBuilder::new)
             .registerBuilderSupplier(Ban.Builder.class, SpongeBanBuilder::new)
+            .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
+            .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
         ;
     }
 
@@ -268,6 +276,7 @@ public final class CommonModuleRegistry {
             .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
             .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
             .registerModule(Fish.class, new FishRegistryModule())
+            .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
             .registerModule(GameMode.class, new GameModeRegistryModule())
             .registerModule(GeneratorType.class, new GeneratorRegistryModule())
             .registerModule(GoalType.class, GoalTypeModule.getInstance())

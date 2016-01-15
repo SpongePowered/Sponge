@@ -31,6 +31,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.MapValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeMapValue;
@@ -64,7 +65,7 @@ public abstract class AbstractSingleMapData<K, V, M extends DataManipulator<M, I
     }
 
     @Override
-    protected Value<?> getValueGetter() {
+    protected MapValue<K, V> getValueGetter() {
         return new SpongeMapValue<>(this.usedKey, getValue());
     }
 

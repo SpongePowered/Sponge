@@ -49,6 +49,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskType> {
 
@@ -57,7 +58,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
     }
 
     @RegisterCatalog(AITaskTypes.class)
-    private final Map<String, AITaskType> aiTaskTypes = new HashMap<>();
+    private final Map<String, AITaskType> aiTaskTypes = new ConcurrentHashMap<>();
 
     @Override
     public Map<String, AITaskType> provideCatalogMap() {
