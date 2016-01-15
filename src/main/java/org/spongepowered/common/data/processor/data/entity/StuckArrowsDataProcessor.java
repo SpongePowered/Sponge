@@ -46,7 +46,7 @@ public class StuckArrowsDataProcessor extends
         AbstractEntitySingleDataProcessor<EntityLivingBase, Integer, MutableBoundedValue<Integer>, StuckArrowsData, ImmutableStuckArrowsData> {
 
     public StuckArrowsDataProcessor() {
-        super(EntityLivingBase.class, Keys.aSTUCK_ARROWS);
+        super(EntityLivingBase.class, Keys.STUCK_ARROWS);
     }
 
     @Override
