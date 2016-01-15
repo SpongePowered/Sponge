@@ -34,13 +34,4 @@ import java.util.Collection;
 @Mixin(value = PropertyInteger.class)
 public abstract class MixinPropertyInteger extends MixinPropertyHelper<Integer> implements IntegerTrait {
 
-    @SuppressWarnings("rawtypes")
-    @Shadow public abstract Collection getAllowedValues();
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<Integer> getPossibleValues() {
-        return getAllowedValues();
-    }
-
 }

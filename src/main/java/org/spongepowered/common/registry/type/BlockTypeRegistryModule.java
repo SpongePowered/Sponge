@@ -25,9 +25,14 @@
 package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import net.minecraft.block.Block;
+import net.minecraft.block.properties.IProperty;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -38,6 +43,7 @@ import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
@@ -55,6 +61,12 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @RegisterCatalog(BlockTypes.class)
     private final Map<String, BlockType> blockTypeMappings = Maps.newHashMap();
+
+    private final BiMap<String, BlockTrait<?>> blockTraitMap = HashBiMap.create();
+
+    public String getIdFor(IProperty<?> blockTrait) {
+        return checkNotNull(this.blockTraitMap.inverse().get(blockTrait), "BlockTrait doesn't have a registered id!");
+    }
 
     @Override
     public Map<String, BlockType> provideCatalogMap() {
@@ -95,16 +107,20 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
         registerBlockTrait(id, blockType);
     }
 
+
     private void registerBlockTrait(String id, BlockType block) {
         for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
             BlockTrait<?> property = mapEntry.getKey();
-            ((IMixinPropertyHolder) property).setId(id.toLowerCase() + "_" + property.getName().toLowerCase());
+            final String propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);
+            if (property instanceof IMixinPropertyHolder) {
+                ((IMixinPropertyHolder) property).setId(propertyId);
+            }
             if (property instanceof EnumTrait) {
-                EnumTraitRegistryModule.getInstance().registerBlock(id, block, (EnumTrait<?>) property);
+                EnumTraitRegistryModule.getInstance().registerBlock(propertyId, block, (EnumTrait<?>) property);
             } else if (property instanceof IntegerTrait) {
-                IntegerTraitRegistryModule.getInstance().registerBlock(id, block, (IntegerTrait) property);
+                IntegerTraitRegistryModule.getInstance().registerBlock(propertyId, block, (IntegerTrait) property);
             } else if (property instanceof BooleanTrait) {
-                BooleanTraitRegistryModule.getInstance().registerBlock(id, block, (BooleanTrait) property);
+                BooleanTraitRegistryModule.getInstance().registerBlock(propertyId, block, (BooleanTrait) property);
             }
         }
     }

@@ -97,6 +97,7 @@
         "block.MixinBlockWall",
         "block.MixinBlockWallSign",
         "block.MixinBlockWoodSlab",
+        "block.properties.MixinIProperty",
         "block.properties.MixinPropertyBoolean",
         "block.properties.MixinPropertyEnum",
         "block.properties.MixinPropertyHelper",
