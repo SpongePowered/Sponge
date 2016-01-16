@@ -71,6 +71,7 @@ import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.selector.SelectorType;
@@ -116,6 +117,7 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
+import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.*;
 import org.spongepowered.common.registry.type.entity.*;
 import org.spongepowered.common.registry.type.event.*;
@@ -312,6 +314,7 @@ public final class CommonModuleRegistry {
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
             .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
+            .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             ;
     }
 
