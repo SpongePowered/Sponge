@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.profile;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
@@ -46,12 +43,12 @@ import org.spongepowered.common.scheduler.SpongeScheduler;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
 public class SpongeProfileManager implements GameProfileManager {
-
-    private final ListeningExecutorService executor = SpongeScheduler.getInstance().getListeningExecService();
 
     @Override
     public GameProfile createProfile(UUID uniqueId, @Nullable String name) {
@@ -65,28 +62,28 @@ public class SpongeProfileManager implements GameProfileManager {
     }
 
     @Override
-    public ListenableFuture<GameProfile> get(UUID uniqueId, final boolean useCache) {
-        return this.executor.submit(new UniqueIdQuery.SingleGet(checkNotNull(uniqueId, "uniqueId"), useCache));
+    public CompletableFuture<GameProfile> get(UUID uniqueId, final boolean useCache) {
+        return this.submitTask(new UniqueIdQuery.SingleGet(checkNotNull(uniqueId, "uniqueId"), useCache));
     }
 
     @Override
-    public ListenableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
-        return this.executor.submit(new UniqueIdQuery.MultiGet(checkNotNull(uniqueIds, "uniqueIds"), useCache));
+    public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
+        return this.submitTask(new UniqueIdQuery.MultiGet(checkNotNull(uniqueIds, "uniqueIds"), useCache));
     }
 
     @Override
-    public ListenableFuture<GameProfile> get(String name, boolean useCache) {
-        return this.executor.submit(new NameQuery.SingleGet(checkNotNull(name, "name"), useCache));
+    public CompletableFuture<GameProfile> get(String name, boolean useCache) {
+        return this.submitTask(new NameQuery.SingleGet(checkNotNull(name, "name"), useCache));
     }
 
     @Override
-    public ListenableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
-        return this.executor.submit(new NameQuery.MultiGet(checkNotNull(names, "names"), useCache));
+    public CompletableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
+        return this.submitTask(new NameQuery.MultiGet(checkNotNull(names, "names"), useCache));
     }
 
     @Override
-    public ListenableFuture<GameProfile> fill(GameProfile profile, boolean signed, boolean useCache) {
-        return this.executor.submit(new GameProfileQuery.SingleFill(checkNotNull(profile, "profile"), signed, useCache));
+    public CompletableFuture<GameProfile> fill(GameProfile profile, boolean signed, boolean useCache) {
+        return this.submitTask(new GameProfileQuery.SingleFill(checkNotNull(profile, "profile"), signed, useCache));
     }
 
     @Override
@@ -127,6 +124,10 @@ public class SpongeProfileManager implements GameProfileManager {
             SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
             return null;
         }
+    }
+
+    private static <T> CompletableFuture<T> submitTask(Callable<T> taskCallable) {
+        return SpongeScheduler.getInstance().submitAsyncTask(taskCallable);
     }
 
 }
