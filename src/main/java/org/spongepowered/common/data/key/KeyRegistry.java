@@ -280,6 +280,7 @@ public class KeyRegistry {
         keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
         keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
         keyMap.put("is_aflame", makeSingleKey(Boolean.class, Value.class, of("IsAflame")));
+        keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
