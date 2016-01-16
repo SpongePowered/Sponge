@@ -68,36 +68,14 @@ public final class SpongeImpl {
 
     public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
     public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
-    
+
+    // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8", 47);
 
     @Nullable
     private static SpongeImpl instance;
 
-    private static final Path gameDir = SpongeLaunch.getGameDirectory();
-    private static final Path configDir = SpongeLaunch.getConfigDirectory();
-    private static final Path pluginsDir = SpongeLaunch.getPluginsDirectory();
-    private static final Path spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
-
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
-    // TODO: Keep up to date
-    private static Package getPackage() {
-        return SpongeImpl.class.getPackage();
-    }
-
-    @Nullable
-    private static List<PluginContainer> components;
-
-    public static List<PluginContainer> getInternalPlugins() {
-        if (components == null) {
-            components = new ArrayList<>(6);
-            components.add(SpongeImpl.getMinecraftPlugin());
-            components.add(Sponge.getPlatform().getApi());
-            components.add(Sponge.getPlatform().getImplementation());
-        }
-
-        return components;
-    }
 
     private final Injector injector;
     private final Game game;
@@ -105,6 +83,9 @@ public final class SpongeImpl {
     private final org.slf4j.Logger slf4jLogger;
     private final PluginContainer plugin;
     private final PluginContainer minecraftPlugin;
+
+    @Nullable
+    private static List<PluginContainer> components;
 
     @Inject
     public SpongeImpl(Injector injector, Game game, Logger logger,
@@ -163,37 +144,52 @@ public final class SpongeImpl {
     }
 
     public static Path getGameDir() {
-        return gameDir;
+        return SpongeLaunch.getGameDir();
     }
 
     public static Path getConfigDir() {
-        return configDir;
+        return SpongeLaunch.getConfigDir();
     }
 
     public static Path getPluginsDir() {
-        return pluginsDir;
+        return SpongeLaunch.getPluginsDir();
     }
 
     public static Path getSpongeConfigDir() {
-        return spongeConfigDir;
+        return SpongeLaunch.getSpongeConfigDir();
     }
 
     public static SpongeConfig<SpongeConfig.GlobalConfig> getGlobalConfig() {
         if (globalConfig == null) {
-            globalConfig = new SpongeConfig<>(GLOBAL, spongeConfigDir.resolve("global.conf"), ECOSYSTEM_ID);
+            globalConfig = new SpongeConfig<>(GLOBAL, getSpongeConfigDir().resolve("global.conf"), ECOSYSTEM_ID);
         }
 
         return globalConfig;
+    }
+
+    public static List<PluginContainer> getInternalPlugins() {
+        if (components == null) {
+            components = new ArrayList<>(6);
+            components.add(SpongeImpl.getMinecraftPlugin());
+            components.add(Sponge.getPlatform().getApi());
+            components.add(Sponge.getPlatform().getImplementation());
+        }
+
+        return components;
     }
 
     public static void postState(Class<? extends GameStateEvent> type, GameState state) {
         getGame().setState(state);
         ((SpongeEventManager) getGame().getEventManager()).post(SpongeEventFactoryUtils.createState(type, getGame()), true);
     }
-    
+
     public static void postShutdownEvents() {
         postState(GameStoppingEvent.class, GameState.GAME_STOPPING);
         postState(GameStoppedEvent.class, GameState.GAME_STOPPED);
+    }
+
+    private static Package getPackage() {
+        return SpongeImpl.class.getPackage();
     }
 
 }
