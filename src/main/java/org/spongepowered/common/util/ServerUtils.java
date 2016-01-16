@@ -28,9 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Throwables;
-import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListeningExecutorService;
-import com.google.common.util.concurrent.MoreExecutors;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
@@ -49,12 +46,12 @@ import java.io.IOException;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletableFuture;
 
 public class ServerUtils {
 
-    private static final ListeningExecutorService executor = SpongeScheduler.getInstance().getListeningExecService();
 
-    public static ListenableFuture<Optional<WorldProperties>> copyWorld(MinecraftServer server, WorldProperties worldProperties, String copyName) {
+    public static CompletableFuture<Optional<WorldProperties>> copyWorld(MinecraftServer server, WorldProperties worldProperties, String copyName) {
         checkArgument(WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldProperties.getUniqueId()), "World properties not registered");
         checkArgument(!WorldPropertyRegistryModule.getInstance().isWorldRegistered(copyName), "Destination world name already is registered");
         WorldInfo info = (WorldInfo) worldProperties;
@@ -67,19 +64,17 @@ public class ServerUtils {
             }
             ((IMixinMinecraftServer) server).setSaveEnabled(false);
         }
-        ListenableFuture<Optional<WorldProperties>> future = executor.submit(new CopyWorldTask(info, copyName));
+        CompletableFuture<Optional<WorldProperties>> future = SpongeScheduler.getInstance().submitAsyncTask(new CopyWorldTask(info, copyName));
         if (world != null) { // World was loaded
-            future.addListener(() -> {
-                ((IMixinMinecraftServer) server).setSaveEnabled(true);
-            } , MoreExecutors.sameThreadExecutor());
+            future.thenRun(() -> ((IMixinMinecraftServer) server).setSaveEnabled(true));
         }
         return future;
     }
 
-    public static ListenableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
+    public static CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
         checkArgument(WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldProperties.getUniqueId()), "World properties not registered");
         checkState(DimensionManager.getWorldFromDimId(((IMixinWorldInfo) worldProperties).getDimensionId()) == null, "World not unloaded");
-        return executor.submit(new DeleteWorldTask(worldProperties));
+        return SpongeScheduler.getInstance().submitAsyncTask(new DeleteWorldTask(worldProperties));
     }
 
     private static class CopyWorldTask implements Callable<Optional<WorldProperties>> {
