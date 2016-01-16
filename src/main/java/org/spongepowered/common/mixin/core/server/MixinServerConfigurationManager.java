@@ -189,8 +189,7 @@ public abstract class MixinServerConfigurationManager {
         }
 
         Player player = (Player) playerIn;
-        Location<World> location = new Location<>((World) worldserver, VecHelper.toVector(playerIn.getPosition()));
-        Transform<World> fromTransform = player.getTransform().setLocation(location);
+        Transform<World> fromTransform = player.getTransform().setExtent((World) worldserver);
 
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
             Cause.of(NamedCause.source(player)), disconnectMessage, disconnectMessage, fromTransform, fromTransform,

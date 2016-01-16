@@ -47,6 +47,8 @@ import org.spongepowered.api.data.property.block.*;
 import org.spongepowered.api.data.property.entity.*;
 import org.spongepowered.api.data.property.item.*;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
+import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -70,16 +72,19 @@ import org.spongepowered.common.data.key.KeyRegistry;
 import org.spongepowered.common.data.manipulator.immutable.*;
 import org.spongepowered.common.data.manipulator.immutable.block.*;
 import org.spongepowered.common.data.manipulator.immutable.entity.*;
+import org.spongepowered.common.data.manipulator.immutable.extra.ImmutableSpongeFluidItemData;
 import org.spongepowered.common.data.manipulator.immutable.item.*;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.*;
 import org.spongepowered.common.data.manipulator.mutable.*;
 import org.spongepowered.common.data.manipulator.mutable.block.*;
 import org.spongepowered.common.data.manipulator.mutable.entity.*;
+import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemData;
 import org.spongepowered.common.data.manipulator.mutable.item.*;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.*;
 import org.spongepowered.common.data.processor.data.*;
 import org.spongepowered.common.data.processor.data.block.*;
 import org.spongepowered.common.data.processor.data.entity.*;
+import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
 import org.spongepowered.common.data.processor.dual.entity.CustomNameVisibleDualProcessor;
@@ -318,6 +323,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(StuckArrowsData.class, SpongeStuckArrowsData.class, ImmutableStuckArrowsData.class,
                 ImmutableSpongeStuckArrowsData.class, new StuckArrowsDataProcessor());
 
+        dataManager.registerDualProcessor(BreedableData.class, SpongeBreedableData.class, ImmutableBreedableData.class,
+                ImmutableSpongeBreedableData.class, new BreedableDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -391,6 +399,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(StoredEnchantmentData.class, SpongeStoredEnchantmentData.class,
                 ImmutableStoredEnchantmentData.class, ImmutableSpongeStoredEnchantmentData.class, new StoredEnchantmentDataProcessor());
+
+        dataManager.registerDualProcessor(FluidItemData.class, SpongeFluidItemData.class, ImmutableFluidItemData.class,
+                ImmutableSpongeFluidItemData.class, new FluidItemDataProcessor());
 
         // Block Processors
 

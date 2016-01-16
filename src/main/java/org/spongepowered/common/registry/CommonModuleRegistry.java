@@ -56,6 +56,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.extra.fluid.FluidStack;
+import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
+import org.spongepowered.api.extra.fluid.FluidType;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
@@ -77,6 +80,7 @@ import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.selector.SelectorType;
@@ -121,16 +125,20 @@ import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
+import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
+import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.effect.*;
 import org.spongepowered.common.registry.type.entity.*;
 import org.spongepowered.common.registry.type.event.*;
+import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.*;
 import org.spongepowered.common.registry.type.text.*;
@@ -244,6 +252,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(BreedingSpawnCause.Builder.class, SpongeBreedingSpawnCauseBuilder::new)
             .registerBuilderSupplier(BlockSpawnCause.Builder.class, SpongeBlockSpawnCauseBuilder::new)
             .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
+            .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
+            .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
         ;
     }
 
@@ -284,6 +294,7 @@ public final class CommonModuleRegistry {
             .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())
             .registerModule(FireworkShape.class, new FireworkShapeRegistryModule())
             .registerModule(Fish.class, new FishRegistryModule())
+            .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
             .registerModule(GameMode.class, new GameModeRegistryModule())
             .registerModule(GeneratorType.class, new GeneratorRegistryModule())
             .registerModule(GoalType.class, GoalTypeModule.getInstance())
@@ -330,6 +341,7 @@ public final class CommonModuleRegistry {
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
             .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
+            .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             ;
     }
 

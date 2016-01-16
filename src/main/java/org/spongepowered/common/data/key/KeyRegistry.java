@@ -87,6 +87,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -98,6 +99,7 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -279,6 +281,9 @@ public class KeyRegistry {
         keyMap.put("invisibility_ignores_collision", makeSingleKey(Boolean.class, Value.class, of("InvisiblityIgnoresCollision")));
         keyMap.put("invisibility_prevents_targeting", makeSingleKey(Boolean.class, Value.class, of("InvisibilityPreventsTargeting")));
         keyMap.put("is_aflame", makeSingleKey(Boolean.class, Value.class, of("IsAflame")));
+        keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
+        keyMap.put("fluid_item_stack", makeSingleKey(FluidStackSnapshot.class, Value.class, of("FluidItemContainerSnapshot")));
+        keyMap.put("fluid_tank_contents", makeMapKey(Direction.class, List.class, of("FluidTankContents")));
         keyMap.put("custom_name_visible", makeSingleKey(Boolean.class, Value.class, of("CustomNameVisible")));
     }
 

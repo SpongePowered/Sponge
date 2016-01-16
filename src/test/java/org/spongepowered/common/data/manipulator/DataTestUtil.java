@@ -31,10 +31,12 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
+import org.spongepowered.api.extra.fluid.FluidTypes;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.key.KeyRegistry;
+import org.spongepowered.common.data.type.SpongeCommonFluidType;
 import org.spongepowered.common.data.util.DataProcessorDelegate;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
@@ -52,6 +54,7 @@ final class DataTestUtil {
     @SuppressWarnings("unchecked")
     static List<Object[]> generateManipulatorTestObjects() throws Exception {
         generateKeyMap();
+        setupCatalogTypes();
         SpongeGame mockGame = mock(SpongeGame.class);
 
         when(mockGame.getDataManager()).thenReturn(SpongeDataManager.getInstance());
@@ -102,4 +105,26 @@ final class DataTestUtil {
         return (Map<Class<? extends DataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>>) builderMap.get(SpongeDataManager.getInstance());
     }
 
+
+    public static void setStaticFinalField(Field field, Object value) throws ReflectiveOperationException {
+        field.setAccessible(true);
+
+        Field modifiersField = Field.class.getDeclaredField("modifiers");
+        modifiersField.setAccessible(true);
+        modifiersField.setInt(field, field.getModifiers() & ~Modifier.FINAL);
+
+        field.set(null, value);
+    }
+
+    private static void setupCatalogTypes() {
+        for (Field field : FluidTypes.class.getDeclaredFields()) {
+            try {
+                setStaticFinalField(field, new SpongeCommonFluidType(field.getName().toLowerCase()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
 }

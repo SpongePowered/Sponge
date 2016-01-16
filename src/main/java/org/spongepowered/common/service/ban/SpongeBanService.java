@@ -28,9 +28,13 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.BanList;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.util.UserListUtils;
@@ -39,7 +43,6 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 
 /**
@@ -144,9 +147,16 @@ public class SpongeBanService implements BanService {
 
         if (ban.getType().equals(BanTypes.PROFILE)) {
             prevBan = this.getBanFor(((Ban.Profile) ban).getProfile());
+
+            User user = Sponge.getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate(((Ban.Profile) ban).getProfile());
+            Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(Cause.of(this), (Ban.Profile) ban, user));
+
             UserListUtils.addEntry(this.getUserBanList(), (UserListEntry) ban);
         } else if (ban.getType().equals(BanTypes.IP)) {
             prevBan = this.getBanFor(((Ban.Ip) ban).getAddress());
+
+            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(Cause.of(this), (Ban.Ip) ban));
+
             UserListUtils.addEntry(this.getIPBanList(), (UserListEntry) ban);
         } else {
             throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
