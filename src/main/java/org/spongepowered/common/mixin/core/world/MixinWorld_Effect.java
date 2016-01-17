@@ -29,11 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.network.Packet;
-import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.world.WorldProvider;
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -50,6 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
@@ -70,12 +69,11 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
     @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void onEffectsConstructed(ISaveHandler handler, WorldInfo info, WorldProvider provider, Profiler profiler, boolean client, CallbackInfo callbackInfo) {
+    @Inject(method = "init", at = @At("HEAD"))
+    protected void onWorldEffectsInit(CallbackInfoReturnable<net.minecraft.world.World> cir) {
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
     }
-
 
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume) {

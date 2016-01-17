@@ -102,6 +102,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private ServerScoreboard scoreboard;
+    private boolean isValid = true;
 
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
@@ -156,7 +157,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
-        if (name.equals("MpServer")) {
+        if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
+            this.isValid = false;
             return;
         }
 
@@ -221,6 +223,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                                 .resolve(this.levelName)
                                 .resolve("world.conf"),
                         SpongeImpl.ECOSYSTEM_ID);
+    }
+
+    @Override
+    public boolean isValid() {
+        return this.isValid;
     }
 
     @Override
