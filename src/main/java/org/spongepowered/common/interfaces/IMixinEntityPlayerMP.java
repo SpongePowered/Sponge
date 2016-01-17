@@ -34,7 +34,9 @@ public interface IMixinEntityPlayerMP {
 
     void reset();
 
-    boolean usesCustomClient();
+    default boolean usesCustomClient() {
+        return false;
+    }
 
     User getUserObject();
 

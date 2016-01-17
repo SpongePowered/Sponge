@@ -48,6 +48,7 @@ import net.minecraft.server.management.ItemInWorldManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -506,4 +507,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.sendPlayerAbilities();
         this.markPotionsDirty();
     }
+
+    @Redirect(method = "onDeath", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
+    public boolean onGetGameRules(GameRules gameRules, String gameRule) {
+        return false; // Suppress death messages since this is handled together with the event calling
+    }
+
 }

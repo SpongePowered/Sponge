@@ -29,6 +29,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +59,15 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void inactiveTick();
 
-    NBTTagCompound getSpongeData();
+    NBTTagCompound getEntityData();
+
+    default NBTTagCompound getSpongeData() {
+        final NBTTagCompound data = this.getEntityData();
+        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        }
+        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+    }
 
     default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) { }
 
@@ -75,7 +84,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
      * @param compound The SpongeData compound to write to
      */
     void writeToNbt(NBTTagCompound compound);
-    
+
     void setImplVelocity(Vector3d velocity);
 
     boolean isReallyREALLYInvisible();

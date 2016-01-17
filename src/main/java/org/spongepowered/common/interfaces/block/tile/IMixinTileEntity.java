@@ -34,12 +34,27 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 public interface IMixinTileEntity {
 
     /**
+     * Gets a {@link NBTTagCompound} that can be used to store custom data for
+     * this tile entity. It will be written, and read from disc, so it persists
+     * over world saves.
+     *
+     * @return A compound tag for custom data
+     */
+    NBTTagCompound getTileData();
+
+    /**
      * Gets the included {@link NBTTagCompound} for a tile entity. With Vanilla, this is
      * created by vanilla. With Forge, this is included.
      *
      * @return Gets the tag compound containing various tile data
      */
-    NBTTagCompound getSpongeData();
+    default NBTTagCompound getSpongeData() {
+        NBTTagCompound data = this.getTileData();
+        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        }
+        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+    }
 
     /**
      * Read extra data (SpongeData) from the tile entity's NBT tag.
