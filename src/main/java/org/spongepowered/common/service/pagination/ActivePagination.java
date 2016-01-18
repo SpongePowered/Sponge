@@ -29,6 +29,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.command.CommandException;
@@ -46,7 +47,7 @@ abstract class ActivePagination {
 
     private static final Text SLASH_TEXT = Text.of("/");
     private static final Text DIVIDER_TEXT = Text.of(" ");
-    private final WeakReference<CommandSource> src;
+    private final WeakReference<MessageReceiver> src;
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
     private final Text prevPageText;
@@ -55,10 +56,10 @@ abstract class ActivePagination {
     private final Text footer;
     private int currentPage;
     private final int maxContentLinesPerPage;
-    protected final PaginationCalculator<CommandSource> calc;
+    protected final PaginationCalculator<MessageReceiver> calc;
     private final String padding;
 
-    public ActivePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Text title,
+    public ActivePagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, Text title,
             Text header, Text footer, String padding) {
         this.src = new WeakReference<>(src);
         this.calc = calc;
@@ -121,7 +122,7 @@ abstract class ActivePagination {
     }
 
     public void specificPage(int page) throws CommandException {
-        CommandSource src = this.src.get();
+        MessageReceiver src = this.src.get();
         if (src == null) {
             throw new CommandException(t("Source for pagination %s is no longer active!", getId()));
         }
