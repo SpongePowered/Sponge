@@ -672,27 +672,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void sendMessage(ChatType type, Text message) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, message);
-        }
-    }
+        checkNotNull(type, "type");
+        checkNotNull(message, "message");
 
-    @Override
-    public void sendMessages(ChatType type, Text... messages) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, messages);
-        }
-    }
-
-    @Override
-    public void sendMessages(ChatType type, Iterable<Text> messages) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, messages);
+        for (Player player : this.getPlayers()) {
+            player.sendMessage(type, message);
         }
     }
 
     @Override
     public void sendTitle(Title title) {
+        checkNotNull(title, "title");
+
         for (Player player : getPlayers()) {
             player.sendTitle(title);
         }
