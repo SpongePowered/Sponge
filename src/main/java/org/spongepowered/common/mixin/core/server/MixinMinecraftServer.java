@@ -655,6 +655,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         if (worldInfo != null) {
+            ((IMixinWorldInfo) worldInfo).createWorldConfig();
             // check if enabled
             if (!((WorldProperties) worldInfo).isEnabled()) {
                 SpongeImpl.getLogger().error("World [{}] cannot be loaded as it is disabled.", worldName);
@@ -886,9 +887,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!oldDir.renameTo(newDir)) {
             return Optional.empty();
         }
+        WorldPropertyRegistryModule.getInstance().unregister(worldProperties);
         WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
+        ((IMixinWorldInfo) info).createWorldConfig();
         getHandler(newName).saveWorldInfo(info);
+        WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
     }
 
