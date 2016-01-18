@@ -174,6 +174,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
         this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
         this.worldConfig.getConfig().getWorld().setLoadOnStartup(creationSettings.loadOnStartup());
+        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(creationSettings.doesGenerateSpawnOnLoad());
         if (!creationSettings.getGeneratorModifiers().isEmpty()) {
             this.worldConfig.getConfig().getWorldGenModifiers().clear();
             this.worldConfig.getConfig().getWorldGenModifiers()
