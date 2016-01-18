@@ -22,22 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.text;
+package org.spongepowered.common.data.type;
 
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.text.chat.SpongeChatType;
+import com.google.common.base.Objects;
+import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+public final class SpongeSkinPart extends SpongeCatalogType.Translatable implements SkinPart {
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+    private final int ordinal;
+    private final int mask;
 
+    public SpongeSkinPart(int ordinal, String id) {
+        super("minecraft:" + id, new SpongeTranslation("options.modelPart." + id));
+        this.ordinal = ordinal;
+        this.mask = 1 << this.ordinal;
+    }
+
+    public boolean test(int flags) {
+        return (flags & this.mask) != 0;
+    }
+
+    @Override
+    protected Objects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("ordinal", this.ordinal);
+    }
 }

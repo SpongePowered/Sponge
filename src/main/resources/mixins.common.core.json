@@ -152,6 +152,7 @@
         "data.types.MixinBlockTallGrassEnumType",
         "data.types.MixinBlockWallEnumType",
         "data.types.MixinEnumBannerPattern",
+        "data.types.MixinEnumChatVisibility",
         "data.types.MixinEnumDifficulty",
         "data.types.MixinEnumDyeColor",
         "data.types.MixinEnumLogAxis",

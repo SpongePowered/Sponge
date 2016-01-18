@@ -22,22 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.text;
+package org.spongepowered.common.interfaces;
 
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.text.chat.SpongeChatType;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+import java.util.Set;
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+public interface IMixinEnumChatVisibility {
 
+    void setChatTypes(Set<ChatType> chatTypes);
 }
