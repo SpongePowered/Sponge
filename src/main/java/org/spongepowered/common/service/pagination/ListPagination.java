@@ -26,10 +26,10 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +41,7 @@ import java.util.Map;
 class ListPagination extends ActivePagination {
     private final List<List<Text>> pages;
 
-    public ListPagination(CommandSource src, PaginationCalculator<CommandSource> calc, List<Map.Entry<Text, Integer>> lines,
+    public ListPagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, List<Map.Entry<Text, Integer>> lines,
             Text title, Text header, Text footer, String padding) {
         super(src, calc, title, header, footer, padding);
         List<List<Text>> pages = new ArrayList<>();
