@@ -46,7 +46,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -623,7 +622,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (passenger != null) {
             passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
             builder.success(new ImmutableSpongeValue<>(Keys.PASSENGER, ((Entity) passenger).createSnapshot()));
-            return builder.build();
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
 
