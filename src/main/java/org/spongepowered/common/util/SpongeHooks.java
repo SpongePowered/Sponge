@@ -610,7 +610,7 @@ public class SpongeHooks {
     }
 
     public static Optional<User> tryToTrackBlock(World world, Object source, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
-        if (!world.isBlockLoaded(sourcePos)) {
+        if (!world.isBlockLoaded(sourcePos) || !world.isBlockLoaded(targetPos)) {
             return Optional.empty();
         }
 
@@ -619,10 +619,6 @@ public class SpongeHooks {
             Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
             Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
             if (notifier.isPresent()) {
-                if (!world.isBlockLoaded(targetPos)) {
-                    return Optional.empty();
-                }
-
                 spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
                 spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, notifier.get(), type);
                 return notifier;
