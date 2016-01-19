@@ -1482,6 +1482,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public void setRestoringBlocks(boolean flag) {
+        this.restoringBlocks = flag;
+    }
+
+    @Override
     public boolean isWorldSpawnerRunning() {
         return this.worldSpawnerRunning;
     }
