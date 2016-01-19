@@ -22,35 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core;
-
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
-
-import java.util.UUID;
-
-@Mixin(value = com.mojang.authlib.GameProfile.class, remap = false)
-public abstract class MixinGameProfile implements GameProfile {
-
-    @Shadow public abstract String shadow$getName();
-    @Shadow public abstract UUID getId();
-
-    @Override
-    public UUID getUniqueId() {
-        return getId();
-    }
-
-    @Override
-    public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer()
-            .set(DataQueries.USER_UUID, getUniqueId().toString());
-        if (this.shadow$getName() != null) {
-            container.set(DataQueries.USER_NAME, this.shadow$getName());
-        }
-        return container;
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core;
