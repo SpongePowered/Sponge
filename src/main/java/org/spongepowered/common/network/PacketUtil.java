@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
@@ -98,14 +99,18 @@ public class PacketUtil {
 
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
             if (StaticMixinHelper.packetPlayer.getHeldItem() != null
-                && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
+                && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement || packetIn instanceof C02PacketUseEntity)) {
                 StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
             world.setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
-            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
-                    .handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
+            Cause cause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
+            if(StaticMixinHelper.prePacketProcessItem != null){
+                cause = cause.with(StaticMixinHelper.prePacketProcessItem);
+            }
+
+            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj).handlePostTickCaptures(cause);
             world.setProcessingCaptureCause(false);
             resetStaticData();
         } else { // client

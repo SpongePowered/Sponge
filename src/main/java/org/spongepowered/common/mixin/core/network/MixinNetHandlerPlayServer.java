@@ -92,6 +92,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -450,8 +451,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             return; // PVP is disabled, ignore
         }
 
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
-            Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
+        Cause cause = Cause.of(NamedCause.source(this.playerEntity));
+        if(StaticMixinHelper.prePacketProcessItem != null){
+            cause = cause.with(StaticMixinHelper.prePacketProcessItem);
+        }
+
+        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(cause, Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
         SpongeImpl.postEvent(event);
         if (!event.isCancelled()) {
             player.attackTargetEntityWithCurrentItem(entityIn);
