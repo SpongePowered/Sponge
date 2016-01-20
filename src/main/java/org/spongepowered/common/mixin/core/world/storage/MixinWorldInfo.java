@@ -64,10 +64,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
@@ -605,7 +605,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
         } catch (JsonParseException | IllegalStateException ignored) {
         }
-        return new MemoryDataContainer().set(IMixinWorldType.CUSTOM_SETTINGS, this.generatorOptions);
+        return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override
