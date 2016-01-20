@@ -37,6 +37,10 @@ import java.util.UUID;
 
 public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
+    boolean isInConstructPhase();
+
+    void firePostConstructEvents();
+
     boolean isTeleporting();
 
     void setIsTeleporting(boolean teleporting);

@@ -31,16 +31,19 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
 import org.spongepowered.api.entity.ai.GoalTypes;
+import org.spongepowered.api.entity.ai.task.AITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
+import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,10 +54,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
+import java.util.Iterator;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -109,6 +114,28 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
         ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
+    }
+
+    @Override
+    public void firePostConstructEvents() {
+        super.firePostConstructEvents();
+        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.tasks);
+        handleDelayedTaskEventFiring((IMixinEntityAITasks) this.targetTasks);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void handleDelayedTaskEventFiring(IMixinEntityAITasks tasks) {
+        Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
+        while (taskItr.hasNext()) {
+            EntityAITasks.EntityAITaskEntry task = taskItr.next();
+            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()),
+                    task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                ((IMixinEntityAIBase) task.action).setGoal(null);
+                taskItr.remove();
+            }
+        }
     }
 
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)

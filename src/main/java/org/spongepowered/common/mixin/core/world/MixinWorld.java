@@ -516,6 +516,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(entity, "Entity cannot be null!");
         checkNotNull(cause, "Cause cannot be null!");
 
+        // Very first thing - fire events that are from entity construction
+        if (((IMixinEntity) entity).isInConstructPhase()) {
+            ((IMixinEntity) entity).firePostConstructEvents();
+        }
+
         net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         if (!this.isRemote && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlocks))) {
