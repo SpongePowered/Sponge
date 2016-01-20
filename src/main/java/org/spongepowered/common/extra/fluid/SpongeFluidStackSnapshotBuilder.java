@@ -32,10 +32,10 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 

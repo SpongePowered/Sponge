@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
@@ -36,8 +34,6 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractMappedData;
 
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
 
 public class SpongeRespawnLocationData extends AbstractMappedData<UUID, Vector3d, RespawnLocationData, ImmutableRespawnLocation>
@@ -55,42 +51,5 @@ public class SpongeRespawnLocationData extends AbstractMappedData<UUID, Vector3d
     public DataContainer toContainer() {
         return super.toContainer()
             .set(Keys.RESPAWN_LOCATIONS, getValue());
-    }
-
-    @Override
-    public Optional<Vector3d> get(UUID key) {
-        return Optional.ofNullable(super.getValue().get(key));
-    }
-
-    @Override
-    public Set<UUID> getMapKeys() {
-        return getValue().keySet();
-    }
-
-    @Override
-    public RespawnLocationData put(UUID key, Vector3d value) {
-        final Map<UUID, Vector3d> map = getValue();
-        map.put(checkNotNull(key, "World unique id cannot be null!"), checkNotNull(value, "Vector position cannot be null!"));
-        setValue(map);
-        return this;
-    }
-
-    @Override
-    public RespawnLocationData putAll(Map<? extends UUID, ? extends Vector3d> map) {
-        final Map<UUID, Vector3d> newMap = getValue();
-        for (Map.Entry<? extends UUID, ? extends Vector3d> entry : map.entrySet()) {
-            newMap.put(checkNotNull(entry.getKey(), "World unique id cannot be null!"),
-                checkNotNull(entry.getValue(), "Vector position cannot be null!"));
-        }
-        setValue(newMap);
-        return this;
-    }
-
-    @Override
-    public RespawnLocationData remove(UUID key) {
-        final Map<UUID, Vector3d> newMap = getValue();
-        newMap.remove(checkNotNull(key, "World unique id cannot be null!"));
-        setValue(newMap);
-        return this;
     }
 }

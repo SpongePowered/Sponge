@@ -25,9 +25,11 @@
 package org.spongepowered.common.data.manipulator.mutable.common;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -42,6 +44,7 @@ import org.spongepowered.common.util.ReflectionUtil;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -78,6 +81,7 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
         return ReflectionUtil.createInstance(this.immutableClass, getValue());
     }
 
+    @Override
     protected MapValue<K, V> getValueGetter() {
         return new SpongeMapValue<>(this.usedKey, this.getValue());
     }
@@ -129,6 +133,16 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     }
 
     @Override
+    public Optional<V> get(K key) {
+        return Optional.of(super.getValue().get(checkNotNull(key)));
+    }
+
+    @Override
+    public Set<K> getMapKeys() {
+        return ImmutableSet.copyOf(super.getValue().keySet());
+    }
+
+    @Override
     public MapValue<K, V> getMapValue() {
         return getValueGetter();
     }
@@ -136,5 +150,23 @@ public abstract class AbstractMappedData<K, V, M extends MappedData<K, V, M, I>,
     @Override
     public Map<K, V> asMap() {
         return getValue();
+    }
+
+    @Override
+    public M put(K key, V value) {
+        super.getValue().put(checkNotNull(key, "Key cannot be null!"), checkNotNull(value, "Value cannot be null!"));
+        return (M) this;
+    }
+
+    @Override
+    public M putAll(Map<? extends K, ? extends V> map) {
+        super.getValue().putAll(checkNotNull(map, "Map cannot be null!"));
+        return (M) this;
+    }
+
+    @Override
+    public M remove(K key) {
+        super.getValue().remove(checkNotNull(key, "Key cannot be null!"));
+        return (M) this;
     }
 }
