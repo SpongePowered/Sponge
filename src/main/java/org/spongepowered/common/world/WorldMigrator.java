@@ -98,6 +98,7 @@ public class WorldMigrator {
                     try {
                         worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
                         FileUtils.copyDirectory(oldWorldPath.toFile(), worldPath.toFile());
+                        fixInnerNetherOrEndRegionData(worldPath);
                         removeInnerNameFolder(worldPath);
                         migrated.add(worldPath);
                     } catch (IOException ioe) {
@@ -163,8 +164,6 @@ public class WorldMigrator {
     private static Path renameToVanillaNetherOrEnd(Path worldContainer, Path oldWorldPath, Path worldPath) {
         final String newName = getVanillaNetherOrEndName(worldContainer, oldWorldPath);
         final Path newWorldPath = worldContainer.resolve(newName);
-
-        fixInnerNetherOrEndRegionData(oldWorldPath);
 
         // We only rename the Nether/The_End folder if the prefix matches the worldContainer directory name
         // Ex. If worldContainer directory name is "world" and folder names "world_nether" or "world_end" exist, we need to rename
