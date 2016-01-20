@@ -93,17 +93,16 @@ artifacts {
 }
 
 sourceJar {
-    // Include SpongeCommon sources in source jar
-    dependsOn common.tasks.sourceJar
-    from zipTree(common.tasks.sourceJar.archivePath)
+    // Include SpongeCommon sources
+    from common.sourceSets.main.allSource
+    from common.sourceSets.java6.allSource
 }
 
-// TODO: Finish dev jar
-/*devJar {
+devJar {
     // Include SpongeCommon
-    dependsOn common.tasks.reobfJar
-    from zipTree(common.tasks.reobfJar.jar)
-}*/
+    from common.sourceSets.main.output
+    from common.sourceSets.java6.output
+}
 
 // Include SpongeCommon dependencies in our POM
 ext.shadedDevProject = common
