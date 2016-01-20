@@ -24,53 +24,67 @@
  */
 package org.spongepowered.common.launch;
 
-import static com.google.common.base.Preconditions.checkState;
+import static org.spongepowered.asm.mixin.MixinEnvironment.CompatibilityLevel.JAVA_8;
+import static org.spongepowered.common.SpongeImpl.ECOSYSTEM_ID;
+
+import org.spongepowered.asm.launch.MixinBootstrap;
+import org.spongepowered.asm.mixin.MixinEnvironment;
+import org.spongepowered.common.launch.transformer.SpongeSuperclassRegistry;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.annotation.Nullable;
-
 public class SpongeLaunch {
-
-    @Nullable private static Path gameDir;
-    @Nullable private static Path configDir;
-    @Nullable private static Path pluginsDir;
 
     private SpongeLaunch() {
     }
 
-    public static void initialize() {
-        initialize(null);
-    }
+    public static final String SUPERCLASS_TRANSFORMER = "org.spongepowered.common.launch.transformer.SpongeSuperclassTransformer";
 
-    public static void initialize(@Nullable  Path gameDir) {
-        initialize(null, null, null);
-    }
+    private static final Path gameDir = Paths.get("");
+    private static final Path pluginsDir = gameDir.resolve("mods");
+    private static final Path configDir = gameDir.resolve("config");
+    private static final Path spongeConfigDir = configDir.resolve(ECOSYSTEM_ID);
 
-    public static void initialize(@Nullable Path gameDir, @Nullable Path configDir, @Nullable Path pluginsDir) {
-        if (gameDir == null) {
-            gameDir = Paths.get("");
-        }
-
-        SpongeLaunch.gameDir = gameDir;
-        SpongeLaunch.configDir = configDir != null ? configDir : gameDir.resolve("config");
-        SpongeLaunch.pluginsDir = pluginsDir != null ? pluginsDir : gameDir.resolve("mods");
-    }
-
-    public static Path getGameDirectory() {
-        checkState(gameDir != null, "Sponge was not initialized");
+    public static Path getGameDir() {
         return gameDir;
     }
 
-    public static Path getConfigDirectory() {
-        checkState(configDir != null, "Sponge was not initialized");
+    public static Path getPluginsDir() {
+        return pluginsDir;
+    }
+
+    public static Path getConfigDir() {
         return configDir;
     }
 
-    public static Path getPluginsDirectory() {
-        checkState(pluginsDir != null, "Sponge was not initialized");
-        return pluginsDir;
+    public static Path getSpongeConfigDir() {
+        return spongeConfigDir;
+    }
+
+    public static MixinEnvironment setupMixinEnvironment() {
+        MixinBootstrap.init();
+        MixinEnvironment.setCompatibilityLevel(JAVA_8);
+
+        // Register common mixin configurations
+        return MixinEnvironment.getDefaultEnvironment()
+                .addConfiguration("mixins.common.api.json")
+                .addConfiguration("mixins.common.core.json")
+                .addConfiguration("mixins.common.bungeecord.json")
+                .addConfiguration("mixins.common.timings.json");
+    }
+
+    public static void setupSuperClassTransformer() {
+        SpongeSuperclassRegistry.registerSuperclassModification("org.spongepowered.api.entity.ai.task.AbstractAITask",
+                "org.spongepowered.common.entity.ai.SpongeEntityAICommonSuperclass");
+        SpongeSuperclassRegistry.registerSuperclassModification("org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource",
+                "org.spongepowered.common.event.damage.SpongeCommonDamageSource");
+        SpongeSuperclassRegistry.registerSuperclassModification(
+                "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractEntityDamageSource",
+                "org.spongepowered.common.event.damage.SpongeCommonEntityDamageSource");
+        SpongeSuperclassRegistry.registerSuperclassModification(
+                "org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource",
+                "org.spongepowered.common.event.damage.SpongeCommonIndirectEntityDamageSource");
     }
 
 }

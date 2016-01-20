@@ -22,22 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.text;
+package org.spongepowered.common.util;
 
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.util.GuavaCollectors;
+import org.spongepowered.common.data.type.SpongeSkinPart;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+import java.util.Set;
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+public final class SkinUtil {
+
+    private SkinUtil() {
+    }
+
+    public static Set<SkinPart> fromFlags(int flags) {
+        return Sponge.getRegistry().getAllOf(SkinPart.class).stream()
+                .map(part -> (SpongeSkinPart) part)
+                .filter(part -> part.test(flags))
+                .collect(GuavaCollectors.toImmutableSet());
+    }
 
 }

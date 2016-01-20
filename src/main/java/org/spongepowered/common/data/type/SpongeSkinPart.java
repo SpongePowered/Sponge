@@ -22,12 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.data.type;
 
-import com.mojang.authlib.GameProfile;
+import com.google.common.base.Objects;
+import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public interface IMixinPlayerProfileCacheEntry {
+public final class SpongeSkinPart extends SpongeCatalogType.Translatable implements SkinPart {
 
-    GameProfile getGameProfile();
+    private final int ordinal;
+    private final int mask;
 
+    public SpongeSkinPart(int ordinal, String id) {
+        super("minecraft:" + id, new SpongeTranslation("options.modelPart." + id));
+        this.ordinal = ordinal;
+        this.mask = 1 << this.ordinal;
+    }
+
+    public boolean test(int flags) {
+        return (flags & this.mask) != 0;
+    }
+
+    @Override
+    protected Objects.ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("ordinal", this.ordinal);
+    }
 }

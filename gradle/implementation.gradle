@@ -1,51 +1,37 @@
 // Shared Gradle configuration for the Sponge implementation projects
 
 ext.common = project(':SpongeCommon')
+// Finish configuring SpongeCommon first
+evaluationDependsOn common.path
 
 // Apply shared ForgeGradle configuration
 apply from: common.file('gradle/minecraft.gradle')
 
-ext.apiVersion = (api.version - '-SNAPSHOT') + '-BETA'
+ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 
 dependencies {
     compile common
 }
 
-// Eclipse is too stupid to order the classpath correctly unfortunately...
-// Put Common last
-eclipse {
-    classpath {
-        file {
-            whenMerged { classpath ->
-                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
-                def others = classpath.entries.findAll { it != lib }
-                classpath.entries = others + lib
-            }
-        }
-    }
+// Add Common access transformers
+minecraft {
+    atSource common.sourceSets.main
 }
 
 jar {
-    classifier = 'deobf'
+    classifier = 'base'
 }
-
-// The version can change until we're done configuring the project, so delay setting the manifest entries until that is final
-afterEvaluate {
-    manifest {
-        attributes(
-                'Implementation-Version': "$version+$ciSystem-b${buildNumber}.git-$commit"
-        )
-    }
-}
-
-// Finish configuring SpongeCommon first
-evaluationDependsOn common.path
 
 // Apply shadow plugin to include the dependencies in the JAR
 apply plugin: 'com.github.johnrengelman.shadow'
 
 shadowJar {
+    // Clear the current source set
+    // TODO: Find a better way for this, will likely break in the future
+    mainSpec.sourcePaths.clear()
+
     // Make sure SpongeCommon was actually reobfuscated before shading it
+    dependsOn reobfJar
     dependsOn common.tasks.reobfJar
 
     classifier = ''
@@ -55,8 +41,11 @@ shadowJar {
     exclude 'net/minecraftforge/**'
     exclude 'dummyThing'
 
-    from jar.refMaps
-    from sourceSets.java6.output
+    // Wait for reobf task to be fully configured
+    afterEvaluate {
+        // Include obfuscated classes
+        from zipTree(reobfJar.jar)
+    }
 
     dependencies {
         // SpongeCommon and Mixin
@@ -86,7 +75,6 @@ shadowJar {
         include dependency('org.yaml:snakeyaml')
 
         include dependency('com.zaxxer:HikariCP')
-        include dependency('org.javassist:javassist')
 
         include dependency('org.mariadb.jdbc:mariadb-java-client')
         include dependency('com.h2database:h2')
@@ -100,64 +88,36 @@ shadowJar {
     exclude 'LICENSE', 'NOTICE'
 }
 
-afterEvaluate {
-    // Reobfuscate the shaded JAR directly
-    reobfJar {
-        dependsOn shadowJar
-        jar = shadowJar.archivePath
-    }
-}
-
-// Add Common access transformers
-minecraft {
-    atSource common.sourceSets.main
-}
-
-// Deployment stuff
-task deobfJar(type: Jar, dependsOn: [classes, api.tasks.classes, common.tasks.classes]) {
-    from api.sourceSets.main.output
-    from common.sourceSets.main.output
-    from sourceSets.main.output
+artifacts {
+    archives shadowJar
 }
 
 sourceJar {
-    from api.sourceSets.main.allSource
-    from common.sourceSets.main.allSource
+    // Include SpongeCommon sources in source jar
+    dependsOn common.tasks.sourceJar
+    from zipTree(common.tasks.sourceJar.archivePath)
 }
 
-javadocJar {
-    dependsOn api.tasks.javadoc
-    dependsOn common.tasks.javadoc
-    from api.tasks.javadoc.destinationDir
-    from common.tasks.javadoc.destinationDir
-}
+// TODO: Finish dev jar
+/*devJar {
+    // Include SpongeCommon
+    dependsOn common.tasks.reobfJar
+    from zipTree(common.tasks.reobfJar.jar)
+}*/
 
-task sdkZip(type: Zip) {
-    enabled = false // project.file("sdk").exists()
-    classifier = 'sdk'
+// Include SpongeCommon dependencies in our POM
+ext.shadedDevProject = common
 
-    from fileTree("sdk");
-    rename ".*\\.gitignore", ".gitignore"
-    def apiVersion = "";
-    if (project.ext.has('forgeVersion'))
-        apiVersion = project.minecraft.version + "-" + project.ext.forgeVersion
-    eachFile { file ->
-        if (file.getName() == "build.gradle")
-        {
-           file.expand([
-                "mcVersion": project.minecraft.version,
-                "apiVersion": apiVersion,
-                "mappings": project.minecraft.mappings,
-                "version": project.version
-           ])
+// Eclipse is too stupid to order the classpath correctly unfortunately...
+// Put Common last
+eclipse {
+    classpath {
+        file {
+            whenMerged { classpath ->
+                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
+                def others = classpath.entries.findAll { it != lib }
+                classpath.entries = others + lib
+            }
         }
-    }
-}
-
-artifacts {
-    archives deobfJar
-    // Include sdk ZIP only if it's actually supported for the implementation
-    if (sdkZip.enabled) {
-        archives sdkZip
     }
 }

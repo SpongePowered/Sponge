@@ -364,8 +364,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     populatorSnapshotList = this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator);
                     populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
                 } else if (this.captureBlockDecay) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
-                    this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                    // Only capture final state of decay, ignore the rest
+                    if (block == Blocks.air) {
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+                        this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                    }
                 } else if (block == Blocks.air) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
                     this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
@@ -680,7 +683,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         boolean destructDrop = false;
 
         // Attempt to find a Player cause if we do not have one
-        if (!cause.first(User.class).isPresent()) {
+        if (!cause.first(User.class).isPresent() && !(this.capturedSpongeBlockSnapshots.size() > 0 && ((SpongeBlockSnapshot) this.capturedSpongeBlockSnapshots.get(0)).captureType == CaptureType.DECAY)) {
             if ((cause.first(BlockSnapshot.class).isPresent() || cause.first(TileEntity.class).isPresent())) {
                 // Check for player at pos of first transaction
                 Optional<BlockSnapshot> snapshot = cause.first(BlockSnapshot.class);
@@ -1476,6 +1479,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setCapturingBlockDecay(boolean flag) {
         this.captureBlockDecay = flag;
+    }
+
+    @Override
+    public void setRestoringBlocks(boolean flag) {
+        this.restoringBlocks = flag;
     }
 
     @Override

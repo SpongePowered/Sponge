@@ -121,6 +121,7 @@ public class ServerUtils {
             int dim = DimensionManager.getNextFreeDimId();
             ((IMixinWorldInfo) info).setDimensionId(dim);
             ((IMixinWorldInfo) info).setUUID(UUID.randomUUID());
+            ((IMixinWorldInfo) info).createWorldConfig();
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) info);
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getHandler(this.newName).saveWorldInfo(info);
             return Optional.of((WorldProperties) info);

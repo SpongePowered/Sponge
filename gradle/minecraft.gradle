@@ -8,8 +8,15 @@ apply from: api.file('gradle/sponge.gradle')
 // Finish configuring SpongeAPI first
 evaluationDependsOn api.path
 
-// ForgeGradle 2 doesn't provide {SRG_DIR} anymore, we still need it frequently so we'll add it on our own for now
-minecraftPlugin.replacer.putReplacement('SRG_DIR', "$DIR_MCP_MAPPINGS/srgs")
+// Apply MixinGradle plugin to project
+apply plugin: 'org.spongepowered.mixin'
+
+minecraft {
+    mappings = 'snapshot_20160109'
+    runDir = 'run'
+
+    atSource sourceSets.main
+}
 
 // Mixins
 sourceSets {
@@ -18,61 +25,98 @@ sourceSets {
     }
 }
 
-minecraft {
-    mappings = 'snapshot_20160109'
-    runDir = 'run'
-}
-
 // Compile options
 compileJava {
     options.compilerArgs += '-Xlint:-processing'
 }
-
-// Copy the current srgs to the build dir so the user doesn't have to go hunting for them
-task copySrgs(type: Copy, dependsOn: 'genSrgs') {
-    from minecraftPlugin.delayedFile('{SRG_DIR}')
-
-    include '**/*.srg'
-    into 'build/srgs'
-}
-
-// Run copySrgs when setting up the workspace
-setupDecompWorkspace.dependsOn copySrgs
-setupDevWorkspace.dependsOn copySrgs
-compileJava.dependsOn copySrgs
 
 // ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
 // We use the access transformer to make the catalogs in the API accessible
 deobfMcMCP { failOnAtError = false }
 deobfMcSRG { failOnAtError = false }
 
-if (!plugins.hasPlugin('net.minecraftforge.forge')) {
-    minecraft {
-        atSource sourceSets.main
-    }
-    reobf.jar.mappingType = 'SEARGE'
-}
+// The access transformers we use
+ext.ats = ['common_at.cfg']
 
 // Set manifest entries
 jar {
     manifest {
         attributes(
-                'Specification-Name': api.name,
+                'Specification-Title': api.name,
                 'Specification-Version': api.version,
                 'Specification-Vendor': api.url
         )
     }
+
+    // Append API revision to the SpongeAPI version
+    dependsOn common.resolveApiRevision
+    doFirst {
+        manifest {
+            attributes('Specification-Version': common.apiVersion)
+        }
+    }
+
+    afterEvaluate {
+        manifest {
+            attributes('FMLAT': project.ats.join(' '))
+        }
+    }
 }
 
+// Don't upload temp jar to Maven repository
+configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
+
+// Reobfuscate to SRG mappings
+reobf.jar.mappingType = 'SEARGE'
+
+sourceJar {
+    // Include SpongeAPI sources in source jar
+    from api.sourceSets.main.allSource
+}
+
+artifacts {
+    // Upload source jar to Maven repository
+    archives sourceJar
+}
+
+// TODO: Finish dev jar
+/*task devJar(type: Jar, dependsOn: [reobfJar]) {
+    classifier = 'dev'
+    duplicatesStrategy = 'exclude'
+    manifest.from jar.manifest
+
+    // Include API
+    from api.sourceSets.main.output
+
+    afterEvaluate {
+        from zipTree(reobfJar.jar)
+    }
+}
+
+artifacts {
+    // Upload dev jar to Maven repository
+    archives devJar
+}
+
+// Include SpongeAPI/SpongeCommon dependencies in our POM
+// Note: This is ugly, just keep scrolling
+uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
+    dependencies.removeAll { it.artifactId == shadedDevProject.archivesBaseName }
+    def deps = new HashSet(dependencies.collect { it.groupId + ':' + it.artifactId })
+    dependencies.addAll(shadedDevProject.uploadArchives.repositories.mavenDeployer.pom.effectivePom.dependencies.findAll {
+        !deps.contains(it.groupId + ':' + it.artifactId) // Don't add the same dependency several times to the POM
+    })
+}*/
+
+// Java 6 source set for compatibility checking
 sourceSets {
     java6 {
         compileClasspath += main.compileClasspath + main.output
     }
 }
 
-// Java 6 source set for compatibility checking
-
 jar {
+    // Include java6 classes in jar
     from sourceSets.java6.output
 }
 
@@ -81,11 +125,16 @@ compileJava6Java {
     targetCompatibility = '1.6'
 }
 
-// Use checkstyle suppressions from Common
-checkstyle {
-    configProperties['suppressions'] = common.file('checkstyle-suppressions.xml')
+// Code style configuration
+sortAccessTransformers {
+    add sourceSets.main
 }
 
 license {
     ext.name = 'Sponge'
+}
+
+// Use checkstyle suppressions from Common
+checkstyle {
+    configProperties['suppressions'] = common.file('checkstyle-suppressions.xml')
 }

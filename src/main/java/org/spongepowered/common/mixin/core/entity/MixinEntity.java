@@ -625,7 +625,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (passenger != null) {
             passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
             builder.success(new ImmutableSpongeValue<>(Keys.PASSENGER, ((Entity) passenger).createSnapshot()));
-            return builder.build();
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
 

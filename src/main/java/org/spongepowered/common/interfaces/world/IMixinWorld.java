@@ -94,6 +94,8 @@ public interface IMixinWorld {
 
     void setCurrentTickBlock(BlockSnapshot snapshot);
 
+    void setRestoringBlocks(boolean flag);
+
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);

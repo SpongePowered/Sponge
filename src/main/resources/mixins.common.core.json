@@ -14,7 +14,6 @@
         "ban.MixinIPBanEntry",
         "ban.MixinIPBanList",
         "ban.MixinUserBanEntry",
-        "ban.MixinUserList",
         "ban.MixinUserListBans",
         "block.MixinBehaviorProjectileDispense",
         "block.MixinBlock",
@@ -154,6 +153,7 @@
         "data.types.MixinBlockTallGrassEnumType",
         "data.types.MixinBlockWallEnumType",
         "data.types.MixinEnumBannerPattern",
+        "data.types.MixinEnumChatVisibility",
         "data.types.MixinEnumDifficulty",
         "data.types.MixinEnumDyeColor",
         "data.types.MixinEnumLogAxis",
@@ -410,8 +410,9 @@
         "world.storage.MixinSaveHandler"
     ],
     "server": [
-        "server.MixinDedicatedServer",
+        "ban.MixinUserList",
         "network.rcon.MixinRConConsoleSource",
-        "network.rcon.MixinRConThreadClient"
+        "network.rcon.MixinRConThreadClient",
+        "server.MixinDedicatedServer"
     ]
 }

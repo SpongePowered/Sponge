@@ -75,7 +75,8 @@ public class SkullRotationDataProcessor
         if (skull.getWorld().getBlockState(skull.getPos()).getValue(BlockSkull.FACING) != EnumFacing.UP) {
             return Optional.empty();
         }
-        return Optional.of(Direction.values()[skull.skullRotation]);
+        int rot = skull.skullRotation % 16;
+        return Optional.of(Direction.values()[rot < 0 ? rot + 16 : rot]);
     }
 
     @Override

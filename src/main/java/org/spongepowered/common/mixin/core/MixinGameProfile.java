@@ -22,22 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.text;
+package org.spongepowered.common.mixin.core;
 
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
-import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+import java.util.UUID;
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+@Mixin(value = com.mojang.authlib.GameProfile.class, remap = false)
+public abstract class MixinGameProfile implements GameProfile {
 
+    @Shadow public abstract String shadow$getName();
+    @Shadow public abstract UUID getId();
+
+    @Override
+    public UUID getUniqueId() {
+        return getId();
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        final DataContainer container = new MemoryDataContainer()
+            .set(DataQueries.USER_UUID, getUniqueId().toString());
+        if (this.shadow$getName() != null) {
+            container.set(DataQueries.USER_NAME, this.shadow$getName());
+        }
+        return container;
+    }
 }
