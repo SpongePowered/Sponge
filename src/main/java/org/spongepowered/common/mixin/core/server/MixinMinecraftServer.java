@@ -740,7 +740,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
         }
 
-        System.err.println(((IMixinWorldSettings) settings).getDimensionId());
         if (((IMixinWorldSettings)settings).getDimensionId() == null || ((IMixinWorldSettings)settings).getDimensionId() == 0) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(DimensionManager.getNextFreeDimId());
         }
