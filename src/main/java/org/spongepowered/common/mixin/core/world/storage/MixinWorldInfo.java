@@ -31,8 +31,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -67,11 +67,13 @@ import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.persistence.JsonTranslator;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.nio.file.Files;
@@ -600,11 +602,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            NBTTagCompound nbt = JsonToNBT.getTagFromJson(this.generatorOptions);
-            return NbtTranslator.getInstance().translateFrom(nbt);
-        } catch (NBTException ignored) {
+            return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
+        } catch (JsonParseException | IllegalStateException ignored) {
         }
-        return new MemoryDataContainer().set(DataQuery.of("customSettings"), this.generatorOptions);
+        return new MemoryDataContainer().set(IMixinWorldType.CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override

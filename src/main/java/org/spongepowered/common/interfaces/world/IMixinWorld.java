@@ -38,6 +38,7 @@ import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
+import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -111,7 +112,7 @@ public interface IMixinWorld {
     Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulatorChanges();
 
     void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
-    
-    void setSpongeGenerator(SpongeChunkProvider spongegen);
+
+    SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
 
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.Objects;
+import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
@@ -118,8 +119,8 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
         final StringWriter writer = new StringWriter();
         try {
-            HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().
-                    translateData(settings));
+            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
+                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to convert settings contained in [" + settings + "] for type [" + this + "] for world [" + world +
                     "].", e);
