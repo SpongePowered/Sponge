@@ -79,7 +79,7 @@ configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 reobf.jar.mappingType = 'SEARGE'
 
 task devJar(type: Jar) {
-    classifier = 'dev'
+    classifier = 'deobf'
     duplicatesStrategy = 'exclude' // Exclude duplicate LICENSE.txt file
 
     // Inherit manifest from jar
