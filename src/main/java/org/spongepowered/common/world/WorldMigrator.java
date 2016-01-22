@@ -26,6 +26,7 @@ package org.spongepowered.common.world;
 
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.apache.commons.io.FileUtils;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
@@ -71,6 +72,11 @@ public class WorldMigrator {
         return worldContainer;
     }
 
+    /**
+     * Performs the migration of worlds from {@link WorldMigrator#getOldWorldContainer()} to the provided worldContainer.
+     *
+     * @param worldContainer The container to move worlds to
+     */
     public static void migrateWorldsTo(Path worldContainer) {
         SpongeImpl.getLogger().info("Checking for worlds that need to be migrated...");
 
@@ -91,11 +97,9 @@ public class WorldMigrator {
                     SpongeImpl.getLogger().info("Migrating [{}] from [{}].", oldWorldPath.getFileName(), oldWorldContainer);
                     try {
                         worldPath = renameToVanillaNetherOrEnd(worldContainer, oldWorldPath, worldPath);
-                        com.google.common.io.Files.move(oldWorldPath.toFile(), worldPath.toFile());
-                        // world_nether/world_the_end
-                        if (isValidBukkitNetherOrEnd(worldContainer, oldWorldPath)) {
-                            removeInnerNameFolder(worldPath);
-                        }
+                        FileUtils.copyDirectory(oldWorldPath.toFile(), worldPath.toFile());
+                        fixInnerNetherOrEndRegionData(worldPath);
+                        removeInnerNameFolder(worldPath);
                         migrated.add(worldPath);
                     } catch (IOException ioe) {
                         SpongeImpl.getLogger().warn("Failed to migrate [{}] from [{}] to [{}]", oldWorldPath.getFileName(), oldWorldContainer,
@@ -130,7 +134,8 @@ public class WorldMigrator {
     }
 
     /**
-     * Gets the name we should rename the incoming world folder to. Either "DIM-1" or "DIM1"
+     * Gets the name we should rename the incoming world folder to. Either "DIM-1" or "DIM1".
+     *
      * @param worldContainer The old world container where our world is coming from
      * @param oldWorldPath The old world path
      * @return The rename or the same name otherwise
@@ -152,19 +157,13 @@ public class WorldMigrator {
      * Renames the world at the provided path to the proper Vanilla naming for Nether and The_End, if needed.
      *
      * Generally this is DIM-1 and DIM1 for Nether and The_End respectively.
+     *
      * @param worldPath The path to rename
      * @return The corrected path or the original path if un-needed
      */
     private static Path renameToVanillaNetherOrEnd(Path worldContainer, Path oldWorldPath, Path worldPath) {
         final String newName = getVanillaNetherOrEndName(worldContainer, oldWorldPath);
         final Path newWorldPath = worldContainer.resolve(newName);
-
-        // Fix Bukkit's desire to have a folder name the same as Vanilla's dimension name INSIDE this folder's name
-        // ex. world_nether/DIM-1 world_the_end/DIM1
-        try {
-            // Copy region within DIM-1/DIM1 to world_nether/world_the_end root
-            com.google.common.io.Files.move(oldWorldPath.resolve(newName).resolve("region").toFile(), oldWorldPath.resolve("region").toFile());
-        } catch (IOException ignore) {}
 
         // We only rename the Nether/The_End folder if the prefix matches the worldContainer directory name
         // Ex. If worldContainer directory name is "world" and folder names "world_nether" or "world_end" exist, we need to rename
@@ -181,15 +180,37 @@ public class WorldMigrator {
     }
 
     /**
-     * The last step of migration involves cleaning up folders within the world folders that are the same name as the root
-     * folder's name (which happens due to how Bukkit stores DIM-1/DIM1 within world_nether/world_the_end
+     * Fix Bukkit's desire to have a folder name the same as Vanilla's dimension name INSIDE this folder's name.
+     *
+     * ex. world_nether/DIM-1 world_the_end/DIM1
+     *
+     * @param oldWorldPath The path to the old world data
+     */
+    private static void fixInnerNetherOrEndRegionData(Path oldWorldPath) {
+        try {
+            // Copy region within DIM-1 to world root
+            com.google.common.io.Files.move(oldWorldPath.resolve("DIM-1").resolve("region").toFile(), oldWorldPath.resolve("region").toFile());
+        } catch (IOException ignore) {}
+
+        try {
+            // Copy region within DIM1 to world root
+            com.google.common.io.Files.move(oldWorldPath.resolve("DIM1").resolve("region").toFile(), oldWorldPath.resolve("region").toFile());
+        } catch (IOException ignore) {}
+    }
+
+    /**
+     * The last step of migration involves cleaning up folders within the world folders that match Vanilla dimension names (DIM-1/DIM1).
+     *
      * @param worldPath The path to inspect
      */
     private static void removeInnerNameFolder(Path worldPath) {
         // We successfully copied the region folder elsewhere so now delete the DIM-1/DIM1 inside
-        // world_nether/world_the_end
         try {
-            Files.delete(worldPath.resolve(worldPath.getFileName().toString()));
+            Files.delete(worldPath.resolve("DIM-1"));
+        } catch (IOException ignore) {}
+
+        try {
+            Files.delete(worldPath.resolve("DIM1"));
         } catch (IOException ignore) {}
     }
 }

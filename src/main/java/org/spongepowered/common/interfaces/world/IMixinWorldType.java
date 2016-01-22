@@ -25,13 +25,10 @@
 package org.spongepowered.common.interfaces.world;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 public interface IMixinWorldType {
-
-    DataQuery CUSTOM_SETTINGS = DataQuery.of("customSettings");
 
     SpongeWorldGenerator createGenerator(World world, DataContainer settings);
 
@@ -39,8 +36,6 @@ public interface IMixinWorldType {
 
     int getMinimumSpawnHeight(net.minecraft.world.World world);
 
-    default int getSpawnFuzz() {
-        return Math.max(5, net.minecraft.server.MinecraftServer.getServer().getSpawnProtectionSize() - 6);
-    }
+    int getSpawnFuzz();
 
 }

@@ -31,8 +31,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
@@ -56,6 +56,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,6 +66,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -73,6 +75,7 @@ import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.persistence.JsonTranslator;
 
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -243,6 +246,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.terrainType = (WorldType) type;
     }
 
+    @Intrinsic
     public long worldproperties$getSeed() {
         return this.randomSeed;
     }
@@ -257,6 +261,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         return this.totalTime;
     }
 
+    @Intrinsic
     public long worldproperties$getWorldTime() {
         return this.worldTime;
     }
@@ -276,6 +281,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.dimensionType = type;
     }
 
+    @Intrinsic
     public String worldproperties$getWorldName() {
         return this.levelName;
     }
@@ -285,6 +291,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.levelName = name;
     }
 
+    @Intrinsic
     public boolean worldproperties$isRaining() {
         return this.raining;
     }
@@ -294,18 +301,22 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.raining = state;
     }
 
+    @Intrinsic
     public int worldproperties$getRainTime() {
         return this.rainTime;
     }
 
+    @Intrinsic
     public void worldproperties$setRainTime(int time) {
         this.rainTime = time;
     }
 
+    @Intrinsic
     public boolean worldproperties$isThundering() {
         return this.thundering;
     }
 
+    @Intrinsic
     public void worldproperties$setThundering(boolean state) {
         this.thundering = state;
     }
@@ -538,6 +549,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public boolean doesGenerateSpawnOnLoad() {
+        return SpongeHooks.getActiveConfig(this.dimensionType.getId(), this.getWorldName()).getConfig().getWorld().getGenerateSpawnOnLoad();
+    }
+
+    @Override
+    public void setGenerateSpawnOnLoad(boolean state) {
+        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(state);
+    }
+
+    @Override
     public boolean isPVPEnabled() {
         return !this.worldConfig.getConfig().isConfigEnabled() || this.worldConfig.getConfig().getWorld().getPVPEnabled();
     }
@@ -590,11 +611,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         // Minecraft uses a String, we want to return a fancy DataContainer
         // Parse the world generator settings as JSON
         try {
-            NBTTagCompound nbt = JsonToNBT.getTagFromJson(this.generatorOptions);
-            return NbtTranslator.getInstance().translateFrom(nbt);
-        } catch (NBTException ignored) {
+            return JsonTranslator.translateFrom(new JsonParser().parse(this.generatorOptions).getAsJsonObject());
+        } catch (JsonParseException | IllegalStateException ignored) {
         }
-        return new MemoryDataContainer().set(DataQuery.of("customSettings"), this.generatorOptions);
+        return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, this.generatorOptions);
     }
 
     @Override

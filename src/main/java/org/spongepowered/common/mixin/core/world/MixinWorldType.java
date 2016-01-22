@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.world;
 
 import com.google.common.base.Objects;
-import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.nbt.NBTException;
-import net.minecraft.nbt.NBTTagCompound;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.WorldChunkManager;
@@ -47,9 +47,10 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
+import org.spongepowered.common.util.persistence.JsonTranslator;
 import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
@@ -81,7 +82,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // a serialized JSON string
         if ((Object) this == WorldType.FLAT) {
             String defaultSettings = FlatGeneratorInfo.getDefaultFlatGenerator().toString();
-            return new MemoryDataContainer().set(CUSTOM_SETTINGS, defaultSettings);
+            return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, defaultSettings);
         }
         if ((Object) this == WorldType.CUSTOMIZED) {
             // They easiest way to go from ChunkProviderSettings to
@@ -89,9 +90,8 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             // is via json and NBT
             try {
                 String jsonString = ChunkProviderSettings.Factory.jsonToFactory("").toString();
-                NBTTagCompound nbt = JsonToNBT.getTagFromJson(jsonString);
-                return NbtTranslator.getInstance().translateFrom(nbt);
-            } catch (NBTException e) {
+                return JsonTranslator.translateFrom(new JsonParser().parse(jsonString).getAsJsonObject());
+            } catch (JsonParseException | IllegalStateException e) {
                 AssertionError error = new AssertionError("Failed to parse default settings of CUSTOMIZED world type");
                 error.initCause(e);
                 throw error;
@@ -111,15 +111,15 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         // This string can be a JSON string, or be a string of a custom format
 
         // Try to convert to custom format
-        Optional<String> optCustomSettings = settings.getString(CUSTOM_SETTINGS);
+        Optional<String> optCustomSettings = settings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
         if (optCustomSettings.isPresent()) {
             return this.createGeneratorFromString(world, optCustomSettings.get());
         }
 
         final StringWriter writer = new StringWriter();
         try {
-            HoconConfigurationLoader.builder().setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().
-                    translateData(settings));
+            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
+                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to convert settings contained in [" + settings + "] for type [" + this + "] for world [" + world +
                     "].", e);

@@ -25,8 +25,13 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.util.BlockPos;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
-public interface IMixinEntityPlayer {
+import javax.annotation.Nullable;
+
+public interface IMixinEntityPlayer extends IMixinEntity {
+
+    @Nullable
     BlockPos getBedLocation(int dim);
 
     boolean isSpawnForced(int dim);

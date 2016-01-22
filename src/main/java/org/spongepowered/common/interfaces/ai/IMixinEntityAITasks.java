@@ -25,9 +25,13 @@
 package org.spongepowered.common.interfaces.ai;
 
 import net.minecraft.entity.EntityLiving;
+import net.minecraft.entity.ai.EntityAITasks;
 import org.spongepowered.api.entity.ai.GoalType;
 
+import java.util.List;
+
 public interface IMixinEntityAITasks {
+
     EntityLiving getOwner();
 
     void setOwner(EntityLiving living);
@@ -35,4 +39,7 @@ public interface IMixinEntityAITasks {
     GoalType getType();
 
     void setType(GoalType type);
+
+    List<EntityAITasks.EntityAITaskEntry> getTasksUnsafe();
+
 }

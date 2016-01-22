@@ -14,8 +14,10 @@ apply plugin: 'org.spongepowered.mixin'
 minecraft {
     mappings = 'snapshot_20160109'
     runDir = 'run'
-
     atSource sourceSets.main
+
+    // We don't use the obfuscated dev jar currently
+    makeObfSourceJar = false
 }
 
 // Mixins
@@ -25,9 +27,21 @@ sourceSets {
     }
 }
 
+// Java 6 source set for compatibility checking
+sourceSets {
+    java6 {
+        compileClasspath += main.compileClasspath + main.output
+    }
+}
+
 // Compile options
 compileJava {
     options.compilerArgs += '-Xlint:-processing'
+}
+
+compileJava6Java {
+    sourceCompatibility = '1.6'
+    targetCompatibility = '1.6'
 }
 
 // ForgeGradle 2 fails to apply transformer rules for classes it doesn't know of by default
@@ -40,20 +54,15 @@ ext.ats = ['common_at.cfg']
 
 // Set manifest entries
 jar {
+    // Include Java 6 classes
+    from sourceSets.java6.output
+
     manifest {
         attributes(
                 'Specification-Title': api.name,
                 'Specification-Version': api.version,
                 'Specification-Vendor': api.url
         )
-    }
-
-    // Append API revision to the SpongeAPI version
-    dependsOn common.resolveApiRevision
-    doFirst {
-        manifest {
-            attributes('Specification-Version': common.apiVersion)
-        }
     }
 
     afterEvaluate {
@@ -69,7 +78,33 @@ configurations.archives.artifacts.removeAll { it.archiveTask.is jar }
 // Reobfuscate to SRG mappings
 reobf.jar.mappingType = 'SEARGE'
 
-sourceJar {
+task devJar(type: Jar) {
+    classifier = 'dev'
+    duplicatesStrategy = 'exclude' // Exclude duplicate LICENSE.txt file
+
+    // Inherit manifest from jar
+    manifest.from jar.manifest
+
+    // Include classes
+    from sourceSets.main.output
+    from sourceSets.java6.output
+
+    // Include API
+    from api.sourceSets.main.output
+}
+
+artifacts {
+    // Upload dev jar to Maven repository
+    archives devJar
+}
+
+task sourceJar(type: Jar, overwrite: true) {
+    classifier = 'sources'
+
+    // Include sources
+    from sourceSets.main.allSource
+    from sourceSets.java6.allSource
+
     // Include SpongeAPI sources in source jar
     from api.sourceSets.main.allSource
 }
@@ -77,25 +112,6 @@ sourceJar {
 artifacts {
     // Upload source jar to Maven repository
     archives sourceJar
-}
-
-// TODO: Finish dev jar
-/*task devJar(type: Jar, dependsOn: [reobfJar]) {
-    classifier = 'dev'
-    duplicatesStrategy = 'exclude'
-    manifest.from jar.manifest
-
-    // Include API
-    from api.sourceSets.main.output
-
-    afterEvaluate {
-        from zipTree(reobfJar.jar)
-    }
-}
-
-artifacts {
-    // Upload dev jar to Maven repository
-    archives devJar
 }
 
 // Include SpongeAPI/SpongeCommon dependencies in our POM
@@ -106,23 +122,15 @@ uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
     dependencies.addAll(shadedDevProject.uploadArchives.repositories.mavenDeployer.pom.effectivePom.dependencies.findAll {
         !deps.contains(it.groupId + ':' + it.artifactId) // Don't add the same dependency several times to the POM
     })
-}*/
-
-// Java 6 source set for compatibility checking
-sourceSets {
-    java6 {
-        compileClasspath += main.compileClasspath + main.output
-    }
 }
 
-jar {
-    // Include java6 classes in jar
-    from sourceSets.java6.output
+configure([jar, devJar]) {
+    // Append API revision to the SpongeAPI version
+    dependsOn common.resolveApiRevision
 }
 
-compileJava6Java {
-    sourceCompatibility = '1.6'
-    targetCompatibility = '1.6'
+common.tasks.resolveApiRevision << {
+    jar.manifest.attributes('Specification-Version': common.apiVersion)
 }
 
 // Code style configuration

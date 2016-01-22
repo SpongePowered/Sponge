@@ -70,9 +70,10 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
 
     public void registerBlock(String id, BlockType block, EnumTrait<?> property) {
         checkNotNull(id, "Id was null!");
-        checkNotNull(block, "Block was null!");
         checkNotNull(property, "Property was null!");
-        this.enumTraitMap.put(id.toLowerCase() + "_" + property.getName().toLowerCase(), property);
+        this.enumTraitMap.put(id.toLowerCase(), property);
+        final String propertyId = block.getId().toLowerCase() + "_" + property.getName().toLowerCase();
+        this.enumTraitMap.put(propertyId, property);
     }
 
     private EnumTraitRegistryModule() { }

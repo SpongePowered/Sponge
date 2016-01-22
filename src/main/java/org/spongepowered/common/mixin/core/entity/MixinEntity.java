@@ -130,6 +130,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private float origWidth;
     private float origHeight;
     @Nullable private DamageSource originalLava;
+    protected boolean isConstructing = true;
     @Nullable private Text displayName;
 
     @Shadow private UUID entityUniqueID;
@@ -184,6 +185,16 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
 
     // @formatter:on
+
+    @Override
+    public boolean isInConstructPhase() {
+        return this.isConstructing;
+    }
+
+    @Override
+    public void firePostConstructEvents() {
+        this.isConstructing = false;
+    }
 
     @Inject(method = "setSize", at = @At("RETURN"))
     public void onSetSize(float width, float height, CallbackInfo ci) {
@@ -741,6 +752,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      */
     @Inject(method = "Lnet/minecraft/entity/Entity;readFromNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("RETURN"))
     public void onReadFromNBT(NBTTagCompound compound, CallbackInfo ci) {
+        if (this.isConstructing) {
+            firePostConstructEvents(); // Do this early as possible
+        }
         this.readFromNbt(this.getSpongeData());
     }
 

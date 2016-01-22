@@ -50,7 +50,7 @@ minecraft {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.4.11-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.4.14-SNAPSHOT') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }

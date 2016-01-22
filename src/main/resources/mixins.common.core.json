@@ -1,6 +1,6 @@
 {
     "required": true,
-    "minVersion": "0.2",
+    "minVersion": "0.4.12",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.CorePlugin",
@@ -85,7 +85,6 @@
         "block.MixinBlockStainedGlassPane",
         "block.MixinBlockStairs",
         "block.MixinBlockStandingSign",
-        "block.MixinBlockState",
         "block.MixinBlockStem",
         "block.MixinBlockStone",
         "block.MixinBlockStoneBrick",
@@ -99,10 +98,13 @@
         "block.MixinBlockWall",
         "block.MixinBlockWallSign",
         "block.MixinBlockWoodSlab",
+        "block.properties.MixinIProperty",
         "block.properties.MixinPropertyBoolean",
         "block.properties.MixinPropertyEnum",
         "block.properties.MixinPropertyHelper",
         "block.properties.MixinPropertyInteger",
+        "block.state.MixinIBlockState",
+        "block.state.MixinStateImplementation",
         "block.tiles.MixinTileEntity",
         "block.tiles.MixinTileEntityBanner",
         "block.tiles.MixinTileEntityBeacon",
@@ -414,5 +416,8 @@
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient",
         "server.MixinDedicatedServer"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

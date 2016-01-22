@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.BooleanTraits;
+import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -70,9 +71,10 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
 
     public void registerBlock(String id, BlockType block, BooleanTrait property) {
         checkNotNull(id, "Id was null!");
-        checkNotNull(block, "Block was null!");
         checkNotNull(property, "Property was null!");
         this.booleanTraitMap.put(id.toLowerCase() + "_" + property.getName().toLowerCase(), property);
+        final String propertyId = block.getId().toLowerCase() + "_" + property.getName().toLowerCase();
+        this.booleanTraitMap.put(propertyId, property);
     }
 
     private BooleanTraitRegistryModule() { }

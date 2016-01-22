@@ -105,11 +105,14 @@ import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -407,11 +410,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                         (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
 
             } else {
-                if (((WorldProperties) worldInfo).getUniqueId() == null || ((WorldProperties) worldInfo).getUniqueId().equals
-                        (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
-                    ((IMixinWorldInfo) worldInfo).setUUID(UUID.randomUUID());
-                }
-
+                setUuidForProperties((WorldProperties) worldInfo);
                 ((IMixinWorldInfo) worldInfo).setDimensionId(dim);
                 ((IMixinWorldInfo) worldInfo).setDimensionType(((Dimension) provider).getType());
                 worldSettings = new WorldSettings(worldInfo);
@@ -720,7 +719,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return Optional.empty();
         }
 
-        int dim;
         AnvilSaveHandler savehandler;
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             savehandler =
@@ -734,25 +732,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         WorldInfo worldInfo = savehandler.loadWorldInfo();
 
         if (worldInfo != null) {
-            ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            if (!WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getUniqueId())) {
-                WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
+            if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getWorldName())) {
                 return Optional.of((WorldProperties) worldInfo);
-            } else {
-                return WorldPropertyRegistryModule.getInstance().getWorldProperties(((WorldProperties) worldInfo).getUniqueId());
             }
-        }
-
-        if (((IMixinWorldSettings)settings).getDimensionId() != null && ((IMixinWorldSettings)settings).getDimensionId() != 0) {
-            dim = ((IMixinWorldSettings)settings).getDimensionId();
         } else {
-            dim = DimensionManager.getNextFreeDimId();
-            ((IMixinWorldSettings) settings).setDimensionId(dim);
+            worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
+        }
+        ((IMixinWorldInfo) worldInfo).createWorldConfig();
+
+        if (((IMixinWorldSettings)settings).getDimensionId() == null || ((IMixinWorldSettings)settings).getDimensionId() == 0) {
+            ((IMixinWorldInfo) worldInfo).setDimensionId(DimensionManager.getNextFreeDimId());
         }
 
-        worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
-        final UUID uuid = UUID.randomUUID();
-        ((IMixinWorldInfo) worldInfo).setUUID(uuid);
+        final int dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
+        final UUID uuid = setUuidForProperties((WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
@@ -771,6 +764,37 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)), settings,
             (WorldProperties) worldInfo));
         return Optional.of((WorldProperties) worldInfo);
+    }
+
+    private UUID setUuidForProperties(WorldProperties properties) {
+        checkNotNull(properties);
+
+        UUID uuid;
+        if (properties.getUniqueId() == null || properties.getUniqueId().equals
+                (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+            // Check if Bukkit's uid.dat file is here and use it
+            final Path uidPath = SpongeImpl.getGame().getSavesDirectory().resolve(properties.getWorldName()).resolve("uid.dat");
+            if (!Files.exists(uidPath)) {
+                uuid = UUID.randomUUID();
+            } else {
+                DataInputStream dis;
+
+                try {
+                    dis = new DataInputStream(Files.newInputStream(uidPath));
+                    uuid = new UUID(dis.readLong(), dis.readLong());
+                } catch (IOException e) {
+                    SpongeImpl.getLogger().error("World folder [{}] has an existing Bukkit unique identifier for it but we encountered issues "
+                                    + "parsing the file. We will have to use a new unique id. Please report this to Sponge ASAP.", properties.getWorldName(),
+                            e);
+                    uuid = UUID.randomUUID();
+                }
+            }
+        } else {
+            uuid = properties.getUniqueId();
+        }
+
+        ((IMixinWorldInfo) properties).setUUID(uuid);
+        return uuid;
     }
 
     @Override

@@ -30,7 +30,6 @@ import org.spongepowered.api.data.DataQuery;
 
 public final class DataQueries {
 
-
     // BannerPatterns
     public static final DataQuery BANNER_SHAPE_ID = of("BannerShapeId");
     public static final DataQuery BANNER_COLOR = of("DyeColor");
@@ -93,6 +92,9 @@ public final class DataQueries {
     public static final DataQuery DATA_CLASS = of("DataClass");
     public static final DataQuery INTERNAL_DATA = of("ManipulatorData");
 
+    // World
+    public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
+
     // Snapshots
     public static final DataQuery SNAPSHOT_WORLD_POSITION = of("Position");
     public static final DataQuery SNAPSHOT_TILE_DATA = of("TileEntityData");
@@ -150,5 +152,6 @@ public final class DataQueries {
     public static final DataQuery FLUID_TYPE = of("FluidType");
     public static final DataQuery FLUID_VOLUME = of("FluidVolume");
 
-    private DataQueries() { }
+    private DataQueries() {
+    }
 }

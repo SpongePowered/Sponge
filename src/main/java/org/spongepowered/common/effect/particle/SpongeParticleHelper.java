@@ -29,16 +29,13 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
-import net.minecraft.item.ItemBlock;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S2APacketParticles;
 import net.minecraft.util.EnumParticleTypes;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.type.SpongeNotePitch;
-import org.spongepowered.common.mixin.core.block.MixinBlockState;
 
 import java.util.Collections;
 import java.util.List;

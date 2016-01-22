@@ -37,20 +37,4 @@ import java.util.Collection;
 @Mixin(value = PropertyEnum.class)
 public abstract class MixinPropertyEnum<E extends Enum<E>> extends MixinPropertyHelper<E> implements EnumTrait<E> {
 
-    @SuppressWarnings("rawtypes")
-    @Shadow 
-    public abstract Collection getAllowedValues();
-
-    @SuppressWarnings("rawtypes")
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String name, Class valueClass, Collection allowedValues, CallbackInfo ci) {
-        this.propertyName = name;
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<E> getPossibleValues() {
-        return getAllowedValues();
-    }
-
 }

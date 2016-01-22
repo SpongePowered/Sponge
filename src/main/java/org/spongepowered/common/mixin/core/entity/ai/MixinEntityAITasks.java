@@ -46,6 +46,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Iterator;
 import java.util.List;
@@ -113,7 +114,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
     public List<? extends AITask<?>> goal$getTasks() {
         final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
-        for (Object o : taskEntries) {
+        for (Object o : this.taskEntries) {
             final EntityAITasks.EntityAITaskEntry entry = (EntityAITasks.EntityAITaskEntry) o;
 
             tasks.add((AITask<?>) entry.action);
@@ -121,9 +122,19 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         return tasks.build();
     }
 
+    @Override
+    public List<EntityAITasks.EntityAITaskEntry> getTasksUnsafe() {
+        return this.taskEntries;
+    }
+
     @Overwrite
     public void addTask(int priority, EntityAIBase base) {
-        ((IMixinEntityAIBase) base).setGoal((Goal) (Object) this);
+        ((IMixinEntityAIBase) base).setGoal((Goal<?>) (Object) this);
+        if (((IMixinEntity) this.owner).isInConstructPhase()) {
+            // Event is fired in firePostConstructEvents
+            this.taskEntries.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
+            return;
+        }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()), priority, priority,
             (Goal) (Object) this, (Agent) this.owner, (AITask) base);
         SpongeImpl.postEvent(event);
