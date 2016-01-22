@@ -56,6 +56,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -245,6 +246,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.terrainType = (WorldType) type;
     }
 
+    @Intrinsic
     public long worldproperties$getSeed() {
         return this.randomSeed;
     }
@@ -259,6 +261,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         return this.totalTime;
     }
 
+    @Intrinsic
     public long worldproperties$getWorldTime() {
         return this.worldTime;
     }
@@ -278,6 +281,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.dimensionType = type;
     }
 
+    @Intrinsic
     public String worldproperties$getWorldName() {
         return this.levelName;
     }
@@ -287,6 +291,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.levelName = name;
     }
 
+    @Intrinsic
     public boolean worldproperties$isRaining() {
         return this.raining;
     }
@@ -296,18 +301,22 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.raining = state;
     }
 
+    @Intrinsic
     public int worldproperties$getRainTime() {
         return this.rainTime;
     }
 
+    @Intrinsic
     public void worldproperties$setRainTime(int time) {
         this.rainTime = time;
     }
 
+    @Intrinsic
     public boolean worldproperties$isThundering() {
         return this.thundering;
     }
 
+    @Intrinsic
     public void worldproperties$setThundering(boolean state) {
         this.thundering = state;
     }

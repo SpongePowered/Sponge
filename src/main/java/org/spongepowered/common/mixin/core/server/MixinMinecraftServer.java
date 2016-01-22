@@ -730,7 +730,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         WorldInfo worldInfo = savehandler.loadWorldInfo();
-        ((IMixinWorldInfo) worldInfo).createWorldConfig();
 
         if (worldInfo != null) {
             if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getWorldName())) {
@@ -739,6 +738,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         } else {
             worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
         }
+        ((IMixinWorldInfo) worldInfo).createWorldConfig();
 
         if (((IMixinWorldSettings)settings).getDimensionId() == null || ((IMixinWorldSettings)settings).getDimensionId() == 0) {
             ((IMixinWorldInfo) worldInfo).setDimensionId(DimensionManager.getNextFreeDimId());
