@@ -247,12 +247,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
     public boolean restoringBlocks = false;
+    public boolean onBlockAddedTicking = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
     public List<Entity> capturedOnBlockAddedEntities = new ArrayList<>();
     public List<Entity> capturedOnBlockAddedItems = new ArrayList<>();
     public BlockSnapshot currentTickBlock = null;
-    public BlockSnapshot currentTickOnBlockAdded = null;
     public Entity currentTickEntity = null;
     public TileEntity currentTickTileEntity = null;
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
@@ -555,16 +555,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
 
             if (!flag && this.processingCaptureCause) {
-                BlockSnapshot tickBlock = null;
                 if (this.currentTickBlock != null) {
-                    tickBlock = this.currentTickBlock;
-                } else if (this.currentTickOnBlockAdded != null) {
-                    tickBlock = this.currentTickOnBlockAdded;
-                }
-                if (tickBlock != null) {
-                    BlockPos sourcePos = VecHelper.toBlockPos(tickBlock.getPosition());
+                    BlockPos sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
                     Block targetBlock = getBlockState(entityIn.getPosition()).getBlock();
-                    SpongeHooks.tryToTrackBlockAndEntity(this.nmsWorld, tickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
+                    SpongeHooks.tryToTrackBlockAndEntity(this.nmsWorld, this.currentTickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
                 }
                 if (this.currentTickEntity != null) {
                     Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -573,13 +567,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
                 if (entityIn instanceof EntityItem) {
-                    if (this.currentTickOnBlockAdded != null) {
+                    if (this.onBlockAddedTicking) {
                         this.capturedOnBlockAddedItems.add((Item) entityIn);
                     } else {
                         this.capturedEntityItems.add((Item) entityIn);
                     }
                 } else {
-                    if (this.currentTickOnBlockAdded != null) {
+                    if (this.onBlockAddedTicking) {
                         this.capturedOnBlockAddedEntities.add((Entity) entityIn);
                     } else {
                         this.capturedEntities.add((Entity) entityIn);
@@ -1213,12 +1207,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+            BlockSnapshot currentTickingBlock = this.currentTickBlock;
             // Containers get placed automatically
             if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
-                this.currentTickOnBlockAdded = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
+                this.onBlockAddedTicking = true;
+                this.currentTickBlock = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
-                    Cause blockCause = Cause.of(NamedCause.source(this.currentTickOnBlockAdded));
+                    Cause blockCause = Cause.of(NamedCause.source(this.currentTickBlock));
                     if (this.captureTerrainGen) {
                         net.minecraft.world.chunk.Chunk chunk = getChunkFromBlockCoords(pos);
                         if (chunk != null && ((IMixinChunk) chunk).getCurrentPopulateCause() != null) {
@@ -1228,7 +1224,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     handleDroppedItems(blockCause, this.capturedOnBlockAddedItems, null, getBlockState(pos) != newState);
                 }
                 if (this.capturedOnBlockAddedEntities.size() > 0) {
-                    Cause blockCause = Cause.of(this.currentTickOnBlockAdded);
+                    Cause blockCause = Cause.of(this.currentTickBlock);
                     if (this.captureTerrainGen) {
                         net.minecraft.world.chunk.Chunk chunk = getChunkFromBlockCoords(pos);
                         if (chunk != null && ((IMixinChunk) chunk).getCurrentPopulateCause() != null) {
@@ -1238,7 +1234,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     handleEntitySpawns(blockCause, this.capturedOnBlockAddedEntities, null);
                 }
 
-                this.currentTickOnBlockAdded = null;
+                this.onBlockAddedTicking = false;
+                this.currentTickBlock = currentTickingBlock;
             }
             proxyBlockAccess.proceed();
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
@@ -1351,9 +1348,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         if (this.currentTickBlock != null) {
                             source = this.currentTickBlock;
                             sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-                        } else if (this.currentTickOnBlockAdded != null) {
-                            source = this.currentTickOnBlockAdded;
-                            sourcePos = VecHelper.toBlockPos(this.currentTickOnBlockAdded.getPosition());
                         } else if (this.currentTickTileEntity != null) {
                             source = this.currentTickTileEntity;
                             sourcePos = ((net.minecraft.tileentity.TileEntity)this.currentTickTileEntity).getPos();
