@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.mixin.core.block.state;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -68,28 +68,19 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+/**
+ * This shares implementation with {@link IMixinBlockState}, since this
+ * all relies on Data API implementations.
+ */
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
-public abstract class MixinBlockState extends BlockStateBase implements BlockState, IMixinBlockState {
+public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
 
-    @Shadow
-    @SuppressWarnings("rawtypes")
-    private ImmutableMap properties;
     @Shadow private Block block;
 
     private ImmutableSet<ImmutableValue<?>> values;
     private ImmutableSet<Key<?>> keys;
     private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private ImmutableMap<Key<?>, Object> keyMap;
-
-    @Override
-    public BlockType getType() {
-        return (BlockType) getBlock();
-    }
-
-    @Override
-    public BlockState withExtendedProperties(Location<World> location) {
-        return (BlockState) this.block.getActualState(this, (net.minecraft.world.World) location.getExtent(), VecHelper.toBlockPos(location));
-    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -339,68 +330,6 @@ public abstract class MixinBlockState extends BlockStateBase implements BlockSta
     @Override
     public int getStateMeta() {
         return this.block.getMetaFromState(this);
-    }
-
-    @Override
-    public Optional<BlockTrait<?>> getTrait(String blockTrait) {
-        for (Object obj : this.properties.keySet()) {
-            BlockTrait<?> trait = (BlockTrait<?>) obj;
-            if (trait.getName().equalsIgnoreCase(blockTrait)) {
-                return Optional.<BlockTrait<?>>of(trait);
-            }
-        }
-
-        return Optional.empty();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
-        if (value instanceof String) {
-            Comparable foundValue = null;
-            for (Comparable comparable : trait.getPossibleValues()) {
-                if (comparable.toString().equals(value)) {
-                    foundValue = comparable;
-                    break;
-                }
-            }
-            if (foundValue != null) {
-                return Optional.of((BlockState) this.withProperty((IProperty) trait, foundValue));
-            }
-        }
-        if (value instanceof Comparable) {
-            if (this.properties.containsKey(trait) && ((IProperty) trait).getAllowedValues().contains(value)) {
-                return Optional.of((BlockState) this.withProperty((IProperty) trait, (Comparable) value));
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <T extends Comparable<T>> Optional<T> getTraitValue(BlockTrait<T> property) {
-        if (!this.properties.containsKey(property)) {
-            return Optional.empty();
-        } else {
-            return Optional.of((T) (Comparable<T>) property.getValueClass().cast(this.properties.get(property)));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public ImmutableMap<BlockTrait<?>, ?> getTraitMap() {
-        return (ImmutableMap) getProperties();
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public Collection<BlockTrait<?>> getTraits() {
-        return (Collection) getProperties().keySet();
-    }
-
-    @Override
-    public Collection<?> getTraitValues() {
-        return getProperties().values();
     }
 
 }

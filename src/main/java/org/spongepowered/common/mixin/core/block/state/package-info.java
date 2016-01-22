@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.block;
-
-public interface IMixinBlockState {
-
-    int getStateMeta();
-
-}
+/**
+ * A majority of these interfaces are to aid in manipulating block states and blocks
+ * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
+ * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
+ * for the benefit of being able to "reset" the block to a "default state".
+ */
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.state;

@@ -56,7 +56,7 @@ import java.util.Optional;
  */
 public interface IMixinBlock {
 
-    // Support methods for MixinBlockState
+    // Support methods for MixinStateImplementation
     /**
      * Gets all the {@link ImmutableDataManipulator}s for the provided
      * {@link IBlockState}.
