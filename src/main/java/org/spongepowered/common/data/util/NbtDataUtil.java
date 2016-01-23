@@ -137,6 +137,11 @@ public final class NbtDataUtil {
     public static final String IS_MOD = "isMod";
     public static final String FORGE_ENTITY_TYPE = "entity_name";
 
+    // Legacy migration tags from Bukkit
+    public static final String BUKKIT = "bukkit";
+    public static final String BUKKIT_FIRST_PLAYED = "firstPlayed";
+    public static final String BUKKIT_LAST_PLAYED = "lastPlayed";
+
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
     /**

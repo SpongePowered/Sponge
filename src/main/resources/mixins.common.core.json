@@ -335,6 +335,7 @@
         "text.MixinChatComponentTranslation",
         "text.MixinClickEvent",
         "text.MixinHoverEvent",
+        "util.MixinClassInheritanceMultiMap",
         "util.MixinPacketThreadUtil",
         "whitelist.MixinUserListWhitelist",
         "world.MixinAnvilSaveHandler",

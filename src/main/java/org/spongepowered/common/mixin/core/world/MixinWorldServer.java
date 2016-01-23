@@ -158,8 +158,6 @@ public abstract class MixinWorldServer extends MixinWorld {
             BlockPos sourcePos = null;
             if (this.currentTickBlock != null) {
                 sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-            } else if (this.currentTickOnBlockAdded != null) {
-                sourcePos = VecHelper.toBlockPos(this.currentTickOnBlockAdded.getPosition());
             } else if (this.currentTickTileEntity != null) {
                 sourcePos = ((net.minecraft.tileentity.TileEntity) this.currentTickTileEntity).getPos();
             }
@@ -224,6 +222,11 @@ public abstract class MixinWorldServer extends MixinWorld {
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         sbu.setPriority(priority);
         ((IMixinBlockUpdate) sbu).setWorld((WorldServer) (Object) this);
+        if (!((net.minecraft.world.World)(Object) this).isBlockLoaded(sbu.position)) {
+            this.tmpScheduledObj = sbu;
+            return;
+        }
+
         // Pistons, Beacons, Notes, Comparators etc. schedule block updates so we must track these positions
         if (this.currentTickBlock != null) {
             BlockPos pos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());

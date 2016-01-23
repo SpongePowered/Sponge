@@ -22,55 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.data.entity;
+package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAffectsSpawningData;
-import org.spongepowered.api.data.manipulator.mutable.entity.AffectsSpawningData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAffectsSpawningData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
-public class AffectsSpawningDataProcessor extends
-        AbstractEntitySingleDataProcessor<EntityPlayerMP, Boolean, Value<Boolean>, AffectsSpawningData, ImmutableAffectsSpawningData> {
+public class FirstJoinValueProcessor extends AbstractSpongeValueProcessor<EntityPlayer, Instant, Value<Instant>> {
 
-    public AffectsSpawningDataProcessor() {
-        super(EntityPlayerMP.class, Keys.AFFECTS_SPAWNING);
+    public FirstJoinValueProcessor() {
+        super(EntityPlayer.class, Keys.FIRST_DATE_PLAYED);
     }
 
     @Override
-    protected boolean set(EntityPlayerMP entity, Boolean value) {
-        ((IMixinEntityPlayer) entity).setAffectsSpawning(value);
+    protected Value<Instant> constructValue(Instant actualValue) {
+        return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.now(), actualValue);
+    }
+
+    @Override
+    protected boolean set(EntityPlayer container, Instant value) {
+        final UUID id = container.getUniqueID();
+        final Instant played = SpongePlayerDataHandler.getLastPlayed(id).orElse(Instant.now());
+        SpongePlayerDataHandler.setPlayerInfo(id, value, played);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityPlayerMP entity) {
-        return Optional.of(((IMixinEntityPlayer) entity).affectsSpawning());
+    protected Optional<Instant> getVal(EntityPlayer container) {
+        return SpongePlayerDataHandler.getFirstJoined(container.getUniqueID());
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.AFFECTS_SPAWNING, true, value);
-    }
-
-    @Override
-    protected AffectsSpawningData createManipulator() {
-        return new SpongeAffectsSpawningData();
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.AFFECTS_SPAWNING, true, actualValue);
+    protected ImmutableValue<Instant> constructImmutableValue(Instant value) {
+        return new ImmutableSpongeValue<Instant>(Keys.FIRST_DATE_PLAYED, Instant.now(), value);
     }
 
     @Override

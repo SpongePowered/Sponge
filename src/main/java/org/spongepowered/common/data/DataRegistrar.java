@@ -102,9 +102,11 @@ import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.world.storage.SpongePlayerData;
 
 public class DataRegistrar {
 
+    @SuppressWarnings("unchecked")
     public static void setupSerialization(Game game) {
         KeyRegistry.registerKeys();
         SpongeDataManager dataManager = SpongeDataManager.getInstance();
@@ -151,7 +153,8 @@ public class DataRegistrar {
         dataManager.registerBuilder(VariableAmount.Fixed.class, new FixedBuilder());
         dataManager.registerBuilder(VariableAmount.OptionalAmount.class, new OptionalVarianceBuilder());
 
-        dataManager.registerBuilder((Class<Location<World>>) (Class) Location.class, new LocationBuilder());
+        dataManager.registerBuilder((Class<Location<World>>) (Class<?>) Location.class, new LocationBuilder());
+        dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
 
         // Data Manipulators
 
@@ -325,6 +328,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(BreedableData.class, SpongeBreedableData.class, ImmutableBreedableData.class,
                 ImmutableSpongeBreedableData.class, new BreedableDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(JoinData.class, SpongeJoinData.class, ImmutableJoinData.class, ImmutableSpongeJoinData.class,
+                new JoinDataProcessor());
 
         // Item Processors
 
@@ -641,6 +647,8 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new WolfDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new SheepDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
+        dataManager.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
+        dataManager.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

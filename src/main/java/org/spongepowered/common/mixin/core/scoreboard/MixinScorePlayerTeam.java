@@ -207,7 +207,13 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     public boolean team$removeMember(Text member) {
         String legacyName = SpongeTexts.toLegacy(member);
         if (this.theScoreboard != null) {
-            return this.theScoreboard.removePlayerFromTeams(legacyName);
+            ScorePlayerTeam realTeam = theScoreboard.getPlayersTeam(legacyName);
+
+            if ((Object) realTeam == this) {
+                this.theScoreboard.removePlayerFromTeam(legacyName, realTeam);
+                return true;
+            }
+            return false;
         } else {
             return this.membershipSet.remove(legacyName);
         }

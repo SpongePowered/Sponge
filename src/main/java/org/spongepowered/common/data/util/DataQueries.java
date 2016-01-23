@@ -152,6 +152,10 @@ public final class DataQueries {
     public static final DataQuery FLUID_TYPE = of("FluidType");
     public static final DataQuery FLUID_VOLUME = of("FluidVolume");
 
+    // SpongePlayerData
+    public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
+    public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
+
     private DataQueries() {
     }
 }
