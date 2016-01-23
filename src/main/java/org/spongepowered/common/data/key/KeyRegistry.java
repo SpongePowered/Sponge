@@ -99,6 +99,7 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.awt.Color;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -285,6 +286,8 @@ public class KeyRegistry {
         keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
         keyMap.put("fluid_item_stack", makeSingleKey(FluidStackSnapshot.class, Value.class, of("FluidItemContainerSnapshot")));
         keyMap.put("fluid_tank_contents", makeMapKey(Direction.class, List.class, of("FluidTankContents")));
+        keyMap.put("first_date_played", makeSingleKey(Instant.class, Value.class, of("FirstTimeJoined")));
+        keyMap.put("last_date_played", makeSingleKey(Instant.class, Value.class, of("LastTimePlayed")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

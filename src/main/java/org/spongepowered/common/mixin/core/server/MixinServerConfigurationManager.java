@@ -82,6 +82,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -91,7 +92,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
@@ -99,8 +100,10 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
+import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.SocketAddress;
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -112,12 +115,13 @@ import javax.annotation.Nullable;
 @Mixin(ServerConfigurationManager.class)
 public abstract class MixinServerConfigurationManager {
 
-    @Shadow private static Logger logger;
-    @Shadow private MinecraftServer mcServer;
+    private static final String WRITE_PLAYER_DATA =
+            "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
+    @Shadow @Final private static Logger logger;
+    @Shadow @Final private MinecraftServer mcServer;
+    @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
+    @Shadow @Final public List<EntityPlayerMP> playerEntityList;
     @Shadow private IPlayerFileData playerNBTManagerObj;
-    @Shadow public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
-    @SuppressWarnings("rawtypes")
-    @Shadow public List playerEntityList;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
     @Shadow public abstract MinecraftServer getServerInstance();
@@ -204,6 +208,11 @@ public abstract class MixinServerConfigurationManager {
             disconnectClient(netManager, loginEvent.getMessage(), gameprofile);
             return;
         }
+
+        // Join data
+        Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
+        Instant lastJoined = Instant.now();
+        SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
 
         double x = loginEvent.getToTransform().getPosition().getX();
         double y = loginEvent.getToTransform().getPosition().getY();
@@ -533,6 +542,11 @@ public abstract class MixinServerConfigurationManager {
             }
             // Sponge End
         }
+    }
+
+    @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))
+    private void onWritePlayerFile(EntityPlayerMP playerMP, CallbackInfo callbackInfo) {
+        SpongePlayerDataHandler.savePlayer(playerMP.getUniqueID());
     }
 
 }
