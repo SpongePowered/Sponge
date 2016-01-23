@@ -46,4 +46,6 @@ public interface IMixinEntityPlayerMP {
 
     void initScoreboard();
 
+    void resetAttributeMap();
+
 }

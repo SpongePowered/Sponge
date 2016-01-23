@@ -32,8 +32,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
@@ -514,4 +516,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return false; // Suppress death messages since this is handled together with the event calling
     }
 
+    @Override
+    public void resetAttributeMap() {
+        // The name is wrong - it's used on the client and server
+        this.attributeMap = new ServersideAttributeMap();
+        this.applyEntityAttributes();
+
+        // Re-create the array, so that attributes are properly re-added
+        this.previousEquipment = new ItemStack[5];
+    }
 }
