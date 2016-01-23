@@ -247,7 +247,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
     public boolean restoringBlocks = false;
-    public boolean onBlockAddedTicking = false;
+    public boolean notifyingBlocks = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
     public List<Entity> capturedOnBlockAddedEntities = new ArrayList<>();
@@ -330,7 +330,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
      *
      * Purpose: Rewritten to support capturing blocks
      */
-    @SuppressWarnings({"unchecked"})
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
@@ -351,7 +350,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
             // Don't capture if we are restoring blocks
-            if (!this.isRemote && !this.restoringBlocks) {
+            if (!this.isRemote && !this.restoringBlocks && !this.notifyingBlocks) {
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 if (StaticMixinHelper.runningGenerator != null) {
@@ -567,13 +566,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
                 if (entityIn instanceof EntityItem) {
-                    if (this.onBlockAddedTicking) {
+                    if (this.notifyingBlocks) {
                         this.capturedOnBlockAddedItems.add((Item) entityIn);
                     } else {
                         this.capturedEntityItems.add((Item) entityIn);
                     }
                 } else {
-                    if (this.onBlockAddedTicking) {
+                    if (this.notifyingBlocks) {
                         this.capturedOnBlockAddedEntities.add((Entity) entityIn);
                     } else {
                         this.capturedEntities.add((Entity) entityIn);
@@ -1189,12 +1188,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause) {
+        this.notifyingBlocks = true; // Don't capture while we notify blocks
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess((IBlockAccess) this, transactions);
         for (Transaction<BlockSnapshot> transaction : transactions) {
+            if (!transaction.isValid()) {
+                continue; // Don't use invalidated block transactions during notifications, these only need to be restored
+            }
             // Handle custom replacements
-            if (transaction.isValid() && transaction.getCustom().isPresent()) {
+            if (transaction.getCustom().isPresent()) {
                 this.restoringBlocks = true;
                 transaction.getFinal().restore(true, false);
                 this.restoringBlocks = false;
@@ -1210,7 +1213,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             BlockSnapshot currentTickingBlock = this.currentTickBlock;
             // Containers get placed automatically
             if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
-                this.onBlockAddedTicking = true;
                 this.currentTickBlock = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
                 if (this.capturedOnBlockAddedItems.size() > 0) {
@@ -1234,12 +1236,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     handleEntitySpawns(blockCause, this.capturedOnBlockAddedEntities, null);
                 }
 
-                this.onBlockAddedTicking = false;
                 this.currentTickBlock = currentTickingBlock;
             }
             proxyBlockAccess.proceed();
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
         }
+        this.notifyingBlocks = false;
     }
 
     private boolean addWeatherEffect(net.minecraft.entity.Entity entity, Cause cause) {
