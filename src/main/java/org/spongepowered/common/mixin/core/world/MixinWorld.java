@@ -247,11 +247,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
     public boolean restoringBlocks = false;
-    public boolean notifyingBlocks = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
-    public List<Entity> capturedOnBlockAddedEntities = new ArrayList<>();
-    public List<Entity> capturedOnBlockAddedItems = new ArrayList<>();
     public BlockSnapshot currentTickBlock = null;
     public Entity currentTickEntity = null;
     public TileEntity currentTickTileEntity = null;
@@ -350,7 +347,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
             // Don't capture if we are restoring blocks
-            if (!this.isRemote && !this.restoringBlocks && !this.notifyingBlocks) {
+            if (!this.isRemote && !this.restoringBlocks) {
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 if (StaticMixinHelper.runningGenerator != null) {
@@ -566,17 +563,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
                 if (entityIn instanceof EntityItem) {
-                    if (this.notifyingBlocks) {
-                        this.capturedOnBlockAddedItems.add((Item) entityIn);
-                    } else {
-                        this.capturedEntityItems.add((Item) entityIn);
-                    }
+                    this.capturedEntityItems.add((Item) entityIn);
                 } else {
-                    if (this.notifyingBlocks) {
-                        this.capturedOnBlockAddedEntities.add((Entity) entityIn);
-                    } else {
-                        this.capturedEntities.add((Entity) entityIn);
-                    }
+                    this.capturedEntities.add((Entity) entityIn);
                 }
                 return true;
             } else { // Custom
@@ -905,12 +894,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     handlePostPlayerBlockEvent(captureType, player, world, invalidTransactions);
                 }
 
+                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
+
                 if (this.capturedEntityItems.size() > 0) {
                     handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions,
                             captureType == CaptureType.BREAK ? true : destructDrop);
                 }
-
-                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
                 if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
                     player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
@@ -1188,7 +1177,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause) {
-        this.notifyingBlocks = true; // Don't capture while we notify blocks
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess((IBlockAccess) this, transactions);
@@ -1215,33 +1203,24 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.currentTickBlock = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
-                if (this.capturedOnBlockAddedItems.size() > 0) {
-                    Cause blockCause = Cause.of(NamedCause.source(this.currentTickBlock));
-                    if (this.captureTerrainGen) {
-                        net.minecraft.world.chunk.Chunk chunk = getChunkFromBlockCoords(pos);
-                        if (chunk != null && ((IMixinChunk) chunk).getCurrentPopulateCause() != null) {
-                            blockCause = blockCause.with(((IMixinChunk) chunk).getCurrentPopulateCause().all());
-                        }
-                    }
-                    handleDroppedItems(blockCause, this.capturedOnBlockAddedItems, null, getBlockState(pos) != newState);
+                if (!this.captureTerrainGen && !cause.contains(this.currentTickBlock)) {
+                    Cause currentCause = cause;
+                    cause = Cause.of(NamedCause.source(this.currentTickBlock));
+                    cause = cause.with(currentCause.all());
                 }
-                if (this.capturedOnBlockAddedEntities.size() > 0) {
-                    Cause blockCause = Cause.of(this.currentTickBlock);
-                    if (this.captureTerrainGen) {
-                        net.minecraft.world.chunk.Chunk chunk = getChunkFromBlockCoords(pos);
-                        if (chunk != null && ((IMixinChunk) chunk).getCurrentPopulateCause() != null) {
-                            blockCause = blockCause.with(((IMixinChunk) chunk).getCurrentPopulateCause().all());
-                        }
-                    }
-                    handleEntitySpawns(blockCause, this.capturedOnBlockAddedEntities, null);
-                }
-
-                this.currentTickBlock = currentTickingBlock;
             }
+
             proxyBlockAccess.proceed();
             markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
+
+            // Handle any additional captures during notify
+            // This is to ensure new captures do not leak into next tick with wrong cause
+            if (!this.captureTerrainGen) {
+                this.handlePostTickCaptures(cause);
+            }
+
+            this.currentTickBlock = currentTickingBlock;
         }
-        this.notifyingBlocks = false;
     }
 
     private boolean addWeatherEffect(net.minecraft.entity.Entity entity, Cause cause) {
