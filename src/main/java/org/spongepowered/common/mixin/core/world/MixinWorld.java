@@ -611,10 +611,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
 
-                if (specialCause != null) {
-                    if (!cause.all().contains(specialCause)) {
-                        cause = cause.with(NamedCause.of(causeName, specialCause));
-                    }
+                if (specialCause != null && !cause.containsNamed(causeName)) {
+                    cause = cause.with(NamedCause.of(causeName, specialCause));
                 }
 
                 org.spongepowered.api.event.Event event = null;
@@ -667,7 +665,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet packetIn = StaticMixinHelper.processingPacket;
         List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
-        boolean destructDrop = false;
 
         // Attempt to find a Player cause if we do not have one
         if (!cause.first(User.class).isPresent() && !(this.capturedSpongeBlockSnapshots.size() > 0 && ((SpongeBlockSnapshot) this.capturedSpongeBlockSnapshots.get(0)).captureType == CaptureType.DECAY)) {
@@ -687,12 +684,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                     Optional<User> owner = spongeChunk.getBlockOwner(pos);
                     Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                    if (notifier.isPresent()) {
-                        if (!cause.all().contains(notifier.get())) {
-                            cause = cause.with(NamedCause.notifier(notifier.get()));
-                        }
+                    if (notifier.isPresent() && !cause.containsNamed(NamedCause.NOTIFIER)) {
+                        cause = cause.with(NamedCause.notifier(notifier.get()));
                     }
-                    if (owner.isPresent()) {
+                    if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.owner(owner.get()));
                     }
                 }
@@ -700,12 +695,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 Entity entity = cause.first(Entity.class).get();
                 if (entity instanceof EntityTameable) {
                     EntityTameable tameable = (EntityTameable) entity;
-                    if (tameable.getOwner() != null) {
+                    if (tameable.getOwner() != null && !cause.containsNamed(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.owner(tameable.getOwner()));
                     }
                 } else {
                     Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (owner.isPresent()) {
+                    if (owner.isPresent() && !cause.contains(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.owner(owner.get()));
                     }
                 }
@@ -894,12 +889,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     handlePostPlayerBlockEvent(captureType, player, world, invalidTransactions);
                 }
 
-                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
-
-                if (this.capturedEntityItems.size() > 0) {
-                    handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions,
-                            captureType == CaptureType.BREAK ? true : destructDrop);
+                if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
+                    StaticMixinHelper.destructItemDrop = true;
                 }
+
+                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
                 if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
                     player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
@@ -911,7 +905,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (player != null && packetIn instanceof C07PacketPlayerDigging) {
             C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
             if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                destructDrop = false;
+                StaticMixinHelper.destructItemDrop = false;
             }
         }
 
@@ -919,10 +913,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (player != null && packetIn instanceof C01PacketChatMessage) {
             C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
             if (chatPacket.getMessage().contains("kill")) {
-                if (!cause.all().contains(player)) {
+                if (!cause.contains(player)) {
                     cause = cause.with(player);
                 }
-                destructDrop = true;
+                StaticMixinHelper.destructItemDrop = true;
             }
         }
 
@@ -961,15 +955,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (this.capturedEntityItems.size() > 0) {
             if (StaticMixinHelper.dropCause != null) {
                 cause = StaticMixinHelper.dropCause;
-                destructDrop = true;
+                StaticMixinHelper.destructItemDrop = true;
             }
-            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions, destructDrop);
+            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions, StaticMixinHelper.destructItemDrop);
         }
         if (this.capturedEntities.size() > 0) {
             handleEntitySpawns(cause, this.capturedEntities, invalidTransactions);
         }
 
         StaticMixinHelper.dropCause = null;
+        StaticMixinHelper.destructItemDrop = false;
     }
 
     private void handlePostPlayerBlockEvent(CaptureType captureType, EntityPlayerMP player, net.minecraft.world.World world,
@@ -1109,10 +1104,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
                 Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                if (owner.isPresent()) {
-                    if (!cause.all().contains(owner.get())) {
-                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
-                    }
+                if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
+                     cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
             }
