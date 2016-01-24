@@ -104,6 +104,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -161,8 +162,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
         if (world.getCapturedEntityItems().size() > 0) {
+            StaticMixinHelper.destructItemDrop = true;
             world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)),
-                (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
+                (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null);
+            StaticMixinHelper.destructItemDrop = false;
         }
     }
 

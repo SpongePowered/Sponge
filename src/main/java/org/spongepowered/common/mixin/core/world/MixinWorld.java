@@ -957,7 +957,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 cause = StaticMixinHelper.dropCause;
                 StaticMixinHelper.destructItemDrop = true;
             }
-            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions, StaticMixinHelper.destructItemDrop);
+            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions);
         }
         if (this.capturedEntities.size() > 0) {
             handleEntitySpawns(cause, this.capturedEntities, invalidTransactions);
@@ -1007,7 +1007,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems) {
+    public void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions) {
         Iterator<Entity> iter = entities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
@@ -1031,7 +1031,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         DropItemEvent event = null;
 
-        if (destructItems) {
+        if (StaticMixinHelper.destructItemDrop) {
             event = SpongeEventFactory.createDropItemEventDestruct(cause, entities, entitySnapshotBuilder.build(), (World) this);
         } else {
             event = SpongeEventFactory.createDropItemEventDispense(cause, entities, entitySnapshotBuilder.build(), (World) this);
