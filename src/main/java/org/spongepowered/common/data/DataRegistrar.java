@@ -582,6 +582,10 @@ public class DataRegistrar {
                 ImmutableSpongeDyeableData.class, dyeableDataProcessor);
 
 
+        final HideDataProcessor hideDataProcessor = new HideDataProcessor();
+        dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
+                hideDataProcessor);
+
         // Values
 
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -646,6 +650,12 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
         dataManager.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_ENCHANTMENTS, new HideEnchantmentsValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_ATTRIBUTES, new HideAttributesValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_UNBREAKABLE, new HideUnbreakableValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

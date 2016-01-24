@@ -288,6 +288,12 @@ public class KeyRegistry {
         keyMap.put("fluid_tank_contents", makeMapKey(Direction.class, List.class, of("FluidTankContents")));
         keyMap.put("first_date_played", makeSingleKey(Instant.class, Value.class, of("FirstTimeJoined")));
         keyMap.put("last_date_played", makeSingleKey(Instant.class, Value.class, of("LastTimePlayed")));
+        keyMap.put("hide_enchantments", makeSingleKey(Boolean.class, Value.class, of("HideEnchantments")));
+        keyMap.put("hide_attributes", makeSingleKey(Boolean.class, Value.class, of("HideAttributes")));
+        keyMap.put("hide_unbreakable", makeSingleKey(Boolean.class, Value.class, of("HideUnbreakable")));
+        keyMap.put("hide_can_destroy", makeSingleKey(Boolean.class, Value.class, of("HideCanDestroy")));
+        keyMap.put("hide_can_place", makeSingleKey(Boolean.class, Value.class, of("HideCanPlace")));
+        keyMap.put("hide_miscellaneous", makeSingleKey(Boolean.class, Value.class, of("HideMiscellaneous")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
