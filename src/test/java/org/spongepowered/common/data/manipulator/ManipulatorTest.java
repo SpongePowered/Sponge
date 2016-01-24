@@ -119,7 +119,7 @@ public class ManipulatorTest {
                             + "be equal to it.\n"
                             + "The mutable manipulator in question: " + this.dataName + "\n"
                             + "The immutable manipulator in question: " + immutableDataManipulator.getClass().getSimpleName(),
-                    manipulator.equals(newManipulator), is(true));
+                    manipulator.getValues().equals(newManipulator.getValues()), is(true));
         } catch (NoSuchMethodException e) {
             throw new UnsupportedOperationException("All Sponge provided DataManipulator implementations require a no-args constructor! \n"
                     + "If the manipulator needs to be parametarized, please understand that there needs to "
