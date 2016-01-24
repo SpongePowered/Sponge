@@ -297,7 +297,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract WorldChunkManager getWorldChunkManager();
     @Shadow public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
-    @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
@@ -306,6 +305,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract int getRedstonePower(BlockPos pos, EnumFacing facing);
 
     private final net.minecraft.world.World nmsWorld = (net.minecraft.world.World)(Object) this;
 
@@ -1373,7 +1373,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
 
+                StaticMixinHelper.neighborNotifySourceBlockPos = sourcePos;
                 iblockstate.getBlock().onNeighborBlockChange(this.nmsWorld, notifyPos, iblockstate, sourceBlock);
+                StaticMixinHelper.neighborNotifySourceBlockPos = null;
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
@@ -2540,4 +2542,32 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         return entityplayer;
     }
+
+    /**
+     * Replaced calls to {@code {@link #getRedstonePower(BlockPos, EnumFacing)} > 0} with
+     * {@link #checkBlockPoweredWithCapture(BlockPos, EnumFacing)} to capture the BlockPos
+     * being checked for use in mixins later on.
+     *
+     * @author kashike - 02/01/2016
+     */
+    @Overwrite
+    public boolean isBlockPowered(BlockPos pos) {
+        StaticMixinHelper.powerProvidingBlockPos = null;
+        return this.checkBlockPoweredWithCapture(pos.down(), EnumFacing.DOWN)
+                || this.checkBlockPoweredWithCapture(pos.up(), EnumFacing.UP)
+                || this.checkBlockPoweredWithCapture(pos.north(), EnumFacing.NORTH)
+                || this.checkBlockPoweredWithCapture(pos.south(), EnumFacing.SOUTH)
+                || this.checkBlockPoweredWithCapture(pos.west(), EnumFacing.WEST)
+                || this.checkBlockPoweredWithCapture(pos.east(), EnumFacing.EAST);
+    }
+
+    private boolean checkBlockPoweredWithCapture(BlockPos pos, EnumFacing facing) {
+        if (this.getRedstonePower(pos, facing) > 0) {
+            StaticMixinHelper.powerProvidingBlockPos = pos;
+            return true;
+        }
+
+        return false;
+    }
+
 }

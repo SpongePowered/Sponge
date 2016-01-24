@@ -24,15 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import com.google.common.collect.Lists;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityLargeFireball.class)
 public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball {
@@ -49,10 +62,23 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
         return this.damage;
     }
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
-        at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
-    protected Entity newExplosion(Entity entityIn) {
-        return (Entity) (Object) this;
+    @Nullable
+    @Redirect(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
+    public Explosion processExplosion(World world, Entity entity, double x, double y, double z, float strength, boolean flaming, boolean smoking) {
+        List<Object> cause = Lists.newArrayList();
+
+        if (this.shootingEntity != null) {
+            cause.add(NamedCause.igniter(this.shootingEntity));
+        }
+
+        cause.add(NamedCause.source(this));
+
+        ExplosionEvent.Pre event = SpongeEventFactory.createExplosionEventPre(Cause.of(cause), (org.spongepowered.api.world.World) this.worldObj);
+        if (!SpongeImpl.postEvent(event)) {
+            world.newExplosion((Entity) (Object) this, x, y, z, strength, flaming, smoking);
+        }
+
+        return null;
     }
 
     public double getDamage() {
