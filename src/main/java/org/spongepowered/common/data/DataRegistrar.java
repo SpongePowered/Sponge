@@ -331,6 +331,12 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(JoinData.class, SpongeJoinData.class, ImmutableJoinData.class, ImmutableSpongeJoinData.class,
                 new JoinDataProcessor());
 
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new EntityPotionDataProcessor());
+
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -407,6 +413,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(FluidItemData.class, SpongeFluidItemData.class, ImmutableFluidItemData.class,
                 ImmutableSpongeFluidItemData.class, new FluidItemDataProcessor());
+
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new ItemPotionDataProcessor());
 
         // Block Processors
 
