@@ -25,9 +25,12 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,6 +48,8 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
+
+    @Shadow public abstract ItemStack getEntityItem();
 
     public int lifespan;
     public float dropChance = 1.0f;
@@ -168,4 +173,8 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         return getItemData().item().get().getType().getTranslation();
     }
 
+    @Override
+    public ItemType getItemType() {
+        return (ItemType) getEntityItem().getItem();
+    }
 }
