@@ -33,6 +33,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.ban.Ban;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,10 +53,10 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
         super(p_i1146_1_);
     }
 
-    @Shadow private String reason;
-    @Shadow private String bannedBy;
-    @Shadow private Date banStartDate;
-    @Shadow private Date banEndDate;
+    @Shadow @Final private String reason;
+    @Shadow @Final private String bannedBy;
+    @Shadow @Final private Date banStartDate;
+    @Shadow @Final private Date banEndDate;
 
     private Text spongeReason;
     private Text source;

@@ -32,6 +32,7 @@ import net.minecraft.world.gen.feature.WorldGenTrees;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
@@ -42,6 +43,7 @@ import java.util.Random;
 public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree implements PopulatorObject, IWorldGenTrees {
 
     @Shadow private int minTreeHeight;
+
     private VariableAmount minHeight = VariableAmount.fixed(4);
 
     @Shadow

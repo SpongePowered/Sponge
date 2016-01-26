@@ -29,6 +29,7 @@ import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentTranslation;
 import org.spongepowered.api.text.TranslatableText;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinText;
@@ -39,8 +40,8 @@ import java.util.Locale;
 @Mixin(value = TranslatableText.class, remap = false)
 public abstract class MixinTextTranslatable extends MixinText {
 
-    @Shadow protected Translation translation;
-    @Shadow protected ImmutableList<Object> arguments;
+    @Shadow @Final protected Translation translation;
+    @Shadow @Final protected ImmutableList<Object> arguments;
 
     @Override
     protected ChatComponentStyle createComponent() {

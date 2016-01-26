@@ -166,6 +166,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -264,17 +265,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private long weatherStartTime;
 
     // @formatter:off
-    @Shadow public Profiler theProfiler;
-    @Shadow public boolean isRemote;
+    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public boolean isRemote;
+    @Shadow @Final public WorldProvider provider;
+    @Shadow @Final public Random rand;
+    @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
+    @Shadow @Final private net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
-    @Shadow public WorldProvider provider;
     @Shadow protected WorldInfo worldInfo;
-    @Shadow public Random rand;
-    @Shadow public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow public Scoreboard worldScoreboard;
-    @Shadow public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow private net.minecraft.world.border.WorldBorder worldBorder;
-    @Shadow public List<EntityPlayer> playerEntities;
 
     @Shadow(prefix = "shadow$") public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow(prefix = "shadow$") public abstract EnumDifficulty shadow$getDifficulty();

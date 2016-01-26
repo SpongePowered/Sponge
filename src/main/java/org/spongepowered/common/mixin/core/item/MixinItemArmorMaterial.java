@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.item.ItemArmor;
 import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.data.type.ArmorType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ItemArmor.ArmorMaterial.class)
 public abstract class MixinItemArmorMaterial implements ArmorType {
 
-    @Shadow private String name;
+    @Shadow @Final private String name;
 
     // getName() end up replacing a method with the same signature in ArmorMaterial
     // at dev time. Since it's capitalized, the client becomes unable to retrieve

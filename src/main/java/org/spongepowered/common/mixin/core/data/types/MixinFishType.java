@@ -28,6 +28,7 @@ import net.minecraft.item.ItemFishFood;
 import org.spongepowered.api.data.type.CookedFish;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
@@ -38,7 +39,7 @@ import java.util.Optional;
 @Mixin(ItemFishFood.FishType.class)
 public abstract class MixinFishType implements Fish {
 
-    @Shadow private String unlocalizedName;
+    @Shadow @Final private String unlocalizedName;
     @Shadow private boolean cookable;
 
     private Translation translation;

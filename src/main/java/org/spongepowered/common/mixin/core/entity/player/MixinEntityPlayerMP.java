@@ -79,6 +79,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -126,10 +127,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
+    @Shadow @Final public MinecraftServer mcServer;
+    @Shadow @Final public ItemInWorldManager theItemInWorldManager;
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
-    @Shadow public MinecraftServer mcServer;
-    @Shadow public ItemInWorldManager theItemInWorldManager;
     @Shadow public int lastExperience;
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();

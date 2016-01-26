@@ -54,6 +54,7 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Lake;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -75,11 +76,11 @@ import java.util.Random;
 @Mixin(ChunkProviderGenerate.class)
 public abstract class MixinChunkProviderGenerate implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderGenerate {
 
+    @Shadow @Final private double[] field_147434_q;
+    @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow private net.minecraft.world.World worldObj;
-    @Shadow private double[] field_147434_q;
     @Shadow private Block field_177476_s;
     @Shadow private ChunkProviderSettings settings;
-    @Shadow private boolean mapFeaturesEnabled;
     @Shadow private Random rand;
 
     @Shadow private MapGenBase caveGenerator;

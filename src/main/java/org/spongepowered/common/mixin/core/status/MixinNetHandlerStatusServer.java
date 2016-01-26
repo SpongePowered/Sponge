@@ -30,6 +30,7 @@ import net.minecraft.network.status.client.C00PacketServerQuery;
 import net.minecraft.network.status.server.S00PacketServerInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerStatusServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,8 +40,8 @@ import org.spongepowered.common.network.status.SpongeStatusResponse;
 @Mixin(NetHandlerStatusServer.class)
 public abstract class MixinNetHandlerStatusServer {
 
-    @Shadow private MinecraftServer server;
-    @Shadow private NetworkManager networkManager;
+    @Shadow @Final private MinecraftServer server;
+    @Shadow @Final private NetworkManager networkManager;
 
     @Overwrite
     public void processServerQuery(C00PacketServerQuery packetIn) {

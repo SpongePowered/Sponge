@@ -34,6 +34,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinSubject;
@@ -44,7 +45,7 @@ import java.util.List;
 @Mixin(TileEntitySign.class)
 public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
-    @Shadow public IChatComponent[] signText;
+    @Shadow @Final public IChatComponent[] signText;
 
     @Override
     public DataContainer toContainer() {

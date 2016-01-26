@@ -29,6 +29,7 @@ import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 import net.minecraft.util.ChatComponentStyle;
 import net.minecraft.util.ChatComponentText;
 import org.spongepowered.api.text.LiteralText;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -38,7 +39,7 @@ import java.util.Locale;
 @Mixin(value = LiteralText.class, remap = false)
 public abstract class MixinTextLiteral extends MixinText {
 
-    @Shadow protected String content;
+    @Shadow @Final protected String content;
 
     @Override
     protected ChatComponentStyle createComponent() {

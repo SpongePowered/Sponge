@@ -28,6 +28,7 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.MinecraftFallingBlockDamageSource;
@@ -35,7 +36,7 @@ import org.spongepowered.common.event.MinecraftFallingBlockDamageSource;
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
 public abstract class MixinMinecraftFallingBlockDamageSource extends MixinEntityDamageSource implements FallingBlockDamageSource {
 
-    @Shadow(remap = false) private ImmutableFallingBlockData fallingBlockData;
+    @Shadow(remap = false) @Final private ImmutableFallingBlockData fallingBlockData;
 
     @Override
     public FallingBlock getSource() {

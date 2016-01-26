@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(IScoreObjectiveCriteria.EnumRenderType.class)
 public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
 
-    @Shadow public String field_178798_d;
+    @Shadow @Final public String field_178798_d;
 
     @Override
     public String getId() {

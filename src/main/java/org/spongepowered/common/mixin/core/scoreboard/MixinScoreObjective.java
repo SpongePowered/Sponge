@@ -29,6 +29,7 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.text.serializer.TextSerializers;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +45,7 @@ import org.spongepowered.common.text.SpongeTexts;
 @Mixin(ScoreObjective.class)
 public abstract class MixinScoreObjective implements IMixinScoreObjective {
 
-    @Shadow public Scoreboard theScoreboard;
+    @Shadow @Final public Scoreboard theScoreboard;
 
     public SpongeObjective spongeObjective;
 

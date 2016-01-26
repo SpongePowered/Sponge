@@ -30,6 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -71,8 +72,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     private static final String READ_PLAYER_DATA = "readPlayerData(Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/nbt/NBTTagCompound;";
     private static final String NBT_COMPOUND_SET = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;"
                                                    + "Lnet/minecraft/nbt/NBTBase;)V";
-    @Shadow private File worldDirectory;
-    @Shadow private long initializationTime;
+    @Shadow @Final private File worldDirectory;
+    @Shadow @Final private long initializationTime;
 
     @ModifyArg(method = "checkSessionLock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/MinecraftException;<init>(Ljava/lang/String;)V"
             , ordinal = 0, remap = false))

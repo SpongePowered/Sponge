@@ -33,6 +33,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -46,7 +47,7 @@ import java.util.Set;
 @Mixin(EntityPlayer.EnumChatVisibility.class)
 public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinEnumChatVisibility {
 
-    @Shadow private String resourceKey;
+    @Shadow @Final private String resourceKey;
     private String id;
     private Translation translation;
     private Set<ChatType> visibleChatTypes;

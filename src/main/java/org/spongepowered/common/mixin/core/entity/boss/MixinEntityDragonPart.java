@@ -28,6 +28,7 @@ import net.minecraft.entity.IEntityMultiPart;
 import net.minecraft.entity.boss.EntityDragonPart;
 import org.spongepowered.api.entity.living.complex.EnderDragon;
 import org.spongepowered.api.entity.living.complex.EnderDragonPart;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -35,7 +36,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin(EntityDragonPart.class)
 public abstract class MixinEntityDragonPart extends MixinEntity implements EnderDragonPart {
 
-    @Shadow public IEntityMultiPart entityDragonObj;
+    @Shadow @Final public IEntityMultiPart entityDragonObj;
 
     @Override
     public EnderDragon getParent() {

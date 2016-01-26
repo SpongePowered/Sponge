@@ -44,6 +44,7 @@ import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
@@ -62,8 +63,8 @@ import java.util.Optional;
 @Mixin(WorldType.class)
 public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
-    @Shadow private String worldType;
-    @Shadow private int worldTypeId;
+    @Shadow @Final private String worldType;
+    @Shadow @Final private int worldTypeId;
 
     @Override
     public String getId() {

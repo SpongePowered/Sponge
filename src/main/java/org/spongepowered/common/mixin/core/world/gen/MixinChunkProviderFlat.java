@@ -41,6 +41,7 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Lake;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -52,10 +53,10 @@ import java.util.List;
 @Mixin(ChunkProviderFlat.class)
 public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorProvider {
 
-    @Shadow private IBlockState[] cachedBlockIDs;
-    @Shadow private List structureGenerators;
-    @Shadow private boolean hasDecoration;
-    @Shadow private boolean hasDungeons;
+    @Shadow @Final private IBlockState[] cachedBlockIDs;
+    @Shadow @Final private List<MapGenStructure> structureGenerators;
+    @Shadow @Final private boolean hasDecoration;
+    @Shadow @Final private boolean hasDungeons;
     @Shadow private WorldGenLakes waterLakeGenerator;
     @Shadow private WorldGenLakes lavaLakeGenerator;
 

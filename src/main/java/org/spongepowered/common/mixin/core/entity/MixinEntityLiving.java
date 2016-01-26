@@ -44,6 +44,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.LeashEntityEvent;
 import org.spongepowered.api.event.entity.UnleashEntityEvent;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,14 +68,14 @@ import javax.annotation.Nullable;
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
+    @Shadow @Final private EntityAITasks tasks;
+    @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
     @Shadow private EntityLivingBase attackTarget;
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
-    @Shadow private EntityAITasks tasks;
-    @Shadow private EntityAITasks targetTasks;
 
     public boolean isAiEnabled() {
         return !isAIDisabled();

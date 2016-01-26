@@ -44,6 +44,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,10 +74,11 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
 
+    @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
+    @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
+
     @Shadow public abstract void updateBlockTick(BlockPos p_175654_1_, Block p_175654_2_, int p_175654_3_, int p_175654_4_);
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
-    @Shadow private Set<NextTickListEntry> pendingTickListEntriesHashSet;
-    @Shadow private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {

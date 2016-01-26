@@ -33,6 +33,6 @@ public interface IMixinServerScoreboard extends IMixinScoreboard {
 
     void removePlayer(EntityPlayerMP player);
 
-    void sendToPlayers(Packet packet);
+    void sendToPlayers(Packet<?> packet);
 
 }

@@ -40,6 +40,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,9 +57,9 @@ import java.util.Optional;
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLoginServer {
 
-    @Shadow private static Logger logger;
-    @Shadow public NetworkManager networkManager;
-    @Shadow private MinecraftServer server;
+    @Shadow @Final private static Logger logger;
+    @Shadow @Final public NetworkManager networkManager;
+    @Shadow @Final private MinecraftServer server;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
 
     @Shadow public abstract String getConnectionInfo();

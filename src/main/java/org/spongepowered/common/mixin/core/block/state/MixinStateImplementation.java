@@ -51,6 +51,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.util.Cycleable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -75,7 +76,7 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
 public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
 
-    @Shadow private Block block;
+    @Shadow @Final private Block block;
 
     private ImmutableSet<ImmutableValue<?>> values;
     private ImmutableSet<Key<?>> keys;
@@ -226,7 +227,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         } else {
             BlockState temp = this;
             for (ImmutableDataManipulator<?, ?> manipulator : that.getManipulators()) {
-                @Nullable ImmutableDataManipulator old = temp.get(manipulator.getClass()).orElse(null);
+                @Nullable ImmutableDataManipulator<?, ?> old = temp.get(manipulator.getClass()).orElse(null);
                 Optional<BlockState> optional = temp.with(checkNotNull(function.merge(old, manipulator)));
                 if (optional.isPresent()) {
                     temp = optional.get();

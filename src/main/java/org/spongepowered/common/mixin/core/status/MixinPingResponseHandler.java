@@ -33,6 +33,7 @@ import net.minecraft.network.PingResponseHandler;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +45,7 @@ import java.net.InetSocketAddress;
 @Mixin(PingResponseHandler.class)
 public abstract class MixinPingResponseHandler extends ChannelInboundHandlerAdapter {
 
-    @Shadow private static Logger logger;
+    @Shadow @Final private static Logger logger;
     @Shadow private NetworkSystem networkSystem;
 
     @Shadow abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);

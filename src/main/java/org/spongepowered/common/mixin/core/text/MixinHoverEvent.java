@@ -38,6 +38,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.statistic.achievement.Achievement;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
@@ -49,8 +50,8 @@ import java.util.UUID;
 @Mixin(HoverEvent.class)
 public abstract class MixinHoverEvent implements IMixinHoverEvent {
 
-    @Shadow private HoverEvent.Action action;
-    @Shadow private IChatComponent value;
+    @Shadow @Final private HoverEvent.Action action;
+    @Shadow @Final private IChatComponent value;
 
     private HoverAction<?> handle;
     private boolean initialized;
