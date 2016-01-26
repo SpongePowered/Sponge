@@ -40,6 +40,8 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -47,7 +49,9 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -73,6 +77,7 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -543,5 +548,37 @@ public class SpongeCommonEventFactory {
         SpongeImpl.postEvent(event);
         StaticMixinHelper.processingInternalForgeEvent = false;
         return event;
+    }
+ 
+    public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, ProjectileSource projectileSource, MovingObjectPosition
+            movingObjectPosition) {
+        MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
+        Cause cause = Cause.of(projectile, projectileSource);
+        IMixinEntity spongeEntity = (IMixinEntity) projectile;
+        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
+             cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+        }
+
+        Location<World> impactPoint = new Location<World>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));
+
+        if (movingObjectType == MovingObjectType.BLOCK) {
+            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector(movingObjectPosition.getBlockPos()));
+            Direction side = Direction.NONE;
+            if (movingObjectPosition.sideHit != null) {
+                side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
+            }
+
+            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(cause, impactPoint, targetBlock.getState(), targetBlock.getLocation().get(), side);
+            return SpongeImpl.postEvent(event);
+        } else if (movingObjectPosition.entityHit != null) { // entity
+            ImmutableList.Builder<Entity> entityBuilder = new ImmutableList.Builder<>();
+            ArrayList<Entity> entityList = new ArrayList<>();
+            entityList.add((Entity) movingObjectPosition.entityHit);
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityBuilder.add((Entity) movingObjectPosition.entityHit).build(), entityList, impactPoint, (World) projectile.worldObj);
+            return SpongeImpl.postEvent(event);
+        }
+
+        return false;
     }
 }
