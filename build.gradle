@@ -23,8 +23,8 @@ buildscript {
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
-        classpath 'org.spongepowered:spongegradle:0.2-SNAPSHOT'
-        classpath 'org.spongepowered:mixingradle:0.2-SNAPSHOT'
+        classpath 'org.spongepowered:spongegradle:0.3.1-SNAPSHOT'
+        classpath 'org.spongepowered:mixingradle:0.3-SNAPSHOT'
     }
 }
 
@@ -50,7 +50,7 @@ minecraft {
 
 dependencies {
     compile api
-    compile('org.spongepowered:mixin:0.4.14-SNAPSHOT') {
+    compile('org.spongepowered:mixin:0.4.17-SNAPSHOT') {
         exclude module: 'launchwrapper'
         exclude module: 'guava'
     }
@@ -63,7 +63,7 @@ dependencies {
     // Database connectors
     compile 'com.zaxxer:HikariCP:2.4.3'
     runtime 'org.mariadb.jdbc:mariadb-java-client:1.3.4'
-    runtime 'com.h2database:h2:1.4.190'
+    runtime 'com.h2database:h2:1.4.191'
     runtime 'org.xerial:sqlite-jdbc:3.8.11.2'
 }
 
