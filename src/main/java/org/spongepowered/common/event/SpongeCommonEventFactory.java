@@ -113,7 +113,7 @@ public class SpongeCommonEventFactory {
     // Create Sponge Events
 
     public static ChangeInventoryEvent.Held callChangeInventoryHeldEvent(EntityPlayerMP player,
-            C09PacketHeldItemChange packetIn) {
+                                                                         C09PacketHeldItemChange packetIn) {
         Slot sourceSlot = player.inventoryContainer.getSlot(player.inventory.currentItem + player.inventory.mainInventory.length);
         Slot targetSlot = player.inventoryContainer.getSlot(packetIn.getSlotId() + player.inventory.mainInventory.length);
         if (sourceSlot == null || targetSlot == null) {
@@ -139,18 +139,7 @@ public class SpongeCommonEventFactory {
         if (event.isCancelled()) {
             player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
         } else {
-            for (SlotTransaction slotTransaction : event.getTransactions()) {
-                if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
-                    Slot currentSlot = (net.minecraft.inventory.Slot) slotTransaction.getSlot();
-                    ItemStack customStack =
-                            slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
-                                    .getFinal().createStack();
-                    currentSlot.putStack(customStack);
-                    player.playerNetServerHandler
-                            .sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, currentSlot.slotNumber, customStack));
-                }
-            }
-
+            handleCustomSlot(player, event.getTransactions());
             player.inventory.currentItem = packetIn.getSlotId();
             player.markPlayerActive();
         }
@@ -161,7 +150,7 @@ public class SpongeCommonEventFactory {
     public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet packetIn) {
         if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
                 || (packetIn instanceof C16PacketClientStatus
-                        && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
+                && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
@@ -175,12 +164,7 @@ public class SpongeCommonEventFactory {
             } else {
                 // Custom cursor
                 if (event.getCursorTransaction().getCustom().isPresent()) {
-                    ItemStack cursor =
-                            event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
-                                            .createStack();
-                    player.inventory.setItemStack(cursor);
-                    player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+                    handleCustomCursor(player, event.getCursorTransaction().getFinal());
                 }
             }
         } else if (player.openContainer instanceof ContainerPlayer && !(StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)) {
@@ -209,12 +193,7 @@ public class SpongeCommonEventFactory {
             } else {
                 // Custom cursor
                 if (event.getCursorTransaction().getCustom().isPresent()) {
-                    ItemStack cursor =
-                            event.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                    : (net.minecraft.item.ItemStack) event.getCursorTransaction().getFinal()
-                                            .createStack();
-                    player.inventory.setItemStack(cursor);
-                    player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+                    handleCustomCursor(player, event.getCursorTransaction().getFinal());
                 }
             }
         }
@@ -258,45 +237,16 @@ public class SpongeCommonEventFactory {
             }
 
             // Restore cursor
-            ItemStack cursor =
-                    ((ClickInventoryEvent) event).getCursorTransaction().getOriginal() == ItemStackSnapshot.NONE ? null
-                            : (net.minecraft.item.ItemStack) ((ClickInventoryEvent) event).getCursorTransaction().getOriginal()
-                                    .createStack();
-            player.inventory.setItemStack(cursor);
-            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+            handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getOriginal());
 
             // Restore target slots
-            Iterator<SlotTransaction> iterator = event.getTransactions().iterator();
-            while (iterator.hasNext()) {
-                SlotTransaction slotTransaction = iterator.next();
-                Slot slot = (net.minecraft.inventory.Slot) slotTransaction.getSlot();
-                ItemStack originalStack =
-                        slotTransaction.getOriginal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
-                                .getOriginal().createStack();
-                slot.putStack(originalStack);
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, originalStack));
-                iterator.remove();
-            }
+            handleSlotRestore(player, event.getTransactions());
         } else {
-            for (SlotTransaction slotTransaction : event.getTransactions()) {
-                if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
-                    Slot slot = (net.minecraft.inventory.Slot) slotTransaction.getSlot();
-                    ItemStack customStack =
-                            slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
-                                    .getFinal().createStack();
-                    slot.putStack(customStack);
-                    player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, customStack));
-                }
-            }
+            handleCustomSlot(player, event.getTransactions());
 
             // Custom cursor
             if (((ClickInventoryEvent) event).getCursorTransaction().getCustom().isPresent()) {
-                ItemStack cursor =
-                        ((ClickInventoryEvent) event).getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) ((ClickInventoryEvent) event).getCursorTransaction().getFinal()
-                                        .createStack();
-                player.inventory.setItemStack(cursor);
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+                handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getFinal());
             }
         }
 
@@ -427,12 +377,7 @@ public class SpongeCommonEventFactory {
             }
 
             // Restore cursor
-            ItemStack cursor =
-                    clickEvent.getCursorTransaction().getOriginal() == ItemStackSnapshot.NONE ? null
-                            : (net.minecraft.item.ItemStack) clickEvent.getCursorTransaction().getOriginal()
-                                    .createStack();
-            player.inventory.setItemStack(cursor);
-            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+            handleCustomCursor(player, clickEvent.getCursorTransaction().getOriginal());
 
             if (clickEvent instanceof ClickInventoryEvent.Double) {
                 clickEvent.getTransactions().clear();
@@ -440,46 +385,65 @@ public class SpongeCommonEventFactory {
             }
 
             // Restore target slots
-            Iterator<SlotTransaction> iterator = clickEvent.getTransactions().iterator();
-            while (iterator.hasNext()) {
-                SlotTransaction slotTransaction = iterator.next();
-                Slot slot = (net.minecraft.inventory.Slot) slotTransaction.getSlot();
-                ItemStack originalStack =
-                        slotTransaction.getOriginal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
-                                .getOriginal().createStack();
-                slot.putStack(originalStack);
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(packetIn.getWindowId(), slot.slotNumber, originalStack));
-                iterator.remove();
-            }
+            handleSlotRestore(player, clickEvent.getTransactions());
         } else {
-            for (SlotTransaction slotTransaction : clickEvent.getTransactions()) {
-                if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
-                    Slot slot = (net.minecraft.inventory.Slot) slotTransaction.getSlot();
-                    ItemStack customStack =
-                            slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
-                                    .getFinal().createStack();
-                    slot.putStack(customStack);
-                    player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(packetIn.getWindowId(), slot.slotNumber, customStack));
-                }
-            }
+            handleCustomSlot(player, clickEvent.getTransactions());
 
             // Custom cursor
             if (clickEvent.getCursorTransaction().getCustom().isPresent()) {
-                ItemStack cursor =
-                        clickEvent.getCursorTransaction().getFinal() == ItemStackSnapshot.NONE ? null
-                                : (net.minecraft.item.ItemStack) clickEvent.getCursorTransaction().getFinal()
-                                        .createStack();
-                player.inventory.setItemStack(cursor);
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+                handleCustomCursor(player, clickEvent.getCursorTransaction().getFinal());
             }
         }
 
         ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
     }
 
+    private static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
+            ItemStack originalStack =
+                    slotTransaction.getOriginal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
+                            .getOriginal().createStack();
+            if (originalStack == null) {
+                slot.clear();
+            } else {
+                slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
+            }
+
+            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.getOrdinal(), originalStack));
+        }
+    }
+
+    private static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
+        ItemStack cursor =
+                customCursor == ItemStackSnapshot.NONE ? null
+                        : (net.minecraft.item.ItemStack) customCursor
+                        .createStack();
+        player.inventory.setItemStack(cursor);
+        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+    }
+
+    private static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
+                SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
+                ItemStack customStack =
+                        slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
+                                .getFinal().createStack();
+                if (customStack == null) {
+                    slot.clear();
+                } else {
+                    slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
+                }
+
+                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.getOrdinal(), customStack));
+            }
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, net.minecraft.entity.Entity sourceEntity,
-            List<net.minecraft.entity.Entity> entities) {
+                                                            List<net.minecraft.entity.Entity> entities) {
         Cause cause = null;
         if (sourceEntity != null) {
             cause = Cause.of(NamedCause.source(sourceEntity));
