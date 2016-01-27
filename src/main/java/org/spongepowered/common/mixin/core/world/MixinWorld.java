@@ -1014,17 +1014,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            // check to see if this drop is invalid and if so, remove
-            boolean invalid = false;
-            for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
-                if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
-                    invalid = true;
-                    iter.remove();
-                    break;
+            if (invalidTransactions != null) {
+                // check to see if this drop is invalid and if so, remove
+                boolean invalid = false;
+                for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
+                    if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
+                        invalid = true;
+                        iter.remove();
+                        break;
+                    }
                 }
-            }
-            if (invalid) {
-                continue;
+                if (invalid) {
+                    continue;
+                }
             }
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
@@ -1101,17 +1103,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            // check to see if this spawn is invalid and if so, remove
-            boolean invalid = false;
-            for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
-                if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
-                    invalid = true;
-                    iter.remove();
-                    break;
+            if (invalidTransactions != null) {
+                // check to see if this spawn is invalid and if so, remove
+                boolean invalid = false;
+                for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
+                    if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
+                        invalid = true;
+                        iter.remove();
+                        break;
+                    }
                 }
-            }
-            if (invalid) {
-                continue;
+                if (invalid) {
+                    continue;
+                }
             }
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
