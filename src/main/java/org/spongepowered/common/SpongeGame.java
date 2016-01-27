@@ -34,6 +34,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
@@ -65,17 +66,19 @@ public abstract class SpongeGame implements Game {
     private final TeleportHelper teleportHelper;
     private final ConfigManager configManager;
     private final CommandManager commandManager;
+    private final ChannelRegistrar channelRegistrar;
 
     private GameState state = GameState.CONSTRUCTION;
 
     protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry,
-            ServiceManager serviceManager, TeleportHelper teleportHelper, Logger logger) {
+            ServiceManager serviceManager, TeleportHelper teleportHelper, ChannelRegistrar channelRegistrar, Logger logger) {
         this.platform = checkNotNull(platform, "platform");
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
         this.eventManager = checkNotNull(eventManager, "eventManager");
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
+        this.channelRegistrar = checkNotNull(channelRegistrar, "channelRegistrar");
         this.configManager = new SpongeConfigManager();
         this.commandManager = new SpongeCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
 
@@ -114,6 +117,11 @@ public abstract class SpongeGame implements Game {
     @Override
     public TeleportHelper getTeleportHelper() {
         return this.teleportHelper;
+    }
+
+    @Override
+    public ChannelRegistrar getChannelRegistrar() {
+        return this.channelRegistrar;
     }
 
     @Override
