@@ -1051,14 +1051,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     /**
      * @author gabizou - January 4th, 2016
+     * @updated gabizou - January 27th, 2016 - Rewrite to a redirect
      *
      * This prevents sounds from being sent to the server by entities that are invisible
      */
-    @Overwrite
-    public void playSound(String name, float volume, float pitch) {
-        if (!this.isReallyInvisible || !this.isSilent()) {
-            this.worldObj.playSoundAtEntity((net.minecraft.entity.Entity) (Object) this, name, volume, pitch);
-        }
+    @Redirect(method = "playSound(Ljava/lang/String;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+    public boolean playSound(net.minecraft.entity.Entity entity) {
+        return entity.isSilent() || this.isReallyInvisible;
     }
 
     @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
