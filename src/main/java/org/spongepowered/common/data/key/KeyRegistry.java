@@ -27,6 +27,7 @@ package org.spongepowered.common.data.key;
 import static org.spongepowered.api.data.DataQuery.of;
 import static org.spongepowered.api.data.key.KeyFactory.makeListKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeMapKey;
+import static org.spongepowered.api.data.key.KeyFactory.makeOptionalKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
@@ -80,7 +81,6 @@ import org.spongepowered.api.data.value.BoundedValue;
 import org.spongepowered.api.data.value.immutable.ImmutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
-import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -150,7 +150,7 @@ public class KeyRegistry {
         keyMap.put("command", makeSingleKey(String.class, Value.class, of("Command")));
         keyMap.put("success_count", makeSingleKey(Integer.class, Value.class, of("SuccessCount")));
         keyMap.put("tracks_output", makeSingleKey(Boolean.class, Value.class, of("TracksOutput")));
-        keyMap.put("last_command_output", makeSingleKey(Text.class, OptionalValue.class, of("LastCommandOutput")));
+        keyMap.put("last_command_output", makeOptionalKey(Text.class, of("LastCommandOutput")));
         keyMap.put("trade_offers", makeListKey(TradeOffer.class, of("TradeOffers")));
         keyMap.put("dye_color", makeSingleKey(DyeColor.class, Value.class, of("DyeColor")));
         keyMap.put("firework_flight_modifier", makeSingleKey(Integer.class, BoundedValue.class, of("FlightModifier")));
@@ -191,7 +191,7 @@ public class KeyRegistry {
         keyMap.put("is_sitting", makeSingleKey(Boolean.class, Value.class, of("IsSitting")));
         keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));
         keyMap.put("pig_saddle", makeSingleKey(Boolean.class, Value.class, of("IsPigSaddled")));
-        keyMap.put("tamed_owner", makeSingleKey(UUID.class, OptionalValue.class, of("TamerUUID")));
+        keyMap.put("tamed_owner", makeOptionalKey(UUID.class, of("TamerUUID")));
         keyMap.put("is_wet", makeSingleKey(Boolean.class, Value.class, of("IsWet")));
         keyMap.put("elder_guardian", makeSingleKey(Boolean.class, Value.class, of("Elder")));
         keyMap.put("coal_type", makeSingleKey(CoalType.class, Value.class, of("CoalType")));
