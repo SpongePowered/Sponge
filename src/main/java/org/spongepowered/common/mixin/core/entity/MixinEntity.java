@@ -77,6 +77,7 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -1055,8 +1056,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      *
      * This prevents sounds from being sent to the server by entities that are invisible
      */
-    @Redirect(method = "playSound(Ljava/lang/String;II)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
-    public boolean playSound(net.minecraft.entity.Entity entity) {
+    @Redirect(method = "playSound(Ljava/lang/String;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+    public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
         return entity.isSilent() || this.isReallyInvisible;
     }
 
