@@ -1532,11 +1532,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<Chunk> getChunk(Vector3i position) {
-        return getChunk(position.getX(), position.getY(), position.getZ());
-    }
-
-    @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {
             return Optional.empty();

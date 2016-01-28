@@ -24,14 +24,8 @@
  */
 package org.spongepowered.common.world.storage;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.storage.ChunkLayout;
-
-import java.util.Optional;
 
 public final class SpongeChunkLayout implements ChunkLayout {
 
@@ -71,32 +65,9 @@ public final class SpongeChunkLayout implements ChunkLayout {
     }
 
     @Override
-    public boolean isValidChunk(Vector3i coords) {
-        checkNotNull(coords, "coords");
-        return isValidChunk(coords.getX(), coords.getY(), coords.getZ());
-    }
-
-    @Override
-    public boolean isValidChunk(int x, int y, int z) {
-        return x >= SPACE_MIN.getX() && x <= SPACE_MAX.getX()
-                && y >= SPACE_MIN.getY() && y <= SPACE_MAX.getY()
-                && z >= SPACE_MIN.getZ() && z <= SPACE_MAX.getZ();
-    }
-
-    @Override
-    public boolean isInChunk(Vector3i localCoords) {
-        return isInChunk(localCoords.getX(), localCoords.getY(), localCoords.getZ());
-    }
-
-    @Override
     public boolean isInChunk(int x, int y, int z) {
         // no bits allowed outside the mask!
         return (x & ~CHUNK_MASK.getX()) == 0 && (y & ~CHUNK_MASK.getY()) == 0 && (z & ~CHUNK_MASK.getZ()) == 0;
-    }
-
-    @Override
-    public boolean isInChunk(Vector3i worldCoords, Vector3i chunkCoords) {
-        return isInChunk(worldCoords.getX(), worldCoords.getY(), worldCoords.getZ(), chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ());
     }
 
     @Override
@@ -105,60 +76,13 @@ public final class SpongeChunkLayout implements ChunkLayout {
     }
 
     @Override
-    public Optional<Vector3i> toChunk(Vector3i worldCoords) {
-        checkNotNull(worldCoords, "worldCoords");
-        return toChunk(worldCoords.getX(), worldCoords.getY(), worldCoords.getZ());
+    public Vector3i forceToChunk(int x, int y, int z) {
+        return new Vector3i(x >> 4, y >> 8, z >> 4);
     }
 
     @Override
-    public Optional<Vector3i> toChunk(int x, int y, int z) {
-        final Vector3i chunkCoords = new Vector3i(x >> 4, y >> 8, z >> 4);
-        return isValidChunk(chunkCoords) ? Optional.of(chunkCoords) : Optional.<Vector3i>empty();
-    }
-
-    @Override
-    public Optional<Vector3i> toWorld(Vector3i chunkCoords) {
-        checkNotNull(chunkCoords, "chunkCoords");
-        return toWorld(chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ());
-    }
-
-    @Override
-    public Optional<Vector3i> toWorld(int x, int y, int z) {
-        return isValidChunk(x, y, z) ? Optional.of(new Vector3i(x << 4, 0, z << 4)) : Optional.<Vector3i>empty();
-    }
-
-    @Override
-    public Optional<Vector3i> addToChunk(Vector3i chunkCoords, Vector3i chunkOffset) {
-        checkNotNull(chunkCoords, "chunkCoords");
-        checkNotNull(chunkOffset, "chunkOffset");
-        return addToChunk(chunkCoords.getX(), chunkCoords.getY(), chunkCoords.getZ(), chunkOffset.getX(), chunkOffset.getY(), chunkOffset.getZ());
-    }
-
-    @Override
-    public Optional<Vector3i> addToChunk(int cx, int cy, int cz, int ox, int oy, int oz) {
-        final Vector3i newChunkCoords = new Vector3i(cx + ox, cy + oy, cz + oz);
-        return isValidChunk(newChunkCoords) ? Optional.of(newChunkCoords) : Optional.<Vector3i>empty();
-    }
-
-    @Override
-    public Optional<Vector3i> moveToChunk(int x, int y, int z, Direction direction) {
-        return moveToChunk(new Vector3i(x, y, z), direction);
-    }
-
-    @Override
-    public Optional<Vector3i> moveToChunk(Vector3i chunkCoords, Direction direction) {
-        return moveToChunk(chunkCoords, direction, 1);
-    }
-
-    @Override
-    public Optional<Vector3i> moveToChunk(int x, int y, int z, Direction direction, int steps) {
-        return moveToChunk(new Vector3i(x, y, z), direction, steps);
-    }
-
-    @Override
-    public Optional<Vector3i> moveToChunk(Vector3i chunkCoords, Direction direction, int steps) {
-        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
-        return addToChunk(chunkCoords, direction.toVector3d().ceil().toInt().mul(steps));
+    public Vector3i forceToWorld(int x, int y, int z) {
+        return new Vector3i(x << 4, y << 8, z << 4);
     }
 
 }
