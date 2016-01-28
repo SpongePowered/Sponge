@@ -79,7 +79,7 @@ public interface IMixinWorld {
 
     void handlePostTickCaptures(Cause cause);
 
-    void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions, boolean destructItems);
+    void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions);
 
     void setProcessingCaptureCause(boolean flag);
 

@@ -26,7 +26,6 @@ package org.spongepowered.common.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -43,6 +42,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -239,13 +239,15 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_ROTATION, DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
+        if (!container.contains(Queries.WORLD_ID, DataQueries.ENTITY_TYPE, DataQueries.ENTITY_ROTATION, DataQueries.ENTITY_SCALE, DataQueries.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
         this.worldId = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         this.position = DataUtil.getPosition3d(container);
         this.rotation = DataUtil.getPosition3d(container, DataQueries.ENTITY_ROTATION);
         this.scale = DataUtil.getPosition3d(container, DataQueries.ENTITY_SCALE);
+        final String entityTypeId = container.getString(DataQueries.ENTITY_TYPE).get();
+        this.entityType = SpongeImpl.getRegistry().getType(EntityType.class, entityTypeId).get();
 
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             this.manipulators = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());

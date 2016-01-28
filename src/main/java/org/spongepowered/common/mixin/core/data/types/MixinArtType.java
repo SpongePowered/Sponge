@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.entity.item.EntityPainting;
 import org.spongepowered.api.data.type.Art;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -34,9 +35,9 @@ public abstract class MixinArtType implements Art {
 
     private static final int PIXELS_PER_BLOCK = 16;
 
-    @Shadow public String title;
-    @Shadow public int sizeX;
-    @Shadow public int sizeY;
+    @Shadow @Final public String title;
+    @Shadow @Final public int sizeX;
+    @Shadow @Final public int sizeY;
 
     @Override
     public String getId() {

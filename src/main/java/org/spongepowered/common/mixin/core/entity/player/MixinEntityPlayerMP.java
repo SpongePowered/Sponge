@@ -32,8 +32,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
@@ -77,6 +79,7 @@ import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -102,6 +105,7 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -123,10 +127,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
+    @Shadow @Final public MinecraftServer mcServer;
+    @Shadow @Final public ItemInWorldManager theItemInWorldManager;
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
-    @Shadow public MinecraftServer mcServer;
-    @Shadow public ItemInWorldManager theItemInWorldManager;
     @Shadow public int lastExperience;
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
@@ -159,8 +163,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
         if (world.getCapturedEntityItems().size() > 0) {
+            StaticMixinHelper.destructItemDrop = true;
             world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)),
-                (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null, true);
+                (List<org.spongepowered.api.entity.Entity>) (List<?>) world.getCapturedEntityItems(), null);
+            StaticMixinHelper.destructItemDrop = false;
         }
     }
 
@@ -514,4 +520,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return false; // Suppress death messages since this is handled together with the event calling
     }
 
+    @Override
+    public void resetAttributeMap() {
+        // The name is wrong - it's used on the client and server
+        this.attributeMap = new ServersideAttributeMap();
+        this.applyEntityAttributes();
+
+        // Re-create the array, so that attributes are properly re-added
+        this.previousEquipment = new ItemStack[5];
+    }
 }

@@ -78,6 +78,7 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -935,19 +936,24 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
-            return;
-        } else if (world.isRemote) {
+        if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, entity);
             return;
         }
 
+        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
         if (entity instanceof EntityPlayer) {
             StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
+        } else {
+            IMixinEntity spongeEntity = (IMixinEntity) entity;
+            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (user.isPresent()) {
+                cause = cause.with(NamedCause.owner(user.get()));
+            }
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
         SpongeImpl.postEvent(event);
 
         if (!event.isCancelled()) {
@@ -958,19 +964,24 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
-            return;
-        } else if (world.isRemote) {
+        if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
             return;
         }
 
+        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
         if (entity instanceof EntityPlayer) {
             StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
+        } else {
+            IMixinEntity spongeEntity = (IMixinEntity) entity;
+            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (user.isPresent()) {
+                cause = cause.with(NamedCause.owner(user.get()));
+            }
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent( Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
         SpongeImpl.postEvent(event);
 
         if (!event.isCancelled()) {
@@ -1044,14 +1055,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     /**
      * @author gabizou - January 4th, 2016
+     * @updated gabizou - January 27th, 2016 - Rewrite to a redirect
      *
      * This prevents sounds from being sent to the server by entities that are invisible
      */
-    @Overwrite
-    public void playSound(String name, float volume, float pitch) {
-        if (!this.isReallyInvisible || !this.isSilent()) {
-            this.worldObj.playSoundAtEntity((net.minecraft.entity.Entity) (Object) this, name, volume, pitch);
-        }
+    @Redirect(method = "playSound(Ljava/lang/String;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+    public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
+        return entity.isSilent() || this.isReallyInvisible;
     }
 
     @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))

@@ -332,6 +332,12 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(JoinData.class, SpongeJoinData.class, ImmutableJoinData.class, ImmutableSpongeJoinData.class,
                 new JoinDataProcessor());
 
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new EntityPotionDataProcessor());
+
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -408,6 +414,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(FluidItemData.class, SpongeFluidItemData.class, ImmutableFluidItemData.class,
                 ImmutableSpongeFluidItemData.class, new FluidItemDataProcessor());
+
+        dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
+                ImmutableSpongePotionEffectData.class, new ItemPotionDataProcessor());
 
         // Block Processors
 
@@ -586,6 +595,10 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
                 ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleDualProcessor());
 
+        final HideDataProcessor hideDataProcessor = new HideDataProcessor();
+        dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
+                hideDataProcessor);
+
         // Values
 
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -649,6 +662,12 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DYE_COLOR, new ItemDyeColorValueProcessor());
         dataManager.registerValueProcessor(Keys.FIRST_DATE_PLAYED, new FirstJoinValueProcessor());
         dataManager.registerValueProcessor(Keys.LAST_DATE_PLAYED, new LastPlayedValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_ENCHANTMENTS, new HideEnchantmentsValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_ATTRIBUTES, new HideAttributesValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_UNBREAKABLE, new HideUnbreakableValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
+        dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

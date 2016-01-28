@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.command;
 
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
@@ -33,7 +34,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 @Mixin(targets = IMixinCommandSender.COMMAND_BLOCK_SENDER)
 public abstract class MixinBlockCommandBlockSender implements IMixinCommandSender {
 
-    @Shadow(aliases = {"field_145767_a", "this$0"}) private TileEntityCommandBlock commandBlock;
+    @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock commandBlock;
 
     @Override
     public CommandSource asCommandSource() {

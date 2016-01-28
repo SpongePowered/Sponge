@@ -34,6 +34,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.player.SpongeUser;
@@ -44,7 +45,7 @@ import java.util.Optional;
 @Mixin(value = SpongeUser.class, remap = false)
 public abstract class MixinSpongeUser implements User, IMixinSubject {
 
-    @Shadow private com.mojang.authlib.GameProfile profile;
+    @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
     @Override
     public GameProfile getProfile() {

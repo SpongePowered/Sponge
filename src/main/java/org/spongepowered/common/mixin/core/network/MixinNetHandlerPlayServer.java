@@ -75,6 +75,7 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -102,10 +103,10 @@ import java.util.Set;
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
-    @Shadow private static Logger logger;
-    @Shadow public NetworkManager netManager;
+    @Shadow @Final private static Logger logger;
+    @Shadow @Final public NetworkManager netManager;
+    @Shadow @Final private MinecraftServer serverController;
     @Shadow public EntityPlayerMP playerEntity;
-    @Shadow private MinecraftServer serverController;
     @Shadow private IntHashMap field_147372_n;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);

@@ -37,6 +37,7 @@ import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,13 +56,12 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
-    @Shadow
-    MinecraftServer scoreboardMCServer;
+    @Shadow @Final private MinecraftServer scoreboardMCServer;
 
     private List<EntityPlayerMP> players = new ArrayList<>();
 
     @Override
-    public void sendToPlayers(Packet packet) {
+    public void sendToPlayers(Packet<?> packet) {
         for (EntityPlayerMP player: this.players) {
             player.playerNetServerHandler.sendPacket(packet);
         }

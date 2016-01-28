@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Team.EnumVisible.class)
 public abstract class MixinEnumVisible implements Visibility {
 
-    @Shadow public String internalName;
+    @Shadow @Final public String internalName;
 
     @Override
     public String getId() {

@@ -28,18 +28,22 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityFireball.class)
 public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
 
     @Shadow public EntityLivingBase shootingEntity;
-    @Shadow protected abstract void onImpact(MovingObjectPosition p_70227_1_);
+    @Shadow protected abstract void onImpact(MovingObjectPosition movingObjectPosition);
 
     private ProjectileSource projectileSource = null;
 
@@ -82,4 +86,15 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
     }
 
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/MovingObjectPosition;)V"))
+    public void onProjectileImpact(EntityFireball projectile, MovingObjectPosition movingObjectPosition) {
+        if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == MovingObjectType.MISS) {
+            this.onImpact(movingObjectPosition);
+            return;
+        }
+
+        if (!SpongeCommonEventFactory.handleImpactEvent(projectile, this.projectileSource, movingObjectPosition)) {
+            this.onImpact(movingObjectPosition);
+        }
+    }
 }

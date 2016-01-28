@@ -85,6 +85,13 @@ public final class DataConstants {
     public static final int DEFAULT_FIRE_TICKS = 10;
     public static final int MINIMUM_FIRE_TICKS = 1;
 
+    public static final int HIDE_MISCELLANEOUS_FLAG = 32;
+    public static final int HIDE_CAN_PLACE_FLAG = 16;
+    public static final int HIDE_CAN_DESTROY_FLAG = 8;
+    public static final int HIDE_UNBREAKABLE_FLAG = 4;
+    public static final int HIDE_ATTRIBUTES_FLAG = 2;
+    public static final int HIDE_ENCHANTMENTS_FLAG = 1;
+
     public static final double DEFAULT_FLYING_SPEED = 0.05D;
 
     public static final double DEFAULT_EXHAUSTION = 0;

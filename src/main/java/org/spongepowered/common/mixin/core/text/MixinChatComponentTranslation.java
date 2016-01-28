@@ -28,6 +28,7 @@ import com.google.common.collect.Iterators;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
@@ -40,10 +41,10 @@ import java.util.List;
 @Mixin(ChatComponentTranslation.class)
 public abstract class MixinChatComponentTranslation extends MixinChatComponentStyle {
 
-    @Shadow private String key;
-    @Shadow private Object[] formatArgs;
-
+    @Shadow @Final private String key;
+    @Shadow @Final private Object[] formatArgs;
     @Shadow List<IChatComponent> children;
+
     @Shadow abstract void ensureInitialized();
 
     @Override

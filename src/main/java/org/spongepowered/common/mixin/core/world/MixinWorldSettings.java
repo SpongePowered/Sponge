@@ -36,6 +36,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -69,11 +70,11 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     private boolean isMod;
     private boolean fromBuilder;
 
-    @Shadow private long seed;
-    @Shadow private WorldSettings.GameType theGameType;
-    @Shadow private boolean mapFeaturesEnabled;
-    @Shadow private boolean hardcoreEnabled;
-    @Shadow private WorldType terrainType;
+    @Shadow @Final private long seed;
+    @Shadow @Final private WorldSettings.GameType theGameType;
+    @Shadow @Final private boolean mapFeaturesEnabled;
+    @Shadow @Final private boolean hardcoreEnabled;
+    @Shadow @Final private WorldType terrainType;
     @Shadow private boolean commandsAllowed;
     @Shadow private boolean bonusChestEnabled;
 

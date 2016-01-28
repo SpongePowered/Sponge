@@ -379,6 +379,8 @@ public abstract class MixinServerConfigurationManager {
         // update to safe location
         toTransform = toTransform.setLocation(location);
 
+        ((IMixinEntityPlayerMP) playerIn).resetAttributeMap();
+
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
                 SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
@@ -428,6 +430,7 @@ public abstract class MixinServerConfigurationManager {
         final MutableBoundedValue<Double> maxHealth = ((Player) playerIn).maxHealth();
         final MutableBoundedValue<Integer> food = ((Player) playerIn).foodLevel();
         final MutableBoundedValue<Double> saturation = ((Player) playerIn).saturation();
+
         playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(1.0F);
         playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth.get().floatValue());
         playerIn.playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));

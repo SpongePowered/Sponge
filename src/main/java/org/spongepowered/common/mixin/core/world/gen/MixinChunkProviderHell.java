@@ -36,6 +36,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -46,10 +47,10 @@ import java.util.Random;
 @Mixin(ChunkProviderHell.class)
 public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow private boolean field_177466_i;
-    @Shadow public Random hellRNG;
-    @Shadow private MapGenNetherBridge genNetherBridge;
-    @Shadow private MapGenBase netherCaveGenerator;
+    @Shadow @Final private boolean field_177466_i;
+    @Shadow @Final public Random hellRNG;
+    @Shadow @Final private MapGenNetherBridge genNetherBridge;
+    @Shadow @Final private MapGenBase netherCaveGenerator;
 
     @Shadow
     public abstract void func_180515_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);

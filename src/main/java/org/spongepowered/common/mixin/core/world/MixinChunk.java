@@ -67,6 +67,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -121,18 +122,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Vector2i biomeMin;
     private Vector2i biomeMax;
 
-    @Shadow private World worldObj;
-    @Shadow public int xPosition;
-    @Shadow public int zPosition;
+    @Shadow @Final private World worldObj;
+    @Shadow @Final public int xPosition;
+    @Shadow @Final public int zPosition;
+    @Shadow @Final private ExtendedBlockStorage[] storageArrays;
+    @Shadow @Final private int[] precipitationHeightMap;
+    @Shadow @Final private int[] heightMap;
+    @Shadow @Final private ClassInheritanceMultiMap<Entity>[] entityLists;
+    @Shadow @Final private Map<BlockPos, TileEntity> chunkTileEntityMap;
     @Shadow private long inhabitedTime;
     @Shadow private boolean isChunkLoaded;
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
-    @Shadow private ExtendedBlockStorage[] storageArrays;
-    @Shadow private int[] precipitationHeightMap;
-    @Shadow private int[] heightMap;
-    @Shadow private ClassInheritanceMultiMap[] entityLists;
-    @Shadow private Map<BlockPos, TileEntity> chunkTileEntityMap;
 
     @Shadow public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();

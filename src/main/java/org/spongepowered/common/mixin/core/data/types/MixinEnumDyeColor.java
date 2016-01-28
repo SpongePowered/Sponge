@@ -28,6 +28,7 @@ import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Color;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,8 +39,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = DyeColor.class, prefix = "dye$"))
 public abstract class MixinEnumDyeColor implements DyeColor {
 
-    @Shadow private String name;
-    @Shadow private String unlocalizedName;
+    @Shadow @Final private String name;
+    @Shadow @Final private String unlocalizedName;
 
     private Translation translation;
 

@@ -34,29 +34,25 @@ import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.api.text.action.ShiftClickAction;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextFormat;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
-import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.action.SpongeClickAction;
 import org.spongepowered.common.text.action.SpongeHoverAction;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 
 @Mixin(value = Text.class, remap = false)
 public abstract class MixinText implements IMixinText {
 
-    @Shadow protected TextFormat format;
-    @Shadow protected ImmutableList<Text> children;
-    @Shadow protected Optional<ClickAction<?>> clickAction;
-    @Shadow protected Optional<HoverAction<?>> hoverAction;
-    @Shadow protected Optional<ShiftClickAction<?>> shiftClickAction;
+    @Shadow @Final protected TextFormat format;
+    @Shadow @Final protected ImmutableList<Text> children;
+    @Shadow @Final protected Optional<ClickAction<?>> clickAction;
+    @Shadow @Final protected Optional<HoverAction<?>> hoverAction;
+    @Shadow @Final protected Optional<ShiftClickAction<?>> shiftClickAction;
 
     private IChatComponent component;
     private String json;
@@ -68,7 +64,7 @@ public abstract class MixinText implements IMixinText {
     private IChatComponent initializeComponent() {
         if (this.component == null) {
             this.component = createComponent();
-            ChatStyle style = component.getChatStyle();
+            ChatStyle style = this.component.getChatStyle();
 
             if (this.format.getColor() != TextColors.NONE) {
                 style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
@@ -96,10 +92,10 @@ public abstract class MixinText implements IMixinText {
             }
 
             for (Text child : this.children) {
-                component.appendSibling(((IMixinText) child).toComponent());
+                this.component.appendSibling(((IMixinText) child).toComponent());
             }
         }
-        return component;
+        return this.component;
     }
 
     private IChatComponent getHandle() {

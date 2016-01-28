@@ -300,6 +300,7 @@
         "item.inventory.TraitInventoryAdapter",
         "item.inventory.TraitInventoryObservable",
         "item.merchant.MixinMerchantRecipe",
+        "nbt.MixinNBTTagCompound",
         "network.MixinNetHandlerPlayServer",
         "network.MixinPacketBuffer",
         "network.packet.MixinS3BPacketScoreboardObjective",

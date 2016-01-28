@@ -25,8 +25,10 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -76,6 +78,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public boolean potionsNeedUpdate;
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
+    @Shadow protected BaseAttributeMap attributeMap;
+    @Shadow protected ItemStack[] previousEquipment;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
@@ -100,6 +104,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
+    @Shadow protected abstract void applyEntityAttributes();
 
     @Override
     public int getMaxAir() {

@@ -51,6 +51,7 @@ public class StaticMixinHelper {
     public static EntityPlayerMP packetPlayer = null;
     public static EntityPlayerMP collidePlayer = null;
     public static User blockEventUser = null;
+    @SuppressWarnings("rawtypes")
     public static Packet processingPacket = null;
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
@@ -58,18 +59,17 @@ public class StaticMixinHelper {
     public static ItemStack prePacketProcessItem = null;
     @SuppressWarnings("rawtypes")
     public static Class lastPopulatorClass = null;
-    public static boolean isFlowerGen = false;
     public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
     public static int lastDestroyedEntityId = -1;
     public static EntityLivingBase currentTargetEntity = null;
     public static Cause dropCause = null;
-    @SuppressWarnings("rawtypes")
     public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
+    public static boolean destructItemDrop = false;
 
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
     // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.

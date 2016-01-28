@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.Slot;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
@@ -32,7 +33,7 @@ import org.spongepowered.common.interfaces.inventory.IMixinSlot;
 @Mixin(Slot.class)
 public abstract class MixinSlot implements org.spongepowered.api.item.inventory.Slot, IMixinSlot {
 
-    @Shadow private int slotIndex;
+    @Shadow @Final private int slotIndex;
     
     @Override
     public int getSlotIndex() {

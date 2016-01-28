@@ -30,6 +30,7 @@ import net.minecraft.util.Vec3;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,7 +57,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Shadow public Entity exploder;
     @Shadow public float explosionSize;
     @SuppressWarnings("rawtypes")
-    @Shadow public List affectedBlockPositions;
+    @Shadow @Final public List affectedBlockPositions;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     public void onConstructed(net.minecraft.world.World world, Entity entity, double originX, double originY,

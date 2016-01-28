@@ -36,6 +36,7 @@ import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DesertWell;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -47,7 +48,7 @@ import java.util.Random;
 @Mixin(WorldGenDesertWells.class)
 public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, PopulatorObject {
 
-    @Shadow private static BlockStateHelper field_175913_a;
+    @Shadow @Final private static BlockStateHelper field_175913_a;
 
     private double spawnProbability;
     private PopulatorObject obj;

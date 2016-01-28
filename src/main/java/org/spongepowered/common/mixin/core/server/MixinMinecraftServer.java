@@ -73,6 +73,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -126,15 +127,15 @@ import java.util.UUID;
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
-    @Shadow private static Logger logger;
+    @Shadow @Final private static Logger logger;
+    @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
     @Shadow private boolean worldIsBeingDeleted;
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow public WorldServer[] worldServers;
-    @Shadow public Profiler theProfiler;
-    @Shadow public long[] tickTimeArray;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(IChatComponent message);

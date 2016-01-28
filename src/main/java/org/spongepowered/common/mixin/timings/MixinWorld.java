@@ -31,6 +31,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,9 +46,9 @@ public class MixinWorld {
     // ESS - endStartSection
     private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
-    @Shadow public boolean isRemote;
-    @Shadow public List<Entity> loadedEntityList;
-    @Shadow public List<TileEntity> loadedTileEntityList;
+    @Shadow @Final public boolean isRemote;
+    @Shadow @Final public List<Entity> loadedEntityList;
+    @Shadow @Final public List<TileEntity> loadedTileEntityList;
 
     protected WorldTimingsHandler timings;
 

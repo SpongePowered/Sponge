@@ -30,6 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -45,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinEnchantment implements Enchantment {
 
     @Shadow protected String name;
-    @Shadow private int weight;
+    @Shadow @Final private int weight;
 
     @Shadow public abstract int getMinLevel();
     @Shadow public abstract int getMaxLevel();

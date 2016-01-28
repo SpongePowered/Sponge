@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.text.translation.Translation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -38,7 +39,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = ShrubType.class, prefix = "shadow$"))
 public abstract class MixinBlockTallGrassEnumType implements ShrubType {
 
-    @Shadow private String name;
+    @Shadow @Final private String name;
 
     private Translation translation;
 

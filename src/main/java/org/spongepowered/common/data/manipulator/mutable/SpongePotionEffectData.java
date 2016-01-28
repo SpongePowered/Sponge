@@ -32,9 +32,14 @@ import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionEffectData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SpongePotionEffectData extends AbstractListData<PotionEffect, PotionEffectData, ImmutablePotionEffectData> implements PotionEffectData {
+
+    public SpongePotionEffectData() {
+        this(new ArrayList<>());
+    }
 
     public SpongePotionEffectData(List<PotionEffect> effects) {
         super(PotionEffectData.class, effects, Keys.POTION_EFFECTS, ImmutableSpongePotionEffectData.class);

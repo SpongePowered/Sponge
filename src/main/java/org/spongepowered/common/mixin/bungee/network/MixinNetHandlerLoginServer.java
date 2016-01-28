@@ -31,6 +31,7 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerLoginServer;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -43,7 +44,7 @@ import java.util.UUID;
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer {
 
-    @Shadow private MinecraftServer server;
+    @Shadow @Final private MinecraftServer server;
     @Shadow public NetworkManager networkManager;
     @Shadow private GameProfile loginGameProfile;
 

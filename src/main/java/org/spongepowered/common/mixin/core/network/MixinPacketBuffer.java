@@ -33,6 +33,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.network.ChannelBuf;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,7 +49,7 @@ import java.util.UUID;
 @Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$"))
 public abstract class MixinPacketBuffer extends ByteBuf {
 
-    @Shadow private ByteBuf buf;
+    @Shadow @Final private ByteBuf buf;
 
     @Shadow protected abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
     @Shadow protected abstract void writeNBTTagCompoundToBuffer(NBTTagCompound compound);

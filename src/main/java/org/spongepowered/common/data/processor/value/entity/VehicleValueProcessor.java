@@ -73,7 +73,7 @@ public class VehicleValueProcessor extends AbstractSpongeValueProcessor<net.mine
 
     @Override
     protected boolean set(net.minecraft.entity.Entity container, EntitySnapshot value) {
-        return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value);
+        return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value.restore().orElse(null));
     }
 
     @Override

@@ -27,13 +27,14 @@ package org.spongepowered.common.mixin.core.text;
 import net.minecraft.util.ChatComponentSelector;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.selector.Selector;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ChatComponentSelector.class)
 public abstract class MixinChatComponentSelector extends MixinChatComponentStyle {
 
-    @Shadow private String selector;
+    @Shadow @Final private String selector;
 
     @Override
     protected Text.Builder createBuilder() {
