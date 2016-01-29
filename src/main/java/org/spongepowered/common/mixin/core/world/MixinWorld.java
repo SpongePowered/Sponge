@@ -770,13 +770,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         if (blockEvents.size() > 1) {
             if (breakEvent != null) {
-                cause = cause.with(breakEvent);
+                cause = cause.with(NamedCause.of("BreakEvent", breakEvent));
             }
             if (modifyEvent != null) {
-                cause = cause.with(modifyEvent);
+                cause = cause.with(NamedCause.of("ModifyEvent", modifyEvent));
             }
             if (placeEvent != null) {
-                cause = cause.with(placeEvent);
+                cause = cause.with(NamedCause.of("PlaceEvent", placeEvent));
             }
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, (World) world, blockMultiTransactions);
             SpongeImpl.postEvent(changeBlockEvent);
@@ -852,7 +852,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             } else {
                 for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
                     if (!transaction.isValid()) {
-                        invalidTransactions.add(transaction);
+                        this.invalidTransactions.add(transaction);
                     } else {
                         if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
                              BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
@@ -881,13 +881,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     }
                 }
 
-                if (invalidTransactions.size() > 0) {
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
+                if (this.invalidTransactions.size() > 0) {
+                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(this.invalidTransactions)) {
                         this.restoringBlocks = true;
                         transaction.getOriginal().restore(true, false);
                         this.restoringBlocks = false;
                     }
-                    handlePostPlayerBlockEvent(captureType, player, world, invalidTransactions);
+                    handlePostPlayerBlockEvent(captureType, player, world, this.invalidTransactions);
                 }
 
                 if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
@@ -915,7 +915,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
             if (chatPacket.getMessage().contains("kill")) {
                 if (!cause.contains(player)) {
-                    cause = cause.with(player);
+                    cause = cause.with(NamedCause.of("Player", player));
                 }
                 StaticMixinHelper.destructItemDrop = true;
             }
@@ -943,11 +943,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
             if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
-                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(player), player, (C10PacketCreativeInventoryAction) packetIn);
+                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
+                        (C10PacketCreativeInventoryAction) packetIn);
             } else {
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(player), player, packetIn);
+                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
                 if (packetIn instanceof C0EPacketClickWindow) {
-                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(player), player, (C0EPacketClickWindow) packetIn);
+                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
+                            (C0EPacketClickWindow) packetIn);
                 }
             }
         }
@@ -958,10 +960,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 cause = StaticMixinHelper.dropCause;
                 StaticMixinHelper.destructItemDrop = true;
             }
-            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, invalidTransactions);
+            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, this.invalidTransactions);
         }
         if (this.capturedEntities.size() > 0) {
-            handleEntitySpawns(cause, this.capturedEntities, invalidTransactions);
+            handleEntitySpawns(cause, this.capturedEntities, this.invalidTransactions);
         }
 
         StaticMixinHelper.dropCause = null;
@@ -1209,7 +1211,21 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 if (!this.captureTerrainGen && !cause.contains(this.currentTickBlock)) {
                     Cause currentCause = cause;
                     cause = Cause.of(NamedCause.source(this.currentTickBlock));
-                    cause = cause.with(currentCause.all());
+                    List<NamedCause> causes = new ArrayList<>();
+                    causes.add(NamedCause.source(this.currentTickBlock));
+                    List<String> namesUsed = new ArrayList<>();
+                    int iteration = 1;
+                    for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
+                        String name = entry.getKey().equalsIgnoreCase("Source")
+                                            ? "AdditionalSource" : entry.getKey().equalsIgnoreCase("AdditionalSource")
+                                                                   ? "PreviousSource" : entry.getKey();
+                        if (namesUsed.contains(name)) {
+                            name += iteration++;
+                        }
+                        namesUsed.add(name);
+                        causes.add(NamedCause.of(name, entry.getValue()));
+                    }
+                    cause = Cause.of(causes);
                 }
             }
 

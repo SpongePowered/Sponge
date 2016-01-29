@@ -37,6 +37,7 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -179,7 +180,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             final EntityAIBase otherAiBase = entityaitaskentry.action;
 
             if (otherAiBase.equals(aiBase)) {
-                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(Sponge.getGame()),
+                final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
                     (Goal) (Object) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
