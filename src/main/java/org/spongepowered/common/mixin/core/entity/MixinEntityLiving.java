@@ -129,7 +129,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         Iterator<EntityAITasks.EntityAITaskEntry> taskItr = tasks.getTasksUnsafe().iterator();
         while (taskItr.hasNext()) {
             EntityAITasks.EntityAITaskEntry task = taskItr.next();
-            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()),
+            final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(NamedCause.source(Sponge.getGame())),
                     task.priority, task.priority, (Goal<? extends Agent>) tasks, this, (AITask<?>) task.action);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
