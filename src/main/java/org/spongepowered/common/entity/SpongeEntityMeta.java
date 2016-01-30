@@ -30,6 +30,7 @@ import static org.spongepowered.api.data.DataQuery.of;
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.text.translation.Translatable;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
@@ -52,11 +53,11 @@ public class SpongeEntityMeta extends SpongeCatalogType {
                 .add("type", this.type);
     }
 
-    public static abstract class Translatable extends SpongeEntityMeta implements org.spongepowered.api.text.translation.Translatable {
+    public static abstract class TranslatableMeta extends SpongeEntityMeta implements Translatable {
 
         private final Translation translation;
 
-        public Translatable(int type, String name, Translation translation) {
+        public TranslatableMeta(int type, String name, Translation translation) {
             super(type, name);
             this.translation = checkNotNull(translation, "translation");
         }

@@ -28,7 +28,7 @@ import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeHorseVariant extends SpongeEntityMeta.Translatable implements HorseVariant {
+public class SpongeHorseVariant extends SpongeEntityMeta.TranslatableMeta implements HorseVariant {
 
     public SpongeHorseVariant(int variant, String name) {
         super(variant, name, calcTranslation(variant));

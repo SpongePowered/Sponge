@@ -26,13 +26,12 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.Objects.ToStringHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
+public class SpongeEntityType extends SpongeCatalogType.TranslatableType implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
 
@@ -64,7 +63,6 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public final String entityName;
     public final String modId;
     public final Class<? extends Entity> entityClass;
-    private final Translation translation;
     // currently not used
     public int trackingRange;
     public int updateFrequency;
@@ -80,11 +78,6 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase();
         this.entityClass = clazz;
         this.modId = modId.toLowerCase();
-        String translationName = (String) EntityList.classToStringMapping.get(clazz);
-        if (translationName == null) {
-            translationName = "generic";
-        }
-        this.translation = new SpongeTranslation("entity." + translationName + ".name");
     }
 
     private static Translation check(Translation translation) {

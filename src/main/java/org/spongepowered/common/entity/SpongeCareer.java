@@ -31,7 +31,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 @NonnullByDefault
-public class SpongeCareer extends SpongeEntityMeta.Translatable implements Career {
+public class SpongeCareer extends SpongeEntityMeta.TranslatableMeta implements Career {
 
     private final Profession profession;
 

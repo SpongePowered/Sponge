@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translatable;
 import org.spongepowered.api.text.translation.Translation;
 
 public abstract class SpongeCatalogType implements CatalogType {
@@ -75,7 +76,7 @@ public abstract class SpongeCatalogType implements CatalogType {
                 .add("name", type.getName());
     }
 
-    public static <T extends CatalogType & org.spongepowered.api.text.translation.Translatable> ToStringHelper toStringHelperTranslatable(T type) {
+    public static <T extends CatalogType & Translatable> ToStringHelper toStringHelperTranslatable(T type) {
         return toStringHelper(type)
                 .add("translation", type.getTranslation());
     }
@@ -96,11 +97,11 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     }
 
-    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
+    public static abstract class TranslatableType extends SpongeCatalogType implements Translatable {
 
         private final Translation translation;
 
-        public Translatable(String id, Translation translation) {
+        public TranslatableType(String id, Translation translation) {
             super(id);
             this.translation = checkNotNull(translation, "translation");
         }

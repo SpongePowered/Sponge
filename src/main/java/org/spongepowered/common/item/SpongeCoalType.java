@@ -28,7 +28,7 @@ import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 
-public class SpongeCoalType extends SpongeEntityMeta.Translatable implements CoalType {
+public class SpongeCoalType extends SpongeEntityMeta.TranslatableMeta implements CoalType {
 
     public SpongeCoalType(int type, String name, Translation translation) {
         super(type, name, translation);
