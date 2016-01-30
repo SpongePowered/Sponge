@@ -71,6 +71,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.inventory.IMixinSlotAdapter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -401,16 +402,24 @@ public class SpongeCommonEventFactory {
     private static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
         for (SlotTransaction slotTransaction : slotTransactions) {
             SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
+            int slotNumber = ((IMixinSlotAdapter) slot).getSlotNumber();
             ItemStack originalStack =
                     slotTransaction.getOriginal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
                             .getOriginal().createStack();
-            if (originalStack == null) {
+
+            // TODO: fix below
+            /*if (originalStack == null) {
                 slot.clear();
             } else {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
+            }*/
+
+            Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+            if (nmsSlot != null) {
+                nmsSlot.putStack(originalStack);
             }
 
-            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.getOrdinal(), originalStack));
+            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
         }
     }
 
@@ -427,16 +436,24 @@ public class SpongeCommonEventFactory {
         for (SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
                 SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
+                int slotNumber = ((IMixinSlotAdapter) slot).getSlotNumber();
                 ItemStack customStack =
                         slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
                                 .getFinal().createStack();
-                if (customStack == null) {
+
+                // TODO: fix below
+                /*if (customStack == null) {
                     slot.clear();
                 } else {
                     slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
+                }*/
+
+                Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+                if (nmsSlot != null) {
+                    nmsSlot.putStack(customStack);
                 }
 
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.getOrdinal(), customStack));
+                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
             }
         }
     }
@@ -513,7 +530,7 @@ public class SpongeCommonEventFactory {
         StaticMixinHelper.processingInternalForgeEvent = false;
         return event;
     }
- 
+
     public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, ProjectileSource projectileSource, MovingObjectPosition
             movingObjectPosition) {
         MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
@@ -521,7 +538,7 @@ public class SpongeCommonEventFactory {
         IMixinEntity spongeEntity = (IMixinEntity) projectile;
         Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-             cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+            cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
         }
 
         Location<World> impactPoint = new Location<World>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));

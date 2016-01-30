@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Builder;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult.Type;
 import org.spongepowered.common.interfaces.inventory.IMixinSlot;
+import org.spongepowered.common.interfaces.inventory.IMixinSlotAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.impl.MinecraftFabric;
@@ -46,16 +47,19 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
-public class SlotAdapter extends Adapter implements Slot {
+public class SlotAdapter extends Adapter implements Slot, IMixinSlotAdapter {
     
     private final SlotLens<IInventory, net.minecraft.item.ItemStack> slot;
     
     private final int ordinal;
     
     private SlotAdapter nextSlot;
-    
+
+    private int slotNumber = -1;
+
     public SlotAdapter(net.minecraft.inventory.Slot slot) {
         this(MinecraftFabric.of(slot.inventory), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()));
+        this.slotNumber = slot.slotNumber;
     }
 
     public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens) {
@@ -264,5 +268,10 @@ public class SlotAdapter extends Adapter implements Slot {
 //        // TODO 
 //        return super.iterator();
 //    }
-    
+
+    // Internal use for events, will be removed soon!
+    @Override
+    public int getSlotNumber() {
+        return this.slotNumber;
+    }
 }
