@@ -876,7 +876,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                              }
                          }
 
-                        if (captureType == CaptureType.PLACE && player != null && transaction.getOriginal().getState().getType() == BlockTypes.AIR) {
+                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                             IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
                             spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos, (User) player, PlayerTracker.Type.OWNER);
