@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStone;
+import net.minecraft.block.material.MapColor;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -46,7 +47,7 @@ public abstract class MixinBlockStoneEnumType {
     private Translation translation;
 
     @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int metadata, String name, String unlocalizedName, CallbackInfo ci) {
+    public void onConstructed(String internalName, int internalOrdinal, int metadata, MapColor mapColor, String name, String unlocalizedName, CallbackInfo ci) {
         this.translation = new SpongeTranslation("tile.stone." + unlocalizedName + ".name");
     }
 
