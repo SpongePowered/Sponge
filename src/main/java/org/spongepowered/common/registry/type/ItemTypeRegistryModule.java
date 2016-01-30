@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -74,7 +74,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public Collection<ItemType> getAll() {
-        return ImmutableList.copyOf(this.itemTypeMappings.values());
+        return ImmutableSet.copyOf(this.itemTypeMappings.values());
     }
 
     public void registerFromGameData(String id, ItemType itemType) {

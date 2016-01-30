@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
@@ -86,7 +86,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @Override
     public Collection<EntityType> getAll() {
-        return ImmutableList.copyOf(this.entityTypeMappings.values());
+        return ImmutableSet.copyOf(this.entityTypeMappings.values());
     }
 
     @Override

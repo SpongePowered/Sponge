@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type.effect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.SoundTypes;
@@ -307,6 +307,6 @@ public final class SoundRegistryModule implements CatalogRegistryModule<SoundTyp
 
     @Override
     public Collection<SoundType> getAll() {
-        return ImmutableList.copyOf(this.soundNames.values());
+        return ImmutableSet.copyOf(this.soundNames.values());
     }
 }

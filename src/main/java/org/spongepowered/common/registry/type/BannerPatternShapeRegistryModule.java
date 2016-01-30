@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.tileentity.TileEntityBanner;
 import org.spongepowered.api.data.type.BannerPatternShape;
@@ -51,7 +51,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
 
     @Override
     public Collection<BannerPatternShape> getAll() {
-        return ImmutableList.copyOf(this.bannerPatternShapeMappings.values());
+        return ImmutableSet.copyOf(this.bannerPatternShapeMappings.values());
     }
 
     @Override
