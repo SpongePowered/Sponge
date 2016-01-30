@@ -71,7 +71,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.inventory.IMixinSlotAdapter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -402,7 +401,7 @@ public class SpongeCommonEventFactory {
     private static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
         for (SlotTransaction slotTransaction : slotTransactions) {
             SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-            int slotNumber = ((IMixinSlotAdapter) slot).getSlotNumber();
+            int slotNumber = slot.slotNumber;
             ItemStack originalStack =
                     slotTransaction.getOriginal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
                             .getOriginal().createStack();
@@ -436,7 +435,7 @@ public class SpongeCommonEventFactory {
         for (SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
                 SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-                int slotNumber = ((IMixinSlotAdapter) slot).getSlotNumber();
+                int slotNumber = slot.slotNumber;
                 ItemStack customStack =
                         slotTransaction.getFinal() == ItemStackSnapshot.NONE ? null : (net.minecraft.item.ItemStack) slotTransaction
                                 .getFinal().createStack();
