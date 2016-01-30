@@ -267,6 +267,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private SpongeChunkProvider spongegen;
     private Weather prevWeather;
     private long weatherStartTime;
+    private int notifyCounter = 0;
 
     // @formatter:off
     @Shadow @Final public Profiler theProfiler;
@@ -775,13 +776,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         if (blockEvents.size() > 1) {
             if (breakEvent != null) {
-                cause = cause.with(NamedCause.of("BreakEvent", breakEvent));
+                String namedCause = "BreakEvent" + (this.notifyCounter != 0 ? this.notifyCounter : "");
+                cause = cause.with(NamedCause.of(namedCause, breakEvent));
             }
             if (modifyEvent != null) {
-                cause = cause.with(NamedCause.of("ModifyEvent", modifyEvent));
+                String namedCause = "ModifyEvent" + (this.notifyCounter != 0 ? this.notifyCounter : "");
+                cause = cause.with(NamedCause.of(namedCause, modifyEvent));
             }
             if (placeEvent != null) {
-                cause = cause.with(NamedCause.of("PlaceEvent", placeEvent));
+                String namedCause = "PlaceEvent" + (this.notifyCounter != 0 ? this.notifyCounter : "");
+                cause = cause.with(NamedCause.of(namedCause, placeEvent));
             }
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, (World) world, blockMultiTransactions);
             SpongeImpl.postEvent(changeBlockEvent);
@@ -1239,12 +1243,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (!this.captureTerrainGen) {
+            if (!this.captureTerrainGen && this.capturedSpongeBlockSnapshots.size() > 0) {
+                this.notifyCounter++;
                 this.handlePostTickCaptures(cause);
             }
 
             this.currentTickBlock = currentTickingBlock;
         }
+        this.notifyCounter = 0;
     }
 
     private boolean addWeatherEffect(net.minecraft.entity.Entity entity, Cause cause) {
