@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -48,6 +49,10 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -56,6 +61,7 @@ import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CreativeInventoryEvent;
@@ -478,10 +484,10 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        ImmutableList<org.spongepowered.api.entity.Entity> originalEntities =
-                ImmutableList.copyOf((List<org.spongepowered.api.entity.Entity>) (List<?>) entities);
+        ImmutableList<Entity> originalEntities =
+                ImmutableList.copyOf((List<Entity>) (List<?>) entities);
         CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, originalEntities,
-                (List<org.spongepowered.api.entity.Entity>) (List<?>) entities, (org.spongepowered.api.world.World) world);
+                (List<Entity>) (List<?>) entities, (World) world);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -549,16 +555,67 @@ public class SpongeCommonEventFactory {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
             }
 
-            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(cause, impactPoint, targetBlock.getState(), targetBlock.getLocation().get(), side);
+            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(cause, impactPoint, targetBlock.getState(),
+                    targetBlock.getLocation().get(), side);
             return SpongeImpl.postEvent(event);
         } else if (movingObjectPosition.entityHit != null) { // entity
             ImmutableList.Builder<Entity> entityBuilder = new ImmutableList.Builder<>();
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityBuilder.add((Entity) movingObjectPosition.entityHit).build(), entityList, impactPoint, (World) projectile.worldObj);
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause,
+                    entityBuilder.add((Entity) movingObjectPosition.entityHit).build(), entityList, impactPoint, (World) projectile.worldObj);
             return SpongeImpl.postEvent(event);
         }
 
         return false;
+    }
+
+
+    public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
+        if (entity.prevPosX != entity.posX || entity.prevPosY != entity.posY || entity.prevPosZ != entity.posZ
+            || entity.rotationPitch != entity.prevRotationPitch || entity.rotationYaw != entity.prevRotationYaw) {
+            // yes we have a move event.
+            if (entity instanceof Player) {
+                return; // this is handled elsewhere
+            }
+            DisplaceEntityEvent.Move event;
+            Transform<World> previous = new Transform<>(((World) entity.worldObj),
+                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw,
+                    0));
+            Transform<World> current = new Transform<>(((Entity) entity).getLocation(),
+                    ((Entity) entity).getRotation(),
+                    ((Entity) entity).getScale());
+
+            if (entity instanceof Humanoid) {
+                event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(entity)), previous, current,
+                        (Humanoid) entity);
+            } else if (entity instanceof Living) {
+                event = SpongeEventFactory.createDisplaceEntityEventMoveTargetLiving(Cause.of(NamedCause.source(entity)), previous, current,
+                        (Living) entity);
+            } else {
+                event = SpongeEventFactory.createDisplaceEntityEventMove(Cause.of(NamedCause.source(entity)), previous, current,
+                        (Entity) entity);
+            }
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                entity.posX = entity.prevPosX;
+                entity.posY = entity.prevPosY;
+                entity.posZ = entity.prevPosZ;
+                entity.rotationPitch = entity.prevRotationPitch;
+                entity.rotationYaw = entity.prevRotationYaw;
+            } else {
+                /*
+                Some thoughts from gabizou: The interesting thing here is that while this is only called
+                in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
+                of the entity being handled here. The interesting issue is that since we are setting the transform,
+                the rider entity (and the rest of the rider entities) are being updated as well with the new position
+                and potentially world, which results in a dirty world usage (since the world transfer is handled by
+                us). Now, the thing is, the previous position is not updated either, and likewise, the current position
+                is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
+                logic.
+                 */
+                ((Entity) entity).setTransform(event.getToTransform());
+            }
+        }
     }
 }
