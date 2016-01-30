@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.state.pattern.BlockStateHelper;
@@ -42,21 +44,33 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenDesertWells.class)
-public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, PopulatorObject {
+public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, IWorldGenPopulatorObject {
 
     @Shadow @Final private static BlockStateHelper field_175913_a;
 
     private double spawnProbability;
     private PopulatorObject obj;
+    private String id;
 
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.spawnProbability = 0.001;
         this.obj = this;
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override
@@ -133,7 +147,7 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
         return Objects.toStringHelper(this)
                 .add("Type", "DesertWell")
                 .add("Chance", this.spawnProbability)
-                .add("Object", this.obj)
+                .add("Object", this.obj == this ? "this" : this.obj)
                 .toString();
     }
 

@@ -22,45 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.block.BlockSandStone;
-import org.spongepowered.api.data.type.SandstoneType;
-import org.spongepowered.api.text.translation.Translation;
+import com.google.common.base.Objects;
+import net.minecraft.scoreboard.GoalColor;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockSandStone.EnumType.class)
-@Implements(@Interface(iface = SandstoneType.class, prefix = "shadow$"))
-public abstract class MixinBlockSandStoneEnumType {
+@Mixin(GoalColor.class)
+@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
+public abstract class MixinCriterionGoalColor {
 
-    @Shadow public abstract String getName();
+    @Shadow protected abstract String getName();
 
-    private Translation translation;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int metadata, String name, String unlocalizedName, CallbackInfo ci) {
-        this.translation = new SpongeTranslation("tile.sandStone." + unlocalizedName + ".name");
-    }
-
-    public String shadow$getId() {
-        return getName();
+    public String criterion$getId() {
+        return this.getName();
     }
 
     @Intrinsic
-    public String shadow$getName() {
-        return this.translation.get();
+    public String criterion$getName() {
+        return this.getName();
     }
 
-    public Translation shadow$getTranslation() {
-        return this.translation;
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", criterion$getId())
+                .add("name", criterion$getName())
+                .toString();
     }
 
 }

@@ -32,23 +32,39 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(WorldSettings.GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
 public abstract class MixinGameType {
+
     @Shadow String name;
 
+    private Translation translation;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String internalName, int internalOrdinal, int type, String name, CallbackInfo ci) {
+        this.translation = new SpongeTranslation("gameMode." + getId());
+    }
+
     public String getId() {
-        return this.name;
+        if (this.name.isEmpty()) {
+            return "not_set";
+        } else {
+            return this.name;
+        }
     }
 
     @Intrinsic
     public String gamemode$getName() {
-        return this.name;
+        return getId();
     }
 
     public Translation getTranslation() {
-        return new SpongeTranslation("gameMode." + this.name.toLowerCase());
+        return this.translation;
     }
+
 }

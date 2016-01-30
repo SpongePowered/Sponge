@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
@@ -46,6 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -56,7 +59,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldGenBigMushroom.class)
-public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator implements BigMushroom, PopulatorObject {
+public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator implements BigMushroom, IWorldGenPopulatorObject {
 
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
@@ -64,11 +67,22 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     private WeightedTable<PopulatorObject> types;
     private Function<Location<Chunk>, PopulatorObject> override = null;
     private VariableAmount mushroomsPerChunk;
+    private String id;
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.mushroomsPerChunk = VariableAmount.fixed(1);
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override

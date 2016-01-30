@@ -295,8 +295,8 @@ public final class SoundRegistryModule implements CatalogRegistryModule<SoundTyp
 
         soundMappings.forEach((soundName, soundId) -> {
             final SoundType soundType = new SpongeSound(soundName, soundId);
-            this.soundNames.put(soundName, soundType);
-            this.soundNames.put(soundId, soundType);
+            this.soundNames.put(soundName.toLowerCase(), soundType);
+            this.soundNames.put(soundId.toLowerCase(), soundType);
         });
     }
 

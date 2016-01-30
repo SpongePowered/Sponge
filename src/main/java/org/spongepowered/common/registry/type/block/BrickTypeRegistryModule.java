@@ -24,39 +24,19 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStoneBrick;
 import org.spongepowered.api.data.type.BrickType;
-import org.spongepowered.api.data.type.BrickTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class BrickTypeRegistryModule implements CatalogRegistryModule<BrickType> {
-
-    @RegisterCatalog(BrickTypes.class)
-    private final Map<String, BrickType> brickTypeMappings = new ImmutableMap.Builder<String, BrickType>()
-        .put("default", (BrickType) (Object) BlockStoneBrick.EnumType.DEFAULT)
-        .put("chiseled", (BrickType) (Object) BlockStoneBrick.EnumType.CHISELED)
-        .put("mossy", (BrickType) (Object) BlockStoneBrick.EnumType.MOSSY)
-        .put("cracked", (BrickType) (Object) BlockStoneBrick.EnumType.CRACKED)
-        .build();
-
+public final class BrickTypeRegistryModule extends ImmutableCatalogRegistryModule<BrickType> {
 
     @Override
-    public Optional<BrickType> getById(String id) {
-        return Optional.ofNullable(this.brickTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<BrickType> getAll() {
-        return ImmutableList.copyOf(this.brickTypeMappings.values());
+    protected void collect(BiConsumer<String, BrickType> consumer) {
+        for (BlockStoneBrick.EnumType type : BlockStoneBrick.EnumType.values()) {
+            addUnsafe(consumer, type, type.name(), type.name() + "_stonebrick", type.toString());
+        }
     }
 
 }

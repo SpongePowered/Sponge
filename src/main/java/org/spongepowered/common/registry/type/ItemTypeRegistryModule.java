@@ -69,7 +69,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.itemTypeMappings.get(id));
+        return Optional.ofNullable(this.itemTypeMappings.get(id.toLowerCase()));
     }
 
     @Override
@@ -95,6 +95,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     public void registerDefaults() {
         setItemNone();
         this.itemTypeMappings.put("none", (ItemType) NONE_ITEM);
+        this.itemTypeMappings.put("minecraft:none", (ItemType) NONE_ITEM);
     }
 
     private void setItemNone() {

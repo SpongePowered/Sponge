@@ -24,35 +24,28 @@
  */
 package org.spongepowered.common.rotation;
 
+import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.common.registry.type.block.RotationRegistryModule;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeRotation implements Rotation {
+public class SpongeRotation extends SpongeCatalogType.Named implements Rotation {
 
     private final int angle;
-    private final String name;
-    private String id;
 
-    public SpongeRotation(int angle, String name) {
+    public SpongeRotation(int angle, String id, String name) {
+        super(id, name);
         this.angle = angle;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        if (this.id == null) {
-            this.id = RotationRegistryModule.rotationMap.inverse().get(this);
-        }
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override
     public int getAngle() {
         return this.angle;
     }
+
+    @Override
+    public ToStringHelper toStringHelper() {
+        return super.toStringHelper()
+                .add("angle", getAngle());
+    }
+
 }

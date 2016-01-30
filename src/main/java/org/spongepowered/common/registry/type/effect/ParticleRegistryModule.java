@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.registry.type.effect;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumParticleTypes;
@@ -34,31 +31,18 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.effect.particle.ParticleType;
 import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
-public final class ParticleRegistryModule implements CatalogRegistryModule<ParticleType> {
+public final class ParticleRegistryModule extends MutableCatalogRegistryModule<ParticleType> {
 
     @RegisterCatalog(ParticleTypes.class)
     private final Map<String, SpongeParticleType> particleMappings = Maps.newHashMap();
-    private final Map<String, ParticleType> particleByName = Maps.newHashMap();
-
-    @Override
-    public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<ParticleType> getAll() {
-        return ImmutableList.copyOf(this.particleByName.values());
-    }
 
     @Override
     public void registerDefaults() {
@@ -113,16 +97,14 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     private void addParticleType(String mapping, SpongeParticleType particle) {
         this.particleMappings.put(mapping, particle);
-        this.particleByName.put(particle.getName(), particle);
+        register(particle, particle.getName());
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (EnumParticleTypes particleTypes : EnumParticleTypes.values()) {
-            if (!this.particleByName.containsKey(particleTypes.getParticleName())) {
-                addParticleType(particleTypes.getParticleName().toLowerCase(), new SpongeParticleType(particleTypes, false));
-            }
+            tryRegister(new SpongeParticleType(particleTypes, false), particleTypes.getParticleName());
         }
-
     }
+
 }

@@ -26,11 +26,16 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockQuartz;
 import org.spongepowered.api.data.type.QuartzType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockQuartz.EnumType.class)
 @Implements(@Interface(iface = QuartzType.class, prefix = "shadow$"))
@@ -38,12 +43,24 @@ public abstract class MixinBlockQuartzEnumType {
 
     @Shadow public abstract String getName();
 
+    private Translation translation;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String internalName, int internalOrdinal, int metadata, String name, String unlocalizedName, CallbackInfo ci) {
+        this.translation = new SpongeTranslation("tile.quartzBlock." + unlocalizedName + ".name");
+    }
+
     public String shadow$getId() {
         return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
-        return getName();
+        return this.translation.get();
     }
+
+    public Translation shadow$getTranslation() {
+        return this.translation;
+    }
+
 }

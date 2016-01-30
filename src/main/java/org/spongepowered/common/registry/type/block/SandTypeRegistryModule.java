@@ -24,36 +24,21 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSand;
 import org.spongepowered.api.data.type.SandType;
-import org.spongepowered.api.data.type.SandTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class SandTypeRegistryModule implements CatalogRegistryModule<SandType> {
-
-    @RegisterCatalog(SandTypes.class)
-    private final Map<String, SandType> sandTypeMappings = new ImmutableMap.Builder<String, SandType>()
-        .put("normal", (SandType) (Object) BlockSand.EnumType.SAND)
-        .put("red", (SandType) (Object) BlockSand.EnumType.RED_SAND)
-        .build();
+public final class SandTypeRegistryModule extends ImmutableCatalogRegistryModule<SandType> {
 
     @Override
-    public Optional<SandType> getById(String id) {
-        return Optional.ofNullable(this.sandTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<SandType> getAll() {
-        return ImmutableList.copyOf(this.sandTypeMappings.values());
+    protected void collect(BiConsumer<String, SandType> consumer) {
+        for (BlockSand.EnumType type : BlockSand.EnumType.values()) {
+            addUnsafe(consumer, type, type.name(), type.getName(), type.getUnlocalizedName());
+        }
+        // Additional alias
+        addUnsafe(consumer, BlockSand.EnumType.SAND, "normal");
     }
 
 }

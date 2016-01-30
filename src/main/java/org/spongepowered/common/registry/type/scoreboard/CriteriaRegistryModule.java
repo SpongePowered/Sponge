@@ -24,42 +24,20 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
-public final class CriteriaRegistryModule implements CatalogRegistryModule<Criterion> {
-
-    @RegisterCatalog(Criteria.class)
-    public final Map<String, Criterion> criteriaMap = Maps.newHashMap();
-
-    @Override
-    public Optional<Criterion> getById(String id) {
-        return Optional.ofNullable(this.criteriaMap.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<Criterion> getAll() {
-        return ImmutableList.copyOf(this.criteriaMap.values());
-    }
+public final class CriteriaRegistryModule extends MutableCatalogRegistryModule<Criterion> {
 
     @Override
     public void registerDefaults() {
-        this.criteriaMap.put("dummy", (Criterion) IScoreObjectiveCriteria.DUMMY);
-        this.criteriaMap.put("trigger", (Criterion) IScoreObjectiveCriteria.TRIGGER);
-        this.criteriaMap.put("health", (Criterion) IScoreObjectiveCriteria.health);
-        this.criteriaMap.put("player_kills", (Criterion) IScoreObjectiveCriteria.playerKillCount);
-        this.criteriaMap.put("total_kills", (Criterion) IScoreObjectiveCriteria.totalKillCount);
-        this.criteriaMap.put("deaths", (Criterion) IScoreObjectiveCriteria.deathCount);
+        registerUnsafe(IScoreObjectiveCriteria.DUMMY, "dummy");
+        registerUnsafe(IScoreObjectiveCriteria.TRIGGER, "trigger");
+        registerUnsafe(IScoreObjectiveCriteria.health, "health");
+        registerUnsafe(IScoreObjectiveCriteria.playerKillCount, "player_kills");
+        registerUnsafe(IScoreObjectiveCriteria.totalKillCount, "total_kills");
+        registerUnsafe(IScoreObjectiveCriteria.deathCount, "deaths");
     }
+
 }

@@ -24,18 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenBigTree.class)
-public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implements PopulatorObject {
+public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implements IWorldGenPopulatorObject {
+
+    private String id;
 
     public MixinWorldGenBigTree(boolean p_i45448_1_) {
         super(p_i45448_1_);
@@ -47,6 +51,16 @@ public abstract class MixinWorldGenBigTree extends WorldGenAbstractTree implemen
 
     @Shadow
     public abstract boolean validTreeLocation();
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {

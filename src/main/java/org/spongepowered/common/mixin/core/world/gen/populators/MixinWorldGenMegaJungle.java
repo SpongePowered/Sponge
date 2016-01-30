@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import java.util.Random;
 
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -36,10 +38,22 @@ import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 
 @Mixin(WorldGenMegaJungle.class)
-public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implements PopulatorObject {
+public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implements IWorldGenPopulatorObject {
+
+    private String id;
 
     public MixinWorldGenMegaJungle(boolean a, int b, int c, IBlockState d, IBlockState e) {
         super(a, b, c, d, e);
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override

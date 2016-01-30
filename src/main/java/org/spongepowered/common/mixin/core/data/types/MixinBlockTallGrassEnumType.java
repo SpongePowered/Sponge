@@ -33,43 +33,44 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockTallGrass.EnumType.class)
 @Implements(@Interface(iface = ShrubType.class, prefix = "shadow$"))
-public abstract class MixinBlockTallGrassEnumType implements ShrubType {
+public abstract class MixinBlockTallGrassEnumType {
 
     @Shadow @Final private String name;
 
     private Translation translation;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String internalName, int internalOrdinal, int meta, String name, CallbackInfo ci) {
+        final String translationId;
+        if ("dead_bush".equals(name)) {
+            translationId = "tile.tallgrass.shrub.name";
+        } else if ("tall_grass".equals(name)) {
+            translationId = "tile.tallgrass.tallgrass.name";
+        } else if ("fern".equals(name)) {
+            translationId = "tile.tallgrass.fern.name";
+        } else {
+            translationId = "tile.tallgrass.name";
+        }
+        this.translation = new SpongeTranslation(translationId);
+    }
 
     public String shadow$getId() {
         return this.name;
     }
 
     @Intrinsic
-    public String shrub$getName() {
-        return this.name;
-    }
-
-    private Translation resolveTranslation() {
-        switch ((BlockTallGrass.EnumType) (Object) this) {
-            case DEAD_BUSH:
-                return new SpongeTranslation("tile.tallgrass.shrub.name");
-            case FERN:
-                return new SpongeTranslation("tile.tallgrass.fern.name");
-            case GRASS:
-                return new SpongeTranslation("tile.tallgrass.grass.name");
-            default:
-                return new SpongeTranslation("tile.tallgrass.name");
-        }
+    public String shadow$getName() {
+        return this.translation.get();
     }
 
     public Translation shadow$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
-        if (this.translation == null) {
-            this.translation = resolveTranslation();
-        }
         return this.translation;
     }
 

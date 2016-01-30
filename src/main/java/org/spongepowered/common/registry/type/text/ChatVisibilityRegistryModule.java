@@ -24,31 +24,22 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayer;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
-import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatTypes;
 import org.spongepowered.api.text.chat.ChatVisibilities;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.common.interfaces.IMixinEnumChatVisibility;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 @RegistrationDependency(ChatTypeRegistryModule.class)
-public final class ChatVisibilityRegistryModule implements CatalogRegistryModule<ChatVisibility> {
+public final class ChatVisibilityRegistryModule extends MutableCatalogRegistryModule<ChatVisibility> {
 
     @RegisterCatalog(ChatVisibilities.class)
     public final Map<String, ChatVisibility> chatVisibilityMap = Maps.newHashMap();
@@ -56,39 +47,27 @@ public final class ChatVisibilityRegistryModule implements CatalogRegistryModule
     @Override
     public void registerDefaults() {
         this.setChatTypes();
-
-        this.chatVisibilityMap.put("full", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.FULL);
-        this.chatVisibilityMap.put("system", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.SYSTEM);
-        this.chatVisibilityMap.put("hidden", (ChatVisibility) (Object) EntityPlayer.EnumChatVisibility.HIDDEN);
+        registerUnsafe(EntityPlayer.EnumChatVisibility.FULL, "full");
+        registerUnsafe(EntityPlayer.EnumChatVisibility.SYSTEM, "system");
+        registerUnsafe(EntityPlayer.EnumChatVisibility.HIDDEN, "hidden");
     }
 
     private void setChatTypes() {
-        // We can't do this in the EnumChatVisibility constructor, since the registry isn't initialized then
+        // We can't do this in the EnumChatVisibility constructor, since the
+        // registry isn't initialized then
         EntityPlayer.EnumChatVisibility FULL = EntityPlayer.EnumChatVisibility.FULL;
         EntityPlayer.EnumChatVisibility SYSTEM = EntityPlayer.EnumChatVisibility.SYSTEM;
         EntityPlayer.EnumChatVisibility HIDDEN = EntityPlayer.EnumChatVisibility.HIDDEN;
 
-        ((IMixinEnumChatVisibility) (Object) FULL).setChatTypes(ImmutableSet.copyOf(ChatTypeRegistryModule.chatTypeMappings.values()));
+        ((IMixinEnumChatVisibility) (Object) FULL).setChatTypes(ImmutableSet.copyOf(ChatTypeRegistryModule.getInstance().getAll()));
         ((IMixinEnumChatVisibility) (Object) SYSTEM).setChatTypes(ImmutableSet.of(ChatTypes.SYSTEM, ChatTypes.ACTION_BAR));
         ((IMixinEnumChatVisibility) (Object) HIDDEN).setChatTypes(ImmutableSet.of());
-    }
-
-    @Override
-    public Optional<ChatVisibility> getById(String id) {
-        return Optional.ofNullable(this.chatVisibilityMap.get(checkNotNull(id, "id").toLowerCase()));
-    }
-
-    @Override
-    public Collection<ChatVisibility> getAll() {
-        return ImmutableSet.copyOf((ChatVisibility[]) (Object[]) EntityPlayer.EnumChatVisibility.values());
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (EntityPlayer.EnumChatVisibility visibility : EntityPlayer.EnumChatVisibility.values()) {
-            if (!this.chatVisibilityMap.containsKey(visibility.name().toLowerCase())) {
-                this.chatVisibilityMap.put(visibility.name().toLowerCase(), (ChatVisibility) (Object) visibility);
-            }
+            tryRegisterUnsafe(visibility);
         }
     }
 

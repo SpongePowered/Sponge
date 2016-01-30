@@ -24,22 +24,36 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenCanopyTree.class)
-public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree implements PopulatorObject {
+public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree implements IWorldGenPopulatorObject {
+
+    private String id;
 
     public MixinWorldGenCanopyTree(boolean p_i45448_1_) {
         super(p_i45448_1_);
+    }
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
     }
 
     @Override

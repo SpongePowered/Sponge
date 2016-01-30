@@ -24,37 +24,19 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockSandStone;
 import org.spongepowered.api.data.type.SandstoneType;
-import org.spongepowered.api.data.type.SandstoneTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class SandstoneTypeRegistryModule implements CatalogRegistryModule<SandstoneType> {
-
-    @RegisterCatalog(SandstoneTypes.class)
-    private final Map<String, SandstoneType> sandStoneTypeMappings = new ImmutableMap.Builder<String, SandstoneType>()
-        .put("default", (SandstoneType) (Object) BlockSandStone.EnumType.DEFAULT)
-        .put("chiseled", (SandstoneType) (Object) BlockSandStone.EnumType.CHISELED)
-        .put("smooth", (SandstoneType) (Object) BlockSandStone.EnumType.SMOOTH)
-        .build();
+public final class SandstoneTypeRegistryModule extends ImmutableCatalogRegistryModule<SandstoneType> {
 
     @Override
-    public Optional<SandstoneType> getById(String id) {
-        return Optional.ofNullable(this.sandStoneTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<SandstoneType> getAll() {
-        return ImmutableList.copyOf(this.sandStoneTypeMappings.values());
+    protected void collect(BiConsumer<String, SandstoneType> consumer) {
+        for (BlockSandStone.EnumType type : BlockSandStone.EnumType.values()) {
+            addUnsafe(consumer, type, type.name(), type.getName(), type.getUnlocalizedName());
+        }
     }
 
 }

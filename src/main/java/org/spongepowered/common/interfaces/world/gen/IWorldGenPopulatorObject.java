@@ -22,32 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.scoreboard;
 
-import com.google.common.collect.Maps;
-import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.scoreboard.Visibilities;
-import org.spongepowered.api.scoreboard.Visibility;
-import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
+package org.spongepowered.common.interfaces.world.gen;
 
-import java.util.Map;
+import org.spongepowered.api.world.gen.PopulatorObject;
 
-public final class VisibilityRegistryModule extends MutableCatalogRegistryModule<Visibility> {
+public interface IWorldGenPopulatorObject extends PopulatorObject {
 
-    @RegisterCatalog(Visibilities.class)
-    public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
-
-    public VisibilityRegistryModule() {
-        super(visibilityMappings);
-    }
+    void setId(String id);
 
     @Override
-    public void registerDefaults() {
-        registerUnsafe(Team.EnumVisible.ALWAYS, "all");
-        registerUnsafe(Team.EnumVisible.HIDE_FOR_OTHER_TEAMS, "own_team");
-        registerUnsafe(Team.EnumVisible.HIDE_FOR_OWN_TEAM, "other_teams");
-        registerUnsafe(Team.EnumVisible.NEVER, "none");
+    default String getName() {
+        return getId();
     }
 
 }

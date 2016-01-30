@@ -24,20 +24,34 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenShrub;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenShrub.class)
-public abstract class MixinWorldGenShrub implements PopulatorObject {
+public abstract class MixinWorldGenShrub implements IWorldGenPopulatorObject {
+
+    private String id;
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random p_180709_2_, BlockPos p_180709_3_);
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {

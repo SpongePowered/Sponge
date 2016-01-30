@@ -24,24 +24,36 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.GoalColor;
+import com.google.common.base.Objects;
 import net.minecraft.scoreboard.ScoreDummyCriteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(value = {GoalColor.class, ScoreDummyCriteria.class})
+@Mixin(ScoreDummyCriteria.class)
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class MixinCriterion implements Criterion { // Trick to allow avoid shadowing, since multiple targets are used
+public abstract class MixinCriterionScoreDummy {
+
+    @Shadow protected abstract String getName();
+
+    public String criterion$getId() {
+        return this.getName();
+    }
 
     @Intrinsic
     public String criterion$getName() {
         return this.getName();
     }
 
-    public String criterion$getId() {
-        return this.getName();
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", criterion$getId())
+                .add("name", criterion$getName())
+                .toString();
     }
+
 }

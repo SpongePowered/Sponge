@@ -26,8 +26,6 @@ package org.spongepowered.common.registry.type.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
-
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -47,61 +45,58 @@ import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.api.world.gen.PopulatorObjects;
+import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
-public class PopulatorObjectRegistryModule implements CatalogRegistryModule<PopulatorObject> {
-
-    @RegisterCatalog(PopulatorObjects.class) private final Map<String, PopulatorObject> populatorObjectMappings = new HashMap<>();
-
-    @Override
-    public Optional<PopulatorObject> getById(String id) {
-        return Optional.ofNullable(this.populatorObjectMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<PopulatorObject> getAll() {
-        return ImmutableList.copyOf(this.populatorObjectMappings.values());
-    }
+public class PopulatorObjectRegistryModule extends MutableCatalogRegistryModule<PopulatorObject> {
 
     @Override
     public void registerDefaults() {
         // Populators
-        this.populatorObjectMappings.put("desert_well", (PopulatorObject) new WorldGenDesertWells());
+        registerUnsafe(new WorldGenDesertWells(), "desert_well");
 
         // Trees
-        this.populatorObjectMappings.put("oak", (PopulatorObject) new WorldGenTrees(false));
-        this.populatorObjectMappings.put("mega_oak", (PopulatorObject) new WorldGenBigTree(false));
-        this.populatorObjectMappings.put("birch", (PopulatorObject) new WorldGenForest(false, false));
-        this.populatorObjectMappings.put("mega_birch", (PopulatorObject) new WorldGenForest(false, true));
-        this.populatorObjectMappings.put("tall_taiga", (PopulatorObject) new WorldGenTaiga2(false));
-        this.populatorObjectMappings.put("pointy_taiga", (PopulatorObject) new WorldGenTaiga1());
-        this.populatorObjectMappings.put("mega_tall_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, true));
-        this.populatorObjectMappings.put("mega_pointy_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, false));
+        registerUnsafe(new WorldGenTrees(false), "oak");
+        registerUnsafe(new WorldGenBigTree(false), "mega_oak");
+        registerUnsafe(new WorldGenForest(false, false), "birch");
+        registerUnsafe(new WorldGenForest(false, true), "mega_birch");
+        registerUnsafe(new WorldGenTaiga2(false), "tall_taiga");
+        registerUnsafe(new WorldGenTaiga1(), "pointy_taiga");
+        registerUnsafe(new WorldGenMegaPineTree(false, true), "mega_tall_taiga");
+        registerUnsafe(new WorldGenMegaPineTree(false, false), "mega_pointy_taiga");
         IBlockState jlog = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
         IBlockState jleaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IBlockState leaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
-        this.populatorObjectMappings.put("jungle", (PopulatorObject) trees);
-        this.populatorObjectMappings.put("mega_jungle", (PopulatorObject) new WorldGenMegaJungle(false, 10, 20, jlog, jleaf));
+        register(trees, "jungle");
+        registerUnsafe(new WorldGenMegaJungle(false, 10, 20, jlog, jleaf), "mega_jungle");
         WorldGenShrub bush = new WorldGenShrub(jlog, leaf);
-        this.populatorObjectMappings.put("jungle_bush", (PopulatorObject) bush);
-        this.populatorObjectMappings.put("savanna", (PopulatorObject) new WorldGenSavannaTree(false));
-        this.populatorObjectMappings.put("canopy", (PopulatorObject) new WorldGenCanopyTree(false));
-        this.populatorObjectMappings.put("swamp", (PopulatorObject) new WorldGenSwamp());
+        registerUnsafe(bush, "jungle_bush");
+        registerUnsafe(new WorldGenSavannaTree(false), "savanna");
+        registerUnsafe(new WorldGenCanopyTree(false), "canopy");
+        registerUnsafe(new WorldGenSwamp(), "swamp");
 
         // Mushrooms
-        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom));
-        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom));
+        registerUnsafe(new WorldGenBigMushroom(Blocks.brown_mushroom), "brown");
+        registerUnsafe(new WorldGenBigMushroom(Blocks.red_mushroom), "red");
     }
+
+    @Override
+    protected void register(PopulatorObject type, String... aliases) {
+        checkNotNull(type, "type");
+        checkNotNull(aliases, "aliases");
+        if (type.getId() == null) {
+            if (aliases.length > 0 && type instanceof IWorldGenPopulatorObject) {
+                ((IWorldGenPopulatorObject) type).setId(aliases[0]);
+            } else {
+                throw new IllegalArgumentException("PopulatorObject " + type + " does not have an id!");
+            }
+        }
+        super.register(type, aliases);
+    }
+
 }

@@ -22,45 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.data.types;
+package org.spongepowered.common.mixin.core.item;
 
-import net.minecraft.block.BlockSandStone;
-import org.spongepowered.api.data.type.SandstoneType;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import net.minecraft.enchantment.EnchantmentProtection;
+import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.text.translation.SpongeTranslation;
 
-@Mixin(BlockSandStone.EnumType.class)
-@Implements(@Interface(iface = SandstoneType.class, prefix = "shadow$"))
-public abstract class MixinBlockSandStoneEnumType {
-
-    @Shadow public abstract String getName();
-
-    private Translation translation;
+@NonnullByDefault
+@Mixin(EnchantmentProtection.class)
+public abstract class MixinEnchantmentProtection extends MixinEnchantment {
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int metadata, String name, String unlocalizedName, CallbackInfo ci) {
-        this.translation = new SpongeTranslation("tile.sandStone." + unlocalizedName + ".name");
-    }
-
-    public String shadow$getId() {
-        return getName();
-    }
-
-    @Intrinsic
-    public String shadow$getName() {
-        return this.translation.get();
-    }
-
-    public Translation shadow$getTranslation() {
-        return this.translation;
+    public void onConstructed(int id, ResourceLocation resLoc, int weight, int protectionType, CallbackInfo ci) {
+        updateTranslation();
     }
 
 }

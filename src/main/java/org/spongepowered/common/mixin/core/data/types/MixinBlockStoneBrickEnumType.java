@@ -26,11 +26,16 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStoneBrick;
 import org.spongepowered.api.data.type.BrickType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockStoneBrick.EnumType.class)
 @Implements(@Interface(iface = BrickType.class, prefix = "shadow$"))
@@ -38,12 +43,24 @@ public abstract class MixinBlockStoneBrickEnumType {
 
     @Shadow public abstract String getName();
 
+    private Translation translation;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String internalName, int internalOrdinal, int meta, String name, String unlocalizedName, CallbackInfo ci) {
+        this.translation = new SpongeTranslation("tile.stonebricksmooth." + unlocalizedName + ".name");
+    }
+
     public String shadow$getId() {
         return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
-        return getName();
+        return this.translation.get();
     }
+
+    public Translation shadow$getTranslation() {
+        return this.translation;
+    }
+
 }

@@ -76,6 +76,7 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 import org.spongepowered.api.statistic.Statistic;
+import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.text.selector.SelectorType;
@@ -257,7 +258,7 @@ public final class CommonModuleRegistry {
             .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
             .registerModule(BrickType.class, new BrickTypeRegistryModule())
             .registerModule(Career.class, CareerRegistryModule.getInstance())
-            .registerModule(new ChatTypeRegistryModule())
+            .registerModule(ChatType.class, ChatTypeRegistryModule.getInstance())
             .registerModule(CoalType.class, new CoalTypeRegistryModule())
             .registerModule(ComparatorType.class, new ComparatorTypeRegistryModule())
             .registerModule(CookedFish.class, new CookedFishRegistryModule())
@@ -284,6 +285,9 @@ public final class CommonModuleRegistry {
             .registerModule(GoalType.class, GoalTypeModule.getInstance())
             .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
             .registerModule(Hinge.class, new HingeRegistryModule())
+            .registerModule(HorseColor.class, new HorseColorRegistryModule())
+            .registerModule(HorseStyle.class, new HorseStyleRegistryModule())
+            .registerModule(HorseVariant.class, new HorseVariantRegistryModule())
             .registerModule(IntegerTrait.class, IntegerTraitRegistryModule.getInstance())
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(new LocaleRegistryModule())
@@ -304,7 +308,7 @@ public final class CommonModuleRegistry {
             .registerModule(QuartzType.class, new QuartzTypeRegistryModule())
             .registerModule(RabbitType.class, new RabbitTypeRegistryModule())
             .registerModule(RailDirection.class, new RailDirectionRegistryModule())
-            .registerModule(Rotation.class, new RotationRegistryModule())
+            .registerModule(Rotation.class, RotationRegistryModule.getInstance())
             .registerModule(SandstoneType.class, new SandstoneTypeRegistryModule())
             .registerModule(SandType.class, new SandTypeRegistryModule())
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())

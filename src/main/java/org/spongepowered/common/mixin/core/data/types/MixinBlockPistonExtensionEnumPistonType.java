@@ -26,11 +26,16 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockPistonExtension;
 import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockPistonExtension.EnumPistonType.class)
 @Implements(@Interface(iface = PistonType.class, prefix = "shadow$"))
@@ -38,12 +43,32 @@ public abstract class MixinBlockPistonExtensionEnumPistonType {
 
     @Shadow public abstract String getName();
 
+    private Translation translation;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(String internalName, int internalOrdinal, String name, CallbackInfo ci) {
+        final String translationId;
+        if ("normal".equals(name)) {
+            translationId = "tile.pistonBase.name";
+        } else if ("sticky".equals(name)) {
+            translationId = "tile.pistonStickyBase.name";
+        } else {
+            translationId = "tile.pistonBase.name";
+        }
+        this.translation = new SpongeTranslation(translationId);
+    }
+
     public String shadow$getId() {
         return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
-        return getName();
+        return this.translation.get();
     }
+
+    public Translation shadow$getTranslation() {
+        return this.translation;
+    }
+
 }
