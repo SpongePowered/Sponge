@@ -67,6 +67,8 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -85,6 +87,8 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
@@ -357,6 +361,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
         return new ExtentViewTransform(this, transform);
+    }
+
+    @Override
+    public MutableBiomeAreaWorker<? extends Chunk> getBiomeWorker() {
+        return new SpongeMutableBiomeAreaWorker<>(this);
+    }
+
+    @Override
+    public MutableBlockVolumeWorker<? extends Chunk> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @SuppressWarnings({"unchecked"})

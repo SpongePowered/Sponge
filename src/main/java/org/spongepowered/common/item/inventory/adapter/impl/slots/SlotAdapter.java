@@ -53,9 +53,13 @@ public class SlotAdapter extends Adapter implements Slot {
     private final int ordinal;
     
     private SlotAdapter nextSlot;
-    
+
+    // Internal use for events, will be removed soon!
+    public int slotNumber = -1;
+
     public SlotAdapter(net.minecraft.inventory.Slot slot) {
         this(MinecraftFabric.of(slot.inventory), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()));
+        this.slotNumber = slot.slotNumber;
     }
 
     public SlotAdapter(Fabric<IInventory> inventory, SlotLens<IInventory, net.minecraft.item.ItemStack> lens) {
@@ -264,5 +268,4 @@ public class SlotAdapter extends Adapter implements Slot {
 //        // TODO 
 //        return super.iterator();
 //    }
-    
 }

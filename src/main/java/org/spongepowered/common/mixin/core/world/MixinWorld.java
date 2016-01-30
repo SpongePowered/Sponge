@@ -160,6 +160,8 @@ import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
+import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
+import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -207,6 +209,8 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
+import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
@@ -872,7 +876,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                              }
                          }
 
-                        if (captureType == CaptureType.PLACE && player != null && transaction.getOriginal().getState().getType() == BlockTypes.AIR) {
+                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                             IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
                             spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos, (User) player, PlayerTracker.Type.OWNER);
@@ -2153,6 +2157,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
         return new ExtentViewTransform(this, transform);
+    }
+
+    @Override
+    public MutableBiomeAreaWorker<? extends World> getBiomeWorker() {
+        return new SpongeMutableBiomeAreaWorker<>(this);
+    }
+
+    @Override
+    public MutableBlockVolumeWorker<? extends World> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
