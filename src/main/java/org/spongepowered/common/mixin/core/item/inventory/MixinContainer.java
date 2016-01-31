@@ -146,7 +146,6 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 ((EntityPlayerMP) player).playerNetServerHandler
                         .kickPlayerFromServer("You have been kicked for attempting to click an out of bounds slot.");
                 ci.setReturnValue(null);
-                ci.cancel();
             }
         }
     }
