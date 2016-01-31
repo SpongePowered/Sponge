@@ -103,7 +103,6 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
@@ -189,10 +188,10 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -454,6 +453,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entityIn;
         entityIn.onUpdate();
+        SpongeCommonEventFactory.handleEntityMovement(entityIn);
         handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
         this.currentTickEntity = null;
         this.processingCaptureCause = false;
@@ -484,6 +484,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entity;
         entity.onUpdate();
+        SpongeCommonEventFactory.handleEntityMovement(entity);
         handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         this.currentTickEntity = null;
         this.processingCaptureCause = false;
@@ -774,13 +775,19 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         if (blockEvents.size() > 1) {
             if (breakEvent != null) {
-                cause = cause.with(NamedCause.of("BreakEvent", breakEvent));
+                int count = cause.allOf(ChangeBlockEvent.Break.class).size();
+                String namedCause = "BreakEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, breakEvent));
             }
             if (modifyEvent != null) {
-                cause = cause.with(NamedCause.of("ModifyEvent", modifyEvent));
+                int count = cause.allOf(ChangeBlockEvent.Modify.class).size();
+                String namedCause = "ModifyEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, modifyEvent));
             }
             if (placeEvent != null) {
-                cause = cause.with(NamedCause.of("PlaceEvent", placeEvent));
+                int count = cause.allOf(ChangeBlockEvent.Place.class).size();
+                String namedCause = "PlaceEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, placeEvent));
             }
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, (World) world, blockMultiTransactions);
             SpongeImpl.postEvent(changeBlockEvent);
@@ -1238,7 +1245,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (!this.captureTerrainGen) {
+            if (!this.captureTerrainGen && this.capturedSpongeBlockSnapshots.size() > 0) {
                 this.handlePostTickCaptures(cause);
             }
 
