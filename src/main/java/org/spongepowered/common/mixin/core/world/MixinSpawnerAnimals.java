@@ -40,6 +40,8 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -69,6 +71,8 @@ public abstract class MixinSpawnerAnimals {
 
     private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/Collection;)"
         + "Lnet/minecraft/util/WeightedRandom$Item;";
+    private static final String WORLD_SERVER_SPAWN_ENTITY = "Lnet/minecraft/world/WorldServer;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
 
     private static boolean spawnerStart;
     private static EntityType spawnerEntityType;
@@ -88,7 +92,7 @@ public abstract class MixinSpawnerAnimals {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
         if (causeTracker.getCapturedEntities().size() > 0) {
-            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer)));
+            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
         }
 
         causeTracker.setWorldSpawnerRunning(false);
@@ -114,7 +118,7 @@ public abstract class MixinSpawnerAnimals {
         IMixinWorld spongeWorld = (IMixinWorld) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         if (causeTracker.getCapturedEntities().size() > 0) {
-            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
+            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.of("Biome", biome)));
         }
 
         causeTracker.setChunkSpawnerRunning(false);
@@ -202,6 +206,27 @@ public abstract class MixinSpawnerAnimals {
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(world)), entityType, transform);
         SpongeImpl.postEvent(event);
         return !event.isCancelled();
+    }
+
+    /**
+     * @author gabizou - January 30th, 2016
+     *
+     * Redirects the spawning here to note that it's from the world spawner.
+     *
+     * @param worldServer The world server coming in
+     * @param nmsEntity The nms entity
+     * @return True if the world spawn was successful
+     */
+    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_SERVER_SPAWN_ENTITY))
+    private boolean onSpawnEntityInWorld(WorldServer worldServer, net.minecraft.entity.Entity nmsEntity) {
+        return ((org.spongepowered.api.world.World) worldServer).spawnEntity(((Entity) nmsEntity),
+                Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.owner(worldServer)));
+    }
+
+    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
+    private static boolean onSpawnEntityInWorldGen(World world, net.minecraft.entity.Entity entity) {
+        return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity,
+                Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
     }
 
 }

@@ -76,4 +76,9 @@ public class StaticMixinHelper {
     public static boolean lastPlayerInteractCancelled = false;
 
     public static boolean setCustomNameTagSkip = false;
+
+    // For spawning
+    public static boolean gettingSpawnList;
+    public static boolean structureSpawning;
+    public static boolean dispenserDispensing;
 }

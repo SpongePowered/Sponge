@@ -57,6 +57,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -131,6 +133,7 @@ import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
@@ -267,6 +270,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
+            .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
         ;
     }
 
@@ -344,6 +348,7 @@ public final class CommonModuleRegistry {
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
+            .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TextColor.class, new TextColorRegistryModule())

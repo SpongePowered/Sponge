@@ -266,7 +266,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {

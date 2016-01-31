@@ -53,6 +53,7 @@ public final class NbtDataUtil {
 
     public static final String BANNER_PATTERN_ID = "Pattern";
     public static final String BANNER_PATTERN_COLOR = "Color";
+    public static final String ENTITY_ROTATION = "Rotation";
 
     private NbtDataUtil() {
     }
@@ -146,6 +147,11 @@ public final class NbtDataUtil {
     public static final String BUKKIT = "bukkit";
     public static final String BUKKIT_FIRST_PLAYED = "firstPlayed";
     public static final String BUKKIT_LAST_PLAYED = "lastPlayed";
+
+    // These are used by Minecraft's internals for entity spawning
+    public static final String ENTITY_TYPE_ID = "id";
+    public static final String MINECART_TYPE = "Type";
+    public static final String ENTITY_POSITION = "Pos";
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 

@@ -103,7 +103,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             ServerConfigurationManager manager = MinecraftServer.getServer().getConfigurationManager();
@@ -112,7 +112,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
             double y = position.getY();
             double z = position.getZ();
 
-            for (Packet packet : packets) {
+            for (Packet<?> packet : packets) {
                 manager.sendToAllNear(x, y, z, radius, this.provider.getDimensionId(), packet);
             }
         }

@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
+import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
@@ -38,9 +40,17 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,6 +75,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
+    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
     @Shadow public int experienceLevel;
@@ -201,4 +212,37 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
+
+    @Inject(method = "dropItem", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/entity/player/EntityPlayer;posY:D"), cancellable = true)
+    private void onDropTop(ItemStack itemStack, boolean a, boolean b, CallbackInfoReturnable<EntityItem> callbackInfoReturnable) {
+        final double height = this.posY - 0.3D + (double)this.getEyeHeight();
+        Transform<org.spongepowered.api.world.World> transform = new Transform<>(this.getWorld(), new Vector3d(this.posX, height, this.posZ));
+        SpawnCause cause = EntitySpawnCause.builder()
+                .entity(this)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, transform);
+        SpongeImpl.postEvent(event);
+        if (event.isCancelled()) {
+            callbackInfoReturnable.setReturnValue(null);
+        }
+    }
+
+    /**
+     * @author gabizou - January 30th, 2016
+     *
+     * Redirects the dropped item spawning to use our world spawning since we know the cause.
+     *
+     * @param world The world
+     * @param entity The entity item
+     * @return True if the events and such succeeded
+     */
+    @Redirect(method = "joinEntityItemWithWorld", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
+    private boolean onDropItem(World world, net.minecraft.entity.Entity entity) {
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity(this)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
+    }
 }

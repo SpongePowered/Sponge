@@ -31,8 +31,9 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCauseBuilder;
+import org.spongepowered.api.event.cause.entity.spawn.common.AbstractSpawnCauseBuilder;
 
-public class SpongeMobSpawnerSpawnCauseBuilder extends AbstractBlockSpawnCauseBuilder<MobSpawnerSpawnCause, MobSpawnerSpawnCause.Builder>
+public class SpongeMobSpawnerSpawnCauseBuilder extends AbstractSpawnCauseBuilder<MobSpawnerSpawnCause, MobSpawnerSpawnCause.Builder>
         implements MobSpawnerSpawnCause.Builder {
 
     protected ImmutableMobSpawnerData mobSpawnerData;
@@ -46,7 +47,6 @@ public class SpongeMobSpawnerSpawnCauseBuilder extends AbstractBlockSpawnCauseBu
     @Override
     public MobSpawnerSpawnCause build() {
         checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.blockSnapshot != null, "EntitySnapshot cannot be null!");
         return new SpongeMobSpawnerSpawnCause(this);
     }
 

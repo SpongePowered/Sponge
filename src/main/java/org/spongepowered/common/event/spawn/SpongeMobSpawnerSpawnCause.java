@@ -26,11 +26,10 @@ package org.spongepowered.common.event.spawn;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableMobSpawnerData;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.MobSpawnerSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.common.AbstractBlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.common.AbstractSpawnCause;
 
-public class SpongeMobSpawnerSpawnCause extends AbstractBlockSpawnCause implements MobSpawnerSpawnCause {
+public class SpongeMobSpawnerSpawnCause extends AbstractSpawnCause implements MobSpawnerSpawnCause {
 
     private final ImmutableMobSpawnerData mobSpawnerData;
 
@@ -53,21 +52,19 @@ public class SpongeMobSpawnerSpawnCause extends AbstractBlockSpawnCause implemen
             return false;
         }
         SpongeMobSpawnerSpawnCause that = (SpongeMobSpawnerSpawnCause) o;
-        return Objects.equal(this.blockSnapshot, that.blockSnapshot)
-               && Objects.equal(this.spawnType, that.spawnType)
+        return Objects.equal(this.spawnType, that.spawnType)
                 && Objects.equal(this.mobSpawnerData, that.mobSpawnerData);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.getType(), this.blockSnapshot);
+        return Objects.hashCode(this.getType());
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper("MobSpawnerSpawnCause")
                 .add("SpawnType", this.spawnType)
-                .add("BlockSnapshot", this.blockSnapshot)
                 .add("MobSpawnerData", this.mobSpawnerData)
                 .toString();
     }
