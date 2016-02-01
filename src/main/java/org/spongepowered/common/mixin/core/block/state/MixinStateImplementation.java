@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block.state;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Joiner;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
@@ -54,6 +55,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -61,8 +65,10 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -77,11 +83,14 @@ import javax.annotation.Nullable;
 public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
 
     @Shadow @Final private Block block;
+    @Shadow @Final private ImmutableMap<IProperty<?>, Comparable<?>> properties;
 
     private ImmutableSet<ImmutableValue<?>> values;
     private ImmutableSet<Key<?>> keys;
     private ImmutableList<ImmutableDataManipulator<?, ?>> manipulators;
     private ImmutableMap<Key<?>, Object> keyMap;
+
+    private String id;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -333,4 +342,30 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return this.block.getMetaFromState(this);
     }
 
+    @Override
+    public void generateId(Block block) {
+        StringBuilder builder = new StringBuilder();
+        builder.append(((BlockType) block).getId());
+        if (!this.properties.isEmpty()) {
+            builder.append('[');
+            Joiner joiner = Joiner.on(',');
+            List<String> propertyValues = new ArrayList<>();
+            for (Map.Entry<IProperty<?>, Comparable<?>> entry : this.properties.entrySet()) {
+                propertyValues.add(entry.getKey().getName() + "=" + entry.getValue());
+            }
+            builder.append(joiner.join(propertyValues));
+            builder.append(']');
+        }
+        this.id = builder.toString();
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.id;
+    }
 }

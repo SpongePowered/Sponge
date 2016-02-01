@@ -253,6 +253,7 @@ public final class CommonModuleRegistry {
             .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
             .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())
             .registerModule(BiomeType.class, new BiomeTypeRegistryModule())
+            .registerModule(BlockState.class, BlockStateRegistryModule.getInstance())
             .registerModule(BlockType.class, BlockTypeRegistryModule.getInstance())
             .registerModule(BrickType.class, new BrickTypeRegistryModule())
             .registerModule(Career.class, CareerRegistryModule.getInstance())
