@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
@@ -572,7 +573,7 @@ public class SpongeCommonEventFactory {
 
 
     public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
-        if (entity.prevPosX != entity.posX || entity.prevPosY != entity.posY || entity.prevPosZ != entity.posZ
+        if (entity.lastTickPosX != entity.posX || entity.lastTickPosY != entity.posY || entity.lastTickPosZ != entity.posZ
             || entity.rotationPitch != entity.prevRotationPitch || entity.rotationYaw != entity.prevRotationYaw) {
             // yes we have a move event.
             if (entity instanceof Player) {
@@ -598,12 +599,19 @@ public class SpongeCommonEventFactory {
             }
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                entity.posX = entity.prevPosX;
-                entity.posY = entity.prevPosY;
-                entity.posZ = entity.prevPosZ;
+                entity.posX = entity.lastTickPosX;
+                entity.posY = entity.lastTickPosY;
+                entity.posZ = entity.lastTickPosZ;
                 entity.rotationPitch = entity.prevRotationPitch;
                 entity.rotationYaw = entity.prevRotationYaw;
             } else {
+                if (entity instanceof EntityHorse) {
+                    System.err.printf("Horse moving!");
+                }
+                Transform<World> worldTransform = event.getFromTransform();
+                Vector3d position = worldTransform.getPosition();
+                Vector3d rotation = worldTransform.getRotation();
+                //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
                 /*
                 Some thoughts from gabizou: The interesting thing here is that while this is only called
                 in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
@@ -614,7 +622,7 @@ public class SpongeCommonEventFactory {
                 is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
                 logic.
                  */
-                ((Entity) entity).setTransform(event.getToTransform());
+                //((Entity) entity).setTransform(event.getToTransform());
             }
         }
     }
