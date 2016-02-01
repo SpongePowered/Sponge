@@ -188,6 +188,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
@@ -246,6 +247,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final String CHECK_NO_ENTITY_COLLISION = "checkNoEntityCollision(Lnet/minecraft/util/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
     private static final String GET_ENTITIES_WITHIN_AABB = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;";
     public boolean processingCaptureCause = false;
+    public boolean processingBlockRandomTicks = false;
     public boolean captureEntitySpawns = true;
     public boolean captureBlockDecay = false;
     public boolean captureTerrainGen = false;
@@ -354,32 +356,50 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Don't capture if we are restoring blocks
             if (!this.isRemote && !this.restoringBlocks && !this.worldSpawnerRunning && !this.chunkSpawnerRunning) {
-                originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
+                originalBlockSnapshot = null;
+                if (this.captureTerrainGen) {
+                    if (StaticMixinHelper.runningGenerator != null) {
+                        originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                                (IBlockAccess) this, pos), pos, flags);
 
-                if (StaticMixinHelper.runningGenerator != null) {
-                    if (this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator) == null) {
-                        this.capturedSpongePopulators.put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
+                        if (this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator) == null) {
+                            this.capturedSpongePopulators.put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
+                        }
+
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
+                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                        populatorSnapshotList = this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator);
+                        populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
                     }
+                } else if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks())) {
+                    originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                            (IBlockAccess) this, pos), pos, flags);
 
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                    transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                    populatorSnapshotList = this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator);
-                    populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-                } else if (this.captureBlockDecay) {
-                    // Only capture final state of decay, ignore the rest
-                    if (block == Blocks.air) {
-                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+                    if (StaticMixinHelper.runningGenerator != null) {
+                        if (this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator) == null) {
+                            this.capturedSpongePopulators.put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
+                        }
+
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
+                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                        populatorSnapshotList = this.capturedSpongePopulators.get(StaticMixinHelper.runningGenerator);
+                        populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
+                    } else if (this.captureBlockDecay) {
+                        // Only capture final state of decay, ignore the rest
+                        if (block == Blocks.air) {
+                            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+                            this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                        }
+                    } else if (block == Blocks.air) {
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
+                        this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                    } else if (block != currentState.getBlock()) {
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
+                        this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                    } else {
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
                         this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
                     }
-                } else if (block == Blocks.air) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
-                    this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-                } else if (block != currentState.getBlock()) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
-                    this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-                } else {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
-                    this.capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
                 }
             }
 
@@ -1221,8 +1241,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.currentTickBlock = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
-                if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.captureCommand &&
-                        this.currentTickBlock != null && !cause.contains(this.currentTickBlock)) {
+                if (shouldChainCause(cause)) {
                     Cause currentCause = cause;
                     cause = Cause.of(NamedCause.source(this.currentTickBlock));
                     List<NamedCause> causes = new ArrayList<>();
@@ -1248,13 +1267,21 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.captureCommand &&
-                    this.capturedSpongeBlockSnapshots.size() > 0 && this.currentTickBlock != null) {
+            if (this.capturedSpongeBlockSnapshots.size() > 0) {
                 this.handlePostTickCaptures(cause);
             }
 
             this.currentTickBlock = currentTickingBlock;
         }
+    }
+
+    private boolean shouldChainCause(Cause cause) {
+        if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.processingBlockRandomTicks &&
+                !this.captureCommand && this.currentTickBlock != null && !cause.contains(this.currentTickBlock)) {
+            return true;
+        }
+
+        return false;
     }
 
     private boolean addWeatherEffect(net.minecraft.entity.Entity entity, Cause cause) {
@@ -1491,11 +1518,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void setCapturingEntitySpawns(boolean flag) {
-        this.captureEntitySpawns = flag;
-    }
-
-    @Override
     public void setCapturingBlockDecay(boolean flag) {
         this.captureBlockDecay = flag;
     }
@@ -1526,18 +1548,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean processingCaptureCause() {
-        return this.processingCaptureCause;
-    }
-
-    @Override
     public void setProcessingCaptureCause(boolean flag) {
         this.processingCaptureCause = flag;
-    }
-
-    @Override
-    public void setCurrentTickBlock(BlockSnapshot snapshot) {
-        this.currentTickBlock = snapshot;
     }
 
     @Shadow

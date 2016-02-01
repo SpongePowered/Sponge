@@ -65,8 +65,6 @@ public interface IMixinWorld {
 
     boolean capturingTerrainGen();
 
-    boolean processingCaptureCause();
-
     boolean restoringBlocks();
 
     Optional<BlockSnapshot> getCurrentTickBlock();
@@ -93,11 +91,7 @@ public interface IMixinWorld {
 
     void setCapturingTerrainGen(boolean flag);
 
-    void setCapturingEntitySpawns(boolean flag);
-
     void setCapturingBlockDecay(boolean flag);
-
-    void setCurrentTickBlock(BlockSnapshot snapshot);
 
     void setRestoringBlocks(boolean flag);
 

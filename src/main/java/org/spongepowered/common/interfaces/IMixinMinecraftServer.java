@@ -36,4 +36,5 @@ public interface IMixinMinecraftServer {
 
     void setSaveEnabled(boolean enabled);
 
+    boolean isPreparingChunks();
 }
