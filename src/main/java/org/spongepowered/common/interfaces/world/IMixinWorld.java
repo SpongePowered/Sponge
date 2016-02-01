@@ -79,13 +79,17 @@ public interface IMixinWorld {
 
     void handlePostTickCaptures(Cause cause);
 
-    void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions);
+    void handleDroppedItems(Cause cause);
+
+    void handleEntitySpawns(Cause cause);
 
     void setProcessingCaptureCause(boolean flag);
 
     void setWorldSpawnerRunning(boolean flag);
 
     void setChunkSpawnerRunning(boolean flag);
+
+    void setCapturingCommand(boolean flag);
 
     void setCapturingTerrainGen(boolean flag);
 

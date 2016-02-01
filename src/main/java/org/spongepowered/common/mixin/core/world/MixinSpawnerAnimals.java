@@ -75,16 +75,21 @@ public abstract class MixinSpawnerAnimals {
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
-        ((IMixinWorld) worldServer).setWorldSpawnerRunning(true);
-        ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
+        IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
+        spongeWorld.setWorldSpawnerRunning(true);
+        spongeWorld.setProcessingCaptureCause(true);
         spawnerStart = true;
     }
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
-        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
-        ((IMixinWorld) worldServer).setWorldSpawnerRunning(false);
-        ((IMixinWorld) worldServer).setProcessingCaptureCause(false);
+        IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
+        if (spongeWorld.getCapturedEntities().size() > 0) {
+            spongeWorld.handleEntitySpawns(Cause.of(NamedCause.source(worldServer)));
+        }
+
+        spongeWorld.setWorldSpawnerRunning(false);
+        spongeWorld.setProcessingCaptureCause(false);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
@@ -94,16 +99,21 @@ public abstract class MixinSpawnerAnimals {
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        ((IMixinWorld) worldServer).setChunkSpawnerRunning(true);
-        ((IMixinWorld) worldServer).setProcessingCaptureCause(true);
+        IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
+        spongeWorld.setChunkSpawnerRunning(true);
+        spongeWorld.setProcessingCaptureCause(true);
         spawnerStart = true;
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
-        ((IMixinWorld) worldServer).handlePostTickCaptures(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
-        ((IMixinWorld) worldServer).setChunkSpawnerRunning(false);
-        ((IMixinWorld) worldServer).setProcessingCaptureCause(false);
+        IMixinWorld spongeWorld = (IMixinWorld) worldServer;
+        if (spongeWorld.getCapturedEntities().size() > 0) {
+            spongeWorld.handleEntitySpawns(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
+        }
+
+        spongeWorld.setChunkSpawnerRunning(false);
+        spongeWorld.setProcessingCaptureCause(false);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
