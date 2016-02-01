@@ -576,6 +576,13 @@ public class SpongeCommonEventFactory {
         if (entity.lastTickPosX != entity.posX || entity.lastTickPosY != entity.posY || entity.lastTickPosZ != entity.posZ
             || entity.rotationPitch != entity.prevRotationPitch || entity.rotationYaw != entity.prevRotationYaw) {
             // yes we have a move event.
+            final double currentPosX = entity.posX;
+            final double currentPosY = entity.posY;
+            final double currentPosZ = entity.posZ;
+            final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+            final double currentRotPitch = entity.rotationPitch;
+            final double currentRotYaw = entity.rotationYaw;
+            Vector3d currentRotationVector = new Vector3d(currentRotPitch, currentRotYaw, 0);
             if (entity instanceof Player) {
                 return; // this is handled elsewhere
             }
@@ -583,9 +590,8 @@ public class SpongeCommonEventFactory {
             Transform<World> previous = new Transform<>(((World) entity.worldObj),
                     new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw,
                     0));
-            Transform<World> current = new Transform<>(((Entity) entity).getLocation(),
-                    ((Entity) entity).getRotation(),
-                    ((Entity) entity).getScale());
+            Location<World> currentLocation = new Location<>(((World) entity.worldObj), currentPosX, currentPosY, currentPosZ);
+            Transform<World> current = new Transform<>(currentLocation, currentRotationVector, ((Entity) entity).getScale());
 
             if (entity instanceof Humanoid) {
                 event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(entity)), previous, current,
@@ -605,12 +611,18 @@ public class SpongeCommonEventFactory {
                 entity.rotationPitch = entity.prevRotationPitch;
                 entity.rotationYaw = entity.prevRotationYaw;
             } else {
-                if (entity instanceof EntityHorse) {
-                    System.err.printf("Horse moving!");
+                Transform<World> worldTransform = event.getToTransform();
+                Vector3d eventPosition = worldTransform.getPosition();
+                Vector3d eventRotation = worldTransform.getRotation();
+                if (!eventPosition.equals(currentPositionVector)) {
+                    entity.posX = eventPosition.getX();
+                    entity.posY = eventPosition.getY();
+                    entity.posZ = eventPosition.getZ();
                 }
-                Transform<World> worldTransform = event.getFromTransform();
-                Vector3d position = worldTransform.getPosition();
-                Vector3d rotation = worldTransform.getRotation();
+                if (!eventRotation.equals(currentRotationVector)) {
+                    entity.rotationPitch = (float) currentRotationVector.getX();
+                    entity.rotationYaw = (float) currentRotationVector.getY();
+                }
                 //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
                 /*
                 Some thoughts from gabizou: The interesting thing here is that while this is only called
