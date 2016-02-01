@@ -268,11 +268,18 @@ public class SpongeCommonEventFactory {
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
-            Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
-            if (slot != null) {
-                SlotTransaction slotTransaction =
-                        new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
-                ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
+            // Handle out of bounds slot locations
+            if (packetIn.getSlotId() >= player.openContainer.inventorySlots.size()) {
+                // Kick the player who's sending an invalid slot index
+                player.playerNetServerHandler.kickPlayerFromServer(
+                        "You have been kicked for attempting to click an out of bounds slot.");
+            } else {
+                Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
+                if (slot != null) {
+                    SlotTransaction slotTransaction =
+                            new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
+                    ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
+                }
             }
         }
         if (packetIn.getMode() == MODE_CLICK || packetIn.getMode() == MODE_PICKBLOCK) {
