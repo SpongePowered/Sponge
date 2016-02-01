@@ -51,6 +51,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.setProcessingCaptureCause(true);
+            world.setCapturingCommand(true);
         }
         ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
     }
@@ -61,6 +62,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
             world.setProcessingCaptureCause(false);
+            world.setCapturingCommand(false);
         }
         ((IMixinCommandBase) command).setExpandedSelector(false);
     }

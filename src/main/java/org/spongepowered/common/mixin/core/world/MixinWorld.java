@@ -250,6 +250,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureBlockDecay = false;
     public boolean captureTerrainGen = false;
     public boolean captureBlocks = false;
+    public boolean captureCommand = false;
     public boolean restoringBlocks = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
@@ -352,7 +353,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
             // Don't capture if we are restoring blocks
-            if (!this.isRemote && !this.restoringBlocks) {
+            if (!this.isRemote && !this.restoringBlocks && !this.worldSpawnerRunning && !this.chunkSpawnerRunning) {
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, pos), pos, flags);
 
                 if (StaticMixinHelper.runningGenerator != null) {
@@ -430,7 +431,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V") )
     public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (this.isRemote || this.currentTickBlock != null || ((IMixinWorld) worldIn).capturingTerrainGen()) {
+        if (this.isRemote || this.currentTickBlock != null || this.captureTerrainGen || this.worldSpawnerRunning || this.chunkSpawnerRunning) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -971,10 +972,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 cause = StaticMixinHelper.dropCause;
                 StaticMixinHelper.destructItemDrop = true;
             }
-            handleDroppedItems(cause, (List<Entity>) (List<?>) this.capturedEntityItems, this.invalidTransactions);
+            handleDroppedItems(cause);
         }
         if (this.capturedEntities.size() > 0) {
-            handleEntitySpawns(cause, this.capturedEntities, this.invalidTransactions);
+            handleEntitySpawns(cause);
         }
 
         StaticMixinHelper.dropCause = null;
@@ -1022,15 +1023,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public void handleDroppedItems(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions) {
-        Iterator<Entity> iter = entities.iterator();
+    public void handleDroppedItems(Cause cause) {
+        Iterator<Entity> iter = this.capturedEntityItems.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            if (invalidTransactions != null) {
+            if (this.invalidTransactions != null) {
                 // check to see if this drop is invalid and if so, remove
                 boolean invalid = false;
-                for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
+                for (Transaction<BlockSnapshot> blockSnapshot : this.invalidTransactions) {
                     if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
                         invalid = true;
                         iter.remove();
@@ -1065,9 +1066,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            event = SpongeEventFactory.createDropItemEventDestruct(cause, entities, entitySnapshots, (World) this);
+            event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, (World) this);
         } else {
-            event = SpongeEventFactory.createDropItemEventDispense(cause, entities, entitySnapshots, (World) this);
+            event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, (World) this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1111,15 +1112,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    private void handleEntitySpawns(Cause cause, List<Entity> entities, List<Transaction<BlockSnapshot>> invalidTransactions) {
-        Iterator<Entity> iter = entities.iterator();
+    @Override
+    public void handleEntitySpawns(Cause cause) {
+        Iterator<Entity> iter = this.capturedEntities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            if (invalidTransactions != null) {
+            if (this.invalidTransactions != null) {
                 // check to see if this spawn is invalid and if so, remove
                 boolean invalid = false;
-                for (Transaction<BlockSnapshot> blockSnapshot : invalidTransactions) {
+                for (Transaction<BlockSnapshot> blockSnapshot : this.invalidTransactions) {
                     if (blockSnapshot.getOriginal().getLocation().get().getBlockPosition().equals(currentEntity.getLocation().getBlockPosition())) {
                         invalid = true;
                         iter.remove();
@@ -1153,16 +1155,16 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         if (this.worldSpawnerRunning) {
             event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(cause, entities, entitySnapshots,
+                    SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedEntities, entitySnapshots,
                                                                      (World) (Object) this);
         } else if (this.chunkSpawnerRunning) {
             event =
-                    SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, entities, entitySnapshots,
+                    SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots,
                                                                        (World) (Object) this);
         } else {
             event =
                     SpongeEventFactory
-                            .createSpawnEntityEvent(cause, entities, entitySnapshotBuilder.build(), (World) (Object) this);
+                            .createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), (World) (Object) this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1219,7 +1221,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (newState != null && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.currentTickBlock = this.createSpongeBlockSnapshot(newState, newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
                 newState.getBlock().onBlockAdded((net.minecraft.world.World) (Object) this, pos, newState);
-                if (!this.captureTerrainGen && !cause.contains(this.currentTickBlock)) {
+                if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.captureCommand &&
+                        this.currentTickBlock != null && !cause.contains(this.currentTickBlock)) {
                     Cause currentCause = cause;
                     cause = Cause.of(NamedCause.source(this.currentTickBlock));
                     List<NamedCause> causes = new ArrayList<>();
@@ -1245,7 +1248,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (!this.captureTerrainGen && this.capturedSpongeBlockSnapshots.size() > 0) {
+            if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.captureCommand &&
+                    this.capturedSpongeBlockSnapshots.size() > 0 && this.currentTickBlock != null) {
                 this.handlePostTickCaptures(cause);
             }
 
@@ -1474,6 +1478,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public boolean capturingTerrainGen() {
         return this.captureTerrainGen;
+    }
+
+    @Override
+    public void setCapturingCommand(boolean flag) {
+        this.captureCommand = flag;
     }
 
     @Override
