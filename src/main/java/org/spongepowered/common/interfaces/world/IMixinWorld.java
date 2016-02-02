@@ -57,6 +57,8 @@ public interface IMixinWorld {
 
     BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
+    boolean isProcessingCaptureCause();
+
     boolean isWorldSpawnerRunning();
 
     boolean isChunkSpawnerRunning();

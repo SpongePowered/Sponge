@@ -1528,6 +1528,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public boolean isProcessingCaptureCause() {
+        return this.processingCaptureCause;
+    }
+
+    @Override
     public boolean isWorldSpawnerRunning() {
         return this.worldSpawnerRunning;
     }

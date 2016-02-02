@@ -102,6 +102,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
+    protected boolean prevCapturingTerrain;
+    protected boolean prevProcessingCaptures;
+    protected boolean prevRestoringBlocks;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
@@ -252,6 +255,8 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     @Override
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
+        this.prevCapturingTerrain = world.capturingTerrainGen();
+        this.prevProcessingCaptures = world.isProcessingCaptureCause();
         world.setProcessingCaptureCause(true);
         world.setCapturingTerrainGen(true);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
@@ -276,17 +281,17 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
+            StaticMixinHelper.runningGenerator = populator.getType();
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
             }
-            StaticMixinHelper.runningGenerator = populator.getType();
             if (populator instanceof IFlaggedPopulator) {
                 ((IFlaggedPopulator) populator).populate(chunkProvider, chunk, this.rand, flags);
             } else {
                 populator.populate(chunk, this.rand);
             }
-            StaticMixinHelper.runningGenerator = null;
         }
+        StaticMixinHelper.runningGenerator = null;
 
         // If we wrapped a custom chunk provider then we should call its
         // populate method so that its particular changes are used.
@@ -304,12 +309,14 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                         chunk);
         SpongeImpl.postEvent(event);
 
+        this.prevRestoringBlocks = world.restoringBlocks();
+        world.setRestoringBlocks(true);
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
             world.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }
-
-        world.setCapturingTerrainGen(false);
-        world.setProcessingCaptureCause(false);
+        world.setRestoringBlocks(this.prevRestoringBlocks);
+        world.setCapturingTerrainGen(this.prevCapturingTerrain);
+        world.setProcessingCaptureCause(this.prevProcessingCaptures);
         world.getCapturedPopulatorChanges().clear();
 
         BlockFalling.fallInstantly = false;
