@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -122,6 +121,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
@@ -889,7 +889,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ListenableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
+    public CompletableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
         return ServerUtils.copyWorld((MinecraftServer) (Object) this, checkNotNull(worldProperties, "worldProperties"),
                 checkNotNull(copyName, "copyName"));
     }
@@ -921,7 +921,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ListenableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
+    public CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
         return ServerUtils.deleteWorld(checkNotNull(worldProperties, "worldProperties"));
     }
 

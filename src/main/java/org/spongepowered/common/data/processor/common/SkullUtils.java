@@ -41,6 +41,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedPlayer
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.Nullable;
@@ -126,7 +127,7 @@ public class SkullUtils {
         // Skulls need a name in order to properly display -> resolve if no name is contained in the given profile
         final GameProfileManager resolver = Sponge.getGame().getServer().getGameProfileManager();
         if (!profile.getName().isPresent() || profile.getName().get().isEmpty()) {
-            final ListenableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
+            final CompletableFuture<GameProfile> future = resolver.get(profile.getUniqueId());
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
@@ -134,7 +135,7 @@ public class SkullUtils {
                 return null;
             }
         } else if (profile.getUniqueId() == null) {
-            final ListenableFuture<GameProfile> future = resolver.get(profile.getName().get());
+            final CompletableFuture<GameProfile> future = resolver.get(profile.getName().get());
             try {
                 return future.get();
             } catch (InterruptedException | ExecutionException e) {
