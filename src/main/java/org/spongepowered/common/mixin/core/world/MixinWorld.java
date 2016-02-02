@@ -1618,13 +1618,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        IBlockState state = getBlockState(new BlockPos(x, y, z));
-        if (((IMixinBlock) state.getBlock()).forceUpdateBlockState()) {
-            BlockState updatedState = (BlockState) state.getBlock().getActualState(state, (IBlockAccess) this, new BlockPos(x, y, z));
-            return updatedState;
-        } else {
-            return (BlockState) state;
-        }
+        return (BlockState) getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
@@ -2277,7 +2271,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public <E> Optional<E> get(int x, int y, int z, Key<? extends BaseValue<E>> key) {
-        final Optional<E> optional = getBlock(x, y, z).get(key);
+        final Optional<E> optional = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z)).get(key);
         if (optional.isPresent()) {
             return optional;
         } else {
@@ -2317,7 +2311,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
-        final BlockState blockState = getBlock(x, y, z);
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z));
         if (blockState.supports(key)) {
             return blockState.getValue(key);
         } else {
@@ -2365,7 +2359,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<Key<?>> getKeys(int x, int y, int z) {
         final ImmutableSet.Builder<Key<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z);
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z));
         builder.addAll(blockState.getKeys());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         if (tileEntity.isPresent()) {
@@ -2377,7 +2371,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Set<ImmutableValue<?>> getValues(int x, int y, int z) {
         final ImmutableSet.Builder<ImmutableValue<?>> builder = ImmutableSet.builder();
-        final BlockState blockState = getBlock(x, y, z);
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z));
         builder.addAll(blockState.getValues());
         final Optional<TileEntity> tileEntity = getTileEntity(x, y, z);
         if (tileEntity.isPresent()) {
@@ -2389,7 +2383,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public <E> DataTransactionResult offer(int x, int y, int z, Key<? extends BaseValue<E>> key, E value) {
-        final BlockState blockState = getBlock(x, y, z);
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z));
         if (blockState.supports(key)) {
             ImmutableValue<E> old = ((Value<E>) getValue(x, y, z, (Key) key).get()).asImmutable();
             setBlock(x, y, z, blockState.with(key, value).get());
@@ -2406,7 +2400,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public DataTransactionResult offer(int x, int y, int z, DataManipulator<?, ?> manipulator, MergeFunction function) {
-        final BlockState blockState = getBlock(x, y, z);
+        final BlockState blockState = getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z));
         final ImmutableDataManipulator<?, ?> immutableDataManipulator = manipulator.asImmutable();
         if (blockState.supports((Class) immutableDataManipulator.getClass())) {
             final List<ImmutableValue<?>> old = new ArrayList<>(blockState.getValues());
@@ -2469,7 +2463,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public Collection<DataManipulator<?, ?>> getManipulators(int x, int y, int z) {
         final List<DataManipulator<?, ?>> list = new ArrayList<>();
-        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z).getManipulators();
+        final Collection<ImmutableDataManipulator<?, ?>> manipulators = this.getBlock(x, y, z).withExtendedProperties(new Location<World>((World) this, x, y, z)).getManipulators();
         for (ImmutableDataManipulator<?, ?> immutableDataManipulator : manipulators) {
             list.add(immutableDataManipulator.asMutable());
         }
