@@ -32,6 +32,8 @@ import org.spongepowered.api.entity.hanging.Hanging;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(EntityHanging.class)
 public abstract class MixinEntityHanging extends MixinEntity implements Hanging {
@@ -47,20 +49,9 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging 
     /**
      * Called to update the entity's position/logic.
      */
-    @Overwrite
-    public void onUpdate() {
-        this.prevPosX = this.posX;
-        this.prevPosY = this.posY;
-        this.prevPosZ = this.posZ;
-
-        if (this.tickCounter1++ == 100 && !this.worldObj.isRemote) {
-            this.tickCounter1 = 0;
-
-            if (!this.isDead && !this.onValidSurface() && !this.ignorePhysics) {
-                this.setDead();
-                this.onBroken((Entity) null);
-            }
-        }
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityHanging;onValidSurface()Z"))
+    private boolean checkIfOnValidSurceAndIgnoresPhysics(EntityHanging entityHanging) {
+        return this.onValidSurface() && !this.ignorePhysics;
     }
 
     @Override

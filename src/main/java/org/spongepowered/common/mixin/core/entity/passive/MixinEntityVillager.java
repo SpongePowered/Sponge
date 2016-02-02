@@ -31,6 +31,9 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,10 +52,10 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 @Mixin(EntityVillager.class)
+@Implements(@Interface(iface = Villager.class, prefix = "villager$"))
 public abstract class MixinEntityVillager extends MixinEntityAgeable implements Villager, IMixinVillager {
 
     @Shadow private boolean isPlaying;
-    @Shadow private EntityPlayer buyingPlayer;
     @Shadow private int careerId;
     @Shadow private int careerLevel;
     @Shadow private MerchantRecipeList buyingList;
@@ -60,8 +63,8 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow public abstract int getProfession();
     @Shadow public abstract void setProfession(int professionId);
     @Shadow public abstract void setCustomer(EntityPlayer player);
-    @Shadow(prefix = "shadow$")
-    public abstract EntityPlayer shadow$getCustomer();
+    @Shadow public abstract boolean shadow$isTrading();
+    @Shadow public abstract EntityPlayer shadow$getCustomer();
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Profession profession;
@@ -83,10 +86,9 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.isPlaying = playing;
     }
 
-    @Override
-    @Overwrite
-    public boolean isTrading() {
-        return this.buyingPlayer != null;
+    @Intrinsic
+    public boolean villager$isTrading() {
+        return shadow$isTrading();
     }
 
     @Override

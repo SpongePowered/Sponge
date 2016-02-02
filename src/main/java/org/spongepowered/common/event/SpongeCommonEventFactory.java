@@ -573,6 +573,9 @@ public class SpongeCommonEventFactory {
 
 
     public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
+        if (entity instanceof Player) {
+            return; // this is handled elsewhere
+        }
         if (entity.lastTickPosX != entity.posX || entity.lastTickPosY != entity.posY || entity.lastTickPosZ != entity.posZ
             || entity.rotationPitch != entity.prevRotationPitch || entity.rotationYaw != entity.prevRotationYaw) {
             // yes we have a move event.
@@ -583,9 +586,6 @@ public class SpongeCommonEventFactory {
             final double currentRotPitch = entity.rotationPitch;
             final double currentRotYaw = entity.rotationYaw;
             Vector3d currentRotationVector = new Vector3d(currentRotPitch, currentRotYaw, 0);
-            if (entity instanceof Player) {
-                return; // this is handled elsewhere
-            }
             DisplaceEntityEvent.Move event;
             Transform<World> previous = new Transform<>(((World) entity.worldObj),
                     new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw,

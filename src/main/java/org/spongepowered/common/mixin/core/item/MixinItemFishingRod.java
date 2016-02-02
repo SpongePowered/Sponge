@@ -39,40 +39,36 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 
 @Mixin(ItemFishingRod.class)
 public abstract class MixinItemFishingRod extends Item {
 
-    @Override
-    @Overwrite
-    public ItemStack onItemRightClick(ItemStack itemStack, World world, EntityPlayer player) {
-        if (player.fishEntity != null) {
-            // Damage and animation logic is moved inside handleHookRetraction, as the event
-            // is fired there
-            ((IMixinEntityFishHook) player.fishEntity).setFishingRodItemStack(itemStack);
-            player.fishEntity.handleHookRetraction();
-        } else {
-            EntityFishHook fishHook = new EntityFishHook(world, player);
-            EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
-            // only fire event on server-side to avoid crash on client
-            if (!player.worldObj.isRemote
-                && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Cause.of(NamedCause.source(player)),
+    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFishHook;handleHookRetraction()I"), cancellable = true)
+    private void onItemRightClickFirst(ItemStack itemStack, World world, EntityPlayer player,
+            CallbackInfoReturnable<ItemStack> callbackInfoReturnable) {
+        ((IMixinEntityFishHook) player.fishEntity).setFishingRodItemStack(itemStack);
+        player.fishEntity.handleHookRetraction();
+        callbackInfoReturnable.setReturnValue(itemStack);
+        callbackInfoReturnable.cancel();
+    }
+
+    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSoundAtEntity(Lnet/minecraft/entity/Entity;Ljava/lang/String;FF)V"), cancellable = true)
+    private void onThrowEvent(ItemStack itemStack, World world, EntityPlayer player, CallbackInfoReturnable<ItemStack> callbackInfoReturnable) {
+        EntityFishHook fishHook = new EntityFishHook(world, player);
+        EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();
+        // only fire event on server-side to avoid crash on client
+        if (!player.worldObj.isRemote
+            && SpongeImpl.postEvent(SpongeEventFactory.createFishingEventStart(Cause.of(NamedCause.source(player)),
                 fishHookSnapshot, (FishHook) fishHook))) {
-                player.fishEntity = null;
-                return itemStack;
-            }
-
-            world.playSoundAtEntity(player, "random.bow", 0.5F, 0.4F / (itemRand.nextFloat() * 0.4F + 0.8F));
-            if (!player.worldObj.isRemote) {
-                world.spawnEntityInWorld(fishHook);
-            }
-
-            player.swingItem();
-            player.triggerAchievement(StatList.objectUseStats[Item.getIdFromItem(this)]);
+            player.fishEntity = null;
+            callbackInfoReturnable.setReturnValue(itemStack);
+            callbackInfoReturnable.cancel();
         }
-        return itemStack;
     }
 
 }
