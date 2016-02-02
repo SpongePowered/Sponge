@@ -59,7 +59,9 @@ public class FlyingDataProcessor extends AbstractEntitySingleDataProcessor<Entit
     @Override
     protected boolean set(Entity entity, Boolean value) {
         if (entity instanceof EntityPlayer) {
-            ((EntityPlayer) entity).capabilities.isFlying = value;
+            EntityPlayer entityPlayer = (EntityPlayer)entity;
+            entityPlayer.capabilities.isFlying = value;
+            entityPlayer.sendPlayerAbilities();
         } else {
             entity.isAirBorne = value;
         }
