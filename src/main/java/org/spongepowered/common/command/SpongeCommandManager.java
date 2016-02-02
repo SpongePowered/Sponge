@@ -24,24 +24,13 @@
  */
 package org.spongepowered.common.command;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spongepowered.api.command.CommandMessageFormatting.error;
-import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.command.CommandCallable;
-import org.spongepowered.api.command.CommandException;
-import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.command.CommandMapping;
-import org.spongepowered.api.command.CommandPermissionException;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.command.*;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -55,20 +44,16 @@ import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.TextMessageException;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-
 import javax.annotation.Nullable;
 import javax.inject.Inject;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.*;
+import java.util.function.Function;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.command.CommandMessageFormatting.error;
+import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
 
 /**
  * A simple implementation of {@link CommandManager}.
@@ -315,6 +300,11 @@ public class SpongeCommandManager implements CommandManager {
     @Override
     public boolean testPermission(CommandSource source) {
         return this.dispatcher.testPermission(source);
+    }
+
+    @Override
+    public boolean testSourceType(CommandSource source) {
+        return this.dispatcher.testSourceType(source);
     }
 
     @Override
