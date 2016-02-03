@@ -30,7 +30,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 
-final class EntityDummy extends Entity {
+public final class EntityDummy extends Entity {
 
     protected EntityDummy(World worldIn) {
         super(worldIn);
