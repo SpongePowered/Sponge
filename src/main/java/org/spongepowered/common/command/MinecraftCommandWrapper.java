@@ -35,22 +35,19 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerSelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +57,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -170,6 +165,11 @@ public class MinecraftCommandWrapper implements CommandCallable {
     @Override
     public boolean testPermission(CommandSource source) {
         return this.command.canCommandSenderUseCommand(WrapperICommandSender.of(source));
+    }
+
+    @Override
+    public boolean testSourceType(CommandSource source) {
+        return true;
     }
 
     @Override

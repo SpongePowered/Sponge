@@ -318,6 +318,11 @@ public class SpongeCommandManager implements CommandManager {
     }
 
     @Override
+    public boolean testSourceType(CommandSource source) {
+        return this.dispatcher.testSourceType(source);
+    }
+
+    @Override
     public Optional<Text> getShortDescription(CommandSource source) {
         return this.dispatcher.getShortDescription(source);
     }
