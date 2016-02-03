@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.interfaces.block;
 
+import net.minecraft.block.Block;
+
 public interface IMixinBlockState {
 
     int getStateMeta();
+
+    void generateId(Block block);
 
 }

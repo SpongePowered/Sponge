@@ -57,6 +57,8 @@ public interface IMixinWorld {
 
     BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
+    boolean isProcessingCaptureCause();
+
     boolean isWorldSpawnerRunning();
 
     boolean isChunkSpawnerRunning();
@@ -64,8 +66,6 @@ public interface IMixinWorld {
     boolean capturingBlocks();
 
     boolean capturingTerrainGen();
-
-    boolean processingCaptureCause();
 
     boolean restoringBlocks();
 
@@ -93,11 +93,7 @@ public interface IMixinWorld {
 
     void setCapturingTerrainGen(boolean flag);
 
-    void setCapturingEntitySpawns(boolean flag);
-
     void setCapturingBlockDecay(boolean flag);
-
-    void setCurrentTickBlock(BlockSnapshot snapshot);
 
     void setRestoringBlocks(boolean flag);
 

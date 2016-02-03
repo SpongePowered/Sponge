@@ -25,51 +25,54 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinMinecart;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 
-    private double maxSpeed = 0.4D;
+    private static final String RIDER_ENTITY_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;riddenByEntity:Lnet/minecraft/entity/Entity;";
+    private static final String MINECART_MOTION_X_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionX:D";
+    private static final String MINECART_MOTION_Z_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionZ:D";
+    protected double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(0.5D, 0.5D, 0.5D);
-    private Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
+    protected Vector3d airborneMod = new Vector3d(0.94999998807907104D, 0.94999998807907104D, 0.94999998807907104D);
+    protected Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
 
-    // this method overwrites vanilla behavior to allow for a custom deceleration rate when derailed
-    @Inject(method = "moveDerailedMinecart()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;moveEntity(DDD)V"))
-    public void implementCustomDerailedDeceleration(CallbackInfo ci) {
-        if (this.isOnGround()) {
-            this.motionX /= 0.5D;
-            this.motionY /= 0.5D;
-            this.motionZ /= 0.5D;
-            this.motionX *= this.derailedMod.getX();
-            this.motionY *= this.derailedMod.getY();
-            this.motionZ *= this.derailedMod.getZ();
-        }
+    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_X_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void onDecelerateX(EntityMinecart self, double modifier) {
+        self.motionX *= this.derailedMod.getX();
+    }
+    // note there would be a vanilla variant for the Y derail, however Forge re-assigns the motionY once, so the ordinals are out of sync
+
+    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_Z_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void onDecelerateZ(EntityMinecart self, double modifier) {
+        self.motionZ *= this.derailedMod.getZ();
     }
 
-    // this method overwrites vanilla behavior to allow the cart not to slow when empty
-    @Overwrite
-    protected void applyDrag() {
-        if (this.riddenByEntity != null || !this.slowWhenEmpty) {
-            this.motionX *= 1.0D;
-            this.motionY *= 0.0D;
-            this.motionZ *= 1.0D;
-        } else {
-            this.motionX *= 0.96D;
-            this.motionY *= 0.0D;
-            this.motionZ *= 0.96D;
+    @Nullable
+    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = RIDER_ENTITY_FIELD, opcode = Opcodes.GETFIELD))
+    private Entity onGetRiderEntity(EntityMinecart self) {
+        Entity rider = self.riddenByEntity;
+        if (rider == null && !this.slowWhenEmpty) {
+            return EntityUtil.USELESS_ENTITY_FOR_MIXINS;
         }
+        return rider;
     }
 
     @Override

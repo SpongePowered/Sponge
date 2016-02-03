@@ -88,6 +88,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -117,18 +118,24 @@ public abstract class MixinServerConfigurationManager {
 
     private static final String WRITE_PLAYER_DATA =
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
+    private static final String
+            SERVER_SEND_PACKET_TO_ALL_PLAYERS =
+            "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+    private static final String NET_HANDLER_SEND_PACKET = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V";
     @Shadow @Final private static Logger logger;
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
     @Shadow private IPlayerFileData playerNBTManagerObj;
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
-    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP p_72381_1_, EntityPlayerMP p_72381_2_, net.minecraft.world.World worldIn);
+    @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP playerIn, @Nullable EntityPlayerMP other, net.minecraft.world.World worldIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
-    @Shadow public abstract void sendPacketToAllPlayers(Packet packetIn);
+    @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
+    @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
@@ -145,8 +152,8 @@ public abstract class MixinServerConfigurationManager {
         initializeConnectionToPlayer(netManager, playerIn, null);
     }
 
-    private void disconnectClient(NetworkManager netManager, Optional<Text> disconnectMessage, GameProfile profile) {
-        IChatComponent reason = null;
+    private void disconnectClient(NetworkManager netManager, Optional<Text> disconnectMessage, @Nullable GameProfile profile) {
+        IChatComponent reason;
         if (disconnectMessage.isPresent()) {
             reason = SpongeTexts.toComponent(disconnectMessage.get());
         } else {
@@ -297,11 +304,11 @@ public abstract class MixinServerConfigurationManager {
 
         if (!playerIn.getName().equalsIgnoreCase(s))
         {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", new Object[] {playerIn.getDisplayName(), s});
+            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
         }
         else
         {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", new Object[] {playerIn.getDisplayName()});
+            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
         chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
@@ -478,27 +485,18 @@ public abstract class MixinServerConfigurationManager {
         return new Location<>((World) targetWorld, spawnPos);
     }
 
-    @Overwrite
-    public void setPlayerManager(WorldServer[] worldServers) {
-        if (this.playerNBTManagerObj != null) {
-            return;
+    @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)
+    private void onSetPlayerManager(WorldServer[] worldServers, CallbackInfo callbackInfo) {
+        if (this.playerNBTManagerObj == null) {
+            this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
+            worldServers[0].getWorldBorder().addListener(new PlayerBorderListener());
         }
-        this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
-        worldServers[0].getWorldBorder().addListener(new PlayerBorderListener());
+        callbackInfo.cancel();
     }
 
-    @Overwrite
-    public void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn) {
-        WorldBorder worldborder = worldIn.getWorldBorder();
-        playerIn.playerNetServerHandler.sendPacket(new S44PacketWorldBorder(worldborder, S44PacketWorldBorder.Action.INITIALIZE));
-        playerIn.playerNetServerHandler.sendPacket(new S03PacketTimeUpdate(worldIn.getTotalWorldTime(), worldIn.getWorldTime(), worldIn
-                .getGameRules().getBoolean("doDaylightCycle")));
-
-        if (worldIn.isRaining()) {
-            playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(1, 0.0F));
-            playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(7, worldIn.getRainStrength(1.0F)));
-            playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(8, worldIn.getThunderStrength(1.0F)));
-        }
+    @Redirect(method = "updateTimeAndWeatherForPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;getWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
+    private WorldBorder onUpdateTimeGetWorldBorder(WorldServer worldServer, EntityPlayerMP entityPlayerMP, WorldServer worldServerIn) {
+        return worldServerIn.getWorldBorder();
     }
 
     @Inject(method = "playerLoggedOut(Lnet/minecraft/entity/player/EntityPlayerMP;)V", at = @At("HEAD"))
@@ -516,34 +514,17 @@ public abstract class MixinServerConfigurationManager {
         }
     }
 
-    /**
-     * @author gabizou - January 4th, 2016
-     *
-     * This prevents the server incorrectly sending invisible players to the actual player
-     * @param playerIn
-     */
-    @SuppressWarnings("unchecked")
-    @Overwrite
-    public void playerLoggedIn(EntityPlayerMP playerIn) {
-        this.playerEntityList.add(playerIn);
-        this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);
-        // Sponge Start - check invisibility from plugins
-        if (!((IMixinEntity) playerIn).isReallyREALLYInvisible()) {
-            this.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerIn));
+    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
+    private void onPlayerSendPacket(ServerConfigurationManager manager, Packet<?> packet, EntityPlayerMP playerMP) {
+        if (!((IMixinEntity) playerMP).isReallyREALLYInvisible()) {
+            manager.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerMP));
         }
-        // Sponge End
-        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
-        worldserver.spawnEntityInWorld(playerIn);
-        this.preparePlayer(playerIn, (WorldServer) null);
+    }
 
-        for (int i = 0; i < this.playerEntityList.size(); ++i) {
-            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) this.playerEntityList.get(i);
-            // Sponge Start - check invisibility for plugins so we don't send invisible players
-            if (!((IMixinEntity) entityplayermp1).isReallyREALLYInvisible()) {
-                playerIn.playerNetServerHandler
-                        .sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, entityplayermp1));
-            }
-            // Sponge End
+    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
+    private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
+        if (!((IMixinEntity) playerMP).isReallyREALLYInvisible()) {
+            netHandler.sendPacket(packet);
         }
     }
 

@@ -81,11 +81,6 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public boolean forceUpdateBlockState() {
-        return true;
-    }
-
     private ImmutableRedstonePoweredData getPowerFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class,
                 (Integer) blockState.getValue(BlockRedstoneWire.POWER));

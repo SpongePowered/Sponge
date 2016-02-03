@@ -44,6 +44,8 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
@@ -55,8 +57,11 @@ import java.util.List;
 @Mixin(EntityAITasks.class)
 @Implements(value = @Interface(iface = Goal.class, prefix = "goal$"))
 public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
-    @Shadow private List taskEntries;
-    @Shadow private List executingTaskEntries;
+    @Shadow private List<EntityAITasks.EntityAITaskEntry> taskEntries;
+    @Shadow private List<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
+
+    @Shadow public abstract void addTask(int priority, EntityAIBase task);
+
     private EntityLiving owner;
     private GoalType type;
 
@@ -68,23 +73,23 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         return getType();
     }
 
-    public Goal goal$addTask(int priority, AITask<?> task) {
+    public Goal<?> goal$addTask(int priority, AITask<?> task) {
         addTask(priority, (EntityAIBase) task);
-        return (Goal) (Object) this;
+        return (Goal<?>) this;
     }
 
-    public Goal goal$removeTask(AITask<?> task) {
+    public Goal<?> goal$removeTask(AITask<?> task) {
         removeTask((EntityAIBase) task);
-        return (Goal) (Object) this;
+        return (Goal<?>) this;
     }
 
-    public Goal goal$removeTasks(AITaskType type) {
-        Iterator iterator = this.taskEntries.iterator();
+    public Goal<?> goal$removeTasks(AITaskType type) {
+        Iterator<EntityAITasks.EntityAITaskEntry> iterator = this.taskEntries.iterator();
 
         while (iterator.hasNext()) {
-            final EntityAITasks.EntityAITaskEntry entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
+            final EntityAITasks.EntityAITaskEntry entityaitaskentry = iterator.next();
             final EntityAIBase otherAiBase = entityaitaskentry.action;
-            final AITask otherTask = (AITask) otherAiBase;
+            final AITask<?> otherTask = (AITask<?>) otherAiBase;
 
             if (otherTask.getType().equals(type)) {
                 if (this.executingTaskEntries.contains(entityaitaskentry)) {
@@ -96,13 +101,13 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             }
         }
 
-        return (Goal) (Object) this;
+        return (Goal<?>) this;
     }
 
     public List<? extends AITask<?>> goal$getTasksByType(AITaskType type) {
         final ImmutableList.Builder<AITask<?>> tasks = ImmutableList.builder();
 
-        for (EntityAITasks.EntityAITaskEntry entry : (List<EntityAITasks.EntityAITaskEntry>) this.taskEntries) {
+        for (EntityAITasks.EntityAITaskEntry entry : this.taskEntries) {
             final AITask<?> task = (AITask<?>) entry.action;
 
             if (task.getType().equals(type)) {
@@ -128,21 +133,31 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         return this.taskEntries;
     }
 
-    @Overwrite
-    public void addTask(int priority, EntityAIBase base) {
-        ((IMixinEntityAIBase) base).setGoal((Goal<?>) (Object) this);
+    /**
+     * @author gabizou - February 1st, 2016
+     * Purpose: Rewrites the overwrite to use a redirect when an entry is being added
+     * to the task entries. We throw an event for plugins to potentially cancel.
+     *
+     * @param entry
+     * @param priority
+     * @param base
+     * @return
+     */
+    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    private boolean onAddEntityTask(List<EntityAITasks.EntityAITaskEntry> list, Object entry, int priority, EntityAIBase base) {
+        ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {
             // Event is fired in firePostConstructEvents
-            this.taskEntries.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
-            return;
+            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()), priority, priority,
-            (Goal) (Object) this, (Agent) this.owner, (AITask) base);
+                (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ((IMixinEntityAIBase) base).setGoal(null);
+            return false;
         } else {
-            this.taskEntries.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
+            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
         }
     }
 
@@ -181,7 +196,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
 
             if (otherAiBase.equals(aiBase)) {
                 final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
-                    (Goal) (Object) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
+                    (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
                     if (this.executingTaskEntries.contains(entityaitaskentry)) {
@@ -195,6 +210,14 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         }
     }
 
+    /**
+     * @author Zidane
+     * Reason: Use SpongeAPI's method check instead of exposing mutex bits
+     *
+     * @param taskEntry1
+     * @param taskEntry2
+     * @return
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     private boolean areTasksCompatible(EntityAITasks.EntityAITaskEntry taskEntry1, EntityAITasks.EntityAITaskEntry taskEntry2) {

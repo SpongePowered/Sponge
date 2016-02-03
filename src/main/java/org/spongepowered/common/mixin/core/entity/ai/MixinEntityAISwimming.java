@@ -42,14 +42,14 @@ public abstract class MixinEntityAISwimming implements SwimmingAITask {
      */
     @Overwrite
     public void updateTask() {
-        if (this.theEntity.getRNG().nextFloat() < swimChance) {
+        if (this.theEntity.getRNG().nextFloat() < this.swimChance) {
             this.theEntity.getJumpHelper().setJumping();
         }
     }
 
     @Override
     public float getSwimChance() {
-        return swimChance;
+        return this.swimChance;
     }
 
     @Override

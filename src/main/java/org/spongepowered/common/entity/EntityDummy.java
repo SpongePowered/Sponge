@@ -22,19 +22,49 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.entity;
 
-import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.block.Block;
+import net.minecraft.entity.Entity;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.world.World;
 
-import java.util.Hashtable;
+final class EntityDummy extends Entity {
 
-public interface IMixinMinecraftServer {
+    protected EntityDummy(World worldIn) {
+        super(worldIn);
+    }
 
-    Hashtable<Integer, long[]> getWorldTickTimes();
+    @Override
+    public int getEntityId() {
+        return -1337;
+    }
 
-    AnvilSaveHandler getHandler(String worldName);
+    @Override
+    protected void entityInit() {
 
-    void setSaveEnabled(boolean enabled);
+    }
 
-    boolean isPreparingChunks();
+    @Override
+    public void onUpdate() {
+    }
+
+    @Override
+    protected void playStepSound(BlockPos pos, Block blockIn) {
+    }
+
+    @Override
+    public void playSound(String name, float volume, float pitch) {
+    }
+
+    @Override
+    protected void readEntityFromNBT(NBTTagCompound tagCompund) {
+
+    }
+
+    @Override
+    protected void writeEntityToNBT(NBTTagCompound tagCompound) {
+
+    }
 }

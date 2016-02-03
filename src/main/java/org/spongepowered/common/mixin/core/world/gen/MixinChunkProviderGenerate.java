@@ -60,6 +60,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -90,14 +91,12 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
     @Shadow private MapGenScatteredFeature scatteredFeatureGenerator;
     @Shadow private MapGenBase ravineGenerator;
     @Shadow private StructureOceanMonument oceanMonumentGenerator;
-
-    @Shadow
-    public abstract void func_147423_a(int p_147423_1_, int p_147423_2_, int p_147423_3_);
-
-    @Shadow
-    public abstract void replaceBlocksForBiome(int p_180517_1_, int p_180517_2_, ChunkPrimer p_180517_3_, BiomeGenBase[] p_180517_4_);
-
     @Shadow private BiomeGenBase[] biomesForGeneration;
+
+    @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
+    @Shadow public abstract void func_147423_a(int p_147423_1_, int p_147423_2_, int p_147423_3_);
+    @Shadow public abstract void replaceBlocksForBiome(int p_180517_1_, int p_180517_2_, ChunkPrimer p_180517_3_, BiomeGenBase[] p_180517_4_);
+
     private BiomeGenerator biomegen;
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -240,71 +239,15 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
         return this.biomesForGeneration;
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author gabizou - February 1st, 2016
      *
-     * Purpose: Remove the call to get biomes for generation.
-     * TODO could be redirect?
+     * Redirects this method call to just simply return the current bimoes, as
+     * necessitated by @Deamon's changes. This avoids an overwrite entirely.
      */
-    @Overwrite
-    public void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_) {
-        // this.biomesForGeneration =
-        // this.worldObj.getWorldChunkManager().getBiomesForGeneration(this.biomesForGeneration,
-        // p_180518_1_ * 4 - 2, p_180518_2_ * 4 - 2, 10, 10);
-        this.func_147423_a(p_180518_1_ * 4, 0, p_180518_2_ * 4);
-
-        for (int k = 0; k < 4; ++k) {
-            int l = k * 5;
-            int i1 = (k + 1) * 5;
-
-            for (int j1 = 0; j1 < 4; ++j1) {
-                int k1 = (l + j1) * 33;
-                int l1 = (l + j1 + 1) * 33;
-                int i2 = (i1 + j1) * 33;
-                int j2 = (i1 + j1 + 1) * 33;
-
-                for (int k2 = 0; k2 < 32; ++k2) {
-                    double d0 = 0.125D;
-                    double d1 = this.field_147434_q[k1 + k2];
-                    double d2 = this.field_147434_q[l1 + k2];
-                    double d3 = this.field_147434_q[i2 + k2];
-                    double d4 = this.field_147434_q[j2 + k2];
-                    double d5 = (this.field_147434_q[k1 + k2 + 1] - d1) * d0;
-                    double d6 = (this.field_147434_q[l1 + k2 + 1] - d2) * d0;
-                    double d7 = (this.field_147434_q[i2 + k2 + 1] - d3) * d0;
-                    double d8 = (this.field_147434_q[j2 + k2 + 1] - d4) * d0;
-
-                    for (int l2 = 0; l2 < 8; ++l2) {
-                        double d9 = 0.25D;
-                        double d10 = d1;
-                        double d11 = d2;
-                        double d12 = (d3 - d1) * d9;
-                        double d13 = (d4 - d2) * d9;
-
-                        for (int i3 = 0; i3 < 4; ++i3) {
-                            double d14 = 0.25D;
-                            double d16 = (d11 - d10) * d14;
-                            double d15 = d10 - d16;
-
-                            for (int j3 = 0; j3 < 4; ++j3) {
-                                if ((d15 += d16) > 0.0D) {
-                                    p_180518_3_.setBlockState(k * 4 + i3, k2 * 8 + l2, j1 * 4 + j3, Blocks.stone.getDefaultState());
-                                } else if (k2 * 8 + l2 < this.settings.seaLevel) {
-                                    p_180518_3_.setBlockState(k * 4 + i3, k2 * 8 + l2, j1 * 4 + j3, this.field_177476_s.getDefaultState());
-                                }
-                            }
-
-                            d10 += d12;
-                            d11 += d13;
-                        }
-
-                        d1 += d5;
-                        d2 += d6;
-                        d3 += d7;
-                        d4 += d8;
-                    }
-                }
-            }
-        }
+    @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/WorldChunkManager;getBiomesForGeneration([Lnet/minecraft/world/biome/BiomeGenBase;IIII)[Lnet/minecraft/world/biome/BiomeGenBase;"))
+    private BiomeGenBase[] onSetBlocksGetBiomesIgnore(WorldChunkManager manager, BiomeGenBase[] biomes, int x, int z, int width, int height) {
+        return biomes;
     }
+
 }

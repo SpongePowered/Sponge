@@ -85,6 +85,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
@@ -138,6 +139,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private boolean chatColours;
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
+    
+    private WorldSettings.GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
@@ -476,43 +479,28 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory<? extends Carrier>) this.inventory;
     }
-
+    
     /**
-     * We overwrite this method to call the ChangeGameModeEvent.TargetPlayer event.
-     *
-     * <p>This does not use another injection annotation because we set the {@code gameType}
-     * variable, and to do so using other annotations would result in a mess.</p>
-     *
-     * @author kashike - 30/12/2015
+     * This is deliberately declared <b>before</b> {@link #onSetGameType} since
+     * both inject at <tt>HEAD</tt>. This handler is therefore injected at HEAD
+     * first, and then {@link #onSetGameType} will be injected before it.
      */
-    @Overwrite
-    public void setGameType(WorldSettings.GameType gameType) {
-        // Sponge start
+    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), argsOnly = true)
+    private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
+        return this.pendingGameType;
+    }
+
+    @Inject(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), cancellable = true)
+    private void onSetGameType(WorldSettings.GameType gameType, CallbackInfo ci) {
         ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
                 (GameMode) (Object) this.theItemInWorldManager.getGameType(), (GameMode) (Object) gameType, this);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            return;
+            ci.cancel();
         }
-
-        gameType = (WorldSettings.GameType) (Object) event.getGameMode();
-        // Sponge end
-        this.theItemInWorldManager.setGameType(gameType);
-        this.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(3, (float) gameType.getID()));
-
-        if (gameType == WorldSettings.GameType.SPECTATOR)
-        {
-            this.mountEntity((Entity)null);
-        }
-        else
-        {
-            this.setSpectatingEntity((Entity) (Object) this);
-        }
-
-        this.sendPlayerAbilities();
-        this.markPotionsDirty();
+        this.pendingGameType = (WorldSettings.GameType) (Object) event.getGameMode();
     }
-
+    
     @Redirect(method = "onDeath", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
     public boolean onGetGameRules(GameRules gameRules, String gameRule) {

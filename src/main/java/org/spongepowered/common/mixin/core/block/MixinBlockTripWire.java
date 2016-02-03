@@ -109,11 +109,6 @@ public abstract class MixinBlockTripWire extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @Override
-    public boolean forceUpdateBlockState() {
-        return true;
-    }
-
     private ImmutableDisarmedData getIsDisarmedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, (Boolean) blockState.getValue(BlockTripWire.DISARMED));
     }

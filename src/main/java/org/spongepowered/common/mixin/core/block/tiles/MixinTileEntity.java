@@ -95,6 +95,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "addMapping(Ljava/lang/Class;Ljava/lang/String;)V", at = @At(value = "RETURN"))
     private static void onRegister(Class clazz, String name, CallbackInfo callbackInfo) {
+        if (clazz == null) {
+            // do nothing This is for backwards compatibility since Minecraft would otherwise throw exceptions for
+            // tile entities that aren't upgraded or updated.
+        }
         final String id = TileEntityTypeRegistryModule.getInstance().getIdForName(name);
         final TileEntityType tileEntityType = new SpongeTileEntityType((Class<? extends TileEntity>) clazz, name, id);
         TileEntityTypeRegistryModule.getInstance().registerAdditionalCatalog(tileEntityType);

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.ban;
 
 import net.minecraft.server.management.UserList;
 import net.minecraft.server.management.UserListBans;
+import net.minecraft.server.management.UserListBansEntry;
 import net.minecraft.server.management.UserListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
@@ -39,20 +40,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mixin(UserListBans.class)
-public abstract class MixinUserListBans extends UserList {
+public abstract class MixinUserListBans extends UserList<com.mojang.authlib.GameProfile, UserListBansEntry> {
 
     public MixinUserListBans(File saveFile) {
         super(saveFile);
     }
 
     @Override
-    public boolean hasEntry(Object object) {
+    public boolean hasEntry(com.mojang.authlib.GameProfile object) {
         return Sponge.getServiceManager().provideUnchecked(BanService.class).isBanned((GameProfile) object);
     }
 
     @Override
-    public UserListEntry getEntry(Object object) {
-        return (UserListEntry) Sponge.getServiceManager().provideUnchecked(BanService.class).getBanFor((GameProfile) object).orElse(null);
+    public UserListBansEntry getEntry(com.mojang.authlib.GameProfile object) {
+        return (UserListBansEntry) Sponge.getServiceManager().provideUnchecked(BanService.class).getBanFor((GameProfile) object).orElse(null);
     }
 
     @Overwrite
@@ -68,7 +69,7 @@ public abstract class MixinUserListBans extends UserList {
     }
 
     @Override
-    public void addEntry(UserListEntry entry) {
+    public void addEntry(UserListBansEntry entry) {
         Sponge.getServiceManager().provideUnchecked(BanService.class).addBan((Ban) entry);
     }
 
@@ -78,7 +79,7 @@ public abstract class MixinUserListBans extends UserList {
     }
 
     @Override
-    public void removeEntry(Object object) {
+    public void removeEntry(com.mojang.authlib.GameProfile object) {
         Sponge.getServiceManager().provideUnchecked(BanService.class).pardon((GameProfile) object);
     }
 

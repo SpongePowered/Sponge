@@ -74,7 +74,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
     @Override
     protected Optional<List<PotionEffect>> getVal(ItemStack dataHolder) {
         final List<net.minecraft.potion.PotionEffect> effects = Items.potionitem.getEffects(dataHolder);
-        if (effects.isEmpty()) {
+        if (effects == null || effects.isEmpty()) {
             return Optional.empty();
         }
         return Optional.of((List<PotionEffect>) (List<?>) effects);

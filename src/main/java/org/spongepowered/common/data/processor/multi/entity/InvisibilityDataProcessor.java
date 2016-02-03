@@ -35,7 +35,7 @@ import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableInvisibi
 import org.spongepowered.api.data.manipulator.mutable.entity.InvisibilityData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeInvisibilityData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.data.util.EntityUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Map;

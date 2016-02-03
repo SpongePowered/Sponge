@@ -42,6 +42,10 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -58,42 +62,17 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Shadow private int transferCooldown;
     @Shadow private String customName;
 
-    /**
-     * @author bloodmc - November 15th, 2015
-     *
-     * Purpose: Used to track when an item is thrown into the world and sucked
-     * into a hopper.
-     */
-    @Overwrite
-    public static boolean putDropInInventoryAllSlots(IInventory source, EntityItem entityItem) {
-        boolean flag = false;
-
-        if (entityItem == null) {
-            return false;
-        } else {
-            // Sponge start - transfer owner to inventory source
-            IMixinEntity spongeEntity = (IMixinEntity) entityItem;
-            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (owner.isPresent()) {
-                if (source instanceof TileEntity) {
-                    TileEntity te = (TileEntity) source;
-                    BlockPos pos = te.getPos();
-                    IMixinChunk spongeChunk = (IMixinChunk) te.getWorld().getChunkFromBlockCoords(pos);
-                    spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                }
+    @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
+    private static void onPutDrop(IInventory inventory, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
+        IMixinEntity spongeEntity = (IMixinEntity) entityItem;
+        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        if (owner.isPresent()) {
+            if (inventory instanceof TileEntity) {
+                TileEntity te = (TileEntity) inventory;
+                BlockPos pos = te.getPos();
+                IMixinChunk spongeChunk = (IMixinChunk) te.getWorld().getChunkFromBlockCoords(pos);
+                spongeChunk.addTrackedBlockPosition(te.getBlockType(), pos, owner.get(), PlayerTracker.Type.NOTIFIER);
             }
-            // Sponge end
-            ItemStack itemstack = entityItem.getEntityItem().copy();
-            ItemStack itemstack1 = TileEntityHopper.putStackInInventoryAllSlots(source, itemstack, (EnumFacing) null);
-
-            if (itemstack1 != null && itemstack1.stackSize != 0) {
-                entityItem.setEntityItemStack(itemstack1);
-            } else {
-                flag = true;
-                entityItem.setDead();
-            }
-
-            return flag;
         }
     }
 

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.util;
+package org.spongepowered.common.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityTracker;
@@ -47,6 +47,13 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public final class EntityUtil {
+
+    /**
+     * This is a dummy entity that can be used for various mixins where a null
+     * check on an entity is required. Note that this entity SHOULD NEVER BE
+     * USED FOR OTHER PURPOSES AT ALL.
+     */
+    public static final Entity USELESS_ENTITY_FOR_MIXINS = new EntityDummy(null);
 
     private EntityUtil() {
     }

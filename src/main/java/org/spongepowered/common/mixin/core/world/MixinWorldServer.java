@@ -102,11 +102,13 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         this.processingCaptureCause = true;
+        this.processingBlockRandomTicks = true;
         this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
         block.randomTick(worldIn, pos, state, rand);
         handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
         this.processingCaptureCause = false;
+        this.processingBlockRandomTicks = false;
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))

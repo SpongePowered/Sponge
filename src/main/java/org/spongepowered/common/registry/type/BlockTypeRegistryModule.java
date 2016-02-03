@@ -33,6 +33,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
+import net.minecraft.block.state.IBlockState;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.trait.BlockTrait;
@@ -41,6 +43,7 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
@@ -109,6 +112,11 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
 
     private void registerBlockTrait(String id, BlockType block) {
+        Block nmsBlock = (Block) block;
+        for (IBlockState state : nmsBlock.getBlockState().getValidStates()) {
+            ((IMixinBlockState) state).generateId(nmsBlock);
+            BlockStateRegistryModule.getInstance().registerBlockState((BlockState) state);
+        }
         for (Map.Entry<BlockTrait<?>, ?> mapEntry : block.getDefaultState().getTraitMap().entrySet()) {
             BlockTrait<?> property = mapEntry.getKey();
             final String propertyId = BlockPropertyIdProvider.getIdAndTryRegistration((IProperty<?>) property, (Block) block, id);

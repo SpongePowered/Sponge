@@ -157,11 +157,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Override
-    public boolean forceUpdateBlockState() {
-        return false;
-    }
-
-    @Override
     public Collection<BlockTrait<?>> getTraits() {
         return getDefaultBlockState().getTraits();
     }

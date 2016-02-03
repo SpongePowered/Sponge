@@ -29,49 +29,48 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
+/**
+ * @author gabizou - January 25th, 2016
+ * Updated: February 2nd - Rewrite overwrite to use two redirects
+ *
+ * Normally this shouldn't be necessary, however, due to unforseen consequences
+ * of creating block snapshots, there are corner cases where mod authors are
+ * setting nulls into the compound for their tile entities. This overwrite
+ * prevents an NPE crashing the game. A pretty warning message will be printed
+ * out for the client to see and report to both Sponge and the mod author.
+ */
 @Mixin(NBTTagCompound.class)
 public abstract class MixinNBTTagCompound extends NBTBase {
 
+    private static final String SET_TAG = "Lnet/minecraft/nbt/NBTTagCompound;setTag(Ljava/lang/String;Lnet/minecraft/nbt/NBTBase;)V";
+
     @Shadow private Map<String, NBTBase> tagMap;
 
-    /**
-     * @author gabizou - January 25th, 2016
-     *
-     * Normally this shouldn't be necessary, however, due to unforseen consequences
-     * of creating block snapshots, there are corner cases where mod authors are
-     * setting nulls into the compound for their tile entities. This overwrite
-     * prevents an NPE crashing the game. A pretty warning message will be printed
-     * out for the client to see and report to both Sponge and the mod author.
-     *
-     * @return The copied NBTTagCompound
-     */
-    @Overwrite
-    @Override
-    public NBTBase copy() {
-        NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-        for (String s : this.tagMap.keySet()) {
-            // Sponge Start - check for nulls
-            // nbttagcompound.setTag(s, ((NBTBase)this.tagMap.get(s)).copy()); // original
-            NBTBase base = this.tagMap.get(s);
-            if (base == null) {
-                IllegalStateException exception = new IllegalStateException("There is a null NBTBase in the compound for key: " + s);
-                SpongeImpl.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
-                                             + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
-                                             + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
-                                             + "authors for the offending compound data!", exception);
-            } else {
-                nbttagcompound.setTag(s, base.copy());
-            }
-            // Sponge End
-        }
-
-        return nbttagcompound;
+    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTBase;copy()Lnet/minecraft/nbt/NBTBase;"))
+    @Nullable
+    private NBTBase onTagCopy(@Nullable NBTBase base) {
+        return base == null ? null : base.copy();
     }
 
+    @Redirect(method = "copy", at = @At(value = "INVOKE", target = SET_TAG))
+    private void onCopySet(NBTTagCompound compound, String string, @Nullable NBTBase base) {
+        if (base == null) {
+            IllegalStateException exception = new IllegalStateException("There is a null NBTBase in the compound for key: " + string);
+            SpongeImpl.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
+                                         + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
+                                         + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
+                                         + "authors for the offending compound data!", exception);
+        } else {
+            compound.setTag(string, base);
+        }
+    }
 
 }

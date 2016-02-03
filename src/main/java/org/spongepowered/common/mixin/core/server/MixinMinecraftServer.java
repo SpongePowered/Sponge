@@ -158,6 +158,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
+    private boolean preparingChunks = false;
     private GameProfileManager profileManager = new SpongeProfileManager();
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
@@ -447,7 +448,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
+        this.preparingChunks = true;
         this.initialWorldChunkLoad();
+        this.preparingChunks = false;
     }
 
     /**
@@ -1023,5 +1026,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
+    }
+
+    @Override
+    public boolean isPreparingChunks() {
+        return this.preparingChunks;
     }
 }
