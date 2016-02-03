@@ -49,22 +49,20 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     private static final String RIDER_ENTITY_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;riddenByEntity:Lnet/minecraft/entity/Entity;";
     private static final String MINECART_MOTION_X_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionX:D";
     private static final String MINECART_MOTION_Z_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionZ:D";
-    private double maxSpeed = 0.4D;
+    protected double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
-    private Vector3d airborneMod = new Vector3d(0.5D, 0.5D, 0.5D);
-    private Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
+    protected Vector3d airborneMod = new Vector3d(0.94999998807907104D, 0.94999998807907104D, 0.94999998807907104D);
+    protected Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
 
-    // this method overwrites vanilla behavior to allow for a custom deceleration rate when derailed
-    @Inject(method = "moveDerailedMinecart()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityMinecart;moveEntity(DDD)V"))
-    public void implementCustomDerailedDeceleration(CallbackInfo ci) {
-        if (this.isOnGround()) {
-            this.motionX /= 0.5D;
-            this.motionY /= 0.5D;
-            this.motionZ /= 0.5D;
-            this.motionX *= this.derailedMod.getX();
-            this.motionY *= this.derailedMod.getY();
-            this.motionZ *= this.derailedMod.getZ();
-        }
+    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_X_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void onDecelerateX(EntityMinecart self, double modifier) {
+        self.motionX *= this.derailedMod.getX();
+    }
+    // note there would be a vanilla variant for the Y derail, however Forge re-assigns the motionY once, so the ordinals are out of sync
+
+    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_Z_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
+    private void onDecelerateZ(EntityMinecart self, double modifier) {
+        self.motionZ *= this.derailedMod.getZ();
     }
 
     @Nullable
@@ -75,16 +73,6 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
             return EntityUtil.USELESS_ENTITY_FOR_MIXINS;
         }
         return rider;
-    }
-
-    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = MINECART_MOTION_X_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    private void onMotionX(EntityMinecart self, double ignored) {
-        // ignore setting the field
-    }
-
-    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = MINECART_MOTION_Z_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
-    private void onMotionZ(EntityMinecart self, double ignored) {
-        // ignore setting the field
     }
 
     @Override
