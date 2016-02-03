@@ -66,7 +66,7 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
             return Optional.empty();
         }
         Collection<net.minecraft.potion.PotionEffect> effects = Items.potionitem.getEffects(potionItem);
-        if (effects.isEmpty()) {
+        if (effects == null || effects.isEmpty()) {
             return Optional.empty();
         }
         List<PotionEffect> apiEffects = new ArrayList<>();
