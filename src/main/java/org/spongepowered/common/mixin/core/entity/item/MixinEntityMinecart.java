@@ -25,21 +25,30 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinMinecart;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 import org.spongepowered.common.util.VectorSerializer;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 
+    private static final String RIDER_ENTITY_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;riddenByEntity:Lnet/minecraft/entity/Entity;";
+    private static final String MINECART_MOTION_X_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionX:D";
+    private static final String MINECART_MOTION_Z_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionZ:D";
     private double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
     private Vector3d airborneMod = new Vector3d(0.5D, 0.5D, 0.5D);
@@ -58,18 +67,24 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
         }
     }
 
-    // this method overwrites vanilla behavior to allow the cart not to slow when empty
-    @Overwrite
-    protected void applyDrag() {
-        if (this.riddenByEntity != null || !this.slowWhenEmpty) {
-            this.motionX *= 1.0D;
-            this.motionY *= 0.0D;
-            this.motionZ *= 1.0D;
-        } else {
-            this.motionX *= 0.96D;
-            this.motionY *= 0.0D;
-            this.motionZ *= 0.96D;
+    @Nullable
+    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = RIDER_ENTITY_FIELD, opcode = Opcodes.GETFIELD))
+    private Entity onGetRiderEntity(EntityMinecart self) {
+        Entity rider = self.riddenByEntity;
+        if (rider == null && !this.slowWhenEmpty) {
+            return EntityUtil.USELESS_ENTITY_FOR_MIXINS;
         }
+        return rider;
+    }
+
+    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = MINECART_MOTION_X_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
+    private void onMotionX(EntityMinecart self, double ignored) {
+        // ignore setting the field
+    }
+
+    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = MINECART_MOTION_Z_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 0))
+    private void onMotionZ(EntityMinecart self, double ignored) {
+        // ignore setting the field
     }
 
     @Override
