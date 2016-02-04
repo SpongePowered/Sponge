@@ -323,7 +323,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     }
 
     @Override
-    public boolean func_177460_a(IChunkProvider chunkProvider, Chunk chunk, int chunkX, int chunkZ) {
+    public boolean populateChunk(IChunkProvider chunkProvider, Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
