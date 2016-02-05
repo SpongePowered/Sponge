@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.world.extent;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -48,6 +50,7 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
@@ -64,6 +67,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 // TODO: rotate Direction by transform?
 public class ExtentViewTransform implements DefaultedExtent {
@@ -193,6 +198,12 @@ public class ExtentViewTransform implements DefaultedExtent {
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
         this.extent.setBlock(this.inverseTransform.transformX(x, y, z), this.inverseTransform.transformY(x, y, z), this.inverseTransform
             .transformZ(x, y, z), block, notifyNeighbors);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState blockState, boolean notifyNeighbors, Cause cause) {
+        checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
+        this.extent.setBlock(x, y, z, blockState, notifyNeighbors, cause);
     }
 
     @Override
@@ -482,6 +493,22 @@ public class ExtentViewTransform implements DefaultedExtent {
     @Override
     public Extent getExtentView(DiscreteTransform3 transform) {
         return new ExtentViewTransform(this.extent, this.transform.withTransformation(transform));
+    }
+
+    @Override public Optional<UUID> getCreator(int x, int y, int z) {
+        return this.extent.getCreator(x, y, z);
+    }
+
+    @Override public Optional<UUID> getNotifier(int x, int y, int z) {
+        return this.extent.getNotifier(x, y, z);
+    }
+
+    @Override public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        this.extent.setCreator(x, y, z, uuid);
+    }
+
+    @Override public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+        this.extent.setNotifier(x, y, z, uuid);
     }
 
     @Override

@@ -651,6 +651,56 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return Optional.empty();
     }
 
+    // Special setter used by API
+    @Override
+    public void setBlockNotifier(BlockPos pos, UUID uuid) {
+        if (pos.getY() <= 255) {
+            short blockPos = blockPosToShort(pos);
+            if (this.trackedShortBlockPositions.get(blockPos) != null) {
+                this.trackedShortBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
+                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
+            } else {
+                this.trackedShortBlockPositions.put(blockPos,
+                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
+                                PlayerTracker.Type.NOTIFIER));
+            }
+        } else {
+            int blockPos = blockPosToInt(pos);
+            if (this.trackedIntBlockPositions.get(blockPos) != null) {
+                this.trackedIntBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
+                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
+            } else {
+                this.trackedIntBlockPositions.put(blockPos,
+                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
+                                PlayerTracker.Type.NOTIFIER));
+            }
+        }
+    }
+
+    // Special setter used by API
+    @Override
+    public void setBlockCreator(BlockPos pos, UUID uuid) {
+        if (pos.getY() <= 255) {
+            short blockPos = blockPosToShort(pos);
+            if (this.trackedShortBlockPositions.get(blockPos) != null) {
+                this.trackedShortBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
+                        .getIndexForUniqueId(uuid);
+            } else {
+                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
+                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
+            }
+        } else {
+            int blockPos = blockPosToInt(pos);
+            if (this.trackedIntBlockPositions.get(blockPos) != null) {
+                this.trackedIntBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
+                        .getIndexForUniqueId(uuid);
+            } else {
+                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
+                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
+            }
+        }
+    }
+
     @Override
     public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
         this.trackedIntBlockPositions = trackedPositions;

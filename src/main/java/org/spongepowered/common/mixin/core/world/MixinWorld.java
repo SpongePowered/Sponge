@@ -138,6 +138,7 @@ import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -260,9 +261,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean restoringBlocks = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
-    public BlockSnapshot currentTickBlock = null;
-    public Entity currentTickEntity = null;
-    public TileEntity currentTickTileEntity = null;
+    public BlockSnapshot currentTickBlock;
+    public Entity currentTickEntity;
+    public TileEntity currentTickTileEntity;
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     public List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
     public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
@@ -270,6 +271,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean keepSpawnLoaded;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
+    private Cause pluginCause;
     @Nullable private volatile Context worldContext;
     private SpongeChunkProvider spongegen;
     private Weather prevWeather;
@@ -452,10 +454,15 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     this.theProfiler.endSection();
                 }
 
-                // Don't notify clients or update physics while capturing blockstates
-                if (originalBlockSnapshot == null) {
-                    // Modularize client and physic updates
-                    markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
+                if (this.pluginCause != null) {
+                    handleBlockCaptures(this.pluginCause);
+                    this.pluginCause = null;
+                } else {
+                    // Don't notify clients or update physics while capturing blockstates
+                    if (originalBlockSnapshot == null) {
+                        // Modularize client and physic updates
+                        markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
+                    }
                 }
 
                 return true;
@@ -719,7 +726,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return; // nothing was captured, return
         }
 
-        net.minecraft.world.World world = (net.minecraft.world.World) (Object) this;
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet packetIn = StaticMixinHelper.processingPacket;
 
@@ -766,211 +772,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
 
-        ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions = null;
-        ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions = null;
-        ImmutableList<Transaction<BlockSnapshot>> blockPlaceTransactions = null;
-        ImmutableList<Transaction<BlockSnapshot>> blockDecayTransactions = null;
-        ImmutableList<Transaction<BlockSnapshot>> blockMultiTransactions = null;
-        ImmutableList.Builder<Transaction<BlockSnapshot>> breakBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> placeBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> decayBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> modifyBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> multiBuilder = new ImmutableList.Builder<>();
-        ChangeBlockEvent.Break breakEvent = null;
-        ChangeBlockEvent.Modify modifyEvent = null;
-        ChangeBlockEvent.Place placeEvent = null;
-        List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-
-        Iterator<BlockSnapshot> iterator = this.capturedSpongeBlockSnapshots.iterator();
-        while (iterator.hasNext()) {
-            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) iterator.next();
-            CaptureType captureType = blockSnapshot.captureType;
-            BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
-            IBlockState currentState = getBlockState(pos);
-            Transaction<BlockSnapshot> transaction = new Transaction<>(blockSnapshot, createSpongeBlockSnapshot(currentState, currentState.getBlock()
-                    .getActualState(currentState, (IBlockAccess) this, pos), pos, 0));
-            if (captureType == CaptureType.BREAK) {
-                breakBuilder.add(transaction);
-            } else if (captureType == CaptureType.DECAY) {
-                decayBuilder.add(transaction);
-            } else if (captureType == CaptureType.PLACE) {
-                placeBuilder.add(transaction);
-            } else if (captureType == CaptureType.MODIFY) {
-                modifyBuilder.add(transaction);
-            }
-            multiBuilder.add(transaction);
-            iterator.remove();
-        }
-
-        blockBreakTransactions = breakBuilder.build();
-        blockDecayTransactions = decayBuilder.build();
-        blockModifyTransactions = modifyBuilder.build();
-        blockPlaceTransactions = placeBuilder.build();
-        blockMultiTransactions = multiBuilder.build();
-        ChangeBlockEvent changeBlockEvent = null;
-        if (blockBreakTransactions.size() > 0) {
-            changeBlockEvent = SpongeEventFactory.createChangeBlockEventBreak(cause, (World) world, blockBreakTransactions);
-            SpongeImpl.postEvent(changeBlockEvent);
-            breakEvent = (ChangeBlockEvent.Break) changeBlockEvent;
-            blockEvents.add(changeBlockEvent);
-        }
-        if (blockModifyTransactions.size() > 0) {
-            changeBlockEvent = SpongeEventFactory.createChangeBlockEventModify(cause, (World) world, blockModifyTransactions);
-            SpongeImpl.postEvent(changeBlockEvent);
-            modifyEvent = (ChangeBlockEvent.Modify) changeBlockEvent;
-            blockEvents.add(changeBlockEvent);
-        }
-        if (blockPlaceTransactions.size() > 0) {
-            changeBlockEvent = SpongeEventFactory.createChangeBlockEventPlace(cause, (World) world, blockPlaceTransactions);
-            SpongeImpl.postEvent(changeBlockEvent);
-            placeEvent = (ChangeBlockEvent.Place) changeBlockEvent;
-            blockEvents.add(changeBlockEvent);
-        }
-        if (blockEvents.size() > 1) {
-            if (breakEvent != null) {
-                int count = cause.allOf(ChangeBlockEvent.Break.class).size();
-                String namedCause = "BreakEvent" + (count != 0 ? count : "");
-                cause = cause.with(NamedCause.of(namedCause, breakEvent));
-            }
-            if (modifyEvent != null) {
-                int count = cause.allOf(ChangeBlockEvent.Modify.class).size();
-                String namedCause = "ModifyEvent" + (count != 0 ? count : "");
-                cause = cause.with(NamedCause.of(namedCause, modifyEvent));
-            }
-            if (placeEvent != null) {
-                int count = cause.allOf(ChangeBlockEvent.Place.class).size();
-                String namedCause = "PlaceEvent" + (count != 0 ? count : "");
-                cause = cause.with(NamedCause.of(namedCause, placeEvent));
-            }
-            changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, (World) world, blockMultiTransactions);
-            SpongeImpl.postEvent(changeBlockEvent);
-            if (changeBlockEvent.isCancelled()) {
-                // Restore original blocks
-                ListIterator<Transaction<BlockSnapshot>>
-                        listIterator =
-                        changeBlockEvent.getTransactions().listIterator(changeBlockEvent.getTransactions().size());
-                while (listIterator.hasPrevious()) {
-                    Transaction<BlockSnapshot> transaction = listIterator.previous();
-                    this.restoringBlocks = true;
-                    transaction.getOriginal().restore(true, false);
-                    this.restoringBlocks = false;
-                }
-
-                if (player != null) {
-                    CaptureType captureType = null;
-                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                        captureType = CaptureType.PLACE;
-                    } else if (packetIn instanceof C07PacketPlayerDigging) {
-                        captureType = CaptureType.BREAK;
-                    }
-                    if (captureType != null) {
-                        handlePostPlayerBlockEvent(captureType, player, world, changeBlockEvent.getTransactions());
-                    }
-                }
-
-                // clear entity list and return to avoid spawning items
-                this.capturedEntities.clear();
-                this.capturedEntityItems.clear();
-                return;
-            }
-        }
-
-        if (blockDecayTransactions.size() > 0) {
-            changeBlockEvent = SpongeEventFactory.createChangeBlockEventDecay(cause, (World) world, blockDecayTransactions);
-            SpongeImpl.postEvent(changeBlockEvent);
-            blockEvents.add(changeBlockEvent);
-        }
-
-        for (ChangeBlockEvent blockEvent : blockEvents) {
-            CaptureType captureType = null;
-            if (blockEvent instanceof ChangeBlockEvent.Break) {
-                captureType = CaptureType.BREAK;
-            } else if (blockEvent instanceof ChangeBlockEvent.Decay) {
-                captureType = CaptureType.DECAY;
-            } else if (blockEvent instanceof ChangeBlockEvent.Modify) {
-                captureType = CaptureType.MODIFY;
-            } else if (blockEvent instanceof ChangeBlockEvent.Place) {
-                captureType = CaptureType.PLACE;
-            }
-
-            C08PacketPlayerBlockPlacement packet = null;
-
-            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                packet = (C08PacketPlayerBlockPlacement) packetIn;
-            }
-
-            if (blockEvent.isCancelled()) {
-                // Restore original blocks
-                ListIterator<Transaction<BlockSnapshot>>
-                        listIterator =
-                        blockEvent.getTransactions().listIterator(blockEvent.getTransactions().size());
-                while (listIterator.hasPrevious()) {
-                    Transaction<BlockSnapshot> transaction = listIterator.previous();
-                    this.restoringBlocks = true;
-                    transaction.getOriginal().restore(true, false);
-                    this.restoringBlocks = false;
-                }
-
-                handlePostPlayerBlockEvent(captureType, player, world, blockEvent.getTransactions());
-
-                // clear entity list and return to avoid spawning items
-                this.capturedEntities.clear();
-                this.capturedEntityItems.clear();
-                return;
-            } else {
-                for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
-                    if (!transaction.isValid()) {
-                        this.invalidTransactions.add(transaction);
-                    } else {
-                        if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
-                            BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                            for (EntityHanging hanging : SpongeHooks.findHangingEntities(world, pos)) {
-                                if (hanging != null) {
-                                    if (hanging instanceof EntityItemFrame) {
-                                        EntityItemFrame itemFrame = (EntityItemFrame) hanging;
-                                        net.minecraft.entity.Entity dropCause = null;
-                                        if (cause.root() instanceof net.minecraft.entity.Entity) {
-                                            dropCause = (net.minecraft.entity.Entity) cause.root();
-                                        }
-
-                                        itemFrame.dropItemOrSelf(dropCause, true);
-                                        itemFrame.setDead();
-                                    }
-                                }
-                            }
-                        }
-
-                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
-                            BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                            IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
-                                    (User) player, PlayerTracker.Type.OWNER);
-                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
-                                    (User) player, PlayerTracker.Type.NOTIFIER);
-                        }
-                    }
-                }
-
-                if (this.invalidTransactions.size() > 0) {
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(this.invalidTransactions)) {
-                        this.restoringBlocks = true;
-                        transaction.getOriginal().restore(true, false);
-                        this.restoringBlocks = false;
-                    }
-                    handlePostPlayerBlockEvent(captureType, player, world, this.invalidTransactions);
-                }
-
-                if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
-                    StaticMixinHelper.destructItemDrop = true;
-                }
-
-                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
-
-                if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
-                    player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
-                }
-            }
-        }
+        // Handle Block Captures
+        handleBlockCaptures(cause);
 
         // Handle Player Toss
         if (player != null && packetIn instanceof C07PacketPlayerDigging) {
@@ -1041,26 +844,240 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.invalidTransactions.clear();
     }
 
-    private void handlePostPlayerBlockEvent(CaptureType captureType, EntityPlayerMP player, net.minecraft.world.World world,
-            List<Transaction<BlockSnapshot>> transactions) {
-        if (captureType == CaptureType.BREAK && player != null) {
+    private void handleBlockCaptures(Cause cause) {
+        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
+        Packet packetIn = StaticMixinHelper.processingPacket;
+
+        ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions = null;
+        ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions = null;
+        ImmutableList<Transaction<BlockSnapshot>> blockPlaceTransactions = null;
+        ImmutableList<Transaction<BlockSnapshot>> blockDecayTransactions = null;
+        ImmutableList<Transaction<BlockSnapshot>> blockMultiTransactions = null;
+        ImmutableList.Builder<Transaction<BlockSnapshot>> breakBuilder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<Transaction<BlockSnapshot>> placeBuilder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<Transaction<BlockSnapshot>> decayBuilder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<Transaction<BlockSnapshot>> modifyBuilder = new ImmutableList.Builder<>();
+        ImmutableList.Builder<Transaction<BlockSnapshot>> multiBuilder = new ImmutableList.Builder<>();
+        ChangeBlockEvent.Break breakEvent = null;
+        ChangeBlockEvent.Modify modifyEvent = null;
+        ChangeBlockEvent.Place placeEvent = null;
+        List<ChangeBlockEvent> blockEvents = new ArrayList<>();
+
+        Iterator<BlockSnapshot> iterator = this.capturedSpongeBlockSnapshots.iterator();
+        while (iterator.hasNext()) {
+            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) iterator.next();
+            CaptureType captureType = blockSnapshot.captureType;
+            BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
+            IBlockState currentState = getBlockState(pos);
+            Transaction<BlockSnapshot> transaction = new Transaction<>(blockSnapshot, createSpongeBlockSnapshot(currentState, currentState.getBlock()
+                    .getActualState(currentState, (IBlockAccess) this, pos), pos, 0));
+            if (captureType == CaptureType.BREAK) {
+                breakBuilder.add(transaction);
+            } else if (captureType == CaptureType.DECAY) {
+                decayBuilder.add(transaction);
+            } else if (captureType == CaptureType.PLACE) {
+                placeBuilder.add(transaction);
+            } else if (captureType == CaptureType.MODIFY) {
+                modifyBuilder.add(transaction);
+            }
+            multiBuilder.add(transaction);
+            iterator.remove();
+        }
+
+        blockBreakTransactions = breakBuilder.build();
+        blockDecayTransactions = decayBuilder.build();
+        blockModifyTransactions = modifyBuilder.build();
+        blockPlaceTransactions = placeBuilder.build();
+        blockMultiTransactions = multiBuilder.build();
+        ChangeBlockEvent changeBlockEvent = null;
+        if (blockBreakTransactions.size() > 0) {
+            changeBlockEvent = SpongeEventFactory.createChangeBlockEventBreak(cause, this, blockBreakTransactions);
+            SpongeImpl.postEvent(changeBlockEvent);
+            breakEvent = (ChangeBlockEvent.Break) changeBlockEvent;
+            blockEvents.add(changeBlockEvent);
+        }
+        if (blockModifyTransactions.size() > 0) {
+            changeBlockEvent = SpongeEventFactory.createChangeBlockEventModify(cause, this, blockModifyTransactions);
+            SpongeImpl.postEvent(changeBlockEvent);
+            modifyEvent = (ChangeBlockEvent.Modify) changeBlockEvent;
+            blockEvents.add(changeBlockEvent);
+        }
+        if (blockPlaceTransactions.size() > 0) {
+            changeBlockEvent = SpongeEventFactory.createChangeBlockEventPlace(cause, this, blockPlaceTransactions);
+            SpongeImpl.postEvent(changeBlockEvent);
+            placeEvent = (ChangeBlockEvent.Place) changeBlockEvent;
+            blockEvents.add(changeBlockEvent);
+        }
+        if (blockEvents.size() > 1) {
+            if (breakEvent != null) {
+                int count = cause.allOf(ChangeBlockEvent.Break.class).size();
+                String namedCause = "BreakEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, breakEvent));
+            }
+            if (modifyEvent != null) {
+                int count = cause.allOf(ChangeBlockEvent.Modify.class).size();
+                String namedCause = "ModifyEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, modifyEvent));
+            }
+            if (placeEvent != null) {
+                int count = cause.allOf(ChangeBlockEvent.Place.class).size();
+                String namedCause = "PlaceEvent" + (count != 0 ? count : "");
+                cause = cause.with(NamedCause.of(namedCause, placeEvent));
+            }
+            changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, this, blockMultiTransactions);
+            SpongeImpl.postEvent(changeBlockEvent);
+            if (changeBlockEvent.isCancelled()) {
+                // Restore original blocks
+                ListIterator<Transaction<BlockSnapshot>>
+                        listIterator =
+                        changeBlockEvent.getTransactions().listIterator(changeBlockEvent.getTransactions().size());
+                while (listIterator.hasPrevious()) {
+                    Transaction<BlockSnapshot> transaction = listIterator.previous();
+                    this.restoringBlocks = true;
+                    transaction.getOriginal().restore(true, false);
+                    this.restoringBlocks = false;
+                }
+
+                if (player != null) {
+                    CaptureType captureType = null;
+                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+                        captureType = CaptureType.PLACE;
+                    } else if (packetIn instanceof C07PacketPlayerDigging) {
+                        captureType = CaptureType.BREAK;
+                    }
+                    if (captureType != null) {
+                        handlePostPlayerBlockEvent(captureType, changeBlockEvent.getTransactions());
+                    }
+                }
+
+                // clear entity list and return to avoid spawning items
+                this.capturedEntities.clear();
+                this.capturedEntityItems.clear();
+                return;
+            }
+        }
+
+        if (blockDecayTransactions.size() > 0) {
+            changeBlockEvent = SpongeEventFactory.createChangeBlockEventDecay(cause, this, blockDecayTransactions);
+            SpongeImpl.postEvent(changeBlockEvent);
+            blockEvents.add(changeBlockEvent);
+        }
+
+        for (ChangeBlockEvent blockEvent : blockEvents) {
+            CaptureType captureType = null;
+            if (blockEvent instanceof ChangeBlockEvent.Break) {
+                captureType = CaptureType.BREAK;
+            } else if (blockEvent instanceof ChangeBlockEvent.Decay) {
+                captureType = CaptureType.DECAY;
+            } else if (blockEvent instanceof ChangeBlockEvent.Modify) {
+                captureType = CaptureType.MODIFY;
+            } else if (blockEvent instanceof ChangeBlockEvent.Place) {
+                captureType = CaptureType.PLACE;
+            }
+
+            C08PacketPlayerBlockPlacement packet = null;
+
+            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+                packet = (C08PacketPlayerBlockPlacement) packetIn;
+            }
+
+            if (blockEvent.isCancelled()) {
+                // Restore original blocks
+                ListIterator<Transaction<BlockSnapshot>>
+                        listIterator =
+                        blockEvent.getTransactions().listIterator(blockEvent.getTransactions().size());
+                while (listIterator.hasPrevious()) {
+                    Transaction<BlockSnapshot> transaction = listIterator.previous();
+                    this.restoringBlocks = true;
+                    transaction.getOriginal().restore(true, false);
+                    this.restoringBlocks = false;
+                }
+
+                handlePostPlayerBlockEvent(captureType, blockEvent.getTransactions());
+
+                // clear entity list and return to avoid spawning items
+                this.capturedEntities.clear();
+                this.capturedEntityItems.clear();
+                return;
+            } else {
+                for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
+                    if (!transaction.isValid()) {
+                        this.invalidTransactions.add(transaction);
+                    } else {
+                        if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
+                            BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                            for (EntityHanging hanging : SpongeHooks.findHangingEntities(this.nmsWorld, pos)) {
+                                if (hanging != null) {
+                                    if (hanging instanceof EntityItemFrame) {
+                                        EntityItemFrame itemFrame = (EntityItemFrame) hanging;
+                                        net.minecraft.entity.Entity dropCause = null;
+                                        if (cause.root() instanceof net.minecraft.entity.Entity) {
+                                            dropCause = (net.minecraft.entity.Entity) cause.root();
+                                        }
+
+                                        itemFrame.dropItemOrSelf(dropCause, true);
+                                        itemFrame.setDead();
+                                    }
+                                }
+                            }
+                        }
+
+                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
+                            BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                            IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
+                                    (User) player, PlayerTracker.Type.OWNER);
+                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
+                                    (User) player, PlayerTracker.Type.NOTIFIER);
+                        }
+                    }
+                }
+
+                if (this.invalidTransactions.size() > 0) {
+                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(this.invalidTransactions)) {
+                        this.restoringBlocks = true;
+                        transaction.getOriginal().restore(true, false);
+                        this.restoringBlocks = false;
+                    }
+                    handlePostPlayerBlockEvent(captureType, this.invalidTransactions);
+                }
+
+                if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
+                    StaticMixinHelper.destructItemDrop = true;
+                }
+
+                markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
+
+                if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
+                    player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
+                }
+            }
+        }
+    }
+
+    private void handlePostPlayerBlockEvent(CaptureType captureType, List<Transaction<BlockSnapshot>> transactions) {
+        if (StaticMixinHelper.packetPlayer == null) {
+            return;
+        }
+
+        if (captureType == CaptureType.BREAK) {
             // Let the client know the blocks still exist
             for (Transaction<BlockSnapshot> transaction : transactions) {
                 BlockSnapshot snapshot = transaction.getOriginal();
                 BlockPos pos = VecHelper.toBlockPos(snapshot.getPosition());
-                player.playerNetServerHandler.sendPacket(new S23PacketBlockChange(world, pos));
+                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.nmsWorld, pos));
 
                 // Update any tile entity data for this block
-                net.minecraft.tileentity.TileEntity tileentity = world.getTileEntity(pos);
+                net.minecraft.tileentity.TileEntity tileentity = this.nmsWorld.getTileEntity(pos);
                 if (tileentity != null) {
                     Packet pkt = tileentity.getDescriptionPacket();
                     if (pkt != null) {
-                        player.playerNetServerHandler.sendPacket(pkt);
+                        StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(pkt);
                     }
                 }
             }
-        } else if (captureType == CaptureType.PLACE && player != null) {
-            sendItemChangeToPlayer(player);
+        } else if (captureType == CaptureType.PLACE) {
+            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
         }
     }
 
@@ -1124,9 +1141,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, (World) this);
+            event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this);
         } else {
-            event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, (World) this);
+            event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1212,17 +1229,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         SpawnEntityEvent event = null;
 
         if (this.worldSpawnerRunning) {
-            event =
-                    SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedEntities, entitySnapshots,
-                            (World) (Object) this);
+            event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedEntities, entitySnapshots, this);
         } else if (this.chunkSpawnerRunning) {
-            event =
-                    SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots,
-                            (World) (Object) this);
+            event = SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots, this);
         } else {
-            event =
-                    SpongeEventFactory
-                            .createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), (World) (Object) this);
+            event = SpongeEventFactory.createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), this);
         }
 
         if (!(SpongeImpl.postEvent(event))) {
@@ -1307,7 +1318,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (this.capturedSpongeBlockSnapshots.size() > 0) {
+            if (this.capturedSpongeBlockSnapshots.size() > 0 && this.pluginCause == null) {
                 this.handlePostTickCaptures(cause);
             }
 
@@ -1317,7 +1328,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     private boolean shouldChainCause(Cause cause) {
         if (!this.captureTerrainGen && !this.worldSpawnerRunning && !this.chunkSpawnerRunning && !this.processingBlockRandomTicks &&
-            !this.captureCommand && this.currentTickBlock != null && !cause.contains(this.currentTickBlock)) {
+            !this.captureCommand && this.currentTickBlock != null && this.pluginCause == null && !cause.contains(this.currentTickBlock)) {
             return true;
         }
 
@@ -1496,6 +1507,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
                 .position(location.getBlockPosition());
+        Optional<UUID> creator = getCreator(pos.getX(), pos.getY(), pos.getZ());
+        Optional<UUID> notifier = getNotifier(pos.getX(), pos.getY(), pos.getZ());
+        if (creator.isPresent()) {
+            this.builder.creator(creator.get());
+        }
+        if (notifier.isPresent()) {
+            this.builder.notifier(notifier.get());
+        }
         if (state.getBlock() instanceof ITileEntityProvider) {
             net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
             if (te != null) {
@@ -1678,8 +1697,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
+        setBlock(x, y, z, block, notifyNeighbors, null);
+    }
+
+    @Override
+    public void setBlock(int x, int y, int z, BlockState blockState, boolean notifyNeighbors, Cause cause) {
+        if (cause != null) {
+            checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
+            this.pluginCause = cause;
+        }
+
         checkBlockBounds(x, y, z);
-        SpongeHooks.setBlockState(((net.minecraft.world.World) (Object) this), x, y, z, block, notifyNeighbors);
+        setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
     }
 
     @Override
@@ -2244,10 +2273,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
         World world = ((World) this);
         BlockState state = world.getBlock(x, y, z);
         Optional<TileEntity> te = world.getTileEntity(x, y, z);
-        final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
+        SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder()
                 .blockState(state)
                 .worldId(world.getUniqueId())
                 .position(new Vector3i(x, y, z));
+        Optional<UUID> creator = getCreator(x, y, z);
+        Optional<UUID> notifier = getNotifier(x, y, z);
+        if (creator.isPresent()) {
+            builder.creator(creator.get());
+        }
+        if (notifier.isPresent()) {
+            builder.notifier(notifier.get());
+        }
         if (te.isPresent()) {
             final TileEntity tileEntity = te.get();
             for (DataManipulator<?, ?> manipulator : tileEntity.getContainers()) {
@@ -2269,6 +2306,44 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean restoreSnapshot(int x, int y, int z, BlockSnapshot snapshot, boolean force, boolean notifyNeighbors) {
         snapshot = snapshot.withLocation(new Location<>(this, new Vector3i(x, y, z)));
         return snapshot.restore(force, notifyNeighbors);
+    }
+
+    @Override
+    public Optional<UUID> getCreator(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+        Optional<User> user = spongeChunk.getBlockOwner(pos);
+        if (user.isPresent()) {
+            return Optional.of(user.get().getUniqueId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public Optional<UUID> getNotifier(int x, int y, int z) {
+        BlockPos pos = new BlockPos(x, y, z);
+        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+        Optional<User> user = spongeChunk.getBlockNotifier(pos);
+        if (user.isPresent()) {
+            return Optional.of(user.get().getUniqueId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
+        BlockPos pos = new BlockPos(x, y, z);
+        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+        spongeChunk.setBlockCreator(pos, uuid);
+    }
+
+    @Override
+    public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
+        BlockPos pos = new BlockPos(x, y, z);
+        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
+        spongeChunk.setBlockNotifier(pos, uuid);
     }
 
     @Override

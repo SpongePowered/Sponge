@@ -34,6 +34,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface IMixinChunk {
 
@@ -48,6 +49,10 @@ public interface IMixinChunk {
     Optional<User> getBlockNotifier(BlockPos pos);
 
     IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot);
+
+    void setBlockNotifier(BlockPos pos, UUID uuid);
+
+    void setBlockCreator(BlockPos pos, UUID uuid);
 
     void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
 
