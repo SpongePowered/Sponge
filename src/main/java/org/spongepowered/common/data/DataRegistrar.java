@@ -157,9 +157,8 @@ public class DataRegistrar {
 
         // Data Manipulators
 
-        final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         dataManager.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
         // Entity Processors
 
@@ -336,6 +335,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
+
+        dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
+                ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
         // Item Processors
 
