@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.entity.player;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
@@ -44,17 +46,21 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityPlayer.class)
-public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer {
+public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer, ITargetedLocation {
 
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String WORLD_PLAY_SOUND_AT =
@@ -67,7 +73,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
     @Shadow public abstract int xpBarCap();
-    @Shadow public abstract FoodStats getFoodStats();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract Scoreboard getWorldScoreboard();
@@ -76,6 +81,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow private BlockPos playerLocation;
     @Shadow protected FoodStats foodStats;
     private boolean affectsSpawning = true;
+    private Vector3d targetedLocation;
+
+    @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
+    public void construct(World worldIn, GameProfile gameProfileIn, CallbackInfo ci) {
+        this.targetedLocation = VecHelper.toVector3d(worldIn.getSpawnPoint());
+    }
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onGetDisplayName(CallbackInfoReturnable<IChatComponent> ci, ChatComponentText component) {
@@ -176,4 +187,18 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     public void setAffectsSpawning(boolean affectsSpawning) {
         this.affectsSpawning = affectsSpawning;
     }
+
+    @Override
+    public Vector3d getTargetedLocation() {
+        return this.targetedLocation;
+    }
+
+    @Override
+    public void setTargetedLocation(@Nullable Vector3d vec) {
+        this.targetedLocation = vec != null ? vec : VecHelper.toVector3d(this.worldObj.getSpawnPoint());
+        if (!((Object) this instanceof EntityPlayerMP)) {
+            this.worldObj.setSpawnPoint(VecHelper.toBlockPos(this.targetedLocation));
+        }
+    }
+
 }
