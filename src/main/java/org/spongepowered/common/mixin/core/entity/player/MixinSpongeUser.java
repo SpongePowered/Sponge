@@ -28,9 +28,14 @@ import com.google.common.base.Objects;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
@@ -43,7 +48,7 @@ import org.spongepowered.common.interfaces.IMixinSubject;
 import java.util.Optional;
 
 @Mixin(value = SpongeUser.class, remap = false)
-public abstract class MixinSpongeUser implements User, IMixinSubject {
+public abstract class MixinSpongeUser implements User, IMixinSubject, TextRepresentable {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 
@@ -100,4 +105,30 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
                 .add("profile", this.getProfile())
                 .toString();
     }
+
+    @Override
+    public Text toText() {
+        Optional<Player> player = getPlayer();
+        if (player.isPresent()) {
+            return player.get().toText();
+        }
+        Text.Builder builder;
+        Optional<DisplayNameData> optName = get(DisplayNameData.class);
+        // Can this be present at all?
+        if (optName.isPresent()) {
+            Value<Text> displayName = optName.get().displayName();
+            if (displayName.exists()) {
+                builder = displayName.get().toBuilder();
+            } else {
+                builder = Text.builder(getName());
+            }
+        } else {
+            builder = Text.builder(getName());
+        }
+        builder.onHover(TextActions.showText(Text.of(getName() + '\n' + getUniqueId())));
+        // builder.onClick(TextActions.suggestCommand("/msg " + getName()));
+        builder.onShiftClick(TextActions.insertText(getUniqueId().toString()));
+        return builder.build();
+    }
+
 }

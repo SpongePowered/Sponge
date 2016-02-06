@@ -46,6 +46,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -68,6 +69,7 @@ import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
@@ -98,6 +100,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -180,6 +183,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
+    @Shadow(prefix = "shadow$") public abstract IChatComponent shadow$getDisplayName();
 
 
     // @formatter:on
@@ -1053,6 +1057,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public Translation getTranslation() {
         return getType().getTranslation();
+    }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(shadow$getDisplayName());
     }
 
     private boolean collision = false;
