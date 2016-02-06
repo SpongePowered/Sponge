@@ -292,6 +292,7 @@ public class KeyRegistry {
         keyMap.put("hide_can_place", makeSingleKey(Boolean.class, Value.class, of("HideCanPlace")));
         keyMap.put("hide_miscellaneous", makeSingleKey(Boolean.class, Value.class, of("HideMiscellaneous")));
         keyMap.put("potion_effects", makeListKey(PotionEffect.class, of("PotionEffects")));
+        keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
