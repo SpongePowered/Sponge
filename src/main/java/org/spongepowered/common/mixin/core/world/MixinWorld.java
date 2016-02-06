@@ -456,7 +456,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (this.pluginCause != null) {
                     handleBlockCaptures(this.pluginCause);
-                    this.pluginCause = null;
                 } else {
                     // Don't notify clients or update physics while capturing blockstates
                     if (originalBlockSnapshot == null) {
@@ -1709,6 +1708,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         checkBlockBounds(x, y, z);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
+        this.pluginCause = null;
     }
 
     @Override
