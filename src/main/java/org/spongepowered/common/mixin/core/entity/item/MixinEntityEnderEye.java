@@ -24,17 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityEnderEye;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityEnderEye.class)
-public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder {
+public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEnder, ITargetedLocation {
 
+    @Shadow private double targetX;
+    @Shadow private double targetY;
+    @Shadow private double targetZ;
     private ProjectileSource projectileSource = ProjectileSource.UNKNOWN;
 
     @Override
@@ -57,6 +63,18 @@ public abstract class MixinEntityEnderEye extends MixinEntity implements EyeOfEn
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, null);
+    }
+
+    @Override
+    public Vector3d getTargetedLocation() {
+        return new Vector3d(this.targetX, this.targetY, this.targetZ);
+    }
+
+    @Override
+    public void setTargetedLocation(Vector3d vec) {
+        this.targetX = vec.getX();
+        this.targetY = vec.getY();
+        this.targetZ = vec.getZ();
     }
 
 }

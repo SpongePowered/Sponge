@@ -22,21 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.util.BlockPos;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import com.flowpowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
 
-public interface IMixinEntityPlayer extends IMixinEntity {
+public interface ITargetedLocation {
 
-    @Nullable
-    BlockPos getBedLocation(int dim);
+    Vector3d getTargetedLocation();
 
-    boolean isSpawnForced(int dim);
+    void setTargetedLocation(@Nullable Vector3d vec);
 
-    boolean affectsSpawning();
-
-    void setAffectsSpawning(boolean affectsSpawning);
 }
