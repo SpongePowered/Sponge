@@ -894,11 +894,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         } else {
             NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
 
-            if (!creatorNbt.hasKey("uuid_most") || !creatorNbt.hasKey("uuid_least")) {
+            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
                 return Optional.empty();
             }
 
-            UUID uuid = new UUID(creatorNbt.getLong("uuid_most"), creatorNbt.getLong("uuid_least"));
+            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
             // get player if online
             EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
             if (player != null) {
@@ -912,14 +912,53 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void trackEntityUniqueId(String nbtKey, UUID uuid) {
         if (!getSpongeData().hasKey(nbtKey)) {
+            if (uuid == null) {
+                return;
+            }
+
             NBTTagCompound sourceNbt = new NBTTagCompound();
-            sourceNbt.setLong("uuid_least", uuid.getLeastSignificantBits());
-            sourceNbt.setLong("uuid_most", uuid.getMostSignificantBits());
+            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
+            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
             getSpongeData().setTag(nbtKey, sourceNbt);
         } else {
-            getSpongeData().getCompoundTag(nbtKey).setLong("uuid_least", uuid.getLeastSignificantBits());
-            getSpongeData().getCompoundTag(nbtKey).setLong("uuid_most", uuid.getMostSignificantBits());
+            if (uuid == null) {
+                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_LEAST);
+                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_MOST);
+            } else {
+                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
+                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
+            }
         }
+    }
+
+    @Override
+    public Optional<UUID> getCreator() {
+       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+       if (user.isPresent()) {
+           return Optional.of(user.get().getUniqueId());
+       } else {
+           return Optional.empty();
+       }
+    }
+
+    @Override
+    public Optional<UUID> getNotifier() {
+        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+        if (user.isPresent()) {
+            return Optional.of(user.get().getUniqueId());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public void setCreator(@Nullable UUID uuid) {
+        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid);
+    }
+
+    @Override
+    public void setNotifier(@Nullable UUID uuid) {
+        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, uuid);
     }
 
     @Override

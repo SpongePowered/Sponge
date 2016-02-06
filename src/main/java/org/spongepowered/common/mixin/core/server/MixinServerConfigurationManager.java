@@ -194,7 +194,7 @@ public abstract class MixinServerConfigurationManager {
         @Nullable String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
         Optional<Text> disconnectMessage;
         if (kickReason != null) {
-            disconnectMessage = Optional.of(Text.of(kickReason));
+            disconnectMessage = Optional.of(SpongeTexts.fromLegacy(kickReason));
         } else {
             disconnectMessage = Optional.of(Text.of("You are not allowed to log in to this server."));
         }

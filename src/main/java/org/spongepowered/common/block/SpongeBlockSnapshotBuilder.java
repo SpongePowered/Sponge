@@ -29,16 +29,13 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -66,6 +63,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     BlockState blockState;
     BlockState extendedState;
     UUID worldUuid;
+    UUID creatorUuid;
+    UUID notifierUuid;
     Vector3i coords;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
@@ -123,6 +122,18 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         return this;
     }
 
+    @Override
+    public BlockSnapshot.Builder creator(UUID uuid) {
+        this.creatorUuid = checkNotNull(uuid);
+        return this;
+    }
+
+    @Override
+    public BlockSnapshot.Builder notifier(UUID uuid) {
+        this.notifierUuid = checkNotNull(uuid);
+        return this;
+    }
+
     public SpongeBlockSnapshotBuilder unsafeNbt(NBTTagCompound compound) {
         this.compound = (NBTTagCompound) compound.copy();
         return this;
@@ -153,6 +164,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder from(BlockSnapshot holder) {
         this.blockState = holder.getState();
         this.worldUuid = holder.getWorldUniqueId();
+        if (holder.getCreator().isPresent()) {
+            this.creatorUuid = holder.getCreator().get();
+        }
+        if (holder.getNotifier().isPresent()) {
+            this.notifierUuid = holder.getNotifier().get();
+        }
         this.coords = holder.getPosition();
         this.manipulators = Lists.newArrayList(holder.getManipulators());
         if (holder instanceof SpongeBlockSnapshot) {
@@ -167,6 +184,8 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder reset() {
         this.blockState = BlockTypes.AIR.getDefaultState();
         this.worldUuid = null;
+        this.creatorUuid = null;
+        this.notifierUuid = null;
         this.coords = null;
         this.manipulators = null;
         this.compound = null;
@@ -192,6 +211,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         final SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
         final UUID worldUuid = UUID.fromString(container.getString(Queries.WORLD_ID).get());
         final Vector3i coordinate = DataUtil.getPosition3i(container);
+        Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
+        Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
+
         // We now reconstruct the custom data and all extra data.
         final BlockState blockState = container.getSerializable(DataQueries.BLOCK_STATE, BlockState.class).get();
         BlockState extendedState = null;
@@ -205,6 +227,12 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
                 .extendedState(extendedState)
                 .position(coordinate)
                 .worldId(worldUuid);
+        if (creatorUuid.isPresent()) {
+            builder.creator(UUID.fromString(creatorUuid.get()));
+        }
+        if (notifierUuid.isPresent()) {
+            builder.notifier(UUID.fromString(notifierUuid.get()));
+        }
         Optional<DataView> unsafeCompound = container.getView(DataQueries.UNSAFE_NBT);
         final NBTTagCompound compound = unsafeCompound.isPresent() ? NbtTranslator.getInstance().translateData(unsafeCompound.get()) : null;
         if (compound != null) {

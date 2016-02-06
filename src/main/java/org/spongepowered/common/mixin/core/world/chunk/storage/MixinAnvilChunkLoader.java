@@ -60,12 +60,8 @@ public class MixinAnvilChunkLoader {
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                if (ownerUniqueIdIndex != -1) {
-                    valueNbt.setInteger("owner", ownerUniqueIdIndex);
-                }
-                if (notifierUniqueIdIndex != -1) {
-                    valueNbt.setInteger("notifier", notifierUniqueIdIndex);
-                }
+                valueNbt.setInteger("owner", ownerUniqueIdIndex);
+                valueNbt.setInteger("notifier", notifierUniqueIdIndex);
                 valueNbt.setShort("pos", pos);
                 positions.appendTag(valueNbt);
             }
@@ -75,12 +71,8 @@ public class MixinAnvilChunkLoader {
                 Integer ownerUniqueIdIndex = mapEntry.getValue().ownerIndex;
                 Integer notifierUniqueIdIndex = mapEntry.getValue().notifierIndex;
                 NBTTagCompound valueNbt = new NBTTagCompound();
-                if (ownerUniqueIdIndex != -1) {
-                    valueNbt.setInteger("owner", ownerUniqueIdIndex);
-                }
-                if (notifierUniqueIdIndex != -1) {
-                    valueNbt.setInteger("notifier", notifierUniqueIdIndex);
-                }
+                valueNbt.setInteger("owner", ownerUniqueIdIndex);
+                valueNbt.setInteger("notifier", notifierUniqueIdIndex);
                 valueNbt.setInteger("ipos", pos);
                 positions.appendTag(valueNbt);
             }

@@ -36,7 +36,8 @@ public abstract class MixinClassInheritanceMultiMap {
      * @author Minecrell
      * @reason Adds support for finding values by searching for one of their interfaces.
      */
-    @Redirect(method = "func_181157_b", at = @At(value = "INVOKE", target = "Ljava/lang/Class;isAssignableFrom(Ljava/lang/Class;)Z"), remap = false)
+    @Redirect(method = "initializeClassLookup",
+            at = @At(value = "INVOKE", target = "Ljava/lang/Class;isAssignableFrom(Ljava/lang/Class;)Z", remap = false))
     private boolean onIsClassValid(Class<?> baseClass, Class<?> clazz) {
         return clazz.isInterface() || baseClass.isAssignableFrom(clazz);
     }

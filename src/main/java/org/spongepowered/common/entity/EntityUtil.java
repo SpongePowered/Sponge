@@ -97,9 +97,9 @@ public final class EntityUtil {
     @SuppressWarnings("unchecked")
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
         final EntityTracker paintingTracker = ((WorldServer) painting.worldObj).getEntityTracker();
-        EntityTrackerEntry paintingEntry = (EntityTrackerEntry) paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
+        EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
-        for (EntityPlayerMP player : (Set<EntityPlayerMP>) paintingEntry.trackingPlayers) {
+        for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
             S13PacketDestroyEntities packet = new S13PacketDestroyEntities(painting.getEntityId());
             player.playerNetServerHandler.sendPacket(packet);
             playerMPs.add(player);
@@ -122,9 +122,9 @@ public final class EntityUtil {
     public static boolean toggleInvisibility(Entity entity, boolean vanish) {
         EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
         if (vanish) {
-            EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
+            EntityTrackerEntry entry = entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
             if (entry != null) {
-                Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>((Set<EntityPlayerMP>) entry.trackingPlayers);
+                Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>(entry.trackingPlayers);
                 entityPlayerMPs.forEach(player -> {
                     if (player != entity) { // don't remove ourselves
                         entry.removeFromTrackedPlayers(player);
@@ -139,15 +139,15 @@ public final class EntityUtil {
             if (!entityTracker.trackedEntityHashTable.containsItem(entity.getEntityId())) {
                 entityTracker.trackEntity(entity);
             }
-            EntityTrackerEntry entry = (EntityTrackerEntry) entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
+            EntityTrackerEntry entry = entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
 
-            for (EntityPlayerMP playerMP : (List<EntityPlayerMP>) MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
+            for (EntityPlayerMP playerMP : MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
                 if (entity != playerMP) { // don't remove ourselves
                     if (entity instanceof EntityPlayerMP) {
-                        Packet packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) entity);
+                        Packet<?> packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) entity);
                         playerMP.playerNetServerHandler.sendPacket(packet);
                     }
-                    Packet newPacket = entry.func_151260_c(); // creates the spawn packet for us
+                    Packet<?> newPacket = entry.createSpawnPacket(); // creates the spawn packet for us
                     playerMP.playerNetServerHandler.sendPacket(newPacket);
                 }
             }

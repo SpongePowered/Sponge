@@ -80,7 +80,6 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
     @Shadow @Final private double[] field_147434_q;
     @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow private net.minecraft.world.World worldObj;
-    @Shadow private Block field_177476_s;
     @Shadow private ChunkProviderSettings settings;
     @Shadow private Random rand;
 
@@ -94,7 +93,6 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
     @Shadow private BiomeGenBase[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
-    @Shadow public abstract void func_147423_a(int p_147423_1_, int p_147423_2_, int p_147423_3_);
     @Shadow public abstract void replaceBlocksForBiome(int p_180517_1_, int p_180517_2_, ChunkPrimer p_180517_3_, BiomeGenBase[] p_180517_4_);
 
     private BiomeGenerator biomegen;

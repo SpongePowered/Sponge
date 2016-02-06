@@ -49,11 +49,11 @@ public abstract class MixinEntityTrackerEntry {
     @Shadow public Set<EntityPlayerMP> trackingPlayers;
 
     @Shadow
-    public abstract void func_151261_b(Packet packetIn);
+    public abstract void func_151261_b(Packet<?> packetIn);
 
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
-    public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet spawnPacket, final EntityPlayerMP playerIn) {
+    public void onSendSpawnPacket(final NetHandlerPlayServer thisCtx, final Packet<?> spawnPacket, final EntityPlayerMP playerIn) {
         if (!(this.trackedEntity instanceof EntityHuman)) {
             // This is the method call that was @Redirected
             thisCtx.sendPacket(spawnPacket);
@@ -74,8 +74,8 @@ public abstract class MixinEntityTrackerEntry {
     }
 
     // The spawn packet for a human is a player
-    @Inject(method = "func_151260_c", at = @At("HEAD"), cancellable = true)
-    public void onGetSpawnPacket(CallbackInfoReturnable<Packet> cir) {
+    @Inject(method = "createSpawnPacket", at = @At("HEAD"), cancellable = true)
+    public void onGetSpawnPacket(CallbackInfoReturnable<Packet<?>> cir) {
         if (this.trackedEntity instanceof EntityHuman) {
             cir.setReturnValue(((EntityHuman) this.trackedEntity).createSpawnPacket());
         }
@@ -87,16 +87,16 @@ public abstract class MixinEntityTrackerEntry {
             return;
         }
         EntityHuman human = (EntityHuman) this.trackedEntity;
-        Packet[] packets = human.popQueuedPackets(null);
+        Packet<?>[] packets = human.popQueuedPackets(null);
         for (EntityPlayerMP player : this.trackingPlayers) {
             if (packets != null) {
-                for (Packet packet : packets) {
+                for (Packet<?> packet : packets) {
                     player.playerNetServerHandler.sendPacket(packet);
                 }
             }
-            Packet[] playerPackets = human.popQueuedPackets(player);
+            Packet<?>[] playerPackets = human.popQueuedPackets(player);
             if (playerPackets != null) {
-                for (Packet packet : playerPackets) {
+                for (Packet<?> packet : playerPackets) {
                     player.playerNetServerHandler.sendPacket(packet);
                 }
             }

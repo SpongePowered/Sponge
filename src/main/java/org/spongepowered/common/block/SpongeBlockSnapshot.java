@@ -55,8 +55,8 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.CaptureType;
 
 import java.util.Collection;
 import java.util.List;
@@ -80,9 +80,12 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     private final ImmutableList<ImmutableDataManipulator<?, ?>> blockData;
     private final ImmutableMap<Key<?>, ImmutableValue<?>> blockKeyValueMap;
     private final ImmutableSet<ImmutableValue<?>> blockValueSet;
-    private int updateFlag; // internal use
-    public CaptureType captureType; // used internally for post event
     @Nullable final NBTTagCompound compound;
+    @Nullable final UUID creatorUniqueId;
+    @Nullable final UUID notifierUniqueId;
+    // Internal use only
+    private int updateFlag;
+    public CaptureType captureType; // used for post event
 
     // Internal use for restores
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, int flag) {
@@ -94,6 +97,8 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.blockState = checkNotNull(builder.blockState, "The block state was null!");
         this.extendedState = builder.extendedState;
         this.worldUniqueId = checkNotNull(builder.worldUuid);
+        this.creatorUniqueId = builder.creatorUuid;
+        this.notifierUniqueId = builder.notifierUuid;
         this.pos = checkNotNull(builder.coords);
         final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
         for (ImmutableValue<?> value : this.blockState.getValues()) {
@@ -184,6 +189,16 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         ((IMixinWorld) world).setRestoringBlocks(false);
         return true;
+    }
+
+    @Override
+    public Optional<UUID> getCreator() {
+        return Optional.ofNullable(this.creatorUniqueId);
+    }
+
+    @Override
+    public Optional<UUID> getNotifier() {
+        return Optional.ofNullable(this.notifierUniqueId);
     }
 
     @Override
