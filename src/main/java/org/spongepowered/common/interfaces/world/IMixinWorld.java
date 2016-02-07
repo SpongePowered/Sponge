@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -102,6 +103,8 @@ public interface IMixinWorld {
     void setWeatherStartTime(long weatherStartTime);
 
     void notifyBlockOfStateChange(BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos);
+
+    void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation);
 
     @Nullable
     EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double distance);

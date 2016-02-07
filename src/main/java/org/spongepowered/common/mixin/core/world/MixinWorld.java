@@ -79,7 +79,6 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.MathHelper;
@@ -190,7 +189,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -221,6 +219,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -268,6 +267,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
     public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
     public List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
+    private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private boolean keepSpawnLoaded;
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
@@ -498,6 +498,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = false;
     }
 
+    @Override
+    public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
+        this.rotationUpdates.put(entity, rotation);
+    }
+
+    private void updateRotation(net.minecraft.entity.Entity entityIn) {
+        Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
+        if (rotationUpdate != null) {
+            entityIn.rotationPitch = (float) rotationUpdate.getX();
+            entityIn.rotationYaw = (float) rotationUpdate.getY();
+        }
+        this.rotationUpdates.remove(entityIn);
+    }
+
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onUpdateEntities(net.minecraft.entity.Entity entityIn) {
         if (this.isRemote || this.currentTickEntity != null) {
@@ -508,10 +522,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entityIn;
         entityIn.onUpdate();
+        updateRotation(entityIn);
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
         handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
         this.currentTickEntity = null;
         this.processingCaptureCause = false;
+
+
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -539,6 +556,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.processingCaptureCause = true;
         this.currentTickEntity = (Entity) entity;
         entity.onUpdate();
+        updateRotation(entity);
         SpongeCommonEventFactory.handleEntityMovement(entity);
         handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         this.currentTickEntity = null;
