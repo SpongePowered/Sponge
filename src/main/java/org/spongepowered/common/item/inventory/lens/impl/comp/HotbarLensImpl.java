@@ -72,7 +72,7 @@ public class HotbarLensImpl extends InventoryRowLensImpl implements HotbarLens<I
     public void setSelectedSlotIndex(Fabric<IInventory> inv, int index) {
         for (IInventory inner : inv.allInventories()) {
             if (inner instanceof InventoryPlayer) {
-                ((InventoryPlayer) inv).currentItem = index;
+                ((InventoryPlayer) inner).currentItem = index;
             }
         }
     }
