@@ -2678,4 +2678,44 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return predicate.apply(player) && mixinEntity.isReallyREALLYInvisible();
     }
 
+    /**
+     * @author gabizou - February 7th, 2016
+     *
+     * This will short circuit all other patches such that we control the
+     * entities being loaded by chunkloading and can throw our bulk entity
+     * event. This will bypass Forge's hook for individual entity events,
+     * but the SpongeModEventManager will still successfully throw the
+     * appropriate event and cancel the entities otherwise contained.
+     *
+     * @param entities The entities being loaded
+     * @param callbackInfo The callback info
+     */
+    @Final
+    @Inject(method = "loadEntities", at = @At("HEAD"), cancellable = true)
+    private void spongeLoadEntities(Collection<net.minecraft.entity.Entity> entities, CallbackInfo callbackInfo) {
+        if (entities.isEmpty()) {
+            // just return, no entities to load!
+            callbackInfo.cancel();
+            return;
+        }
+        List<Entity> entityList = new ArrayList<>();
+        ImmutableList.Builder<EntitySnapshot> snapshotBuilder = ImmutableList.builder();
+        for (net.minecraft.entity.Entity entity : entities) {
+            entityList.add((Entity) entity);
+            snapshotBuilder.add(((Entity) entity).createSnapshot());
+        }
+        List<NamedCause> causes = new ArrayList<>();
+        causes.add(NamedCause.source(this));
+        causes.add(NamedCause.of("World", this));
+        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList,
+            snapshotBuilder.build(), this);
+        SpongeImpl.postEvent(chunkLoad);
+        if (!chunkLoad.isCancelled()) {
+            for (Entity successful : chunkLoad.getEntities()) {
+                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                this.onEntityAdded((net.minecraft.entity.Entity) successful);
+            }
+        }
+        callbackInfo.cancel();
+    }
 }
