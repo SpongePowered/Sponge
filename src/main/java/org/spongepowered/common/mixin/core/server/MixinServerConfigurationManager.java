@@ -487,7 +487,8 @@ public abstract class MixinServerConfigurationManager {
     private void onSetPlayerManager(WorldServer[] worldServers, CallbackInfo callbackInfo) {
         if (this.playerNBTManagerObj == null) {
             this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
-            worldServers[0].getWorldBorder().addListener(new PlayerBorderListener(0));
+            // This is already added in our world constructor
+            //worldServers[0].getWorldBorder().addListener(new PlayerBorderListener(0));
         }
         callbackInfo.cancel();
     }
