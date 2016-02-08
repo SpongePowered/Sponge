@@ -30,9 +30,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
+import org.spongepowered.api.text.Text.Builder;
+import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.text.translation.Translation;
 
-public abstract class SpongeCatalogType implements CatalogType {
+public abstract class SpongeCatalogType implements CatalogType, TextRepresentable {
 
     private final String id;
 
@@ -78,6 +84,26 @@ public abstract class SpongeCatalogType implements CatalogType {
                 .add("name", getName());
     }
 
+    protected Text.Builder toTextBuilder() {
+        return Text.builder(getName());
+    }
+
+    protected Text.Builder toTextHoverBuilder() {
+        return Text.builder()
+                .append(Text.of("Id: " + getId()), Text.NEW_LINE)
+                .append(Text.of("Name: " + getName()));
+    }
+
+    @Override
+    public Text toText() {
+        final Text.Builder builder = toTextBuilder();
+        builder.color(TextColors.AQUA);
+        builder.style(TextStyles.BOLD);
+        builder.onHover(TextActions.showText(toTextHoverBuilder().build()));
+        builder.onShiftClick(TextActions.insertText(getId()));
+        return builder.build();
+    }
+
     public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
 
         private final Translation translation;
@@ -101,6 +127,17 @@ public abstract class SpongeCatalogType implements CatalogType {
         protected ToStringHelper toStringHelper() {
             return super.toStringHelper()
                     .add("translation", getTranslation());
+        }
+
+        @Override
+        protected Builder toTextBuilder() {
+            return Text.builder(this);
+        }
+
+        @Override
+        protected Builder toTextHoverBuilder() {
+            return super.toTextHoverBuilder().append(Text.NEW_LINE)
+                    .append(Text.of("TranslationId: " + getTranslation().getId()));
         }
 
     }

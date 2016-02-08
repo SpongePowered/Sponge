@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.item;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.IChatComponent;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Property;
@@ -34,6 +35,8 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.TextRepresentable;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,13 +46,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
 import java.util.Optional;
 
 @Mixin(Item.class)
-public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry {
+public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDictionaryEntry, TextRepresentable {
 
     public Optional<BlockType> blockType = Optional.empty();
 
@@ -58,6 +62,9 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Shadow
     public abstract String getUnlocalizedName();
+    
+    @Shadow(prefix = "shadow$")
+    public abstract IChatComponent shadow$getChatComponent();
 
     @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
     private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
@@ -124,4 +131,10 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     public ItemStack createDictionaryStack(int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
+
+    @Override
+    public Text toText() {
+        return SpongeTexts.toText(shadow$getChatComponent());
+    }
+
 }
