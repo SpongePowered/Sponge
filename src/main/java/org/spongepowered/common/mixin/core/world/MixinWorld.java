@@ -79,7 +79,6 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EntitySelectors;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.MathHelper;
@@ -190,7 +189,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -350,7 +348,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener());
+            this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
         }
 
         // Turn on capturing
