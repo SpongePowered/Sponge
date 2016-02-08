@@ -479,16 +479,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public CarriedInventory<? extends Carrier> getInventory() {
         return (CarriedInventory<? extends Carrier>) this.inventory;
     }
-    
-    /**
-     * This is deliberately declared <b>before</b> {@link #onSetGameType} since
-     * both inject at <tt>HEAD</tt>. This handler is therefore injected at HEAD
-     * first, and then {@link #onSetGameType} will be injected before it.
-     */
-    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), argsOnly = true)
-    private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
-        return this.pendingGameType;
-    }
 
     @Inject(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(WorldSettings.GameType gameType, CallbackInfo ci) {
@@ -501,6 +491,16 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.pendingGameType = (WorldSettings.GameType) (Object) event.getGameMode();
     }
     
+    /**
+     * This injector must appear <b>after</b> {@link #onSetGameType} since it
+     * assigns the {@link #pendingGameType} returned by the event to the actual
+     * local variable in the method.
+     */
+    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), argsOnly = true)
+    private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
+        return this.pendingGameType;
+    }
+
     @Redirect(method = "onDeath", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z", ordinal = 0))
     public boolean onGetGameRules(GameRules gameRules, String gameRule) {
