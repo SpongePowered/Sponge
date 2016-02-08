@@ -33,12 +33,12 @@ import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenCanopyTree.class)
-public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree implements IWorldGenPopulatorObject {
+public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree implements IMixinWorldGenPopulatorObject {
 
     private String id;
 

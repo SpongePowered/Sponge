@@ -47,7 +47,7 @@ import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
 import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
@@ -90,8 +90,8 @@ public class PopulatorObjectRegistryModule extends MutableCatalogRegistryModule<
         checkNotNull(type, "type");
         checkNotNull(aliases, "aliases");
         if (type.getId() == null) {
-            if (aliases.length > 0 && type instanceof IWorldGenPopulatorObject) {
-                ((IWorldGenPopulatorObject) type).setId(aliases[0]);
+            if (aliases.length > 0 && type instanceof IMixinWorldGenPopulatorObject) {
+                ((IMixinWorldGenPopulatorObject) type).setId(aliases[0]);
             } else {
                 throw new IllegalArgumentException("PopulatorObject " + type + " does not have an id!");
             }

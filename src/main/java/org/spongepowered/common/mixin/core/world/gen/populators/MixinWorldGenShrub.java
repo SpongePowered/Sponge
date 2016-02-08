@@ -31,12 +31,12 @@ import net.minecraft.world.gen.feature.WorldGenShrub;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenShrub.class)
-public abstract class MixinWorldGenShrub implements IWorldGenPopulatorObject {
+public abstract class MixinWorldGenShrub implements IMixinWorldGenPopulatorObject {
 
     private String id;
 

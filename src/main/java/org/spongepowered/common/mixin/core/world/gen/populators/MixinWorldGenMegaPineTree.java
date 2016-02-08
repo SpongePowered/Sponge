@@ -31,7 +31,7 @@ import java.util.Random;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -39,7 +39,7 @@ import net.minecraft.world.gen.feature.WorldGenHugeTrees;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
 
 @Mixin(WorldGenMegaPineTree.class)
-public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implements IWorldGenPopulatorObject {
+public abstract class MixinWorldGenMegaPineTree extends WorldGenHugeTrees implements IMixinWorldGenPopulatorObject {
 
     private String id;
 

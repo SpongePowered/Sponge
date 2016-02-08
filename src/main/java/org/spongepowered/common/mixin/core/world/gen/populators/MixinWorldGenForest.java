@@ -34,12 +34,12 @@ import net.minecraft.world.gen.feature.WorldGenForest;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenForest.class)
-public abstract class MixinWorldGenForest extends MixinWorldGenAbstractTree implements IWorldGenPopulatorObject {
+public abstract class MixinWorldGenForest extends MixinWorldGenAbstractTree implements IMixinWorldGenPopulatorObject {
 
     private String id;
 

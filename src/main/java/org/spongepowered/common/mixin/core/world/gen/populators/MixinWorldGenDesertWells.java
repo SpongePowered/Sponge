@@ -44,12 +44,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import java.util.Random;
 
 @Mixin(WorldGenDesertWells.class)
-public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, IWorldGenPopulatorObject {
+public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, IMixinWorldGenPopulatorObject {
 
     @Shadow @Final private static BlockStateHelper field_175913_a;
 

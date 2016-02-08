@@ -112,7 +112,7 @@ public final class RegistryModuleLoader {
                     }
                 }
             } catch (Exception e) {
-                // Something went wrong
+                throw new RuntimeException("Error trying to check for catalog registrations in module: " + module.getClass().getCanonicalName(), e);
             }
         }
         return false;

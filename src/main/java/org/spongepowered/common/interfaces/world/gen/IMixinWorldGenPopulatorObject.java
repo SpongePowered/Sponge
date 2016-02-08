@@ -25,10 +25,21 @@
 
 package org.spongepowered.common.interfaces.world.gen;
 
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.world.gen.PopulatorObject;
 
-public interface IWorldGenPopulatorObject extends PopulatorObject {
+/**
+ * Helper interface to allow setting the id on a vanilla {@link PopulatorObject}
+ * .
+ */
+public interface IMixinWorldGenPopulatorObject extends PopulatorObject {
 
+    /**
+     * Sets the unique id for this {@link PopulatorObject}. The passed values
+     * must meet the requirements specified in {@link CatalogType}.
+     *
+     * @param id The unique identifier of this populator object
+     */
     void setId(String id);
 
     @Override

@@ -75,7 +75,8 @@ public abstract class MixinEnchantment implements Enchantment {
         this.translation = new SpongeTranslation(shadow$getName());
     }
 
-    public String enchantment$getId() {
+    @Override
+    public String getId() {
         return this.id;
     }
 
@@ -84,7 +85,8 @@ public abstract class MixinEnchantment implements Enchantment {
         return this.translation.get();
     }
 
-    public Translation enchantment$getTranslation() {
+    @Override
+    public Translation getTranslation() {
         return this.translation;
     }
 

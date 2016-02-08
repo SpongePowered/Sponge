@@ -48,7 +48,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.gen.IWorldGenPopulatorObject;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -59,7 +59,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(WorldGenBigMushroom.class)
-public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator implements BigMushroom, IWorldGenPopulatorObject {
+public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator implements BigMushroom, IMixinWorldGenPopulatorObject {
 
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
