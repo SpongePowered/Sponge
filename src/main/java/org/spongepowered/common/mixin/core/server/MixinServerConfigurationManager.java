@@ -38,7 +38,6 @@ import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.server.S01PacketJoinGame;
-import net.minecraft.network.play.server.S03PacketTimeUpdate;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S06PacketUpdateHealth;
 import net.minecraft.network.play.server.S07PacketRespawn;
@@ -51,7 +50,6 @@ import net.minecraft.network.play.server.S39PacketPlayerAbilities;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.network.play.server.S40PacketDisconnect;
 import net.minecraft.network.play.server.S41PacketServerDifficulty;
-import net.minecraft.network.play.server.S44PacketWorldBorder;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
@@ -489,7 +487,8 @@ public abstract class MixinServerConfigurationManager {
     private void onSetPlayerManager(WorldServer[] worldServers, CallbackInfo callbackInfo) {
         if (this.playerNBTManagerObj == null) {
             this.playerNBTManagerObj = worldServers[0].getSaveHandler().getPlayerNBTManager();
-            worldServers[0].getWorldBorder().addListener(new PlayerBorderListener());
+            // This is already added in our world constructor
+            //worldServers[0].getWorldBorder().addListener(new PlayerBorderListener(0));
         }
         callbackInfo.cancel();
     }
