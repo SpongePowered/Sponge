@@ -47,34 +47,21 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = Enchantment.class, prefix = "enchantment$"))
 public abstract class MixinEnchantment implements Enchantment {
 
-    @Shadow
-    @Final
-    private int weight;
+    @Shadow @Final private int weight;
 
-    @Shadow
-    public abstract int getMinLevel();
+    @Shadow public abstract int getMinLevel();
+    @Shadow public abstract int getMaxLevel();
+    @Shadow public abstract int getMinEnchantability(int level);
+    @Shadow public abstract int getMaxEnchantability(int level);
+    @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
+    @Shadow public abstract String shadow$getName();
 
-    @Shadow
-    public abstract int getMaxLevel();
-
-    @Shadow
-    public abstract int getMinEnchantability(int level);
-
-    @Shadow
-    public abstract int getMaxEnchantability(int level);
-
-    @Shadow
-    public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
-
-    @Shadow
-    public abstract String shadow$getName();
-
-    private String id;
+    private String id = "";
     private String name;
     private Translation translation;
     private String toString;
 
-    @Inject(method = "<init>", at = @At("RETURN") )
+    @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
         this.id = resLoc.toString();
     }

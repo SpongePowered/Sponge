@@ -59,12 +59,13 @@ public abstract class MixinBlockFlowerEnumFlowerType {
 
     public Translation shadow$getTranslation() {
         if (this.translation == null) {
-            if (getBlockType() == BlockFlower.EnumFlowerColor.YELLOW) {
+            final BlockFlower.EnumFlowerColor blockType = getBlockType();
+            if (blockType == BlockFlower.EnumFlowerColor.YELLOW) {
                 this.translation = new SpongeTranslation("tile.flower1." + getUnlocalizedName() + ".name");
-            } else if (getBlockType() == BlockFlower.EnumFlowerColor.RED) {
+            } else if (blockType == BlockFlower.EnumFlowerColor.RED) {
                 this.translation = new SpongeTranslation("tile.flower2." + getUnlocalizedName() + ".name");
             } else {
-                throw new IllegalStateException("Unknown flower color: " + getBlockType());
+                throw new IllegalStateException("Unknown flower color: " + blockType);
             }
         }
         return this.translation;
