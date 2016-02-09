@@ -34,8 +34,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 
-import java.util.Locale;
-
 @Mixin(value = LiteralText.class, remap = false)
 public abstract class MixinTextLiteral extends MixinText {
 

@@ -1,3 +1,4 @@
+
 /*
  * This file is part of Sponge, licensed under the MIT License (MIT).
  *
@@ -22,40 +23,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.mixin.core.text;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatComponentTranslation;
-import org.spongepowered.api.text.TranslatableText;
-import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.text.PlaceholderText;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.transformer.Transformer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.text.IMixinText;
+import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import org.spongepowered.common.text.ChatComponentPlaceholder;
 
-@Mixin(value = TranslatableText.class, remap = false)
-public abstract class MixinTextTranslatable extends MixinText {
+@Mixin(value = ChatComponentPlaceholder.class, remap = false)
+public abstract class MixinChatComponentPlaceholder extends MixinChatComponentStyle {
 
-    @Shadow @Final protected Translation translation;
-    @Shadow @Final protected ImmutableList<Object> arguments;
+    @Shadow(remap = false) private Transformer<?> transformer;
+    @Shadow(remap = false) private IChatComponent fallback;
 
     @Override
-    protected ChatComponentStyle createComponent() {
-        return new ChatComponentTranslation(this.translation.getId(), unwrapArguments(this.arguments));
-    }
-
-    private Object[] unwrapArguments(ImmutableList<Object> args) {
-        Object[] result = new Object[args.size()];
-        for (int i = 0; i < args.size(); i++) {
-            final Object arg = args.get(i);
-            if (arg instanceof IMixinText) {
-                result[i] = ((IMixinText) arg).toComponent();
-            } else {
-                result[i] = arg;
-            }
+    protected PlaceholderText.Builder createBuilder() {
+        final PlaceholderText.Builder ret = Text.placeholderBuilder(this.transformer);
+        if (this.fallback != null) {
+            ret.fallback(((IMixinChatComponent) this.fallback).toText());
         }
-        return result;
+        return ret;
     }
 
 }
