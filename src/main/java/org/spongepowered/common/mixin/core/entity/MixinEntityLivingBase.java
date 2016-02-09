@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.BaseAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
-import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -101,11 +101,25 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract boolean isPotionActive(Potion potion);
     @Shadow public abstract float getHealth();
     @Shadow public abstract float getMaxHealth();
+    @Shadow public abstract float getRotationYawHead();
+    @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+
+    @Override
+    public Vector3d getHeadRotation() {
+        // pitch, yaw, roll -- Minecraft does not currently support head roll
+        return new Vector3d(getRotation().getX(), getRotationYawHead(), 0);
+    }
+
+    @Override
+    public void setHeadRotation(Vector3d rotation) {
+        setRotation(getRotation().mul(0, 1, 1).add(rotation.getX(), 0, 0));
+        setRotationYawHead((float) rotation.getY());
+    }
 
     @Override
     public int getMaxAir() {
