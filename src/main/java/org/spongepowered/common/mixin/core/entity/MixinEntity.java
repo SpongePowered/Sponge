@@ -157,6 +157,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public int hurtResistantTime;
     @Shadow public int fireResistance;
     @Shadow public int fire;
+    @Shadow public int dimension;
     @Shadow public net.minecraft.entity.Entity riddenByEntity;
     @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow protected DataWatcher dataWatcher;
@@ -182,6 +183,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
+    @Shadow public abstract void setEating(boolean eating);
 
 
     // @formatter:on
