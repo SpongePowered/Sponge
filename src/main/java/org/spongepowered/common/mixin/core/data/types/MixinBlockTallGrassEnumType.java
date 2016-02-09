@@ -62,7 +62,7 @@ public abstract class MixinBlockTallGrassEnumType {
             if ("dead_bush".equals(internalName)) {
                 translationId = "tile.tallgrass.shrub.name";
             } else if ("tall_grass".equals(internalName)) {
-                translationId = "tile.tallgrass.tallgrass.name";
+                translationId = "tile.tallgrass.grass.name";
             } else if ("fern".equals(internalName)) {
                 translationId = "tile.tallgrass.fern.name";
             } else {
