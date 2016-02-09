@@ -29,36 +29,43 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.border.IBorderListener;
 import net.minecraft.world.border.WorldBorder;
 
-public class PlayerBorderListener implements IBorderListener {
+public final class PlayerBorderListener implements IBorderListener {
+
+    private final int dimensionId;
+
+    public PlayerBorderListener(int dimensionId) {
+        this.dimensionId = dimensionId;
+    }
 
     @Override
     public void onSizeChanged(WorldBorder border, double newSize) {
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayers(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_SIZE));
+                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_SIZE), this.dimensionId);
     }
 
     @Override
     public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayers(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.LERP_SIZE));
+                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.LERP_SIZE), this.dimensionId);
     }
 
     @Override
     public void onCenterChanged(WorldBorder border, double x, double z) {
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayers(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_CENTER));
+                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_CENTER), this.dimensionId);
     }
 
     @Override
     public void onWarningTimeChanged(WorldBorder border, int newTime) {
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayers(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_WARNING_TIME));
+                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_WARNING_TIME), this.dimensionId);
     }
 
     @Override
     public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
         MinecraftServer.getServer().getConfigurationManager()
-                .sendPacketToAllPlayers(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_WARNING_BLOCKS));
+                .sendPacketToAllPlayersInDimension(new S44PacketWorldBorder(border, S44PacketWorldBorder.Action.SET_WARNING_BLOCKS),
+                        this.dimensionId);
     }
 
     @Override
@@ -68,4 +75,5 @@ public class PlayerBorderListener implements IBorderListener {
     @Override
     public void onDamageBufferChanged(WorldBorder border, double newSize) {
     }
+
 }

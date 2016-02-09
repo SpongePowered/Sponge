@@ -99,7 +99,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         return CommandBase.getEntityName(sender, string);
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
     public String onGetEntityNameLeaveSecond(ICommandSender sender, String string) throws EntityNotFoundException {
         String entityName = CommandBase.getEntityName(sender, string);
         if (this.isExpandedSelector()) {

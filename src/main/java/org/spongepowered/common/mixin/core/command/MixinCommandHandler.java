@@ -53,7 +53,9 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             world.setProcessingCaptureCause(true);
             world.setCapturingCommand(true);
         }
-        ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
+        if (command instanceof IMixinCommandBase) {
+            ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
+        }
     }
 
     @Inject(method = "tryExecute", at = @At(value = "RETURN"))
@@ -64,7 +66,9 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             world.setProcessingCaptureCause(false);
             world.setCapturingCommand(false);
         }
-        ((IMixinCommandBase) command).setExpandedSelector(false);
+        if (command instanceof IMixinCommandBase) {
+            ((IMixinCommandBase) command).setExpandedSelector(false);
+        }
     }
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"

@@ -98,6 +98,8 @@ public interface IMixinWorld {
 
     void setRestoringBlocks(boolean flag);
 
+    void setSpawningDeathDrops(boolean flag);
+
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
