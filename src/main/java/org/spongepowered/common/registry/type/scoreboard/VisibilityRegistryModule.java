@@ -24,40 +24,30 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.Team;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 
-import java.util.Collection;
 import java.util.Map;
-import java.util.Optional;
 
-public final class VisibilityRegistryModule implements CatalogRegistryModule<Visibility> {
+public final class VisibilityRegistryModule extends MutableCatalogRegistryModule<Visibility> {
 
     @RegisterCatalog(Visibilities.class)
     public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
 
-    @Override
-    public Optional<Visibility> getById(String id) {
-        return Optional.ofNullable(visibilityMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<Visibility> getAll() {
-        return ImmutableList.copyOf(visibilityMappings.values());
+    public VisibilityRegistryModule() {
+        super(visibilityMappings);
     }
 
     @Override
     public void registerDefaults() {
-        this.visibilityMappings.put("all", (Visibility) (Object) Team.EnumVisible.ALWAYS);
-        this.visibilityMappings.put("own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
-        this.visibilityMappings.put("other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
-        this.visibilityMappings.put("none", (Visibility) (Object) Team.EnumVisible.NEVER);
+        registerUnsafe(Team.EnumVisible.ALWAYS, "all");
+        registerUnsafe(Team.EnumVisible.HIDE_FOR_OTHER_TEAMS, "own_team");
+        registerUnsafe(Team.EnumVisible.HIDE_FOR_OWN_TEAM, "other_teams");
+        registerUnsafe(Team.EnumVisible.NEVER, "none");
     }
+
 }

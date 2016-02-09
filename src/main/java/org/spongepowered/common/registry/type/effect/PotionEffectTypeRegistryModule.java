@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type.effect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.potion.PotionEffectType;
@@ -62,7 +62,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
 
     @Override
     public Collection<PotionEffectType> getAll() {
-        return ImmutableList.copyOf(this.potionList);
+        return ImmutableSet.copyOf(this.potionList);
     }
 
     @SuppressWarnings("unchecked")

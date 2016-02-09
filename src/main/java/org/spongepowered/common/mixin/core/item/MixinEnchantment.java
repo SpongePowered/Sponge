@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.item;
 
-import com.google.common.base.Objects;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
@@ -39,13 +39,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = Enchantment.class, prefix = "enchantment$"))
 public abstract class MixinEnchantment implements Enchantment {
 
-    @Shadow protected String name;
     @Shadow @Final private int weight;
 
     @Shadow public abstract int getMinLevel();
@@ -56,6 +57,9 @@ public abstract class MixinEnchantment implements Enchantment {
     @Shadow public abstract String shadow$getName();
 
     private String id = "";
+    private String name;
+    private Translation translation;
+    private String toString;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
@@ -65,6 +69,22 @@ public abstract class MixinEnchantment implements Enchantment {
     @Override
     public String getId() {
         return this.id;
+    }
+
+    @Intrinsic
+    public String enchantment$getName() {
+        if (this.name == null) {
+            this.name = getTranslation().get();
+        }
+        return this.name;
+    }
+
+    @Override
+    public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(shadow$getName());
+        }
+        return this.translation;
     }
 
     @Override
@@ -102,16 +122,13 @@ public abstract class MixinEnchantment implements Enchantment {
         return canApplyTogether((net.minecraft.enchantment.Enchantment) ench);
     }
 
-    @Intrinsic
-    public String enchantment$getName() {
-        return shadow$getName();
-    }
-
     @Override
     public String toString() {
-        return Objects.toStringHelper("Enchantment")
-                .add("Name", shadow$getName())
-                .add("Id", getId())
-                .toString();
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelperTranslatable(this)
+                    .toString();
+        }
+        return this.toString;
     }
+
 }

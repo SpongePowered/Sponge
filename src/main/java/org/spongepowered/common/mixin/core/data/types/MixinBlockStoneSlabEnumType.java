@@ -26,17 +26,23 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStoneSlab;
 import org.spongepowered.api.data.type.SlabType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockStoneSlab.EnumType.class)
 @Implements(@Interface(iface = SlabType.class, prefix = "shadow$"))
 public abstract class MixinBlockStoneSlabEnumType {
 
     @Shadow public abstract String getName();
+    @Shadow public abstract String getUnlocalizedName();
+
+    private String name;
+    private Translation translation;
 
     public String shadow$getId() {
         return getName();
@@ -44,6 +50,17 @@ public abstract class MixinBlockStoneSlabEnumType {
 
     @Intrinsic
     public String shadow$getName() {
-        return getName();
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
+
+    public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.stoneSlab." + getUnlocalizedName() + ".name");
+        }
+        return this.translation;
+    }
+
 }

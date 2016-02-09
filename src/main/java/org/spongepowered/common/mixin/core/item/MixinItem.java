@@ -40,6 +40,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
 import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
@@ -58,6 +59,8 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
 
     @Shadow
     public abstract String getUnlocalizedName();
+
+    private String toString;
 
     @Inject(method = "registerItem(ILnet/minecraft/util/ResourceLocation;Lnet/minecraft/item/Item;)V", at = @At("RETURN"))
     private static void registerMinecraftItem(int id, ResourceLocation name, Item item, CallbackInfo ci) {
@@ -124,4 +127,14 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
     public ItemStack createDictionaryStack(int wildcardValue) {
         return new ItemStack((Item) (Object) this, 1, wildcardValue);
     }
+
+    @Override
+    public String toString() {
+        if (this.toString == null) {
+            this.toString =  SpongeCatalogType.toStringHelperTranslatable(this)
+                    .toString();
+        }
+        return this.toString;
+    }
+
 }

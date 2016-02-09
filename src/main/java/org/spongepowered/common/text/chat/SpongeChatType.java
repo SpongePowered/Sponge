@@ -25,26 +25,19 @@
 package org.spongepowered.common.text.chat;
 
 import org.spongepowered.api.text.chat.ChatType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeChatType implements ChatType {
+public class SpongeChatType extends SpongeCatalogType.Named implements ChatType {
 
     private final byte id;
 
-    public SpongeChatType(byte id) {
+    public SpongeChatType(byte id, String name) {
+        super("minecraft:" + id, name);
         this.id = id;
-    }
-
-    @Override
-    public String getId() {
-        return "minecraft:" + this.id;
-    }
-
-    @Override
-    public String getName() {
-        return getId(); // todo actually pick up a name
     }
 
     public byte getByteId() {
         return this.id;
     }
+
 }

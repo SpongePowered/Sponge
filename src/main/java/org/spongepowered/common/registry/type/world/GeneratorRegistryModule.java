@@ -24,60 +24,38 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Maps;
 import net.minecraft.world.WorldType;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.common.registry.RegistryHelper;
+import org.spongepowered.common.registry.type.MutableCatalogRegistryModule;
 import org.spongepowered.common.world.type.SpongeWorldTypeEnd;
 import org.spongepowered.common.world.type.SpongeWorldTypeNether;
 import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
-
-public final class GeneratorRegistryModule implements CatalogRegistryModule<GeneratorType> {
-
-    @RegisterCatalog(GeneratorTypes.class)
-    private final Map<String, GeneratorType> generatorTypeMappings = Maps.newHashMap();
-
-    @Override
-    public Optional<GeneratorType> getById(String id) {
-        return Optional.ofNullable(this.generatorTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<GeneratorType> getAll() {
-        return ImmutableList.copyOf(this.generatorTypeMappings.values());
-    }
+public final class GeneratorRegistryModule extends MutableCatalogRegistryModule<GeneratorType> {
 
     @Override
     public void registerDefaults() {
-        this.generatorTypeMappings.put("amplified", (GeneratorType) WorldType.AMPLIFIED);
-        this.generatorTypeMappings.put("debug", (GeneratorType) WorldType.DEBUG_WORLD);
-        this.generatorTypeMappings.put("default", (GeneratorType) WorldType.DEFAULT);
-        this.generatorTypeMappings.put("the_end", (GeneratorType) new SpongeWorldTypeEnd());
-        this.generatorTypeMappings.put("flat", (GeneratorType) WorldType.FLAT);
-        this.generatorTypeMappings.put("large_biomes", (GeneratorType) WorldType.LARGE_BIOMES);
-        this.generatorTypeMappings.put("nether", (GeneratorType) new SpongeWorldTypeNether());
-        this.generatorTypeMappings.put("overworld", (GeneratorType) new SpongeWorldTypeOverworld());
+        registerUnsafe(WorldType.AMPLIFIED, "amplified");
+        registerUnsafe(WorldType.DEBUG_WORLD, "debug", "debug_all_block_states");
+        registerUnsafe(WorldType.DEFAULT, "default");
+        registerUnsafe(new SpongeWorldTypeEnd(), "the_end");
+        registerUnsafe(WorldType.FLAT, "flat");
+        registerUnsafe(WorldType.LARGE_BIOMES, "large_biomes", "largebiomes");
+        registerUnsafe(new SpongeWorldTypeNether(), "nether");
+        registerUnsafe(new SpongeWorldTypeOverworld(), "overworld");
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
         for (WorldType worldType : WorldType.worldTypes) {
-            if (worldType != null && !this.generatorTypeMappings.values().contains(worldType)) {
-                this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(), (GeneratorType) worldType);
+            if (worldType != null) {
+                registerUnsafe(worldType, worldType.getWorldTypeName());
             }
         }
         // Re-map fields in case mods have changed vanilla world types
-        RegistryHelper.mapFields(GeneratorTypes.class, this.generatorTypeMappings);
+        RegistryHelper.mapFields(GeneratorTypes.class, provideCatalogMap());
     }
 }

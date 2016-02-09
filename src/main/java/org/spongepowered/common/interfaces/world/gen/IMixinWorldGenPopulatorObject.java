@@ -22,26 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.GoalColor;
-import net.minecraft.scoreboard.ScoreDummyCriteria;
-import org.spongepowered.api.scoreboard.critieria.Criterion;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
+package org.spongepowered.common.interfaces.world.gen;
 
-@Mixin(value = {GoalColor.class, ScoreDummyCriteria.class})
-@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
-public abstract class MixinCriterion implements Criterion { // Trick to allow avoid shadowing, since multiple targets are used
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.world.gen.PopulatorObject;
 
-    @Intrinsic
-    public String criterion$getName() {
-        return this.getName();
+/**
+ * Helper interface to allow setting the id on a vanilla {@link PopulatorObject}
+ * .
+ */
+public interface IMixinWorldGenPopulatorObject extends PopulatorObject {
+
+    /**
+     * Sets the unique id for this {@link PopulatorObject}. The passed values
+     * must meet the requirements specified in {@link CatalogType}.
+     *
+     * @param id The unique identifier of this populator object
+     */
+    void setId(String id);
+
+    @Override
+    default String getName() {
+        return getId();
     }
 
-    public String criterion$getId() {
-        return this.getName();
-    }
 }

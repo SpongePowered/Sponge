@@ -24,40 +24,51 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.spongepowered.api.util.rotation.Rotation;
-import org.spongepowered.api.util.rotation.Rotations;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 import org.spongepowered.common.rotation.SpongeRotation;
 
-import java.util.Collection;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
+public final class RotationRegistryModule extends ImmutableCatalogRegistryModule<Rotation> {
 
-    @RegisterCatalog(Rotations.class)
-    public static final BiMap<String, Rotation> rotationMap = ImmutableBiMap.<String, Rotation>builder()
-        .put("top", new SpongeRotation(0, "Top"))
-        .put("top_right", new SpongeRotation(45, "Top Right"))
-        .put("right", new SpongeRotation(90, "Right"))
-        .put("bottom_right", new SpongeRotation(135, "Bottom Right"))
-        .put("bottom", new SpongeRotation(180, "Bottom"))
-        .put("bottom_left", new SpongeRotation(225, "Bottom Left"))
-        .put("left", new SpongeRotation(270, "Left"))
-        .put("top_left", new SpongeRotation(315, "Top Left"))
-        .build();
+    public static RotationRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
-    @Override
-    public Optional<Rotation> getById(String id) {
-        return Optional.ofNullable(rotationMap.get(id.toLowerCase()));
+    private final Map<Integer, Rotation> rotation;
+
+    private RotationRegistryModule() {
+        this.rotation = getAll().stream()
+                .map((rotation) -> Maps.immutableEntry(rotation.getAngle(), rotation)).<ImmutableMap
+                .Builder<Integer, Rotation>>collect(ImmutableMap::builder, ImmutableMap.Builder::put, (left, right) -> left.putAll(right.build()))
+                .build();
     }
 
     @Override
-    public Collection<Rotation> getAll() {
-        return ImmutableList.copyOf(rotationMap.values());
+    protected void collect(BiConsumer<String, Rotation> consumer) {
+        add(consumer, new SpongeRotation(0, "top", "Top"));
+        add(consumer, new SpongeRotation(45, "top_right", "Top Right"));
+        add(consumer, new SpongeRotation(90, "right", "Right"));
+        add(consumer, new SpongeRotation(135, "bottom_right", "Bottom Right"));
+        add(consumer, new SpongeRotation(180, "bottom", "Bottom"));
+        add(consumer, new SpongeRotation(225, "bottom_left", "Bottom Left"));
+        add(consumer, new SpongeRotation(270, "left", "Left"));
+        add(consumer, new SpongeRotation(315, "top_left", "Top Left"));
+    };
+
+    public Optional<Rotation> getByAngle(int degrees) {
+        return Optional.ofNullable(this.rotation.get((degrees % 360 + 360) % 360));
+    }
+
+    private static final class Holder {
+
+        private static final RotationRegistryModule INSTANCE = new RotationRegistryModule();
+
     }
 
 }

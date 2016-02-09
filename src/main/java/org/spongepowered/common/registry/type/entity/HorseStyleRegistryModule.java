@@ -22,52 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.world;
+package org.spongepowered.common.registry.type.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.EnumDifficulty;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.difficulty.Difficulties;
-import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class DifficultyRegistryModule implements CatalogRegistryModule<Difficulty> {
+public class HorseStyleRegistryModule implements CatalogRegistryModule<HorseStyle> {
 
-    @RegisterCatalog(Difficulties.class)
-    private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
+    @RegisterCatalog(HorseStyles.class)
+    private final Map<String, HorseStyle> horseStyles = new HashMap<>();
 
     @Override
-    public Optional<Difficulty> getById(String id) {
-        return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase().replaceFirst("^difficulty\\.", "")));
+    public Optional<HorseStyle> getById(String id) {
+        return Optional.ofNullable(this.horseStyles.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<Difficulty> getAll() {
-        return ImmutableList.copyOf(this.difficultyMappings.values());
+    public Collection<HorseStyle> getAll() {
+        return ImmutableList.copyOf(this.horseStyles.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.difficultyMappings.put("peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL);
-        this.difficultyMappings.put("easy", (Difficulty) (Object) EnumDifficulty.EASY);
-        this.difficultyMappings.put("normal", (Difficulty) (Object) EnumDifficulty.NORMAL);
-        this.difficultyMappings.put("hard", (Difficulty) (Object) EnumDifficulty.HARD);
+        this.horseStyles.putAll(SpongeEntityConstants.HORSE_STYLES);
     }
 
-    @AdditionalRegistration
-    public void additional() {
-        for (EnumDifficulty difficulty : EnumDifficulty.values()) {
-            if (!this.difficultyMappings.containsValue((Difficulty) (Object) difficulty)) {
-                this.difficultyMappings.put(difficulty.name(), (Difficulty) (Object) difficulty);
-            }
-        }
-    }
 }

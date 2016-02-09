@@ -292,12 +292,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @Override
     public Optional<Rotation> getRotationFromDegree(int degrees) {
-        for (Rotation rotation : RotationRegistryModule.rotationMap.values()) {
-            if (rotation.getAngle() == degrees) {
-                return Optional.of(rotation);
-            }
-        }
-        return Optional.empty();
+        return RotationRegistryModule.getInstance().getByAngle(degrees);
     }
 
     @Override

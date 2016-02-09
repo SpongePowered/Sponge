@@ -74,7 +74,7 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
         this.displaySlotMappings.put("below_name", new SpongeDisplaySlot("below_name", null, 2));
 
         for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
-            this.displaySlotMappings.put(entry.getValue().getId(),
+            this.displaySlotMappings.put(entry.getValue().getId().toLowerCase(),
                                          new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
         }
     }

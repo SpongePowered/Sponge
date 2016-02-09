@@ -32,7 +32,7 @@ import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeCookedFish extends SpongeCatalogType.Translatable implements CookedFish {
+public class SpongeCookedFish extends SpongeCatalogType.TranslatableType implements CookedFish {
 
     public final ItemFishFood.FishType fish;
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -69,12 +69,12 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.itemTypeMappings.get(id));
+        return Optional.ofNullable(this.itemTypeMappings.get(id.toLowerCase()));
     }
 
     @Override
     public Collection<ItemType> getAll() {
-        return ImmutableList.copyOf(this.itemTypeMappings.values());
+        return ImmutableSet.copyOf(this.itemTypeMappings.values());
     }
 
     public void registerFromGameData(String id, ItemType itemType) {
@@ -95,6 +95,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     public void registerDefaults() {
         setItemNone();
         this.itemTypeMappings.put("none", (ItemType) NONE_ITEM);
+        this.itemTypeMappings.put("minecraft:none", (ItemType) NONE_ITEM);
     }
 
     private void setItemNone() {

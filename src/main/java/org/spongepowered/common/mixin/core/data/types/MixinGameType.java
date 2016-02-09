@@ -35,20 +35,40 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(WorldSettings.GameType.class)
-@Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
+@Implements(@Interface(iface = GameMode.class, prefix = "shadow$"))
 public abstract class MixinGameType {
-    @Shadow String name;
 
-    public String getId() {
-        return this.name;
+    @Shadow public abstract String getName();
+
+    private String id;
+    private String name;
+    private Translation translation;
+
+    public String shadow$getId() {
+        if (this.id == null) {
+            final String internalName = getName();
+            if (internalName.isEmpty()) {
+                return "not_set";
+            } else {
+                return internalName;
+            }
+        }
+        return this.id;
     }
 
     @Intrinsic
-    public String gamemode$getName() {
+    public String shadow$getName() {
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
         return this.name;
     }
 
-    public Translation getTranslation() {
-        return new SpongeTranslation("gameMode." + this.name.toLowerCase());
+    public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("gameMode." + shadow$getId());
+        }
+        return this.translation;
     }
+
 }

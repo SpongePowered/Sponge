@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.block.BlockFlower;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -37,26 +36,37 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockFlower.EnumFlowerType.class)
 @Implements(@Interface(iface = PlantType.class, prefix = "shadow$"))
-public abstract class MixinBlockFlowerEnumFlowerType implements PlantType {
+public abstract class MixinBlockFlowerEnumFlowerType {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private String unlocalizedName;
+    @Shadow public abstract String getName();
+    @Shadow public abstract String getUnlocalizedName();
+    @Shadow public abstract BlockFlower.EnumFlowerColor getBlockType();
 
+    private String name;
     private Translation translation;
 
     public String shadow$getId() {
-        return this.name;
+        return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
         return this.name;
     }
 
     public Translation shadow$getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
-            this.translation = new SpongeTranslation("tile.flower2." + this.unlocalizedName + ".name");
+            final BlockFlower.EnumFlowerColor blockType = getBlockType();
+            if (blockType == BlockFlower.EnumFlowerColor.YELLOW) {
+                this.translation = new SpongeTranslation("tile.flower1." + getUnlocalizedName() + ".name");
+            } else if (blockType == BlockFlower.EnumFlowerColor.RED) {
+                this.translation = new SpongeTranslation("tile.flower2." + getUnlocalizedName() + ".name");
+            } else {
+                throw new IllegalStateException("Unknown flower color: " + blockType);
+            }
         }
         return this.translation;
     }

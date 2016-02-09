@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import com.google.common.base.Objects.ToStringHelper;
 import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.text.translation.Translatable;
 import org.spongepowered.api.text.translation.Translation;
 
 public abstract class SpongeCatalogType implements CatalogType {
@@ -57,14 +58,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
     @Override
     public final boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final CatalogType other = (CatalogType) obj;
-        return getId().equals(other.getId());
+        return this == obj;
     }
 
     @Override
@@ -73,16 +67,41 @@ public abstract class SpongeCatalogType implements CatalogType {
     }
 
     protected ToStringHelper toStringHelper() {
-        return Objects.toStringHelper(this)
-                .add("id", getId())
-                .add("name", getName());
+        return toStringHelper(this);
     }
 
-    public static abstract class Translatable extends SpongeCatalogType implements org.spongepowered.api.text.translation.Translatable {
+    public static ToStringHelper toStringHelper(CatalogType type) {
+        return Objects.toStringHelper(type)
+                .add("id", type.getId())
+                .add("name", type.getName());
+    }
+
+    public static <T extends CatalogType & Translatable> ToStringHelper toStringHelperTranslatable(T type) {
+        return toStringHelper(type)
+                .add("translation", type.getTranslation());
+    }
+
+    public static abstract class Named extends SpongeCatalogType {
+
+        private final String name;
+
+        public Named(String id, String name) {
+            super(id);
+            this.name = checkNotNull(name, "name");
+        }
+
+        @Override
+        public final String getName() {
+            return this.name;
+        }
+
+    }
+
+    public static abstract class TranslatableType extends SpongeCatalogType implements Translatable {
 
         private final Translation translation;
 
-        public Translatable(String id, Translation translation) {
+        public TranslatableType(String id, Translation translation) {
             super(id);
             this.translation = checkNotNull(translation, "translation");
         }
@@ -99,8 +118,7 @@ public abstract class SpongeCatalogType implements CatalogType {
 
         @Override
         protected ToStringHelper toStringHelper() {
-            return super.toStringHelper()
-                    .add("translation", getTranslation());
+            return toStringHelperTranslatable(this);
         }
 
     }

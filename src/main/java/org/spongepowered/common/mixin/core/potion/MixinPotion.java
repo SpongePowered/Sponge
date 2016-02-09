@@ -32,26 +32,32 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(Potion.class)
 @Implements(@Interface(iface = PotionEffectType.class, prefix = "potion$"))
 public abstract class MixinPotion implements PotionEffectType {
 
-    @Shadow private String name;
+    @Shadow public abstract String shadow$getName();
 
     @Override
     @Shadow
     public abstract boolean isInstant();
 
+    private String name;
     private Translation translation;
     private Translation potionTranslation;
+    private String toString;
 
     public String potion$getId() {
-        return this.name;
+        return shadow$getName();
     }
 
     public String potion$getName() {
+        if (this.name == null) {
+            this.name = getTranslation().get();
+        }
         return this.name;
     }
 
@@ -60,12 +66,8 @@ public abstract class MixinPotion implements PotionEffectType {
         return this.isInstant();
     }
 
-    @Shadow(prefix = "shadow$")
-    public abstract String shadow$getName();
-
     @Override
     public Translation getTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.translation == null) {
             this.translation = new SpongeTranslation(shadow$getName());
         }
@@ -75,11 +77,19 @@ public abstract class MixinPotion implements PotionEffectType {
     @Intrinsic
     @Override
     public Translation getPotionTranslation() {
-        // Maybe move this to a @Inject at the end of the constructor
         if (this.potionTranslation == null) {
             this.potionTranslation = new SpongeTranslation(shadow$getName() + ".postfix");
         }
         return this.potionTranslation;
+    }
+
+    @Override
+    public String toString() {
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelperTranslatable(this)
+                    .toString();
+        }
+        return this.toString;
     }
 
 }

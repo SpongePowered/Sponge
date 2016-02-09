@@ -26,8 +26,8 @@ package org.spongepowered.common.interfaces.world.gen;
 
 import org.spongepowered.api.util.weighted.VariableAmount;
 
-public interface IWorldGenTrees {
+public interface IWorldGenTrees extends IMixinWorldGenPopulatorObject {
 
     void setMinHeight(VariableAmount height);
-    
+
 }

@@ -31,20 +31,13 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.common.SpongeCatalogType;
 
-public class SpongeTileEntityType extends SpongeCatalogType implements TileEntityType {
+public class SpongeTileEntityType extends SpongeCatalogType.Named implements TileEntityType {
 
-    private final String name;
     private final Class<? extends TileEntity> clazz;
 
     public SpongeTileEntityType(Class<? extends TileEntity> clazz, String name, String id) {
-        super(id);
-        this.name = checkNotNull(name, "name");
+        super(id, name);
         this.clazz = checkNotNull(clazz, "clazz");
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
     }
 
     @Override

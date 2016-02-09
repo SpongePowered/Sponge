@@ -24,37 +24,19 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockPrismarine;
 import org.spongepowered.api.data.type.PrismarineType;
-import org.spongepowered.api.data.type.PrismarineTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class PrismarineRegistryModule implements CatalogRegistryModule<PrismarineType> {
-
-    @RegisterCatalog(PrismarineTypes.class)
-    private final Map<String, PrismarineType> prismarineTypeMappings = new ImmutableMap.Builder<String, PrismarineType>()
-        .put("bricks", (PrismarineType) (Object) BlockPrismarine.EnumType.BRICKS)
-        .put("dark", (PrismarineType) (Object) BlockPrismarine.EnumType.DARK)
-        .put("rough", (PrismarineType) (Object) BlockPrismarine.EnumType.ROUGH)
-        .build();
+public final class PrismarineRegistryModule extends ImmutableCatalogRegistryModule<PrismarineType> {
 
     @Override
-    public Optional<PrismarineType> getById(String id) {
-        return Optional.ofNullable(this.prismarineTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<PrismarineType> getAll() {
-        return ImmutableList.copyOf(this.prismarineTypeMappings.values());
+    protected void collect(BiConsumer<String, PrismarineType> consumer) {
+        for (BlockPrismarine.EnumType type : BlockPrismarine.EnumType.values()) {
+            addUnsafe(consumer, type, type.name(), type.getName(), type.getUnlocalizedName());
+        }
     }
 
 }

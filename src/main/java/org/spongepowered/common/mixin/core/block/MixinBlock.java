@@ -53,6 +53,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -79,6 +80,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract Material getMaterial();
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
+    
+    private String toString;
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
@@ -179,4 +182,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             return;
         }
     }
+
+    @Override
+    public String toString() {
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelperTranslatable(this)
+                    .add("class", getClass().getName())
+                    .toString();
+        }
+        return this.toString;
+    }
+
 }

@@ -29,7 +29,7 @@ import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public final class SpongeSkinPart extends SpongeCatalogType.Translatable implements SkinPart {
+public final class SpongeSkinPart extends SpongeCatalogType.TranslatableType implements SkinPart {
 
     private final int ordinal;
     private final int mask;

@@ -24,34 +24,23 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
+import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.Random;
 
+public class WrappedPopulatorObject extends SpongeCatalogType.Named implements PopulatorObject {
 
-public class WrappedPopulatorObject implements PopulatorObject {
-    
-    private final String id;
-    private final String name;
-    private WorldGenerator gen;
-    
+    private final WorldGenerator gen;
+
     public WrappedPopulatorObject(String id, String name, WorldGenerator gen) {
-        this.gen = gen;
-        this.id = id;
-        this.name = name;
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
+        super(id, name);
+        this.gen = checkNotNull(gen, "gen");
     }
 
     @Override

@@ -22,52 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry.type.world;
+package org.spongepowered.common.registry.type.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.EnumDifficulty;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.difficulty.Difficulties;
-import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public final class DifficultyRegistryModule implements CatalogRegistryModule<Difficulty> {
+public class HorseVariantRegistryModule implements CatalogRegistryModule<HorseVariant> {
 
-    @RegisterCatalog(Difficulties.class)
-    private final Map<String, Difficulty> difficultyMappings = new HashMap<>();
+    @RegisterCatalog(HorseVariants.class)
+    private final Map<String, HorseVariant> horseVariants = new HashMap<>();
 
     @Override
-    public Optional<Difficulty> getById(String id) {
-        return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase().replaceFirst("^difficulty\\.", "")));
+    public Optional<HorseVariant> getById(String id) {
+        return Optional.ofNullable(this.horseVariants.get(checkNotNull(id).toLowerCase()));
     }
 
     @Override
-    public Collection<Difficulty> getAll() {
-        return ImmutableList.copyOf(this.difficultyMappings.values());
+    public Collection<HorseVariant> getAll() {
+        return ImmutableList.copyOf(this.horseVariants.values());
     }
 
     @Override
     public void registerDefaults() {
-        this.difficultyMappings.put("peaceful", (Difficulty) (Object) EnumDifficulty.PEACEFUL);
-        this.difficultyMappings.put("easy", (Difficulty) (Object) EnumDifficulty.EASY);
-        this.difficultyMappings.put("normal", (Difficulty) (Object) EnumDifficulty.NORMAL);
-        this.difficultyMappings.put("hard", (Difficulty) (Object) EnumDifficulty.HARD);
+        this.horseVariants.putAll(SpongeEntityConstants.HORSE_VARIANTS);
     }
 
-    @AdditionalRegistration
-    public void additional() {
-        for (EnumDifficulty difficulty : EnumDifficulty.values()) {
-            if (!this.difficultyMappings.containsValue((Difficulty) (Object) difficulty)) {
-                this.difficultyMappings.put(difficulty.name(), (Difficulty) (Object) difficulty);
-            }
-        }
-    }
 }

@@ -31,25 +31,13 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
 @NonnullByDefault
-public class SpongeCareer extends SpongeEntityMeta implements Career {
+public class SpongeCareer extends SpongeEntityMeta.TranslatableMeta implements Career {
 
-    private final Translation translation;
     private final Profession profession;
 
     public SpongeCareer(int id, String name, Profession profession, Translation translation) {
-        super(id, name);
-        this.translation = translation;
+        super(id, name, translation);
         this.profession = profession;
-    }
-
-    @Override
-    public String getName() {
-        return getTranslation().get();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.translation;
     }
 
     @Override
@@ -60,7 +48,6 @@ public class SpongeCareer extends SpongeEntityMeta implements Career {
     @Override
     protected ToStringHelper toStringHelper() {
         return super.toStringHelper()
-                .add("translation", this.translation)
                 .add("profession", this.profession);
     }
 

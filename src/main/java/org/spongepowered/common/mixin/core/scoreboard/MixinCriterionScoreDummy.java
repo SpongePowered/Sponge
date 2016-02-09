@@ -22,32 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Objects.ToStringHelper;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.living.Agent;
-import org.spongepowered.common.SpongeCatalogType;
+import com.google.common.base.Objects;
+import net.minecraft.scoreboard.ScoreDummyCriteria;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class SpongeAITaskType extends SpongeCatalogType.Named implements AITaskType {
+@Mixin(ScoreDummyCriteria.class)
+@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
+public abstract class MixinCriterionScoreDummy {
 
-    private final Class<? extends AITask<? extends Agent>> aiClass;
+    @Shadow protected abstract String getName();
 
-    public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
-        super(id, name);
-        this.aiClass = aiClass;
+    public String criterion$getId() {
+        return this.getName();
+    }
+
+    @Intrinsic
+    public String criterion$getName() {
+        return this.getName();
     }
 
     @Override
-    public Class<? extends AITask<? extends Agent>> getAIClass() {
-        return this.aiClass;
-    }
-
-    @Override
-    protected ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("aiClass", this.aiClass);
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", criterion$getId())
+                .add("name", criterion$getName())
+                .toString();
     }
 
 }

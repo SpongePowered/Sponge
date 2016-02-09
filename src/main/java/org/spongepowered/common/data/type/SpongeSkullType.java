@@ -29,7 +29,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
-public class SpongeSkullType extends SpongeCatalogType.Translatable implements SkullType {
+public class SpongeSkullType extends SpongeCatalogType.TranslatableType implements SkullType {
 
     private final byte id;
 

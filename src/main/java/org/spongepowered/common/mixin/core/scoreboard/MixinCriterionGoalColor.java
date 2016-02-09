@@ -22,32 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.ai;
+package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Objects.ToStringHelper;
-import org.spongepowered.api.entity.ai.task.AITask;
-import org.spongepowered.api.entity.ai.task.AITaskType;
-import org.spongepowered.api.entity.living.Agent;
+import net.minecraft.scoreboard.GoalColor;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.scoreboard.critieria.Criterion;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeAITaskType extends SpongeCatalogType.Named implements AITaskType {
+@Mixin(GoalColor.class)
+@Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
+public abstract class MixinCriterionGoalColor {
 
-    private final Class<? extends AITask<? extends Agent>> aiClass;
+    @Shadow protected abstract String getName();
 
-    public SpongeAITaskType(String id, String name, Class<? extends AITask<? extends Agent>> aiClass) {
-        super(id, name);
-        this.aiClass = aiClass;
+    private String toString;
+
+    public String criterion$getId() {
+        return this.getName();
+    }
+
+    @Intrinsic
+    public String criterion$getName() {
+        return this.getName();
     }
 
     @Override
-    public Class<? extends AITask<? extends Agent>> getAIClass() {
-        return this.aiClass;
-    }
-
-    @Override
-    protected ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("aiClass", this.aiClass);
+    public String toString() {
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelper((CatalogType) this)
+                    .toString();
+        }
+        return this.toString();
     }
 
 }

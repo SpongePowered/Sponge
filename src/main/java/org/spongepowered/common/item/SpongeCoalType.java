@@ -24,29 +24,14 @@
  */
 package org.spongepowered.common.item;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.type.CoalType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 
-public class SpongeCoalType extends SpongeEntityMeta implements CoalType {
-
-    private final Translation translation;
+public class SpongeCoalType extends SpongeEntityMeta.TranslatableMeta implements CoalType {
 
     public SpongeCoalType(int type, String name, Translation translation) {
-        super(type, name);
-        this.translation = checkNotNull(translation, "translation");
-    }
-
-    @Override
-    public String getName() {
-        return getTranslation().get();
-    }
-
-    @Override
-    public Translation getTranslation() {
-        return this.translation;
+        super(type, name, translation);
     }
 
 }

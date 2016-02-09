@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockPistonExtension;
 import org.spongepowered.api.data.type.PistonType;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockPistonExtension.EnumPistonType.class)
 @Implements(@Interface(iface = PistonType.class, prefix = "shadow$"))
@@ -38,12 +40,35 @@ public abstract class MixinBlockPistonExtensionEnumPistonType {
 
     @Shadow public abstract String getName();
 
+    private String name;
+    private Translation translation;
+
     public String shadow$getId() {
         return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
-        return getName();
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
+
+    public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            final String internalName = getName();
+            final String translationId;
+            if ("normal".equals(internalName)) {
+                translationId = "tile.pistonBase.name";
+            } else if ("sticky".equals(internalName)) {
+                translationId = "tile.pistonStickyBase.name";
+            } else {
+                translationId = "tile.pistonBase.name";
+            }
+            this.translation = new SpongeTranslation(translationId);
+        }
+        return this.translation;
+    }
+
 }

@@ -24,20 +24,32 @@
  */
 package org.spongepowered.common.registry.type.text;
 
-import com.google.common.collect.ImmutableMap;
-import org.spongepowered.api.registry.RegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.chat.ChatType;
-import org.spongepowered.api.text.chat.ChatTypes;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 import org.spongepowered.common.text.chat.SpongeChatType;
 
-public final class ChatTypeRegistryModule implements RegistryModule {
+import java.util.function.BiConsumer;
 
-    @RegisterCatalog(ChatTypes.class)
-    public static final ImmutableMap<String, ChatType> chatTypeMappings = new ImmutableMap.Builder<String, ChatType>()
-        .put("chat", new SpongeChatType((byte) 0))
-        .put("system", new SpongeChatType((byte) 1))
-        .put("action_bar", new SpongeChatType((byte) 2))
-        .build();
+public final class ChatTypeRegistryModule extends ImmutableCatalogRegistryModule<ChatType> {
+
+    public static ChatTypeRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
+
+    private ChatTypeRegistryModule() {
+    }
+
+    @Override
+    protected void collect(BiConsumer<String, ChatType> consumer) {
+        add(consumer, new SpongeChatType((byte) 0, "chat"), "chat");
+        add(consumer, new SpongeChatType((byte) 1, "system"), "system");
+        add(consumer, new SpongeChatType((byte) 2, "action_bar"), "action_bar");
+    }
+
+    private static final class Holder {
+
+        private static final ChatTypeRegistryModule INSTANCE = new ChatTypeRegistryModule();
+
+    }
 
 }

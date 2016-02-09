@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
@@ -31,18 +33,30 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.gen.IMixinWorldGenPopulatorObject;
 
 import java.util.Random;
 
 //tall_taiga
 @Mixin(WorldGenTaiga2.class)
-public abstract class MixinWorldGenTaiga2 extends MixinWorldGenAbstractTree implements PopulatorObject {
+public abstract class MixinWorldGenTaiga2 extends MixinWorldGenAbstractTree implements IMixinWorldGenPopulatorObject {
+
+    private String id;
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);
+
+    @Override
+    public void setId(String id) {
+        this.id = checkNotNull(id, "id");
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {

@@ -24,44 +24,26 @@
  */
 package org.spongepowered.common.registry.type.block;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockStoneSlab;
 import net.minecraft.block.BlockStoneSlabNew;
 import org.spongepowered.api.data.type.SlabType;
-import org.spongepowered.api.data.type.SlabTypes;
-import org.spongepowered.api.registry.CatalogRegistryModule;
-import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.type.ImmutableCatalogRegistryModule;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.BiConsumer;
 
-public final class SlabTypeRegistryModule implements CatalogRegistryModule<SlabType> {
-
-    @RegisterCatalog(SlabTypes.class)
-    private final Map<String, SlabType> slabTypeMappings = new ImmutableMap.Builder<String, SlabType>()
-        .put("brick", (SlabType) (Object) BlockStoneSlab.EnumType.BRICK)
-        .put("cobblestone", (SlabType) (Object) BlockStoneSlab.EnumType.COBBLESTONE)
-        .put("netherbrick", (SlabType) (Object) BlockStoneSlab.EnumType.NETHERBRICK)
-        .put("quartz", (SlabType) (Object) BlockStoneSlab.EnumType.QUARTZ)
-        .put("sand", (SlabType) (Object) BlockStoneSlab.EnumType.SAND)
-        .put("smooth_brick", (SlabType) (Object) BlockStoneSlab.EnumType.SMOOTHBRICK)
-        .put("stone", (SlabType) (Object) BlockStoneSlab.EnumType.STONE)
-        .put("wood", (SlabType) (Object) BlockStoneSlab.EnumType.WOOD)
-        .put("red_sand", (SlabType) (Object) BlockStoneSlabNew.EnumType.RED_SANDSTONE)
-        .build();
+public final class SlabTypeRegistryModule extends ImmutableCatalogRegistryModule<SlabType> {
 
     @Override
-    public Optional<SlabType> getById(String id) {
-        return Optional.ofNullable(this.slabTypeMappings.get(checkNotNull(id).toLowerCase()));
-    }
-
-    @Override
-    public Collection<SlabType> getAll() {
-        return ImmutableList.copyOf(this.slabTypeMappings.values());
-    }
+    protected void collect(BiConsumer<String, SlabType> consumer) {
+        addUnsafe(consumer, BlockStoneSlab.EnumType.BRICK, "brick");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.COBBLESTONE, "cobblestone");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.NETHERBRICK, "netherbrick");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.QUARTZ, "quartz");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.SAND, "sand");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.SMOOTHBRICK, "smooth_brick");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.STONE, "stone");
+        addUnsafe(consumer, BlockStoneSlab.EnumType.WOOD, "wood");
+        addUnsafe(consumer, BlockStoneSlabNew.EnumType.RED_SANDSTONE, "red_sand");
+    };
 
 }
