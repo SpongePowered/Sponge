@@ -32,9 +32,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockPistonExtension.EnumPistonType.class)
@@ -43,20 +40,8 @@ public abstract class MixinBlockPistonExtensionEnumPistonType {
 
     @Shadow public abstract String getName();
 
+    private String name;
     private Translation translation;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, String name, CallbackInfo ci) {
-        final String translationId;
-        if ("normal".equals(name)) {
-            translationId = "tile.pistonBase.name";
-        } else if ("sticky".equals(name)) {
-            translationId = "tile.pistonStickyBase.name";
-        } else {
-            translationId = "tile.pistonBase.name";
-        }
-        this.translation = new SpongeTranslation(translationId);
-    }
 
     public String shadow$getId() {
         return getName();
@@ -64,10 +49,25 @@ public abstract class MixinBlockPistonExtensionEnumPistonType {
 
     @Intrinsic
     public String shadow$getName() {
-        return this.translation.get();
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
 
     public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            final String internalName = getName();
+            final String translationId;
+            if ("normal".equals(internalName)) {
+                translationId = "tile.pistonBase.name";
+            } else if ("sticky".equals(internalName)) {
+                translationId = "tile.pistonStickyBase.name";
+            } else {
+                translationId = "tile.pistonBase.name";
+            }
+            this.translation = new SpongeTranslation(translationId);
+        }
         return this.translation;
     }
 

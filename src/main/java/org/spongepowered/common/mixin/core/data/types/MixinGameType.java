@@ -32,38 +32,42 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(WorldSettings.GameType.class)
-@Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
+@Implements(@Interface(iface = GameMode.class, prefix = "shadow$"))
 public abstract class MixinGameType {
 
-    @Shadow String name;
+    @Shadow public abstract String getName();
 
+    private String id;
+    private String name;
     private Translation translation;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int type, String name, CallbackInfo ci) {
-        this.translation = new SpongeTranslation("gameMode." + getId());
-    }
-
-    public String getId() {
-        if (this.name.isEmpty()) {
-            return "not_set";
-        } else {
-            return this.name;
+    public String shadow$getId() {
+        if (this.id == null) {
+            final String internalName = getName();
+            if (internalName.isEmpty()) {
+                return "not_set";
+            } else {
+                return internalName;
+            }
         }
+        return this.id;
     }
 
     @Intrinsic
-    public String gamemode$getName() {
-        return getId();
+    public String shadow$getName() {
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
 
-    public Translation getTranslation() {
+    public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("gameMode." + shadow$getId());
+        }
         return this.translation;
     }
 

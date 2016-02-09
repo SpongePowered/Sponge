@@ -30,36 +30,40 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @NonnullByDefault
 @Mixin(EnumDifficulty.class)
 public class MixinEnumDifficulty implements Difficulty {
 
-    private String id;
-    private Translation translation;
+    @Shadow @Final private String difficultyResourceKey;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int difficultyId, String difficultyResource, CallbackInfo ci) {
-        this.id = difficultyResource.replaceFirst("^options\\.", "");
-        this.translation = new SpongeTranslation(difficultyResource);
-    }
+    private String id;
+    private String name;
+    private Translation translation;
 
     @Override
     public String getId() {
+        if (this.id == null) {
+            this.id = this.difficultyResourceKey.replaceFirst("^options\\.", "");
+        }
         return this.id;
     }
 
     @Override
     public String getName() {
-        return getTranslation().get();
+        if (this.name == null) {
+            this.name = getTranslation().get();
+        }
+        return this.name;
     }
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(this.difficultyResourceKey);
+        }
         return this.translation;
     }
 

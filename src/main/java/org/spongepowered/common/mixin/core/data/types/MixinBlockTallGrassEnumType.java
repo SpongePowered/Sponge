@@ -27,50 +27,49 @@ package org.spongepowered.common.mixin.core.data.types;
 import net.minecraft.block.BlockTallGrass;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.text.translation.Translation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockTallGrass.EnumType.class)
 @Implements(@Interface(iface = ShrubType.class, prefix = "shadow$"))
 public abstract class MixinBlockTallGrassEnumType {
 
-    @Shadow @Final private String name;
+    @Shadow public abstract String getName();
 
+    private String name;
     private Translation translation;
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int meta, String name, CallbackInfo ci) {
-        final String translationId;
-        if ("dead_bush".equals(name)) {
-            translationId = "tile.tallgrass.shrub.name";
-        } else if ("tall_grass".equals(name)) {
-            translationId = "tile.tallgrass.tallgrass.name";
-        } else if ("fern".equals(name)) {
-            translationId = "tile.tallgrass.fern.name";
-        } else {
-            translationId = "tile.tallgrass.name";
-        }
-        this.translation = new SpongeTranslation(translationId);
-    }
-
     public String shadow$getId() {
-        return this.name;
+        return getName();
     }
 
     @Intrinsic
     public String shadow$getName() {
-        return this.translation.get();
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
 
     public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            final String internalName = getName();
+            final String translationId;
+            if ("dead_bush".equals(internalName)) {
+                translationId = "tile.tallgrass.shrub.name";
+            } else if ("tall_grass".equals(internalName)) {
+                translationId = "tile.tallgrass.tallgrass.name";
+            } else if ("fern".equals(internalName)) {
+                translationId = "tile.tallgrass.fern.name";
+            } else {
+                translationId = "tile.tallgrass.name";
+            }
+            this.translation = new SpongeTranslation(translationId);
+        }
         return this.translation;
     }
 

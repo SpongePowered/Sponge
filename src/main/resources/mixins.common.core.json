@@ -282,8 +282,6 @@
         "event.cause.entity.damage.MixinMinecraftFallingBlockDamageSource",
         "event.cause.entity.damage.MixinIndirectEntityDamageSource",
         "item.MixinEnchantment",
-        "item.MixinEnchantmentDamage",
-        "item.MixinEnchantmentProtection",
         "item.MixinItem",
         "item.MixinItemArmorMaterial",
         "item.MixinItemBlock",

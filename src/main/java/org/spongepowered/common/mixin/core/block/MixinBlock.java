@@ -80,6 +80,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Shadow public abstract Material getMaterial();
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
+    
+    private String toString;
 
     @Inject(method = "registerBlock", at = @At("RETURN"))
     private static void onRegisterBlock(int id, ResourceLocation location, Block block, CallbackInfo ci) {
@@ -183,9 +185,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public String toString() {
-        return SpongeCatalogType.toStringHelperTranslatable(this)
-                .add("class", getClass().getName())
-                .toString();
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelperTranslatable(this)
+                    .add("class", getClass().getName())
+                    .toString();
+        }
+        return this.toString;
     }
 
 }

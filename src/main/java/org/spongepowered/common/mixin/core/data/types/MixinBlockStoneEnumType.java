@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.data.types;
 
 import net.minecraft.block.BlockStone;
-import net.minecraft.block.material.MapColor;
 import org.spongepowered.api.data.type.StoneType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Implements;
@@ -33,9 +32,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 @Mixin(BlockStone.EnumType.class)
@@ -43,13 +39,10 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 public abstract class MixinBlockStoneEnumType {
 
     @Shadow public abstract String getName();
+    @Shadow public abstract String getUnlocalizedName();
 
+    private String name;
     private Translation translation;
-
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    public void onConstructed(String internalName, int internalOrdinal, int metadata, MapColor mapColor, String name, String unlocalizedName, CallbackInfo ci) {
-        this.translation = new SpongeTranslation("tile.stone." + unlocalizedName + ".name");
-    }
 
     public String shadow$getId() {
         return getName();
@@ -57,10 +50,16 @@ public abstract class MixinBlockStoneEnumType {
 
     @Intrinsic
     public String shadow$getName() {
-        return this.translation.get();
+        if (this.name == null) {
+            this.name = shadow$getTranslation().get();
+        }
+        return this.name;
     }
 
     public Translation shadow$getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation("tile.stone." + getUnlocalizedName() + ".name");
+        }
         return this.translation;
     }
 

@@ -24,20 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import com.google.common.base.Objects;
 import net.minecraft.scoreboard.GoalColor;
+import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.SpongeCatalogType;
 
 @Mixin(GoalColor.class)
 @Implements(@Interface(iface = Criterion.class, prefix = "criterion$"))
 public abstract class MixinCriterionGoalColor {
 
     @Shadow protected abstract String getName();
+
+    private String toString;
 
     public String criterion$getId() {
         return this.getName();
@@ -50,10 +53,11 @@ public abstract class MixinCriterionGoalColor {
 
     @Override
     public String toString() {
-        return Objects.toStringHelper(this)
-                .add("id", criterion$getId())
-                .add("name", criterion$getName())
-                .toString();
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelper((CatalogType) this)
+                    .toString();
+        }
+        return this.toString();
     }
 
 }

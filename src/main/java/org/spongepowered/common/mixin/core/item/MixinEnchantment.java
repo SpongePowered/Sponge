@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -48,31 +47,36 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 @Implements(@Interface(iface = Enchantment.class, prefix = "enchantment$"))
 public abstract class MixinEnchantment implements Enchantment {
 
-    @Shadow @Final private int weight;
+    @Shadow
+    @Final
+    private int weight;
 
-    @Shadow public abstract int getMinLevel();
-    @Shadow public abstract int getMaxLevel();
-    @Shadow public abstract int getMinEnchantability(int level);
-    @Shadow public abstract int getMaxEnchantability(int level);
-    @Shadow public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
-    @Shadow public abstract String shadow$getName();
+    @Shadow
+    public abstract int getMinLevel();
 
-    private String id = "";
-    private Translation translation = null;
+    @Shadow
+    public abstract int getMaxLevel();
 
-    @Inject(method = "<init>", at = @At("RETURN"))
+    @Shadow
+    public abstract int getMinEnchantability(int level);
+
+    @Shadow
+    public abstract int getMaxEnchantability(int level);
+
+    @Shadow
+    public abstract boolean canApplyTogether(net.minecraft.enchantment.Enchantment ench);
+
+    @Shadow
+    public abstract String shadow$getName();
+
+    private String id;
+    private String name;
+    private Translation translation;
+    private String toString;
+
+    @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
         this.id = resLoc.toString();
-        updateTranslation();
-    }
-
-    @Inject(method = "setName", at = @At("RETURN"))
-    public void setName(String name, CallbackInfoReturnable<Enchantment> cir) {
-        updateTranslation();
-    }
-
-    public void updateTranslation() {
-        this.translation = new SpongeTranslation(shadow$getName());
     }
 
     @Override
@@ -82,11 +86,17 @@ public abstract class MixinEnchantment implements Enchantment {
 
     @Intrinsic
     public String enchantment$getName() {
-        return this.translation.get();
+        if (this.name == null) {
+            this.name = getTranslation().get();
+        }
+        return this.name;
     }
 
     @Override
     public Translation getTranslation() {
+        if (this.translation == null) {
+            this.translation = new SpongeTranslation(shadow$getName());
+        }
         return this.translation;
     }
 
@@ -127,8 +137,11 @@ public abstract class MixinEnchantment implements Enchantment {
 
     @Override
     public String toString() {
-        return SpongeCatalogType.toStringHelperTranslatable(this)
-                .toString();
+        if (this.toString == null) {
+            this.toString = SpongeCatalogType.toStringHelperTranslatable(this)
+                    .toString();
+        }
+        return this.toString;
     }
 
 }
