@@ -193,6 +193,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -259,6 +260,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public boolean captureBlocks = false;
     public boolean captureCommand = false;
     public boolean restoringBlocks = false;
+    public boolean spawningDeathDrops = false;
     public List<Entity> capturedEntities = new ArrayList<>();
     public List<Entity> capturedEntityItems = new ArrayList<>();
     public BlockSnapshot currentTickBlock;
@@ -605,7 +607,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 world.updateAllPlayersSleepingFlag();
             }
 
-            if (this.isRemote || flag) {
+            if (this.isRemote || flag || this.spawningDeathDrops) {
                 this.getChunkFromChunkCoords(i, j).addEntity(entityIn);
                 this.loadedEntityList.add(entityIn);
                 this.onEntityAdded(entityIn);
@@ -718,7 +720,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause) {
-        if (this.isRemote || this.restoringBlocks || cause == null) {
+        if (this.isRemote || this.restoringBlocks || this.spawningDeathDrops || cause == null) {
             return;
         } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
                    && this.capturedSpongePopulators.size() == 0 && StaticMixinHelper.packetPlayer == null) {
@@ -1128,6 +1130,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+                }
+                if (spongeEntity instanceof EntityLivingBase) {
+                    IMixinEntityLivingBase spongeLivingEntity = (IMixinEntityLivingBase) spongeEntity;
+                    if (spongeLivingEntity.getLastDamageSource() != null) {
+                        cause = cause.with(NamedCause.of("Attacker", spongeLivingEntity.getLastDamageSource()));
+                    }
                 }
             }
             entitySnapshotBuilder.add(currentEntity.createSnapshot());
@@ -1587,6 +1595,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setRestoringBlocks(boolean flag) {
         this.restoringBlocks = flag;
+    }
+
+    @Override
+    public void setSpawningDeathDrops(boolean flag) {
+        this.spawningDeathDrops = flag;
     }
 
     @Override
