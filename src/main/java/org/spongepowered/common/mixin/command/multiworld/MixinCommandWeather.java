@@ -22,17 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.command.multiworld;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.command.CommandWeather;
+import net.minecraft.command.ICommandSender;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.World;
+import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-public interface IMixinWorldProvider {
+@Mixin(CommandWeather.class)
+public abstract class MixinCommandWeather {
 
-    WorldBorder createServerWorldBorder();
-
-    void setGeneratorSettings(String generatorSettings);
-
-    int getRespawnDimension(EntityPlayerMP playerMP);
+    @Redirect(method = "execute", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/World;getWorldInfo()Lnet/minecraft/world/storage/WorldInfo;"))
+    private WorldInfo onGetWorldInfo(World world, MinecraftServer server, ICommandSender sender, String[] args) {
+        return sender.getEntityWorld().getWorldInfo();
+    }
 
 }
