@@ -65,6 +65,12 @@ jar {
         )
     }
 
+    def branch = System.getenv("GIT_BRANCH")
+
+    if (branch != null) {
+        manifest.attributes('Git-Branch': branch)
+    }
+
     afterEvaluate {
         manifest {
             attributes('FMLAT': project.ats.join(' '))
