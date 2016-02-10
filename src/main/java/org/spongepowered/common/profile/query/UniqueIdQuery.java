@@ -24,56 +24,53 @@
  */
 package org.spongepowered.common.profile.query;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileCache;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.UUID;
 
 public abstract class UniqueIdQuery<T> extends Query<T> {
 
-    protected UniqueIdQuery(boolean useCache) {
-        super(useCache);
+    protected UniqueIdQuery(GameProfileCache cache, boolean useCache) {
+        super(cache, useCache);
     }
 
-    public static class SingleGet extends UniqueIdQuery<GameProfile> {
+    public static final class SingleGet extends UniqueIdQuery<GameProfile> {
 
         private final UUID uniqueId;
 
-        public SingleGet(UUID uniqueId, boolean useCache) {
-            super(useCache);
+        public SingleGet(GameProfileCache cache, UUID uniqueId, boolean useCache) {
+            super(cache, useCache);
             this.uniqueId = uniqueId;
         }
 
         @Override
         public GameProfile call() throws Exception {
-            return this.fromUniqueId(this.uniqueId);
+            return this.fromUniqueIds(Collections.singleton(this.uniqueId)).get(0);
         }
     }
 
-    public static class MultiGet extends UniqueIdQuery<Collection<GameProfile>> {
+    public static final class MultiGet extends UniqueIdQuery<Collection<GameProfile>> {
 
         private final Iterator<UUID> iterator;
 
-        public MultiGet(Iterable<UUID> iterable, boolean useCache) {
-            super(useCache);
+        public MultiGet(GameProfileCache cache, Iterable<UUID> iterable, boolean useCache) {
+            super(cache, useCache);
             this.iterator = iterable.iterator();
         }
 
         @Override
         public Collection<GameProfile> call() throws Exception {
             if (!this.iterator.hasNext()) {
-                return ImmutableList.of();
+                return ImmutableSet.of();
             }
 
-            Collection<GameProfile> profiles = Lists.newArrayList();
-            while (this.iterator.hasNext()) {
-                profiles.add(this.fromUniqueId(this.iterator.next()));
-            }
-
-            return profiles;
+            return this.fromUniqueIds(Sets.newHashSet(this.iterator));
         }
     }
 

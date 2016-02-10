@@ -22,32 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.query;
-
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileCache;
-
-public abstract class GameProfileQuery<T> extends Query<T> {
-
-    protected GameProfileQuery(GameProfileCache cache, boolean useCache) {
-        super(cache, useCache);
-    }
-
-    public static final class SingleFill extends GameProfileQuery<GameProfile> {
-
-        private final GameProfile profile;
-        private final boolean signed;
-
-        public SingleFill(GameProfileCache cache, GameProfile profile, boolean signed, boolean useCache) {
-            super(cache, useCache);
-            this.profile = profile;
-            this.signed = signed;
-        }
-
-        @Override
-        public GameProfile call() throws Exception {
-            return this.fillProfile(this.profile, this.signed);
-        }
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.mixin.core.server.management;

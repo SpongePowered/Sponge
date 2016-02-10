@@ -26,29 +26,28 @@ package org.spongepowered.common.profile;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.profile.query.GameProfileQuery;
 import org.spongepowered.common.profile.query.NameQuery;
 import org.spongepowered.common.profile.query.UniqueIdQuery;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.util.Collection;
-import java.util.Locale;
 import java.util.UUID;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-public class SpongeProfileManager implements GameProfileManager {
+public final class SpongeProfileManager implements GameProfileManager {
+
+    private final GameProfileCache defaultCache = (GameProfileCache) ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache();
+    private GameProfileCache cache = this.defaultCache;
 
     @Override
     public GameProfile createProfile(UUID uniqueId, @Nullable String name) {
@@ -63,71 +62,46 @@ public class SpongeProfileManager implements GameProfileManager {
 
     @Override
     public CompletableFuture<GameProfile> get(UUID uniqueId, final boolean useCache) {
-        return this.submitTask(new UniqueIdQuery.SingleGet(checkNotNull(uniqueId, "uniqueId"), useCache));
+        return this.submitTask(new UniqueIdQuery.SingleGet(this.cache, checkNotNull(uniqueId, "unique id"), useCache));
     }
 
     @Override
     public CompletableFuture<Collection<GameProfile>> getAllById(Iterable<UUID> uniqueIds, boolean useCache) {
-        return this.submitTask(new UniqueIdQuery.MultiGet(checkNotNull(uniqueIds, "uniqueIds"), useCache));
+        return this.submitTask(new UniqueIdQuery.MultiGet(this.cache, checkNotNull(uniqueIds, "unique ids"), useCache));
     }
 
     @Override
     public CompletableFuture<GameProfile> get(String name, boolean useCache) {
-        return this.submitTask(new NameQuery.SingleGet(checkNotNull(name, "name"), useCache));
+        return this.submitTask(new NameQuery.SingleGet(this.cache, checkNotNull(name, "name"), useCache));
     }
 
     @Override
     public CompletableFuture<Collection<GameProfile>> getAllByName(Iterable<String> names, boolean useCache) {
-        return this.submitTask(new NameQuery.MultiGet(checkNotNull(names, "names"), useCache));
+        return this.submitTask(new NameQuery.MultiGet(this.cache, checkNotNull(names, "names"), useCache));
     }
 
     @Override
     public CompletableFuture<GameProfile> fill(GameProfile profile, boolean signed, boolean useCache) {
-        return this.submitTask(new GameProfileQuery.SingleFill(checkNotNull(profile, "profile"), signed, useCache));
+        return this.submitTask(new GameProfileQuery.SingleFill(this.cache, checkNotNull(profile, "profile"), signed, useCache));
     }
 
     @Override
-    public Collection<GameProfile> getCachedProfiles() {
-        PlayerProfileCache cache = ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache();
-        Collection<GameProfile> profiles = Lists.newArrayList();
-        for (String name : cache.getUsernames()) {
-            if (name != null) {
-                GameProfile profile = (GameProfile) cache.getGameProfileForUsername(name);
-                if (profile != null) {
-                    profiles.add(profile);
-                }
-            }
-        }
-        return profiles;
+    public GameProfileCache getCache() {
+        return this.cache;
     }
 
     @Override
-    public Collection<GameProfile> match(String lastKnownName) {
-        lastKnownName = checkNotNull(lastKnownName, "lastKnownName").toLowerCase(Locale.ROOT);
-        Collection<GameProfile> allProfiles = this.getCachedProfiles();
-        Collection<GameProfile> matching = Sets.newHashSet();
-        for (GameProfile profile : allProfiles) {
-            if (profile.getName().isPresent() && profile.getName().get().startsWith(lastKnownName)) {
-                matching.add(profile);
-            }
-        }
-
-
-        return matching;
+    public void setCache(GameProfileCache cache) {
+        this.cache = checkNotNull(cache, "cache");
     }
 
-    // Internal. Get the profile from the UUID and block until a result
-    public static GameProfile getProfile(UUID uniqueId, boolean useCache) {
-        try {
-            return new UniqueIdQuery.SingleGet(uniqueId, useCache).call();
-        } catch (Exception e) {
-            SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
-            return null;
-        }
+    @Override
+    public GameProfileCache getDefaultCache() {
+        return this.defaultCache;
     }
 
-    private static <T> CompletableFuture<T> submitTask(Callable<T> taskCallable) {
-        return SpongeScheduler.getInstance().submitAsyncTask(taskCallable);
+    private <T> CompletableFuture<T> submitTask(Callable<T> callable) {
+        return SpongeScheduler.getInstance().submitAsyncTask(callable);
     }
 
 }
