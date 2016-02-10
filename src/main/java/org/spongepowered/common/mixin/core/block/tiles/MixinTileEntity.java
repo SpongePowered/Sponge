@@ -63,6 +63,7 @@ import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
@@ -85,10 +86,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (this.worldObj != null && !this.worldObj.isRemote) {
             IMixinWorld world = (IMixinWorld) this.worldObj;
             // This handles transfers to this TE from a source such as a Hopper
-            if (world.getCurrentTickTileEntity().isPresent() && this != world.getCurrentTickTileEntity().get()) {
-                net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) world.getCurrentTickTileEntity().get();
-                SpongeHooks.tryToTrackBlock(te.getWorld(), te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
-            }
+            world.getCauseTracker().getCurrentTickTileEntity().ifPresent(currentTick -> {
+                if (currentTick != this) {
+                    net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
+                    SpongeHooks.tryToTrackBlock(te.getWorld(), te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);
+                }
+            });
         }
     }
 

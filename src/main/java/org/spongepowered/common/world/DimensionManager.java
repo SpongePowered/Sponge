@@ -60,6 +60,8 @@ import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 
+import javax.annotation.Nullable;
+
 public class DimensionManager {
 
     public static final Hashtable<Integer, Class<? extends WorldProvider>> providers = new Hashtable<>();
@@ -206,6 +208,7 @@ public class DimensionManager {
         return dimensions.keySet().toArray(new Integer[dimensions.keySet().size()]);
     }
 
+    @Nullable
     public static WorldServer getWorldFromDimId(int id) {
         return worlds.get(id);
     }

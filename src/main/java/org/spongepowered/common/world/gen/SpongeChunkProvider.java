@@ -68,6 +68,7 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
@@ -255,10 +256,11 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     @Override
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
-        this.prevCapturingTerrain = world.capturingTerrainGen();
-        this.prevProcessingCaptures = world.isProcessingCaptureCause();
-        world.setProcessingCaptureCause(true);
-        world.setCapturingTerrainGen(true);
+        final CauseTracker causeTracker = world.getCauseTracker();
+        this.prevCapturingTerrain = causeTracker.isCapturingTerrainGen();
+        this.prevProcessingCaptures = causeTracker.isProcessingCaptureCause();
+        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setCapturingTerrainGen(true);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -300,7 +302,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         }
 
         ImmutableMap.Builder<PopulatorType, List<Transaction<BlockSnapshot>>> populatorChanges = ImmutableMap.builder();
-        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : world.getCapturedPopulatorChanges().entrySet()) {
+        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : causeTracker.getCapturedPopulators().entrySet()) {
             populatorChanges.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().values()));
         }
         PopulateChunkEvent.Post event =
@@ -309,15 +311,15 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                         chunk);
         SpongeImpl.postEvent(event);
 
-        this.prevRestoringBlocks = world.restoringBlocks();
-        world.setRestoringBlocks(true);
+        this.prevRestoringBlocks = causeTracker.isRestoringBlocks();
+        causeTracker.setRestoringBlocks(true);
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
-            world.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
+            causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }
-        world.setRestoringBlocks(this.prevRestoringBlocks);
-        world.setCapturingTerrainGen(this.prevCapturingTerrain);
-        world.setProcessingCaptureCause(this.prevProcessingCaptures);
-        world.getCapturedPopulatorChanges().clear();
+        causeTracker.setRestoringBlocks(this.prevRestoringBlocks);
+        causeTracker.setCapturingTerrainGen(this.prevCapturingTerrain);
+        causeTracker.setProcessingCaptureCause(this.prevProcessingCaptures);
+        causeTracker.getCapturedPopulators().clear();
 
         BlockFalling.fallInstantly = false;
     }

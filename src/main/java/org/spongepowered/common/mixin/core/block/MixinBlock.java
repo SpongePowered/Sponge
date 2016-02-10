@@ -168,14 +168,14 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"))
     public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).restoringBlocks()) {
+        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
             return;
         }
     }
 
     @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
     private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).restoringBlocks()) {
+        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
             return;
         }
     }

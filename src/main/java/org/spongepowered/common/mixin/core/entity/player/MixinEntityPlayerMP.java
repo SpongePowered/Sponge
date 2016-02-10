@@ -165,9 +165,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
-        if (world.getCapturedEntityItems().size() > 0) {
+        if (world.getCauseTracker().getCapturedEntityItems().size() > 0) {
             StaticMixinHelper.destructItemDrop = true;
-            world.handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)));
+            world.getCauseTracker().handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)));
             StaticMixinHelper.destructItemDrop = false;
         }
     }

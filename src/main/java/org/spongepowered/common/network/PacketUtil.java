@@ -102,11 +102,11 @@ public class PacketUtil {
                 StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
-            world.setProcessingCaptureCause(true);
+            world.getCauseTracker().setProcessingCaptureCause(true);
             packetIn.processPacket(netHandler);
             ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
-                    .handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
-            world.setProcessingCaptureCause(false);
+                .getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
+            world.getCauseTracker().setProcessingCaptureCause(false);
             resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);

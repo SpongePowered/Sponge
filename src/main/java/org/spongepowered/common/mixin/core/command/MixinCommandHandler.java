@@ -50,8 +50,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.setProcessingCaptureCause(true);
-            world.setCapturingCommand(true);
+            world.getCauseTracker().setProcessingCaptureCause(true);
+            world.getCauseTracker().setCapturingCommand(true);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -62,9 +62,9 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
-            world.setProcessingCaptureCause(false);
-            world.setCapturingCommand(false);
+            world.getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
+            world.getCauseTracker().setProcessingCaptureCause(false);
+            world.getCauseTracker().setCapturingCommand(false);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);

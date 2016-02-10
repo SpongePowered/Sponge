@@ -37,6 +37,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -45,8 +46,6 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.util.SpongeHooks;
@@ -67,6 +67,9 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldServer.class)
@@ -79,6 +82,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Shadow public abstract void updateBlockTick(BlockPos p_175654_1_, Block p_175654_2_, int p_175654_3_, int p_175654_4_);
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
+    @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
@@ -96,55 +100,43 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (this.isRemote || this.currentTickBlock != null || this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+                .isChunkSpawnerRunning()) {
             block.randomTick(worldIn, pos, state, rand);
             return;
         }
 
-        this.processingCaptureCause = true;
-        this.processingBlockRandomTicks = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
-        block.randomTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
-        this.processingBlockRandomTicks = false;
+        causeTracker.randomTickBlock(block, pos, state, rand);
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (this.isRemote || this.currentTickBlock != null || this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+                .isChunkSpawnerRunning()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
-
-        this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
-        block.updateTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
+        causeTracker.updateTickBlock(block, pos, state, rand);
     }
 
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;"
             + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        if (this.isRemote || this.currentTickBlock != null || this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+                .isChunkSpawnerRunning()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
-
-        this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0);
-        block.updateTick(worldIn, pos, state, rand);
-        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
+        causeTracker.updateTickBlock(block, pos, state, rand);
     }
 
     @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
     public void onAddBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
-        if (this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
             return;
         }
 
@@ -154,57 +146,56 @@ public abstract class MixinWorldServer extends MixinWorld {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
                 Optional<User> owner = spongeChunk.getBlockOwner(pos);
                 Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                if (notifier.isPresent()) {
-                    spongeChunk.addTrackedBlockPosition(blockIn, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-                    this.trackedBlockEvents.put(pos, notifier.get());
-                } else if (owner.isPresent()) {
-                    spongeChunk.addTrackedBlockPosition(blockIn, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                    this.trackedBlockEvents.put(pos, owner.get());
-                }
+                assingTracking(blockIn, pos, notifier, owner, spongeChunk);
             }
         } else {
             BlockPos sourcePos = null;
-            if (this.currentTickBlock != null) {
-                sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-            } else if (this.currentTickTileEntity != null) {
-                sourcePos = ((net.minecraft.tileentity.TileEntity) this.currentTickTileEntity).getPos();
+            if (causeTracker.hasTickingBlock()) {
+                sourcePos = VecHelper.toBlockPos(causeTracker.getCurrentTickBlock().get().getPosition());
+            } else if (causeTracker.hasTickingTileEntity()) {
+                sourcePos = ((net.minecraft.tileentity.TileEntity) causeTracker.getCurrentTickTileEntity().get()).getPos();
             }
             if (sourcePos != null && isBlockLoaded(sourcePos)) {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
                 Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
                 Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
-                if (notifier.isPresent()) {
-                    spongeChunk.addTrackedBlockPosition(blockIn, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-                    this.trackedBlockEvents.put(pos, notifier.get());
-                } else if (owner.isPresent()) {
-                    spongeChunk.addTrackedBlockPosition(blockIn, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                    this.trackedBlockEvents.put(pos, owner.get());
-                }
+                assingTracking(blockIn, pos, notifier, owner, spongeChunk);
             }
+        }
+    }
+
+    private void assingTracking(Block block, BlockPos pos, Optional<User> notifier, Optional<User> owner, IMixinChunk spongeChunk) {
+        if (notifier.isPresent()) {
+            spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+            this.trackedBlockEvents.put(pos, notifier.get());
+        } else if (owner.isPresent()) {
+            spongeChunk.addTrackedBlockPosition(block, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
+            this.trackedBlockEvents.put(pos, owner.get());
         }
     }
 
     // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
-        if (this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
             return fireBlockEvent(event);
         }
 
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
-        this.processingCaptureCause = true;
-        this.currentTickBlock = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3);
-        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
+        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3));
+        Cause cause = Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get()));
         if (this.trackedBlockEvents.get(event.getPosition()) != null) {
             User user = this.trackedBlockEvents.get(event.getPosition());
             cause = cause.with(NamedCause.notifier(user));
             StaticMixinHelper.blockEventUser = user;
         }
         boolean result = fireBlockEvent(event);
-        this.handlePostTickCaptures(cause);
+        causeTracker.handlePostTickCaptures(cause);
         StaticMixinHelper.blockEventUser = null;
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
+        causeTracker.setCurrentTickBlock(null);
+        causeTracker.setProcessingCaptureCause(false);
         this.trackedBlockEvents.remove(event.getPosition());
         return result;
     }
@@ -232,7 +223,8 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Redirect(method = "scheduleBlockUpdate(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
-        if (this.isRemote || this.captureTerrainGen || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
             this.tmpScheduledObj = sbu;
             return;
         }
@@ -245,9 +237,9 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         // Pistons, Beacons, Notes, Comparators etc. schedule block updates so we must track these positions
-        if (this.currentTickBlock != null) {
-            BlockPos pos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-            SpongeHooks.tryToTrackBlock((net.minecraft.world.World)(Object) this, this.currentTickBlock, pos, sbu.getBlock(), sbu.position, PlayerTracker.Type.NOTIFIER);
+        if (causeTracker.hasTickingBlock()) {
+            BlockPos pos = VecHelper.toBlockPos(causeTracker.getCurrentTickBlock().get().getPosition());
+            SpongeHooks.tryToTrackBlock((net.minecraft.world.World)(Object) this, causeTracker.getCurrentTickBlock().get(), pos, sbu.getBlock(), sbu.position, PlayerTracker.Type.NOTIFIER);
         }
 
         this.tmpScheduledObj = sbu;
@@ -294,5 +286,10 @@ public abstract class MixinWorldServer extends MixinWorld {
         // this redirect forces it to return false if a player is sleep-ignored even if they're a spectator
         boolean ignore = entityPlayer instanceof Player && ((Player)entityPlayer).isSleepingIgnored();
         return !ignore && entityPlayer.isSpectator();
+    }
+
+    @Override
+    public Optional<Entity> getEntity(UUID uuid) {
+        return Optional.ofNullable((Entity) this.getEntityFromUuid(uuid));
     }
 }

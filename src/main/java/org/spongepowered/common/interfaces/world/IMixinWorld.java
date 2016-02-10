@@ -24,26 +24,20 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -51,59 +45,15 @@ public interface IMixinWorld {
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
 
-    List<Entity> getCapturedEntities();
-
-    List<Entity> getCapturedEntityItems();
+    CauseTracker getCauseTracker();
 
     BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
-    boolean isProcessingCaptureCause();
-
-    boolean isWorldSpawnerRunning();
-
-    boolean isChunkSpawnerRunning();
-
-    boolean capturingBlocks();
-
-    boolean capturingTerrainGen();
-
-    boolean restoringBlocks();
-
-    Optional<BlockSnapshot> getCurrentTickBlock();
-
-    Optional<Entity> getCurrentTickEntity();
-
-    Optional<TileEntity> getCurrentTickTileEntity();
-
     void updateWorldGenerator();
-
-    void handlePostTickCaptures(Cause cause);
-
-    void handleDroppedItems(Cause cause);
-
-    void handleEntitySpawns(Cause cause);
-
-    void setProcessingCaptureCause(boolean flag);
-
-    void setWorldSpawnerRunning(boolean flag);
-
-    void setChunkSpawnerRunning(boolean flag);
-
-    void setCapturingCommand(boolean flag);
-
-    void setCapturingTerrainGen(boolean flag);
-
-    void setCapturingBlockDecay(boolean flag);
-
-    void setRestoringBlocks(boolean flag);
-
-    void setSpawningDeathDrops(boolean flag);
 
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
-
-    void notifyBlockOfStateChange(BlockPos notifyPos, Block sourceBlock, BlockPos sourcePos);
 
     @Nullable
     EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double distance);
@@ -111,10 +61,12 @@ public interface IMixinWorld {
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
 
-    Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulatorChanges();
-
     void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
 
     SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
+
+    void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
+
+    void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
 }
