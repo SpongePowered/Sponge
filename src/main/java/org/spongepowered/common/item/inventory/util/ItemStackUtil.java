@@ -51,7 +51,7 @@ public abstract class ItemStackUtil {
     }
     
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
-        if (stack instanceof ItemStack) {
+        if (stack == null || stack instanceof ItemStack) {
             return (ItemStack) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
