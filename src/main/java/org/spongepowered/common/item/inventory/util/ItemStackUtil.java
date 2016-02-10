@@ -44,14 +44,14 @@ public abstract class ItemStackUtil {
     }
 
     public static net.minecraft.item.ItemStack toNative(ItemStack stack) {
-        if (stack instanceof net.minecraft.item.ItemStack) {
+        if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
             return (net.minecraft.item.ItemStack) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
     
     public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
-        if (stack instanceof ItemStack) {
+        if (stack instanceof ItemStack || stack == null) {
             return (ItemStack) stack;
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
