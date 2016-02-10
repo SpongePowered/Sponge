@@ -109,7 +109,7 @@ public final class LensHandle<TInventory, TStack> {
     public <T, K, V> InventoryProperty<K, V> getProperty(Class<T> property, Object key) {
         if (this.properties != null) {
             for (InventoryProperty<?, ?> prop : this.properties) {
-                if (prop.getClass().equals(prop) && (key == null || key.equals(prop.getKey()))) {
+                if (prop.getClass().equals(property) && (key == null || key.equals(prop.getKey()))) {
                     return (InventoryProperty<K, V>) prop;
                 }
             }
