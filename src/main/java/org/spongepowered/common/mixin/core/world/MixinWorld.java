@@ -2686,7 +2686,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;
-        return predicate.apply(player) && mixinEntity.isReallyREALLYInvisible();
+        return predicate.apply(player) && !mixinEntity.isReallyREALLYInvisible();
     }
 
     /**
