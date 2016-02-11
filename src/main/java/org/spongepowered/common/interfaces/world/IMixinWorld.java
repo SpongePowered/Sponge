@@ -24,23 +24,19 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.CauseTracker;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
 
+@NonnullByDefault
 public interface IMixinWorld {
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
@@ -60,8 +56,6 @@ public interface IMixinWorld {
 
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
-
-    void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
 
     SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
 

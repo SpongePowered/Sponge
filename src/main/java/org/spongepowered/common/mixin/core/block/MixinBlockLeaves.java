@@ -48,7 +48,8 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
-import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.tracking.BlockTrackingPhase;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.List;
@@ -62,9 +63,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setCapturingBlockDecay(true);
+        causeTracker.setBlockPhase(BlockTrackingPhase.BLOCK_DECAY);
         boolean result = worldIn.setBlockState(pos, state, flags);
-        causeTracker.setCapturingBlockDecay(false);
+        causeTracker.setBlockPhase(BlockTrackingPhase.COMPLETE);
         return result;
     }
 
@@ -72,18 +73,18 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setCapturingBlockDecay(true);
+        causeTracker.setBlockPhase(BlockTrackingPhase.BLOCK_DECAY);
         boolean result = worldIn.setBlockToAir(pos);
-        causeTracker.setCapturingBlockDecay(false);
+        causeTracker.setBlockPhase(BlockTrackingPhase.COMPLETE);
         return result;
     }
 
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
         if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLeaf.VARIANT);
+            type = blockState.getValue(BlockOldLeaf.VARIANT);
         } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLeaf.VARIANT);
+            type = blockState.getValue(BlockNewLeaf.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }

@@ -54,7 +54,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.util.SpongeHooks;

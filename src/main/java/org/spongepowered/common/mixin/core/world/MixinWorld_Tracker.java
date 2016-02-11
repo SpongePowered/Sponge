@@ -62,7 +62,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -105,7 +105,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         // Turn on capturing
         final CauseTracker causeTracker = this.getCauseTracker();
         causeTracker.setCaptureBlocks(true);
-        causeTracker.setCaptureEntitySpawns(true);
     }
 
     /**
