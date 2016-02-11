@@ -132,6 +132,8 @@ public final class CauseTracker {
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
     private BlockTrackingPhase blockPhase = BlockTrackingPhase.COMPLETE;
+    private GeneralPhase generalPhase;
+    private SpawningTrackingPhase entityPhase;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         this.targetWorld = targetWorld;
@@ -149,16 +151,34 @@ public final class CauseTracker {
         return (IMixinWorld) this.targetWorld;
     }
 
+    public GeneralPhase getGeneralPhase() {
+        return this.generalPhase;
+    }
+
+    public void setGeneralPhase(GeneralPhase generalPhase) {
+        this.generalPhase = generalPhase;
+    }
+
     public BlockTrackingPhase getBlockPhase() {
         return this.blockPhase;
     }
 
     public void setBlockPhase(BlockTrackingPhase blockPhase) {
         this.blockPhase = blockPhase;
+        this.generalPhase = blockPhase.isBusy() ? GeneralPhase.COMPLETE : GeneralPhase.PROCESSING;
     }
 
-    public boolean isProcessingCaptureCause() {
-        return this.processingCaptureCause;
+    public SpawningTrackingPhase getEntityPhase() {
+        return this.entityPhase;
+    }
+
+    public void setEntityPhase(SpawningTrackingPhase entityPhase) {
+        this.entityPhase = entityPhase;
+        this.generalPhase = entityPhase.isBusy() ? GeneralPhase.COMPLETE : GeneralPhase.PROCESSING;
+    }
+
+    public boolean isCapturing() {
+        return this.generalPhase != GeneralPhase.COMPLETE;
     }
 
     public void setProcessingCaptureCause(boolean processingCaptureCause) {
@@ -1160,4 +1180,6 @@ public final class CauseTracker {
                && !cause.contains(this.getCurrentTickBlock().get());
 
     }
+
+
 }

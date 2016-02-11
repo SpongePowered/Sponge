@@ -64,6 +64,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -290,12 +291,13 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
+        causeTracker.setGeneralPhase(GeneralPhase.TICKING_ENTITY);
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entity);
         entity.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entity);
         causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
-        causeTracker.setCurrentTickEntity(null);
+        causeTracker.setGeneralPhase(GeneralPhase.COMPLETE);
         causeTracker.setProcessingCaptureCause(false);
     }
 

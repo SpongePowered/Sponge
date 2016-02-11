@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.SpawningTrackingPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -78,8 +79,7 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setWorldSpawnerRunning(true);
-        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setEntityPhase(SpawningTrackingPhase.WORLD_SPAWNER_SPAWNING);
         spawnerStart = true;
     }
 
@@ -87,12 +87,10 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        if (causeTracker.getCapturedEntities().size() > 0) {
+        if (!causeTracker.getCapturedEntities().isEmpty()) {
             causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer)));
         }
-
-        causeTracker.setWorldSpawnerRunning(false);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.setEntityPhase(SpawningTrackingPhase.COMPLETE);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
