@@ -548,7 +548,7 @@ public final class CauseTracker {
                     IMixinEntityLivingBase spongeLivingEntity = (IMixinEntityLivingBase) spongeEntity;
                     DamageSource lastDamageSource = spongeLivingEntity.getLastDamageSource();
                     if (lastDamageSource != null && !cause.contains(lastDamageSource)) {
-                        if (cause.containsNamed("Attacker")) {
+                        if (!cause.containsNamed("Attacker")) {
                             cause = cause.with(NamedCause.of("Attacker", lastDamageSource));
                         }
 
