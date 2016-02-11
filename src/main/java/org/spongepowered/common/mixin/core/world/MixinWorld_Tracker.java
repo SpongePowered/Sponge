@@ -99,7 +99,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
+    private void onTrackerConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
 
         // Turn on capturing
