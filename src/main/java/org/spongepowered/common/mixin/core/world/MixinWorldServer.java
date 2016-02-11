@@ -146,7 +146,7 @@ public abstract class MixinWorldServer extends MixinWorld {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
                 Optional<User> owner = spongeChunk.getBlockOwner(pos);
                 Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                assingTracking(blockIn, pos, notifier, owner, spongeChunk);
+                userTracking(blockIn, pos, notifier, owner, spongeChunk);
             }
         } else {
             BlockPos sourcePos = null;
@@ -159,12 +159,12 @@ public abstract class MixinWorldServer extends MixinWorld {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
                 Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
                 Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
-                assingTracking(blockIn, pos, notifier, owner, spongeChunk);
+                userTracking(blockIn, pos, notifier, owner, spongeChunk);
             }
         }
     }
 
-    private void assingTracking(Block block, BlockPos pos, Optional<User> notifier, Optional<User> owner, IMixinChunk spongeChunk) {
+    private void userTracking(Block block, BlockPos pos, Optional<User> notifier, Optional<User> owner, IMixinChunk spongeChunk) {
         if (notifier.isPresent()) {
             spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
             this.trackedBlockEvents.put(pos, notifier.get());
