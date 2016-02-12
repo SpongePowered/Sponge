@@ -53,11 +53,11 @@ public class TrackingPhases {
 
     @Nullable
     public ITrackingPhaseState peek() {
-        return this.states.peekLast();
+        return this.states.peek();
     }
 
     public TrackingPhase current() {
-        ITrackingPhaseState current = this.states.peekLast();
+        ITrackingPhaseState current = this.states.peek();
         return current == null ? null : current.getPhase();
     }
 

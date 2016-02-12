@@ -34,8 +34,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.ISpawnablePhase;
+import org.spongepowered.common.event.tracking.ITickingPhase;
 import org.spongepowered.common.event.tracking.ITrackingPhaseState;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -48,7 +52,7 @@ import javax.annotation.Nullable;
 
 public class SpawningPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState {
+    public enum State implements ITrackingPhaseState, ISpawnablePhase {
         DEATH_DROPS_SPAWNING(true),
         DROP_ITEM,
         WORLD_SPAWNER_SPAWNING,
@@ -78,47 +82,29 @@ public class SpawningPhase extends TrackingPhase {
         }
 
         @Override
+        public boolean canSwitchTo(ITrackingPhaseState state) {
+            return this == CHUNK_SPAWNING && state instanceof ITickingPhase;
+        }
+
+        @Override
         public TrackingPhase getPhase() {
             return TrackingPhases.SPAWNING;
         }
 
+        public void process(Cause cause, CauseTracker causeTracker) {
+            causeTracker.handlePostTickCaptures(cause);
+        }
+
         @Nullable
-        public SpawnEntityEvent createEntityEvent(Cause cause, World world, List<Entity> capturedEntities, List<Transaction<BlockSnapshot>> invalidTransactions) {
-            Iterator<Entity> iter = capturedEntities.iterator();
-            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-            while (iter.hasNext()) {
-                Entity currentEntity = iter.next();
-                if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
-                    continue;
-                }
-                if (cause.first(User.class).isPresent()) {
-                    // store user UUID with entity to track later
-                    User user = cause.first(User.class).get();
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
-                } else if (cause.first(Entity.class).isPresent()) {
-                    IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                    Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
-                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
-                    }
-                }
-                entitySnapshotBuilder.add(currentEntity.createSnapshot());
-            }
-
-            List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
-            if (entitySnapshots.isEmpty()) {
-                return null;
-            }
-
+        @Override
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, List<Entity> capturedEntities, List<EntitySnapshot> entitySnapshots, World world) {
             if (this == WORLD_SPAWNER_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
             } else if (this == CHUNK_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, capturedEntities, entitySnapshots, world);
             } else {
-                return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshotBuilder.build(), world);
+                return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
             }
-
         }
     }
 

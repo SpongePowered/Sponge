@@ -26,11 +26,29 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.collect.ImmutableList;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ITickingPhase;
 import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
@@ -110,6 +128,15 @@ public class WorldPhase extends TrackingPhase {
             checkArgument(this.isTicking(), "Cannot process a tick for a non-ticking state!");
         }
 
+        @Nullable
+        @Override
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, List<Entity> capturedEntities, List<EntitySnapshot> entitySnapshots, World world) {
+            if (this.isTicking()) {
+                return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
+            } else {
+                throw new IllegalStateException(String.format("Cannot create a SpawnEntityEvent if this isn't tickable!! Current phase: %s", this));
+            }
+        }
 
     }
 

@@ -1,11 +1,19 @@
 package org.spongepowered.common.event.tracking;
 
 import com.flowpowered.math.vector.Vector3i;
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockPortal;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.effect.EntityLightningBolt;
+import net.minecraft.entity.effect.EntityWeatherEffect;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityFishHook;
+import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
@@ -17,14 +25,18 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -32,13 +44,20 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
@@ -175,6 +194,160 @@ public class MoveToPhases {
             }
         } else if (captureType == CaptureType.PLACE) {
             TrackingHelper.sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+        }
+    }
+
+    static void preProcessItemDrops(Cause cause, List<Transaction<BlockSnapshot>> invalidTransactions, Iterator<Entity> iter,
+            ImmutableList.Builder<EntitySnapshot> builder) {
+        while (iter.hasNext()) {
+            Entity currentEntity = iter.next();
+            if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
+                continue;
+            }
+
+            if (cause.first(User.class).isPresent()) {
+                // store user UUID with entity to track later
+                User user = cause.first(User.class).get();
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
+            } else if (cause.first(Entity.class).isPresent()) {
+                IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                if (owner.isPresent()) {
+                    if (!cause.containsNamed(NamedCause.OWNER)) {
+                        cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+                    }
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+                }
+                if (spongeEntity instanceof EntityLivingBase) {
+                    IMixinEntityLivingBase spongeLivingEntity = (IMixinEntityLivingBase) spongeEntity;
+                    DamageSource lastDamageSource = spongeLivingEntity.getLastDamageSource();
+                    if (lastDamageSource != null && !cause.contains(lastDamageSource)) {
+                        if (!cause.containsNamed("Attacker")) {
+                            cause = cause.with(NamedCause.of("Attacker", lastDamageSource));
+                        }
+
+                    }
+                }
+            }
+            builder.add(currentEntity.createSnapshot());
+        }
+    }
+
+    static boolean addWeatherEffect(final net.minecraft.entity.Entity entity, World minecraftWorld) {
+        if (entity instanceof EntityLightningBolt) {
+            LightningEvent.Pre event = SpongeEventFactory.createLightningEventPre(((IMixinEntityLightningBolt) entity).getCause());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                return minecraftWorld.addWeatherEffect(entity);
+            }
+        } else {
+            return minecraftWorld.addWeatherEffect(entity);
+        }
+        return false;
+    }
+
+    static boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ) {
+        net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
+
+
+        // handle actual capturing
+        if (causeTracker.isCapturing()) {
+            if (causeTracker.hasTickingBlock()) {
+                BlockPos sourcePos = VecHelper.toBlockPos(causeTracker.getCurrentTickBlock().get().getPosition());
+                Block targetBlock = causeTracker.getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
+                SpongeHooks
+                        .tryToTrackBlockAndEntity(causeTracker.getMinecraftWorld(), causeTracker.getCurrentTickBlock().get(), entityIn, sourcePos, targetBlock, entityIn.getPosition(),
+                                PlayerTracker.Type.NOTIFIER);
+            }
+            if (causeTracker.hasTickingEntity()) {
+                Optional<User> creator = ((IMixinEntity) causeTracker.getCurrentTickEntity().get()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
+                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
+                }
+            }
+            if (entityIn instanceof EntityItem) {
+                causeTracker.getCapturedEntityItems().add(entity);
+            } else {
+                causeTracker.getCapturedEntities().add(entity);
+            }
+            return true;
+        } else { // Custom
+
+            if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
+                // TODO MixinEntityFishHook.setShooter makes angler null
+                // sometimes, but that will cause NPE when ticking
+                return false;
+            }
+
+            EntityLivingBase specialCause = null;
+            String causeName = "";
+            // Special case for throwables
+            if (entityIn instanceof EntityThrowable) {
+                EntityThrowable throwable = (EntityThrowable) entityIn;
+                specialCause = throwable.getThrower();
+
+                if (specialCause != null) {
+                    causeName = NamedCause.THROWER;
+                    if (specialCause instanceof Player) {
+                        Player player = (Player) specialCause;
+                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                    }
+                }
+            }
+            // Special case for TNT
+            else if (entityIn instanceof EntityTNTPrimed) {
+                EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
+                specialCause = tntEntity.getTntPlacedBy();
+                causeName = NamedCause.IGNITER;
+
+                if (specialCause instanceof Player) {
+                    Player player = (Player) specialCause;
+                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                }
+            }
+            // Special case for Tameables
+            else if (entityIn instanceof EntityTameable) {
+                EntityTameable tameable = (EntityTameable) entityIn;
+                if (tameable.getOwner() != null) {
+                    specialCause = tameable.getOwner();
+                    causeName = NamedCause.OWNER;
+                }
+            }
+
+            if (specialCause != null && !cause.containsNamed(causeName)) {
+                cause = cause.with(NamedCause.of(causeName, specialCause));
+            }
+
+            org.spongepowered.api.event.Event event;
+            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+            entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
+
+            if (entityIn instanceof EntityItem) {
+                causeTracker.getCapturedEntityItems().add(entity);
+                event = SpongeEventFactory.createDropItemEventCustom(cause, causeTracker.getCapturedEntityItems(),
+                        entitySnapshotBuilder.build(), causeTracker.getWorld());
+            } else {
+                causeTracker.getCapturedEntities().add(entity);
+                event = SpongeEventFactory.createSpawnEntityEventCustom(cause, causeTracker.getCapturedEntities(),
+                        entitySnapshotBuilder.build(), causeTracker.getWorld());
+            }
+            if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
+                if (entityIn instanceof EntityWeatherEffect) {
+                    return addWeatherEffect(entityIn, causeTracker.getMinecraftWorld());
+                }
+
+                causeTracker.getMinecraftWorld().getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entityIn);
+                causeTracker.getMinecraftWorld().loadedEntityList.add(entityIn);
+                causeTracker.getMixinWorld().onSpongeEntityAdded(entityIn);
+                if (entityIn instanceof EntityItem) {
+                    causeTracker.getCapturedEntityItems().remove(entity);
+                } else {
+                    causeTracker.getCapturedEntities().remove(entity);
+                }
+                return true;
+            }
+
+            return false;
         }
     }
 }

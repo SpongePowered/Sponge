@@ -88,7 +88,7 @@ public abstract class MixinSpawnerAnimals {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
         if (!causeTracker.getCapturedEntities().isEmpty()) {
-            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer)));
+            causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
         }
         if (spawnerStart) {
             spawnerStart = false;
@@ -109,7 +109,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = (IMixinWorld) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
+        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;

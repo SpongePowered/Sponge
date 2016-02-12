@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
@@ -34,9 +35,11 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
@@ -146,5 +149,32 @@ public class TrackingHelper {
                && !tracker.isProcessingBlockRandomTicks() && !tracker.isCaptureCommand() && tracker.hasTickingBlock() && tracker.hasPluginCause()
                && !cause.contains(tracker.getCurrentTickBlock().get());
 
+    }
+
+    public static Tuple<List<EntitySnapshot>, Cause> processSnapshotsForSpawning(Cause cause, org.spongepowered.api.world.World world, List<Entity> capturedEntities, List<Transaction<BlockSnapshot>> invalidTransactions) {
+        Iterator<Entity> iter = capturedEntities.iterator();
+        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+        while (iter.hasNext()) {
+            Entity currentEntity = iter.next();
+            if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
+                continue;
+            }
+            if (cause.first(User.class).isPresent()) {
+                // store user UUID with entity to track later
+                User user = cause.first(User.class).get();
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
+            } else if (cause.first(Entity.class).isPresent()) {
+                IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
+                    cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+                }
+            }
+            entitySnapshotBuilder.add(currentEntity.createSnapshot());
+        }
+
+        List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
+        return new Tuple<>(entitySnapshots, cause);
     }
 }
