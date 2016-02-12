@@ -28,7 +28,6 @@ public enum BlockTrackingPhase {
 
     BLOCK_DECAY,
     TERRAIN_GENERATION,
-    BLOCK_TICK,
     RESTORING_BLOCKS,
     PROCESSING,
     COMPLETE,
@@ -43,6 +42,10 @@ public enum BlockTrackingPhase {
      */
     public boolean isBusy() {
         return this != COMPLETE;
+    }
+
+    public boolean canSpawnEntities() {
+        return this == TERRAIN_GENERATION;
     }
 
 }

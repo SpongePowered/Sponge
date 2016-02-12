@@ -62,9 +62,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockTrackingPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -163,7 +163,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
                         transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
                         populatorSnapshotList = causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator);
                         populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-                    } else if (causeTracker.isCaptureBlockDecay()) {
+                    } else if (causeTracker.getBlockPhase() == BlockTrackingPhase.BLOCK_DECAY) {
                         // Only capture final state of decay, ignore the rest
                         if (block == Blocks.air) {
                             ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
@@ -242,12 +242,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0));
         block.updateTick(worldIn, pos, state, rand);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
-        causeTracker.setCurrentTickBlock(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeTickingBlock();
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
@@ -258,13 +255,10 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entityIn);
         entityIn.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
-        causeTracker.setCurrentTickEntity(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeTickingEntity();
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -275,12 +269,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickTileEntity((TileEntity) tile);
         tile.update();
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(tile)));
-        causeTracker.setCurrentTickTileEntity(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeTickingTileEntity();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
@@ -291,14 +282,10 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setGeneralPhase(GeneralPhase.TICKING_ENTITY);
-        causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entity);
         entity.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entity);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
-        causeTracker.setGeneralPhase(GeneralPhase.COMPLETE);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeTickingEntity();
     }
 
     /**

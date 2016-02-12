@@ -37,6 +37,8 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -50,8 +52,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.getCauseTracker().setProcessingCaptureCause(true);
-            world.getCauseTracker().setCapturingCommand(true);
+            final CauseTracker causeTracker = world.getCauseTracker();
+            causeTracker.setGeneralPhase(GeneralPhase.COMMAND);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -62,9 +64,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
-            world.getCauseTracker().setProcessingCaptureCause(false);
-            world.getCauseTracker().setCapturingCommand(false);
+            final CauseTracker causeTracker = world.getCauseTracker();
+            causeTracker.completeCommand(command, sender);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);

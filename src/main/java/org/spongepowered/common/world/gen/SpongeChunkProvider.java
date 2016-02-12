@@ -68,7 +68,9 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.BlockTrackingPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
@@ -259,8 +261,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         final CauseTracker causeTracker = world.getCauseTracker();
         this.prevCapturingTerrain = causeTracker.isCapturingTerrainGen();
         this.prevProcessingCaptures = causeTracker.isCapturing();
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCapturingTerrainGen(true);
+        causeTracker.setBlockPhase(BlockTrackingPhase.TERRAIN_GENERATION);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -312,13 +313,20 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         SpongeImpl.postEvent(event);
 
         this.prevRestoringBlocks = causeTracker.isRestoringBlocks();
-        causeTracker.setRestoringBlocks(true);
+        causeTracker.setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
             causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }
-        causeTracker.setRestoringBlocks(this.prevRestoringBlocks);
-        causeTracker.setCapturingTerrainGen(this.prevCapturingTerrain);
-        causeTracker.setProcessingCaptureCause(this.prevProcessingCaptures);
+        // Figure something to do here.
+        if (this.prevRestoringBlocks) {
+            causeTracker.setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
+        }
+        if (this.prevCapturingTerrain) {
+            causeTracker.setBlockPhase(BlockTrackingPhase.TERRAIN_GENERATION);
+        }
+        if (this.prevProcessingCaptures) {
+            causeTracker.setGeneralPhase(GeneralPhase.PROCESSING);
+        }
         causeTracker.getCapturedPopulators().clear();
 
         BlockFalling.fallInstantly = false;

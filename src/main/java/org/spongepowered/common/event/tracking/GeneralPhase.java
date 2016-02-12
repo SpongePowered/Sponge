@@ -26,10 +26,27 @@ package org.spongepowered.common.event.tracking;
 
 public enum GeneralPhase {
 
-    TICKING_ENTITY,
-    TICKING_BLOCK,
-    COMMAND,
-    PROCESSING,
-    COMPLETE,
+    TICKING_ENTITY(false),
+    TICKING_BLOCK(true),
+    RANDOM_TICKING_BLOCK(true),
+    TICKING_TILE(true),
+    COMMAND(false),
+    PACKET(false),
+    PROCESSING(false),
+    COMPLETE(false),
     ;
+
+    private final boolean intermediate;
+
+    GeneralPhase(boolean intermediate) {
+        this.intermediate = intermediate;
+    }
+
+    public boolean isBusy() {
+        return this != COMPLETE;
+    }
+
+    public boolean isIntermediate() {
+        return this.intermediate;
+    }
 }

@@ -183,7 +183,6 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
-        causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState, (IBlockAccess) this, event.getPosition()), event.getPosition(), 3));
         Cause cause = Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get()));
         if (this.trackedBlockEvents.get(event.getPosition()) != null) {
@@ -194,8 +193,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         boolean result = fireBlockEvent(event);
         causeTracker.handlePostTickCaptures(cause);
         StaticMixinHelper.blockEventUser = null;
-        causeTracker.setCurrentTickBlock(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeTickingBlock();
         this.trackedBlockEvents.remove(event.getPosition());
         return result;
     }
@@ -212,6 +210,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         return builder.build();
     }
 
+    @Nullable
     private NextTickListEntry tmpScheduledObj;
 
     @Redirect(method = "updateBlockTick(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",

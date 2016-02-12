@@ -30,6 +30,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
@@ -44,12 +45,17 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.util.ItemsHelper;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 public class PacketUtil {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
@@ -91,29 +97,32 @@ public class PacketUtil {
 
             //System.out.println("RECEIVED PACKET " + packetIn);
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
-            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
-                                                                                                       : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory
-                                                                                                               .getItemStack()).createSnapshot();
+            ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null
+                                       ? ItemStackSnapshot.NONE
+                                       : ItemStackUtil.fromNative(StaticMixinHelper.packetPlayer.inventory.getItemStack()).createSnapshot();
             StaticMixinHelper.lastCursor = cursor;
 
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
             if (StaticMixinHelper.packetPlayer.getHeldItem() != null
                 && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
+                StaticMixinHelper.prePacketProcessItem = ItemStackUtil.cloneDefensiveNative(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
-            world.getCauseTracker().setProcessingCaptureCause(true);
-            packetIn.processPacket(netHandler);
-            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
-                .getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
-            world.getCauseTracker().setProcessingCaptureCause(false);
+            final CauseTracker causeTracker = world.getCauseTracker();
+            if (packetIn instanceof C03PacketPlayer) {
+                packetIn.processPacket(netHandler);
+            } else {
+                causeTracker.setGeneralPhase(GeneralPhase.PACKET);
+                packetIn.processPacket(netHandler);
+                causeTracker.completePacketProcessing(StaticMixinHelper.packetPlayer);
+            }
             resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);
         }
     }
 
-    private static boolean creativeCheck(Packet packet) {
+    private static boolean creativeCheck(Packet<?> packet) {
         return packet instanceof C10PacketCreativeInventoryAction;
     }
 

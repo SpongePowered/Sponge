@@ -90,7 +90,7 @@ public abstract class MixinSpawnerAnimals {
         if (!causeTracker.getCapturedEntities().isEmpty()) {
             causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer)));
         }
-        causeTracker.setEntityPhase(SpawningTrackingPhase.COMPLETE);
+        causeTracker.completeEntitySpawnPhase();
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
@@ -102,8 +102,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setChunkSpawnerRunning(true);
-        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setEntityPhase(SpawningTrackingPhase.CHUNK_SPAWNING);
         spawnerStart = true;
     }
 
@@ -114,9 +113,7 @@ public abstract class MixinSpawnerAnimals {
         if (causeTracker.getCapturedEntities().size() > 0) {
             causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(worldServer), NamedCause.of("Biome", biome)));
         }
-
-        causeTracker.setChunkSpawnerRunning(false);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.completeEntitySpawnPhase();
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
