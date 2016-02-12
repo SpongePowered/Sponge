@@ -22,26 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-public class SpawningPhase extends TrackingPhase {
+import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+
+public class GeneralPhase extends TrackingPhase {
 
     public enum State implements ITrackingPhaseState {
-        DEATH_DROPS_SPAWNING(true),
-        WORLD_SPAWNER_SPAWNING,
-        CHUNK_SPAWNING,
-        ENTITY_SPAWNING,
-        PROCESSING,
-        COMPLETE;
+        COMMAND(false),
+        PACKET(false),
+        PROCESSING(false),
+        COMPLETE(false);
 
-        private final boolean managed;
+        private final boolean intermediate;
 
-        State() {
-            this.managed = false;
-        }
-
-        State(boolean managed) {
-            this.managed = managed;
+        State(boolean intermediate) {
+            this.intermediate = intermediate;
         }
 
         @Override
@@ -51,17 +47,31 @@ public class SpawningPhase extends TrackingPhase {
 
         @Override
         public boolean isManaged() {
-            return this.managed;
+            return false;
+        }
+
+        @Override
+        public boolean canSwitchTo(ITrackingPhaseState state) {
+            return !isBusy() || state instanceof BlockPhase.State;
+        }
+
+        public boolean isIntermediate() {
+            return this.intermediate;
         }
 
         @Override
         public TrackingPhase getPhase() {
-            return TrackingPhases.SPAWNING;
+            return TrackingPhases.GENERAL;
         }
     }
 
-    public SpawningPhase(TrackingPhase parent) {
+    public GeneralPhase(TrackingPhase parent) {
         super(parent);
     }
 
+    @Override
+    public GeneralPhase addChild(TrackingPhase child) {
+        super.addChild(child);
+        return this;
+    }
 }

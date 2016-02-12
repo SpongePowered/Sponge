@@ -22,32 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.spongepowered.common.event.tracking.ITrackingPhaseState;
 
-public abstract class TrackingPhase {
+public class BlockPhase extends TrackingPhase {
 
-    private final TrackingPhase parent;
+    public enum State implements ITrackingPhaseState {
+        BLOCK_DECAY(false),
+        RESTORING_BLOCKS,
+        COMPLETE;
 
-    private final List<TrackingPhase> children = new ArrayList<>();
+        private final boolean managed;
 
-    public TrackingPhase(TrackingPhase parent) {
-        this.parent = parent;
+        State() {
+            this.managed = false;
+        }
+
+        State(boolean managed) {
+            this.managed = managed;
+        }
+
+        @Override
+        public boolean isBusy() {
+            return this != COMPLETE;
+        }
+
+        @Override
+        public boolean isManaged() {
+            return this.managed;
+        }
+
+        @Override
+        public boolean canSwitchTo(ITrackingPhaseState state) {
+            return false;
+        }
+
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.BLOCK;
+        }
+
     }
 
-    public TrackingPhase getParent() {
-        return this.parent;
-    }
-
-    public List<TrackingPhase> getChildren() {
-        return this.children;
-    }
-
-    public TrackingPhase addChild(TrackingPhase child) {
-        this.children.add(child);
-        return this;
+    public BlockPhase(TrackingPhase parent) {
+        super(parent);
     }
 
 }

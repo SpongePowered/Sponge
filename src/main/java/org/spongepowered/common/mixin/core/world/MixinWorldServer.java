@@ -191,7 +191,6 @@ public abstract class MixinWorldServer extends MixinWorld {
             StaticMixinHelper.blockEventUser = user;
         }
         boolean result = fireBlockEvent(event);
-        causeTracker.handlePostTickCaptures(cause);
         StaticMixinHelper.blockEventUser = null;
         causeTracker.completeTickingBlock();
         this.trackedBlockEvents.remove(event.getPosition());

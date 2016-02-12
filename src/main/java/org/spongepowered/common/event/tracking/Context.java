@@ -24,24 +24,23 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 
-public interface ITrackingPhaseState {
+import java.util.ArrayList;
+import java.util.List;
 
-    TrackingPhase getPhase();
+public class Context {
 
-    boolean isBusy();
+    private final List<NamedCause> contextObjects = new ArrayList<>();
 
-    boolean isManaged();
-
-    int ordinal();
-
-    default boolean canSwitchTo(ITrackingPhaseState state) {
-        return false;
+    public Context add(NamedCause namedCause) {
+        this.contextObjects.add(namedCause);
+        return this;
     }
 
-    default boolean isTicking() {
-        return false;
+    public Cause toCause() {
+        return Cause.of(this.contextObjects);
     }
 
 }

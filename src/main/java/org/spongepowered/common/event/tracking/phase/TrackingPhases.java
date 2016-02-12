@@ -22,11 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
+
+import org.spongepowered.common.event.tracking.ITrackingPhaseState;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Queue;
+
+import javax.annotation.Nullable;
 
 public class TrackingPhases {
 
@@ -35,6 +38,8 @@ public class TrackingPhases {
     public static final SpawningPhase SPAWNING = new SpawningPhase(TrackingPhases.GENERAL);
     public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
     public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
+    public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL);
+    public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
 
     private final Deque<ITrackingPhaseState> states = new ArrayDeque<>(DEFAULT_QUEUE_SIZE);
 
@@ -46,12 +51,13 @@ public class TrackingPhases {
         return this.states.pop();
     }
 
+    @Nullable
     public ITrackingPhaseState peek() {
         return this.states.peekLast();
     }
 
     public TrackingPhase current() {
-        ITrackingPhaseState current = this.states.peekFirst();
+        ITrackingPhaseState current = this.states.peekLast();
         return current == null ? null : current.getPhase();
     }
 

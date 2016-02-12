@@ -22,53 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-public class GeneralPhase extends TrackingPhase {
+import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+
+public class PacketPhase extends TrackingPhase {
 
     public enum State implements ITrackingPhaseState {
-        TICKING_ENTITY(false),
-        TICKING_BLOCK(true),
-        RANDOM_TICKING_BLOCK(true),
-        TICKING_TILE(true),
-        COMMAND(false),
-        PACKET(false),
-        PROCESSING(false),
-        COMPLETE(false);
+        UNKNOWN,
+        INVENTORY,
+        MOVEMENT,
+        INTERACTION,
+        ;
 
-        private final boolean intermediate;
 
-        State(boolean intermediate) {
-            this.intermediate = intermediate;
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.PACKET;
         }
 
         @Override
         public boolean isBusy() {
-            return this != COMPLETE;
+            return true;
         }
 
         @Override
         public boolean isManaged() {
             return false;
         }
-
-        public boolean isIntermediate() {
-            return this.intermediate;
-        }
-
-        @Override
-        public TrackingPhase getPhase() {
-            return TrackingPhases.GENERAL;
-        }
     }
 
-    public GeneralPhase(TrackingPhase parent) {
+
+    public PacketPhase(TrackingPhase parent) {
         super(parent);
-    }
-
-    @Override
-    public GeneralPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
     }
 }

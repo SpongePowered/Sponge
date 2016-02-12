@@ -43,7 +43,6 @@ import java.util.Arrays;
 
 public class StaticMixinHelper {
 
-    public static final ImmutableList<EnumFacing> VALID_HANGING_FACES = ImmutableList.copyOf(Arrays.asList(EnumFacing.NORTH, EnumFacing.SOUTH, EnumFacing.EAST, EnumFacing.WEST));
     public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
     public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
@@ -58,12 +57,9 @@ public class StaticMixinHelper {
     public static IBlockState breakEventExtendedState = null;
     public static ItemStack prePacketProcessItem = null;
     @SuppressWarnings("rawtypes")
-    public static Class lastPopulatorClass = null;
     public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
-    public static IInventory lastOpenInventory = null;
     public static int lastDestroyedEntityId = -1;
-    public static EntityLivingBase currentTargetEntity = null;
     public static Cause dropCause = null;
     public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;

@@ -22,50 +22,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-public class BlockPhase extends TrackingPhase {
+import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+
+public class WorldPhase extends TrackingPhase {
 
     public enum State implements ITrackingPhaseState {
-        BLOCK_DECAY(false),
         TERRAIN_GENERATION,
-        RESTORING_BLOCKS,
-        PROCESSING,
-        COMPLETE;
+        CHUNK_LOADING,
+        TICKING_ENTITY,
+        TICKING_TILE_ENTITY,
+        TICKING_BLOCK,
+        RANDOM_TICK_BLOCK,
+        IDLE;
 
-        private final boolean managed;
 
-        State() {
-            this.managed = false;
-        }
-
-        State(boolean managed) {
-            this.managed = managed;
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.WORLD;
         }
 
         @Override
         public boolean isBusy() {
-            return this != COMPLETE;
+            return this != IDLE;
         }
 
         @Override
         public boolean isManaged() {
-            return this.managed;
-        }
-
-        public boolean canSpawnEntities() {
-            return this == TERRAIN_GENERATION;
+            return false;
         }
 
         @Override
-        public TrackingPhase getPhase() {
-            return TrackingPhases.BLOCK;
+        public boolean canSwitchTo(ITrackingPhaseState state) {
+            if (this == TERRAIN_GENERATION) {
+                if (state.isTicking()) {
+                    return true;
+                } else if (state == BlockPhase.State.BLOCK_DECAY) {
+                    return true;
+                }
+                // I'm sure there will be more cases.
+            }
+            return false;
         }
 
+        @Override
+        public boolean isTicking() {
+            return this == TICKING_BLOCK || this == TICKING_ENTITY || this == TICKING_TILE_ENTITY || this == RANDOM_TICK_BLOCK;
+        }
     }
 
-    public BlockPhase(TrackingPhase parent) {
+    public WorldPhase(TrackingPhase parent) {
         super(parent);
     }
-
 }

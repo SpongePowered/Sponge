@@ -29,6 +29,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public abstract class ItemStackUtil {
     
     private ItemStackUtil() {
@@ -56,14 +58,18 @@ public abstract class ItemStackUtil {
         }
         throw new NativeStackException("The supplied native item stack was not compatible with the target environment");
     }
-    
+
+    @Nullable
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
         return net.minecraft.item.ItemStack.copyItemStack(stack);
     }
-    
+
+    @Nullable
     public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack, int newSize) {
         net.minecraft.item.ItemStack clone = net.minecraft.item.ItemStack.copyItemStack(stack);
-        clone.stackSize = newSize;
+        if (clone != null) {
+            clone.stackSize = newSize;
+        }
         return clone;
     }
     

@@ -22,26 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import java.util.ArrayList;
+import java.util.List;
 
-public interface ITrackingPhaseState {
+public abstract class TrackingPhase {
 
-    TrackingPhase getPhase();
+    private final TrackingPhase parent;
 
-    boolean isBusy();
+    private final List<TrackingPhase> children = new ArrayList<>();
 
-    boolean isManaged();
-
-    int ordinal();
-
-    default boolean canSwitchTo(ITrackingPhaseState state) {
-        return false;
+    public TrackingPhase(TrackingPhase parent) {
+        this.parent = parent;
     }
 
-    default boolean isTicking() {
-        return false;
+    public TrackingPhase getParent() {
+        return this.parent;
+    }
+
+    public List<TrackingPhase> getChildren() {
+        return this.children;
+    }
+
+    public TrackingPhase addChild(TrackingPhase child) {
+        this.children.add(child);
+        return this;
     }
 
 }
