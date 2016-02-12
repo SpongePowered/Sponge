@@ -153,16 +153,16 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
     }
 
     @Override
-    public void forecast(Weather weather) {
+    public void setWeather(Weather weather) {
         if (weather.equals(Weathers.CLEAR)) {
-            this.forecast(weather, (300 + this.rand.nextInt(600)) * 20);
+            this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
         } else {
-            this.forecast(weather, 0);
+            this.setWeather(weather, 0);
         }
     }
 
     @Override
-    public void forecast(Weather weather, long duration) {
+    public void setWeather(Weather weather, long duration) {
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -193,9 +193,9 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
                     weather, weather, this.prevWeather, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                this.forecast(this.prevWeather);
+                this.setWeather(this.prevWeather);
             } else {
-                this.forecast(event.getWeather(), event.getDuration());
+                this.setWeather(event.getWeather(), event.getDuration());
                 this.prevWeather = event.getWeather();
                 this.weatherStartTime = this.worldInfo.getWorldTotalTime();
             }
