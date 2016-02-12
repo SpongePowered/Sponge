@@ -24,17 +24,51 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.ITickingPhase;
 import org.spongepowered.common.event.tracking.ITrackingPhaseState;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState {
+    public enum State implements ITrackingPhaseState, ITickingPhase {
         TERRAIN_GENERATION,
         CHUNK_LOADING,
-        TICKING_ENTITY,
-        TICKING_TILE_ENTITY,
-        TICKING_BLOCK,
-        RANDOM_TICK_BLOCK,
+        TICKING_ENTITY() {
+            @Override
+            public void processPostTick(CauseTracker causeTracker) {
+                checkArgument(causeTracker.hasTickingEntity(), "CauseTracker is currently not ticking an entity!!!");
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickEntity().get())));
+                causeTracker.resetTickEntity();
+            }
+        },
+        TICKING_TILE_ENTITY() {
+            @Override
+            public void processPostTick(CauseTracker causeTracker) {
+                checkArgument(causeTracker.hasTickingTileEntity(), "CauseTracker is currently not ticking an entity!!!");
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickTileEntity().get())));
+                causeTracker.resetTickTile();
+            }
+        },
+        TICKING_BLOCK() {
+            @Override
+            public void processPostTick(CauseTracker causeTracker) {
+                checkArgument(causeTracker.hasTickingBlock(), "CauseTracker is currently not ticking an entity!!!");
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
+                causeTracker.resetTickBlock();
+            }
+        },
+        RANDOM_TICK_BLOCK() {
+            @Override
+            public void processPostTick(CauseTracker causeTracker) {
+                checkArgument(causeTracker.hasTickingBlock(), "CauseTracker is currently not ticking an entity!!!");
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
+                causeTracker.resetTickBlock();
+            }
+        },
         IDLE;
 
 
@@ -56,7 +90,7 @@ public class WorldPhase extends TrackingPhase {
         @Override
         public boolean canSwitchTo(ITrackingPhaseState state) {
             if (this == TERRAIN_GENERATION) {
-                if (state.isTicking()) {
+                if (state instanceof ITickingPhase && ((ITickingPhase) state).isTicking()) {
                     return true;
                 } else if (state == BlockPhase.State.BLOCK_DECAY) {
                     return true;
@@ -70,6 +104,13 @@ public class WorldPhase extends TrackingPhase {
         public boolean isTicking() {
             return this == TICKING_BLOCK || this == TICKING_ENTITY || this == TICKING_TILE_ENTITY || this == RANDOM_TICK_BLOCK;
         }
+
+        @Override
+        public void processPostTick(CauseTracker causeTracker) {
+            checkArgument(this.isTicking(), "Cannot process a tick for a non-ticking state!");
+        }
+
+
     }
 
     public WorldPhase(TrackingPhase parent) {

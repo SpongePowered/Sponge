@@ -25,6 +25,9 @@
 package org.spongepowered.common.event.tracking;
 
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.Slot;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -36,13 +39,16 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 public class TrackingHelper {
@@ -108,5 +114,37 @@ public class TrackingHelper {
             }
         }
         return cause;
+    }
+
+    static void sendItemChangeToPlayer(EntityPlayerMP player) {
+        if (StaticMixinHelper.prePacketProcessItem == null) {
+            return;
+        }
+
+        // handle revert
+        player.isChangingQuantityOnly = true;
+        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.prePacketProcessItem;
+        Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
+        player.openContainer.detectAndSendChanges();
+        player.isChangingQuantityOnly = false;
+        // force client itemstack update if place event was cancelled
+        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
+            StaticMixinHelper.prePacketProcessItem));
+    }
+
+    static void processList(CauseTracker causeTracker, ListIterator<Transaction<BlockSnapshot>> listIterator) {
+        while (listIterator.hasPrevious()) {
+            Transaction<BlockSnapshot> transaction = listIterator.previous();
+            causeTracker.push(BlockPhase.State.RESTORING_BLOCKS);
+            transaction.getOriginal().restore(true, false);
+            causeTracker.pop();
+        }
+    }
+
+    static boolean shouldChainCause(CauseTracker tracker, Cause cause) {
+        return !tracker.isCapturingTerrainGen() && !tracker.isWorldSpawnerRunning() && !tracker.isChunkSpawnerRunning()
+               && !tracker.isProcessingBlockRandomTicks() && !tracker.isCaptureCommand() && tracker.hasTickingBlock() && tracker.hasPluginCause()
+               && !cause.contains(tracker.getCurrentTickBlock().get());
+
     }
 }

@@ -40,8 +40,4 @@ public interface ITrackingPhaseState {
         return false;
     }
 
-    default boolean isTicking() {
-        return false;
-    }
-
 }

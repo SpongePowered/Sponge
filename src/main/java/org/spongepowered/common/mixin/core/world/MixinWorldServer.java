@@ -192,7 +192,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
         boolean result = fireBlockEvent(event);
         StaticMixinHelper.blockEventUser = null;
-        causeTracker.completeTickingBlock();
+        causeTracker.completePhase();
         this.trackedBlockEvents.remove(event.getPosition());
         return result;
     }
