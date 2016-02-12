@@ -28,8 +28,6 @@ import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentTranslation;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -53,7 +50,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.setGeneralPhase(GeneralPhase.COMMAND);
+            causeTracker.setCommandCapture(sender, command);
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -65,7 +62,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.completeCommand(command, sender);
+            causeTracker.completeCommand();
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);

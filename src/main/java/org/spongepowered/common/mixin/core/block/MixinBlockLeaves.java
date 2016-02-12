@@ -48,8 +48,9 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
-import org.spongepowered.common.event.tracking.BlockTrackingPhase;
+import org.spongepowered.common.event.tracking.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.List;
@@ -63,9 +64,14 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setBlockPhase(BlockTrackingPhase.BLOCK_DECAY);
+        final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
+        if (isBlockAlready) {
+            causeTracker.push(BlockPhase.State.BLOCK_DECAY);
+        }
         boolean result = worldIn.setBlockState(pos, state, flags);
-        causeTracker.completeBlockPhase();
+        if (isBlockAlready) {
+            causeTracker.pop();
+        }
         return result;
     }
 
@@ -73,9 +79,14 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setBlockPhase(BlockTrackingPhase.BLOCK_DECAY);
+        final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
+        if (isBlockAlready) {
+            causeTracker.push(BlockPhase.State.BLOCK_DECAY);
+        }
         boolean result = worldIn.setBlockToAir(pos);
-        causeTracker.completeBlockPhase();
+        if (isBlockAlready) {
+            causeTracker.pop();
+        }
         return result;
     }
 

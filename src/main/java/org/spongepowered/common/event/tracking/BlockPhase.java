@@ -24,26 +24,48 @@
  */
 package org.spongepowered.common.event.tracking;
 
-public enum SpawningTrackingPhase {
+public class BlockPhase extends TrackingPhase {
 
-    DEATH_DROPS_SPAWNING,
-    WORLD_SPAWNER_SPAWNING,
-    CHUNK_SPAWNING,
-    ENTITY_SPAWNING,
-    PROCESSING,
-    COMPLETE,
-    ;
+    public enum State implements ITrackingPhaseState {
+        BLOCK_DECAY(false),
+        TERRAIN_GENERATION,
+        RESTORING_BLOCKS,
+        PROCESSING,
+        COMPLETE;
 
-    /**
-     * Gets whether this phase means that the current phase is in a "busy"
-     * phase, where blocks are still being tracked and not being processed
-     * based on whatever is currently happening on the server.
-     *
-     * @return True if this phase is busy
-     */
-    public boolean isBusy() {
-        return this != COMPLETE;
+        private final boolean managed;
+
+        State() {
+            this.managed = false;
+        }
+
+        State(boolean managed) {
+            this.managed = managed;
+        }
+
+        @Override
+        public boolean isBusy() {
+            return this != COMPLETE;
+        }
+
+        @Override
+        public boolean isManaged() {
+            return this.managed;
+        }
+
+        public boolean canSpawnEntities() {
+            return this == TERRAIN_GENERATION;
+        }
+
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.BLOCK;
+        }
+
     }
 
+    public BlockPhase(TrackingPhase parent) {
+        super(parent);
+    }
 
 }

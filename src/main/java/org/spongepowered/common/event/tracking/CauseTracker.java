@@ -124,15 +124,14 @@ public final class CauseTracker {
 
     private boolean captureBlocks = false;
 
-    private BlockTrackingPhase blockPhase = BlockTrackingPhase.COMPLETE;
-    private GeneralPhase generalPhase = GeneralPhase.COMPLETE;
-    private SpawningTrackingPhase entityPhase = SpawningTrackingPhase.COMPLETE;
+    private final TrackingPhases phases = new TrackingPhases();
 
     @Nullable private BlockSnapshot currentTickBlock;
     @Nullable private Entity currentTickEntity;
     @Nullable private TileEntity currentTickTileEntity;
     @Nullable private Cause pluginCause;
-
+    @Nullable private ICommand command;
+    @Nullable private ICommandSender commandSender;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         if (((IMixinWorld) targetWorld).getCauseTracker() != null) {
@@ -153,92 +152,30 @@ public final class CauseTracker {
         return (IMixinWorld) this.targetWorld;
     }
 
-    public void setGeneralPhase(GeneralPhase generalPhase) {
-        this.generalPhase = generalPhase;
-        if (!generalPhase.isBusy()) {
-            if (this.blockPhase.isBusy() || this.entityPhase.isBusy()) {
-                System.err.printf("***** Setting GeneralPhase *****%n");
-                System.err.printf("The block phase is: %s%n", this.blockPhase);
-                System.err.printf("The entity phase is: %s%n", this.entityPhase);
-                System.err.printf("The general phase is: %s%n", this.generalPhase);
-                System.err.printf("The general phase is intermediate: %s%n", this.generalPhase.isIntermediate());
-                System.err.printf("The desired phase is: %s%n", generalPhase);
-                System.err.printf("We should not proceed due to error!!!%n");
-                System.err.printf("*******************************%n");
-            }
-            if (this.blockPhase.isBusy()) {
-                throw new IllegalArgumentException("BlockPhase should not be busy at this current time!!");
-            }
-            if (this.entityPhase.isBusy()) {
-                throw new IllegalArgumentException("EntityPhase should not be busy at this current time!!");
-            }
-
-            this.blockPhase = BlockTrackingPhase.COMPLETE;
-            this.entityPhase = SpawningTrackingPhase.COMPLETE;
-        }
+    public CauseTracker push(ITrackingPhaseState phaseState) {
+        this.phases.push(checkNotNull(phaseState, "Phase state cannot be null!"));
+        return this;
     }
 
-    public BlockTrackingPhase getBlockPhase() {
-        return this.blockPhase;
+    public CauseTracker pop() {
+        this.phases.pop();
+        return this;
     }
 
-    public void setBlockPhase(BlockTrackingPhase blockPhase) {
-        checkArgument(blockPhase.isBusy(), "Cannot set the block phase to complete! Use #completeBlockPhase()!!");
-        final boolean intermediate = this.generalPhase.isIntermediate();
-        final boolean blockPhaseBusy = blockPhase.isBusy();
-        final boolean isCapturing = isCapturing();
-
-        if (blockPhaseBusy) {
-            if (isCapturing && !intermediate) {
-                System.err.printf("***** Setting block phase *****%n");
-                System.err.printf("The block phase is: %s%n", true);
-                System.err.printf("The general phase is: %s%n", this.generalPhase);
-                System.err.printf("The general phase is intermediate: %s%n", false);
-                System.err.printf("We are capturing already: %s%n", true);
-                System.err.printf("We should not proceed due to error!!!%n");
-                System.err.printf("*******************************%n");
-                throw new IllegalStateException("Cannot switch states while busy!");
-            }
-
-        }
-        checkState(blockPhaseBusy != (isCapturing && !intermediate), "Cannot switch states while busy!!");
-        this.blockPhase = blockPhase;
-    }
-
-    public void completeBlockPhase() {
-        this.blockPhase = BlockTrackingPhase.COMPLETE;
-        setGeneralPhase(GeneralPhase.COMPLETE);
-    }
-
-    public void setEntityPhase(SpawningTrackingPhase entityPhase) {
-        if (entityPhase.isBusy() == isCapturing()) {
-            System.err.printf("***** PROCESSING ALREADY TAKING PLACE!! ******\n");
-            System.err.printf("General Phase: %s \n", this.generalPhase);
-            System.err.printf("Entity Phase: %s \n", this.entityPhase);
-            System.err.printf("Block Phase: %s \n", this.blockPhase);
-            Thread.dumpStack();
-        }
-        checkState(entityPhase.isBusy() != isCapturing(), "There's already another phase in process!");
-        this.entityPhase = entityPhase;
-    }
-
-    public void completeEntitySpawnPhase() {
-        this.entityPhase = SpawningTrackingPhase.COMPLETE;
-        if (!this.blockPhase.canSpawnEntities()) {
-            setGeneralPhase(GeneralPhase.COMPLETE);
-        }
+    public TrackingPhases getPhases() {
+        return this.phases;
     }
 
     public boolean isCapturing() {
-        return this.generalPhase.isBusy();
+        return this.phases.peek().isBusy();
     }
 
     public boolean isProcessingBlockRandomTicks() {
-        return this.generalPhase == GeneralPhase.RANDOM_TICKING_BLOCK;
+        return this.phases.peek() == GeneralPhase.State.RANDOM_TICKING_BLOCK;
     }
 
     public boolean isCapturingTerrainGen() {
-        return this.blockPhase == BlockTrackingPhase.TERRAIN_GENERATION;
+        return this.phases.peek() == BlockPhase.State.TERRAIN_GENERATION;
     }
 
     public boolean isCapturingBlocks() {
@@ -250,23 +187,23 @@ public final class CauseTracker {
     }
 
     public boolean isCaptureCommand() {
-        return this.generalPhase == GeneralPhase.COMMAND;
+        return this.phases.peek() == GeneralPhase.State.COMMAND;
     }
 
     public boolean isRestoringBlocks() {
-        return this.blockPhase == BlockTrackingPhase.RESTORING_BLOCKS;
+        return this.phases.peek() == BlockPhase.State.RESTORING_BLOCKS;
     }
 
     public boolean isSpawningDeathDrops() {
-        return this.entityPhase == SpawningTrackingPhase.DEATH_DROPS_SPAWNING;
+        return this.phases.peek() == SpawningPhase.State.DEATH_DROPS_SPAWNING;
     }
 
     public boolean isWorldSpawnerRunning() {
-        return this.generalPhase == GeneralPhase.PROCESSING && this.entityPhase == SpawningTrackingPhase.WORLD_SPAWNER_SPAWNING;
+        return this.phases.peek() == SpawningPhase.State.WORLD_SPAWNER_SPAWNING;
     }
 
     public boolean isChunkSpawnerRunning() {
-        return this.generalPhase == GeneralPhase.PROCESSING && this.entityPhase == SpawningTrackingPhase.CHUNK_SPAWNING;
+        return this.phases.peek() == SpawningPhase.State.CHUNK_SPAWNING;
     }
 
 
@@ -288,15 +225,15 @@ public final class CauseTracker {
 
     public void setCurrentTickBlock(BlockSnapshot currentTickBlock) {
         checkNotNull(currentTickBlock, "Cannot tick on a null ticking block!");
-        setGeneralPhase(GeneralPhase.TICKING_BLOCK);
+        push(GeneralPhase.State.TICKING_BLOCK);
         this.currentTickBlock = currentTickBlock;
     }
 
     public void completeTickingBlock() {
         checkState(this.currentTickBlock != null, "Canot capture on a null ticking block!");
-        this.handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
+        ITrackingPhaseState state = this.phases.peek();
+        handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
         this.currentTickBlock = null;
-        setGeneralPhase(GeneralPhase.COMPLETE);
     }
 
     public boolean hasTickingEntity() {
@@ -309,15 +246,15 @@ public final class CauseTracker {
 
     public void setCurrentTickEntity(Entity currentTickEntity) {
         checkNotNull(currentTickEntity, "Cannot capture on a null ticking entity!");
-        setGeneralPhase(GeneralPhase.TICKING_ENTITY);
+        push(GeneralPhase.State.TICKING_ENTITY);
         this.currentTickEntity = currentTickEntity;
     }
 
     public void completeTickingEntity() {
         checkState(this.currentTickEntity != null, "The current ticking entity is null!!!");
+        ITrackingPhaseState state = this.phases.peek();
         handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickEntity)));
         this.currentTickEntity = null;
-        setGeneralPhase(GeneralPhase.COMPLETE);
     }
 
     public boolean hasTickingTileEntity() {
@@ -330,8 +267,7 @@ public final class CauseTracker {
 
     public void setCurrentTickTileEntity(TileEntity currentTickTileEntity) {
         checkNotNull(currentTickTileEntity, "Cannot capture on a null ticking tile entity!");
-        checkState(!isCapturing(), "Something is already processing!");
-        setGeneralPhase(GeneralPhase.TICKING_TILE);
+        push(GeneralPhase.State.TICKING_TILE);
         this.currentTickTileEntity = currentTickTileEntity;
     }
 
@@ -339,7 +275,6 @@ public final class CauseTracker {
         checkState(this.currentTickTileEntity != null, "Current ticking tile entity is null!!!");
         handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickTileEntity)));
         this.currentTickTileEntity = null;
-        setGeneralPhase(GeneralPhase.COMPLETE);
     }
 
     public List<BlockSnapshot> getCapturedSpongeBlockSnapshots() {
@@ -363,6 +298,10 @@ public final class CauseTracker {
     }
 
     public void handleEntitySpawns(Cause cause) {
+        ITrackingPhaseState state = this.phases.pop();
+        if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty()) {
+            return; // there's nothing to do.
+        }
         Iterator<Entity> iter = this.capturedEntities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
@@ -391,9 +330,9 @@ public final class CauseTracker {
         }
         SpawnEntityEvent event;
 
-        if (this.entityPhase == SpawningTrackingPhase.WORLD_SPAWNER_SPAWNING) {
+        if (state == SpawningPhase.State.WORLD_SPAWNER_SPAWNING) {
             event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedEntities, entitySnapshots, this.getWorld());
-        } else if (this.entityPhase == SpawningTrackingPhase.CHUNK_SPAWNING) {
+        } else if (state == SpawningPhase.State.CHUNK_SPAWNING) {
             event = SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots, this.getWorld());
         } else {
             event = SpongeEventFactory.createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), this.getWorld());
@@ -427,7 +366,8 @@ public final class CauseTracker {
 
     @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause) {
-        if (this.getMinecraftWorld().isRemote || this.blockPhase == BlockTrackingPhase.RESTORING_BLOCKS || this.entityPhase == SpawningTrackingPhase.DEATH_DROPS_SPAWNING) {
+        final ITrackingPhaseState phase = this.phases.pop();
+        if (this.getMinecraftWorld().isRemote || phase.isManaged()) {
             return;
         } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
                    && this.capturedSpongePopulators.size() == 0 && StaticMixinHelper.packetPlayer == null) {
@@ -858,9 +798,9 @@ public final class CauseTracker {
 
                 if (this.invalidTransactions.size() > 0) {
                     for (Transaction<BlockSnapshot> transaction : Lists.reverse(this.invalidTransactions)) {
-                        setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
+                        push(BlockPhase.State.RESTORING_BLOCKS);
                         transaction.getOriginal().restore(true, false);
-                        completeBlockPhase();
+                        pop();
                     }
                     handlePostPlayerBlockEvent(captureType, this.invalidTransactions);
                 }
@@ -923,9 +863,9 @@ public final class CauseTracker {
     private void processList(ListIterator<Transaction<BlockSnapshot>> listIterator) {
         while (listIterator.hasPrevious()) {
             Transaction<BlockSnapshot> transaction = listIterator.previous();
-            setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
+            push(BlockPhase.State.RESTORING_BLOCKS);
             transaction.getOriginal().restore(true, false);
-            completeBlockPhase();
+            pop();
         }
     }
 
@@ -1076,6 +1016,8 @@ public final class CauseTracker {
 
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
         setCurrentTickBlock(this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0));
+        pop();
+        push(GeneralPhase.State.RANDOM_TICKING_BLOCK);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
         completeTickingBlock();
     }
@@ -1158,9 +1100,9 @@ public final class CauseTracker {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
+                push(BlockPhase.State.RESTORING_BLOCKS);
                 transaction.getFinal().restore(true, false);
-                completeBlockPhase();
+                pop();
             }
 
             SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
@@ -1182,15 +1124,15 @@ public final class CauseTracker {
                     causes.add(NamedCause.source(this.getCurrentTickBlock().get()));
                     List<String> namesUsed = new ArrayList<>();
                     int iteration = 1;
-                    for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
+                    final Map<String, Object> namedCauses = currentCause.getNamedCauses();
+                    for (Map.Entry<String, Object> entry : namedCauses.entrySet()) {
                         String name = entry.getKey().equalsIgnoreCase("Source")
                                       ? "AdditionalSource" : entry.getKey().equalsIgnoreCase("AdditionalSource")
                                                              ? "PreviousSource" : entry.getKey();
-                        if (namesUsed.contains(name)) {
-                            name += iteration++;
+                        if (!namesUsed.contains(name)) {
+                            namesUsed.add(name);
+                            causes.add(NamedCause.of(name, entry.getValue()));
                         }
-                        namesUsed.add(name);
-                        causes.add(NamedCause.of(name, entry.getValue()));
                     }
                     cause = Cause.of(causes);
                 }
@@ -1208,7 +1150,7 @@ public final class CauseTracker {
             if (currentTickingBlock != null) {
                 this.setCurrentTickBlock(currentTickingBlock);
             } else {
-                this.completeTickingBlock();
+                this.currentTickBlock = null;
             }
         }
     }
@@ -1221,23 +1163,32 @@ public final class CauseTracker {
     }
 
 
-    public void completeCommand(ICommand command, ICommandSender sender) {
-        if (this.generalPhase != GeneralPhase.COMMAND) {
-            // handle this appropriately.
-            System.err.printf("We aren't capturing a command!!! Curren phase: %s", this.generalPhase);
-            Thread.dumpStack();
+    public void setCommandCapture(ICommandSender sender, ICommand command) {
+        this.commandSender = sender;
+        this.command = command;
+        push(GeneralPhase.State.COMMAND);
+    }
 
-        }
-        handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
-        setGeneralPhase(GeneralPhase.COMPLETE);
+    public void completeCommand() {
+        checkState(this.command != null);
+        checkState(this.commandSender != null);
+        handlePostTickCaptures(Cause.of(NamedCause.of("Command", this.command), NamedCause.of("CommandSender", this.commandSender)));
+        this.command = null;
+        this.commandSender = null;
     }
 
     public void completePacketProcessing(EntityPlayerMP packetPlayer) {
-        if (this.generalPhase != GeneralPhase.PACKET) {
-            System.err.printf("We aren't capturing a packet!!! Curren phase: %s", this.generalPhase);
+        final ITrackingPhaseState phaseState = this.phases.peek();
+        if (phaseState != GeneralPhase.State.PACKET) {
+            System.err.printf("We aren't capturing a packet!!! Curren phase: %s", phaseState);
             Thread.dumpStack();
         }
         handlePostTickCaptures(Cause.of(NamedCause.source(packetPlayer)));
-        setGeneralPhase(GeneralPhase.COMPLETE);
+    }
+
+    public void completePopulate() {
+        getCapturedPopulators().clear();
+        pop();
+
     }
 }

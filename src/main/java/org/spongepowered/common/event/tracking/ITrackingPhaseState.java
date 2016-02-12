@@ -24,51 +24,14 @@
  */
 package org.spongepowered.common.event.tracking;
 
-public class GeneralPhase extends TrackingPhase {
+public interface ITrackingPhaseState {
 
-    public enum State implements ITrackingPhaseState {
-        TICKING_ENTITY(false),
-        TICKING_BLOCK(true),
-        RANDOM_TICKING_BLOCK(true),
-        TICKING_TILE(true),
-        COMMAND(false),
-        PACKET(false),
-        PROCESSING(false),
-        COMPLETE(false);
+    TrackingPhase getPhase();
 
-        private final boolean intermediate;
+    boolean isBusy();
 
-        State(boolean intermediate) {
-            this.intermediate = intermediate;
-        }
+    boolean isManaged();
 
-        @Override
-        public boolean isBusy() {
-            return this != COMPLETE;
-        }
+    int ordinal();
 
-        @Override
-        public boolean isManaged() {
-            return false;
-        }
-
-        public boolean isIntermediate() {
-            return this.intermediate;
-        }
-
-        @Override
-        public TrackingPhase getPhase() {
-            return TrackingPhases.GENERAL;
-        }
-    }
-
-    public GeneralPhase(TrackingPhase parent) {
-        super(parent);
-    }
-
-    @Override
-    public GeneralPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
-    }
 }

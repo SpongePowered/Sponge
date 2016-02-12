@@ -68,9 +68,8 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.tracking.BlockTrackingPhase;
+import org.spongepowered.common.event.tracking.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
@@ -105,9 +104,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
-    protected boolean prevCapturingTerrain;
-    protected boolean prevProcessingCaptures;
-    protected boolean prevRestoringBlocks;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
@@ -259,9 +255,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        this.prevCapturingTerrain = causeTracker.isCapturingTerrainGen();
-        this.prevProcessingCaptures = causeTracker.isCapturing();
-        causeTracker.setBlockPhase(BlockTrackingPhase.TERRAIN_GENERATION);
+        causeTracker.push(BlockPhase.State.TERRAIN_GENERATION);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -312,20 +306,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                         chunk);
         SpongeImpl.postEvent(event);
 
-        this.prevRestoringBlocks = causeTracker.isRestoringBlocks();
-        causeTracker.setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
+        causeTracker.push(BlockPhase.State.RESTORING_BLOCKS);
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
             causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
-        }
-        // Figure something to do here.
-        if (this.prevRestoringBlocks) {
-            causeTracker.setBlockPhase(BlockTrackingPhase.RESTORING_BLOCKS);
-        }
-        if (this.prevCapturingTerrain) {
-            causeTracker.setBlockPhase(BlockTrackingPhase.TERRAIN_GENERATION);
-        }
-        if (this.prevProcessingCaptures) {
-            causeTracker.setGeneralPhase(GeneralPhase.PROCESSING);
         }
         causeTracker.getCapturedPopulators().clear();
 

@@ -26,7 +26,6 @@ package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.event.ClickEvent;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -40,12 +39,9 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.ItemsHelper;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -112,7 +108,7 @@ public class PacketUtil {
             if (packetIn instanceof C03PacketPlayer) {
                 packetIn.processPacket(netHandler);
             } else {
-                causeTracker.setGeneralPhase(GeneralPhase.PACKET);
+                causeTracker.push(GeneralPhase.State.PACKET);
                 packetIn.processPacket(netHandler);
                 causeTracker.completePacketProcessing(StaticMixinHelper.packetPlayer);
             }

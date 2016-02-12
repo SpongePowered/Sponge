@@ -62,7 +62,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.BlockTrackingPhase;
+import org.spongepowered.common.event.tracking.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -163,7 +163,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
                         transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
                         populatorSnapshotList = causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator);
                         populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-                    } else if (causeTracker.getBlockPhase() == BlockTrackingPhase.BLOCK_DECAY) {
+                    } else if (causeTracker.getPhases().peek() == BlockPhase.State.BLOCK_DECAY) {
                         // Only capture final state of decay, ignore the rest
                         if (block == Blocks.air) {
                             ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
@@ -245,6 +245,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0));
         block.updateTick(worldIn, pos, state, rand);
         causeTracker.completeTickingBlock();
+        if (!causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
+            causeTracker.getPhases().validateEmpty();
+        }
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
@@ -259,6 +262,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         entityIn.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
         causeTracker.completeTickingEntity();
+        if (!causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
+            causeTracker.getPhases().validateEmpty();
+        }
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -272,6 +278,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.setCurrentTickTileEntity((TileEntity) tile);
         tile.update();
         causeTracker.completeTickingTileEntity();
+        if (!causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
+            causeTracker.getPhases().validateEmpty();
+        }
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
@@ -286,6 +295,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         entity.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entity);
         causeTracker.completeTickingEntity();
+        if (!causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
+            causeTracker.getPhases().validateEmpty();
+        }
     }
 
     /**
@@ -323,9 +335,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        NotifyNeighborBlockEvent
-                event =
-                SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
+        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
         if (event.isCancelled()) {
             return;
         }

@@ -24,28 +24,30 @@
  */
 package org.spongepowered.common.event.tracking;
 
-public enum BlockTrackingPhase {
+import java.util.ArrayList;
+import java.util.List;
 
-    BLOCK_DECAY,
-    TERRAIN_GENERATION,
-    RESTORING_BLOCKS,
-    PROCESSING,
-    COMPLETE,
-    ;
+public abstract class TrackingPhase {
 
-    /**
-     * Gets whether this phase means that the current phase is in a "busy"
-     * phase, where blocks are still being tracked and not being processed
-     * based on whatever is currently happening on the server.
-     *
-     * @return True if this phase is busy
-     */
-    public boolean isBusy() {
-        return this != COMPLETE;
+    private final TrackingPhase parent;
+
+    private final List<TrackingPhase> children = new ArrayList<>();
+
+    public TrackingPhase(TrackingPhase parent) {
+        this.parent = parent;
     }
 
-    public boolean canSpawnEntities() {
-        return this == TERRAIN_GENERATION;
+    public TrackingPhase getParent() {
+        return this.parent;
+    }
+
+    public List<TrackingPhase> getChildren() {
+        return this.children;
+    }
+
+    public TrackingPhase addChild(TrackingPhase child) {
+        this.children.add(child);
+        return this;
     }
 
 }

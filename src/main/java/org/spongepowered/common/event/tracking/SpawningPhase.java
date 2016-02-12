@@ -24,22 +24,24 @@
  */
 package org.spongepowered.common.event.tracking;
 
-public class GeneralPhase extends TrackingPhase {
+public class SpawningPhase extends TrackingPhase {
 
     public enum State implements ITrackingPhaseState {
-        TICKING_ENTITY(false),
-        TICKING_BLOCK(true),
-        RANDOM_TICKING_BLOCK(true),
-        TICKING_TILE(true),
-        COMMAND(false),
-        PACKET(false),
-        PROCESSING(false),
-        COMPLETE(false);
+        DEATH_DROPS_SPAWNING(true),
+        WORLD_SPAWNER_SPAWNING,
+        CHUNK_SPAWNING,
+        ENTITY_SPAWNING,
+        PROCESSING,
+        COMPLETE;
 
-        private final boolean intermediate;
+        private final boolean managed;
 
-        State(boolean intermediate) {
-            this.intermediate = intermediate;
+        State() {
+            this.managed = false;
+        }
+
+        State(boolean managed) {
+            this.managed = managed;
         }
 
         @Override
@@ -49,26 +51,17 @@ public class GeneralPhase extends TrackingPhase {
 
         @Override
         public boolean isManaged() {
-            return false;
-        }
-
-        public boolean isIntermediate() {
-            return this.intermediate;
+            return this.managed;
         }
 
         @Override
         public TrackingPhase getPhase() {
-            return TrackingPhases.GENERAL;
+            return TrackingPhases.SPAWNING;
         }
     }
 
-    public GeneralPhase(TrackingPhase parent) {
+    public SpawningPhase(TrackingPhase parent) {
         super(parent);
     }
 
-    @Override
-    public GeneralPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
-    }
 }
