@@ -509,7 +509,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                if (!((IMixinWorld)this.worldObj).capturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                if (!((IMixinWorld)this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     if (newBlockSnapshot == null) {
                         block.onBlockAdded(this.worldObj, pos, newState);
                     }
@@ -541,7 +541,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             return;
         } else {
             IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-            if (spongeWorld.capturingTerrainGen()) {
+            if (spongeWorld.getCauseTracker().isCapturingTerrainGen()) {
                 // Don't track chunk gen
                 return;
             }

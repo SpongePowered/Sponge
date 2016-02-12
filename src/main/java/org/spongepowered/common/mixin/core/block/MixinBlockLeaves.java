@@ -48,6 +48,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.List;
@@ -60,18 +61,20 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
-        spongeWorld.setCapturingBlockDecay(true);
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        causeTracker.setCapturingBlockDecay(true);
         boolean result = worldIn.setBlockState(pos, state, flags);
-        spongeWorld.setCapturingBlockDecay(false);
+        causeTracker.setCapturingBlockDecay(false);
         return result;
     }
 
     @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/BlockPos;)Z") )
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorld spongeWorld = (IMixinWorld) worldIn;
-        spongeWorld.setCapturingBlockDecay(true);
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        causeTracker.setCapturingBlockDecay(true);
         boolean result = worldIn.setBlockToAir(pos);
-        spongeWorld.setCapturingBlockDecay(false);
+        causeTracker.setCapturingBlockDecay(false);
         return result;
     }
 

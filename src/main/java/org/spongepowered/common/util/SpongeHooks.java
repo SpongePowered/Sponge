@@ -182,10 +182,11 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         Optional<User> user = cause.first(User.class);
-        if (config.getConfig().getLogging().blockBreakLogging() && type == CaptureType.BREAK
-                || config.getConfig().getLogging().blockModifyLogging() && type == CaptureType.MODIFY
-                || config.getConfig().getLogging().blockPlaceLogging() && type == CaptureType.PLACE
-                || config.getConfig().getLogging().blockPopulateLogging() && type == CaptureType.POPULATE) {
+        SpongeConfig.LoggingCategory logging = config.getConfig().getLogging();
+        if (logging.blockBreakLogging() && type == CaptureType.BREAK
+            || logging.blockModifyLogging() && type == CaptureType.MODIFY
+            || logging.blockPlaceLogging() && type == CaptureType.PLACE
+            || logging.blockPopulateLogging() && type == CaptureType.POPULATE) {
 
             logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     getFriendlyCauseName(cause),

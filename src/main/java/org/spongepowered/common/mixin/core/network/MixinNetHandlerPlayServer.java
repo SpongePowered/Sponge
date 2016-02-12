@@ -459,4 +459,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
+    // Format disconnection message properly, causes weird messages with our console colors
+    // Also see https://bugs.mojang.com/browse/MC-59535
+    @Redirect(method = "onDisconnect(Lnet/minecraft/util/IChatComponent;)V", at = @At(value = "INVOKE",
+            target = "Ljava/lang/StringBuilder;append(Ljava/lang/Object;)Ljava/lang/StringBuilder;", ordinal = 0, remap = false))
+    private StringBuilder onDisconnectReasonToString(StringBuilder builder, Object reason) {
+        return builder.append(SpongeTexts.toLegacy((IChatComponent) reason));
+    }
+
 }
