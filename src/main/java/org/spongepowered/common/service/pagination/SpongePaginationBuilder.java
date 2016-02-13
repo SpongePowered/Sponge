@@ -32,7 +32,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
-class SpongePaginationBuilder implements PaginationList.Builder {
+public class SpongePaginationBuilder implements PaginationList.Builder {
     private final SpongePaginationService service;
     private Iterable<Text> contents;
     private Text title;
@@ -93,7 +93,7 @@ class SpongePaginationBuilder implements PaginationList.Builder {
         checkNotNull(this.contents, "contents");
 
         if (this.paginationList == null) {
-            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer);
+            this.paginationList = new SpongePaginationList(this.service, this.contents, this.title, this.header, this.footer, this.paginationSpacer);
         }
         return this.paginationList;
     }
@@ -115,7 +115,7 @@ class SpongePaginationBuilder implements PaginationList.Builder {
         this.title = list.getTitle();
         this.header = list.getHeader();
         this.footer = list.getFooter();
-        this.paginationSpacer = list.getPaddingString();
+        this.paginationSpacer = list.getPadding();
 
         this.paginationList = null;
         return this;
