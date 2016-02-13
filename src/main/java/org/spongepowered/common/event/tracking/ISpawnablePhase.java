@@ -16,10 +16,13 @@ import javax.annotation.Nullable;
 public interface ISpawnablePhase {
 
     @Nullable
-    SpawnEntityEvent createEventPostPrcess(Cause cause, List<Entity> capturedEntities, List<EntitySnapshot> entitySnapshots, World world);
+    SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots);
 
     @Nullable
-    default SpawnEntityEvent createEntityEvent(Cause cause, World world, List<Entity> capturedEntities, List<Transaction<BlockSnapshot>> invalidTransactions) {
+    default SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker) {
+        World world = causeTracker.getWorld();
+        List<Entity> capturedEntities = causeTracker.getCapturedEntities();
+        List<Transaction<BlockSnapshot>> invalidTransactions = causeTracker.getInvalidTransactions();
         final Tuple<List<EntitySnapshot>, Cause> listCauseTuple =
                 TrackingHelper.processSnapshotsForSpawning(cause, world, capturedEntities, invalidTransactions);
         List<EntitySnapshot> entitySnapshots = listCauseTuple.getFirst();
@@ -27,6 +30,6 @@ public interface ISpawnablePhase {
         if (entitySnapshots.isEmpty()) {
             return null;
         }
-        return createEventPostPrcess(cause, capturedEntities, entitySnapshots, world);
+        return createEventPostPrcess(cause, causeTracker, entitySnapshots);
     }
 }

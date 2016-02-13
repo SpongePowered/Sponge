@@ -66,7 +66,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
-            causeTracker.push(BlockPhase.State.BLOCK_DECAY);
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY);
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
         if (isBlockAlready) {
@@ -81,7 +81,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
-            causeTracker.push(BlockPhase.State.BLOCK_DECAY);
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY);
         }
         boolean result = worldIn.setBlockToAir(pos);
         if (isBlockAlready) {

@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
 public class GeneralPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState {
+    public enum State implements IPhaseState {
         COMMAND(false),
-        PACKET(false),
         PROCESSING(false),
         COMPLETE(false);
 
@@ -51,7 +50,7 @@ public class GeneralPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean canSwitchTo(ITrackingPhaseState state) {
+        public boolean canSwitchTo(IPhaseState state) {
             return !isBusy() || state instanceof BlockPhase.State;
         }
 
@@ -60,7 +59,7 @@ public class GeneralPhase extends TrackingPhase {
         }
 
         @Override
-        public TrackingPhase getPhase() {
+        public GeneralPhase getPhase() {
             return TrackingPhases.GENERAL;
         }
     }

@@ -43,6 +43,7 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -138,7 +139,7 @@ public class TrackingHelper {
     static void processList(CauseTracker causeTracker, ListIterator<Transaction<BlockSnapshot>> listIterator) {
         while (listIterator.hasPrevious()) {
             Transaction<BlockSnapshot> transaction = listIterator.previous();
-            causeTracker.push(BlockPhase.State.RESTORING_BLOCKS);
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
             transaction.getOriginal().restore(true, false);
             causeTracker.pop();
         }

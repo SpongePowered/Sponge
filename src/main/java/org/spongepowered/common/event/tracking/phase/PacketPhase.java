@@ -24,20 +24,35 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C07PacketPlayerDigging;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ISpawnablePhase;
+
+import java.util.List;
+
+import javax.annotation.Nullable;
 
 public class PacketPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState {
+    public enum State implements IPhaseState, ISpawnablePhase {
         UNKNOWN,
         INVENTORY,
+        DROP_ITEM,
+        DROP_INVENTORY,
         MOVEMENT,
         INTERACTION,
         ;
 
 
         @Override
-        public TrackingPhase getPhase() {
+        public PacketPhase getPhase() {
             return TrackingPhases.PACKET;
         }
 
@@ -50,8 +65,25 @@ public class PacketPhase extends TrackingPhase {
         public boolean isManaged() {
             return false;
         }
+
+        @Nullable
+        @Override
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+
+
+            return null;
+        }
     }
 
+    public State getStateForPacket(Packet<?> packet) {
+        if (packet instanceof C07PacketPlayerDigging) {
+            C07PacketPlayerDigging digging = (C07PacketPlayerDigging) packet;
+            if ( digging.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
+                return State.DROP_ITEM;
+            }
+        }
+        return State.UNKNOWN;
+    }
 
     public PacketPhase(TrackingPhase parent) {
         super(parent);

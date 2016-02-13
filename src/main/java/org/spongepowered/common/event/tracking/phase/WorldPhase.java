@@ -26,33 +26,24 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ITickingPhase;
-import org.spongepowered.common.event.tracking.ITrackingPhaseState;
-import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState, ITickingPhase {
+    public enum State implements IPhaseState, ITickingPhase {
         TERRAIN_GENERATION,
         CHUNK_LOADING,
         TICKING_ENTITY() {
@@ -91,7 +82,7 @@ public class WorldPhase extends TrackingPhase {
 
 
         @Override
-        public TrackingPhase getPhase() {
+        public WorldPhase getPhase() {
             return TrackingPhases.WORLD;
         }
 
@@ -106,7 +97,7 @@ public class WorldPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean canSwitchTo(ITrackingPhaseState state) {
+        public boolean canSwitchTo(IPhaseState state) {
             if (this == TERRAIN_GENERATION) {
                 if (state instanceof ITickingPhase && ((ITickingPhase) state).isTicking()) {
                     return true;
@@ -130,7 +121,9 @@ public class WorldPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, List<Entity> capturedEntities, List<EntitySnapshot> entitySnapshots, World world) {
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+            final World world = causeTracker.getWorld();
+            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
             if (this.isTicking()) {
                 return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
             } else {
@@ -142,5 +135,11 @@ public class WorldPhase extends TrackingPhase {
 
     public WorldPhase(TrackingPhase parent) {
         super(parent);
+    }
+
+    @Override
+    public WorldPhase addChild(TrackingPhase child) {
+        super.addChild(child);
+        return this;
     }
 }

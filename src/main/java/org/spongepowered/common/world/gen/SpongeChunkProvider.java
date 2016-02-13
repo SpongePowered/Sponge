@@ -70,6 +70,7 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
@@ -256,7 +257,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        causeTracker.push(WorldPhase.State.TERRAIN_GENERATION);
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -307,7 +308,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                         chunk);
         SpongeImpl.postEvent(event);
 
-        causeTracker.push(BlockPhase.State.RESTORING_BLOCKS);
+        causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
         for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
             causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }

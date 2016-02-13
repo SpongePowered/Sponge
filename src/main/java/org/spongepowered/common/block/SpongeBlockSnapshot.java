@@ -54,6 +54,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.VecHelper;
@@ -170,7 +171,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
-        causeTracker.push(BlockPhase.State.RESTORING_BLOCKS);
+        causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;

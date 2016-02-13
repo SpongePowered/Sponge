@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.common.event.tracking.ITrackingPhaseState;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -35,33 +35,33 @@ public class TrackingPhases {
 
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
+    public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
     public static final SpawningPhase SPAWNING = new SpawningPhase(TrackingPhases.GENERAL);
     public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
     public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
-    public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL);
     public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
 
-    private final Deque<ITrackingPhaseState> states = new ArrayDeque<>(DEFAULT_QUEUE_SIZE);
+    private final Deque<IPhaseState> states = new ArrayDeque<>(DEFAULT_QUEUE_SIZE);
 
-    public void push(ITrackingPhaseState state) {
+    public void push(IPhaseState state) {
         this.states.push(state);
     }
 
-    public ITrackingPhaseState pop() {
+    public IPhaseState pop() {
         return this.states.pop();
     }
 
     @Nullable
-    public ITrackingPhaseState peek() {
+    public IPhaseState peek() {
         return this.states.peek();
     }
 
     public TrackingPhase current() {
-        ITrackingPhaseState current = this.states.peek();
+        IPhaseState current = this.states.peek();
         return current == null ? null : current.getPhase();
     }
 
-    public void gotoState(TrackingPhase phase, ITrackingPhaseState state) {
+    public void gotoState(TrackingPhase phase, IPhaseState state) {
 
     }
 

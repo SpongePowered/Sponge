@@ -79,6 +79,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -143,11 +144,6 @@ public final class CauseTracker {
         return (IMixinWorld) this.targetWorld;
     }
 
-    public CauseTracker push(ITrackingPhaseState phaseState) {
-        this.phases.push(checkNotNull(phaseState, "Phase state cannot be null!"));
-        return this;
-    }
-
     public CauseTracker pop() {
         this.phases.pop();
         return this;
@@ -158,7 +154,7 @@ public final class CauseTracker {
     }
 
     public boolean isCapturing() {
-        final ITrackingPhaseState state = this.phases.peek();
+        final IPhaseState state = this.phases.peek();
         return state != null && state.isBusy();
     }
 
@@ -270,7 +266,7 @@ public final class CauseTracker {
     }
 
     // HANDLED - partially...
-    private void handleEntitySpawns(Cause cause, ITrackingPhaseState currentPhase) {
+    private void handleEntitySpawns(Cause cause, IPhaseState currentPhase) {
         if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty()) {
             return; // there's nothing to do.
         }
@@ -279,7 +275,7 @@ public final class CauseTracker {
             throw new IllegalArgumentException(String.format("Invalid state detected. Current state is: %s. Expected a SpawningState or a currently Ticking phase.", currentPhase));
         }
 
-        SpawnEntityEvent event = ((ISpawnablePhase) currentPhase).createEntityEvent(cause, getWorld(), this.capturedEntities, this.invalidTransactions);
+        SpawnEntityEvent event = ((ISpawnablePhase) currentPhase).createEntityEvent(cause, this);
         if (event == null) {
             return;
         }
@@ -313,7 +309,7 @@ public final class CauseTracker {
     // NOT HANDLED TODO
     @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause) {
-        final ITrackingPhaseState phase = this.phases.pop();
+        final IPhaseState phase = this.phases.pop();
         if (this.getMinecraftWorld().isRemote || phase.isManaged()) {
             return;
         } else if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty() && this.capturedSpongeBlockSnapshots.isEmpty()
@@ -366,7 +362,10 @@ public final class CauseTracker {
     }
 
 
-    public void handleDroppedItems(final Cause cause, final ITrackingPhaseState phaseState) {
+    public void handleDroppedItems(final Cause cause, final IPhaseState phaseState) {
+        if (phaseState.getPhase() == TrackingPhases.PACKET) {
+
+        }
         Iterator<Entity> iter = this.capturedEntityItems.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         MoveToPhases.preProcessItemDrops(cause, this.invalidTransactions, iter, entitySnapshotBuilder);
@@ -417,27 +416,27 @@ public final class CauseTracker {
                 iterator.remove();
             }
         } else {
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                TrackingHelper.sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+            if (cause.root() == this.packetPlayer) {
+                TrackingHelper.sendItemChangeToPlayer(this.packetPlayer);
             }
             this.capturedEntityItems.clear();
         }
     }
 
     public void handleBlockCaptures(Cause cause) {
-        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet<?> packetIn = StaticMixinHelper.processingPacket;
+        final EntityPlayerMP player = this.packetPlayer;
+        final Packet<?> packetIn = this.packetProcessing;
 
-        ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions;
-        ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions;
-        ImmutableList<Transaction<BlockSnapshot>> blockPlaceTransactions;
-        ImmutableList<Transaction<BlockSnapshot>> blockDecayTransactions;
-        ImmutableList<Transaction<BlockSnapshot>> blockMultiTransactions;
-        ImmutableList.Builder<Transaction<BlockSnapshot>> breakBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> placeBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> decayBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> modifyBuilder = new ImmutableList.Builder<>();
-        ImmutableList.Builder<Transaction<BlockSnapshot>> multiBuilder = new ImmutableList.Builder<>();
+        final ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions;
+        final ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions;
+        final ImmutableList<Transaction<BlockSnapshot>> blockPlaceTransactions;
+        final ImmutableList<Transaction<BlockSnapshot>> blockDecayTransactions;
+        final ImmutableList<Transaction<BlockSnapshot>> blockMultiTransactions;
+        final ImmutableList.Builder<Transaction<BlockSnapshot>> breakBuilder = new ImmutableList.Builder<>();
+        final ImmutableList.Builder<Transaction<BlockSnapshot>> placeBuilder = new ImmutableList.Builder<>();
+        final ImmutableList.Builder<Transaction<BlockSnapshot>> decayBuilder = new ImmutableList.Builder<>();
+        final ImmutableList.Builder<Transaction<BlockSnapshot>> modifyBuilder = new ImmutableList.Builder<>();
+        final ImmutableList.Builder<Transaction<BlockSnapshot>> multiBuilder = new ImmutableList.Builder<>();
         ChangeBlockEvent.Break breakEvent = null;
         ChangeBlockEvent.Modify modifyEvent = null;
         ChangeBlockEvent.Place placeEvent = null;
@@ -610,7 +609,7 @@ public final class CauseTracker {
 
                 if (this.invalidTransactions.size() > 0) {
                     for (Transaction<BlockSnapshot> transaction : Lists.reverse(this.invalidTransactions)) {
-                        push(BlockPhase.State.RESTORING_BLOCKS);
+                        switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
                         transaction.getOriginal().restore(true, false);
                         pop();
                     }
@@ -684,7 +683,7 @@ public final class CauseTracker {
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
         setCurrentTickBlock(this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0));
         pop();
-        push(WorldPhase.State.RANDOM_TICK_BLOCK);
+        switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
         completePhase();
     }
@@ -767,7 +766,7 @@ public final class CauseTracker {
             }
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
-                push(BlockPhase.State.RESTORING_BLOCKS);
+                switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
                 transaction.getFinal().restore(true, false);
                 pop();
             }
@@ -827,7 +826,7 @@ public final class CauseTracker {
     public void setCommandCapture(ICommandSender sender, ICommand command) {
         this.commandSender = sender;
         this.command = command;
-        push(GeneralPhase.State.COMMAND);
+        switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND);
     }
 
     public void completeCommand() {
@@ -839,7 +838,7 @@ public final class CauseTracker {
     }
 
     public void completePacketProcessing(EntityPlayerMP packetPlayer) {
-        final ITrackingPhaseState phaseState = this.phases.peek();
+        final IPhaseState phaseState = this.phases.peek();
         if (phaseState.getPhase() != TrackingPhases.PACKET) {
             System.err.printf("We aren't capturing a packet!!! Curren phase: %s%n", phaseState);
         }
@@ -853,7 +852,8 @@ public final class CauseTracker {
     }
 
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-        net.minecraft.world.chunk.Chunk chunk = this.getMinecraftWorld().getChunkFromBlockCoords(pos);
+        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
+        net.minecraft.world.chunk.Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
         IBlockState currentState = chunk.getBlockState(pos);
         if (currentState == newState) {
             return false;
@@ -866,7 +866,7 @@ public final class CauseTracker {
         LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
         // Don't capture if we are restoring blocks
-        if (!this.getMinecraftWorld().isRemote && !this.isRestoringBlocks() && !this.isWorldSpawnerRunning() && !this.isChunkSpawnerRunning()) {
+        if (!minecraftWorld.isRemote && !this.isRestoringBlocks() && !this.isWorldSpawnerRunning() && !this.isChunkSpawnerRunning()) {
             originalBlockSnapshot = null;
             MutablePair<BlockSnapshot, Transaction<BlockSnapshot>> pair = MoveToPhases.handleEvents(this, originalBlockSnapshot, currentState, newState, block, pos, flags, transaction, populatorSnapshotList);
             originalBlockSnapshot = pair.getLeft();
@@ -889,9 +889,9 @@ public final class CauseTracker {
             Block block1 = iblockstate1.getBlock();
 
             if (block.getLightOpacity() != block1.getLightOpacity() || block.getLightValue() != oldLight) {
-                this.getMinecraftWorld().theProfiler.startSection("checkLight");
-                this.getMinecraftWorld().checkLight(pos);
-                this.getMinecraftWorld().theProfiler.endSection();
+                minecraftWorld.theProfiler.startSection("checkLight");
+                minecraftWorld.checkLight(pos);
+                minecraftWorld.theProfiler.endSection();
             }
 
             if (this.hasPluginCause()) {
@@ -908,17 +908,21 @@ public final class CauseTracker {
         }
     }
 
-    public void switchToPhase(TrackingPhase general, ITrackingPhaseState state) {
-        ITrackingPhaseState currentState = this.phases.peek();
+    public void switchToPhase(TrackingPhase general, IPhaseState state) {
+        IPhaseState currentState = this.phases.peek();
         if (!currentState.canSwitchTo(state)) {
 //            throw new IllegalArgumentException(String.format("Cannot switch from %s to %s", currentState, state));
+        }
+        final TrackingPhase current = this.phases.current();
+        if (!current.getChildren().contains(general) && current != general) {
+            throw new IllegalStateException("Cannot switch to invalid phase!");
         }
         this.phases.push(state);
 
     }
 
     public void completePhase() {
-        ITrackingPhaseState state = this.phases.peek();
+        IPhaseState state = this.phases.peek();
         checkState(state != null, "On completing a state, the current state cannot be null!");
         if (state instanceof ITickingPhase) {
             if (!((ITickingPhase) state).isTicking()) {
@@ -928,8 +932,22 @@ public final class CauseTracker {
         }
     }
 
+    @Nullable private EntityPlayerMP packetPlayer = null;
+    @Nullable private Packet<?> packetProcessing = null;
+    private boolean ignoreCreative = false;
+    @Nullable private Container openContainer = null;
+    @Nullable private ItemStackSnapshot packetCursor = null;
+    @Nullable private ItemStack itemStackUsed = null;
+
     public void setPacketCapture(EntityPlayerMP packetPlayer, Packet<?> packetIn, boolean ignoreCreative, Container openContainer,
             ItemStackSnapshot cursor, ItemStack itemUsed) {
+        switchToPhase(TrackingPhases.PACKET, TrackingPhases.PACKET.getStateForPacket(packetIn));
+        this.packetPlayer = packetPlayer;
+        this.packetProcessing = packetIn;
+        this.ignoreCreative = ignoreCreative;
+        this.openContainer = openContainer;
+        this.packetCursor = cursor;
+        this.itemStackUsed = itemUsed;
 
     }
 
@@ -943,5 +961,9 @@ public final class CauseTracker {
 
     public void resetTickTile() {
         this.currentTickTileEntity = null;
+    }
+
+    public List<Transaction<BlockSnapshot>> getInvalidTransactions() {
+        return this.invalidTransactions;
     }
 }

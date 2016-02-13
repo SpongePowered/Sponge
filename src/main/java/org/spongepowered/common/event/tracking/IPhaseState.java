@@ -22,51 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 
-public class BlockPhase extends TrackingPhase {
+public interface IPhaseState {
 
-    public enum State implements IPhaseState {
-        BLOCK_DECAY(false),
-        RESTORING_BLOCKS,
-        COMPLETE;
+    TrackingPhase getPhase();
 
-        private final boolean managed;
+    boolean isBusy();
 
-        State() {
-            this.managed = false;
-        }
+    boolean isManaged();
 
-        State(boolean managed) {
-            this.managed = managed;
-        }
+    int ordinal();
 
-        @Override
-        public boolean isBusy() {
-            return this != COMPLETE;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return this.managed;
-        }
-
-        @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            return false;
-        }
-
-        @Override
-        public BlockPhase getPhase() {
-            return TrackingPhases.BLOCK;
-        }
-
-    }
-
-    public BlockPhase(TrackingPhase parent) {
-        super(parent);
+    default boolean canSwitchTo(IPhaseState state) {
+        return false;
     }
 
 }

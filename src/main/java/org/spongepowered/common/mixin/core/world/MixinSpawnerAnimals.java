@@ -50,6 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
@@ -79,7 +80,7 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.push(SpawningPhase.State.CHUNK_SPAWNING);
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING);
         spawnerStart = true;
     }
 
@@ -101,7 +102,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.push(SpawningPhase.State.CHUNK_SPAWNING);
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING);
         spawnerStart = true;
     }
 

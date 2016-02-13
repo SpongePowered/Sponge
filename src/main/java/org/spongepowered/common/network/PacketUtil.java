@@ -68,8 +68,9 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (packetPlayer.theItemInWorldManager.isCreative() && (packetIn instanceof C16PacketClientStatus
-                                                                                      && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
+            if (packetPlayer.theItemInWorldManager.isCreative()
+                && (packetIn instanceof C16PacketClientStatus
+                    && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
                 StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn)) {
 
@@ -113,7 +114,7 @@ public class PacketUtil {
             } else {
                 causeTracker.setPacketCapture(packetPlayer, packetIn, ignoreCreative, packetPlayer.openContainer, cursor, itemUsed);
                 packetIn.processPacket(netHandler);
-                causeTracker.completePacketProcessing(packetPlayer);
+                causeTracker.completePhase();
             }
             resetStaticData();
         } else { // client

@@ -1,6 +1,6 @@
 package org.spongepowered.common.event.tracking;
 
-public interface ITickingPhase extends ITrackingPhaseState, ISpawnablePhase {
+public interface ITickingPhase extends IPhaseState, ISpawnablePhase {
 
     boolean isTicking();
 

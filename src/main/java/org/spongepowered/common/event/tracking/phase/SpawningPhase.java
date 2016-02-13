@@ -24,35 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ISpawnablePhase;
 import org.spongepowered.common.event.tracking.ITickingPhase;
-import org.spongepowered.common.event.tracking.ITrackingPhaseState;
-import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.event.tracking.IPhaseState;
 
-import java.util.Iterator;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public class SpawningPhase extends TrackingPhase {
 
-    public enum State implements ITrackingPhaseState, ISpawnablePhase {
+    public enum State implements IPhaseState, ISpawnablePhase {
         DEATH_DROPS_SPAWNING(true),
         DROP_ITEM,
         WORLD_SPAWNER_SPAWNING,
@@ -82,12 +71,12 @@ public class SpawningPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean canSwitchTo(ITrackingPhaseState state) {
+        public boolean canSwitchTo(IPhaseState state) {
             return this == CHUNK_SPAWNING && state instanceof ITickingPhase;
         }
 
         @Override
-        public TrackingPhase getPhase() {
+        public SpawningPhase getPhase() {
             return TrackingPhases.SPAWNING;
         }
 
@@ -97,7 +86,9 @@ public class SpawningPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, List<Entity> capturedEntities, List<EntitySnapshot> entitySnapshots, World world) {
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+            final World world = causeTracker.getWorld();
+            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
             if (this == WORLD_SPAWNER_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
             } else if (this == CHUNK_SPAWNING) {

@@ -22,22 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
-
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-
-public interface ITrackingPhaseState {
-
-    TrackingPhase getPhase();
-
-    boolean isBusy();
-
-    boolean isManaged();
-
-    int ordinal();
-
-    default boolean canSwitchTo(ITrackingPhaseState state) {
-        return false;
-    }
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.event.tracking.phase;

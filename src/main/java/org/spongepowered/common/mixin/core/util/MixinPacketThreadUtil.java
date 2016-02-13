@@ -47,7 +47,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 public class MixinPacketThreadUtil {
 
     @Redirect(method = "run", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public void onProcessPacket(Packet packetIn, INetHandler netHandler) {
+    public void onProcessPacket(Packet<?> packetIn, INetHandler netHandler) {
         PacketUtil.onProcessPacket(packetIn, netHandler);
     }
 
