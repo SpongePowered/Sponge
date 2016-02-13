@@ -50,7 +50,7 @@ class FixedLengthPaginationCalculator implements PaginationCalculator<MessageRec
     }
 
     @Override
-    public Text center(MessageReceiver source, Text text, String padding) {
+    public Text center(MessageReceiver source, Text text, Text padding) {
         return text;
     }
 }

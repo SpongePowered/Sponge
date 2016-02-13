@@ -57,10 +57,10 @@ abstract class ActivePagination {
     private int currentPage;
     private final int maxContentLinesPerPage;
     protected final PaginationCalculator<MessageReceiver> calc;
-    private final String padding;
+    private final Text padding;
 
     public ActivePagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, Text title,
-            Text header, Text footer, String padding) {
+            Text header, Text footer, Text padding) {
         this.src = new WeakReference<>(src);
         this.calc = calc;
         this.title = title;

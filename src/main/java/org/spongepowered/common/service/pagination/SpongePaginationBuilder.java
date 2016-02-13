@@ -38,7 +38,7 @@ class SpongePaginationBuilder implements PaginationList.Builder {
     private Text title;
     private Text header;
     private Text footer;
-    private String paginationSpacer = "=";
+    private Text paginationSpacer = Text.of("=");
 
     private PaginationList paginationList;
 
@@ -82,7 +82,7 @@ class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder paddingString(String padding) {
+    public PaginationList.Builder padding(Text padding) {
         this.paginationSpacer = padding;
         this.paginationList = null;
         return this;
@@ -127,7 +127,7 @@ class SpongePaginationBuilder implements PaginationList.Builder {
         this.title = null;
         this.header = null;
         this.footer = null;
-        this.paginationSpacer = "=";
+        this.paginationSpacer = Text.of("=");
 
         this.paginationList = null;
         return this;

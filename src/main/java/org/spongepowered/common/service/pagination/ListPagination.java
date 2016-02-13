@@ -42,7 +42,7 @@ class ListPagination extends ActivePagination {
     private final List<List<Text>> pages;
 
     public ListPagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, List<Map.Entry<Text, Integer>> lines,
-            Text title, Text header, Text footer, String padding) {
+            Text title, Text header, Text footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         List<List<Text>> pages = new ArrayList<>();
         List<Text> currentPage = new ArrayList<>();

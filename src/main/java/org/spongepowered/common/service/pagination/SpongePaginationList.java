@@ -48,7 +48,7 @@ public class SpongePaginationList implements PaginationList {
     private Text title;
     private Text header;
     private Text footer;
-    private String paginationSpacer = "=";
+    private Text paginationSpacer = Text.of("=");
 
     public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header, Text footer) {
         this.service = service;
@@ -79,7 +79,7 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public String getPaddingString() {
+    public Text getPaddingString() {
         return this.paginationSpacer;
     }
 
