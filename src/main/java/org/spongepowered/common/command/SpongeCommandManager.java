@@ -289,6 +289,7 @@ public class SpongeCommandManager implements CommandManager {
             source.sendMessage(error(t("Error occurred while executing command: %s", excBuilder.build())));
             this.log.error(TextSerializers.PLAIN.serialize(t("Error occurred while executing command '%s' for source %s: %s", commandLine, source.toString(), String
                     .valueOf(thr.getMessage()))), thr);
+            return CommandResult.build().throwable(thr).build();
         }
         return CommandResult.empty();
     }
