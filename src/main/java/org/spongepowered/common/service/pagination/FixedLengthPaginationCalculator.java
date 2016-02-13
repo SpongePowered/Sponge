@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.service.pagination;
 
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 /**
  * A pagination calculator that has a fixed length per page.
  */
-class FixedLengthPaginationCalculator implements PaginationCalculator<CommandSource> {
+class FixedLengthPaginationCalculator implements PaginationCalculator<MessageReceiver> {
     private final int linesPerPage;
 
     public FixedLengthPaginationCalculator(int linesPerPage) {
@@ -39,17 +40,17 @@ class FixedLengthPaginationCalculator implements PaginationCalculator<CommandSou
     }
 
     @Override
-    public int getLinesPerPage(CommandSource source) {
+    public int getLinesPerPage(MessageReceiver source) {
         return this.linesPerPage;
     }
 
     @Override
-    public int getLines(CommandSource source, Text text) {
+    public int getLines(MessageReceiver source, Text text) {
         return 1;
     }
 
     @Override
-    public Text center(CommandSource source, Text text, String padding) {
+    public Text center(MessageReceiver source, Text text, String padding) {
         return text;
     }
 }
