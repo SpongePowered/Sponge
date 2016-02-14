@@ -35,7 +35,9 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
@@ -446,7 +448,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      */
     @Overwrite
     public boolean canBeCollidedWith() {
-        return !(this.isReallyREALLYInvisible() && this.ignoresCollision()) && !this.isDead;
+        return !(this.isVanished() && this.ignoresCollision()) && !this.isDead;
     }
 
     @Override
@@ -457,5 +459,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Override
     public int getRecentlyHit() {
         return this.recentlyHit;
+    }
+
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDIDDDD[I)V"))
+    private void spongeSpawnParticleForFallState(WorldServer worldServer, EnumParticleTypes particleTypes, double xCoord, double yCoord,
+            double zCoord, int numberOfParticles, double xOffset, double yOffset, double zOffset, double particleSpeed, int... extraArgs) {
+        if (!this.isVanished()) {
+            worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
+        }
+
     }
 }

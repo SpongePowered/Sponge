@@ -891,7 +891,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         Iterator<net.minecraft.entity.Entity> iterator = entities.iterator();
         while (iterator.hasNext()) {
             net.minecraft.entity.Entity entity = iterator.next();
-            if (((IMixinEntity) entity).isReallyREALLYInvisible() && ((IMixinEntity) entity).ignoresCollision()) {
+            if (((IMixinEntity) entity).isVanished() && ((IMixinEntity) entity).ignoresCollision()) {
                 iterator.remove();
             }
         }
@@ -902,7 +902,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean onGetClosestPlayerCheck(com.google.common.base.Predicate<net.minecraft.entity.Entity> predicate, Object entityPlayer) {
         EntityPlayer player = (EntityPlayer) entityPlayer;
         IMixinEntity mixinEntity = (IMixinEntity) player;
-        return predicate.apply(player) && !mixinEntity.isReallyREALLYInvisible();
+        return predicate.apply(player) && !mixinEntity.isVanished();
     }
 
     /**
@@ -944,5 +944,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
         callbackInfo.cancel();
+    }
+
+    @Inject(method = "playSoundAtEntity", at = @At("HEAD"), cancellable = true)
+    private void spongePlaySoundAtEntity(net.minecraft.entity.Entity entity, String name, float volume, float pitch, CallbackInfo callbackInfo) {
+        if (((IMixinEntity) entity).isVanished()) {
+            callbackInfo.cancel();
+        }
     }
 }

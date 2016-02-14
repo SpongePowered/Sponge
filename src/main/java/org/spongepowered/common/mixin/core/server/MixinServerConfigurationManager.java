@@ -94,11 +94,11 @@ import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.network.IMixinS38PacketPlayerListItem$AddPlayerData;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.SocketAddress;
@@ -515,14 +515,16 @@ public abstract class MixinServerConfigurationManager {
 
     @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
     private void onPlayerSendPacket(ServerConfigurationManager manager, Packet<?> packet, EntityPlayerMP playerMP) {
-        if (!((IMixinEntity) playerMP).isReallyREALLYInvisible()) {
+        if (!((IMixinEntity) playerMP).isVanished()) {
             manager.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerMP));
         }
     }
 
     @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
     private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
-        if (!((IMixinEntity) playerMP).isReallyREALLYInvisible()) {
+        S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
+        EntityPlayerMP playerMP1 = ((IMixinS38PacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
+        if (!((IMixinEntity) playerMP1).isVanished()) {
             netHandler.sendPacket(packet);
         }
     }

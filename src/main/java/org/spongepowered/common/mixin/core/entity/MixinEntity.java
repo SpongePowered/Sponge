@@ -34,13 +34,18 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityTracker;
+import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
@@ -77,9 +82,7 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -180,6 +183,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
+    @Shadow public abstract int getEntityId();
 
 
     // @formatter:on
@@ -399,6 +403,45 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         setLocationAndRotation(location, rotation, relativePositions, false);
+    }
+
+    @Inject(method = "onUpdate", at = @At("RETURN"))
+    private void spongeOnUpdate(CallbackInfo callbackInfo) {
+        if (this.pendingVisibilityUpdate && !this.worldObj.isRemote) {
+            System.err.printf("Turning invisibile: %s%nRemaining Update Ticks: %s%n", this.isVanished, this.visibilityTicks);
+            final EntityTracker entityTracker = ((WorldServer) this.worldObj).getEntityTracker();
+            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
+            if (this.visibilityTicks % 4 == 0) {
+                if (this.isVanished) {
+                    for (EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
+                        entityPlayerMP.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(this.getEntityId()));
+                        if (((Object) this) instanceof EntityPlayerMP) {
+                            entityPlayerMP.playerNetServerHandler.sendPacket(
+                                    new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
+                        }
+                    }
+                } else {
+                    this.visibilityTicks = 1;
+                    this.pendingVisibilityUpdate = false;
+                    for (EntityPlayerMP entityPlayerMP : MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
+                        if (((Object) this) == entityPlayerMP) {
+                            continue;
+                        }
+                        if (((Object) this) instanceof EntityPlayerMP) {
+                            Packet<?> packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
+                            entityPlayerMP.playerNetServerHandler.sendPacket(packet);
+                        }
+                        Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        entityPlayerMP.playerNetServerHandler.sendPacket(newPacket);
+                    }
+                }
+            }
+            if (this.visibilityTicks > 0) {
+                this.visibilityTicks--;
+            } else {
+                this.pendingVisibilityUpdate = false;
+            }
+        }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
@@ -1057,16 +1100,21 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     private boolean collision = false;
     private boolean untargetable = false;
-    private boolean isReallyInvisible = false;
+    private boolean isVanished = false;
+
+    private boolean pendingVisibilityUpdate = false;
+    private int visibilityTicks = 0;
 
     @Override
-    public boolean isReallyREALLYInvisible() {
-        return this.isReallyInvisible;
+    public boolean isVanished() {
+        return this.isVanished;
     }
 
     @Override
-    public void setReallyInvisible(boolean invisible) {
-        this.isReallyInvisible = invisible;
+    public void setVanished(boolean invisible) {
+        this.isVanished = invisible;
+        this.pendingVisibilityUpdate = true;
+        this.visibilityTicks = 20;
     }
 
     @Override
@@ -1097,13 +1145,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      */
     @Redirect(method = "playSound(Ljava/lang/String;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
-        return entity.isSilent() || this.isReallyInvisible;
+        return entity.isSilent() || this.isVanished;
     }
 
     @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
-        if (!this.isReallyInvisible) {
+        if (!this.isVanished) {
             this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
@@ -1111,7 +1159,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Redirect(method = "createRunningParticles", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void runningSpawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {
-        if (!this.isReallyInvisible) {
+        if (!this.isVanished) {
             this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }

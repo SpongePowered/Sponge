@@ -205,7 +205,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      */
     @Overwrite
     public void setAttackTarget(EntityLivingBase entitylivingbaseIn) {
-        if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isReallyREALLYInvisible()
+        if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isVanished()
             && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
             this.attackTarget = null;
             return;
@@ -223,7 +223,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
-            if (((IMixinEntity) this.attackTarget).isReallyREALLYInvisible() && ((IMixinEntity) this.attackTarget).isUntargetable()) {
+            if (((IMixinEntity) this.attackTarget).isVanished() && ((IMixinEntity) this.attackTarget).isUntargetable()) {
                 this.attackTarget = null;
             }
         }

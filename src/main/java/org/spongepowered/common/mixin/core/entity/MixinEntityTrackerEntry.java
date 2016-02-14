@@ -39,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Set;
 
@@ -100,6 +101,20 @@ public abstract class MixinEntityTrackerEntry {
                     player.playerNetServerHandler.sendPacket(packet);
                 }
             }
+        }
+    }
+
+    @Inject(method = "func_180233_c", at = @At("HEAD"), cancellable = true)
+    private void onVisibilityCheck(EntityPlayerMP entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
+        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+            callbackInfoReturnable.setReturnValue(false);
+        }
+    }
+
+    @Inject(method = "sendPacketToTrackedPlayers", at = @At("HEAD"), cancellable = true)
+    private void checkIfTrackedIsInvisiblePriorToSendingPAcketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
+        if (((IMixinEntity) this.trackedEntity).isVanished()) {
+            callBackInfo.cancel();
         }
     }
 }
