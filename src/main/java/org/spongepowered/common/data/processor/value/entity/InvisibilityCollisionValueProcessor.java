@@ -25,10 +25,6 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTracker;
-import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -39,9 +35,7 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
-import java.util.HashSet;
 import java.util.Optional;
-import java.util.Set;
 
 public class InvisibilityCollisionValueProcessor extends AbstractSpongeValueProcessor<Entity, Boolean, Value<Boolean>> {
 
@@ -57,7 +51,7 @@ public class InvisibilityCollisionValueProcessor extends AbstractSpongeValueProc
     @Override
     protected boolean set(Entity container, Boolean value) {
         if (!container.worldObj.isRemote) {
-            if (!((IMixinEntity) container).isReallyREALLYInvisible()) {
+            if (!((IMixinEntity) container).isVanished()) {
                 return false;
             }
             ((IMixinEntity) container).setIgnoresCollision(value);

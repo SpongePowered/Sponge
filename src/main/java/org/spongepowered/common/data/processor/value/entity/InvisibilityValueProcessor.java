@@ -61,7 +61,7 @@ public class InvisibilityValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected Optional<Boolean> getVal(Entity container) {
-        return Optional.of(((IMixinEntity) container).isReallyREALLYInvisible());
+        return Optional.of(((IMixinEntity) container).isVanished());
     }
 
     @Override

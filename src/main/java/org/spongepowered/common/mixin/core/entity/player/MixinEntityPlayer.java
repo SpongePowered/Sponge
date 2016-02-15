@@ -150,7 +150,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset, int ... p_175688_14_) {
-        if (!this.isReallyREALLYInvisible()) {
+        if (!this.isVanished()) {
             this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
@@ -162,7 +162,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
-        if (!this.isReallyREALLYInvisible()) {
+        if (!this.isVanished()) {
             world.playSoundToNearExcept(player, name, volume, pitch);
         }
     }

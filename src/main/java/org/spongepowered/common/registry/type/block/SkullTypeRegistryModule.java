@@ -35,13 +35,14 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 public final class SkullTypeRegistryModule implements CatalogRegistryModule<SkullType> {
 
     @RegisterCatalog(SkullTypes.class)
-    private final Map<String, SkullType> skullTypeMap = new HashMap<>();
+    private final Map<String, SkullType> skullTypeMap = new LinkedHashMap<>();
 
     @Override
     public Optional<SkullType> getById(String id) {

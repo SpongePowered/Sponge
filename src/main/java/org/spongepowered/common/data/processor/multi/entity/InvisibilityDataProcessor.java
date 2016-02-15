@@ -79,7 +79,7 @@ public class InvisibilityDataProcessor
 
     @Override
     protected Map<Key<?>, ?> getValues(Entity dataHolder) {
-        return ImmutableMap.of(Keys.INVISIBLE, ((IMixinEntity) dataHolder).isReallyREALLYInvisible(),
+        return ImmutableMap.of(Keys.INVISIBLE, ((IMixinEntity) dataHolder).isVanished(),
                 Keys.INVISIBILITY_IGNORES_COLLISION, ((IMixinEntity) dataHolder).ignoresCollision(),
                 Keys.INVISIBILITY_PREVENTS_TARGETING, ((IMixinEntity) dataHolder).isUntargetable());
     }

@@ -51,7 +51,7 @@ public class InvisibilityTargetValueProcessor extends AbstractSpongeValueProcess
     @Override
     protected boolean set(Entity container, Boolean value) {
         if (!container.worldObj.isRemote) {
-            if (!((IMixinEntity) container).isReallyREALLYInvisible()) {
+            if (!((IMixinEntity) container).isVanished()) {
                 return false;
             }
             ((IMixinEntity) container).setUntargetable(value);

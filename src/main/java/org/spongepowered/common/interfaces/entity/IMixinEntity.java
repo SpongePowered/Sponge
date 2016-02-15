@@ -94,9 +94,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setImplVelocity(Vector3d velocity);
 
-    boolean isReallyREALLYInvisible();
+    boolean isVanished();
 
-    void setReallyInvisible(boolean invisible);
+    void setVanished(boolean invisible);
 
     boolean ignoresCollision();
 
