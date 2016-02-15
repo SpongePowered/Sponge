@@ -77,7 +77,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(net.minecraft.world.World.class)
+@Mixin(value = net.minecraft.world.World.class, priority = 1001)
 public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
