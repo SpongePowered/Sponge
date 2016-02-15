@@ -430,13 +430,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.setPluginCause(null);
     }
 
-
-    private void checkBiomeBounds(int x, int z) {
-        if (!containsBiome(x, z)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), BIOME_MIN, BIOME_MAX);
-        }
-    }
-
     private void checkBlockBounds(int x, int y, int z) {
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
