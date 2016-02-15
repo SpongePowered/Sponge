@@ -29,6 +29,7 @@ import net.minecraft.network.play.server.S45PacketTitle;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinText;
@@ -40,13 +41,13 @@ import java.util.Optional;
 @Mixin(value = Title.class, remap = false)
 public abstract class MixinTitle implements IMixinTitle {
 
-    @Shadow protected Optional<Text> title;
-    @Shadow protected Optional<Text> subtitle;
-    @Shadow protected Optional<Integer> fadeIn;
-    @Shadow protected Optional<Integer> stay;
-    @Shadow protected Optional<Integer> fadeOut;
-    @Shadow protected boolean clear;
-    @Shadow protected boolean reset;
+    @Shadow @Final protected Optional<Text> title;
+    @Shadow @Final protected Optional<Text> subtitle;
+    @Shadow @Final protected Optional<Integer> fadeIn;
+    @Shadow @Final protected Optional<Integer> stay;
+    @Shadow @Final protected Optional<Integer> fadeOut;
+    @Shadow @Final protected boolean clear;
+    @Shadow @Final protected boolean reset;
 
     private S45PacketTitle[] packets;
 
