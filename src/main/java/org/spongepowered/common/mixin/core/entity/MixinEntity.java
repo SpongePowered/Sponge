@@ -408,7 +408,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Inject(method = "onUpdate", at = @At("RETURN"))
     private void spongeOnUpdate(CallbackInfo callbackInfo) {
         if (this.pendingVisibilityUpdate && !this.worldObj.isRemote) {
-            System.err.printf("Turning invisibile: %s%nRemaining Update Ticks: %s%n", this.isVanished, this.visibilityTicks);
             final EntityTracker entityTracker = ((WorldServer) this.worldObj).getEntityTracker();
             final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
             if (this.visibilityTicks % 4 == 0) {

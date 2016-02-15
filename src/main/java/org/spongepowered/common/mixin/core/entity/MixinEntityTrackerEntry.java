@@ -112,7 +112,7 @@ public abstract class MixinEntityTrackerEntry {
     }
 
     @Inject(method = "sendPacketToTrackedPlayers", at = @At("HEAD"), cancellable = true)
-    private void checkIfTrackedIsInvisiblePriorToSendingPAcketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
+    private void checkIfTrackedIsInvisiblePriorToSendingPacketToPlayers(Packet<?> packet, CallbackInfo callBackInfo) {
         if (((IMixinEntity) this.trackedEntity).isVanished()) {
             callBackInfo.cancel();
         }
