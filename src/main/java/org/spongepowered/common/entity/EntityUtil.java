@@ -36,6 +36,7 @@ import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
@@ -120,41 +121,8 @@ public final class EntityUtil {
 
     @SuppressWarnings("unchecked")
     public static boolean toggleInvisibility(Entity entity, boolean vanish) {
-        EntityTracker entityTracker = ((WorldServer) entity.worldObj).getEntityTracker();
-        if (vanish) {
-            EntityTrackerEntry entry = entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
-            if (entry != null) {
-                Set<EntityPlayerMP> entityPlayerMPs = new HashSet<>(entry.trackingPlayers);
-                entityPlayerMPs.forEach(player -> {
-                    if (player != entity) { // don't remove ourselves
-                        entry.removeFromTrackedPlayers(player);
-                        if (entity instanceof EntityPlayerMP) { // have to remove from the tab list, otherwise they still show up!
-                            player.playerNetServerHandler.sendPacket(
-                                    new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) entity));
-                        }
-                    }
-                });
-            }
-        } else {
-            if (!entityTracker.trackedEntityHashTable.containsItem(entity.getEntityId())) {
-                entityTracker.trackEntity(entity);
-            }
-            EntityTrackerEntry entry = entityTracker.trackedEntityHashTable.lookup(entity.getEntityId());
-
-            for (EntityPlayerMP playerMP : MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
-                if (entity != playerMP) { // don't remove ourselves
-                    if (entity instanceof EntityPlayerMP) {
-                        Packet<?> packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) entity);
-                        playerMP.playerNetServerHandler.sendPacket(packet);
-                    }
-                    Packet<?> newPacket = entry.createSpawnPacket(); // creates the spawn packet for us
-                    playerMP.playerNetServerHandler.sendPacket(newPacket);
-                }
-            }
-            entityTracker.updateTrackedEntities();
-        }
         entity.setInvisible(vanish);
-        ((IMixinEntity) entity).setReallyInvisible(vanish);
+        ((IMixinEntity) entity).setVanished(vanish);
         return true;
     }
 

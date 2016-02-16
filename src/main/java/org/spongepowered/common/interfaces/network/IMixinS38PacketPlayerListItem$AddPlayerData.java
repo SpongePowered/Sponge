@@ -22,29 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.text;
+package org.spongepowered.common.interfaces.network;
 
-import org.spongepowered.api.scoreboard.Score;
-import org.spongepowered.api.text.ScoreText;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import net.minecraft.entity.player.EntityPlayerMP;
 
-import java.util.Optional;
+public interface IMixinS38PacketPlayerListItem$AddPlayerData {
 
-@Mixin(value = ScoreText.class, remap = false)
-public abstract class MixinTextScore extends MixinText {
+    EntityPlayerMP getPlayer();
 
-    @Shadow @Final protected Score score;
-    @Shadow @Final protected Optional<String> override;
+    void setPlayer(EntityPlayerMP player);
 
-    /*@Override
-    protected ChatComponentStyle createComponent(Locale locale) {
-        ChatComponentScore component = new ChatComponentScore(null, null); // TODO
-        if (this.override.isPresent()) {
-            component.setValue(this.override.get());
-        }
-        return component;
-    }*/
 }

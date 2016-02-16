@@ -305,6 +305,8 @@
         "network.packet.MixinS3BPacketScoreboardObjective",
         "network.packet.MixinS48PacketResourcePackSend",
         "network.play.client.MixinC08PacketPlayerBlockPlacement",
+        "network.play.server.MixinS38PacketPlayerListItem",
+        "network.play.server.MixinS38PacketPlayerListItem$AddPlayerData",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
         "scoreboard.MixinCriterion",

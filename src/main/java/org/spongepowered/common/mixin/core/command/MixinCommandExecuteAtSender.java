@@ -36,6 +36,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.command.WrapperCommandSource;
@@ -50,8 +51,8 @@ import java.util.Set;
 @NonnullByDefault
 public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixinCommandSource, IMixinCommandSender {
 
-    @Shadow(aliases = {"field_174804_a", "val$entity"}) private Entity entity;
-    @Shadow(aliases = {"field_174802_b", "val$sender"}) private ICommandSender sender;
+    @Shadow(aliases = {"field_174804_a", "val$entity"}) @Final private Entity entity;
+    @Shadow(aliases = {"field_174802_b", "val$sender"}) @Final private ICommandSender sender;
 
     @Override
     public void sendMessage(Text message) {

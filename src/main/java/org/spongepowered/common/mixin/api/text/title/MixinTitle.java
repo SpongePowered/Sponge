@@ -29,54 +29,56 @@ import net.minecraft.network.play.server.S45PacketTitle;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(value = Title.class, remap = false)
 public abstract class MixinTitle implements IMixinTitle {
 
-    @Shadow protected Optional<Text> title;
-    @Shadow protected Optional<Text> subtitle;
-    @Shadow protected Optional<Integer> fadeIn;
-    @Shadow protected Optional<Integer> stay;
-    @Shadow protected Optional<Integer> fadeOut;
-    @Shadow protected boolean clear;
-    @Shadow protected boolean reset;
+    @Shadow @Final protected Optional<Text> title;
+    @Shadow @Final protected Optional<Text> subtitle;
+    @Shadow @Final protected Optional<Integer> fadeIn;
+    @Shadow @Final protected Optional<Integer> stay;
+    @Shadow @Final protected Optional<Integer> fadeOut;
+    @Shadow @Final protected boolean clear;
+    @Shadow @Final protected boolean reset;
 
-    private S45PacketTitle[] packets;
+    private List<S45PacketTitle> packets;
 
     @Override
     public void send(EntityPlayerMP player) {
-        if (this.packets == null) {
-            S45PacketTitle[] packets = new S45PacketTitle[5];
-            int i = 0;
-
-            if (this.clear) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.CLEAR, null);
-            }
-            if (this.reset) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.RESET, null);
-            }
-            if (this.fadeIn.isPresent() || this.stay.isPresent() || this.fadeOut.isPresent()) {
-                packets[i++] = new S45PacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20));
-            }
-            if (this.subtitle.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent());
-            }
-            if (this.title.isPresent()) {
-                packets[i++] = new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent());
-            }
-
-            this.packets = i == packets.length ? packets : Arrays.copyOf(packets, i);
-        }
-
-        for (S45PacketTitle packet : this.packets) {
+        for (S45PacketTitle packet : this.getPackets()) {
             player.playerNetServerHandler.sendPacket(packet);
         }
+    }
+
+    private List<S45PacketTitle> getPackets() {
+        if (this.packets == null) {
+            this.packets = new ArrayList<S45PacketTitle>();
+            if (this.clear) {
+                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.CLEAR, null));
+            }
+            if (this.reset) {
+                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.RESET, null));
+            }
+            if (this.fadeIn.isPresent() || this.stay.isPresent() || this.fadeOut.isPresent()) {
+                this.packets.add(new S45PacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20)));
+            }
+            if (this.subtitle.isPresent()) {
+                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent()));
+            }
+            if (this.title.isPresent()) {
+                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));
+            }
+        }
+        return this.packets;
     }
 }
