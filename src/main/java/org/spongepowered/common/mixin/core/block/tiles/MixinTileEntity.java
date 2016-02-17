@@ -38,6 +38,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
@@ -86,7 +87,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
         if (this.worldObj != null && !this.worldObj.isRemote) {
             IMixinWorld world = (IMixinWorld) this.worldObj;
             // This handles transfers to this TE from a source such as a Hopper
-            world.getCauseTracker().getCurrentTickTileEntity().ifPresent(currentTick -> {
+            world.getCauseTracker().getPhases().peek().getSecond().firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {
                     net.minecraft.tileentity.TileEntity te = (net.minecraft.tileentity.TileEntity) currentTick;
                     SpongeHooks.tryToTrackBlock(te.getWorld(), te, te.getPos(), this.getBlockType(), this.pos, PlayerTracker.Type.NOTIFIER);

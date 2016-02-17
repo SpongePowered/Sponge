@@ -47,11 +47,14 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -171,13 +174,16 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
 
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
         CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS);
+        causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
+                PhaseContext.start()
+                        .add(NamedCause.of(TrackingHelper.RESTORING_BLOCK, this))
+                        .complete());
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;
         if (!force && (current.getBlock() != replaced.getBlock()
             || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
-            causeTracker.pop();
+            causeTracker.completePhase();
             return false;
         }
 
@@ -191,7 +197,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
             }
         }
 
-        causeTracker.pop();
+        causeTracker.completePhase();
         return true;
     }
 

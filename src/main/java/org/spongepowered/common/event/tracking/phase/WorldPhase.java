@@ -26,6 +26,8 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -36,8 +38,10 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ITickingPhase;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -45,37 +49,42 @@ public class WorldPhase extends TrackingPhase {
 
     public enum State implements IPhaseState, ITickingPhase {
         TERRAIN_GENERATION,
+        POPULATOR_RUNNING,
         CHUNK_LOADING,
         TICKING_ENTITY() {
             @Override
-            public void processPostTick(CauseTracker causeTracker) {
-                checkArgument(causeTracker.hasTickingEntity(), "CauseTracker is currently not ticking an entity!!!");
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickEntity().get())));
-                causeTracker.resetTickEntity();
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Optional<Entity> currentTickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
+                checkArgument(currentTickingEntity.isPresent(), "Not ticking on an Entity! Please analyze the current phase context: %n%s",
+                        phaseContext);
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingEntity.get())), this, phaseContext);
             }
         },
         TICKING_TILE_ENTITY() {
             @Override
-            public void processPostTick(CauseTracker causeTracker) {
-                checkArgument(causeTracker.hasTickingTileEntity(), "CauseTracker is currently not ticking an entity!!!");
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickTileEntity().get())));
-                causeTracker.resetTickTile();
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Optional<TileEntity> currentTickingTileEntity = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class);
+                checkArgument(currentTickingTileEntity.isPresent(), "Not ticking on a TileEntity! Please analyze the current phase context: %n%s",
+                        phaseContext);
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingTileEntity.get())), this, phaseContext);
             }
         },
         TICKING_BLOCK() {
             @Override
-            public void processPostTick(CauseTracker causeTracker) {
-                checkArgument(causeTracker.hasTickingBlock(), "CauseTracker is currently not ticking an entity!!!");
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
-                causeTracker.resetTickBlock();
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+                checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
+                        phaseContext);
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingBlock.get())), this, phaseContext);
             }
         },
         RANDOM_TICK_BLOCK() {
             @Override
-            public void processPostTick(CauseTracker causeTracker) {
-                checkArgument(causeTracker.hasTickingBlock(), "CauseTracker is currently not ticking an entity!!!");
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
-                causeTracker.resetTickBlock();
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+                checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
+                        phaseContext);
+                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingBlock.get())), this, phaseContext);
             }
         },
         IDLE;
@@ -115,8 +124,7 @@ public class WorldPhase extends TrackingPhase {
         }
 
         @Override
-        public void processPostTick(CauseTracker causeTracker) {
-            checkArgument(this.isTicking(), "Cannot process a tick for a non-ticking state!");
+        public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
         }
 
         @Nullable
@@ -129,6 +137,17 @@ public class WorldPhase extends TrackingPhase {
             } else {
                 throw new IllegalStateException(String.format("Cannot create a SpawnEntityEvent if this isn't tickable!! Current phase: %s", this));
             }
+        }
+
+    }
+
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        if (state instanceof ITickingPhase) {
+            ((ITickingPhase) state).processPostTick(causeTracker, phaseContext);
+        }
+        if (state == State.TERRAIN_GENERATION) {
+            causeTracker.getCapturedPopulators().clear();
         }
 
     }

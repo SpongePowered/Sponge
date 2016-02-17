@@ -41,11 +41,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
@@ -56,7 +60,6 @@ public class PacketUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            StaticMixinHelper.processingPacket = packetIn;
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
 
             boolean ignoreCreative = false;
@@ -112,11 +115,24 @@ public class PacketUtil {
             if (packetIn instanceof C03PacketPlayer) {
                 packetIn.processPacket(netHandler);
             } else {
-                causeTracker.setPacketCapture(packetPlayer, packetIn, ignoreCreative, packetPlayer.openContainer, cursor, itemUsed);
+                PhaseContext context = PhaseContext.start()
+                        .add(NamedCause.source(packetPlayer))
+                        .add(NamedCause.of(TrackingHelper.CAPTURED_PACKET, packetIn))
+                        .add(NamedCause.of(TrackingHelper.IGNORING_CREATIVE, ignoreCreative));
+                if (packetPlayer.openContainer != null) {
+                    context.add(NamedCause.of(TrackingHelper.OPEN_CONTAINER, packetPlayer.openContainer));
+                }
+                if (cursor != null) {
+                    context.add(NamedCause.of(TrackingHelper.CURSOR, cursor));
+                }
+                if (itemUsed != null) {
+                    context.add(NamedCause.of(TrackingHelper.ITEM_USED, itemUsed));
+                }
+                context.complete();
+                causeTracker.switchToPhase(TrackingPhases.PACKET, TrackingPhases.PACKET.getStateForPacket(packetIn), context);
                 packetIn.processPacket(netHandler);
                 causeTracker.completePhase();
             }
-            resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);
         }
@@ -126,13 +142,6 @@ public class PacketUtil {
         return packet instanceof C10PacketCreativeInventoryAction;
     }
 
-    public static void resetStaticData() {
-        StaticMixinHelper.packetPlayer = null;
-        StaticMixinHelper.processingPacket = null;
-        StaticMixinHelper.lastCursor = null;
-        StaticMixinHelper.lastOpenContainer = null;
-        StaticMixinHelper.prePacketProcessItem = null;
-    }
 
     public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {

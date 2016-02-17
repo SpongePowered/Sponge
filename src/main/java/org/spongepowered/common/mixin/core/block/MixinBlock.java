@@ -54,6 +54,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
@@ -166,17 +167,17 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
-    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"))
+    @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
-            return;
+        if (((IMixinWorld) worldIn).getCauseTracker().getPhases().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
+            ci.cancel();
         }
     }
 
-    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
+    @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"), cancellable = true)
     private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
-            return;
+        if (((IMixinWorld) worldIn).getCauseTracker().getPhases().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
+            ci.cancel();
         }
     }
 }

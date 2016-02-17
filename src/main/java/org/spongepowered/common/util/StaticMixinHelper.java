@@ -61,7 +61,6 @@ public class StaticMixinHelper {
     public static Container lastOpenContainer = null;
     public static int lastDestroyedEntityId = -1;
     public static Cause dropCause = null;
-    public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;

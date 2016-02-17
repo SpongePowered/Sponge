@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,4 +54,5 @@ public abstract class TrackingPhase {
         return this;
     }
 
+    public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
 }

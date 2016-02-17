@@ -93,6 +93,8 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
@@ -166,10 +168,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         // Special case for players as sometimes tick capturing won't capture deaths
-        if (world.getCauseTracker().getCapturedEntityItems().size() > 0) {
-            StaticMixinHelper.destructItemDrop = true;
-            world.getCauseTracker().handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)), SpawningPhase.State.DEATH_DROPS_SPAWNING);
-            StaticMixinHelper.destructItemDrop = false;
+        final CauseTracker causeTracker = world.getCauseTracker();
+        if (!causeTracker.getCapturedEntityItems().isEmpty()) {
+            TrackingHelper.processDeathDrops(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)), SpawningPhase.State.DEATH_DROPS_SPAWNING);
         }
     }
 

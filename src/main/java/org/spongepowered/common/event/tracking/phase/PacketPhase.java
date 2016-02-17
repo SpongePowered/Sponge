@@ -26,14 +26,14 @@ package org.spongepowered.common.event.tracking.phase;
 
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnablePhase;
+import org.spongepowered.common.event.tracking.ITickingPhase;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
 
@@ -83,6 +83,13 @@ public class PacketPhase extends TrackingPhase {
             }
         }
         return State.UNKNOWN;
+    }
+
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        if (state == State.DROP_ITEM) {
+
+        }
     }
 
     public PacketPhase(TrackingPhase parent) {

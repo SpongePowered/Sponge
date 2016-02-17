@@ -49,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -58,6 +59,8 @@ import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 @Mixin(SpawnerAnimals.class)
 public abstract class MixinSpawnerAnimals {
@@ -72,50 +75,47 @@ public abstract class MixinSpawnerAnimals {
     private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/Collection;)"
         + "Lnet/minecraft/util/WeightedRandom$Item;";
 
-    private static boolean spawnerStart;
+    @Nullable
     private static EntityType spawnerEntityType;
+    @Nullable
     private static Class<? extends Entity> spawnerEntityClass;
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
-    public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
+    private void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING);
-        spawnerStart = true;
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
+            .add(NamedCause.source(worldServer))
+            .complete());
     }
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
-    public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
+    private void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        if (!causeTracker.getCapturedEntities().isEmpty()) {
-            causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
-        }
-        if (spawnerStart) {
-            spawnerStart = false;
-            spawnerEntityClass = null;
-            spawnerEntityType = null;
-        }
+        causeTracker.completePhase();
+        spawnerEntityClass = null;
+        spawnerEntityType = null;
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING);
-        spawnerStart = true;
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
+            .add(NamedCause.source(worldServer))
+            .complete());
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = (IMixinWorld) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(worldServer)));
-        if (spawnerStart) {
-            spawnerStart = false;
-            spawnerEntityClass = null;
-            spawnerEntityType = null;
-        }
+        causeTracker.completePhase();
+        spawnerEntityClass = null;
+        spawnerEntityType = null;
     }
 
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isSpectator()Z"))

@@ -72,7 +72,9 @@ final class TimingIdentifier {
         if (o == null) {
             return false;
         }
-
+        if (!(o instanceof TimingIdentifier)) {
+            return false;
+        }
         TimingIdentifier that = (TimingIdentifier) o;
         return this.group == that.group && this.name == that.name;
     }

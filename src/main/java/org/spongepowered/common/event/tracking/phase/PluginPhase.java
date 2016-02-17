@@ -24,16 +24,26 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.ISpawnablePhase;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-public class BlockPhase extends TrackingPhase {
+import java.util.List;
 
-    public enum State implements IPhaseState {
-        BLOCK_DECAY(false),
-        RESTORING_BLOCKS,
-        POST_NOTIFICATION_EVENT,
+import javax.annotation.Nullable;
+
+public class PluginPhase extends TrackingPhase {
+
+    public enum State implements IPhaseState, ISpawnablePhase {
+        BLOCK_WORKER(false),
+        CUSTOM_SPAWN,
         COMPLETE;
 
         private final boolean managed;
@@ -62,19 +72,39 @@ public class BlockPhase extends TrackingPhase {
         }
 
         @Override
-        public BlockPhase getPhase() {
-            return TrackingPhases.BLOCK;
+        public PluginPhase getPhase() {
+            return TrackingPhases.PLUGIN;
         }
 
+        @Nullable
+        @Override
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+            final World world = causeTracker.getWorld();
+            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
+            if (this == BLOCK_WORKER) {
+                return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
+            } else if (this == CUSTOM_SPAWN) {
+                return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
+            } else {
+                return null;
+            }
+        }
     }
 
-    public BlockPhase(TrackingPhase parent) {
+    public PluginPhase(TrackingPhase parent) {
         super(parent);
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-
+    public PluginPhase addChild(TrackingPhase child) {
+        super.addChild(child);
+        return this;
     }
 
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        if (state == State.BLOCK_WORKER) {
+
+        }
+    }
 }

@@ -24,7 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import static com.google.common.base.Preconditions.checkState;
+
+import net.minecraft.command.ICommand;
+import net.minecraft.command.ICommandSender;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 public class GeneralPhase extends TrackingPhase {
 
@@ -72,5 +80,17 @@ public class GeneralPhase extends TrackingPhase {
     public GeneralPhase addChild(TrackingPhase child) {
         super.addChild(child);
         return this;
+    }
+
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        if (state == State.COMMAND) {
+            Cause cause = phaseContext.toCause();
+            ICommand command = cause.first(ICommand.class).get();
+            ICommandSender sender = cause.first(ICommandSender.class).get();
+            checkState(command != null, "Cannot complete a command when there was no command executed!");
+            checkState(sender != null, "Cannot complete a command when there was no command sender!");
+            causeTracker.handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)), state, phaseContext);
+        }
     }
 }

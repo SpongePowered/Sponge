@@ -34,6 +34,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ISpawnablePhase;
 import org.spongepowered.common.event.tracking.ITickingPhase;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
 
@@ -80,10 +81,6 @@ public class SpawningPhase extends TrackingPhase {
             return TrackingPhases.SPAWNING;
         }
 
-        public void process(Cause cause, CauseTracker causeTracker) {
-            causeTracker.handlePostTickCaptures(cause);
-        }
-
         @Nullable
         @Override
         public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
@@ -97,6 +94,17 @@ public class SpawningPhase extends TrackingPhase {
                 return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
             }
         }
+    }
+
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        final List<Entity> spawnedEntities = causeTracker.getCapturedEntities();
+        final List<Entity> spawnedItems = causeTracker.getCapturedEntityItems();
+        if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
+            return;
+        }
+
+
     }
 
     public SpawningPhase(TrackingPhase parent) {

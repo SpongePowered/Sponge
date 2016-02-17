@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.tracking.CauseStack;
 import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -33,6 +37,9 @@ import javax.annotation.Nullable;
 
 public class TrackingPhases {
 
+    private static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
+    private static final Tuple<IPhaseState, PhaseContext> EMPTY_TUPLE = new Tuple<>(GeneralPhase.State.COMPLETE, EMPTY);
+
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
     public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
@@ -40,25 +47,39 @@ public class TrackingPhases {
     public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
     public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
     public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
+    public static final PluginPhase PLUGIN = new PluginPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
 
-    private final Deque<IPhaseState> states = new ArrayDeque<>(DEFAULT_QUEUE_SIZE);
+    public final CauseStack states = new CauseStack(DEFAULT_QUEUE_SIZE);
 
-    public void push(IPhaseState state) {
-        this.states.push(state);
+    public void push(IPhaseState state, PhaseContext context) {
+        this.states.push(state, context);
     }
 
-    public IPhaseState pop() {
-        return this.states.pop();
+    public IPhaseState popState() {
+        return this.states.pop().getFirst();
     }
 
-    @Nullable
-    public IPhaseState peek() {
-        return this.states.peek();
+    public IPhaseState peekState() {
+        final IPhaseState state = this.states.peekState();
+        return state == null ? GeneralPhase.State.COMPLETE : state;
     }
 
     public TrackingPhase current() {
-        IPhaseState current = this.states.peek();
-        return current == null ? null : current.getPhase();
+        IPhaseState current = this.states.peekState();
+        return current == null ? TrackingPhases.GENERAL : current.getPhase();
+    }
+
+    public PhaseContext peekContext() {
+        final PhaseContext context = this.states.peekContext();
+        return context == null ? EMPTY : context;
+    }
+
+    public PhaseContext popContext() {
+        return this.states.pop().getSecond();
+    }
+
+    public Tuple<IPhaseState, PhaseContext> pop() {
+        return this.states.pop();
     }
 
     public void gotoState(TrackingPhase phase, IPhaseState state) {
@@ -73,4 +94,8 @@ public class TrackingPhases {
         }
     }
 
+    public Tuple<IPhaseState, PhaseContext> peek() {
+        final Tuple<IPhaseState, PhaseContext> tuple = this.states.peek();
+        return tuple == null ? EMPTY_TUPLE : tuple;
+    }
 }

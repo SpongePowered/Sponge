@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -39,6 +40,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
@@ -47,6 +49,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -59,11 +62,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.phase.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.SpawningPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -85,7 +97,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Shadow public abstract boolean isValid(BlockPos pos);
     @Shadow public abstract void markBlockForUpdate(BlockPos pos);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
-    @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean checkLight(BlockPos pos);
 
 
@@ -132,56 +143,63 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen()
-            || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+        final Tuple<IPhaseState, PhaseContext> peek = causeTracker.getPhases().peek();
+        final Optional<BlockSnapshot> currentTickingBlock;
+        final boolean flag;
+        if (peek != null) {
+            flag = peek.getFirst() == SpawningPhase.State.CHUNK_SPAWNING || peek.getFirst() == SpawningPhase.State.WORLD_SPAWNER_SPAWNING;
+            currentTickingBlock = peek.getSecond().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+        } else {
+            flag = false;
+            currentTickingBlock = Optional.empty();
+        }
+        if (this.isRemote || currentTickingBlock.isPresent() || causeTracker.getPhases().peekState() == WorldPhase.State.TERRAIN_GENERATION || flag) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
 
-        causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0));
-        block.updateTick(worldIn, pos, state, rand);
-        causeTracker.completePhase();
+        TrackingHelper.updateTickBlock(causeTracker, block, pos, state, rand);
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onUpdateEntities(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingEntity()) {
+        Optional<Entity> currentTickingEntity = causeTracker.getPhases().peek().getSecond().firstNamed(NamedCause.SOURCE, Entity.class);
+        if (this.isRemote || currentTickingEntity.isPresent()) {
             entityIn.onUpdate();
             return;
         }
 
-        causeTracker.setCurrentTickEntity((Entity) entityIn);
-        entityIn.onUpdate();
-        SpongeCommonEventFactory.handleEntityMovement(entityIn);
-        causeTracker.completePhase();
+        TrackingHelper.tickEntity(causeTracker, entityIn);
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
     public void onUpdateTileEntities(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingTileEntity()) {
+        Optional<TileEntity> currentTickingTileEntity = causeTracker.getPhases().peek().getSecond().firstNamed(NamedCause.SOURCE, TileEntity.class);
+        if (this.isRemote || currentTickingTileEntity.isPresent()) {
             tile.update();
             return;
         }
 
-        causeTracker.setCurrentTickTileEntity((TileEntity) tile);
-        tile.update();
-        causeTracker.completePhase();
+        TrackingHelper.tickTileEntity(causeTracker, tile);
+
 
     }
 
+    @SuppressWarnings("rawtypes")
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingEntity() || StaticMixinHelper.packetPlayer != null) {
+        final Tuple<IPhaseState, PhaseContext> tuple = causeTracker.getPhases().peek();
+        Optional<Entity> currentTickingEntity = tuple.getSecond().firstNamed(NamedCause.SOURCE, Entity.class);
+        Optional<Packet> currentPacket = tuple.getSecond().firstNamed("Packet", Packet.class);
+        if (this.isRemote || currentTickingEntity.isPresent() || currentPacket.isPresent()) {
             entity.onUpdate();
             return;
         }
-        causeTracker.setCurrentTickEntity((Entity) entity);
-        entity.onUpdate();
-        SpongeCommonEventFactory.handleEntityMovement(entity);
-        causeTracker.completePhase();
+
+        TrackingHelper.tickEntity(causeTracker, entity);
     }
 
     /**
@@ -296,7 +314,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        this.getCauseTracker().setPluginCause(null);
         checkBlockBounds(x, y, z);
         setBlockState(new BlockPos(x, y, z), (IBlockState) block, notifyNeighbors ? 3 : 2);
     }
@@ -306,10 +323,15 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         checkArgument(cause != null, "Cause cannot be null!");
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
         final CauseTracker causeTracker = this.getCauseTracker();
-        causeTracker.setPluginCause(cause);
         checkBlockBounds(x, y, z);
+        final PhaseContext context = PhaseContext.start()
+                .add(NamedCause.source(cause.root()));
+        for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+            context.add(NamedCause.of(entry.getKey(), entry.getValue()));
+        }
+        context.complete();
+        causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, context);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
-        causeTracker.setPluginCause(null);
     }
 
     private void checkBlockBounds(int x, int y, int z) {
