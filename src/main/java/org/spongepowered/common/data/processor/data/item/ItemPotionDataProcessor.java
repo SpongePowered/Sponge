@@ -60,11 +60,10 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
         }
         final NBTTagCompound mainCompound = dataHolder.getTagCompound();
         final NBTTagList potionList = new NBTTagList();
-        int index = 0;
         for (PotionEffect effect : value) {
             final NBTTagCompound potionCompound = new NBTTagCompound();
             ((net.minecraft.potion.PotionEffect) effect).writeCustomPotionEffectToNBT(potionCompound);
-            potionList.set(index, potionCompound);
+            potionList.appendTag(potionCompound);
         }
         mainCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, potionList);
         return true;

@@ -1135,6 +1135,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return entity.isSilent() || this.isVanished;
     }
 
+    @Redirect(method = "applyEntityCollision", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;noClip:Z", opcode = Opcodes.GETFIELD))
+    private boolean spongeApplyEntityCollisionCheckVanish(net.minecraft.entity.Entity entity) {
+        return entity.noClip || ((IMixinEntity) entity).isVanished();
+    }
+
     @Redirect(method = "resetHeight", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnParticle(net.minecraft.world.World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord,
             double xOffset, double yOffset, double zOffset, int ... p_175688_14_) {

@@ -28,10 +28,12 @@ import static com.google.common.base.Preconditions.*;
 
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.Slot;
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.UnsupportedFabricException;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.ContainerFabric;
 import org.spongepowered.common.item.inventory.lens.impl.fabric.DefaultInventoryFabric;
+import org.spongepowered.common.item.inventory.lens.impl.fabric.DelegatingFabric;
 
 public abstract class MinecraftFabric implements Fabric<IInventory> {
 
@@ -40,6 +42,12 @@ public abstract class MinecraftFabric implements Fabric<IInventory> {
         checkNotNull(target, "Fabric target");
         if (target instanceof Fabric) {
             return (Fabric<IInventory>) target;
+        } else if (target instanceof Slot) {
+            Slot slot = (Slot)target;
+            if (slot.inventory == null) {
+                return new DelegatingFabric(slot);
+            }
+            return new DefaultInventoryFabric(slot.inventory);
         } else if (target instanceof Container) {
             return new ContainerFabric((Container) target);
         } else if (target instanceof IInventory) {

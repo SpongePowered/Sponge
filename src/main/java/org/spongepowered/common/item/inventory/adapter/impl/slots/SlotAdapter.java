@@ -58,7 +58,7 @@ public class SlotAdapter extends Adapter implements Slot {
     public int slotNumber = -1;
 
     public SlotAdapter(net.minecraft.inventory.Slot slot) {
-        this(MinecraftFabric.of(slot.inventory), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()));
+        this(MinecraftFabric.of(slot), new SlotLensImpl(((IMixinSlot)slot).getSlotIndex()));
         this.slotNumber = slot.slotNumber;
     }
 
