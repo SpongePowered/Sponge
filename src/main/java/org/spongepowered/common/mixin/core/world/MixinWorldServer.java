@@ -153,13 +153,15 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
     public void onAddBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final IPhaseState phaseState = causeTracker.getPhases().peekState();
+        final Tuple<IPhaseState, PhaseContext> currentPhase = causeTracker.getPhases().peek();
+        final IPhaseState phaseState = currentPhase.getFirst();
+        final PhaseContext context = currentPhase.getSecond();
         if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING
             || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
             return;
         }
 
-        if (StaticMixinHelper.packetPlayer != null) {
+        if (context.firstNamed(TrackingHelper.PACKET_PLAYER, User.class).isPresent()) {
             // Add player to block event position
             if (isBlockLoaded(pos)) {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
@@ -169,7 +171,6 @@ public abstract class MixinWorldServer extends MixinWorld {
             }
         } else {
             BlockPos sourcePos = null;
-            final PhaseContext context = causeTracker.getPhases().peekContext();
             Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
             Optional<TileEntity> currentTickingTileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
             if (currentTickingBlock.isPresent()) {

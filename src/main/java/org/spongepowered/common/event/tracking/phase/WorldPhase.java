@@ -26,8 +26,10 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -35,22 +37,74 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.ITickingPhase;
+import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ITickingPhase {
+    public enum State implements IPhaseState, ITickingState {
         TERRAIN_GENERATION,
         POPULATOR_RUNNING,
         CHUNK_LOADING,
+
+        IDLE;
+
+
+        @Override
+        public WorldPhase getPhase() {
+            return TrackingPhases.WORLD;
+        }
+
+        @Override
+        public boolean isBusy() {
+            return this != IDLE;
+        }
+
+        @Override
+        public boolean isManaged() {
+            return false;
+        }
+
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            if (this == TERRAIN_GENERATION) {
+                if (state instanceof ITickingState) {
+                    return true;
+                } else if (state == BlockPhase.State.BLOCK_DECAY) {
+                    return true;
+                }
+                // I'm sure there will be more cases.
+            }
+            return false;
+        }
+
+        @Override
+        public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+        }
+
+        @Nullable
+        @Override
+        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+            final World world = causeTracker.getWorld();
+            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
+            return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
+        }
+
+    }
+
+    public enum Tick implements IPhaseState, ITickingState {
         TICKING_ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
@@ -86,45 +140,12 @@ public class WorldPhase extends TrackingPhase {
                         phaseContext);
                 causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingBlock.get())), this, phaseContext);
             }
-        },
-        IDLE;
+        };
 
-
-        @Override
-        public WorldPhase getPhase() {
-            return TrackingPhases.WORLD;
-        }
-
-        @Override
-        public boolean isBusy() {
-            return this != IDLE;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return false;
-        }
-
-        @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            if (this == TERRAIN_GENERATION) {
-                if (state instanceof ITickingPhase && ((ITickingPhase) state).isTicking()) {
-                    return true;
-                } else if (state == BlockPhase.State.BLOCK_DECAY) {
-                    return true;
-                }
-                // I'm sure there will be more cases.
-            }
-            return false;
-        }
-
-        @Override
-        public boolean isTicking() {
-            return this == TICKING_BLOCK || this == TICKING_ENTITY || this == TICKING_TILE_ENTITY || this == RANDOM_TICK_BLOCK;
-        }
 
         @Override
         public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+
         }
 
         @Nullable
@@ -132,22 +153,44 @@ public class WorldPhase extends TrackingPhase {
         public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
             final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
-            if (this.isTicking()) {
-                return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
-            } else {
-                throw new IllegalStateException(String.format("Cannot create a SpawnEntityEvent if this isn't tickable!! Current phase: %s", this));
-            }
+            return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
         }
 
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.WORLD;
+        }
+
+        @Override
+        public boolean isBusy() {
+            return true;
+        }
+
+        @Override
+        public boolean isManaged() {
+            return false;
+        }
     }
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        if (state instanceof ITickingPhase) {
-            ((ITickingPhase) state).processPostTick(causeTracker, phaseContext);
+        if (state instanceof ITickingState) {
+            ((ITickingState) state).processPostTick(causeTracker, phaseContext);
         }
         if (state == State.TERRAIN_GENERATION) {
-            causeTracker.getCapturedPopulators().clear();
+            final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
+
+        } else if (state == State.POPULATOR_RUNNING) {
+            final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
+            BlockSnapshot originalBlockSnapshot = null;
+            Transaction<BlockSnapshot> transaction = null;
+            LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList;
+            final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+            final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        } else if (state instanceof Tick) {
+            if (state == Tick.RANDOM_TICK_BLOCK) {
+
+            }
         }
 
     }

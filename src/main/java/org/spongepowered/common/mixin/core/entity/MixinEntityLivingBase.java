@@ -43,6 +43,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -55,9 +56,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.DamageObject;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.DamageObject;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.SpawningPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -305,7 +312,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         this.nmsEntityLiving.playSound(s, this.getSoundVolume(), this.getSoundPitch());
                     }
 
+                    // Sponge Start - notify the cause tracker
+                    final CauseTracker causeTracker = ((IMixinWorld) this.getWorld()).getCauseTracker();
+                    causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
+                        .add(NamedCause.source(this))
+                        .add(NamedCause.of("DamageSource", source))
+                        .complete());
                     this.nmsEntityLiving.onDeath(source);
+                    causeTracker.completePhase();
                 } else {
                     s = this.getHurtSound();
 

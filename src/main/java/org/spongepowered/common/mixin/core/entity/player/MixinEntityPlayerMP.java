@@ -163,17 +163,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "onDeath", at = @At(value = "RETURN"))
-    public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        // Special case for players as sometimes tick capturing won't capture deaths
-        final CauseTracker causeTracker = world.getCauseTracker();
-        if (!causeTracker.getCapturedEntityItems().isEmpty()) {
-            TrackingHelper.processDeathDrops(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)), SpawningPhase.State.DEATH_DROPS_SPAWNING);
-        }
-    }
-
     @Override
     public GameProfile getProfile() {
         return this.user.getProfile();

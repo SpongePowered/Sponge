@@ -30,11 +30,8 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.ICommand;
-import net.minecraft.command.ICommandSender;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
@@ -45,7 +42,6 @@ import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
@@ -55,7 +51,6 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -69,11 +64,9 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -81,11 +74,9 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
@@ -106,12 +97,16 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+/**
+ * A helper object that is hard attached to a {@link World} that acts as a
+ * proxy object entering and processing between different states of the
+ * world and it's objects.
+ */
 public final class CauseTracker {
 
     private final net.minecraft.world.World targetWorld;
     private final List<Entity> capturedEntities = new ArrayList<>();
     private final List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
-    private final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
     private final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
     private final List<Entity> capturedEntityItems = new ArrayList<>();
 
@@ -129,16 +124,17 @@ public final class CauseTracker {
     // ----------------- STATE ACCESS ----------------------------------
 
     public void switchToPhase(TrackingPhase phase, IPhaseState state, PhaseContext phaseContext) {
-        if (this.phases.states.size() > 4) {
-            PrettyPrinter printer = new PrettyPrinter(20);
+        if (this.phases.states.size() > 6) {
+            PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Switching Phase").centre().hr();
-            printer.add("%5s Entering Phase: %s", phase);
-            printer.add("%5s Entering State: %s", state);
-            printer.add("%5s Current phases: %s", this.phases.states);
-            printer.add("%5s Printing stack trace:");
+            printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+            printer.add("  %s : %s", "Entering Phase", phase);
+            printer.add("  %s : %s", "Entering State", state);
+            printer.addWrapped(60, "%s : %s", "Current phases", this.phases.states.currentStates());
+            printer.add("  %s :", "Printing stack trace");
             Exception exception = new Exception("Stack trace");
             for (StackTraceElement element : exception.getStackTrace()) {
-                printer.add("%10s %s", element);
+                printer.add("    %s", element);
             }
             printer.print(System.err);
         }
@@ -152,19 +148,21 @@ public final class CauseTracker {
     }
 
     public void completePhase() {
-        final Tuple<IPhaseState, PhaseContext> tuple = this.phases.pop();
+        final Tuple<IPhaseState, PhaseContext> tuple = this.phases.peek();
         IPhaseState state = tuple.getFirst();
-        if (this.phases.states.size() > 4) {
-            PrettyPrinter printer = new PrettyPrinter(20);
+        if (this.phases.states.size() > 6) {
+            PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
-            printer.add("%5s Completing phase: %s", state);
-            printer.add("%5s Phases remaining: %s", this.phases.states);
+            printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
+            printer.addWrapped(60, "  %s : %s", "Completing phase", state);
+            printer.addWrapped(60, "  %s : %s", "Phases remaining", this.phases.states.currentStates());
             Exception exception = new Exception("Stack trace");
             for (StackTraceElement element : exception.getStackTrace()) {
-                printer.add("%10s %s", element);
+                printer.add("     %s", element);
             }
             printer.print(System.err);
         }
+        this.phases.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
@@ -173,14 +171,29 @@ public final class CauseTracker {
 
     // ----------------- SIMPLE GETTERS --------------------------------------
 
+    /**
+     * Gets the {@link World} as a SpongeAPI world.
+     *
+     * @return The world casted as a SpongeAPI world
+     */
     public World getWorld() {
         return (World) this.targetWorld;
     }
 
+    /**
+     * Gets the {@link World} as a Minecraft {@link net.minecraft.world.World}.
+     *
+     * @return The world as it's original object
+     */
     public net.minecraft.world.World getMinecraftWorld() {
         return this.targetWorld;
     }
 
+    /**
+     * Gets the world casted as a {@link IMixinWorld}.
+     *
+     * @return The world casted as a mixin world
+     */
     public IMixinWorld getMixinWorld() {
         return (IMixinWorld) this.targetWorld;
     }
@@ -211,10 +224,6 @@ public final class CauseTracker {
         return this.capturedSpongeBlockSnapshots;
     }
 
-    public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulators() {
-        return this.capturedSpongePopulators;
-    }
-
     public List<Transaction<BlockSnapshot>> getInvalidTransactions() {
         return this.invalidTransactions;
     }
@@ -228,9 +237,12 @@ public final class CauseTracker {
     public void handlePostTickCaptures(Cause cause, IPhaseState phaseState, PhaseContext context) {
         if (this.getMinecraftWorld().isRemote || phaseState.isManaged()) {
             return;
-        } else if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty() && this.capturedSpongeBlockSnapshots.isEmpty()
-                   && this.capturedSpongePopulators.isEmpty() && StaticMixinHelper.packetPlayer == null) {
-            return; // nothing was captured, return
+        } else {
+            final Map<?, ?> map = context.firstNamed(TrackingHelper.POPULATOR_CAPTURE_MAP, Map.class).orElse(null);
+            if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty() && this.capturedSpongeBlockSnapshots.isEmpty()
+                && (map == null || map.isEmpty()) && context.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).isPresent()) {
+                return; // nothing was captured, return
+            }
         }
 
         EntityPlayerMP player = context.first(EntityPlayerMP.class).orElse(null);
@@ -258,7 +270,8 @@ public final class CauseTracker {
 
         // todo
         // Inventory Events
-        MoveToPhases.handleInventoryEvents(player, packetIn, StaticMixinHelper.lastOpenContainer);
+        Optional<Container> openContainer = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class);
+        MoveToPhases.handleInventoryEvents(player, packetIn, openContainer.orElse(null), phaseState, context);
 
         // Handle Entity captures
         if (this.capturedEntityItems.size() > 0) {
@@ -283,11 +296,11 @@ public final class CauseTracker {
             return; // there's nothing to do.
         }
 
-        if (!(currentPhase instanceof ISpawnablePhase)) {
+        if (!(currentPhase instanceof ISpawnableState)) {
             return;
         }
 
-        SpawnEntityEvent event = ((ISpawnablePhase) currentPhase).createEntityEvent(cause, this);
+        SpawnEntityEvent event = ((ISpawnableState) currentPhase).createEntityEvent(cause, this);
         if (event == null) {
             return;
         }
@@ -417,7 +430,8 @@ public final class CauseTracker {
                         captureType = CaptureType.BREAK;
                     }
                     if (captureType != null) {
-                        MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, changeBlockEvent.getTransactions());
+                        MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, changeBlockEvent.getTransactions(), currentPhase,
+                                context);
                     }
                 }
 
@@ -433,10 +447,11 @@ public final class CauseTracker {
             SpongeImpl.postEvent(changeBlockEvent);
             blockEvents.add(changeBlockEvent);
         }
-        processBlockEvents(cause, blockEvents, packetIn, player, breakEvent);
+        processBlockEvents(cause, blockEvents, packetIn, player, breakEvent, currentPhase, context);
     }
 
-    private void processBlockEvents(Cause cause, List<ChangeBlockEvent> blockEvents, Packet<?> packetIn, @Nullable EntityPlayer player, @Nullable ChangeBlockEvent.Break breakEvent) {
+    private void processBlockEvents(Cause cause, List<ChangeBlockEvent> blockEvents, Packet<?> packetIn, @Nullable EntityPlayer player,
+            @Nullable ChangeBlockEvent.Break breakEvent, IPhaseState phaseState, PhaseContext context) {
         for (ChangeBlockEvent blockEvent : blockEvents) {
             CaptureType captureType = null;
             if (blockEvent instanceof ChangeBlockEvent.Break) {
@@ -462,7 +477,7 @@ public final class CauseTracker {
                         blockEvent.getTransactions().listIterator(blockEvent.getTransactions().size());
                 TrackingHelper.processList(this, listIterator);
 
-                MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, blockEvent.getTransactions());
+                MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, blockEvent.getTransactions(), phaseState, context);
 
                 // clear entity list and return to avoid spawning items
                 this.capturedEntities.clear();
@@ -509,7 +524,7 @@ public final class CauseTracker {
                         transaction.getOriginal().restore(true, false);
                         completePhase();
                     }
-                    MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, this.invalidTransactions);
+                    MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, this.invalidTransactions, phaseState, context);
                 }
 
                 if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
@@ -568,7 +583,6 @@ public final class CauseTracker {
                     iterator.remove();
                     continue;
                 }
-
                 net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) entity;
                 int x = MathHelper.floor_double(nmsEntity.posX / 16.0D);
                 int z = MathHelper.floor_double(nmsEntity.posZ / 16.0D);
@@ -581,7 +595,7 @@ public final class CauseTracker {
         } else {
             final EntityPlayerMP entityPlayerMP = context.first(EntityPlayerMP.class).orElse(null);
             if (cause.root() == entityPlayerMP) {
-                TrackingHelper.sendItemChangeToPlayer(entityPlayerMP);
+                TrackingHelper.sendItemChangeToPlayer(entityPlayerMP, context);
             }
             this.capturedEntityItems.clear();
         }
@@ -592,14 +606,16 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
         if (!this.getMinecraftWorld().isRemote) {
             IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
+            final Tuple<IPhaseState, PhaseContext> phaseContextTuple = this.getPhases().peek();
+            Optional<User> packetUser = phaseContextTuple.getSecond().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
 
             try {
                 if (!this.getMinecraftWorld().isRemote) {
                     final Chunk chunkFromBlockCoords = this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                    if (StaticMixinHelper.packetPlayer != null) {
+                    if (packetUser.isPresent()) {
                         IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
                         if (!(spongeChunk instanceof EmptyChunk)) {
-                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, (User) StaticMixinHelper.packetPlayer,
+                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(),
                                     PlayerTracker.Type.NOTIFIER);
                         }
                     } else {
@@ -677,9 +693,10 @@ public final class CauseTracker {
         final PhaseContext phaseContext = currentPhaseContext.getSecond();
         if (!minecraftWorld.isRemote && phaseState != BlockPhase.State.RESTORING_BLOCKS
             && phaseState != SpawningPhase.State.WORLD_SPAWNER_SPAWNING && phaseState != SpawningPhase.State.CHUNK_SPAWNING) {
-            MutablePair<BlockSnapshot, Transaction<BlockSnapshot>> pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext);
-            originalBlockSnapshot = pair.getLeft();
-            transaction = pair.getRight();
+            BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext);
+            originalBlockSnapshot = pair.getBlockSnapshot();
+            transaction = pair.getTransaction();
+            populatorSnapshotList = pair.getPopulatorList();
         }
 
         int oldLight = currentState.getBlock().getLightValue();
@@ -689,8 +706,8 @@ public final class CauseTracker {
         if (iblockstate1 == null) {
             if (originalBlockSnapshot != null) {
                 this.getCapturedSpongeBlockSnapshots().remove(originalBlockSnapshot);
-                if (populatorSnapshotList != null) {
-                    populatorSnapshotList.remove(transaction);
+                if (populatorSnapshotList != null && transaction != null) {
+                    populatorSnapshotList.remove(transaction.getOriginal().getPosition());
                 }
             }
             return false;

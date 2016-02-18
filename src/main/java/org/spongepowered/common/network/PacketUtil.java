@@ -26,7 +26,6 @@ package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.event.ClickEvent;
-import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -48,7 +47,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -75,7 +73,7 @@ public class PacketUtil {
                 && (packetIn instanceof C16PacketClientStatus
                     && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
                 StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
-            } else if (creativeCheck(packetIn)) {
+            } else if (creativeCheck(packetIn, packetPlayer)) {
 
                 long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
@@ -116,7 +114,7 @@ public class PacketUtil {
                 packetIn.processPacket(netHandler);
             } else {
                 PhaseContext context = PhaseContext.start()
-                        .add(NamedCause.source(packetPlayer))
+                        .add(NamedCause.of(TrackingHelper.PACKET_PLAYER, packetPlayer))
                         .add(NamedCause.of(TrackingHelper.CAPTURED_PACKET, packetIn))
                         .add(NamedCause.of(TrackingHelper.IGNORING_CREATIVE, ignoreCreative));
                 if (packetPlayer.openContainer != null) {
@@ -138,7 +136,7 @@ public class PacketUtil {
         }
     }
 
-    private static boolean creativeCheck(Packet<?> packet) {
+    private static boolean creativeCheck(Packet<?> packet, EntityPlayerMP playerMP) {
         return packet instanceof C10PacketCreativeInventoryAction;
     }
 

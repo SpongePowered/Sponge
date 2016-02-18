@@ -24,20 +24,31 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.gen.PopulatorType;
 
-import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
-import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+/**
+ * Similar to {@link Cause} except it can be built continuously
+ * and retains no real side effects. Strictly speaking this object
+ * exists to avoid confusion between what is suggested to be a
+ * {@link Cause} for an {@link Event} versus the context of which
+ * a {@link IPhaseState} is being completed with.
+ */
 public class PhaseContext {
 
     private boolean isCompleted = false;
@@ -78,6 +89,16 @@ public class PhaseContext {
         for (NamedCause cause : this.contextObjects) {
             if (cause.getName().equalsIgnoreCase(name) && tClass.isInstance(cause.getCauseObject())) {
                 return Optional.of((T) cause.getCauseObject());
+            }
+        }
+        return Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>>> getPopulatorMap() {
+        for (NamedCause cause : this.contextObjects) {
+            if (cause.getName().equalsIgnoreCase(TrackingHelper.POPULATOR_CAPTURE_MAP)) {
+                return Optional.of(((Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>>) cause.getCauseObject()));
             }
         }
         return Optional.empty();

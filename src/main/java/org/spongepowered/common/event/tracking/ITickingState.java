@@ -22,38 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkState;
+/**
+ * A specialized state that signifies that it is a "master" state that
+ * can have multiple state side effects, such as spawning other entities,
+ * changing other blocks, calling other populators, etc.
+ */
+public interface ITickingState extends IPhaseState, ISpawnableState {
 
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-
-public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
-
-    @Override
-    public DamageSource build() throws IllegalStateException {
-        checkState(this.damageType != null, "DamageType was null!");
-        net.minecraft.util.DamageSource source = new net.minecraft.util.DamageSource(this.damageType.getId());
-        if (this.absolute) {
-            source.setDamageIsAbsolute();
-        }
-        if (this.bypasses) {
-            source.setDamageBypassesArmor();
-        }
-        if (this.creative) {
-            source.setDamageAllowedInCreativeMode();
-        }
-        if (this.magical) {
-            source.setMagicDamage();
-        }
-        if (this.scales) {
-            source.setDifficultyScaled();
-        }
-        if (this.explosion) {
-            source.setExplosion();
-        }
-        return (DamageSource) source;
-    }
+    void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext);
 
 }

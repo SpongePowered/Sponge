@@ -1,3 +1,27 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.spongepowered.common.event.tracking;
 
 import com.flowpowered.math.vector.Vector3i;
@@ -47,6 +71,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -66,6 +91,12 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+/**
+ * Contains all the logic that needs to move into {@link TrackingPhase}s
+ * and potentially {@link IPhaseState}s. Much of the logic is simply overlap
+ * that could easily be dealt with from the identity of the state
+ * and making assumptions based on said state.
+ */
 public class MoveToPhases {
 
     static void handleEntityDestruct(Cause cause, EntityPlayerMP player, Packet<?> packetIn, World minecraftWorld) {
@@ -101,16 +132,18 @@ public class MoveToPhases {
         return cause;
     }
 
-    static void handleInventoryEvents(EntityPlayerMP player, Packet<?> packetIn, Container container) {
+    static void handleInventoryEvents(EntityPlayerMP player, Packet<?> packetIn, Container container, IPhaseState phaseState, PhaseContext phaseContext) {
         if (player != null && player.getHealth() > 0 && container != null) {
-            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
+            boolean ignoringCreative = phaseContext.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
+            if (packetIn instanceof C10PacketCreativeInventoryAction && !ignoringCreative) {
                 SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C10PacketCreativeInventoryAction) packetIn);
+                        (C10PacketCreativeInventoryAction) packetIn, phaseState, phaseContext);
             } else {
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
+                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn, phaseState,
+                        phaseContext);
                 if (packetIn instanceof C0EPacketClickWindow) {
                     SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                            (C0EPacketClickWindow) packetIn);
+                            (C0EPacketClickWindow) packetIn, phaseState, phaseContext);
                 }
             }
         }
@@ -126,13 +159,13 @@ public class MoveToPhases {
     }
 
     @SuppressWarnings("unchecked")
-    static MutablePair<BlockSnapshot, Transaction<BlockSnapshot>> handleEvents(CauseTracker causeTracker, IBlockState currentState,
+    static BlockStateTriplet handleEvents(CauseTracker causeTracker, IBlockState currentState,
             IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext) {
         BlockSnapshot originalBlockSnapshot = null;
         Transaction<BlockSnapshot> transaction = null;
-        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList;
+        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
         final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
-        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.firstNamed(TrackingHelper.POPULATOR_CAPTURE_MAP, (Class<Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>>>) (Class<?>) Map.class).orElse(null);
+        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
         final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
         if (causeTracker.getPhases().peekState() == WorldPhase.State.POPULATOR_RUNNING) {
             if (runningGenerator != null) {
@@ -178,32 +211,35 @@ public class MoveToPhases {
                 causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
             }
         }
-        return new MutablePair<>(originalBlockSnapshot, transaction);
+        return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);
     }
 
-    static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions) {
-        if (StaticMixinHelper.packetPlayer == null) {
+    static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions,
+            IPhaseState phaseState, PhaseContext context) {
+        final Optional<EntityPlayerMP> entityPlayerMP = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class);
+        if (entityPlayerMP.isPresent()) {
             return;
         }
 
+        final EntityPlayerMP playerMP = entityPlayerMP.get();
         if (captureType == CaptureType.BREAK) {
             // Let the client know the blocks still exist
             for (Transaction<BlockSnapshot> transaction : transactions) {
                 BlockSnapshot snapshot = transaction.getOriginal();
                 BlockPos pos = VecHelper.toBlockPos(snapshot.getPosition());
-                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(minecraftWorld, pos));
+                playerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(minecraftWorld, pos));
 
                 // Update any tile entity data for this block
                 net.minecraft.tileentity.TileEntity tileentity = minecraftWorld.getTileEntity(pos);
                 if (tileentity != null) {
                     Packet<?> pkt = tileentity.getDescriptionPacket();
                     if (pkt != null) {
-                        StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(pkt);
+                        playerMP.playerNetServerHandler.sendPacket(pkt);
                     }
                 }
             }
         } else if (captureType == CaptureType.PLACE) {
-            TrackingHelper.sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+            TrackingHelper.sendItemChangeToPlayer(playerMP, context);
         }
     }
 

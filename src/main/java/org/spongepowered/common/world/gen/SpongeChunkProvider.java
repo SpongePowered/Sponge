@@ -83,6 +83,7 @@ import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -261,10 +262,13 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         final CauseTracker causeTracker = world.getCauseTracker();
         final NamedCause sourceCause = NamedCause.source(this);
         final NamedCause chunkProviderCause = NamedCause.of("ChunkProvider", chunkProvider);
+        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = new HashMap<>();
+        final NamedCause populatorMap = NamedCause.of(TrackingHelper.POPULATOR_CAPTURE_MAP, capturedPopulators);
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-            .add(sourceCause)
-            .add(chunkProviderCause)
-            .complete());
+                .add(sourceCause)
+                .add(chunkProviderCause)
+                .add(populatorMap)
+                .complete());
         Cause populateCause = Cause.of(sourceCause, chunkProviderCause);
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -289,6 +293,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         for (Populator populator : populators) {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                     .add(NamedCause.of(TrackingHelper.CAPTURED_POPULATOR, populator.getType()))
+                    .add(populatorMap)
                     .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
@@ -308,7 +313,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         }
 
         ImmutableMap.Builder<PopulatorType, List<Transaction<BlockSnapshot>>> populatorChanges = ImmutableMap.builder();
-        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : causeTracker.getCapturedPopulators().entrySet()) {
+        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : capturedPopulators.entrySet()) {
             populatorChanges.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().values()));
         }
         PopulateChunkEvent.Post event =

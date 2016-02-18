@@ -32,7 +32,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ISpawnablePhase;
+import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
 
 public class PluginPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ISpawnablePhase {
+    public enum State implements IPhaseState, ISpawnableState {
         BLOCK_WORKER(false),
         CUSTOM_SPAWN,
         COMPLETE;

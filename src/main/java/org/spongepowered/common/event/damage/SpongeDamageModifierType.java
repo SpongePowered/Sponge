@@ -22,31 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
 import com.google.common.base.Objects;
-import net.minecraft.util.DamageSource;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 
-public class MinecraftBlockDamageSource extends DamageSource {
+public class SpongeDamageModifierType implements DamageModifierType {
 
-    private final BlockSnapshot blockSnapshot;
-    private final Location<World> location;
+    private final String id;
+    private final String name;
 
-    public MinecraftBlockDamageSource(String damageTypeIn, Location<World> location) {
-        super(damageTypeIn);
-        this.blockSnapshot = location.createSnapshot();
-        this.location = location;
+    public SpongeDamageModifierType(String name, String id) {
+        this.name = name;
+        this.id = id;
+    }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SpongeDamageModifierType that = (SpongeDamageModifierType) o;
+        return Objects.equal(id, that.id) &&
+               Objects.equal(name, that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id, name);
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("BlockDamageSource")
-            .add("Name", this.damageType)
-            .add("BlockSnapshot", this.blockSnapshot)
-            .add("Location", this.location)
+        return Objects.toStringHelper(this)
+            .add("id", id)
+            .add("name", name)
             .toString();
     }
+
 }

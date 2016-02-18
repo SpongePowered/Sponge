@@ -22,33 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.damage;
 
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import static com.google.common.base.Preconditions.checkState;
 
-/**
- * A literal phase state of which the {@link World} is currently running
- * in. The state itself is owned by {@link TrackingPhase}s as the phase
- * defines what to do upon
- * {@link TrackingPhase#unwind(CauseTracker, IPhaseState, PhaseContext)}.
- * As these should be enums, there's no data that should be stored on
- * this state. It can have control flow with {@link #canSwitchTo(IPhaseState)}
- * where preventing switching to another state is possible (likely points out
- * either errors or runaway states not being unwound).
- */
-public interface IPhaseState {
+import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
-    TrackingPhase getPhase();
+public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<DamageSource, DamageSource.Builder> implements DamageSource.Builder {
 
-    boolean isBusy();
-
-    boolean isManaged();
-
-    int ordinal();
-
-    default boolean canSwitchTo(IPhaseState state) {
-        return false;
+    @Override
+    public DamageSource build() throws IllegalStateException {
+        checkState(this.damageType != null, "DamageType was null!");
+        net.minecraft.util.DamageSource source = new net.minecraft.util.DamageSource(this.damageType.getId());
+        if (this.absolute) {
+            source.setDamageIsAbsolute();
+        }
+        if (this.bypasses) {
+            source.setDamageBypassesArmor();
+        }
+        if (this.creative) {
+            source.setDamageAllowedInCreativeMode();
+        }
+        if (this.magical) {
+            source.setMagicDamage();
+        }
+        if (this.scales) {
+            source.setDifficultyScaled();
+        }
+        if (this.explosion) {
+            source.setExplosion();
+        }
+        return (DamageSource) source;
     }
 
 }

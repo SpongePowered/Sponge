@@ -72,11 +72,13 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -158,14 +160,17 @@ public class SpongeCommonEventFactory {
     }
 
     // Open/Close
-    public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet packetIn) {
-        if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
-                || (packetIn instanceof C16PacketClientStatus
+    public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet<?> packetIn, IPhaseState phaseState,
+            PhaseContext context) {
+        final Container lastOpenContainer = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class).orElse(null);
+        if ((!(player.openContainer instanceof ContainerPlayer) && (lastOpenContainer instanceof ContainerPlayer)
+             || (packetIn instanceof C16PacketClientStatus
                 && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
+            ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             InteractInventoryEvent.Open event =
                     SpongeEventFactory.createInteractInventoryEventOpen(cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer);
@@ -178,18 +183,19 @@ public class SpongeCommonEventFactory {
                     handleCustomCursor(player, event.getCursorTransaction().getFinal());
                 }
             }
-        } else if (player.openContainer instanceof ContainerPlayer && !(StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)) {
+        } else if (player.openContainer instanceof ContainerPlayer && !(lastOpenContainer instanceof ContainerPlayer)) {
+            ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+            Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             InteractInventoryEvent.Close event =
                     SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction,
-                            (org.spongepowered.api.item.inventory.Container) StaticMixinHelper.lastOpenContainer);
+                            (org.spongepowered.api.item.inventory.Container) lastOpenContainer);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                if (StaticMixinHelper.lastOpenContainer.getSlot(0) != null) {
-                    player.openContainer = StaticMixinHelper.lastOpenContainer;
+                if (lastOpenContainer.getSlot(0) != null) {
+                    player.openContainer = lastOpenContainer;
                     Slot slot = player.openContainer.getSlot(0);
                     String guiId = "unknown";
                     if (slot.inventory instanceof IInteractionObject) {
@@ -210,12 +216,14 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void handleCreativeClickInventoryEvent(Cause cause, EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn) {
+    public static void handleCreativeClickInventoryEvent(Cause cause, EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn,
+            IPhaseState phaseState, PhaseContext context) {
         IMixinWorld world = ((IMixinWorld) player.worldObj);
+        ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         CauseTracker causeTracker = world.getCauseTracker();
         CreativeInventoryEvent event = null;
         if (packetIn.getSlotId() == -1 && causeTracker.getCapturedEntityItems().size() > 0) {
@@ -265,12 +273,14 @@ public class SpongeCommonEventFactory {
         ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
     }
 
-    public static void handleClickInteractInventoryEvent(Cause cause, EntityPlayerMP player, C0EPacketClickWindow packetIn) {
+    public static void handleClickInteractInventoryEvent(Cause cause, EntityPlayerMP player, C0EPacketClickWindow packetIn, IPhaseState phaseState,
+            PhaseContext phaseContext) {
         IMixinWorld world = ((IMixinWorld) player.worldObj);
         CauseTracker causeTracker = world.getCauseTracker();
+        ItemStackSnapshot lastCursor = phaseContext.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
         ItemStackSnapshot newCursor = player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                         : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
-        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
+        Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
         final Container openContainer = player.openContainer;
@@ -481,6 +491,9 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
+        final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        final Tuple<IPhaseState, PhaseContext> currentPhase = causeTracker.getPhases().peek();
+        Optional<User> playerNotifier = currentPhase.getSecond().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
         BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
         Map<Direction, BlockState> neighbors = new HashMap<Direction, BlockState>();
 
@@ -502,8 +515,8 @@ public class SpongeCommonEventFactory {
         net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
         IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
         if (spongeChunk != null) {
-            if (StaticMixinHelper.packetPlayer != null) {
-                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
+            if (playerNotifier.isPresent()) {
+                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(playerNotifier));
             } else {
                 Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
                 if (notifier.isPresent()) {

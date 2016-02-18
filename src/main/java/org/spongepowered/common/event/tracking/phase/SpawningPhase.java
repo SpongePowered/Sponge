@@ -31,8 +31,8 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.ISpawnablePhase;
-import org.spongepowered.common.event.tracking.ITickingPhase;
+import org.spongepowered.common.event.tracking.ISpawnableState;
+import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
@@ -42,7 +42,7 @@ import javax.annotation.Nullable;
 
 public class SpawningPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ISpawnablePhase {
+    public enum State implements IPhaseState, ISpawnableState {
         DEATH_DROPS_SPAWNING(true),
         DROP_ITEM,
         WORLD_SPAWNER_SPAWNING,
@@ -73,7 +73,7 @@ public class SpawningPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return this == CHUNK_SPAWNING && state instanceof ITickingPhase;
+            return this == CHUNK_SPAWNING && state instanceof ITickingState;
         }
 
         @Override

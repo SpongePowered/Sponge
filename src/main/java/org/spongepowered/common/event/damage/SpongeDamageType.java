@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
+import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
-public class SpongeDamageModifierType implements DamageModifierType {
+public class SpongeDamageType implements DamageType {
 
-    private final String id;
-    private final String name;
+    private String id; // TODO: figure out how to handle mods
+    private String name;
 
-    public SpongeDamageModifierType(String name, String id) {
+    public SpongeDamageType(String name) {
         this.name = name;
-        this.id = id;
+        this.id = name.toLowerCase();
     }
 
     @Override
@@ -48,29 +48,27 @@ public class SpongeDamageModifierType implements DamageModifierType {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(Object obj) {
+        if (obj == null) {
             return false;
         }
-        SpongeDamageModifierType that = (SpongeDamageModifierType) o;
-        return Objects.equal(id, that.id) &&
-               Objects.equal(name, that.name);
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeDamageType other = (SpongeDamageType) obj;
+        return this.id.equals(other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id, name);
+        return Objects.hashCode(this.id, this.name);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-            .add("id", id)
-            .add("name", name)
-            .toString();
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
     }
-
 }

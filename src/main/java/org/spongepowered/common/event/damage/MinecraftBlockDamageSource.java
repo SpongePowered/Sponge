@@ -22,40 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.event.cause.entity.damage;
+package org.spongepowered.common.event.damage;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
-import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
+import net.minecraft.util.DamageSource;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 
-@Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
-public abstract class MixinMinecraftFallingBlockDamageSource extends MixinEntityDamageSource implements FallingBlockDamageSource {
+public class MinecraftBlockDamageSource extends DamageSource {
 
-    @Shadow(remap = false) @Final private ImmutableFallingBlockData fallingBlockData;
+    private final BlockSnapshot blockSnapshot;
+    private final Location<World> location;
 
-    @Override
-    public FallingBlock getSource() {
-        return (FallingBlock) super.getSource();
-    }
-
-    @Override
-    public ImmutableFallingBlockData getFallingBlockData() {
-        return this.fallingBlockData;
+    public MinecraftBlockDamageSource(String damageTypeIn, Location<World> location) {
+        super(damageTypeIn);
+        this.blockSnapshot = location.createSnapshot();
+        this.location = location;
     }
 
     @Override
     public String toString() {
-        return Objects.toStringHelper("FallingBlockDamageSource")
+        return Objects.toStringHelper("BlockDamageSource")
             .add("Name", this.damageType)
-            .add("Type", this.getType().getId())
-            .add("FallingBlock", getSource().toString())
-            .add("Data", getFallingBlockData())
+            .add("BlockSnapshot", this.blockSnapshot)
+            .add("Location", this.location)
             .toString();
     }
-
 }

@@ -22,53 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
-import com.google.common.base.Objects;
-import org.spongepowered.api.event.cause.entity.damage.DamageType;
+public class DamageObject {
 
-public class SpongeDamageType implements DamageType {
-
-    private String id; // TODO: figure out how to handle mods
-    private String name;
-
-    public SpongeDamageType(String name) {
-        this.name = name;
-        this.id = name.toLowerCase();
-    }
-
-    @Override
-    public String getId() {
-        return this.id;
-    }
-
-    @Override
-    public String getName() {
-        return this.name;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final SpongeDamageType other = (SpongeDamageType) obj;
-        return this.id.equals(other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.id, this.name);
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper(this)
-                .add("id", this.id)
-                .add("name", this.name)
-                .toString();
-    }
+    int slot;
+    double ratio;
+    boolean augment;
+    double previousDamage;
 }

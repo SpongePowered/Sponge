@@ -22,34 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.tracking;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.flowpowered.math.vector.Vector3i;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.EntityFallingBlock;
-import net.minecraft.util.EntityDamageSource;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
-import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
+import java.util.LinkedHashMap;
 
-public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
+import javax.annotation.Nullable;
 
-    private final ImmutableFallingBlockData fallingBlockData;
+public class BlockStateTriplet {
 
-    public MinecraftFallingBlockDamageSource(String p_i1567_1_, EntityFallingBlock damageSourceEntityIn) {
-        super(p_i1567_1_, damageSourceEntityIn);
-        this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
+    @Nullable private final LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorList;
+    @Nullable private final BlockSnapshot blockSnapshot;
+    @Nullable private final Transaction<BlockSnapshot> transaction;
+
+    public BlockStateTriplet(@Nullable LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorList,
+            @Nullable BlockSnapshot blockSnapshot, @Nullable Transaction<BlockSnapshot> transaction) {
+        this.populatorList = populatorList;
+        this.blockSnapshot = blockSnapshot;
+        this.transaction = transaction;
     }
 
-    public MinecraftFallingBlockDamageSource(String type, EntityFallingBlock damageSourceEntityIn, ImmutableFallingBlockData data) {
-        super(type, damageSourceEntityIn);
-        this.fallingBlockData = checkNotNull(data);
+    @Nullable
+    public LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> getPopulatorList() {
+        return this.populatorList;
     }
 
-    @Override
-    public EntityFallingBlock getEntity() {
-        return (EntityFallingBlock) super.getEntity();
+    @Nullable
+    public BlockSnapshot getBlockSnapshot() {
+        return this.blockSnapshot;
     }
 
+    @Nullable
+    public Transaction<BlockSnapshot> getTransaction() {
+        return this.transaction;
+    }
 }

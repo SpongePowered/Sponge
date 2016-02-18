@@ -31,8 +31,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ISpawnablePhase;
-import org.spongepowered.common.event.tracking.ITickingPhase;
+import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.List;
@@ -41,7 +40,7 @@ import javax.annotation.Nullable;
 
 public class PacketPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ISpawnablePhase {
+    public enum State implements IPhaseState, ISpawnableState {
         UNKNOWN,
         INVENTORY,
         DROP_ITEM,

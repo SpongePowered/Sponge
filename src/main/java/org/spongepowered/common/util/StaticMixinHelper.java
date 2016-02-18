@@ -48,21 +48,14 @@ public class StaticMixinHelper {
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
     public static EntityPlayerMP packetPlayer = null;
-    public static EntityPlayerMP collidePlayer = null;
-    public static User blockEventUser = null;
     @SuppressWarnings("rawtypes")
     public static Packet processingPacket = null;
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
-    public static ItemStack prePacketProcessItem = null;
-    @SuppressWarnings("rawtypes")
-    public static ItemStackSnapshot lastCursor = null;
-    public static Container lastOpenContainer = null;
     public static int lastDestroyedEntityId = -1;
     public static Cause dropCause = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
-    public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
     public static boolean destructItemDrop = false;
 

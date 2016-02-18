@@ -94,15 +94,14 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.world.DimensionManager;
@@ -1020,9 +1019,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        } else {
+        if (!(entity instanceof EntityPlayer)) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (user.isPresent()) {
@@ -1037,7 +1034,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (!event.isCancelled()) {
             block.onEntityCollidedWithBlock(world, pos, entity);
         }
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
@@ -1048,9 +1044,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        } else {
+        if (!(entity instanceof EntityPlayer)) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (user.isPresent()) {
@@ -1066,7 +1060,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
         }
 
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
@@ -1078,10 +1071,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return;
         }
 
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        }
-
         CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.UP);
         SpongeImpl.postEvent(event);
 
@@ -1089,7 +1078,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             block.onFallenUpon(world, pos, entity, fallDistance);
         }
 
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Override

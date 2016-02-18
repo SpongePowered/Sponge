@@ -22,12 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
-public class DamageObject {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    int slot;
-    double ratio;
-    boolean augment;
-    double previousDamage;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityFallingBlock;
+import net.minecraft.util.EntityDamageSource;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
+import org.spongepowered.api.data.manipulator.mutable.entity.FallingBlockData;
+
+public class MinecraftFallingBlockDamageSource extends EntityDamageSource {
+
+    private final ImmutableFallingBlockData fallingBlockData;
+
+    public MinecraftFallingBlockDamageSource(String p_i1567_1_, EntityFallingBlock damageSourceEntityIn) {
+        super(p_i1567_1_, damageSourceEntityIn);
+        this.fallingBlockData = ((DataHolder) damageSourceEntityIn).get(FallingBlockData.class).get().asImmutable();
+    }
+
+    public MinecraftFallingBlockDamageSource(String type, EntityFallingBlock damageSourceEntityIn, ImmutableFallingBlockData data) {
+        super(type, damageSourceEntityIn);
+        this.fallingBlockData = checkNotNull(data);
+    }
+
+    @Override
+    public EntityFallingBlock getEntity() {
+        return (EntityFallingBlock) super.getEntity();
+    }
+
 }

@@ -22,32 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<EntityDamageSource, EntityDamageSource.Builder>
-    implements EntityDamageSource.Builder {
+public class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder>
+    implements IndirectEntityDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
+    private WeakReference<Entity> proxy = null;
 
     @Override
-    public SpongeEntityDamageSourceBuilder entity(Entity entity) {
+    public IndirectEntityDamageSource.Builder proxySource(Entity projectile) {
+        this.proxy = new WeakReference<>(projectile);
+        return this;
+    }
+
+    @Override
+    public IndirectEntityDamageSource.Builder entity(Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
     @Override
-    public EntityDamageSource build() throws IllegalStateException {
+    public IndirectEntityDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
-        net.minecraft.util.EntityDamageSource damageSource =
-            new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
+        checkState(this.proxy.get() != null);
+        checkState(this.damageType != null);
+        net.minecraft.util.EntityDamageSourceIndirect damageSource =
+            new net.minecraft.util.EntityDamageSourceIndirect(this.damageType.getId(),
+                (net.minecraft.entity.Entity) this.reference.get(),
+                (net.minecraft.entity.Entity) this.proxy.get());
         if (this.creative) {
             damageSource.setDamageAllowedInCreativeMode();
         }
@@ -66,20 +77,22 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
         if (this.explosion) {
             damageSource.setExplosion();
         }
-        return (EntityDamageSource) damageSource;
+        return (IndirectEntityDamageSource) damageSource;
     }
 
     @Override
-    public EntityDamageSource.Builder from(EntityDamageSource value) {
+    public IndirectEntityDamageSource.Builder from(IndirectEntityDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
+        this.proxy = new WeakReference<>(value.getIndirectSource());
         return this;
     }
 
     @Override
-    public SpongeEntityDamageSourceBuilder reset() {
+    public IndirectEntityDamageSource.Builder reset() {
         super.reset();
         this.reference = null;
+        this.proxy = null;
         return this;
     }
 }

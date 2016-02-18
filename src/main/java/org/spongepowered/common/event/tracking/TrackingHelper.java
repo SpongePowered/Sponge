@@ -34,6 +34,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
@@ -70,6 +71,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
+/**
+ * A simple utility for aiding in tracking, either with resolving notifiers
+ * and owners, or proxying out the logic for ticking a block, entity, etc.
+ */
 public class TrackingHelper {
 
     public static final String CURRENT_TICK_BLOCK = "CurrentTickBlock";
@@ -81,6 +86,7 @@ public class TrackingHelper {
     public static final String CURSOR = "Cursor";
     public static final String ITEM_USED = "ItemUsed";
     public static final String IGNORING_CREATIVE = "IgnoringCreative";
+    public static final String PACKET_PLAYER = "PacketPlayer";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -96,7 +102,7 @@ public class TrackingHelper {
             phaseContext.add(NamedCause.notifier(user));
         }
         phaseContext.complete();
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.State.TICKING_BLOCK, phaseContext);
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_BLOCK, phaseContext);
         boolean result = worldIn.fireBlockEvent(event);
         causeTracker.completePhase();
         trackedBlockEvents.remove(event.getPosition());
@@ -108,7 +114,7 @@ public class TrackingHelper {
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state,
                 minecraftWorld, pos), pos, 0);
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.State.RANDOM_TICK_BLOCK, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_TICK_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
                 .complete());
         block.randomTick(minecraftWorld, pos, state, random);
@@ -119,7 +125,7 @@ public class TrackingHelper {
         final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TICKING_BLOCK, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.TICKING_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(snapshot))
                 .complete());
         block.updateTick(minecraftWorld, pos, state, random);
@@ -189,20 +195,20 @@ public class TrackingHelper {
         return cause;
     }
 
-    static void sendItemChangeToPlayer(EntityPlayerMP player) {
-        if (StaticMixinHelper.prePacketProcessItem == null) {
+    static void sendItemChangeToPlayer(EntityPlayerMP player, PhaseContext context) {
+        ItemStack preProcessItem = context.firstNamed(TrackingHelper.ITEM_USED, ItemStack.class).orElse(null);
+        if (preProcessItem == null) {
             return;
         }
 
         // handle revert
         player.isChangingQuantityOnly = true;
-        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.prePacketProcessItem;
+        player.inventory.mainInventory[player.inventory.currentItem] = preProcessItem;
         Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
-            StaticMixinHelper.prePacketProcessItem));
+        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber, preProcessItem));
     }
 
     static void processList(CauseTracker causeTracker, ListIterator<Transaction<BlockSnapshot>> listIterator) {
@@ -222,7 +228,7 @@ public class TrackingHelper {
             final IPhaseState state = currentPhase.getFirst();
             final PhaseContext context = currentPhase.getSecond();
             Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            return state == WorldPhase.State.TICKING_BLOCK && currentTickingBlock.isPresent()
+            return state == WorldPhase.Tick.TICKING_BLOCK && currentTickingBlock.isPresent()
                    && !context.first(PluginContainer.class).isPresent() && !cause.contains(currentTickingBlock);
         }
         return false;
@@ -256,7 +262,7 @@ public class TrackingHelper {
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.State.TICKING_TILE_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_TILE_ENTITY, PhaseContext.start()
             .add(NamedCause.source(tile))
             .complete());
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
@@ -268,7 +274,7 @@ public class TrackingHelper {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.State.TICKING_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .complete());
         entityIn.onUpdate();
@@ -276,7 +282,4 @@ public class TrackingHelper {
         causeTracker.completePhase();
     }
 
-    public static void processDeathDrops(Cause attacker, SpawningPhase.State deathDropsSpawning) {
-
-    }
 }

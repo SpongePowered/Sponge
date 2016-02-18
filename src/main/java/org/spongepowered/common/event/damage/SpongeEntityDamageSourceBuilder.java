@@ -22,48 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.damage;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.item.EntityFallingBlock;
-import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableFallingBlockData;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.FallingBlock;
-import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
+import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
 
 import java.lang.ref.WeakReference;
 
-public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder>
-    implements FallingBlockDamageSource.Builder {
+public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<EntityDamageSource, EntityDamageSource.Builder>
+    implements EntityDamageSource.Builder {
 
     protected WeakReference<Entity> reference = null;
-    private ImmutableFallingBlockData blockData = null;
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder fallingBlock(ImmutableFallingBlockData fallingBlock) {
-        this.blockData = fallingBlock;
-        return this;
-    }
-
-    @Override
-    public SpongeFallingBlockDamgeSourceBuilder entity(Entity entity) {
-        checkArgument(entity instanceof FallingBlock);
+    public SpongeEntityDamageSourceBuilder entity(Entity entity) {
         this.reference = new WeakReference<>(entity);
         return this;
     }
 
     @Override
-    public FallingBlockDamageSource build() throws IllegalStateException {
+    public EntityDamageSource build() throws IllegalStateException {
         checkState(this.reference.get() != null);
-        checkState(this.blockData != null);
-        checkState(this.damageType != null);
-        MinecraftFallingBlockDamageSource damageSource =
-            new MinecraftFallingBlockDamageSource(this.damageType.getId(),
-                (EntityFallingBlock) this.reference.get(),
-                this.blockData);
+        net.minecraft.util.EntityDamageSource damageSource =
+            new net.minecraft.util.EntityDamageSource(this.damageType.getId(), (net.minecraft.entity.Entity) this.reference.get());
         if (this.creative) {
             damageSource.setDamageAllowedInCreativeMode();
         }
@@ -82,22 +66,20 @@ public class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBu
         if (this.explosion) {
             damageSource.setExplosion();
         }
-        return (FallingBlockDamageSource) damageSource;
+        return (EntityDamageSource) damageSource;
     }
 
     @Override
-    public FallingBlockDamageSource.Builder from(FallingBlockDamageSource value) {
+    public EntityDamageSource.Builder from(EntityDamageSource value) {
         super.from(value);
         this.reference = new WeakReference<>(value.getSource());
-        this.blockData = value.getFallingBlockData();
         return this;
     }
 
     @Override
-    public SpongeFallingBlockDamgeSourceBuilder reset() {
+    public SpongeEntityDamageSourceBuilder reset() {
         super.reset();
         this.reference = null;
-        this.blockData = null;
         return this;
     }
 }

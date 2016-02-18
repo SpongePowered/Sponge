@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
-import org.spongepowered.common.event.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 
 import java.util.Optional;
 
