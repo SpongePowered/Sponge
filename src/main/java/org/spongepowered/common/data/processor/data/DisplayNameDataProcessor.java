@@ -75,7 +75,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
     @Override
     public Optional<DisplayNameData> from(DataHolder holder) {
         if (holder instanceof Entity) {
-            @Nullable Text displayName = ((IMixinEntity) holder).getDisplayName();
+            @Nullable Text displayName = ((IMixinEntity) holder).getDisplayNameText();
             if (displayName != null) {
                 return Optional.of(new SpongeDisplayNameData(displayName));
             } else {

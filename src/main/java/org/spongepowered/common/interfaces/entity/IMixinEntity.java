@@ -107,7 +107,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     void setUntargetable(boolean untargetable);
 
     @Nullable
-    Text getDisplayName();
+    Text getDisplayNameText();
 
     void setDisplayName(@Nullable Text displayName);
 

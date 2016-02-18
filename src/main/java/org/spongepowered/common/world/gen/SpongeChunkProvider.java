@@ -105,7 +105,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     private double[] stoneNoise;
     protected boolean prevCapturingTerrain;
     protected boolean prevProcessingCaptures;
-    protected boolean prevRestoringBlocks;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
@@ -301,22 +300,10 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
             ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkProvider, chunkX, chunkZ);
         }
 
-        ImmutableMap.Builder<PopulatorType, List<Transaction<BlockSnapshot>>> populatorChanges = ImmutableMap.builder();
-        for (Map.Entry<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> entry : causeTracker.getCapturedPopulators().entrySet()) {
-            populatorChanges.put(entry.getKey(), ImmutableList.copyOf(entry.getValue().values()));
-        }
         PopulateChunkEvent.Post event =
-                SpongeEventFactory.createPopulateChunkEventPost(populateCause,
-                        populatorChanges.build(),
-                        chunk);
+                SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
-        this.prevRestoringBlocks = causeTracker.isRestoringBlocks();
-        causeTracker.setRestoringBlocks(true);
-        for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
-            causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
-        }
-        causeTracker.setRestoringBlocks(this.prevRestoringBlocks);
         causeTracker.setCapturingTerrainGen(this.prevCapturingTerrain);
         causeTracker.setProcessingCaptureCause(this.prevProcessingCaptures);
         causeTracker.getCapturedPopulators().clear();

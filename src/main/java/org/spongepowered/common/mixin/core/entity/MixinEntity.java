@@ -1172,7 +1172,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Nullable
     @Override
-    public Text getDisplayName() {
+    public Text getDisplayNameText() {
         return this.displayName;
     }
 

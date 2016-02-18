@@ -58,7 +58,7 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
 
     @Override
     protected Optional<Text> getVal(Entity container) {
-        return Optional.ofNullable(((IMixinEntity) container).getDisplayName());
+        return Optional.ofNullable(((IMixinEntity) container).getDisplayNameText());
     }
 
     @Override
