@@ -51,9 +51,9 @@ public class RandomObjectPopulator implements RandomObject {
         this.obj = checkNotNull(obj);
         this.count = checkNotNull(count);
         this.height = checkNotNull(height);
-        checkArgument(Double.isNaN(chance), "Chance must be a number.");
-        checkArgument(Double.isInfinite(chance), "Chance cannot be infinite.");
-        checkArgument(chance < 0, "Chance cannot be negative.");
+        checkArgument(!Double.isNaN(chance), "Chance must be a number.");
+        checkArgument(!Double.isInfinite(chance), "Chance cannot be infinite.");
+        checkArgument(chance >= 0, "Chance cannot be negative.");
         this.chance = chance;
     }
 
