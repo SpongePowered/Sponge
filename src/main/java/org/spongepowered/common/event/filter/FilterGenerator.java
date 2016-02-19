@@ -45,6 +45,7 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.filter.Getter;
 import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.event.filter.cause.After;
 import org.spongepowered.api.event.filter.cause.All;
@@ -66,6 +67,7 @@ import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDel
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.LastCauseFilterSourceDelegate;
@@ -313,6 +315,7 @@ public class FilterGenerator {
         CAUSE_ALL(All.class),
         CAUSE_ROOT(Root.class),
         CAUSE_NAMED(Named.class),
+        GETTER(Getter.class),
         ;
 
         private final Class<? extends Annotation> cls;
@@ -342,6 +345,9 @@ public class FilterGenerator {
             }
             if (this == CAUSE_NAMED) {
                 return new NamedCauseFilterSourceDelegate((Named) anno);
+            }
+            if (this == GETTER) {
+                return new GetterFilterSourceDelegate((Getter) anno);
             }
             throw new UnsupportedOperationException();
         }
