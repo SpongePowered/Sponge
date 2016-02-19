@@ -100,6 +100,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
@@ -109,16 +111,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Shadow public EntityPlayerMP playerEntity;
     @Shadow private IntHashMap field_147372_n;
 
-    @Shadow public abstract void sendPacket(final Packet packetIn);
+    @Shadow public abstract void sendPacket(final Packet<?> packetIn);
 
     private boolean justTeleported = false;
-    private Location<World> lastMoveLocation = null;
+    @Nullable private Location<World> lastMoveLocation = null;
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
 
     private Long lastPacket;
     // Store the last block right-clicked
-    private Item lastItem;
+    @Nullable private Item lastItem;
 
     @Override
     public Player getPlayer() {
@@ -278,7 +280,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci) {
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
@@ -385,7 +387,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "sendPacket", at = @At("HEAD"))
-    public void onResourcePackSend(Packet packet, CallbackInfo ci) {
+    public void onResourcePackSend(Packet<?> packet, CallbackInfo ci) {
         if (packet instanceof IMixinPacketResourcePackSend) {
             IMixinPacketResourcePackSend p = (IMixinPacketResourcePackSend) packet;
             this.sentResourcePacks.put(p.setFakeHash(), p.getResourcePack());

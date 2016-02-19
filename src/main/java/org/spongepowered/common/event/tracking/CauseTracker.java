@@ -139,7 +139,7 @@ public final class CauseTracker {
             printer.print(System.err);
         }
         IPhaseState currentState = this.phases.peekState();
-        if (currentState != null && !currentState.canSwitchTo(state)) {
+        if (!currentState.canSwitchTo(state)) {
 //            throw new IllegalArgumentException(String.format("Cannot switch from %s to %s", currentState, state));
         }
         final TrackingPhase current = this.phases.current();
