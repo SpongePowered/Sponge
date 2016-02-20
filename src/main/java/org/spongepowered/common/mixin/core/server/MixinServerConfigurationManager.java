@@ -323,7 +323,7 @@ public abstract class MixinServerConfigurationManager {
                 Optional.of(originalChannel), originalMessage, originalMessage, player);
         SpongeImpl.postEvent(event);
         // Send to the channel
-        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(player, text)));
         // Sponge end
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {

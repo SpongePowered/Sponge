@@ -353,7 +353,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)),
                 originalChannel, Optional.of(originalChannel), message, message, player);
         SpongeImpl.postEvent(event);
-        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(player, text)));
     }
 
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
