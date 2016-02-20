@@ -27,8 +27,6 @@ package org.spongepowered.common.plugin;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.locale.Dictionary;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
@@ -67,10 +65,5 @@ public final class SpongeApiContainer extends SpongePluginContainer {
     @Override
     public Optional<Object> getInstance() {
         return Optional.of(SpongeImpl.getGame());
-    }
-
-    @Override
-    public Dictionary getDictionary() {
-        return Sponge.getGame().getDictionary();
     }
 }

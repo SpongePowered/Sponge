@@ -34,11 +34,13 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.locale.Dictionary;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.api.plugin.PluginManager;
@@ -69,7 +71,6 @@ public abstract class SpongeGame implements Game {
     private final ConfigManager configManager;
     private final CommandManager commandManager;
     private final ChannelRegistrar channelRegistrar;
-    private final Dictionary dictionary;
 
     private GameState state = GameState.CONSTRUCTION;
 
@@ -84,7 +85,6 @@ public abstract class SpongeGame implements Game {
         this.channelRegistrar = checkNotNull(channelRegistrar, "channelRegistrar");
         this.configManager = new SpongeConfigManager();
         this.commandManager = new SpongeCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
-        this.dictionary = new SpongeGameDictionary<>(this);
     }
 
     @Override
@@ -95,11 +95,6 @@ public abstract class SpongeGame implements Game {
     @Override
     public PluginManager getPluginManager() {
         return this.pluginManager;
-    }
-
-    @Override
-    public Dictionary getDictionary() {
-        return this.dictionary;
     }
 
     @Override
