@@ -31,25 +31,27 @@ import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.GameState;
+import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.network.ChannelRegistrar;
-import org.spongepowered.common.command.SpongeCommandManager;
-import org.spongepowered.api.config.ConfigManager;
-import org.spongepowered.api.data.property.PropertyRegistry;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.command.CommandManager;
-import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.property.PropertyRegistry;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.api.locale.dictionary.Dictionary;
+import org.spongepowered.api.network.ChannelRegistrar;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.scheduler.Scheduler;
+import org.spongepowered.api.service.ServiceManager;
 import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.common.command.SpongeCommandDisambiguator;
-import org.spongepowered.common.data.property.SpongePropertyRegistry;
-import org.spongepowered.common.registry.SpongeGameRegistry;
+import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.common.config.SpongeConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.property.SpongePropertyRegistry;
+import org.spongepowered.common.locale.SpongeGameDictionary;
+import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import javax.inject.Singleton;
@@ -67,6 +69,7 @@ public abstract class SpongeGame implements Game {
     private final ConfigManager configManager;
     private final CommandManager commandManager;
     private final ChannelRegistrar channelRegistrar;
+    private final Dictionary<Game> dictionary;
 
     private GameState state = GameState.CONSTRUCTION;
 
@@ -81,7 +84,7 @@ public abstract class SpongeGame implements Game {
         this.channelRegistrar = checkNotNull(channelRegistrar, "channelRegistrar");
         this.configManager = new SpongeConfigManager();
         this.commandManager = new SpongeCommandManager(LoggerFactory.getLogger(logger.getName()), new SpongeCommandDisambiguator(this));
-
+        this.dictionary = new SpongeGameDictionary<>(this);
     }
 
     @Override
@@ -92,6 +95,11 @@ public abstract class SpongeGame implements Game {
     @Override
     public PluginManager getPluginManager() {
         return this.pluginManager;
+    }
+
+    @Override
+    public Dictionary<Game> getDictionary() {
+        return this.dictionary;
     }
 
     @Override

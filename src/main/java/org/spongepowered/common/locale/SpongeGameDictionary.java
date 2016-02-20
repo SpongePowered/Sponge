@@ -22,56 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
+package org.spongepowered.common.locale;
 
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.locale.dictionary.Dictionary;
+import org.spongepowered.api.locale.Localized;
 import org.spongepowered.common.SpongeImpl;
 
-import java.util.Optional;
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
-@Singleton
-public final class SpongeApiContainer extends SpongePluginContainer {
+public class SpongeGameDictionary<T extends Localized> extends SpongeDictionary<T> {
 
-    protected SpongeApiContainer() {
-    }
+    public static final Path FILE_NAME = Paths.get("dict.conf");
 
-    @Override
-    public Injector getInjector() {
-        return SpongeImpl.getInjector();
-    }
-
-    @Override
-    public String getId() {
-        return SpongeImpl.API_ID;
-    }
-
-    @Override
-    public String getName() {
-        return SpongeImpl.API_NAME;
-    }
-
-    @Override
-    public String getVersion() {
-        return SpongeImpl.API_VERSION;
-    }
-
-    @Override
-    public Logger getLogger() {
-        return SpongeImpl.getSlf4jLogger();
-    }
-
-    @Override
-    public Optional<Object> getInstance() {
-        return Optional.of(SpongeImpl.getGame());
-    }
-
-    @Override
-    public Dictionary<Game> getDictionary() {
-        return Sponge.getGame().getDictionary();
+    public SpongeGameDictionary(T subject) {
+        super(subject, SpongeImpl.getGlobalConfig().getConfig().getGeneral().getLocale(), SpongeImpl.getConfigDir(), FILE_NAME);
+        try {
+            load();
+        } catch (IOException e) {
+            SpongeImpl.getLogger().error("Failed to load game dictionary", e);
+        }
     }
 }

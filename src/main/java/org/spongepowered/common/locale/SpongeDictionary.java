@@ -22,56 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
+package org.spongepowered.common.locale;
 
-import com.google.inject.Injector;
-import com.google.inject.Singleton;
-import org.slf4j.Logger;
-import org.spongepowered.api.Game;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.locale.dictionary.Dictionary;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.locale.Localized;
+import org.spongepowered.api.locale.dictionary.ConfigDictionarySingle;
+import org.spongepowered.api.locale.dictionary.ResourceDictionary;
 
-import java.util.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
+import java.util.Locale;
 
-@Singleton
-public final class SpongeApiContainer extends SpongePluginContainer {
+public class SpongeDictionary<T extends Localized> extends ConfigDictionarySingle<T> implements ResourceDictionary<T> {
 
-    protected SpongeApiContainer() {
+    private final File file;
+
+    public SpongeDictionary(T subject, Locale defaultLocale, Path parent, Path path) {
+        super(subject, defaultLocale);
+        this.file = new File(parent.toString(), path.toString());
     }
 
     @Override
-    public Injector getInjector() {
-        return SpongeImpl.getInjector();
+    public Path getPath(Locale locale) {
+        if (this.file.exists()) {
+            return this.file.toPath();
+        }
+        return this.file.toPath().getFileName();
     }
 
     @Override
-    public String getId() {
-        return SpongeImpl.API_ID;
-    }
-
-    @Override
-    public String getName() {
-        return SpongeImpl.API_NAME;
-    }
-
-    @Override
-    public String getVersion() {
-        return SpongeImpl.API_VERSION;
-    }
-
-    @Override
-    public Logger getLogger() {
-        return SpongeImpl.getSlf4jLogger();
-    }
-
-    @Override
-    public Optional<Object> getInstance() {
-        return Optional.of(SpongeImpl.getGame());
-    }
-
-    @Override
-    public Dictionary<Game> getDictionary() {
-        return Sponge.getGame().getDictionary();
+    public InputStream getSource(Locale locale) throws IOException {
+        if (this.file.exists()) {
+            return Files.newInputStream(file.toPath(), StandardOpenOption.READ);
+        }
+        return ResourceDictionary.super.getSource(locale);
     }
 }
