@@ -140,21 +140,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             final CauseTracker causeTracker = this.getCauseTracker();
             if (!this.isRemote && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
                 originalBlockSnapshot = null;
-                if (causeTracker.isCapturingTerrainGen()) {
-                    if (StaticMixinHelper.runningGenerator != null) {
-                        originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                                (IBlockAccess) this, pos), pos, flags);
-
-                        if (causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator) == null) {
-                            causeTracker.getCapturedPopulators().put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
-                        }
-
-                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                        populatorSnapshotList = causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator);
-                        populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-                    }
-                } else if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks())) {
+                if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks()) && !causeTracker.isCapturingTerrainGen()) {
                     originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                             (IBlockAccess) this, pos), pos, flags);
 
