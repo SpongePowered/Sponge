@@ -50,7 +50,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
-import org.apache.commons.lang3.tuple.MutablePair;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
@@ -160,14 +159,14 @@ public class MoveToPhases {
 
     @SuppressWarnings("unchecked")
     static BlockStateTriplet handleEvents(CauseTracker causeTracker, IBlockState currentState,
-            IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext) {
+        IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
         BlockSnapshot originalBlockSnapshot = null;
         Transaction<BlockSnapshot> transaction = null;
         LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
         final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
         final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
         final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-        if (causeTracker.getPhases().peekState() == WorldPhase.State.POPULATOR_RUNNING) {
+        if (phaseState == WorldPhase.State.POPULATOR_RUNNING) {
             if (runningGenerator != null) {
                 originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                         causeTracker.getMinecraftWorld(), pos), pos, flags);
@@ -194,7 +193,7 @@ public class MoveToPhases {
                 transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
                 populatorSnapshotList = capturedPopulators.get(runningGenerator);
                 populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-            } else if (causeTracker.getPhases().peekState() == BlockPhase.State.BLOCK_DECAY) {
+            } else if (phaseState == BlockPhase.State.BLOCK_DECAY) {
                 // Only capture final state of decay, ignore the rest
                 if (block == Blocks.air) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
@@ -292,27 +291,25 @@ public class MoveToPhases {
         return false;
     }
 
-    static boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ) {
+    static boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ, IPhaseState phaseState,
+        PhaseContext phaseContext) {
         net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
 
 
         // handle actual capturing
-        if (causeTracker.getPhases().peekState().isBusy()) {
-            final PhaseContext context = causeTracker.getPhases().peekContext();
-            if (context != null) {
-                Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-                Optional<Entity> currentTickEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
-                if (currentTickingBlock.isPresent()) {
-                    BlockPos sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                    Block targetBlock = causeTracker.getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
-                    SpongeHooks.tryToTrackBlockAndEntity(causeTracker.getMinecraftWorld(), currentTickingBlock.get(), entityIn, sourcePos,
-                                    targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
-                }
-                if (currentTickEntity.isPresent()) {
-                    Optional<User> creator = ((IMixinEntity) currentTickEntity.get()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-                    }
+        if (phaseState.isBusy()) {
+            Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+            Optional<Entity> currentTickEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
+            if (currentTickingBlock.isPresent()) {
+                BlockPos sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
+                Block targetBlock = causeTracker.getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
+                SpongeHooks.tryToTrackBlockAndEntity(causeTracker.getMinecraftWorld(), currentTickingBlock.get(), entityIn, sourcePos,
+                    targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
+            }
+            if (currentTickEntity.isPresent()) {
+                Optional<User> creator = ((IMixinEntity) currentTickEntity.get()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
+                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
                 }
             }
             if (entityIn instanceof EntityItem) {
@@ -377,7 +374,7 @@ public class MoveToPhases {
                 event = SpongeEventFactory.createDropItemEventCustom(cause, causeTracker.getCapturedEntityItems(),
                         entitySnapshotBuilder.build(), causeTracker.getWorld());
             } else {
-//                causeTracker.getCapturedEntities().add(entity);
+                causeTracker.getCapturedEntities().add(entity);
                 event = SpongeEventFactory.createSpawnEntityEventCustom(cause, causeTracker.getCapturedEntities(),
                         entitySnapshotBuilder.build(), causeTracker.getWorld());
             }
@@ -390,9 +387,9 @@ public class MoveToPhases {
                 causeTracker.getMinecraftWorld().loadedEntityList.add(entityIn);
                 causeTracker.getMixinWorld().onSpongeEntityAdded(entityIn);
                 if (entityIn instanceof EntityItem) {
-//                    causeTracker.getCapturedEntityItems().remove(entity);
+                    causeTracker.getCapturedEntityItems().remove(entity);
                 } else {
-//                    causeTracker.getCapturedEntities().remove(entity);
+                    causeTracker.getCapturedEntities().remove(entity);
                 }
                 return true;
             }

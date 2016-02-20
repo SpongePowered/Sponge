@@ -65,7 +65,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -690,10 +689,11 @@ public final class CauseTracker {
         // track the phases
         final PhaseData currentPhaseContext = this.getPhases().peek();
         final IPhaseState phaseState = currentPhaseContext.getState();
+        final TrackingPhase phase = phaseState.getPhase();
         final PhaseContext phaseContext = currentPhaseContext.getContext();
-        if (!minecraftWorld.isRemote && phaseState != BlockPhase.State.RESTORING_BLOCKS
-            && phaseState != SpawningPhase.State.WORLD_SPAWNER_SPAWNING && phaseState != SpawningPhase.State.CHUNK_SPAWNING) {
-            BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext);
+        // This is going to be handled in the phase.
+        if (!minecraftWorld.isRemote && phase.requiresBlockCapturing(phaseState)) {
+            BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
             originalBlockSnapshot = pair.getBlockSnapshot();
             transaction = pair.getTransaction();
             populatorSnapshotList = pair.getPopulatorList();
@@ -742,8 +742,10 @@ public final class CauseTracker {
         final net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
-        final IPhaseState phaseState = this.getPhases().peekState();
-        if (!minecraftWorld.isRemote && entityIn instanceof EntityItem && phaseState == BlockPhase.State.RESTORING_BLOCKS) {
+        final PhaseData phaseData = this.getPhases().peek();
+        final IPhaseState phaseState = phaseData.state;
+        final PhaseContext context = phaseData.context;
+        if (!minecraftWorld.isRemote && entityIn instanceof EntityItem && phaseState.getPhase().ignoresEntitySpawns(phaseState)) {
             return false;
         }
 
@@ -777,7 +779,7 @@ public final class CauseTracker {
                 return true;
             }
 
-            return MoveToPhases.completeEntitySpawn(entity, cause, this, chunkX, chunkZ);
+            return MoveToPhases.completeEntitySpawn(entity, cause, this, chunkX, chunkZ, phaseState, phaseData.context);
         }
     }
 

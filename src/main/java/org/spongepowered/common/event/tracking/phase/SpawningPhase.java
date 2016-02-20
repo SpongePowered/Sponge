@@ -111,4 +111,9 @@ public class SpawningPhase extends TrackingPhase {
         super(parent);
     }
 
+    @Override
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return currentState == State.CHUNK_SPAWNING || currentState == State.COMPLETE;
+    }
+
 }

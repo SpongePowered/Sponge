@@ -83,6 +83,7 @@ import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -293,6 +294,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         for (Populator populator : populators) {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                     .add(NamedCause.of(TrackingHelper.CAPTURED_POPULATOR, populator.getType()))
+                    .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                     .add(populatorMap)
                     .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {

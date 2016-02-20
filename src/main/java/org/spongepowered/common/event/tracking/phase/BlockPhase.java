@@ -73,6 +73,16 @@ public class BlockPhase extends TrackingPhase {
     }
 
     @Override
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return currentState == State.RESTORING_BLOCKS;
+    }
+
+    @Override
+    public boolean ignoresEntitySpawns(IPhaseState currentState) {
+        return currentState == State.RESTORING_BLOCKS;
+    }
+
+    @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
 
     }

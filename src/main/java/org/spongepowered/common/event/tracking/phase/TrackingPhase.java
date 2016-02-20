@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -52,6 +54,18 @@ public abstract class TrackingPhase {
     public TrackingPhase addChild(TrackingPhase child) {
         this.children.add(child);
         return this;
+    }
+
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return true;
+    }
+
+    public boolean ignoresEntitySpawns(IPhaseState currentState) {
+        return false;
+    }
+
+    public boolean trackEntitySpawns(IPhaseState phaseState, PhaseContext context, Entity entity, Cause cause, int chunkX, int chunkZ) {
+        return false;
     }
 
     public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);

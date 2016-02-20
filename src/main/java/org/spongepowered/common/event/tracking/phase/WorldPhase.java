@@ -58,7 +58,6 @@ public class WorldPhase extends TrackingPhase {
         TERRAIN_GENERATION,
         POPULATOR_RUNNING,
         CHUNK_LOADING,
-
         IDLE;
 
 
@@ -203,5 +202,10 @@ public class WorldPhase extends TrackingPhase {
     public WorldPhase addChild(TrackingPhase child) {
         super.addChild(child);
         return this;
+    }
+
+    @Override
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return currentState instanceof Tick;
     }
 }

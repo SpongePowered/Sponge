@@ -50,12 +50,14 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
@@ -87,6 +89,7 @@ public abstract class MixinSpawnerAnimals {
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
             .add(NamedCause.source(worldServer))
+            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
             .complete());
     }
 
@@ -105,6 +108,7 @@ public abstract class MixinSpawnerAnimals {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
+            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
             .add(NamedCause.source(worldServer))
             .complete());
     }

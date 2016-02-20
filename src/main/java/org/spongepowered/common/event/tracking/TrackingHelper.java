@@ -64,6 +64,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -87,6 +88,9 @@ public class TrackingHelper {
     public static final String ITEM_USED = "ItemUsed";
     public static final String IGNORING_CREATIVE = "IgnoringCreative";
     public static final String PACKET_PLAYER = "PacketPlayer";
+    public static final String CAPTURED_ENTITIES = "CapturedEntities";
+    public static final String COMMAND = "Command";
+    public static final String CAPTURED_ITEMS = "CapturedItems";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -96,7 +100,8 @@ public class TrackingHelper {
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                 minecraftWorld, event.getPosition()), event.getPosition(), 3);
         final PhaseContext phaseContext = PhaseContext.start()
-                .add(NamedCause.source(currentTickBlock));
+            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
+            .add(NamedCause.source(currentTickBlock));
         if (trackedBlockEvents.get(event.getPosition()) != null) {
             User user = trackedBlockEvents.get(event.getPosition());
             phaseContext.add(NamedCause.notifier(user));
@@ -116,6 +121,7 @@ public class TrackingHelper {
                 minecraftWorld, pos), pos, 0);
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_TICK_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .complete());
         block.randomTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
@@ -127,6 +133,7 @@ public class TrackingHelper {
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.TICKING_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(snapshot))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .complete());
         block.updateTick(minecraftWorld, pos, state, random);
         causeTracker.completePhase();
@@ -264,6 +271,7 @@ public class TrackingHelper {
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_TILE_ENTITY, PhaseContext.start()
             .add(NamedCause.source(tile))
+            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
             .complete());
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
@@ -276,6 +284,7 @@ public class TrackingHelper {
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .complete());
         entityIn.onUpdate();
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
