@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.locale;
 
-import org.spongepowered.api.locale.Localized;
-import org.spongepowered.api.locale.dictionary.ConfigDictionarySingle;
-import org.spongepowered.api.locale.dictionary.ResourceDictionary;
+import org.spongepowered.api.locale.ConfigDictionarySingle;
+import org.spongepowered.api.locale.ResourceDictionary;
 
 import java.io.File;
 import java.io.IOException;
@@ -36,11 +35,11 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Locale;
 
-public class SpongeDictionary<T extends Localized> extends ConfigDictionarySingle<T> implements ResourceDictionary<T> {
+public class SpongeDictionary extends ConfigDictionarySingle implements ResourceDictionary {
 
     private final File file;
 
-    public SpongeDictionary(T subject, Locale defaultLocale, Path parent, Path path) {
+    public SpongeDictionary(Object subject, Locale defaultLocale, Path parent, Path path) {
         super(subject, defaultLocale);
         this.file = new File(parent.toString(), path.toString());
     }
