@@ -27,8 +27,11 @@ package org.spongepowered.common.plugin;
 import com.google.common.base.Objects;
 import com.google.inject.Injector;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.ServiceManager;
+import org.spongepowered.api.service.SimpleServiceManager;
 
 public abstract class SpongePluginContainer implements PluginContainer {
+    private final ServiceManager serviceManager = new SimpleServiceManager();
 
     protected SpongePluginContainer() {
     }
@@ -38,6 +41,11 @@ public abstract class SpongePluginContainer implements PluginContainer {
                 .add("id", this.getId())
                 .add("name", this.getName())
                 .add("version", this.getVersion());
+    }
+
+    @Override
+    public ServiceManager getServiceManager() {
+        return serviceManager;
     }
 
     @Override
