@@ -474,7 +474,7 @@ public final class CauseTracker {
                     DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
                         Optional.empty(), Optional.empty(), (Entity) entity);
                     SpongeImpl.getGame().getEventManager().post(event);
-                    event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+                    event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(entity, text)));
 
                     StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
                 }

@@ -232,7 +232,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     Optional.of(originalChannel), Optional.empty(), Optional.empty(),
                     (Entity) entityIn);
             SpongeImpl.getGame().getEventManager().post(event);
-            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(entityIn, text)));
         }
     }
 
