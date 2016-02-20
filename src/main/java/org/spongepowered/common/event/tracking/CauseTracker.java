@@ -148,8 +148,8 @@ public final class CauseTracker {
     }
 
     public void completePhase() {
-        final Tuple<IPhaseState, PhaseContext> tuple = this.phases.peek();
-        IPhaseState state = tuple.getFirst();
+        final PhaseData tuple = this.phases.peek();
+        IPhaseState state = tuple.getState();
         if (this.phases.states.size() > 6) {
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
@@ -166,7 +166,7 @@ public final class CauseTracker {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
-        phase.unwind(this, state, tuple.getSecond());
+        phase.unwind(this, state, tuple.getContext());
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
@@ -606,8 +606,8 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
         if (!this.getMinecraftWorld().isRemote) {
             IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
-            final Tuple<IPhaseState, PhaseContext> phaseContextTuple = this.getPhases().peek();
-            Optional<User> packetUser = phaseContextTuple.getSecond().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
+            final PhaseData phaseContextTuple = this.getPhases().peek();
+            Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
 
             try {
                 if (!this.getMinecraftWorld().isRemote) {
@@ -688,9 +688,9 @@ public final class CauseTracker {
         // Don't capture if we are restoring blocks
         // uncomment when you want to handle block events. for now just want to set block state and
         // track the phases
-        final Tuple<IPhaseState, PhaseContext> currentPhaseContext = this.getPhases().peek();
-        final IPhaseState phaseState = currentPhaseContext.getFirst();
-        final PhaseContext phaseContext = currentPhaseContext.getSecond();
+        final PhaseData currentPhaseContext = this.getPhases().peek();
+        final IPhaseState phaseState = currentPhaseContext.getState();
+        final PhaseContext phaseContext = currentPhaseContext.getContext();
         if (!minecraftWorld.isRemote && phaseState != BlockPhase.State.RESTORING_BLOCKS
             && phaseState != SpawningPhase.State.WORLD_SPAWNER_SPAWNING && phaseState != SpawningPhase.State.CHUNK_SPAWNING) {
             BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext);
@@ -841,10 +841,10 @@ public final class CauseTracker {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            final Tuple<IPhaseState, PhaseContext> peekedPhase = this.getPhases().peek();
-            final Optional<PluginContainer> pluginContainer = peekedPhase.getSecond().firstNamed(NamedCause.SOURCE, PluginContainer.class);
+            final PhaseData peekedPhase = this.getPhases().peek();
+            final Optional<PluginContainer> pluginContainer = peekedPhase.getContext().firstNamed(NamedCause.SOURCE, PluginContainer.class);
             if (!this.getCapturedEntities().isEmpty() && !pluginContainer.isPresent()) {
-                this.handlePostTickCaptures(cause, peekedPhase.getFirst(), peekedPhase.getSecond());
+                this.handlePostTickCaptures(cause, peekedPhase.getState(), peekedPhase.getContext());
             }
 
         }

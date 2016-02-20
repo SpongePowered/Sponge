@@ -80,6 +80,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -490,8 +491,8 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
-        final Tuple<IPhaseState, PhaseContext> currentPhase = causeTracker.getPhases().peek();
-        Optional<User> playerNotifier = currentPhase.getSecond().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
+        final PhaseData currentPhase = causeTracker.getPhases().peek();
+        Optional<User> playerNotifier = currentPhase.getContext().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
         BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
         Map<Direction, BlockState> neighbors = new HashMap<Direction, BlockState>();
 

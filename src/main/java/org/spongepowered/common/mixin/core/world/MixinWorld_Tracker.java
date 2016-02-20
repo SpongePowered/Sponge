@@ -64,6 +64,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
@@ -143,12 +144,12 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final Tuple<IPhaseState, PhaseContext> peek = causeTracker.getPhases().peek();
+        final PhaseData peek = causeTracker.getPhases().peek();
         final Optional<BlockSnapshot> currentTickingBlock;
         final boolean flag;
         if (peek != null) {
-            flag = peek.getFirst() == SpawningPhase.State.CHUNK_SPAWNING || peek.getFirst() == SpawningPhase.State.WORLD_SPAWNER_SPAWNING;
-            currentTickingBlock = peek.getSecond().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+            flag = peek.getState() == SpawningPhase.State.CHUNK_SPAWNING || peek.getState() == SpawningPhase.State.WORLD_SPAWNER_SPAWNING;
+            currentTickingBlock = peek.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         } else {
             flag = false;
             currentTickingBlock = Optional.empty();
@@ -164,7 +165,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onUpdateEntities(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        Optional<Entity> currentTickingEntity = causeTracker.getPhases().peek().getSecond().firstNamed(NamedCause.SOURCE, Entity.class);
+        Optional<Entity> currentTickingEntity = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, Entity.class);
         if (this.isRemote || currentTickingEntity.isPresent()) {
             entityIn.onUpdate();
             return;
@@ -176,7 +177,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
     public void onUpdateTileEntities(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        Optional<TileEntity> currentTickingTileEntity = causeTracker.getPhases().peek().getSecond().firstNamed(NamedCause.SOURCE, TileEntity.class);
+        Optional<TileEntity> currentTickingTileEntity = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, TileEntity.class);
         if (this.isRemote || currentTickingTileEntity.isPresent()) {
             tile.update();
             return;
@@ -191,9 +192,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final Tuple<IPhaseState, PhaseContext> tuple = causeTracker.getPhases().peek();
-        Optional<Entity> currentTickingEntity = tuple.getSecond().firstNamed(NamedCause.SOURCE, Entity.class);
-        Optional<Packet> currentPacket = tuple.getSecond().firstNamed("Packet", Packet.class);
+        final PhaseData tuple = causeTracker.getPhases().peek();
+        Optional<Entity> currentTickingEntity = tuple.getContext().firstNamed(NamedCause.SOURCE, Entity.class);
+        Optional<Packet> currentPacket = tuple.getContext().firstNamed("Packet", Packet.class);
         if (this.isRemote || currentTickingEntity.isPresent() || currentPacket.isPresent()) {
             entity.onUpdate();
             return;

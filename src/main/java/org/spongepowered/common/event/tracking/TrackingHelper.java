@@ -223,10 +223,10 @@ public class TrackingHelper {
     }
 
     static boolean shouldChainCause(CauseTracker tracker, Cause cause) {
-        final Tuple<IPhaseState, PhaseContext> currentPhase = tracker.getPhases().peek();
+        final PhaseData currentPhase = tracker.getPhases().peek();
         if (currentPhase != null) {
-            final IPhaseState state = currentPhase.getFirst();
-            final PhaseContext context = currentPhase.getSecond();
+            final IPhaseState state = currentPhase.getState();
+            final PhaseContext context = currentPhase.getContext();
             Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
             return state == WorldPhase.Tick.TICKING_BLOCK && currentTickingBlock.isPresent()
                    && !context.first(PluginContainer.class).isPresent() && !cause.contains(currentTickingBlock);

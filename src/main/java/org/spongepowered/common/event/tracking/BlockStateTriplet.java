@@ -32,7 +32,7 @@ import java.util.LinkedHashMap;
 
 import javax.annotation.Nullable;
 
-public class BlockStateTriplet {
+public final class BlockStateTriplet {
 
     @Nullable private final LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorList;
     @Nullable private final BlockSnapshot blockSnapshot;

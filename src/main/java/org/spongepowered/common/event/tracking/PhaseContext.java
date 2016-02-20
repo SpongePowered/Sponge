@@ -49,7 +49,7 @@ import javax.annotation.Nullable;
  * {@link Cause} for an {@link Event} versus the context of which
  * a {@link IPhaseState} is being completed with.
  */
-public class PhaseContext {
+public final class PhaseContext {
 
     private boolean isCompleted = false;
     private final LinkedHashSet<NamedCause> contextObjects = new LinkedHashSet<>();

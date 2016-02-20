@@ -29,6 +29,7 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.event.tracking.CauseStack;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -38,7 +39,7 @@ import javax.annotation.Nullable;
 public class TrackingPhases {
 
     private static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
-    private static final Tuple<IPhaseState, PhaseContext> EMPTY_TUPLE = new Tuple<>(GeneralPhase.State.COMPLETE, EMPTY);
+    private static final PhaseData EMPTY_TUPLE = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
 
     private static final int DEFAULT_QUEUE_SIZE = 16;
 
@@ -56,7 +57,7 @@ public class TrackingPhases {
     }
 
     public IPhaseState popState() {
-        return this.states.pop().getFirst();
+        return this.states.pop().getState();
     }
 
     public IPhaseState peekState() {
@@ -75,10 +76,10 @@ public class TrackingPhases {
     }
 
     public PhaseContext popContext() {
-        return this.states.pop().getSecond();
+        return this.states.pop().getContext();
     }
 
-    public Tuple<IPhaseState, PhaseContext> pop() {
+    public PhaseData pop() {
         return this.states.pop();
     }
 
@@ -94,8 +95,8 @@ public class TrackingPhases {
         }
     }
 
-    public Tuple<IPhaseState, PhaseContext> peek() {
-        final Tuple<IPhaseState, PhaseContext> tuple = this.states.peek();
+    public PhaseData peek() {
+        final PhaseData tuple = this.states.peek();
         return tuple == null ? EMPTY_TUPLE : tuple;
     }
 }

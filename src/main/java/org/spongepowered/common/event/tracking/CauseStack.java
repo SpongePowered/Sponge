@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
  */
 public final class CauseStack {
 
-    private final Deque<Tuple<IPhaseState, PhaseContext>> states;
+    private final Deque<PhaseData> states;
 
     public CauseStack(int size) {
         this.states = new ArrayDeque<>(size);
@@ -54,41 +54,41 @@ public final class CauseStack {
 
 
     public Iterable<IPhaseState> currentStates() {
-        return this.states.stream().map(Tuple::getFirst).collect(Collectors.toList());
+        return this.states.stream().map(PhaseData::getState).collect(Collectors.toList());
     }
 
     @Nullable
     public IPhaseState peekState() {
-        final Tuple<IPhaseState, PhaseContext> peek = this.states.peek();
-        return peek == null ? null : peek.getFirst();
+        final PhaseData peek = this.states.peek();
+        return peek == null ? null : peek.getState();
     }
 
     @Nullable
     public PhaseContext peekContext() {
-        final Tuple<IPhaseState, PhaseContext> peek = this.states.peek();
-        return peek == null ? null : peek.getSecond();
+        final PhaseData peek = this.states.peek();
+        return peek == null ? null : peek.getContext();
     }
 
-    public Tuple<IPhaseState, PhaseContext> pop() {
-        final Tuple<IPhaseState, PhaseContext> tuple = this.states.pop();
+    public PhaseData pop() {
+        final PhaseData tuple = this.states.pop();
         return tuple;
     }
 
     @Nullable
     public TrackingPhase current() {
-        final Tuple<IPhaseState, PhaseContext> tuple = this.states.peek();
-        return tuple == null ? null : tuple.getFirst().getPhase();
+        final PhaseData tuple = this.states.peek();
+        return tuple == null ? null : tuple.getState().getPhase();
     }
 
-    public CauseStack push(Tuple<IPhaseState, PhaseContext> tuple) {
+    public CauseStack push(PhaseData tuple) {
         checkNotNull(tuple, "Tuple cannot be null!");
-        checkArgument(tuple.getSecond().isComplete(), "Phase context must be complete: %s", tuple);
+        checkArgument(tuple.getContext().isComplete(), "Phase context must be complete: %s", tuple);
         this.states.push(tuple);
         return this;
     }
 
     public CauseStack push(IPhaseState state, PhaseContext context) {
-        return push(new Tuple<>(state, context));
+        return push(new PhaseData(context, state));
     }
 
     public boolean isEmpty() {
@@ -124,7 +124,7 @@ public final class CauseStack {
     }
 
     @Nullable
-    public Tuple<IPhaseState, PhaseContext> peek() {
+    public PhaseData peek() {
         return this.states.peek();
     }
 }
