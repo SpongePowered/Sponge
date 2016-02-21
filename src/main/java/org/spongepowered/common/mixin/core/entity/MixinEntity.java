@@ -1202,4 +1202,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
+    @Override
+    public boolean canSee(Entity entity) {
+        // note: this implementation will be changing with contextual data
+        Optional<Boolean> optional = entity.get(Keys.INVISIBLE);
+        return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
+    }
+
 }

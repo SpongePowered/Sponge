@@ -22,25 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.network.play.server;
-
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.network.IMixinS38PacketPlayerListItem$AddPlayerData;
-
-@Mixin(S38PacketPlayerListItem.AddPlayerData.class)
-public abstract class MixinS38PacketPlayerListItem$AddPlayerData implements IMixinS38PacketPlayerListItem$AddPlayerData {
-
-    private EntityPlayerMP playerMP;
-
-    @Override
-    public EntityPlayerMP getPlayer() {
-        return this.playerMP;
-    }
-
-    @Override
-    public void setPlayer(EntityPlayerMP player) {
-        this.playerMP = player;
-    }
-}

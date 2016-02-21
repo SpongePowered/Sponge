@@ -60,6 +60,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -93,6 +94,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -139,7 +141,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private boolean chatColours;
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
-    
+    private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
+
     private WorldSettings.GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
@@ -505,4 +508,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Re-create the array, so that attributes are properly re-added
         this.previousEquipment = new ItemStack[5];
     }
+
+    @Override
+    public TabList getTabList() {
+        return this.tabList;
+    }
+
 }

@@ -22,14 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.network;
-
-import net.minecraft.entity.player.EntityPlayerMP;
-
-public interface IMixinS38PacketPlayerListItem$AddPlayerData {
-
-    EntityPlayerMP getPlayer();
-
-    void setPlayer(EntityPlayerMP player);
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault
+package org.spongepowered.common.entity.player.tab;

@@ -22,5 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.network;
+package org.spongepowered.common.interfaces.network.play.server;
+
+import com.mojang.authlib.GameProfile;
+import net.minecraft.util.IChatComponent;
+import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.entity.living.player.tab.TabListEntry;
+import org.spongepowered.common.text.SpongeTexts;
+
+import javax.annotation.Nullable;
+
+public interface IMixinSPacketPlayerListItem {
+
+    void addEntry(GameProfile profile, int latency, WorldSettings.GameType gameMode, @Nullable IChatComponent displayName);
+
+    default void addEntry(TabListEntry entry) {
+        this.addEntry(
+                (GameProfile) entry.getProfile(),
+                entry.getLatency(),
+                (WorldSettings.GameType) (Object) entry.getGameMode(),
+                entry.getDisplayName().isPresent() ? SpongeTexts.toComponent(entry.getDisplayName().get()) : null
+        );
+    }
+
+}
