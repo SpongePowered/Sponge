@@ -28,6 +28,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.locale.Dictionary;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -35,9 +37,12 @@ import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.api.service.sql.SqlService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.command.SpongeCommand;
 import org.spongepowered.common.command.SpongeHelpCommand;
+import org.spongepowered.common.locale.SpongeGameDictionary;
 import org.spongepowered.common.service.ban.SpongeBanService;
 import org.spongepowered.common.service.pagination.SpongePaginationService;
 import org.spongepowered.common.service.rcon.MinecraftRconService;
@@ -61,6 +66,8 @@ public final class SpongeBootstrap {
         registerService(UserStorageService.class, new SpongeUserStorageService());
         registerService(BanService.class, new SpongeBanService());
         registerService(WhitelistService.class, new SpongeWhitelistService());
+        registerService(Dictionary.class, new SpongeGameDictionary(SpongeImpl.getPlugin()));
+        Sponge.getServer().getConsole().sendMessage(Text.get("test").orElse(Text.of("no value found")).toBuilder().color(TextColors.BLUE).build());
         SpongeInternalListeners.getInstance().registerServiceCallback(PermissionService.class, input -> SpongeImpl.getGame().getServer().getConsole().getContainingCollection());
     }
 
@@ -71,6 +78,6 @@ public final class SpongeBootstrap {
     }
 
     private static <T> void registerService(Class<T> serviceClass, T serviceImpl) {
-        SpongeImpl.getGame().getServiceManager().setProvider(SpongeImpl.getPlugin(), serviceClass, serviceImpl);
+        SpongeImpl.getGame().getServiceManager().setProvider(Cause.of(SpongeImpl.getPlugin()), serviceClass, serviceImpl);
     }
 }

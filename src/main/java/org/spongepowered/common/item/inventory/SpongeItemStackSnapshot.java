@@ -31,7 +31,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.GameDictionary;
+import org.spongepowered.api.ItemDictionary;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -342,7 +342,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public GameDictionary.Entry createGameDictionaryEntry() {
+    public ItemDictionary.Entry createGameDictionaryEntry() {
         return new SpongeGameDictionaryEntry.Specific((Item) this.itemType, this.damageValue);
     }
 }
