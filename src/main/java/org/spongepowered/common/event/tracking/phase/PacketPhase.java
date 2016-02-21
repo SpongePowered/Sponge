@@ -45,68 +45,70 @@ import javax.annotation.Nullable;
 
 public class PacketPhase extends TrackingPhase {
 
-    final static int MASK_OUTSIDE = 0x20; // 100000
-    final static int MASK_MODE = 0x1C;    // 011100
-    final static int MASK_BUTTON = 0x03;  // 000011
+    final static int MASK_NONE              = 0x00000;
+    final static int MASK_OUTSIDE           = 0x30000;
+    final static int MASK_MODE              = 0x0FE00;
+    final static int MASK_DRAGOPERATION     = 0x001C0;
+    final static int MASK_DRAGEVENT         = 0x00038;
+    final static int MASK_BUTTON            = 0x00007;
 
-    final static int MASK_ALL = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON;
-    final static int MASK_NORMAL = MASK_MODE | MASK_BUTTON;
-
-    final static int CLICK_WINDOW = 0x00;
-    final static int CLICK_OUTSIDE_WINDOW = 0x20;
-
+    final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON;
+    final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON;
+    
     // Inventory static fields
-    public final static int BUTTON_PRIMARY = 0;
-    public final static int BUTTON_SECONDARY = 1;
-    public final static int BUTTON_MIDDLE = 2;
-    public final static int CLICK_DRAG_LEFT = 2;
-    public final static int CLICK_DRAG_RIGHT = 6;
-    public final static int CLICK_OUTSIDE = -999;
-    public final static int CLICK_OUTSIDE_CREATIVE = -1;
+    final static int CLICK_OUTSIDE          = -999;
+    final static int CLICK_OUTSIDE_CREATIVE = -1;
+    
+    final static int BUTTON_PRIMARY         = 0x01 << 0 << 0;
+    final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
+    final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
-    public final static int MODE_CLICK = 0;
-    public final static int MODE_SHIFT_CLICK = 1 << 2;
-    public final static int MODE_HOTBAR = 2 << 2;
-    public final static int MODE_PICKBLOCK = 3 << 2;
-    public final static int MODE_DROP = 4 << 2;
-    public final static int MODE_DRAG = 5 << 2;
-    public final static int MODE_DOUBLE_CLICK = 6 << 2;
+    final static int MODE_CLICK             = 0x01 << 9 << 0;
+    final static int MODE_SHIFT_CLICK       = 0x01 << 9 << 1;
+    final static int MODE_HOTBAR            = 0x01 << 9 << 2;
+    final static int MODE_PICKBLOCK         = 0x01 << 9 << 3;
+    final static int MODE_DROP              = 0x01 << 9 << 4;
+    final static int MODE_DRAG              = 0x01 << 9 << 5;
+    final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << 6;
 
-    public final static int DRAG_MODE_SPLIT_ITEMS = 0;
-    public final static int DRAG_MODE_ONE_ITEM = 1;
-    public final static int DRAG_STATUS_STARTED = 0;
-    public final static int DRAG_STATUS_ADD_SLOT = 1;
-    public final static int DRAG_STATUS_STOPPED = 2;
+    final static int CLICK_WINDOW           = 0x01 << 16 << 0;
+    final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
+    
+    final static int DRAG_MODE_SPLIT_ITEMS  = 0x01 << 6 << 0;
+    final static int DRAG_MODE_ONE_ITEM     = 0x01 << 6 << 1;
+    
+    final static int DRAG_STATUS_STARTED    = 0x01 << 3 << 0;
+    final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
+    final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
 
     public enum State implements IPhaseState, ISpawnableState {
-        DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW),
-        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_WINDOW),
-        DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW),
-        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_WINDOW),
-        SECONDARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_RIGHT | CLICK_WINDOW),
-        PRIMARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_WINDOW),
-        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL),
-        DRAGGING_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_DRAG_RIGHT, MASK_NORMAL),
-        PRIMARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_PRIMARY, MASK_NORMAL),
-        SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL),
-        PRIMARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_PRIMARY, MASK_NORMAL),
-        SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL),
-        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE),
-        SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE),
         UNKNOWN,
         INVENTORY,
+        DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW),
         DROP_ITEMS,
         DROP_INVENTORY,
         MOVEMENT,
         INTERACTION,
-        IGNORED;
-
+        IGNORED,
+        DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW),
+        SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE),
+        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_WINDOW),
+        PRIMARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_PRIMARY, MASK_NORMAL),
+//        PRIMARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_WINDOW),
+        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL),
+        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_WINDOW),
+        SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL),
+        SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL),
+//        SECONDARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_RIGHT | CLICK_WINDOW),
+//        DRAGGING_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_DRAG_RIGHT, MASK_NORMAL),
+        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE);
+        
         final int stateId;
 
         final int stateMask;
 
         State() {
-            this(1, 0);
+            this(0, MASK_NONE);
         }
 
         State(int stateId) {
@@ -116,6 +118,15 @@ public class PacketPhase extends TrackingPhase {
         State(int stateId, int stateMask) {
             this.stateId = stateId & stateMask;
             this.stateMask = stateMask;
+            System.err.printf(">> %-36s [%22s] [%22s]\n", this.name(), bin(this.stateId), bin(this.stateMask));
+        }
+
+        private static String bin(int value) {
+            String str = Integer.toBinaryString(value);
+            while (str.length() < 18) {
+                str = "0" + str;
+            }
+            return str.substring(0, 2) + " " + str.substring(2, 9) + " " + str.substring(9, 12) + " " + str.substring(12, 15) + " " + str.substring(15, 18);
         }
 
         @Override
@@ -142,21 +153,43 @@ public class PacketPhase extends TrackingPhase {
         }
 
         public boolean matches(int packetState) {
-            return ((packetState & this.stateMask) | this.stateId) == this.stateId;
+            if (this.stateMask == MASK_NONE) {
+                System.err.printf(" -->  [%22s] %-40s", "SKIP", this.name());
+                return false;
+            }
+            
+            int masked = packetState & this.stateMask;
+            int anded = masked & this.stateId;
+            System.err.printf("[%22s] %-40s    STATE=[%22s]    MASKED=[%22s]    ANDED=[%22s]", bin(this.stateId), this.name(), bin(packetState), bin(masked), bin(anded));
+            boolean result = anded == masked;
+            if (result) {
+                System.err.printf("    MATCH");
+            }
+            return false;
         }
 
         public static State fromPacket(C0EPacketClickWindow packetClickWindow) {
             final int clickMode = packetClickWindow.getMode();
             final int usedButton = packetClickWindow.getUsedButton();
             final boolean isClickOutside = packetClickWindow.getSlotId() == CLICK_OUTSIDE;
+            
+            final int dragMode = 0x01 << 6 << (usedButton >> 2 & 3);
+            final int dragEvent = 0x01 << 3 << usedButton & 3;
 
-            final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | clickMode << 2 | usedButton;
+            final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | 0x01 << 9 << clickMode | dragMode | dragEvent  | 0x01 << (usedButton & 3);
+            System.err.printf("======================================================================\n");
+            System.err.printf("Comparing incoming state [%12s] (MODE=%s, DRAGOP=%s, DRAGEVT=%s, OUTSIDE=%s):\n", bin(packetState), clickMode, usedButton >> 2 & 3, usedButton & 3, isClickOutside);
+            State retState = State.INVENTORY;
             for (State state : State.values()) {
                 if (state.matches(packetState)) {
-                    return state;
+                    System.err.printf(" >>>> MATCHED: %s\n", state);
+                    retState = state;
+                } else {
+                    System.err.printf("\n");
                 }
             }
-            return State.INVENTORY;
+            
+            return retState;
         }
     }
 
