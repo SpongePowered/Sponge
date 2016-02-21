@@ -27,11 +27,11 @@ package org.spongepowered.common.registry;
 import com.google.common.base.Preconditions;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import org.spongepowered.api.GameDictionary;
+import org.spongepowered.api.ItemDictionary;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
-public interface SpongeGameDictionaryEntry extends GameDictionary.Entry {
+public interface SpongeGameDictionaryEntry extends ItemDictionary.Entry {
 
     ItemStack createDictionaryStack(int wildcardValue);
 
