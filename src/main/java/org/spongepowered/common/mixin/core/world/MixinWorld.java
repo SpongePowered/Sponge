@@ -37,6 +37,7 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -404,6 +405,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             try {
                 entity = ConstructorUtils.invokeConstructor(entityClass, this);
                 ((net.minecraft.entity.Entity) entity).setPosition(x, y, z);
+                if (entity instanceof EntityLiving) {
+                	((EntityLiving)entity).onInitialSpawn(world.getDifficultyForLocation(new BlockPos((net.minecraft.entity.Entity) entity)), null);
+                }
             } catch (Exception e) {
                 SpongeImpl.getLogger().error(ExceptionUtils.getStackTrace(e));
             }
