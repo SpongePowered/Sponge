@@ -24,25 +24,17 @@
  */
 package org.spongepowered.common.locale;
 
-import org.spongepowered.api.locale.SimpleConfigDictionary;
+import org.spongepowered.api.locale.DefaultPluginDictionary;
 import org.spongepowered.common.SpongeImpl;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
-public class SpongeGameDictionary extends SimpleConfigDictionary {
+public class SpongeGameDictionary extends DefaultPluginDictionary {
 
-    public static final String FILE_NAME = "dict.conf";
-
-    private final Path path;
-
-    public SpongeGameDictionary(Object subject) {
-        super(subject, SpongeImpl.getGlobalConfig().getConfig().getGeneral().getLocale());
-        this.path = Paths.get(SpongeImpl.getConfigDir().toString(), FILE_NAME);
-        this.resolver.primary(this::resolveSource);
+    public SpongeGameDictionary(Object spongePlugin) {
+        super(spongePlugin, SpongeImpl.getGlobalConfig().getConfig().getGeneral().getLocale(), SpongeImpl.getConfigDir());
         try {
             load();
         } catch (IOException e) {
