@@ -35,7 +35,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
@@ -49,7 +48,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -62,7 +60,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
@@ -72,7 +69,6 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.EnumSet;
 import java.util.Map;
@@ -148,7 +144,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         final Optional<BlockSnapshot> currentTickingBlock;
         final boolean flag;
         if (peek != null) {
-            flag = peek.getState() == SpawningPhase.State.CHUNK_SPAWNING || peek.getState() == SpawningPhase.State.WORLD_SPAWNER_SPAWNING;
+            flag = peek.getState() == SpawningPhase.State.CHUNK_SPAWNING || peek.getState() == WorldPhase.State.WORLD_SPAWNER_SPAWNING;
             currentTickingBlock = peek.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         } else {
             flag = false;

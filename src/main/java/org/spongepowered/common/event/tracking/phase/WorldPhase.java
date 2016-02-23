@@ -39,6 +39,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -54,11 +55,12 @@ import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ITickingState {
+    public enum State implements IPhaseState {
         TERRAIN_GENERATION,
         POPULATOR_RUNNING,
         CHUNK_LOADING,
-        IDLE;
+        IDLE,
+        WORLD_SPAWNER_SPAWNING;
 
 
         @Override
@@ -89,21 +91,9 @@ public class WorldPhase extends TrackingPhase {
             return false;
         }
 
-        @Override
-        public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-        }
-
-        @Nullable
-        @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
-            final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
-            return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
-        }
-
     }
 
-    public enum Tick implements IPhaseState, ITickingState {
+    public enum Tick implements ITickingState {
         TICKING_ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {

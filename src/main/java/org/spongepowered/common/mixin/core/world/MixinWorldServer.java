@@ -31,7 +31,6 @@ import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
@@ -42,9 +41,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -67,7 +64,6 @@ import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
@@ -114,7 +110,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         final Optional<BlockSnapshot> currentTickingblock = currentTuple.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         final IPhaseState phaseState = currentTuple.getState();
         if (this.isRemote || currentTickingblock.isPresent() || phaseState == WorldPhase.State.TERRAIN_GENERATION
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING) {
+            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
             block.randomTick(worldIn, pos, state, rand);
             return;
         }
@@ -129,7 +125,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         final Optional<BlockSnapshot> currentTickingblock = currentTuple.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         final IPhaseState phaseState = currentTuple.getState();
         if (this.isRemote || currentTickingblock.isPresent() || phaseState == WorldPhase.State.TERRAIN_GENERATION
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING) {
+            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -144,7 +140,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         final Optional<BlockSnapshot> currentTickingblock = currentTuple.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         final IPhaseState phaseState = currentTuple.getState();
         if (this.isRemote || currentTickingblock.isPresent() || phaseState == WorldPhase.State.TERRAIN_GENERATION
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING) {
+            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -157,7 +153,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         final PhaseData currentPhase = causeTracker.getPhases().peek();
         final IPhaseState phaseState = currentPhase.getState();
         final PhaseContext context = currentPhase.getContext();
-        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING
+        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
             || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
             return;
         }
@@ -203,7 +199,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getPhases().peekState();
-        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING
+        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
             || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
             return fireBlockEvent(event);
         }
@@ -237,7 +233,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getPhases().peekState();
 
-        if (this.isRemote || phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == SpawningPhase.State.WORLD_SPAWNER_SPAWNING
+        if (this.isRemote || phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
             || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
             this.tmpScheduledObj = sbu;
             return;

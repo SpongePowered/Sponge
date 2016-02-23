@@ -45,11 +45,8 @@ public class SpawningPhase extends TrackingPhase {
     public enum State implements IPhaseState, ISpawnableState {
         DEATH_DROPS_SPAWNING(true),
         DROP_ITEM,
-        WORLD_SPAWNER_SPAWNING,
         CHUNK_SPAWNING,
-        ENTITY_SPAWNING,
-        PROCESSING,
-        COMPLETE;
+        ;
 
         private final boolean managed;
 
@@ -63,7 +60,7 @@ public class SpawningPhase extends TrackingPhase {
 
         @Override
         public boolean isBusy() {
-            return this != COMPLETE;
+            return true;
         }
 
         @Override
@@ -86,7 +83,7 @@ public class SpawningPhase extends TrackingPhase {
         public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
             final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
-            if (this == WORLD_SPAWNER_SPAWNING) {
+            if (this == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
             } else if (this == CHUNK_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, capturedEntities, entitySnapshots, world);
@@ -113,7 +110,7 @@ public class SpawningPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState == State.CHUNK_SPAWNING || currentState == State.COMPLETE;
+        return currentState == State.CHUNK_SPAWNING;
     }
 
 }

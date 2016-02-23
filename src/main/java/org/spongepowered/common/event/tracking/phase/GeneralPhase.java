@@ -34,6 +34,8 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import javax.annotation.Nullable;
+
 public class GeneralPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
@@ -72,7 +74,7 @@ public class GeneralPhase extends TrackingPhase {
         }
     }
 
-    public GeneralPhase(TrackingPhase parent) {
+    public GeneralPhase(@Nullable TrackingPhase parent) {
         super(parent);
     }
 

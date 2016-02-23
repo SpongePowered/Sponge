@@ -693,6 +693,7 @@ public final class CauseTracker {
         final PhaseContext phaseContext = currentPhaseContext.getContext();
         // This is going to be handled in the phase.
         if (!minecraftWorld.isRemote && phase.requiresBlockCapturing(phaseState)) {
+            // todo move this to the phase for block capturing since it's perfect fit.
             BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
             originalBlockSnapshot = pair.getBlockSnapshot();
             transaction = pair.getTransaction();
@@ -728,6 +729,37 @@ public final class CauseTracker {
 
             return true;
         }
+    }
+
+    private boolean setInternalBlockState(IBlockState newState, Block block, net.minecraft.world.World minecraftWorld, BlockPos pos, int flags) {
+        if (newState == null) {
+            return false;
+        }
+        Block newBlock = newState.getBlock();
+
+        if (block.getLightOpacity() != newBlock.getLightOpacity() || block.getLightValue() != newBlock.getLightValue())
+        {
+            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.checkLight(pos);
+            minecraftWorld.theProfiler.endSection();
+        }
+
+        if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
+        {
+            minecraftWorld.markBlockForUpdate(pos);
+        }
+
+        if (!minecraftWorld.isRemote && (flags & 1) != 0)
+        {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, newState.getBlock());
+
+            if (block.hasComparatorInputOverride())
+            {
+                minecraftWorld.updateComparatorOutputLevel(pos, block);
+            }
+        }
+
+        return true;
     }
 
     public boolean processSpawnEntity(Entity entity, Cause cause) {

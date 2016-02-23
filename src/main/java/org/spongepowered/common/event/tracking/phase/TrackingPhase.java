@@ -33,16 +33,19 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public abstract class TrackingPhase {
 
-    private final TrackingPhase parent;
+    @Nullable private final TrackingPhase parent;
 
     private final List<TrackingPhase> children = new ArrayList<>();
 
-    public TrackingPhase(TrackingPhase parent) {
+    public TrackingPhase(@Nullable TrackingPhase parent) {
         this.parent = parent;
     }
 
+    @Nullable
     public TrackingPhase getParent() {
         return this.parent;
     }

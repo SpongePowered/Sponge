@@ -91,7 +91,7 @@ public class PluginPhase extends TrackingPhase {
         }
     }
 
-    public PluginPhase(TrackingPhase parent) {
+    public PluginPhase(@Nullable TrackingPhase parent) {
         super(parent);
     }
 

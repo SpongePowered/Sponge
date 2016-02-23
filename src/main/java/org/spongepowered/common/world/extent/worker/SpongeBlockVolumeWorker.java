@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -76,8 +77,14 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
         // TODO integrate with the cause tracker to handle the block sets in
         // a single go, requiring only one event
+        IMixinWorld mixinWorld = null;
         if (destination instanceof IMixinWorld) {
-            final CauseTracker causeTracker = ((IMixinWorld) destination).getCauseTracker();
+            mixinWorld = (IMixinWorld) destination;
+        } else if (destination instanceof Chunk) {
+            mixinWorld = (IMixinWorld) ((Chunk) destination).getWorld();
+        }
+        if (mixinWorld != null) {
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
             causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                     .add(NamedCause.source(this))
                     .complete());
@@ -91,8 +98,8 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                 }
             }
         }
-        if (destination instanceof IMixinWorld) {
-            final CauseTracker causeTracker = ((IMixinWorld) destination).getCauseTracker();
+        if (mixinWorld != null) {
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
             causeTracker.completePhase();
         }
     }
