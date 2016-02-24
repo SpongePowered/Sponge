@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -127,7 +127,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
         return new WrapperCommandSource(sender);
     }
 
-    public static class Located extends WrapperCommandSource implements LocatedSource {
+    public static class Located extends WrapperCommandSource implements Locatable {
 
         Located(ICommandSender sender) {
             super(sender);
@@ -135,12 +135,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
         @Override
         public Location<World> getLocation() {
-            return new Location<>(getWorld(), VecHelper.toVector(this.sender.getPositionVector()));
-        }
-
-        @Override
-        public World getWorld() {
-            return (World) this.sender.getEntityWorld();
+            return new Location<>((World) this.sender.getEntityWorld(), VecHelper.toVector(this.sender.getPositionVector()));
         }
 
     }
