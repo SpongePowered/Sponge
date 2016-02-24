@@ -376,6 +376,7 @@
         "world.gen.MixinChunkProviderFlat",
         "world.gen.MixinChunkProviderGenerate",
         "world.gen.MixinChunkProviderHell",
+        "world.gen.MixinChunkProviderServer",
         "world.gen.MixinMapGenBase",
         "world.gen.MixinMapGenStructure",
         "world.gen.MixinMapGenVillage",

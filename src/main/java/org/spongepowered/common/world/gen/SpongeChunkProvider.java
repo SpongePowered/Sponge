@@ -103,8 +103,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
-    protected boolean prevCapturingTerrain;
-    protected boolean prevProcessingCaptures;
     protected boolean prevRestoringBlocks;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
@@ -257,10 +255,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        this.prevCapturingTerrain = causeTracker.isCapturingTerrainGen();
-        this.prevProcessingCaptures = causeTracker.isProcessingCaptureCause();
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCapturingTerrainGen(true);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -317,8 +311,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
             causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
         }
         causeTracker.setRestoringBlocks(this.prevRestoringBlocks);
-        causeTracker.setCapturingTerrainGen(this.prevCapturingTerrain);
-        causeTracker.setProcessingCaptureCause(this.prevProcessingCaptures);
         causeTracker.getCapturedPopulators().clear();
 
         BlockFalling.fallInstantly = false;
