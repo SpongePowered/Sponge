@@ -26,11 +26,15 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.entity.living.ArmorStand;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 
 @Mixin(EntityArmorStand.class)
+@Implements(@Interface(iface = ArmorStand.class, prefix = "stand$"))
 public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implements ArmorStand {
 
     @Shadow public abstract boolean getShowArms();
@@ -38,6 +42,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void setNoBasePlate(boolean p_175426_1_);
     @Shadow protected abstract void setNoGravity(boolean p_175425_1_);
+    @Shadow(prefix = "shadow$") public abstract void shadow$setMarker(boolean p_181027_1_);
+    @Shadow public abstract boolean hasMarker();
 
     @Override
     public boolean isSmall() {
@@ -80,4 +86,15 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     public void setGravity(boolean gravity) {
         this.setNoGravity(!gravity);
     }
+
+    @Override
+    public boolean isMarker() {
+        return this.hasMarker();
+    }
+
+    @Intrinsic
+    public void stand$setMarker(boolean marker) {
+        this.shadow$setMarker(marker);
+    }
+
 }
