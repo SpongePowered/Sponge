@@ -293,12 +293,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
-
-    }
-
-    @Override
-    public World getWorld() {
-        return (World) this.worldObj;
     }
 
     @Override

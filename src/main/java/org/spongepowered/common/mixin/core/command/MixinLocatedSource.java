@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.command;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,16 +37,11 @@ import org.spongepowered.common.util.VecHelper;
 
 @Mixin(value = {EntityPlayerMP.class, TileEntityCommandBlock.class, EntityMinecartCommandBlock.class},
         targets = {IMixinCommandSender.SIGN_CLICK_SENDER, IMixinCommandSender.EXECUTE_COMMAND_SENDER})
-public abstract class MixinLocatedSource implements LocatedSource, IMixinCommandSource {
+public abstract class MixinLocatedSource implements Locatable, IMixinCommandSource {
 
     @Override
     public Location<World> getLocation() {
         return new Location<>((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
-    }
-
-    @Override
-    public World getWorld() {
-        return (World) asICommandSender().getEntityWorld();
     }
 
 }
