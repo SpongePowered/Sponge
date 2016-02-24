@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
+import net.minecraft.item.crafting.CraftingManager;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.GameRegistry;
@@ -41,7 +42,7 @@ import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.merchant.VillagerRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
@@ -349,8 +350,8 @@ public class SpongeGameRegistry implements GameRegistry {
     }
 
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        throw new UnsupportedOperationException(); // TODO
+    public CraftingRecipeRegistry getCraftingRecipeRegistry() {
+        return (CraftingRecipeRegistry) CraftingManager.getInstance();
     }
 
     @Override

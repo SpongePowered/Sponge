@@ -83,6 +83,8 @@ import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
+import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -156,6 +158,8 @@ import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
+import org.spongepowered.common.item.recipe.crafting.SpongeShapedCraftingRecipeBuilder;
+import org.spongepowered.common.item.recipe.crafting.SpongeShapelessCraftingRecipeBuilder;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
@@ -315,6 +319,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
+            .registerBuilderSupplier(ShapedCraftingRecipe.Builder.class, SpongeShapedCraftingRecipeBuilder::new)
+            .registerBuilderSupplier(ShapelessCraftingRecipe.Builder.class, SpongeShapelessCraftingRecipeBuilder::new)
         ;
     }
 
