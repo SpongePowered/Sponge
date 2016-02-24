@@ -40,7 +40,7 @@ public abstract class MixinChunkProviderServer {
     @Shadow public WorldServer worldObj;
     @Shadow public abstract Chunk provideChunk(int x, int z);
 
-    @Redirect(method = "populate", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
+    @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
     public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         world.getCauseTracker().setProcessingCaptureCause(true);
