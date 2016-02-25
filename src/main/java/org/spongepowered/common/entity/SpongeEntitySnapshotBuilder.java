@@ -33,8 +33,10 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -151,6 +153,14 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
                 return this;
             }
         }
+        return this;
+    }
+
+    @Override
+    public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+        checkNotNull(key, "key");
+        checkState(this.entityType != null, "Must have a valid entity type before applying data!");
+        //TODO
         return this;
     }
 

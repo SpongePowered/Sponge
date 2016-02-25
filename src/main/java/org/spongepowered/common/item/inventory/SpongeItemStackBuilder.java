@@ -37,8 +37,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -86,6 +88,14 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     @Override
     public ItemStack.Builder itemData(ImmutableDataManipulator<?, ?> itemData) throws IllegalArgumentException {
         return itemData(itemData.asMutable());
+    }
+
+    @Override
+    public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
+        checkNotNull(key, "key");
+        checkNotNull(this.type, "Cannot set item data without having set a type first!");
+        //TODO
+        return this;
     }
 
     @Override
