@@ -94,7 +94,10 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
         checkNotNull(key, "key");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
-        //TODO
+        if (this.itemDataSet == null) {
+            this.itemDataSet = new HashSet<>();
+        }
+        this.itemDataSet.stream().filter(manipulator -> manipulator.supports(key)).forEach(manipulator -> itemData(manipulator.set(key, value)));
         return this;
     }
 

@@ -410,7 +410,9 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         Optional<Entity> newEntity = world.get().createEntity(getType(), this.position);
         if (newEntity.isPresent()) {
             net.minecraft.entity.Entity nmsEntity = (net.minecraft.entity.Entity) newEntity.get();
-            nmsEntity.readFromNBT(this.compound);
+            if(this.compound != null) {
+                nmsEntity.readFromNBT(this.compound);
+            }
 
             boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(world.get())));
             if (spawnResult) {

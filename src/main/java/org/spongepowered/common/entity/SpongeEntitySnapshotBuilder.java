@@ -46,11 +46,11 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.persistence.NbtTranslator;
-import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.List;
 import java.util.Optional;
@@ -160,7 +160,10 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
         checkNotNull(key, "key");
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        //TODO
+        if (this.manipulators == null) {
+            this.manipulators = Lists.newArrayList();
+        }
+        this.manipulators.stream().filter(manipulator -> manipulator.supports(key)).forEach(manipulator -> addManipulator(manipulator.with(key, value).get()));
         return this;
     }
 
