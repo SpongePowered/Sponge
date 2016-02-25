@@ -37,6 +37,7 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -50,6 +51,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.List;
@@ -69,6 +71,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Nullable UUID entityId;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+    @Nullable List<ImmutableValue<?>> values;
 
     public SpongeEntitySnapshotBuilder() {
         super(EntitySnapshot.class, 1);
@@ -160,10 +163,10 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
         checkNotNull(key, "key");
         checkState(this.entityType != null, "Must have a valid entity type before applying data!");
-        if (this.manipulators == null) {
-            this.manipulators = Lists.newArrayList();
+        if (this.values == null) {
+            this.values = Lists.newArrayList();
         }
-        this.manipulators.stream().filter(manipulator -> manipulator.supports(key)).forEach(manipulator -> addManipulator(manipulator.with(key, value).get()));
+        values.add(new ImmutableSpongeValue<>(key, value));
         return this;
     }
 
@@ -247,7 +250,13 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     public EntitySnapshot build() {
-        return new SpongeEntitySnapshot(this);
+        EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
+        if(values != null) {
+            for (ImmutableValue<?> value : values) {
+                snapshot = snapshot.with(value).orElse(snapshot);
+            }
+        }
+        return snapshot;
     }
 
     @Override

@@ -49,6 +49,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.util.persistence.NbtTranslator;
 
@@ -65,6 +66,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     private int quantity;
     private int damageValue = 0;
     @Nullable private NBTTagCompound compound;
+    @Nullable private Set<BaseValue<?>> valueSet;
 
     public SpongeItemStackBuilder() {
         reset();
@@ -94,10 +96,10 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
         checkNotNull(key, "key");
         checkNotNull(this.type, "Cannot set item data without having set a type first!");
-        if (this.itemDataSet == null) {
-            this.itemDataSet = new HashSet<>();
+        if (this.valueSet == null) {
+            this.valueSet = new HashSet<>();
         }
-        this.itemDataSet.stream().filter(manipulator -> manipulator.supports(key)).forEach(manipulator -> itemData(manipulator.set(key, value)));
+        valueSet.add(new ImmutableSpongeValue<>(key, value));
         return this;
     }
 
@@ -242,6 +244,11 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         if (this.itemDataSet != null) {
             this.itemDataSet.forEach(stack::offer);
         }
+
+        if (this.valueSet != null) {
+            this.valueSet.forEach(stack::offer);
+        }
+
         return stack;
     }
 }
