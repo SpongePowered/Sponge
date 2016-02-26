@@ -258,7 +258,7 @@ public class SpongeCommonEventFactory {
             }
 
             // Restore cursor
-            handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getOriginal());
+            handleCustomCursor(player, event.getCursorTransaction().getOriginal());
 
             // Restore target slots
             handleSlotRestore(player, event.getTransactions());
@@ -266,8 +266,8 @@ public class SpongeCommonEventFactory {
             handleCustomSlot(player, event.getTransactions());
 
             // Custom cursor
-            if (((ClickInventoryEvent) event).getCursorTransaction().getCustom().isPresent()) {
-                handleCustomCursor(player, ((ClickInventoryEvent) event).getCursorTransaction().getFinal());
+            if (event.getCursorTransaction().getCustom().isPresent()) {
+                handleCustomCursor(player, event.getCursorTransaction().getFinal());
             }
         }
 
@@ -501,7 +501,7 @@ public class SpongeCommonEventFactory {
                 EnumFacing notifiedSide = (EnumFacing) obj;
                 BlockPos offset = pos.offset(notifiedSide);
                 Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<World>((World) world, VecHelper.toVector(offset));
+                Location<World> location = new Location<World>(world, VecHelper.toVector(offset));
                 if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                     neighbors.put(direction, location.getBlock());
                 }

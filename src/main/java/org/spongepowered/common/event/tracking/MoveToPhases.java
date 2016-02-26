@@ -98,39 +98,6 @@ import javax.annotation.Nullable;
  */
 public class MoveToPhases {
 
-    static void handleEntityDestruct(Cause cause, EntityPlayerMP player, Packet<?> packetIn, World minecraftWorld) {
-        if (player != null && packetIn instanceof C02PacketUseEntity) {
-            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
-            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
-                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(minecraftWorld);
-                if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
-                    Player spongePlayer = (Player) player;
-                    MessageChannel originalChannel = spongePlayer.getMessageChannel();
-
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
-                            Optional.empty(), Optional.empty(), (Entity) entity);
-                    SpongeImpl.getGame().getEventManager().post(event);
-                    event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
-
-                    StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
-                }
-            }
-        }
-    }
-
-    static Cause handleKill(Cause cause, EntityPlayerMP player, Packet<?> packetIn) {
-        if (player != null && packetIn instanceof C01PacketChatMessage) {
-            C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
-            if (chatPacket.getMessage().contains("kill")) {
-                if (!cause.contains(player)) {
-                    cause = cause.with(NamedCause.of("Player", player));
-                }
-                StaticMixinHelper.destructItemDrop = true;
-            }
-        }
-        return cause;
-    }
-
     static void handleInventoryEvents(EntityPlayerMP player, Packet<?> packetIn, Container container, IPhaseState phaseState, PhaseContext phaseContext) {
         if (player != null && player.getHealth() > 0 && container != null) {
             boolean ignoringCreative = phaseContext.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
@@ -146,71 +113,6 @@ public class MoveToPhases {
                 }
             }
         }
-    }
-
-    static void handleToss(@Nullable EntityPlayerMP playerMP, Packet<?> packet) {
-        if (playerMP != null && packet instanceof C07PacketPlayerDigging) {
-            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packet;
-            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                StaticMixinHelper.destructItemDrop = false;
-            }
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    static BlockStateTriplet handleEvents(CauseTracker causeTracker, IBlockState currentState,
-        IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
-        BlockSnapshot originalBlockSnapshot = null;
-        Transaction<BlockSnapshot> transaction = null;
-        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
-        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
-        final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-        if (phaseState == WorldPhase.State.POPULATOR_RUNNING) {
-            if (runningGenerator != null) {
-                originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                        causeTracker.getMinecraftWorld(), pos), pos, flags);
-
-                if (capturedPopulators.get(runningGenerator) == null) {
-                    capturedPopulators.put(runningGenerator, new LinkedHashMap<>());
-                }
-
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                populatorSnapshotList = capturedPopulators.get(runningGenerator);
-                populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-            }
-        } else if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks())) {
-            originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                    causeTracker.getMinecraftWorld(), pos), pos, flags);
-
-            if (runningGenerator != null) {
-                if (capturedPopulators.get(runningGenerator) == null) {
-                    capturedPopulators.put(runningGenerator, new LinkedHashMap<>());
-                }
-
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                populatorSnapshotList = capturedPopulators.get(runningGenerator);
-                populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-            } else if (phaseState == BlockPhase.State.BLOCK_DECAY) {
-                // Only capture final state of decay, ignore the rest
-                if (block == Blocks.air) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
-                    causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-                }
-            } else if (block == Blocks.air) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-            } else if (block != currentState.getBlock()) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-            } else {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-            }
-        }
-        return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);
     }
 
     static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions,

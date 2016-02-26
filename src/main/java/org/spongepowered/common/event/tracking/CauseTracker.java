@@ -256,18 +256,6 @@ public final class CauseTracker {
         handleBlockCaptures(cause, phaseState, context);
 
         // todo
-        // Handle Player Toss
-        MoveToPhases.handleToss(player, packetIn);
-
-        // todo
-        // Handle Player kill commands
-        cause = MoveToPhases.handleKill(cause, player, packetIn);
-
-        // todo
-        // Handle Player Entity destruct
-        MoveToPhases.handleEntityDestruct(cause, player, packetIn, getMinecraftWorld());
-
-        // todo
         // Inventory Events
         Optional<Container> openContainer = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class);
         MoveToPhases.handleInventoryEvents(player, packetIn, openContainer.orElse(null), phaseState, context);
@@ -276,16 +264,14 @@ public final class CauseTracker {
         if (this.capturedEntityItems.size() > 0) {
             if (StaticMixinHelper.dropCause != null) {
                 cause = StaticMixinHelper.dropCause;
-                StaticMixinHelper.destructItemDrop = true;
             }
-            handleDroppedItems(cause, phaseState, context);
+            handleDroppedItems(cause, phaseState, context, this.invalidTransactions);
         }
         if (this.capturedEntities.size() > 0) {
             handleEntitySpawns(cause, phaseState, context);
         }
 
         StaticMixinHelper.dropCause = null;
-        StaticMixinHelper.destructItemDrop = false;
         this.invalidTransactions.clear();
     }
 
@@ -526,10 +512,6 @@ public final class CauseTracker {
                     MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, this.invalidTransactions, phaseState, context);
                 }
 
-                if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
-                    StaticMixinHelper.destructItemDrop = true;
-                }
-
                 this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
                 if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
@@ -539,10 +521,7 @@ public final class CauseTracker {
         }
     }
 
-    private void handleDroppedItems(final Cause cause, final IPhaseState phaseState, PhaseContext context) {
-        if (phaseState.getPhase() == TrackingPhases.PACKET) {
-
-        }
+    private void handleDroppedItems(final Cause cause, final IPhaseState phaseState, PhaseContext context, List<Transaction<BlockSnapshot>> invalidTransactions) {
         Iterator<Entity> iter = this.capturedEntityItems.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         MoveToPhases.preProcessItemDrops(cause, this.invalidTransactions, iter, entitySnapshotBuilder);
@@ -552,8 +531,9 @@ public final class CauseTracker {
             return;
         }
         DropItemEvent event;
+        final boolean destructItemOnDrop = context.firstNamed(TrackingHelper.DESTRUCT_ITEM_DROPS, Boolean.class).orElse(false);
 
-        if (StaticMixinHelper.destructItemDrop) {
+        if (destructItemOnDrop) {
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
@@ -672,13 +652,13 @@ public final class CauseTracker {
 
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
-        Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
-        IBlockState currentState = chunk.getBlockState(pos);
+        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        final IBlockState currentState = chunk.getBlockState(pos);
         if (currentState == newState) {
             return false;
         }
 
-        Block block = newState.getBlock();
+        final Block block = newState.getBlock();
         BlockSnapshot originalBlockSnapshot = null;
         BlockSnapshot newBlockSnapshot = null;
         Transaction<BlockSnapshot> transaction = null;
@@ -693,8 +673,7 @@ public final class CauseTracker {
         final PhaseContext phaseContext = currentPhaseContext.getContext();
         // This is going to be handled in the phase.
         if (!minecraftWorld.isRemote && phase.requiresBlockCapturing(phaseState)) {
-            // todo move this to the phase for block capturing since it's perfect fit.
-            BlockStateTriplet pair = MoveToPhases.handleEvents(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
+            BlockStateTriplet pair = phase.captureBlockChange(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
             originalBlockSnapshot = pair.getBlockSnapshot();
             transaction = pair.getTransaction();
             populatorSnapshotList = pair.getPopulatorList();
@@ -729,37 +708,6 @@ public final class CauseTracker {
 
             return true;
         }
-    }
-
-    private boolean setInternalBlockState(IBlockState newState, Block block, net.minecraft.world.World minecraftWorld, BlockPos pos, int flags) {
-        if (newState == null) {
-            return false;
-        }
-        Block newBlock = newState.getBlock();
-
-        if (block.getLightOpacity() != newBlock.getLightOpacity() || block.getLightValue() != newBlock.getLightValue())
-        {
-            minecraftWorld.theProfiler.startSection("checkLight");
-            minecraftWorld.checkLight(pos);
-            minecraftWorld.theProfiler.endSection();
-        }
-
-        if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
-        {
-            minecraftWorld.markBlockForUpdate(pos);
-        }
-
-        if (!minecraftWorld.isRemote && (flags & 1) != 0)
-        {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, newState.getBlock());
-
-            if (block.hasComparatorInputOverride())
-            {
-                minecraftWorld.updateComparatorOutputLevel(pos, block);
-            }
-        }
-
-        return true;
     }
 
     public boolean processSpawnEntity(Entity entity, Cause cause) {

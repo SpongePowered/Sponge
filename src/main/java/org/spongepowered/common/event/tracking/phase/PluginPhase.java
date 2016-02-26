@@ -78,7 +78,7 @@ public class PluginPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
             final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
             if (this == BLOCK_WORKER) {

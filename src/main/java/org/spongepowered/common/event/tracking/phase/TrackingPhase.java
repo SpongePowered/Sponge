@@ -24,14 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.BlockPos;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.CaptureType;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -61,6 +79,47 @@ public abstract class TrackingPhase {
 
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return true;
+    }
+
+    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState,
+            IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+        BlockSnapshot originalBlockSnapshot = null;
+        Transaction<BlockSnapshot> transaction = null;
+        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
+        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
+        final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+        if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks())) {
+            originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                    causeTracker.getMinecraftWorld(), pos), pos, flags);
+
+            if (runningGenerator != null) {
+                if (capturedPopulators.get(runningGenerator) == null) {
+                    capturedPopulators.put(runningGenerator, new LinkedHashMap<>());
+                }
+
+                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
+                transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                populatorSnapshotList = capturedPopulators.get(runningGenerator);
+                populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
+            } else if (phaseState == BlockPhase.State.BLOCK_DECAY) {
+                // Only capture final state of decay, ignore the rest
+                if (block == Blocks.air) {
+                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+                    causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+                }
+            } else if (block == Blocks.air) {
+                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
+                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+            } else if (block != currentState.getBlock()) {
+                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
+                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+            } else {
+                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
+                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+            }
+        }
+        return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);
     }
 
     public boolean ignoresEntitySpawns(IPhaseState currentState) {

@@ -24,21 +24,40 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C01PacketChatMessage;
+import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
+import net.minecraft.world.World;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -101,7 +120,11 @@ public class PacketPhase extends TrackingPhase {
         SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL),
 //        SECONDARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_RIGHT | CLICK_WINDOW),
 //        DRAGGING_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_DRAG_RIGHT, MASK_NORMAL),
-        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE);
+        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE),
+        INTERACT_ENTITY,
+        ATTACK_ENTITY,
+        INTERACT_AT_ENTITY,
+        CHAT, CREATIVE_INVENTORY;
         
         final int stateId;
 
@@ -146,7 +169,7 @@ public class PacketPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
 
 
             return null;
@@ -168,7 +191,7 @@ public class PacketPhase extends TrackingPhase {
             return false;
         }
 
-        public static State fromPacket(C0EPacketClickWindow packetClickWindow) {
+        public static State fromWindowPacket(C0EPacketClickWindow packetClickWindow) {
             final int clickMode = packetClickWindow.getMode();
             final int usedButton = packetClickWindow.getUsedButton();
             final boolean isClickOutside = packetClickWindow.getSlotId() == CLICK_OUTSIDE;
@@ -205,16 +228,73 @@ public class PacketPhase extends TrackingPhase {
         return State.UNKNOWN;
     }
 
-    @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        if (state == State.DROP_ITEM) {
+    public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
+        checkNotNull(packet, "Packet cannot be null!");
+        checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
+        if (state == State.ATTACK_ENTITY) {
+            final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
+            net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(entityPlayerMP.worldObj);
+            context.add(NamedCause.of(TrackingHelper.TARGETED_ENTITY, entity));
+            context.add(NamedCause.of(TrackingHelper.TRACKED_ENTITY_ID, entity.getEntityId()));
+        } else if (state == State.CHAT) {
+            context.add(NamedCause.of("Player", entityPlayerMP));
+            C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
+            if (chatMessage.getMessage().contains("kill")) {
+                context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, true));
+            }
+        } else if (state == State.DROP_ITEM) {
+            context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, false));
+        }
+        return context;
+    }
 
+    @Override
+    public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
+        Packet<?> packetIn = phaseContext.firstNamed(TrackingHelper.CAPTURED_PACKET, Packet.class).get();
+        EntityPlayerMP player = phaseContext.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class).get();
+        World minecraftWorld = player.worldObj;
+
+        if (phaseState == State.DROP_ITEM) {
+
+        } else if (phaseState == State.ATTACK_ENTITY) {
+            final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packetIn;
+            net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(minecraftWorld);
+            if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
+                Player spongePlayer = (Player) player;
+                MessageChannel originalChannel = spongePlayer.getMessageChannel();
+                Cause cause = Cause.of(NamedCause.source(spongePlayer));
+
+                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
+                        Optional.empty(), Optional.empty(), (Entity) entity);
+                SpongeImpl.getGame().getEventManager().post(event);
+                event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+            }
+        } else if (phaseState == State.CREATIVE_INVENTORY) {
+            boolean ignoringCreative = phaseContext.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
+            if (!ignoringCreative) {
+                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
+                                ((C10PacketCreativeInventoryAction) packetIn),
+                                phaseState, phaseContext);
+            }
         }
     }
 
     public PacketPhase(TrackingPhase parent) {
         super(parent);
-
+        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> State.CHAT);
+        this.packetTranslationMap.put(C02PacketUseEntity.class, packet -> {
+            final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
+            final C02PacketUseEntity.Action action = useEntityPacket.getAction();
+            if ( action == C02PacketUseEntity.Action.INTERACT) {
+                return State.INTERACT_ENTITY;
+            } else if (action == C02PacketUseEntity.Action.ATTACK) {
+                return State.ATTACK_ENTITY;
+            } else if (action == C02PacketUseEntity.Action.INTERACT_AT) {
+                return State.INTERACT_AT_ENTITY;
+            } else {
+                return State.UNKNOWN;
+            }
+        });
         this.packetTranslationMap.put(C07PacketPlayerDigging.class, packet -> {
             final C07PacketPlayerDigging playerDigging = (C07PacketPlayerDigging) packet;
             final C07PacketPlayerDigging.Action action = playerDigging.getStatus();
@@ -234,12 +314,9 @@ public class PacketPhase extends TrackingPhase {
                 return State.IGNORED;
             }
         });
-        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> {
-            final C10PacketCreativeInventoryAction creativePacket = (C10PacketCreativeInventoryAction) packet;
+        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> State.CREATIVE_INVENTORY);
+        this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> State.fromWindowPacket((C0EPacketClickWindow) packet));
 
-            return State.IGNORED;
-        });
-        this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> State.fromPacket((C0EPacketClickWindow) packet));
     }
 
 }

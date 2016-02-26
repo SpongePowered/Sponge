@@ -24,9 +24,22 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import net.minecraft.util.BlockPos;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.CaptureType;
+
+import java.util.LinkedHashMap;
 
 public class BlockPhase extends TrackingPhase {
 
@@ -34,7 +47,7 @@ public class BlockPhase extends TrackingPhase {
         BLOCK_DECAY(false),
         RESTORING_BLOCKS,
         POST_NOTIFICATION_EVENT,
-        COMPLETE;
+        ;
 
         private final boolean managed;
 
@@ -48,7 +61,7 @@ public class BlockPhase extends TrackingPhase {
 
         @Override
         public boolean isBusy() {
-            return this != COMPLETE;
+            return true;
         }
 
         @Override
@@ -74,7 +87,25 @@ public class BlockPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState == State.RESTORING_BLOCKS;
+        return currentState != State.RESTORING_BLOCKS;
+    }
+
+    @Override
+    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block block, BlockPos pos,
+            int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+        // Only capture final state of decay, ignore the rest
+        BlockSnapshot originalBlockSnapshot;
+        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+
+        originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                causeTracker.getMinecraftWorld(), pos), pos, flags);
+        if (block == Blocks.air) {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+            causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+            return new BlockStateTriplet(null, originalBlockSnapshot, null);
+
+        }
+        return super.captureBlockChange(causeTracker, currentState, newState, block, pos, flags, phaseContext, phaseState);
     }
 
     @Override

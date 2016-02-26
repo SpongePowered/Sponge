@@ -47,6 +47,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -129,8 +130,10 @@ public class PacketUtil {
                 if (itemUsed != null) {
                     context.add(NamedCause.of(TrackingHelper.ITEM_USED, itemUsed));
                 }
+                final PacketPhase.State packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                 context.complete();
-                causeTracker.switchToPhase(TrackingPhases.PACKET, TrackingPhases.PACKET.getStateForPacket(packetIn), context);
+                causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
                 packetIn.processPacket(netHandler);
                 causeTracker.completePhase();
             }

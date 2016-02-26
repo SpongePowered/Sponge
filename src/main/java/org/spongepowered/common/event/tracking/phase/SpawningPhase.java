@@ -80,7 +80,7 @@ public class SpawningPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
             final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
             if (this == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {

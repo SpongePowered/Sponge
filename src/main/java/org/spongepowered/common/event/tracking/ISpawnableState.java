@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 public interface ISpawnableState extends IPhaseState {
 
     @Nullable
-    SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots);
+    SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots);
 
     @Nullable
     default SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker) {
@@ -54,12 +54,12 @@ public interface ISpawnableState extends IPhaseState {
         List<Entity> capturedEntities = causeTracker.getCapturedEntities();
         List<Transaction<BlockSnapshot>> invalidTransactions = causeTracker.getInvalidTransactions();
         final Tuple<List<EntitySnapshot>, Cause> listCauseTuple =
-                TrackingHelper.processSnapshotsForSpawning(cause, world, capturedEntities, invalidTransactions);
+                TrackingHelper.processSnapshotsForSpawning(cause, capturedEntities, invalidTransactions);
         List<EntitySnapshot> entitySnapshots = listCauseTuple.getFirst();
         cause = listCauseTuple.getSecond();
         if (entitySnapshots.isEmpty()) {
             return null;
         }
-        return createEventPostPrcess(cause, causeTracker, entitySnapshots);
+        return createSpawnEventPostProcess(cause, causeTracker, entitySnapshots);
     }
 }

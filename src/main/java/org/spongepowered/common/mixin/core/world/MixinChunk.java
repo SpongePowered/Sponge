@@ -436,7 +436,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
         int i = pos.getX() & 15;
         int j = pos.getY();
         int k = pos.getZ() & 15;

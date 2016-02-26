@@ -223,18 +223,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
-    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
-            MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalChannel,
-                    Optional.of(originalChannel), Optional.empty(), Optional.empty(),
-                    (Entity) entityIn);
-            SpongeImpl.getGame().getEventManager().post(event);
-            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
-        }
-    }
 
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {

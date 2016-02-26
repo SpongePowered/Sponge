@@ -60,9 +60,8 @@ public class TrackingPhases {
         return this.states.pop().getState();
     }
 
-    public IPhaseState peekState() {
-        final IPhaseState state = this.states.peekState();
-        return state == null ? GeneralPhase.State.COMPLETE : state;
+    public PhaseData pop() {
+        return this.states.pop();
     }
 
     public TrackingPhase current() {
@@ -70,33 +69,18 @@ public class TrackingPhases {
         return current == null ? TrackingPhases.GENERAL : current.getPhase();
     }
 
-    public PhaseContext peekContext() {
-        final PhaseContext context = this.states.peekContext();
-        return context == null ? EMPTY : context;
-    }
-
-    public PhaseContext popContext() {
-        return this.states.pop().getContext();
-    }
-
-    public PhaseData pop() {
-        return this.states.pop();
-    }
-
-    public void gotoState(TrackingPhase phase, IPhaseState state) {
-
-    }
-
-    public void validateEmpty() {
-        if (!this.states.isEmpty()) {
-            System.err.printf("******* Exception!!! The phases should be empty!***********%n");
-            System.err.printf("The current phases: %s%n", this.states);
-            throw new IllegalStateException("The states are not empty!!");
-        }
-    }
-
     public PhaseData peek() {
         final PhaseData tuple = this.states.peek();
         return tuple == null ? EMPTY_TUPLE : tuple;
+    }
+
+    public IPhaseState peekState() {
+        final IPhaseState state = this.states.peekState();
+        return state == null ? GeneralPhase.State.COMPLETE : state;
+    }
+
+    public PhaseContext peekContext() {
+        final PhaseContext context = this.states.peekContext();
+        return context == null ? EMPTY : context;
     }
 }

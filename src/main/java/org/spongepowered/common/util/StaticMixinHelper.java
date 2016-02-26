@@ -53,7 +53,6 @@ public class StaticMixinHelper {
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
-    public static int lastDestroyedEntityId = -1;
     public static Cause dropCause = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean convertingMapFormat = false;

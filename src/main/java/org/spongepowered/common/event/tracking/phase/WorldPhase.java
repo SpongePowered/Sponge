@@ -27,7 +27,11 @@ package org.spongepowered.common.event.tracking.phase;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -38,6 +42,8 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.ITickingState;
@@ -45,6 +51,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.CaptureType;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -139,7 +146,7 @@ public class WorldPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createEventPostPrcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
             final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
             return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
@@ -197,5 +204,33 @@ public class WorldPhase extends TrackingPhase {
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return currentState instanceof Tick;
+    }
+
+    @Override
+    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block block, BlockPos pos,
+            int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+        BlockSnapshot originalBlockSnapshot = null;
+        Transaction<BlockSnapshot> transaction = null;
+        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
+        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
+        final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+        if (phaseState == State.POPULATOR_RUNNING) {
+            if (runningGenerator != null) {
+                originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
+                        causeTracker.getMinecraftWorld(), pos), pos, flags);
+
+                if (capturedPopulators.get(runningGenerator) == null) {
+                    capturedPopulators.put(runningGenerator, new LinkedHashMap<>());
+                }
+
+                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
+                transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
+                populatorSnapshotList = capturedPopulators.get(runningGenerator);
+                populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
+            }
+            return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);
+        }
+        return super.captureBlockChange(causeTracker, currentState, newState, block, pos, flags, phaseContext, phaseState);
     }
 }
