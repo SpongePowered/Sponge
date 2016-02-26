@@ -199,13 +199,16 @@ public class MoveToPhases {
 
 
         // handle actual capturing
+        final List<Entity> capturedItems = phaseContext.getCapturedItems();
+        final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+        final World minecraftWorld = causeTracker.getMinecraftWorld();
         if (phaseState.isBusy()) {
             Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
             Optional<Entity> currentTickEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
             if (currentTickingBlock.isPresent()) {
                 BlockPos sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                Block targetBlock = causeTracker.getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
-                SpongeHooks.tryToTrackBlockAndEntity(causeTracker.getMinecraftWorld(), currentTickingBlock.get(), entityIn, sourcePos,
+                Block targetBlock = minecraftWorld.getBlockState(entityIn.getPosition()).getBlock();
+                SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, currentTickingBlock.get(), entityIn, sourcePos,
                     targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
             }
             if (currentTickEntity.isPresent()) {
@@ -215,9 +218,9 @@ public class MoveToPhases {
                 }
             }
             if (entityIn instanceof EntityItem) {
-                causeTracker.getCapturedEntityItems().add(entity);
+                capturedItems.add(entity);
             } else {
-                causeTracker.getCapturedEntities().add(entity);
+                capturedEntities.add(entity);
             }
             return true;
         } else { // Custom
@@ -271,27 +274,26 @@ public class MoveToPhases {
             ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
             entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
 
+            final org.spongepowered.api.world.World spongeWorld = causeTracker.getWorld();
             if (entityIn instanceof EntityItem) {
-                causeTracker.getCapturedEntityItems().add(entity);
-                event = SpongeEventFactory.createDropItemEventCustom(cause, causeTracker.getCapturedEntityItems(),
-                        entitySnapshotBuilder.build(), causeTracker.getWorld());
+                capturedItems.add(entity);
+                event = SpongeEventFactory.createDropItemEventCustom(cause, capturedItems, entitySnapshotBuilder.build(), spongeWorld);
             } else {
-                causeTracker.getCapturedEntities().add(entity);
-                event = SpongeEventFactory.createSpawnEntityEventCustom(cause, causeTracker.getCapturedEntities(),
-                        entitySnapshotBuilder.build(), causeTracker.getWorld());
+                capturedEntities.add(entity);
+                event = SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshotBuilder.build(), spongeWorld);
             }
             if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
                 if (entityIn instanceof EntityWeatherEffect) {
-                    return addWeatherEffect(entityIn, causeTracker.getMinecraftWorld());
+                    return addWeatherEffect(entityIn, minecraftWorld);
                 }
 
-                causeTracker.getMinecraftWorld().getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entityIn);
-                causeTracker.getMinecraftWorld().loadedEntityList.add(entityIn);
+                minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entityIn);
+                minecraftWorld.loadedEntityList.add(entityIn);
                 causeTracker.getMixinWorld().onSpongeEntityAdded(entityIn);
                 if (entityIn instanceof EntityItem) {
-                    causeTracker.getCapturedEntityItems().remove(entity);
+                    capturedItems.remove(entity);
                 } else {
-                    causeTracker.getCapturedEntities().remove(entity);
+                    capturedEntities.remove(entity);
                 }
                 return true;
             }

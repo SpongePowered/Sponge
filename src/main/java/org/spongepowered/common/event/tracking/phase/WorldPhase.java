@@ -62,7 +62,7 @@ import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState {
+    public enum State implements IPhaseState, ISpawnableState {
         TERRAIN_GENERATION,
         POPULATOR_RUNNING,
         CHUNK_LOADING,
@@ -98,6 +98,18 @@ public class WorldPhase extends TrackingPhase {
             return false;
         }
 
+        @Nullable
+        @Override
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
+                List<EntitySnapshot> entitySnapshots) {
+            final World world = causeTracker.getWorld();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            if (this == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
+                return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
+            } else {
+                return null;
+            }
+        }
     }
 
     public enum Tick implements ITickingState {
@@ -146,9 +158,11 @@ public class WorldPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
+                List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = causeTracker.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+
             return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
         }
 

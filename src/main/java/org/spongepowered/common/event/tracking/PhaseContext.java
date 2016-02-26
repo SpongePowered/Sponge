@@ -29,13 +29,16 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.gen.PopulatorType;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -102,6 +105,20 @@ public final class PhaseContext {
             }
         }
         return Optional.empty();
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<Entity> getCapturedEntities() {
+        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<List<Entity>>) (Class) List.class).orElse(new ArrayList<>());
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public List<Entity> getCapturedItems() {
+        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<List<Entity>>) (Class) List.class).orElse(new ArrayList<>());
+    }
+
+    public List<Transaction<BlockSnapshot>> getInvalidTransactions() {
+        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<List<Transaction<BlockSnapshot>>>) (Class) List.class).orElse(new ArrayList<>());
     }
 
     public Cause toCause() {

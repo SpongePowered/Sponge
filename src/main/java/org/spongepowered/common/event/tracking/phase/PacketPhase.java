@@ -52,7 +52,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.HashMap;
 import java.util.List;
@@ -169,7 +168,8 @@ public class PacketPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
+                List<EntitySnapshot> entitySnapshots) {
 
 
             return null;

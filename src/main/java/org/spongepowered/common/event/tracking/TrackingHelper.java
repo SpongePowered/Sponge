@@ -94,6 +94,7 @@ public class TrackingHelper {
     public static final String TARGETED_ENTITY = "TargetedEntity";
     public static final String TRACKED_ENTITY_ID = "TargetedEntityId";
     public static final String DESTRUCT_ITEM_DROPS = "DestructItemDrops";
+    public static final String INVALID_TRANSACTIONS = "InvalidTransactions";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
