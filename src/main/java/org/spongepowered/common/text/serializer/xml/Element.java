@@ -88,7 +88,7 @@ public abstract class Element {
         if (this.onClick != null) {
             final Matcher matcher = FUNCTION_PATTERN.matcher(this.onClick);
             if (!matcher.matches()) {
-                throw new RuntimeException("Invalid click handler");
+                throw new RuntimeException("Invalid onClick handler in " + getClass().getSimpleName() + " tag.");
             }
 
             final String eventType = matcher.group(1);
@@ -96,7 +96,7 @@ public abstract class Element {
 
             final ClickEvent.Action enumClickAction = ClickEvent.Action.getValueByCanonicalName(eventType.toLowerCase());
             if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action " + eventType);
+                throw new RuntimeException("Unknown onClick action " + eventType + " in " + getClass().getSimpleName() + " tag.");
             }
 
             builder.onClick(((IMixinClickEvent) new ClickEvent(enumClickAction, eventString)).getHandle());
@@ -105,14 +105,14 @@ public abstract class Element {
         if (this.onShiftClick != null) {
             final Matcher matcher = FUNCTION_PATTERN.matcher(this.onShiftClick);
             if (!matcher.matches()) {
-                throw new RuntimeException("Invalid click handler");
+                throw new RuntimeException("Invalid onShiftClick handler in " + getClass().getSimpleName() + " tag.");
             }
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
 
             if (!eventType.equalsIgnoreCase("insert_text")) {
-                throw new RuntimeException("Unknown click action " + eventType);
+                throw new RuntimeException("Unknown onShiftClick action " + eventType + " in " + getClass().getSimpleName() + " tag.");
             }
 
             builder.onShiftClick(TextActions.insertText(eventString));
@@ -121,20 +121,20 @@ public abstract class Element {
         if (this.onHover != null) {
             final Matcher matcher = FUNCTION_PATTERN.matcher(this.onHover);
             if (!matcher.matches()) {
-                throw new RuntimeException("Invalid hover handler");
+                throw new RuntimeException("Invalid onHover handler in " + getClass().getSimpleName() + " tag.");
             }
 
             final String eventType = matcher.group(1);
             final String eventString = matcher.group(2);
-            final HoverEvent.Action enumClickAction = HoverEvent.Action.getValueByCanonicalName(eventType.toLowerCase());
-            if (enumClickAction == null) {
-                throw new RuntimeException("Unknown click action " + eventType);
+            final HoverEvent.Action enumHoverAction = HoverEvent.Action.getValueByCanonicalName(eventType.toLowerCase());
+            if (enumHoverAction == null) {
+                throw new RuntimeException("Unknown onHover action " + eventType + " in " + getClass().getSimpleName() + " tag.");
             }
 
-            if (enumClickAction == HoverEvent.Action.SHOW_TEXT) {
+            if (enumHoverAction == HoverEvent.Action.SHOW_TEXT) {
                 builder.onHover(TextActions.showText(TextSerializers.TEXT_XML.deserialize(eventString)));
             } else {
-                builder.onHover(((IMixinHoverEvent) new HoverEvent(enumClickAction,
+                builder.onHover(((IMixinHoverEvent) new HoverEvent(enumHoverAction,
                         SpongeTexts.toComponent(TextSerializers.TEXT_XML.deserialize(eventString)))).getHandle());
             }
         }
