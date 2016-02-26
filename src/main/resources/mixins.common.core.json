@@ -294,6 +294,7 @@
         "item.MixinItemToolMaterial",
         "item.data.MixinItemEditableBook",
         "item.data.MixinItemPotion",
+        "item.data.MixinItemWritableBook",
         "item.inventory.MixinContainer",
         "item.inventory.MixinSlot",
         "item.inventory.TraitInventoryAdapter",

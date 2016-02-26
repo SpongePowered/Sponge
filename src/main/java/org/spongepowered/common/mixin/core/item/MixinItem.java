@@ -33,6 +33,7 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
+import org.spongepowered.api.data.manipulator.mutable.item.LoreData;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -102,18 +103,13 @@ public abstract class MixinItem implements ItemType, IMixinItem, SpongeGameDicti
         if (!itemStack.hasTagCompound()) {
             return;
         }
+
+        org.spongepowered.api.item.inventory.ItemStack spongeStack = ((org.spongepowered.api.item.inventory.ItemStack) itemStack);
         if (itemStack.isItemEnchanted()) {
             list.add(getData(itemStack, EnchantmentData.class));
         }
-        if (itemStack.getTagCompound().hasKey("display")) {
-            final NBTTagCompound displayCompound = itemStack.getTagCompound().getCompoundTag("display");
-            if (displayCompound.hasKey("Name")) {
-                list.add(getData(itemStack, DisplayNameData.class));
-            }
-            if (displayCompound.hasKey("Lore")) {
-                // list.add(getData(itemStack, LoreData.class)); // TODO implement
-            }
-        }
+        spongeStack.get(DisplayNameData.class).ifPresent(list::add);
+        spongeStack.get(LoreData.class).ifPresent(list::add);
     }
 
     protected final <T extends DataManipulator<T, ?>> T getData(ItemStack itemStack, Class<T> manipulatorClass) {

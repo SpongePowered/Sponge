@@ -24,32 +24,24 @@
  */
 package org.spongepowered.common.mixin.core.item.data;
 
-import net.minecraft.item.ItemEditableBook;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemWritableBook;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.item.MixinItem;
 
 import java.util.List;
 
-@Mixin(ItemEditableBook.class)
-/**
- * This is actually the written, uneditable book class (the MCP name is bad)
- */
-public abstract class MixinItemEditableBook extends MixinItem {
+@Mixin(ItemWritableBook.class)
+public abstract class MixinItemWritableBook extends MixinItem {
 
     @Override
     public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
         super.getManipulatorsFor(itemStack, list);
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = (org.spongepowered.api.item.inventory.ItemStack) itemStack;
-
-        spongeStack.get(AuthorData.class).ifPresent(list::add);
-        spongeStack.get(PagedData.class).ifPresent(list::add);
-        spongeStack.get(GenerationData.class).ifPresent(list::add);
+        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(AuthorData.class).ifPresent(list::add);
+        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(PagedData.class).ifPresent(list::add);
     }
+
 }
