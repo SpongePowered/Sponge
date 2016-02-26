@@ -326,7 +326,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         if (!getAllowNether()) {
             SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
-                    + "dimensions besides [{}}] will be skipped.", overworldFolder);
+                    + "dimensions besides [{}] will be skipped.", overworldFolder);
         }
 
         WorldMigrator.migrateWorldsTo(SpongeImpl.getGame().getSavesDirectory().resolve(overworldFolder));
