@@ -29,6 +29,7 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.command.CommandException;
@@ -37,6 +38,7 @@ import org.spongepowered.api.command.CommandSource;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -46,20 +48,20 @@ abstract class ActivePagination {
 
     private static final Text SLASH_TEXT = Text.of("/");
     private static final Text DIVIDER_TEXT = Text.of(" ");
-    private final WeakReference<CommandSource> src;
+    private final WeakReference<MessageReceiver> src;
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
     private final Text prevPageText;
     private final Text title;
-    private final Text header;
-    private final Text footer;
+    private final Optional<Text> header;
+    private final Optional<Text> footer;
     private int currentPage;
     private final int maxContentLinesPerPage;
-    protected final PaginationCalculator<CommandSource> calc;
-    private final String padding;
+    protected final PaginationCalculator<MessageReceiver> calc;
+    private final Text padding;
 
-    public ActivePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Text title,
-            Text header, Text footer, String padding) {
+    public ActivePagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, Text title,
+            Optional<Text> header, Optional<Text> footer, Text padding) {
         this.src = new WeakReference<>(src);
         this.calc = calc;
         this.title = title;
@@ -78,11 +80,11 @@ abstract class ActivePagination {
         if (title != null) {
             maxContentLinesPerPage -= calc.getLines(src, title);
         }
-        if (header != null) {
-            maxContentLinesPerPage -= calc.getLines(src, header);
+        if (header.isPresent()) {
+            maxContentLinesPerPage -= calc.getLines(src, header.get());
         }
-        if (footer != null) {
-            maxContentLinesPerPage -= calc.getLines(src, footer);
+        if (footer.isPresent()) {
+            maxContentLinesPerPage -= calc.getLines(src, footer.get());
         }
         this.maxContentLinesPerPage = maxContentLinesPerPage;
 
@@ -121,7 +123,7 @@ abstract class ActivePagination {
     }
 
     public void specificPage(int page) throws CommandException {
-        CommandSource src = this.src.get();
+        MessageReceiver src = this.src.get();
         if (src == null) {
             throw new CommandException(t("Source for pagination %s is no longer active!", getId()));
         }
@@ -132,10 +134,7 @@ abstract class ActivePagination {
         if (title != null) {
             toSend.add(title);
         }
-        Text header = this.header;
-        if (header != null) {
-            toSend.add(header);
-        }
+        this.header.ifPresent(toSend::add);
 
         for (Text line : getLines(page)) {
             toSend.add(line);
@@ -145,9 +144,7 @@ abstract class ActivePagination {
         if (footer != null) {
             toSend.add(this.calc.center(src, footer, this.padding));
         }
-        if (this.footer != null) {
-            toSend.add(this.footer);
-        }
+        this.footer.ifPresent(toSend::add);
         src.sendMessages(toSend);
     }
 

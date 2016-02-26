@@ -29,7 +29,7 @@ import static org.spongepowered.api.command.args.GenericArguments.string;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.service.pagination.PaginationBuilder;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -76,7 +76,7 @@ public class SpongeHelpCommand {
                     throw new CommandException(Text.of("No such command: ", command.get()));
                 }
 
-                PaginationBuilder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
+                PaginationList.Builder builder = SpongeImpl.getGame().getServiceManager().provide(PaginationService.class).get().builder();
                 builder.title(Text.builder("Available commands:").color(TextColors.DARK_GREEN).build());
 
                 TreeSet<CommandMapping> commands = new TreeSet<>(COMMAND_COMPARATOR);

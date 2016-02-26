@@ -34,10 +34,12 @@ import org.spongepowered.api.service.pagination.PaginationCalculator;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -49,8 +51,8 @@ class IterablePagination extends ActivePagination {
     private final PeekingIterator<Map.Entry<Text, Integer>> countIterator;
     private int lastPage;
 
-    public IterablePagination(CommandSource src, PaginationCalculator<CommandSource> calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
-            Text header, Text footer, String padding) {
+    public IterablePagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
+            Optional<Text> header, Optional<Text> footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }
