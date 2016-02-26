@@ -39,6 +39,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -51,7 +52,7 @@ class IterablePagination extends ActivePagination {
     private int lastPage;
 
     public IterablePagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, Iterable<Map.Entry<Text, Integer>> counts, Text title,
-            Text header, Text footer, Text padding) {
+            Optional<Text> header, Optional<Text> footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }

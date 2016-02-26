@@ -34,6 +34,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Pagination working with a list of values.
@@ -42,7 +43,7 @@ class ListPagination extends ActivePagination {
     private final List<List<Text>> pages;
 
     public ListPagination(MessageReceiver src, PaginationCalculator<MessageReceiver> calc, List<Map.Entry<Text, Integer>> lines,
-            Text title, Text header, Text footer, Text padding) {
+            Text title, Optional<Text> header, Optional<Text> footer, Text padding) {
         super(src, calc, title, header, footer, padding);
         List<List<Text>> pages = new ArrayList<>();
         List<Text> currentPage = new ArrayList<>();

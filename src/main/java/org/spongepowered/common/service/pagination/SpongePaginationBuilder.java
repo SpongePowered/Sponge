@@ -32,12 +32,16 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
+import java.util.Optional;
+
+import javax.annotation.Nullable;
+
 public class SpongePaginationBuilder implements PaginationList.Builder {
     private final SpongePaginationService service;
     private Iterable<Text> contents;
     private Text title;
-    private Text header;
-    private Text footer;
+    private Optional<Text> header;
+    private Optional<Text> footer;
     private Text paginationSpacer = Text.of("=");
 
     private PaginationList paginationList;
@@ -68,15 +72,15 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder header(Text header) {
-        this.header = header;
+    public PaginationList.Builder header(@Nullable Text header) {
+        this.header = Optional.ofNullable(header);
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder footer(Text footer) {
-        this.footer = footer;
+    public PaginationList.Builder footer(@Nullable Text footer) {
+        this.footer = Optional.ofNullable(footer);
         this.paginationList = null;
         return this;
     }

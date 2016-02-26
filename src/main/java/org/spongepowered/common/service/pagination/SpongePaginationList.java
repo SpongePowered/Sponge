@@ -38,6 +38,7 @@ import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -46,11 +47,11 @@ public class SpongePaginationList implements PaginationList {
     private final SpongePaginationService service;
     private Iterable<Text> contents;
     private Text title;
-    private Text header;
-    private Text footer;
+    private Optional<Text> header;
+    private Optional<Text> footer;
     private Text paginationSpacer;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header, Text footer, Text paginationSpacer) {
+    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Optional<Text> header, Optional<Text> footer, Text paginationSpacer) {
         this.service = service;
         this.contents = contents;
         this.title = title;
@@ -70,12 +71,12 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public Text getHeader() {
+    public Optional<Text> getHeader() {
         return this.header;
     }
 
     @Override
-    public Text getFooter() {
+    public Optional<Text> getFooter() {
         return this.footer;
     }
 
