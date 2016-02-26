@@ -121,6 +121,13 @@ class UserDiscoverer {
         SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
+
+            // Some mods store other files in the 'playerdata' folder, so
+            // we need to ensure that the filename is a valid UUID
+            if (playerUuid.split("-").length != 5) {
+                continue;
+            }
+
             GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
             if (profile != null) {
                 profiles.add((org.spongepowered.api.profile.GameProfile) profile);

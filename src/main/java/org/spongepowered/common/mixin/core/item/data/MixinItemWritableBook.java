@@ -22,19 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable;
+package org.spongepowered.common.mixin.core.item.data;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
-import org.spongepowered.api.data.manipulator.mutable.SkullData;
-import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemWritableBook;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
+import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.item.MixinItem;
 
-public class ImmutableSpongeSkullData extends AbstractImmutableSingleCatalogData<SkullType, ImmutableSkullData, SkullData> implements ImmutableSkullData {
+import java.util.List;
 
-    public ImmutableSpongeSkullData(SkullType value) {
-        super(ImmutableSkullData.class, value, SkullTypes.SKELETON, Keys.SKULL_TYPE, SpongeSkullData.class);
+@Mixin(ItemWritableBook.class)
+public abstract class MixinItemWritableBook extends MixinItem {
+
+    @Override
+    public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
+        super.getManipulatorsFor(itemStack, list);
+        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(AuthorData.class).ifPresent(list::add);
+        ((org.spongepowered.api.item.inventory.ItemStack) itemStack).get(PagedData.class).ifPresent(list::add);
     }
+
 }

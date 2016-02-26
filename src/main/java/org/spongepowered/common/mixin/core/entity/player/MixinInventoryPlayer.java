@@ -25,18 +25,21 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.HumanInventory;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.interfaces.entity.player.IMixinInventoryPlayer;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.EquipmentSlotAdapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
@@ -50,7 +53,10 @@ import org.spongepowered.common.item.inventory.observer.InventoryEventArgs;
 import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
-public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter, HumanInventory {
+public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, HumanInventory {
+    
+    @Shadow public int currentItem;
+    @Shadow public EntityPlayer player;
 
     protected SlotCollection slots;
     protected Fabric<IInventory> inventory;
@@ -102,6 +108,16 @@ public abstract class MixinInventoryPlayer implements MinecraftInventoryAdapter,
     @Override
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;
+    }
+    
+    @Override
+    public void setSelectedItem(int itemIndex, boolean notify) {
+        itemIndex = itemIndex % 9;
+        if (notify && this.player instanceof EntityPlayerMP) {
+            S09PacketHeldItemChange packet = new S09PacketHeldItemChange(itemIndex);
+            ((EntityPlayerMP)this.player).playerNetServerHandler.sendPacket(packet);
+        }
+        this.currentItem = itemIndex;
     }
 
 }

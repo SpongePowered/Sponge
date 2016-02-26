@@ -28,12 +28,15 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.ChunkProviderFlat;
+import net.minecraft.world.gen.FlatGeneratorInfo;
 import net.minecraft.world.gen.MapGenBase;
-import net.minecraft.world.gen.feature.WorldGenLakes;
 import net.minecraft.world.gen.structure.MapGenStructure;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.biome.BiomeGenerationSettings;
+import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
@@ -57,8 +60,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
     @Shadow @Final private List<MapGenStructure> structureGenerators;
     @Shadow @Final private boolean hasDecoration;
     @Shadow @Final private boolean hasDungeons;
-    @Shadow private WorldGenLakes waterLakeGenerator;
-    @Shadow private WorldGenLakes lavaLakeGenerator;
+    @Shadow @Final private FlatGeneratorInfo flatWorldGenInfo;
 
     @Override
     public void addPopulators(WorldGenerator generator) {
@@ -71,7 +73,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
             }
         }
 
-        if (this.waterLakeGenerator != null) {
+        if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lake")) {
             Lake lake = Lake.builder()
                     .chance(1 / 4d)
                     .liquidType((BlockState) Blocks.water.getDefaultState())
@@ -82,7 +84,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
             generator.getPopulators().add(lake);
         }
 
-        if (this.lavaLakeGenerator != null) {
+        if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lava_lake")) {
             Lake lake = Lake.builder()
                     .chance(1 / 8d)
                     .liquidType((BlockState) Blocks.water.getDefaultState())
@@ -99,6 +101,15 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
                     .attempts(8)
                     .build();
             generator.getPopulators().add(dungeon);
+        }
+        
+        for (BiomeType type : Sponge.getRegistry().getAllOf(BiomeType.class)) {
+            BiomeGenerationSettings settings = generator.getBiomeSettings(type);
+            settings.getGroundCoverLayers().clear();
+            if (!this.hasDecoration) {
+                settings.getPopulators().clear();
+                settings.getGenerationPopulators().clear();
+            }
         }
     }
 

@@ -326,7 +326,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         if (!getAllowNether()) {
             SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
-                    + "dimensions besides [{}}] will be skipped.", overworldFolder);
+                    + "dimensions besides [{}] will be skipped.", overworldFolder);
         }
 
         WorldMigrator.migrateWorldsTo(SpongeImpl.getGame().getSavesDirectory().resolve(overworldFolder));
@@ -439,7 +439,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             worldServer.initialize(worldSettings);
             worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
-            if (!this.isSinglePlayer()) {
+            // This code changes from Mojang's to account for per-world API-set GameModes.
+            if (!this.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(WorldSettings.GameType.NOT_SET)) {
                 worldServer.getWorldInfo().setGameType(this.getGameType());
             }
 

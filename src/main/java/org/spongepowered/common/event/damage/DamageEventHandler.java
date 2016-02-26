@@ -316,11 +316,12 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createAbsorptionModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (entityLivingBase.isPotionActive(Potion.absorption)) {
+        final float absorptionAmount = entityLivingBase.getAbsorptionAmount();
+        if (absorptionAmount > 0) {
             Function<? super Double, Double> function = damage ->
-                -(Math.max(damage - Math.max(damage - entityLivingBase.getAbsorptionAmount(), 0.0F), 0.0F));
+                -(Math.max(damage - Math.max(damage - absorptionAmount, 0.0F), 0.0F));
             DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(NamedCause.of(DamageEntityEvent.ABSORPTION, entityLivingBase.getActivePotionEffect(Potion.absorption)),
+                .cause(Cause.of(NamedCause.of(DamageEntityEvent.ABSORPTION, entityLivingBase),
                                 NamedCause.of(DamageEntityEvent.CREATOR, entityLivingBase)))
                 .type(DamageModifierTypes.ABSORPTION)
                 .build();
