@@ -62,7 +62,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
-import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.chunk.EmptyChunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -80,13 +79,13 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -472,10 +471,13 @@ public final class CauseTracker {
                     Player spongePlayer = (Player) player;
                     MessageChannel originalChannel = spongePlayer.getMessageChannel();
 
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
-                        Optional.empty(), Optional.empty(), (Entity) entity);
+                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+                            cause, originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true
+                    );
                     SpongeImpl.getGame().getEventManager().post(event);
-                    event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(entity, text)));
+                    if (!event.isMessageCancelled()) {
+                        event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
+                    }
 
                     StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
                 }

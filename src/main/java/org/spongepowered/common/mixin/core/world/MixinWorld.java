@@ -86,6 +86,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -228,11 +229,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
             MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalChannel,
-                    Optional.of(originalChannel), Optional.empty(), Optional.empty(),
-                    (Entity) entityIn);
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+                    Cause.of(NamedCause.source(this)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(),
+                    (Entity) entityIn, true
+            );
             SpongeImpl.getGame().getEventManager().post(event);
-            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(entityIn, text)));
+            if (!event.isMessageCancelled()) {
+                event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
+            }
         }
     }
 
