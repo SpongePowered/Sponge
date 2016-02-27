@@ -106,6 +106,7 @@ public class TrackingHelper {
                 minecraftWorld, event.getPosition()), event.getPosition(), 3);
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .add(NamedCause.source(currentTickBlock));
         if (trackedBlockEvents.get(event.getPosition()) != null) {
@@ -127,6 +128,7 @@ public class TrackingHelper {
                 minecraftWorld, pos), pos, 0);
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_TICK_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()))
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .complete());
@@ -140,6 +142,7 @@ public class TrackingHelper {
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.TICKING_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(snapshot))
+                .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()))
                 .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                 .complete());

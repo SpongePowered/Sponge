@@ -57,6 +57,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -118,7 +119,6 @@ public final class TempCauseTracker {
         }
         this.targetWorld = targetWorld;
     }
-
 
     // ----------------- SIMPLE GETTERS --------------------------------------
 
@@ -206,7 +206,7 @@ public final class TempCauseTracker {
         if (!(currentPhase instanceof ISpawnableState)) {
             return;
         }
-
+        SpawnEntityEvent event = null;
         if (event == null) {
             return;
         }
@@ -326,7 +326,7 @@ public final class TempCauseTracker {
                 ListIterator<Transaction<BlockSnapshot>>
                         listIterator =
                         changeBlockEvent.getTransactions().listIterator(changeBlockEvent.getTransactions().size());
-                TrackingHelper.processList(this, listIterator);
+                TrackingHelper.processList(null, listIterator);
 
                 if (player != null) {
                     CaptureType captureType = null;
@@ -381,7 +381,7 @@ public final class TempCauseTracker {
                 ListIterator<Transaction<BlockSnapshot>>
                         listIterator =
                         blockEvent.getTransactions().listIterator(blockEvent.getTransactions().size());
-                TrackingHelper.processList(this, listIterator);
+                TrackingHelper.processList(null, listIterator);
 
                 MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, blockEvent.getTransactions(), phaseState, context);
 
@@ -430,7 +430,7 @@ public final class TempCauseTracker {
                     MoveToPhases.handlePostPlayerBlockEvent(getMinecraftWorld(), captureType, this.invalidTransactions, phaseState, context);
                 }
 
-                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
+//                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
                 if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
                     player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);

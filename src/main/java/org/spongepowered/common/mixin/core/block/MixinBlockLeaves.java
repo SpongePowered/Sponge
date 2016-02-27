@@ -50,11 +50,13 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -69,6 +71,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
                     .add(NamedCause.source(state))
                     .complete());
         }
@@ -86,6 +89,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
                     .add(NamedCause.source(worldIn.getBlockState(pos)))
                     .complete());
         }

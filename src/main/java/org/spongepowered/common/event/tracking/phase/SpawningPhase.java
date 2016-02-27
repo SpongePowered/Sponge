@@ -36,6 +36,8 @@ import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -94,10 +96,13 @@ public class SpawningPhase extends TrackingPhase {
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        final List<Entity> spawnedEntities = phaseContext.getCapturedEntities().get();
-        final List<Entity> spawnedItems = phaseContext.getCapturedItems().get();
+        final List<Entity> spawnedEntities = phaseContext.getCapturedEntities().orElse(Collections.emptyList());
+        final List<Entity> spawnedItems = phaseContext.getCapturedItems().orElse(Collections.emptyList());
         if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
             return;
+        }
+        for (Entity entity : spawnedEntities) {
+            System.err.printf("Spawning entity: " + entity);
         }
 
 

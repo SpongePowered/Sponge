@@ -42,11 +42,7 @@ public abstract class MixinChunkProviderServer {
 
     @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
     public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        world.getCauseTracker().setProcessingCaptureCause(true);
-        world.getCauseTracker().setCapturingTerrainGen(true);
+        // todo - see if it's required that this redirect is required
         serverChunkGenerator.populate(chunkProvider, x, z);
-        world.getCauseTracker().setCapturingTerrainGen(false);
-        world.getCauseTracker().setProcessingCaptureCause(false);
     }
 }

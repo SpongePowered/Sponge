@@ -82,6 +82,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -199,10 +200,10 @@ public class MoveToPhases {
 
 
         // handle actual capturing
-        final List<Entity> capturedItems = phaseContext.getCapturedItems().get();
-        final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
+        final List<Entity> capturedItems = phaseContext.getCapturedItems().orElse(Collections.emptyList());
+        final List<Entity> capturedEntities = phaseContext.getCapturedEntities().orElse(Collections.emptyList());
         final World minecraftWorld = causeTracker.getMinecraftWorld();
-        if (phaseState.isBusy()) {
+        if (false && phaseState.isBusy()) {
             Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
             Optional<Entity> currentTickEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
             if (currentTickingBlock.isPresent()) {
@@ -276,10 +277,10 @@ public class MoveToPhases {
 
             final org.spongepowered.api.world.World spongeWorld = causeTracker.getWorld();
             if (entityIn instanceof EntityItem) {
-                capturedItems.add(entity);
+//                capturedItems.add(entity);
                 event = SpongeEventFactory.createDropItemEventCustom(cause, capturedItems, entitySnapshotBuilder.build(), spongeWorld);
             } else {
-                capturedEntities.add(entity);
+//                capturedEntities.add(entity);
                 event = SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshotBuilder.build(), spongeWorld);
             }
             if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {

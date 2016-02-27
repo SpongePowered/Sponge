@@ -103,7 +103,7 @@ public abstract class TrackingPhase {
                 populatorSnapshotList = capturedPopulators.get(runningGenerator);
                 populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
             } else {
-                final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
+                final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().orElse(new ArrayList<>());
                 if (phaseState == BlockPhase.State.BLOCK_DECAY) {
                     // Only capture final state of decay, ignore the rest
                     if (block == Blocks.air) {
