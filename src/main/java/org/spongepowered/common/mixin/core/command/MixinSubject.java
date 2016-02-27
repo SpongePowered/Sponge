@@ -138,7 +138,8 @@ public abstract class MixinSubject implements Subject, IMixinCommandSource, IMix
 
     @Override
     public boolean hasPermission(String permission) {
-        return hasPermission(getActiveContexts(), permission);
+        Subject subj = internalSubject();
+        return subj == null ? this.permDefault(permission).asBoolean() : subj.hasPermission(permission);
     }
 
     @Override
