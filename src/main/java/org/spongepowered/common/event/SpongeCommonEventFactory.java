@@ -227,7 +227,7 @@ public class SpongeCommonEventFactory {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         CauseTracker causeTracker = world.getCauseTracker();
         CreativeInventoryEvent event;
-        final List<Entity> capturedEntityItems = context.getCapturedItems();
+        final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
         if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
             Iterator<Entity> iterator = capturedEntityItems.iterator();
             ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
@@ -298,9 +298,9 @@ public class SpongeCommonEventFactory {
         final org.spongepowered.api.item.inventory.Container spongeContainer = (org.spongepowered.api.item.inventory.Container) openContainer;
         final int clickMode = packetIn.getMode();
         final int usedButton = packetIn.getUsedButton();
-        final List<Entity> capturedItems = phaseContext.getCapturedItems();
+        final List<Entity> capturedItems = phaseContext.getCapturedItems().get();
         if (clickMode == MODE_CLICK || clickMode == MODE_PICKBLOCK) {
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
             if (usedButton == BUTTON_PRIMARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                     Iterator<Entity> iterator = capturedItems.iterator();

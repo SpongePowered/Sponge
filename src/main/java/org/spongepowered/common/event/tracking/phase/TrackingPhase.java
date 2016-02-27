@@ -102,21 +102,24 @@ public abstract class TrackingPhase {
                 transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
                 populatorSnapshotList = capturedPopulators.get(runningGenerator);
                 populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-            } else if (phaseState == BlockPhase.State.BLOCK_DECAY) {
-                // Only capture final state of decay, ignore the rest
-                if (block == Blocks.air) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
-                    causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-                }
-            } else if (block == Blocks.air) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-            } else if (block != currentState.getBlock()) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
             } else {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
-                causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+                final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
+                if (phaseState == BlockPhase.State.BLOCK_DECAY) {
+                    // Only capture final state of decay, ignore the rest
+                    if (block == Blocks.air) {
+                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
+                        capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                    }
+                } else if (block == Blocks.air) {
+                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
+                    capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                } else if (block != currentState.getBlock()) {
+                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
+                    capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                } else {
+                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
+                    capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+                }
             }
         }
         return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);

@@ -83,7 +83,7 @@ public class SpawningPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
             if (this == CHUNK_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, capturedEntities, entitySnapshots, world);
             } else {
@@ -94,8 +94,8 @@ public class SpawningPhase extends TrackingPhase {
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        final List<Entity> spawnedEntities = phaseContext.getCapturedEntities();
-        final List<Entity> spawnedItems = phaseContext.getCapturedItems();
+        final List<Entity> spawnedEntities = phaseContext.getCapturedEntities().get();
+        final List<Entity> spawnedItems = phaseContext.getCapturedItems().get();
         if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
             return;
         }

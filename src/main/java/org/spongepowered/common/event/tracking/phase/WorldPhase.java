@@ -103,7 +103,7 @@ public class WorldPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
             if (this == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
                 return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
             } else {
@@ -119,7 +119,6 @@ public class WorldPhase extends TrackingPhase {
                 final Optional<Entity> currentTickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
                 checkArgument(currentTickingEntity.isPresent(), "Not ticking on an Entity! Please analyze the current phase context: %n%s",
                         phaseContext);
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingEntity.get())), this, phaseContext);
             }
         },
         TICKING_TILE_ENTITY() {
@@ -128,7 +127,6 @@ public class WorldPhase extends TrackingPhase {
                 final Optional<TileEntity> currentTickingTileEntity = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class);
                 checkArgument(currentTickingTileEntity.isPresent(), "Not ticking on a TileEntity! Please analyze the current phase context: %n%s",
                         phaseContext);
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingTileEntity.get())), this, phaseContext);
             }
         },
         TICKING_BLOCK() {
@@ -137,7 +135,6 @@ public class WorldPhase extends TrackingPhase {
                 final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
                 checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
                         phaseContext);
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingBlock.get())), this, phaseContext);
             }
         },
         RANDOM_TICK_BLOCK() {
@@ -146,7 +143,6 @@ public class WorldPhase extends TrackingPhase {
                 final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
                 checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
                         phaseContext);
-                causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(currentTickingBlock.get())), this, phaseContext);
             }
         };
 
@@ -161,7 +157,7 @@ public class WorldPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
 
             return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
         }

@@ -93,7 +93,6 @@ public class GeneralPhase extends TrackingPhase {
             checkState(command != null, "Cannot complete a command when there was no command executed!");
             checkState(sender != null, "Cannot complete a command when there was no command sender!");
 
-            causeTracker.handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)), state, phaseContext);
         }
     }
 }

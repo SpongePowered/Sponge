@@ -101,7 +101,7 @@ public class BlockPhase extends TrackingPhase {
                 causeTracker.getMinecraftWorld(), pos), pos, flags);
         if (block == Blocks.air) {
             ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
-            causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
+            phaseContext.getCapturedBlocks().get().add(originalBlockSnapshot);
             return new BlockStateTriplet(null, originalBlockSnapshot, null);
 
         }

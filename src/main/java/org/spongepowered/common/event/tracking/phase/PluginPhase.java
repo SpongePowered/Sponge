@@ -81,7 +81,7 @@ public class PluginPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
             if (this == BLOCK_WORKER) {
                 return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
             } else if (this == CUSTOM_SPAWN) {

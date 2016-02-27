@@ -108,17 +108,23 @@ public final class PhaseContext {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<Entity> getCapturedEntities() {
-        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<List<Entity>>) (Class) List.class).orElse(new ArrayList<>());
+    public Optional<List<Entity>> getCapturedEntities() {
+        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<List<Entity>>) (Class) List.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public List<Entity> getCapturedItems() {
-        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<List<Entity>>) (Class) List.class).orElse(new ArrayList<>());
+    public Optional<List<Entity>> getCapturedItems() {
+        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<List<Entity>>) (Class) List.class);
     }
 
-    public List<Transaction<BlockSnapshot>> getInvalidTransactions() {
-        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<List<Transaction<BlockSnapshot>>>) (Class) List.class).orElse(new ArrayList<>());
+    @SuppressWarnings("unchecked")
+    public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
+        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<List<Transaction<BlockSnapshot>>>) (Class<?>) List.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<List<BlockSnapshot>> getCapturedBlocks() {
+        return firstNamed(TrackingHelper.CAPTURED_BLOCKS, (Class<List<BlockSnapshot>>) (Class<?>) List.class);
     }
 
     public Cause toCause() {

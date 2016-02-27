@@ -199,8 +199,8 @@ public class MoveToPhases {
 
 
         // handle actual capturing
-        final List<Entity> capturedItems = phaseContext.getCapturedItems();
-        final List<Entity> capturedEntities = phaseContext.getCapturedEntities();
+        final List<Entity> capturedItems = phaseContext.getCapturedItems().get();
+        final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         if (phaseState.isBusy()) {
             Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);

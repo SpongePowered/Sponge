@@ -104,7 +104,6 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     private final net.minecraft.world.World targetWorld;
-    private final List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
 
     private boolean captureBlocks = false;
 
@@ -205,21 +204,6 @@ public final class CauseTracker {
     public void setCaptureBlocks(boolean captureBlocks) {
         this.captureBlocks = captureBlocks;
     }
-
-    // ----------------- ACCESSORS ----------------------------------
-
-    public List<BlockSnapshot> getCapturedSpongeBlockSnapshots() {
-        return this.capturedSpongeBlockSnapshots;
-    }
-
-    // ----------------- PROCESSORS ----------------------------------
-
-
-    // now it's only handled in phases.
-    @SuppressWarnings("unchecked")
-    public void handlePostTickCaptures(Cause cause, IPhaseState phaseState, PhaseContext context) {
-    }
-
 
     // --------------------- DELEGATED WORLD METHODS -------------------------
 
@@ -326,7 +310,7 @@ public final class CauseTracker {
 
         if (iblockstate1 == null) {
             if (originalBlockSnapshot != null) {
-                this.getCapturedSpongeBlockSnapshots().remove(originalBlockSnapshot);
+                phaseContext.getCapturedBlocks().get().remove(originalBlockSnapshot);
                 if (populatorSnapshotList != null && transaction != null) {
                     populatorSnapshotList.remove(transaction.getOriginal().getPosition());
                 }
@@ -466,8 +450,9 @@ public final class CauseTracker {
             // This is to ensure new captures do not leak into next tick with wrong cause
             final PhaseData peekedPhase = this.getPhases().peek();
             final Optional<PluginContainer> pluginContainer = peekedPhase.getContext().firstNamed(NamedCause.SOURCE, PluginContainer.class);
-            if (!this.getPhases().peekContext().getCapturedEntities().isEmpty() && !pluginContainer.isPresent()) {
-                this.handlePostTickCaptures(cause, peekedPhase.getState(), peekedPhase.getContext());
+            final Optional<List<Entity>> capturedEntities = this.getPhases().peekContext().getCapturedEntities();
+            if (!capturedEntities.isPresent() || !capturedEntities.get().isEmpty() && !pluginContainer.isPresent()) {
+                // TODO tell the phase to handle any captures.
             }
 
         }
