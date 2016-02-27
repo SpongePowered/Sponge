@@ -22,34 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.item.data;
+package org.spongepowered.common.mixin.core.world.gen;
 
-import net.minecraft.item.ItemEditableBook;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
-import org.spongepowered.api.data.manipulator.mutable.item.AuthorData;
-import org.spongepowered.api.data.manipulator.mutable.item.GenerationData;
-import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.item.ItemType;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.core.item.MixinItem;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
-import java.util.List;
+@Mixin(ChunkProviderServer.class)
+public abstract class MixinChunkProviderServer {
 
-@Mixin(ItemEditableBook.class)
-/**
- * This is actually the written, uneditable book class (the MCP name is bad)
- */
-public abstract class MixinItemEditableBook extends MixinItem {
+    @Shadow public WorldServer worldObj;
+    @Shadow public abstract Chunk provideChunk(int x, int z);
 
-    @Override
-    public void getManipulatorsFor(ItemStack itemStack, List<DataManipulator<?, ?>> list) {
-        super.getManipulatorsFor(itemStack, list);
-        org.spongepowered.api.item.inventory.ItemStack spongeStack = (org.spongepowered.api.item.inventory.ItemStack) itemStack;
-
-        spongeStack.get(AuthorData.class).ifPresent(list::add);
-        spongeStack.get(PagedData.class).ifPresent(list::add);
-        spongeStack.get(GenerationData.class).ifPresent(list::add);
+    @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
+    public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
+        IMixinWorld world = (IMixinWorld) this.worldObj;
+        world.getCauseTracker().setProcessingCaptureCause(true);
+        world.getCauseTracker().setCapturingTerrainGen(true);
+        serverChunkGenerator.populate(chunkProvider, x, z);
+        world.getCauseTracker().setCapturingTerrainGen(false);
+        world.getCauseTracker().setProcessingCaptureCause(false);
     }
 }

@@ -80,7 +80,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-@Mixin(net.minecraft.world.World.class)
+@Mixin(value = net.minecraft.world.World.class, priority = 1001)
 public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
@@ -436,13 +436,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         checkBlockBounds(x, y, z);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
         causeTracker.setPluginCause(null);
-    }
-
-
-    private void checkBiomeBounds(int x, int z) {
-        if (!containsBiome(x, z)) {
-            throw new PositionOutOfBoundsException(new Vector2i(x, z), BIOME_MIN, BIOME_MAX);
-        }
     }
 
     private void checkBlockBounds(int x, int y, int z) {

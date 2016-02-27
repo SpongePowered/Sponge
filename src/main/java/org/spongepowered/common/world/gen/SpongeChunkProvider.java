@@ -77,7 +77,10 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -103,8 +106,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
-    protected boolean prevCapturingTerrain;
-    protected boolean prevProcessingCaptures;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
@@ -256,10 +257,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        this.prevCapturingTerrain = causeTracker.isCapturingTerrainGen();
-        this.prevProcessingCaptures = causeTracker.isProcessingCaptureCause();
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCapturingTerrainGen(true);
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -275,8 +272,24 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         if (!this.biomeSettings.containsKey(biome)) {
             this.biomeSettings.put(biome, ((IBiomeGenBase) biome).initPopulators(this.world));
         }
-        List<Populator> populators = Lists.newArrayList(this.pop);
+
+        List<Populator> populators = new ArrayList<>(this.pop);
+
+        Populator snowPopulator = null;
+        Iterator<Populator> itr = populators.iterator();
+        while (itr.hasNext()) {
+            Populator populator = itr.next();
+            if (populator instanceof SnowPopulator) {
+                itr.remove();
+                snowPopulator = populator;
+                break;
+            }
+        }
+
         populators.addAll(this.biomeSettings.get(biome).getPopulators());
+        if (snowPopulator != null) {
+            populators.add(snowPopulator);
+        }
 
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
 
@@ -304,8 +317,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                 SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
-        causeTracker.setCapturingTerrainGen(this.prevCapturingTerrain);
-        causeTracker.setProcessingCaptureCause(this.prevProcessingCaptures);
         causeTracker.getCapturedPopulators().clear();
 
         BlockFalling.fallInstantly = false;

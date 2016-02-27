@@ -22,19 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.manipulator.immutable;
+package org.spongepowered.common.interfaces.entity.player;
 
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableSkullData;
-import org.spongepowered.api.data.manipulator.mutable.SkullData;
-import org.spongepowered.api.data.type.SkullType;
-import org.spongepowered.api.data.type.SkullTypes;
-import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleCatalogData;
-import org.spongepowered.common.data.manipulator.mutable.SpongeSkullData;
+import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
 
-public class ImmutableSpongeSkullData extends AbstractImmutableSingleCatalogData<SkullType, ImmutableSkullData, SkullData> implements ImmutableSkullData {
+public interface IMixinInventoryPlayer extends MinecraftInventoryAdapter {
+    
+    /**
+     * Set the current hotbar item and optionally notify the client
+     * 
+     * @param itemIndex Hotbar index to set
+     * @param notify True to send an update packet to the client if this is a
+     *      server
+     */
+    public abstract void setSelectedItem(int itemIndex, boolean notify);
 
-    public ImmutableSpongeSkullData(SkullType value) {
-        super(ImmutableSkullData.class, value, SkullTypes.SKELETON, Keys.SKULL_TYPE, SpongeSkullData.class);
-    }
 }

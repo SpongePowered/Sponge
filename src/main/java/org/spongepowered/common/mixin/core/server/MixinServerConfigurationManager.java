@@ -179,9 +179,11 @@ public abstract class MixinServerConfigurationManager {
             user.save();
         }
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldserver = this.mcServer.worldServerForDimension(playerIn.dimension);
+        WorldServer worldserver = DimensionManager.getWorldFromDimId(playerIn.dimension);
 
         if (worldserver == null) {
+            SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded dimension [{}]. This is not safe so we have moved them to "
+                    + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
             playerIn.dimension = 0;
             worldserver = this.mcServer.worldServerForDimension(0);
             BlockPos spawnPoint = ((IMixinWorldProvider) worldserver.provider).getRandomizedSpawnPoint();
