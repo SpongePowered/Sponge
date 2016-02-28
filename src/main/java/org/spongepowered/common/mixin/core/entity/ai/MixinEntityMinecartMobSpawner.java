@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.ai.EntityMinecartMobSpawner;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartMobSpawner;
+import org.spongepowered.api.entity.vehicle.minecart.MobSpawnerMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
 
 @Mixin(EntityMinecartMobSpawner.class)
-public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MinecartMobSpawner {
+public abstract class MixinEntityMinecartMobSpawner extends MixinEntityMinecart implements MobSpawnerMinecart {
 
 }
