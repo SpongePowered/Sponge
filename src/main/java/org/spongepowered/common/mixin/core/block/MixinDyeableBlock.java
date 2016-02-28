@@ -25,72 +25,72 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockPane;
+import net.minecraft.block.BlockCarpet;
+import net.minecraft.block.BlockColored;
+import net.minecraft.block.BlockStainedGlass;
+import net.minecraft.block.BlockStainedGlassPane;
+import net.minecraft.block.properties.PropertyEnum;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableConnectedDirectionData;
+import org.spongepowered.api.data.manipulator.immutable.ImmutableDyeableData;
+import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
+import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDyeableData;
+import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-@Mixin(BlockPane.class)
-public abstract class MixinBlockPane extends MixinBlock {
+@Mixin({BlockCarpet.class, BlockColored.class, BlockStainedGlass.class, BlockStainedGlassPane.class})
+public abstract class MixinDyeableBlock extends MixinBlock implements IMixinDyeableBlock {
+
+    private PropertyEnum<EnumDyeColor> property;
+
+    @Override
+    public void setProperty(PropertyEnum<EnumDyeColor> property) {
+        this.property = property;
+    }
 
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getConnectedDirectionData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>builder()
+                .addAll(super.getManipulators(blockState))
+                .add(this.getDyeableData(blockState))
+                .build();
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableConnectedDirectionData.class.isAssignableFrom(immutable);
+        return ImmutableDyeableData.class.isAssignableFrom(immutable) || super.supports(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableConnectedDirectionData) {
-            return Optional.of((BlockState) blockState);
+        if (manipulator instanceof ImmutableDyeableData) {
+            final DyeColor color = ((ImmutableDyeableData) manipulator).type().get();
+            return Optional.of((BlockState) blockState.withProperty(this.property, (EnumDyeColor) (Object) color));
         }
         return super.getStateWithData(blockState, manipulator);
     }
 
     @Override
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.CONNECTED_DIRECTIONS) || key.equals(Keys.CONNECTED_EAST) || key.equals(Keys.CONNECTED_NORTH)
-                || key.equals(Keys.CONNECTED_SOUTH) || key.equals(Keys.CONNECTED_WEST)) {
-            return Optional.of((BlockState) blockState);
+        if (key.equals(Keys.DYE_COLOR)) {
+            final DyeColor color = (DyeColor) value;
+            return Optional.of((BlockState) blockState.withProperty(this.property, (EnumDyeColor) (Object) color));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
-    private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
-        final Set<Direction> directions = new HashSet<>();
-        final Boolean north = (Boolean) blockState.getValue(BlockPane.NORTH);
-        final Boolean east = (Boolean) blockState.getValue(BlockPane.EAST);
-        final Boolean west = (Boolean) blockState.getValue(BlockPane.WEST);
-        final Boolean south = (Boolean) blockState.getValue(BlockPane.SOUTH);
-        if (north) {
-            directions.add(Direction.NORTH);
-        }
-        if (south) {
-            directions.add(Direction.SOUTH);
-        }
-        if (west) {
-            directions.add(Direction.WEST);
-        }
-        if (east) {
-            directions.add(Direction.EAST);
-        }
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeConnectedDirectionData.class, directions);
+    private ImmutableDyeableData getDyeableData(IBlockState blockState) {
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDyeableData.class,
+                (DyeColor) (Object) blockState.getValue(this.property));
     }
+
 }

@@ -22,24 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block;
+package org.spongepowered.common.interfaces.block;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.block.BlockStainedGlassPane;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
+import net.minecraft.block.properties.PropertyEnum;
+import net.minecraft.item.EnumDyeColor;
 
-@Mixin(BlockStainedGlassPane.class)
-public abstract class MixinBlockStainedGlassPane extends MixinBlock implements IMixinDyeableBlock {
+public interface IMixinDyeableBlock {
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onInit(CallbackInfo ci) {
-        this.setProperty(BlockStainedGlassPane.COLOR);
-    }
+    void setProperty(PropertyEnum<EnumDyeColor> property);
 
 }
