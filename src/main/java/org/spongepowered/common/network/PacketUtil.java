@@ -118,7 +118,7 @@ public class PacketUtil {
             } else {
                 PhaseContext context = PhaseContext.start()
                         .add(NamedCause.of(TrackingHelper.PACKET_PLAYER, packetPlayer))
-                        .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
+                        .addCaptures()
                         .add(NamedCause.of(TrackingHelper.CAPTURED_PACKET, packetIn))
                         .add(NamedCause.of(TrackingHelper.IGNORING_CREATIVE, ignoreCreative));
                 if (packetPlayer.openContainer != null) {

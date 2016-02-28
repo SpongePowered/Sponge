@@ -71,7 +71,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                    .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
+                    .addCaptures()
                     .add(NamedCause.source(state))
                     .complete());
         }
@@ -89,7 +89,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
-                    .add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()))
+                    .addCaptures()
                     .add(NamedCause.source(worldIn.getBlockState(pos)))
                     .complete());
         }

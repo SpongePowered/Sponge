@@ -142,7 +142,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
 
-    @Shadow public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
+    @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
     @Shadow protected abstract void relightBlock(int x, int y, int z);
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
@@ -388,12 +388,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
-        if (event == null) {
-            return;
-        } else if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             listToFill.clear();
-        } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
         }
     }
 
@@ -409,12 +405,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
-        if (event == null) {
-            return;
-        } else if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             listToFill.clear();
-        } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
         }
     }
 
@@ -436,6 +428,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
+    @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
         int i = pos.getX() & 15;
         int j = pos.getY();
@@ -507,7 +500,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 }
             }
 
-            TileEntity tileentity;
+            @Nullable TileEntity tileentity;
 
             if (!this.worldObj.isRemote && block1 != block) {
                 // Sponge start - Ignore block activations during block placement captures unless it's
@@ -600,29 +593,27 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
             if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
+                return getUserFromId(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
             if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
+                return getUserFromId(uuid.get());
             }
         }
 
         return Optional.empty();
+    }
+
+    private Optional<User> getUserFromId(UUID uuid) {
+        // get player if online
+        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
+        if (player != null) {
+            return Optional.of((User) player);
+        }
+        // player is not online, get user from storage if one exists
+        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
     }
 
     @Override
@@ -631,25 +622,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
             if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
+                return getUserFromId(uuid.get());
             }
         } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
             PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
             Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
             if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
+                return getUserFromId(uuid.get());
             }
         }
 
@@ -658,7 +637,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     // Special setter used by API
     @Override
-    public void setBlockNotifier(BlockPos pos, UUID uuid) {
+    public void setBlockNotifier(BlockPos pos, @Nullable UUID uuid) {
         if (pos.getY() <= 255) {
             short blockPos = blockPosToShort(pos);
             if (this.trackedShortBlockPositions.get(blockPos) != null) {
@@ -684,7 +663,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     // Special setter used by API
     @Override
-    public void setBlockCreator(BlockPos pos, UUID uuid) {
+    public void setBlockCreator(BlockPos pos, @Nullable UUID uuid) {
         if (pos.getY() <= 255) {
             short blockPos = blockPosToShort(pos);
             if (this.trackedShortBlockPositions.get(blockPos) != null) {
@@ -794,7 +773,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.spawnEntity(entity, cause);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities() {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
@@ -804,6 +783,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return entities;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();

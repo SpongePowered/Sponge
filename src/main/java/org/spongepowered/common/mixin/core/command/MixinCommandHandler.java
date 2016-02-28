@@ -59,8 +59,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
                     .add(NamedCause.source(sender))
-                    .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
                     .add(NamedCause.of(TrackingHelper.COMMAND, command))
+                    .addCaptures()
                     .complete());
         }
         if (command instanceof IMixinCommandBase) {

@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -38,8 +36,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.world.CaptureType;
-
-import java.util.LinkedHashMap;
 
 public class BlockPhase extends TrackingPhase {
 
@@ -102,7 +98,7 @@ public class BlockPhase extends TrackingPhase {
         if (block == Blocks.air) {
             ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
             phaseContext.getCapturedBlocks().get().add(originalBlockSnapshot);
-            return new BlockStateTriplet(null, originalBlockSnapshot, null);
+            return new BlockStateTriplet(originalBlockSnapshot, null);
 
         }
         return super.captureBlockChange(causeTracker, currentState, newState, block, pos, flags, phaseContext, phaseState);

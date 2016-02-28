@@ -316,10 +316,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorld) this.getWorld()).getCauseTracker();
                     causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
-                        .add(NamedCause.source(this))
-                        .add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()))
-                        .add(NamedCause.of("DamageSource", source))
-                        .complete());
+                            .add(NamedCause.source(this))
+                            .add(NamedCause.of("DamageSource", source))
+                            .addCaptures()
+                            .complete());
                     this.nmsEntityLiving.onDeath(source);
                     causeTracker.completePhase();
                 } else {

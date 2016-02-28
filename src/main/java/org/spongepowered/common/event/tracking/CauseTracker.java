@@ -285,9 +285,6 @@ public final class CauseTracker {
 
         final Block block = newState.getBlock();
         BlockSnapshot originalBlockSnapshot = null;
-        BlockSnapshot newBlockSnapshot = null;
-        Transaction<BlockSnapshot> transaction = null;
-        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
 
         // Don't capture if we are restoring blocks
         // uncomment when you want to handle block events. for now just want to set block state and
@@ -300,20 +297,15 @@ public final class CauseTracker {
         if (!minecraftWorld.isRemote && phase.requiresBlockCapturing(phaseState)) {
             BlockStateTriplet pair = phase.captureBlockChange(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
             originalBlockSnapshot = pair.getBlockSnapshot();
-            transaction = pair.getTransaction();
-            populatorSnapshotList = pair.getPopulatorList();
         }
 
         int oldLight = currentState.getBlock().getLightValue();
 
-        IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, newBlockSnapshot);
+        IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, null);
 
         if (iblockstate1 == null) {
             if (originalBlockSnapshot != null) {
                 phaseContext.getCapturedBlocks().get().remove(originalBlockSnapshot);
-                if (populatorSnapshotList != null && transaction != null) {
-                    populatorSnapshotList.remove(transaction.getOriginal().getPosition());
-                }
             }
             return false;
         } else {
@@ -348,8 +340,8 @@ public final class CauseTracker {
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
         final PhaseData phaseData = this.getPhases().peek();
-        final IPhaseState phaseState = phaseData.state;
-        final PhaseContext context = phaseData.context;
+        final IPhaseState phaseState = phaseData.getState();
+        final PhaseContext context = phaseData.getContext();
         if (!minecraftWorld.isRemote && entityIn instanceof EntityItem && phaseState.getPhase().ignoresEntitySpawns(phaseState)) {
             return false;
         }
@@ -384,7 +376,7 @@ public final class CauseTracker {
                 return true;
             }
 
-            return MoveToPhases.completeEntitySpawn(entity, cause, this, chunkX, chunkZ, phaseState, phaseData.context);
+            return MoveToPhases.completeEntitySpawn(entity, cause, this, chunkX, chunkZ, phaseState, context);
         }
     }
 

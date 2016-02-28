@@ -24,30 +24,19 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
-
-import java.util.LinkedHashMap;
 
 import javax.annotation.Nullable;
 
 public final class BlockStateTriplet {
 
-    @Nullable private final LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorList;
     @Nullable private final BlockSnapshot blockSnapshot;
     @Nullable private final Transaction<BlockSnapshot> transaction;
 
-    public BlockStateTriplet(@Nullable LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorList,
-            @Nullable BlockSnapshot blockSnapshot, @Nullable Transaction<BlockSnapshot> transaction) {
-        this.populatorList = populatorList;
+    public BlockStateTriplet(@Nullable BlockSnapshot blockSnapshot, @Nullable Transaction<BlockSnapshot> transaction) {
         this.blockSnapshot = blockSnapshot;
         this.transaction = transaction;
-    }
-
-    @Nullable
-    public LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> getPopulatorList() {
-        return this.populatorList;
     }
 
     @Nullable

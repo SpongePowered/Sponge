@@ -89,7 +89,7 @@ public abstract class MixinSpawnerAnimals {
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
             .add(NamedCause.source(worldServer))
-            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
+            .addCaptures()
             .complete());
     }
 
@@ -108,7 +108,7 @@ public abstract class MixinSpawnerAnimals {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
-            .add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()))
+            .addCaptures()
             .add(NamedCause.source(worldServer))
             .complete());
     }

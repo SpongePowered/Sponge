@@ -184,13 +184,8 @@ public class WorldPhase extends TrackingPhase {
             ((ITickingState) state).processPostTick(causeTracker, phaseContext);
         }
         if (state == State.TERRAIN_GENERATION) {
-            final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
 
         } else if (state == State.POPULATOR_RUNNING) {
-            final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
-            BlockSnapshot originalBlockSnapshot = null;
-            Transaction<BlockSnapshot> transaction = null;
-            LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList;
             final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
             final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
         } else if (state instanceof Tick) {
@@ -216,31 +211,4 @@ public class WorldPhase extends TrackingPhase {
         return currentState instanceof Tick;
     }
 
-    @Override
-    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block block, BlockPos pos,
-            int flags, PhaseContext phaseContext, IPhaseState phaseState) {
-        BlockSnapshot originalBlockSnapshot = null;
-        Transaction<BlockSnapshot> transaction = null;
-        LinkedHashMap<Vector3i, Transaction<BlockSnapshot>> populatorSnapshotList = null;
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
-        final Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedPopulators = phaseContext.getPopulatorMap().orElse(null);
-        final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-        if (phaseState == State.POPULATOR_RUNNING) {
-            if (runningGenerator != null) {
-                originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                        causeTracker.getMinecraftWorld(), pos), pos, flags);
-
-                if (capturedPopulators.get(runningGenerator) == null) {
-                    capturedPopulators.put(runningGenerator, new LinkedHashMap<>());
-                }
-
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                populatorSnapshotList = capturedPopulators.get(runningGenerator);
-                populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-            }
-            return new BlockStateTriplet(populatorSnapshotList, originalBlockSnapshot, transaction);
-        }
-        return super.captureBlockChange(causeTracker, currentState, newState, block, pos, flags, phaseContext, phaseState);
-    }
 }

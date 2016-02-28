@@ -99,6 +99,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public class SpongeCommonEventFactory {
 
     // Inventory static fields
@@ -457,7 +459,8 @@ public class SpongeCommonEventFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, net.minecraft.entity.Entity sourceEntity,
+    @Nullable
+    public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
                                                             List<net.minecraft.entity.Entity> entities) {
         Cause cause = null;
         if (sourceEntity != null) {

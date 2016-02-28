@@ -68,6 +68,13 @@ public final class PhaseContext {
         return this;
     }
 
+    public PhaseContext addCaptures() {
+        add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()));
+        add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()));
+        add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()));
+        return this;
+    }
+
     public PhaseContext complete() {
         this.isCompleted = true;
         return this;
@@ -92,16 +99,6 @@ public final class PhaseContext {
         for (NamedCause cause : this.contextObjects) {
             if (cause.getName().equalsIgnoreCase(name) && tClass.isInstance(cause.getCauseObject())) {
                 return Optional.of((T) cause.getCauseObject());
-            }
-        }
-        return Optional.empty();
-    }
-
-    @SuppressWarnings("unchecked")
-    public Optional<Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>>> getPopulatorMap() {
-        for (NamedCause cause : this.contextObjects) {
-            if (cause.getName().equalsIgnoreCase(TrackingHelper.POPULATOR_CAPTURE_MAP)) {
-                return Optional.of(((Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>>) cause.getCauseObject()));
             }
         }
         return Optional.empty();
