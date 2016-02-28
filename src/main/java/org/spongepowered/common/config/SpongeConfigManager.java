@@ -33,7 +33,7 @@ import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.plugin.SpongePluginContainer;
+import org.spongepowered.common.plugin.PluginContainerExtension;
 
 import java.util.Optional;
 
@@ -72,8 +72,8 @@ public class SpongeConfigManager implements ConfigManager {
     }
 
     private static ObjectMapperFactory getMapperFactory(PluginContainer container) {
-        if (container instanceof SpongePluginContainer) {
-            Injector injector = ((SpongePluginContainer) container).getInjector();
+        if (container instanceof PluginContainerExtension) {
+            Injector injector = ((PluginContainerExtension) container).getInjector();
             if (injector != null) {
                 return injector.getInstance(GuiceObjectMapperFactory.class);
             }

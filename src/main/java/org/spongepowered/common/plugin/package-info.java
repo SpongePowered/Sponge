@@ -22,29 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
-
-import com.google.common.base.Objects;
-import com.google.inject.Injector;
-import org.spongepowered.api.plugin.PluginContainer;
-
-public abstract class SpongePluginContainer implements PluginContainer {
-
-    protected SpongePluginContainer() {
-    }
-
-    protected Objects.ToStringHelper toStringHelper() {
-        return Objects.toStringHelper("Plugin")
-                .add("id", this.getId())
-                .add("name", this.getName())
-                .add("version", this.getVersion());
-    }
-
-    @Override
-    public String toString() {
-        return toStringHelper().toString();
-    }
-
-    public abstract Injector getInjector();
-
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.plugin;
