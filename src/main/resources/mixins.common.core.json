@@ -327,6 +327,8 @@
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
         "server.MixinServerConfigurationManager",
+        "server.management.MixinPlayerProfileCache",
+        "server.management.MixinPlayerProfileCacheEntry",
         "server.network.MixinNetHandlerLoginServer",
         "server.network.MixinNetHandlerLoginServerAnonThread",
         "status.MixinMinecraftProtocolVersionIdentifier",

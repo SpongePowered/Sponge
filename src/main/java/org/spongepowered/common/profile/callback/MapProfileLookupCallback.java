@@ -22,32 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.query;
+package org.spongepowered.common.profile.callback;
 
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileCache;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-public abstract class GameProfileQuery<T> extends Query<T> {
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.ProfileLookupCallback;
 
-    protected GameProfileQuery(GameProfileCache cache, boolean useCache) {
-        super(cache, useCache);
+import java.util.Map;
+import java.util.Optional;
+
+public final class MapProfileLookupCallback implements ProfileLookupCallback {
+
+    private final Map<String, Optional<org.spongepowered.api.profile.GameProfile>> profiles;
+
+    public MapProfileLookupCallback(Map<String, Optional<org.spongepowered.api.profile.GameProfile>> profiles) {
+        this.profiles = checkNotNull(profiles, "profiles");
     }
 
-    public static final class SingleFill extends GameProfileQuery<GameProfile> {
+    @Override
+    public void onProfileLookupSucceeded(GameProfile profile) {
+        this.profiles.put(profile.getName(), Optional.of((org.spongepowered.api.profile.GameProfile) profile));
+    }
 
-        private final GameProfile profile;
-        private final boolean signed;
-
-        public SingleFill(GameProfileCache cache, GameProfile profile, boolean signed, boolean useCache) {
-            super(cache, useCache);
-            this.profile = profile;
-            this.signed = signed;
-        }
-
-        @Override
-        public GameProfile call() throws Exception {
-            return this.fillProfile(this.profile, this.signed);
-        }
+    @Override
+    public void onProfileLookupFailed(GameProfile profile, Exception e) {
+        this.profiles.put(profile.getName(), Optional.empty());
     }
 
 }
