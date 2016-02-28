@@ -59,15 +59,18 @@ import javax.inject.Singleton;
 @Singleton
 public final class SpongeImpl {
 
-    public static final String API_NAME = "SpongeAPI";
-    public static final String API_ID = "spongeapi";
-    public static final String API_VERSION = firstNonNull(getPackage().getSpecificationVersion(), "DEV");
+    public static final String GAME_ID = "minecraft";
+    public static final String GAME_NAME = "Minecraft";
 
-    public static final String ECOSYSTEM_NAME = "Sponge";
+    public static final String API_ID = "spongeapi";
+    public static final String API_NAME = firstNonNull(getPackage().getSpecificationTitle(), "SpongeAPI");
+    public static final Optional<String> API_VERSION = Optional.ofNullable(getPackage().getSpecificationVersion());
+
     public static final String ECOSYSTEM_ID = "sponge";
+    public static final String ECOSYSTEM_NAME = "Sponge";
 
     public static final Optional<String> IMPLEMENTATION_NAME = Optional.ofNullable(getPackage().getImplementationTitle());
-    public static final String IMPLEMENTATION_VERSION =  firstNonNull(getPackage().getImplementationVersion(), "DEV");
+    public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
 
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8.9", 47);
@@ -89,7 +92,7 @@ public final class SpongeImpl {
 
     @Inject
     public SpongeImpl(Injector injector, Game game, Logger logger,
-                      @Named(SpongeImpl.ECOSYSTEM_NAME) PluginContainer plugin, @Named("Minecraft") PluginContainer minecraftPlugin) {
+                      @Named(SpongeImpl.ECOSYSTEM_ID) PluginContainer plugin, @Named(GAME_ID) PluginContainer minecraftPlugin) {
 
         checkState(instance == null, "Sponge was already initialized");
         instance = this;

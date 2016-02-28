@@ -127,7 +127,7 @@ public class SpongeCommandManager implements CommandManager {
 
         synchronized (this.lock) {
             // <namespace>:<alias> for all commands
-            List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 2);
+            List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
             for (String alias : aliases) {
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
@@ -135,8 +135,16 @@ public class SpongeCommandManager implements CommandManager {
                         throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
                     }
                 }
+
                 aliasesWithPrefix.add(alias);
-                aliasesWithPrefix.add(container.getId() + ":" + alias);
+
+                // Alias commands with unqualified ID and qualified ID
+                String unqualifiedId = container.getUnqualifiedId();
+                aliasesWithPrefix.add(unqualifiedId + ':' + alias);
+
+                if (!container.getId().equals(unqualifiedId)) {
+                    aliasesWithPrefix.add(container.getId() + ':' + alias);
+                }
             }
 
             Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback);
