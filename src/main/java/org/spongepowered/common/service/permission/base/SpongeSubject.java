@@ -49,11 +49,6 @@ public abstract class SpongeSubject implements Subject {
     }
 
     @Override
-    public boolean hasPermission(String permission) {
-        return hasPermission(getActiveContexts(), permission);
-    }
-
-    @Override
     public Tristate getPermissionValue(Set<Context> contexts, String permission) {
         return getDataPermissionValue(getSubjectData(), permission);
     }
@@ -74,18 +69,8 @@ public abstract class SpongeSubject implements Subject {
     }
 
     @Override
-    public boolean isChildOf(Subject parent) {
-        return isChildOf(getActiveContexts(), parent);
-    }
-
-    @Override
     public boolean isChildOf(Set<Context> contexts, Subject parent) {
         return getSubjectData().getParents(contexts).contains(parent);
-    }
-
-    @Override
-    public List<Subject> getParents() {
-        return getParents(getActiveContexts());
     }
 
     @Override
