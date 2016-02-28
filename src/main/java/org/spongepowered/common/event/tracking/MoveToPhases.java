@@ -99,23 +99,6 @@ import javax.annotation.Nullable;
  */
 public class MoveToPhases {
 
-    static void handleInventoryEvents(EntityPlayerMP player, Packet<?> packetIn, Container container, IPhaseState phaseState, PhaseContext phaseContext) {
-        if (player != null && player.getHealth() > 0 && container != null) {
-            boolean ignoringCreative = phaseContext.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
-            if (packetIn instanceof C10PacketCreativeInventoryAction && !ignoringCreative) {
-                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C10PacketCreativeInventoryAction) packetIn, phaseState, phaseContext);
-            } else {
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn, phaseState,
-                        phaseContext);
-                if (packetIn instanceof C0EPacketClickWindow) {
-                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                            (C0EPacketClickWindow) packetIn, phaseState, phaseContext);
-                }
-            }
-        }
-    }
-
     static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions,
             IPhaseState phaseState, PhaseContext context) {
         final Optional<EntityPlayerMP> entityPlayerMP = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class);

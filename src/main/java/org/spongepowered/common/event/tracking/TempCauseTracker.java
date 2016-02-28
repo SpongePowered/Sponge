@@ -183,7 +183,6 @@ public final class TempCauseTracker {
         // todo
         // Inventory Events
         Optional<Container> openContainer = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class);
-        MoveToPhases.handleInventoryEvents(player, packetIn, openContainer.orElse(null), phaseState, context);
 
         // Handle Entity captures
         if (this.capturedEntityItems.size() > 0) {

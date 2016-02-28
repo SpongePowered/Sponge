@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
@@ -36,6 +37,7 @@ import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.world.World;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
@@ -44,16 +46,22 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.ClickInventoryEvent;
+import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -99,45 +107,144 @@ public class PacketPhase extends TrackingPhase {
     final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
     final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
 
-    public enum State implements IPhaseState, ISpawnableState {
-        UNKNOWN,
+    public interface IPacketState extends IPhaseState {
+
+        boolean matches(int packetState);
+
+    }
+
+    public enum Inventory implements IPacketState, ISpawnableState {
+
         INVENTORY,
-        DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW),
+        DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                Iterator<Entity> iterator = capturedEntities.iterator();
+                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+                while (iterator.hasNext()) {
+                    Entity currentEntity = iterator.next();
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
+                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
+                }
+                final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
+                return SpongeEventFactory.createClickInventoryEventDropFull(cause, transaction, capturedEntities,
+                        entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
+            }
+        },
         DROP_ITEMS,
         DROP_INVENTORY,
-        MOVEMENT,
-        INTERACTION,
-        IGNORED,
-        DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW),
-        SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE),
-        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_WINDOW),
-        PRIMARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_PRIMARY, MASK_NORMAL),
-//        PRIMARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_WINDOW),
-        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL),
-        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_WINDOW),
-        SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL),
-        SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL),
-//        SECONDARY_DRAG_INVENTORY(MODE_DRAG | CLICK_DRAG_RIGHT | CLICK_WINDOW),
-//        DRAGGING_INVENTORY(MODE_DRAG | CLICK_DRAG_LEFT | CLICK_DRAG_RIGHT, MASK_NORMAL),
-        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE),
-        INTERACT_ENTITY,
-        ATTACK_ENTITY,
-        INTERACT_AT_ENTITY,
-        CHAT, CREATIVE_INVENTORY;
-        
+        DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                final Iterator<Entity> iterator = capturedEntities.iterator();
+                final ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+                while (iterator.hasNext()) {
+                    final Entity currentEntity = iterator.next();
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
+                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
+                }
+                final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
+                return SpongeEventFactory.createClickInventoryEventDropSingle(cause, transaction, capturedEntities,
+                        entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
+
+            }
+        },
+        SWITCH_HOTBAR_NUMBER_PRESS(MODE_HOTBAR, MASK_MODE) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventNumberPress(cause, transaction, openContainer,
+                        slotTransactions, usedButton);
+            }
+        },
+        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_WINDOW) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventPrimary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        PRIMARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_PRIMARY, MASK_NORMAL) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        PRIMARY_DRAG_INVENTORY(MODE_DRAG | BUTTON_PRIMARY | CLICK_OUTSIDE) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragPrimary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_WINDOW) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_INVENTORY_CLICK_DROP(MODE_DROP | BUTTON_SECONDARY, MASK_NORMAL) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventSecondary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_INVENTORY_SHIFT_CLICK(MODE_SHIFT_CLICK | BUTTON_SECONDARY, MASK_NORMAL) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventShiftSecondary(cause, transaction, openContainer, slotTransactions);
+
+            }
+        },
+        SECONDARY_DRAG_INVENTORY(MODE_DRAG | BUTTON_SECONDARY | CLICK_OUTSIDE) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragSecondary(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        DRAGGING_INVENTORY(MODE_DRAG | BUTTON_PRIMARY | BUTTON_SECONDARY, MASK_NORMAL) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return null;
+            }
+        },
+        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDouble(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        ;
+
         final int stateId;
 
         final int stateMask;
 
-        State() {
+        Inventory() {
             this(0, MASK_NONE);
         }
 
-        State(int stateId) {
+        Inventory(int stateId) {
             this(stateId, MASK_ALL);
         }
 
-        State(int stateId, int stateMask) {
+        Inventory(int stateId, int stateMask) {
             this.stateId = stateId & stateMask;
             this.stateMask = stateMask;
             System.err.printf(">> %-36s [%22s] [%22s]\n", this.name(), bin(this.stateId), bin(this.stateMask));
@@ -170,17 +277,16 @@ public class PacketPhase extends TrackingPhase {
         @Override
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
-
-
             return null;
         }
 
+        @Override
         public boolean matches(int packetState) {
             if (this.stateMask == MASK_NONE) {
                 System.err.printf(" -->  [%22s] %-40s", "SKIP", this.name());
                 return false;
             }
-            
+
             int masked = packetState & this.stateMask;
             int anded = masked & this.stateId;
             System.err.printf("[%22s] %-40s    STATE=[%22s]    MASKED=[%22s]    ANDED=[%22s]", bin(this.stateId), this.name(), bin(packetState), bin(masked), bin(anded));
@@ -191,19 +297,25 @@ public class PacketPhase extends TrackingPhase {
             return false;
         }
 
-        public static State fromWindowPacket(C0EPacketClickWindow packetClickWindow) {
+        @Nullable
+        public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+            return null;
+        }
+
+        public static Inventory fromWindowPacket(C0EPacketClickWindow packetClickWindow) {
             final int clickMode = packetClickWindow.getMode();
             final int usedButton = packetClickWindow.getUsedButton();
             final boolean isClickOutside = packetClickWindow.getSlotId() == CLICK_OUTSIDE;
-            
+
             final int dragMode = 0x01 << 6 << (usedButton >> 2 & 3);
             final int dragEvent = 0x01 << 3 << usedButton & 3;
 
             final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | 0x01 << 9 << clickMode | dragMode | dragEvent  | 0x01 << (usedButton & 3);
             System.err.printf("======================================================================\n");
             System.err.printf("Comparing incoming state [%12s] (MODE=%s, DRAGOP=%s, DRAGEVT=%s, OUTSIDE=%s):\n", bin(packetState), clickMode, usedButton >> 2 & 3, usedButton & 3, isClickOutside);
-            State retState = State.INVENTORY;
-            for (State state : State.values()) {
+            Inventory retState = Inventory.INVENTORY;
+            for (Inventory state : Inventory.values()) {
                 if (state.matches(packetState)) {
                     System.err.printf(" >>>> MATCHED: %s\n", state);
                     retState = state;
@@ -211,38 +323,84 @@ public class PacketPhase extends TrackingPhase {
                     System.err.printf("\n");
                 }
             }
-            
+
             return retState;
         }
+
     }
 
-    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, State>> packetTranslationMap = new HashMap<>();
+    public enum General implements ISpawnableState, IPacketState {
+        UNKNOWN,
+        MOVEMENT,
+        INTERACTION() {
+            @Override
+            public boolean canSwitchTo(IPhaseState state) {
+                return state == BlockPhase.State.BLOCK_DECAY;
+            }
+        },
+        IGNORED,
+        INTERACT_ENTITY,
+        ATTACK_ENTITY,
+        INTERACT_AT_ENTITY,
+        CHAT,
+        CREATIVE_INVENTORY;
+
+        @Override
+        public PacketPhase getPhase() {
+            return TrackingPhases.PACKET;
+        }
+
+        @Override
+        public boolean isBusy() {
+            return true;
+        }
+
+        @Override
+        public boolean isManaged() {
+            return false;
+        }
+
+        @Nullable
+        @Override
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
+                List<EntitySnapshot> entitySnapshots) {
+            return null;
+        }
+
+        @Override
+        public boolean matches(int packetState) {
+            return false;
+        }
+
+    }
+
+    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new HashMap<>();
 
     @SuppressWarnings("unchecked")
-    public State getStateForPacket(Packet<?> packet) {
+    public IPacketState getStateForPacket(Packet<?> packet) {
         final Class<? extends Packet<?>> packetClass = (Class<? extends Packet<?>>) packet.getClass();
-        final Function<Packet<?>, State> packetStateFunction = this.packetTranslationMap.get(packetClass);
+        final Function<Packet<?>, IPacketState> packetStateFunction = this.packetTranslationMap.get(packetClass);
         if (packetStateFunction != null) {
             return packetStateFunction.apply(packet);
         }
-        return State.UNKNOWN;
+        return General.UNKNOWN;
     }
 
     public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
-        if (state == State.ATTACK_ENTITY) {
+        if (state == General.ATTACK_ENTITY) {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
             net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(entityPlayerMP.worldObj);
             context.add(NamedCause.of(TrackingHelper.TARGETED_ENTITY, entity));
             context.add(NamedCause.of(TrackingHelper.TRACKED_ENTITY_ID, entity.getEntityId()));
-        } else if (state == State.CHAT) {
+        } else if (state == General.CHAT) {
             context.add(NamedCause.of("Player", entityPlayerMP));
             C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
             if (chatMessage.getMessage().contains("kill")) {
                 context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, true));
             }
-        } else if (state == State.DROP_ITEM) {
+        } else if (state == Inventory.DROP_ITEM) {
             context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, false));
         }
         return context;
@@ -254,9 +412,9 @@ public class PacketPhase extends TrackingPhase {
         EntityPlayerMP player = phaseContext.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class).get();
         World minecraftWorld = player.worldObj;
 
-        if (phaseState == State.DROP_ITEM) {
+        if (phaseState == Inventory.DROP_ITEM) {
 
-        } else if (phaseState == State.ATTACK_ENTITY) {
+        } else if (phaseState == General.ATTACK_ENTITY) {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packetIn;
             net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(minecraftWorld);
             if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
@@ -269,53 +427,53 @@ public class PacketPhase extends TrackingPhase {
                 SpongeImpl.getGame().getEventManager().post(event);
                 event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
             }
-        } else if (phaseState == State.CREATIVE_INVENTORY) {
+        } else if (phaseState == General.CREATIVE_INVENTORY) {
             boolean ignoringCreative = phaseContext.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
             if (!ignoringCreative) {
-                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                                ((C10PacketCreativeInventoryAction) packetIn),
-                                phaseState, phaseContext);
+                PacketPhaseUtil.handleCreativeClickInventoryEvent(phaseState, phaseContext);
             }
+        } else if (phaseState instanceof Inventory) {
+            PacketPhaseUtil.handleInventoryEvents(phaseState, phaseContext);
         }
     }
 
     public PacketPhase(TrackingPhase parent) {
         super(parent);
-        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> State.CHAT);
+        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> General.CHAT);
         this.packetTranslationMap.put(C02PacketUseEntity.class, packet -> {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
             final C02PacketUseEntity.Action action = useEntityPacket.getAction();
             if ( action == C02PacketUseEntity.Action.INTERACT) {
-                return State.INTERACT_ENTITY;
+                return General.INTERACT_ENTITY;
             } else if (action == C02PacketUseEntity.Action.ATTACK) {
-                return State.ATTACK_ENTITY;
+                return General.ATTACK_ENTITY;
             } else if (action == C02PacketUseEntity.Action.INTERACT_AT) {
-                return State.INTERACT_AT_ENTITY;
+                return General.INTERACT_AT_ENTITY;
             } else {
-                return State.UNKNOWN;
+                return General.UNKNOWN;
             }
         });
         this.packetTranslationMap.put(C07PacketPlayerDigging.class, packet -> {
             final C07PacketPlayerDigging playerDigging = (C07PacketPlayerDigging) packet;
             final C07PacketPlayerDigging.Action action = playerDigging.getStatus();
             if (action == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                return State.DROP_ITEM;
+                return Inventory.DROP_ITEM;
             } else if (action == C07PacketPlayerDigging.Action.DROP_ALL_ITEMS) {
-                return State.DROP_INVENTORY;
+                return Inventory.DROP_INVENTORY;
             } else if ( action == C07PacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                return State.INTERACTION;
+                return General.INTERACTION;
             } else if ( action == C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK) {
-                return State.INTERACTION;
+                return General.INTERACTION;
             } else if ( action == C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK) {
-                return State.INTERACTION;
+                return General.INTERACTION;
             } else if ( action == C07PacketPlayerDigging.Action.RELEASE_USE_ITEM) {
-                return State.INTERACTION;
+                return General.INTERACTION;
             } else {
-                return State.IGNORED;
+                return General.IGNORED;
             }
         });
-        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> State.CREATIVE_INVENTORY);
-        this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> State.fromWindowPacket((C0EPacketClickWindow) packet));
+        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> General.CREATIVE_INVENTORY);
+        this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> Inventory.fromWindowPacket((C0EPacketClickWindow) packet));
 
     }
 

@@ -51,6 +51,7 @@ import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -120,8 +121,10 @@ public final class CauseTracker {
 
     public void switchToPhase(TrackingPhase phase, IPhaseState state, PhaseContext phaseContext) {
         if (this.phases.states.size() > 6) {
+            // This printing is to detect possibilities of a phase not being cleared properly
+            // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Switching Phase").centre().hr();
+            printer.add("Switching to Incompatible Phase!!!").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
             printer.add("  %s : %s", "Entering Phase", phase);
             printer.add("  %s : %s", "Entering State", state);
@@ -131,13 +134,26 @@ public final class CauseTracker {
             for (StackTraceElement element : exception.getStackTrace()) {
                 printer.add("    %s", element);
             }
-            printer.print(System.err);
+            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
         IPhaseState currentState = this.phases.peekState();
         if (!currentState.canSwitchTo(state)) {
-//            throw new IllegalArgumentException(String.format("Cannot switch from %s to %s", currentState, state));
+            // This is to detect incompatible phase switches.
+            PrettyPrinter printer = new PrettyPrinter(60);
+            printer.add("Switching Phase").centre().hr();
+            printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
+            printer.add("  %s : %s", "Current Phase", currentState.getPhase());
+            printer.add("  %s : %s", "Current State", currentState);
+            printer.add("  %s : %s", "Entering incompatible Phase", phase);
+            printer.add("  %s : %s", "Entering incompatible State", state);
+            printer.addWrapped(60, "%s : %s", "Current phases", this.phases.states.currentStates());
+            printer.add("  %s :", "Printing stack trace");
+            Exception exception = new Exception("Stack trace");
+            for (StackTraceElement element : exception.getStackTrace()) {
+                printer.add("    %s", element);
+            }
+            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
-        final TrackingPhase current = this.phases.current();
 
         this.phases.push(state, phaseContext);
     }
@@ -146,6 +162,8 @@ public final class CauseTracker {
         final PhaseData tuple = this.phases.peek();
         IPhaseState state = tuple.getState();
         if (this.phases.states.size() > 6) {
+            // This printing is to detect possibilities of a phase not being cleared properly
+            // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -155,7 +173,7 @@ public final class CauseTracker {
             for (StackTraceElement element : exception.getStackTrace()) {
                 printer.add("     %s", element);
             }
-            printer.print(System.err);
+            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
         this.phases.pop();
         // If pop is called, the Deque will already throw an exception if there is no element

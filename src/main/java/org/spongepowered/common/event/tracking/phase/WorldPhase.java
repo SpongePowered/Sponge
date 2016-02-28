@@ -176,6 +176,12 @@ public class WorldPhase extends TrackingPhase {
         public boolean isManaged() {
             return false;
         }
+
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return state instanceof BlockPhase.State || state instanceof SpawningPhase.State;
+        }
+
     }
 
     @Override

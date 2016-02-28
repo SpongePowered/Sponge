@@ -54,8 +54,6 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
-import java.util.ArrayList;
-
 public class PacketUtil {
 
     @SuppressWarnings({"rawtypes", "unchecked"})
@@ -130,7 +128,7 @@ public class PacketUtil {
                 if (itemUsed != null) {
                     context.add(NamedCause.of(TrackingHelper.ITEM_USED, itemUsed));
                 }
-                final PacketPhase.State packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                 context.complete();
                 causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);
