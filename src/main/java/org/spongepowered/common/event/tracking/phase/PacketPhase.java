@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
@@ -60,7 +59,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
-import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -71,25 +70,28 @@ import javax.annotation.Nullable;
 
 public class PacketPhase extends TrackingPhase {
 
+    // Inventory static fields
+    final static int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
+    final static int MAGIC_CLICK_OUTSIDE_CREATIVE = -1;
+
+    // Flag masks
     final static int MASK_NONE              = 0x00000;
     final static int MASK_OUTSIDE           = 0x30000;
     final static int MASK_MODE              = 0x0FE00;
-    final static int MASK_DRAGOPERATION     = 0x001FF;
-    final static int MASK_DRAGEVENT         = 0x001FF;
-    final static int MASK_BUTTON            = 0x001FF;
+    final static int MASK_DRAGDATA          = 0x001F8;
+    final static int MASK_BUTTON            = 0x00007;
 
-    final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON;
-    final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON;
-    final static int MASK_DRAG = MASK_OUTSIDE | MASK_MODE | MASK_DRAGOPERATION | MASK_DRAGEVENT;
+    // Mask presets
+    final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+    final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON | MASK_DRAGDATA;
+    final static int MASK_DRAG              = MASK_OUTSIDE | MASK_NORMAL;
 
-    // Inventory static fields
-    final static int CLICK_OUTSIDE          = -999;
-    final static int CLICK_OUTSIDE_CREATIVE = -1;
+    // Click location semaphore flags
+    final static int CLICK_INSIDE_WINDOW    = 0x01 << 16 << 0;
+    final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
+    final static int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
     
-    final static int BUTTON_PRIMARY         = 0x01 << 0 << 0;
-    final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
-    final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
-
+    // Modes flags
     final static int MODE_CLICK             = 0x01 << 9 << 0;
     final static int MODE_SHIFT_CLICK       = 0x01 << 9 << 1;
     final static int MODE_HOTBAR            = 0x01 << 9 << 2;
@@ -97,17 +99,21 @@ public class PacketPhase extends TrackingPhase {
     final static int MODE_DROP              = 0x01 << 9 << 4;
     final static int MODE_DRAG              = 0x01 << 9 << 5;
     final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << 6;
-
-    final static int CLICK_WINDOW           = 0x01 << 16 << 0;
-    final static int CLICK_OUTSIDE_WINDOW   = 0x01 << 16 << 1;
     
+    // Drag mode flags, bitmasked from button and only set if MODE_DRAG
     final static int DRAG_MODE_SPLIT_ITEMS  = 0x01 << 6 << 0;
     final static int DRAG_MODE_ONE_ITEM     = 0x01 << 6 << 1;
+    final static int DRAG_MODE_ANY          = DRAG_MODE_SPLIT_ITEMS | DRAG_MODE_ONE_ITEM;
 
-    // Note these are only really used on the client side of things.
+    // Drag status flags, bitmasked from button and only set if MODE_DRAG
     final static int DRAG_STATUS_STARTED    = 0x01 << 3 << 0;
     final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
     final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
+
+    // Buttons flags, only set if *not* MODE_DRAG
+    final static int BUTTON_PRIMARY         = 0x01 << 0 << 0;
+    final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
+    final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
     public interface IPacketState extends IPhaseState {
 
@@ -161,7 +167,7 @@ public class PacketPhase extends TrackingPhase {
                         slotTransactions, usedButton);
             }
         },
-        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_WINDOW) {
+        PRIMARY_INVENTORY_CLICK(MODE_CLICK | MODE_DROP | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_INSIDE_WINDOW) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -175,13 +181,6 @@ public class PacketPhase extends TrackingPhase {
                 return SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, transaction, openContainer, slotTransactions);
             }
         },
-        PRIMARY_DRAG_INVENTORY(MODE_DRAG | DRAG_MODE_ONE_ITEM | CLICK_OUTSIDE, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragPrimary(cause, transaction, openContainer, slotTransactions);
-            }
-        },
         MIDDLE_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_MIDDLE, MASK_NORMAL) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
@@ -189,7 +188,7 @@ public class PacketPhase extends TrackingPhase {
                 return SpongeEventFactory.createClickInventoryEventMiddle(cause, transaction, openContainer, slotTransactions);
             }
         },
-        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_WINDOW) {
+        SECONDARY_INVENTORY_CLICK(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_INSIDE_WINDOW) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -211,34 +210,6 @@ public class PacketPhase extends TrackingPhase {
 
             }
         },
-        SECONDARY_DRAG_INVENTORY(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | CLICK_OUTSIDE, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragSecondary(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        DRAGGING_INVENTORY(MODE_DRAG | DRAG_STATUS_ADD_SLOT, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return null;
-            }
-        },
-        DRAGGING_STOP(MODE_DRAG | DRAG_STATUS_STOPPED, MASK_DRAG) {
-            @Nullable
-            @Override
-            public SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext) {
-                return null;
-            }
-        },
-        DRAGGING_START(MODE_DRAG | DRAG_STATUS_STARTED, MASK_DRAG) {
-            @Nullable
-            @Override
-            public SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext) {
-                return null;
-            }
-        },
         DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK | BUTTON_PRIMARY | BUTTON_SECONDARY, MASK_MODE | MASK_BUTTON) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
@@ -246,32 +217,85 @@ public class PacketPhase extends TrackingPhase {
                 return SpongeEventFactory.createClickInventoryEventDouble(cause, transaction, openContainer, slotTransactions);
             }
         },
+        PRIMARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragPrimaryStart(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragSecondaryStart(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        PRIMARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragPrimaryAdd(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragSecondaryAdd(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        PRIMARY_DRAG_INVENTORY_STOP(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_STOPPED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragPrimaryStop(cause, transaction, openContainer, slotTransactions);
+            }
+        },
+        SECONDARY_DRAG_INVENTORY_STOP(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_STOPPED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
+            @Override
+            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                return SpongeEventFactory.createClickInventoryEventDragSecondaryStop(cause, transaction, openContainer, slotTransactions);
+            }
+        },
         ;
 
+        /**
+         * Flags we care about
+         */
         final int stateId;
 
+        /**
+         * Mask for flags we care about, the caremask if you will
+         */
         final int stateMask;
 
+        /**
+         * Don't care about anything
+         */
         Inventory() {
             this(0, MASK_NONE);
         }
 
+        /**
+         * We care a lot
+         * 
+         * @param stateId state
+         */
         Inventory(int stateId) {
             this(stateId, MASK_ALL);
         }
 
+        /**
+         * We care about some things
+         * 
+         * @param stateId flags we care about
+         * @param stateMask caring mask
+         */
         Inventory(int stateId, int stateMask) {
             this.stateId = stateId & stateMask;
             this.stateMask = stateMask;
-            System.err.printf(">> %-36s [%22s] [%22s]\n", this.name(), bin(this.stateId), bin(this.stateMask));
-        }
-
-        private static String bin(int value) {
-            String str = Integer.toBinaryString(value);
-            while (str.length() < 18) {
-                str = "0" + str;
-            }
-            return str.substring(0, 2) + " " + str.substring(2, 9) + " " + str.substring(9, 12) + " " + str.substring(12, 15) + " " + str.substring(15, 18);
         }
 
         @Override
@@ -298,19 +322,7 @@ public class PacketPhase extends TrackingPhase {
 
         @Override
         public boolean matches(int packetState) {
-            if (this.stateMask == MASK_NONE) {
-                System.err.printf(" -->  [%22s] %-40s", "SKIP", this.name());
-                return false;
-            }
-
-            int masked = packetState & this.stateMask;
-            int anded = masked & this.stateId;
-            System.err.printf("[%22s] %-40s    STATE=[%22s]    MASKED=[%22s]    ANDED=[%22s]", bin(this.stateId), this.name(), bin(packetState), bin(masked), bin(anded));
-            boolean result = anded == masked;
-            if (result) {
-                System.err.printf("    MATCH");
-            }
-            return result;
+            return this.stateMask != MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
         }
 
         @Nullable
@@ -319,29 +331,24 @@ public class PacketPhase extends TrackingPhase {
             return null;
         }
 
-        public static Inventory fromWindowPacket(C0EPacketClickWindow packetClickWindow) {
-            final int clickMode = 0x01 << 9 << packetClickWindow.getMode();
-            final int usedButton = packetClickWindow.getUsedButton();
-            final boolean isClickOutside = packetClickWindow.getSlotId() == CLICK_OUTSIDE;
+        public static Inventory fromWindowPacket(C0EPacketClickWindow windowPacket) {
+            final int mode = 0x01 << 9 << windowPacket.getMode();
+            final int packed = windowPacket.getUsedButton();
+            final int unpacked = mode == MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
+            return Inventory.fromState(Inventory.clickType(windowPacket.getSlotId()) | mode | unpacked);
+        }
 
-            final int dragMode = clickMode == MODE_DRAG ? 0x01 << 6 << (usedButton >> 2 & 3) : 0;
-            final int dragEvent = clickMode == MODE_DRAG ? 0x01 << 3 << (usedButton & 3) : 0;
-
-            final int buttonState = clickMode != MODE_DRAG ? 0x01 << (usedButton & 3) : 0;
-            final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | clickMode | dragMode | dragEvent | buttonState;
-            System.err.printf("======================================================================\n");
-            System.err.printf("Comparing incoming state [%12s] (MODE=%s, DRAGOP=%s, DRAGEVT=%s, OUTSIDE=%s):\n", bin(packetState), clickMode, usedButton >> 2 & 3, usedButton & 3, isClickOutside);
-            Inventory retState = Inventory.INVENTORY;
-            for (Inventory state : Inventory.values()) {
-                if (state.matches(packetState)) {
-                    System.err.printf(" >>>> MATCHED: %s\n", state);
-                    retState = state;
-                } else {
-                    System.err.printf("\n");
+        public static Inventory fromState(final int state) {
+            for (Inventory inventory : Inventory.values()) {
+                if (inventory.matches(state)) {
+                    return inventory;
                 }
             }
+            return Inventory.INVENTORY;
+        }
 
-            return retState;
+        private static int clickType(int slotId) {
+            return (slotId == MAGIC_CLICK_OUTSIDE_SURVIVAL || slotId == MAGIC_CLICK_OUTSIDE_CREATIVE) ? CLICK_OUTSIDE_WINDOW : CLICK_INSIDE_WINDOW;
         }
 
     }
@@ -391,7 +398,7 @@ public class PacketPhase extends TrackingPhase {
 
     }
 
-    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new HashMap<>();
+    private final Map<Class<? extends Packet<?>>, Function<Packet<?>, IPacketState>> packetTranslationMap = new IdentityHashMap<>();
 
     @SuppressWarnings("unchecked")
     public IPacketState getStateForPacket(Packet<?> packet) {
