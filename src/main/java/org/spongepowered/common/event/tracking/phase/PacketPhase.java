@@ -74,13 +74,14 @@ public class PacketPhase extends TrackingPhase {
     final static int MASK_NONE              = 0x00000;
     final static int MASK_OUTSIDE           = 0x30000;
     final static int MASK_MODE              = 0x0FE00;
-    final static int MASK_DRAGOPERATION     = 0x001C0;
-    final static int MASK_DRAGEVENT         = 0x00038;
-    final static int MASK_BUTTON            = 0x00007;
+    final static int MASK_DRAGOPERATION     = 0x001FF;
+    final static int MASK_DRAGEVENT         = 0x001FF;
+    final static int MASK_BUTTON            = 0x001FF;
 
     final static int MASK_ALL               = MASK_OUTSIDE | MASK_MODE | MASK_BUTTON;
     final static int MASK_NORMAL            = MASK_MODE | MASK_BUTTON;
-    
+    final static int MASK_DRAG = MASK_OUTSIDE | MASK_MODE | MASK_DRAGOPERATION | MASK_DRAGEVENT;
+
     // Inventory static fields
     final static int CLICK_OUTSIDE          = -999;
     final static int CLICK_OUTSIDE_CREATIVE = -1;
@@ -102,7 +103,8 @@ public class PacketPhase extends TrackingPhase {
     
     final static int DRAG_MODE_SPLIT_ITEMS  = 0x01 << 6 << 0;
     final static int DRAG_MODE_ONE_ITEM     = 0x01 << 6 << 1;
-    
+
+    // Note these are only really used on the client side of things.
     final static int DRAG_STATUS_STARTED    = 0x01 << 3 << 0;
     final static int DRAG_STATUS_ADD_SLOT   = 0x01 << 3 << 1;
     final static int DRAG_STATUS_STOPPED    = 0x01 << 3 << 2;
@@ -173,7 +175,7 @@ public class PacketPhase extends TrackingPhase {
                 return SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, transaction, openContainer, slotTransactions);
             }
         },
-        PRIMARY_DRAG_INVENTORY(MODE_DRAG | BUTTON_PRIMARY | CLICK_OUTSIDE) {
+        PRIMARY_DRAG_INVENTORY(MODE_DRAG | DRAG_MODE_ONE_ITEM | CLICK_OUTSIDE, MASK_DRAG) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -209,21 +211,35 @@ public class PacketPhase extends TrackingPhase {
 
             }
         },
-        SECONDARY_DRAG_INVENTORY(MODE_DRAG | BUTTON_SECONDARY | CLICK_OUTSIDE) {
+        SECONDARY_DRAG_INVENTORY(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | CLICK_OUTSIDE, MASK_DRAG) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 return SpongeEventFactory.createClickInventoryEventDragSecondary(cause, transaction, openContainer, slotTransactions);
             }
         },
-        DRAGGING_INVENTORY(MODE_DRAG | BUTTON_PRIMARY | BUTTON_SECONDARY, MASK_NORMAL) {
+        DRAGGING_INVENTORY(MODE_DRAG | DRAG_STATUS_ADD_SLOT, MASK_DRAG) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
                 return null;
             }
         },
-        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK, MASK_MODE) {
+        DRAGGING_STOP(MODE_DRAG | DRAG_STATUS_STOPPED, MASK_DRAG) {
+            @Nullable
+            @Override
+            public SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext) {
+                return null;
+            }
+        },
+        DRAGGING_START(MODE_DRAG | DRAG_STATUS_STARTED, MASK_DRAG) {
+            @Nullable
+            @Override
+            public SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext) {
+                return null;
+            }
+        },
+        DOUBLE_CLICK_INVENTORY(MODE_DOUBLE_CLICK | BUTTON_PRIMARY | BUTTON_SECONDARY, MASK_MODE | MASK_BUTTON) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -294,7 +310,7 @@ public class PacketPhase extends TrackingPhase {
             if (result) {
                 System.err.printf("    MATCH");
             }
-            return false;
+            return result;
         }
 
         @Nullable
@@ -304,14 +320,15 @@ public class PacketPhase extends TrackingPhase {
         }
 
         public static Inventory fromWindowPacket(C0EPacketClickWindow packetClickWindow) {
-            final int clickMode = packetClickWindow.getMode();
+            final int clickMode = 0x01 << 9 << packetClickWindow.getMode();
             final int usedButton = packetClickWindow.getUsedButton();
             final boolean isClickOutside = packetClickWindow.getSlotId() == CLICK_OUTSIDE;
 
-            final int dragMode = 0x01 << 6 << (usedButton >> 2 & 3);
-            final int dragEvent = 0x01 << 3 << usedButton & 3;
+            final int dragMode = clickMode == MODE_DRAG ? 0x01 << 6 << (usedButton >> 2 & 3) : 0;
+            final int dragEvent = clickMode == MODE_DRAG ? 0x01 << 3 << (usedButton & 3) : 0;
 
-            final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | 0x01 << 9 << clickMode | dragMode | dragEvent  | 0x01 << (usedButton & 3);
+            final int buttonState = clickMode != MODE_DRAG ? 0x01 << (usedButton & 3) : 0;
+            final int packetState = (isClickOutside ? CLICK_OUTSIDE_WINDOW : CLICK_WINDOW) | clickMode | dragMode | dragEvent | buttonState;
             System.err.printf("======================================================================\n");
             System.err.printf("Comparing incoming state [%12s] (MODE=%s, DRAGOP=%s, DRAGEVT=%s, OUTSIDE=%s):\n", bin(packetState), clickMode, usedButton >> 2 & 3, usedButton & 3, isClickOutside);
             Inventory retState = Inventory.INVENTORY;

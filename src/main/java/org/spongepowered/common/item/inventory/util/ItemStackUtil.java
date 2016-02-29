@@ -46,14 +46,16 @@ public abstract class ItemStackUtil {
         return compound;
     }
 
-    public static net.minecraft.item.ItemStack toNative(ItemStack stack) {
+    @Nullable
+    public static net.minecraft.item.ItemStack toNative(@Nullable ItemStack stack) {
         if (stack instanceof net.minecraft.item.ItemStack || stack == null) {
             return (net.minecraft.item.ItemStack) stack;
         }
         throw new NativeStackException("The supplied item stack was not native to the current platform");
     }
-    
-    public static ItemStack fromNative(net.minecraft.item.ItemStack stack) {
+
+    @Nullable
+    public static ItemStack fromNative(@Nullable net.minecraft.item.ItemStack stack) {
         if (stack instanceof ItemStack || stack == null) {
             return (ItemStack) stack;
         }
@@ -61,47 +63,45 @@ public abstract class ItemStackUtil {
     }
 
     @Nullable
-    public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack) {
+    public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack) {
         return net.minecraft.item.ItemStack.copyItemStack(stack);
     }
 
     @Nullable
-    public static net.minecraft.item.ItemStack cloneDefensiveNative(net.minecraft.item.ItemStack stack, int newSize) {
+    public static net.minecraft.item.ItemStack cloneDefensiveNative(@Nullable net.minecraft.item.ItemStack stack, int newSize) {
         net.minecraft.item.ItemStack clone = net.minecraft.item.ItemStack.copyItemStack(stack);
         if (clone != null) {
             clone.stackSize = newSize;
         }
         return clone;
     }
-    
-    public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack) {
+
+    @Nullable
+    public static ItemStack cloneDefensive(@Nullable net.minecraft.item.ItemStack stack) {
         return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack);
     }
-    
-    public static ItemStack cloneDefensive(ItemStack stack) {
+
+    @Nullable
+    public static ItemStack cloneDefensive(@Nullable ItemStack stack) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack));
     }
-    
+
+    @Nullable
     public static ItemStack cloneDefensive(net.minecraft.item.ItemStack stack, int newSize) {
         return (ItemStack) ItemStackUtil.cloneDefensiveNative(stack, newSize);
     }
-    
-    public static ItemStack cloneDefensive(ItemStack stack, int newSize) {
+
+    @Nullable
+    public static ItemStack cloneDefensive(@Nullable ItemStack stack, int newSize) {
         return ItemStackUtil.cloneDefensive(ItemStackUtil.toNative(stack), newSize);
     }
     
-    public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack) {
-        if (stack == null) {
-            return Optional.<ItemStack>empty();
-        }
-        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
+    public static Optional<ItemStack> cloneDefensiveOptional(@Nullable net.minecraft.item.ItemStack stack) {
+        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
 
-    public static Optional<ItemStack> cloneDefensiveOptional(net.minecraft.item.ItemStack stack, int withdraw) {
-        if (stack == null) {
-            return Optional.<ItemStack>empty();
-        }
-        return Optional.<ItemStack>of(ItemStackUtil.cloneDefensive(stack));
+    public static Optional<ItemStack> cloneDefensiveOptional(@Nullable net.minecraft.item.ItemStack stack, int withdraw) {
+        return Optional.<ItemStack>ofNullable(ItemStackUtil.cloneDefensive(stack));
     }
 
     public static boolean compare(net.minecraft.item.ItemStack stack1, net.minecraft.item.ItemStack stack2) {
@@ -125,7 +125,12 @@ public abstract class ItemStackUtil {
     }
 
     @Nullable
-    public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot customCursor) {
-        return customCursor == null ? null : customCursor == ItemStackSnapshot.NONE ? null : toNative(customCursor.createStack());
+    public static net.minecraft.item.ItemStack fromSnapshotToNative(@Nullable ItemStackSnapshot snapshot) {
+        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : toNative(snapshot.createStack());
+    }
+
+    @Nullable
+    public static ItemStack fromSnapshot(@Nullable ItemStackSnapshot snapshot) {
+        return snapshot == null ? null : snapshot == ItemStackSnapshot.NONE ? null : snapshot.createStack();
     }
 }

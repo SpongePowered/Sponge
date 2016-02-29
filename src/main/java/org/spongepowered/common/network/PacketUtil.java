@@ -99,15 +99,14 @@ public class PacketUtil {
             }*/
 
             //System.out.println("RECEIVED PACKET " + packetIn);
-            ItemStackSnapshot cursor = packetPlayer.inventory.getItemStack() == null
-                                       ? ItemStackSnapshot.NONE
-                                       : ItemStackUtil.fromNative(packetPlayer.inventory.getItemStack()).createSnapshot();
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
 
-            IMixinWorld world = (IMixinWorld) packetPlayer.worldObj;
-            ItemStack itemUsed = null;
-            if (packetPlayer.getHeldItem() != null
-                && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
+            final IMixinWorld world = (IMixinWorld) packetPlayer.worldObj;
+            final ItemStack itemUsed;
+            if ((packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 itemUsed = ItemStackUtil.cloneDefensiveNative(packetPlayer.getHeldItem());
+            } else {
+                itemUsed = null;
             }
 
             final CauseTracker causeTracker = world.getCauseTracker();
@@ -118,12 +117,10 @@ public class PacketUtil {
                         .add(NamedCause.of(TrackingHelper.PACKET_PLAYER, packetPlayer))
                         .addCaptures()
                         .add(NamedCause.of(TrackingHelper.CAPTURED_PACKET, packetIn))
+                        .add(NamedCause.of(TrackingHelper.CURSOR, cursor))
                         .add(NamedCause.of(TrackingHelper.IGNORING_CREATIVE, ignoreCreative));
                 if (packetPlayer.openContainer != null) {
                     context.add(NamedCause.of(TrackingHelper.OPEN_CONTAINER, packetPlayer.openContainer));
-                }
-                if (cursor != null) {
-                    context.add(NamedCause.of(TrackingHelper.CURSOR, cursor));
                 }
                 if (itemUsed != null) {
                     context.add(NamedCause.of(TrackingHelper.ITEM_USED, itemUsed));

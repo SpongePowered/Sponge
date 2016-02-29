@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
@@ -120,6 +121,10 @@ public final class CauseTracker {
     // ----------------- STATE ACCESS ----------------------------------
 
     public void switchToPhase(TrackingPhase phase, IPhaseState state, PhaseContext phaseContext) {
+        checkNotNull(phase, "Phase cannot be null!");
+        checkNotNull(state, "State cannot be null!");
+        checkNotNull(phaseContext, "PhaseContext cannot be null!");
+        checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
         if (this.phases.states.size() > 6) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.

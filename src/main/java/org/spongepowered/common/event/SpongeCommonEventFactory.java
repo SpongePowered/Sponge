@@ -83,6 +83,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.phase.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -131,35 +132,11 @@ public class SpongeCommonEventFactory {
         if (event.isCancelled()) {
             player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(inventory.currentItem));
         } else {
-            handleCustomSlot(player, event.getTransactions());
+            PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
             inventory.currentItem = packetIn.getSlotId();
             player.markPlayerActive();
         }
         return event;
-    }
-
-    private static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
-        for (SlotTransaction slotTransaction : slotTransactions) {
-            if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
-                final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-                final int slotNumber = slot.slotNumber;
-                final ItemStack customStack = ItemStackUtil.fromSnapshotToNative(slotTransaction.getFinal());
-
-                // TODO: fix below
-                /*if (customStack == null) {
-                    slot.clear();
-                } else {
-                    slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
-                }*/
-
-                final Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
-                if (nmsSlot != null) {
-                    nmsSlot.putStack(customStack);
-                }
-
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
-            }
-        }
     }
 
     @SuppressWarnings("unchecked")
