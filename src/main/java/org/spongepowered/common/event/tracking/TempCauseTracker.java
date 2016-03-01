@@ -159,40 +159,6 @@ public final class TempCauseTracker {
     // now it's only handled in phases.
     @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause, IPhaseState phaseState, PhaseContext context) {
-        if (this.getMinecraftWorld().isRemote || phaseState.isManaged()) {
-            return;
-        } else {
-            final Map<?, ?> map = context.firstNamed(TrackingHelper.POPULATOR_CAPTURE_MAP, Map.class).orElse(null);
-            if (this.capturedEntities.isEmpty() && this.capturedEntityItems.isEmpty() && this.capturedSpongeBlockSnapshots.isEmpty()
-                && (map == null || map.isEmpty()) && context.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).isPresent()) {
-                return; // nothing was captured, return
-            }
-        }
-
-        EntityPlayerMP player = context.first(EntityPlayerMP.class).orElse(null);
-        Packet<?> packetIn = context.first(Packet.class).orElse(null);
-
-        // todo
-        // Attempt to find a Player cause if we do not have one
-        cause = TrackingHelper.identifyCauses(cause, this.capturedSpongeBlockSnapshots, this.getMinecraftWorld());
-
-        // todo
-        // Handle Block Captures
-        handleBlockCaptures(cause, phaseState, context);
-
-        // todo
-        // Inventory Events
-        Optional<Container> openContainer = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class);
-
-        // Handle Entity captures
-        if (this.capturedEntityItems.size() > 0) {
-            handleDroppedItems(cause, phaseState, context, this.invalidTransactions);
-        }
-        if (this.capturedEntities.size() > 0) {
-            handleEntitySpawns(cause, phaseState, context);
-        }
-
-        this.invalidTransactions.clear();
     }
 
 

@@ -217,46 +217,22 @@ public class PacketPhase extends TrackingPhase {
                 return SpongeEventFactory.createClickInventoryEventDouble(cause, transaction, openContainer, slotTransactions);
             }
         },
-        PRIMARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragPrimaryStart(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        SECONDARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragSecondaryStart(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        PRIMARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragPrimaryAdd(cause, transaction, openContainer, slotTransactions);
-            }
-        },
-        SECONDARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG) {
-            @Override
-            public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
-                    List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragSecondaryAdd(cause, transaction, openContainer, slotTransactions);
-            }
-        },
+        PRIMARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG),
+        SECONDARY_DRAG_INVENTORY_START(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_STARTED | CLICK_OUTSIDE_WINDOW, MASK_DRAG),
+        PRIMARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG),
+        SECONDARY_DRAG_INVENTORY_ADDSLOT(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_ADD_SLOT | CLICK_INSIDE_WINDOW, MASK_DRAG),
         PRIMARY_DRAG_INVENTORY_STOP(MODE_DRAG | DRAG_MODE_SPLIT_ITEMS | DRAG_STATUS_STOPPED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragPrimaryStop(cause, transaction, openContainer, slotTransactions);
+                return SpongeEventFactory.createClickInventoryEventDragPrimary(cause, transaction, openContainer, slotTransactions);
             }
         },
         SECONDARY_DRAG_INVENTORY_STOP(MODE_DRAG | DRAG_MODE_ONE_ITEM | DRAG_STATUS_STOPPED | CLICK_OUTSIDE_WINDOW, MASK_DRAG) {
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
-                return SpongeEventFactory.createClickInventoryEventDragSecondaryStop(cause, transaction, openContainer, slotTransactions);
+                return SpongeEventFactory.createClickInventoryEventDragSecondary(cause, transaction, openContainer, slotTransactions);
             }
         },
         ;
@@ -306,11 +282,6 @@ public class PacketPhase extends TrackingPhase {
         @Override
         public boolean isBusy() {
             return true;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return false;
         }
 
         @Nullable
@@ -377,11 +348,6 @@ public class PacketPhase extends TrackingPhase {
         @Override
         public boolean isBusy() {
             return true;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return false;
         }
 
         @Nullable

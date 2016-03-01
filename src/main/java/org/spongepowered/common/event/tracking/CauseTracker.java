@@ -26,73 +26,45 @@ package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.EmptyChunk;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 
@@ -237,61 +209,58 @@ public final class CauseTracker {
             Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
 
             try {
-                if (!this.getMinecraftWorld().isRemote) {
-                    final Chunk chunkFromBlockCoords = this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                    if (packetUser.isPresent()) {
-                        IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-                        if (!(spongeChunk instanceof EmptyChunk)) {
-                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(),
-                                    PlayerTracker.Type.NOTIFIER);
-                        }
-                    } else {
-                        Object source = null;
-                        final PhaseContext context = this.phases.peekContext();
-                        Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-                        final Optional<TileEntity> currentTickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
-                        final Optional<Entity> currentTickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
-                        if (currentTickingBlock.isPresent()) {
-                            source = currentTickingBlock.get();
-                            sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                        } else if (currentTickingTile.isPresent()) {
-                            source = currentTickingTile.get();
-                            sourcePos = ((net.minecraft.tileentity.TileEntity) currentTickingTile.get()).getPos();
-                        } else if (currentTickingEntity.isPresent()) { // Falling Blocks
-                            IMixinEntity spongeEntity = (IMixinEntity) currentTickingEntity.get();
-                            sourcePos = ((net.minecraft.entity.Entity) currentTickingEntity.get()).getPosition();
-                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-                            IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-                            if (notifier.isPresent()) {
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-                            } else if (owner.isPresent()) {
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                            }
-                        }
-
-                        if (source != null) {
-                            SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, sourcePos, iblockstate.getBlock(), notifyPos,
-                                    PlayerTracker.Type.NOTIFIER);
-                        }
-                    }
-                }
+//                if (!this.getMinecraftWorld().isRemote) {
+//                    final Chunk chunkFromBlockCoords = this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
+//                    if (packetUser.isPresent()) {
+//                        IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
+//                        if (!(spongeChunk instanceof EmptyChunk)) {
+//                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(),
+//                                    PlayerTracker.Type.NOTIFIER);
+//                        }
+//                    } else {
+//                        Object source = null;
+//                        final PhaseContext context = this.phases.peekContext();
+//                        Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+//                        final Optional<TileEntity> currentTickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
+//                        final Optional<Entity> currentTickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
+//                        if (currentTickingBlock.isPresent()) {
+//                            source = currentTickingBlock.get();
+//                            sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
+//                        } else if (currentTickingTile.isPresent()) {
+//                            source = currentTickingTile.get();
+//                            sourcePos = ((net.minecraft.tileentity.TileEntity) currentTickingTile.get()).getPos();
+//                        } else if (currentTickingEntity.isPresent()) { // Falling Blocks
+//                            IMixinEntity spongeEntity = (IMixinEntity) currentTickingEntity.get();
+//                            sourcePos = ((net.minecraft.entity.Entity) currentTickingEntity.get()).getPosition();
+//                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+//                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+//                            IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
+//                            if (notifier.isPresent()) {
+//                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+//                            } else if (owner.isPresent()) {
+//                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, owner.get(), PlayerTracker.Type.NOTIFIER);
+//                            }
+//                        }
+//
+//                        if (source != null) {
+//                            SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, sourcePos, iblockstate.getBlock(), notifyPos,
+//                                    PlayerTracker.Type.NOTIFIER);
+//                        }
+//                    }
+//                }
 
                 iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
                 CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-                // TODO
-                /*crashreportcategory.addCrashSectionCallable("Source block type", new Callable()
-                {
-                    public String call() {
-                        try {
-                            return String.format("ID #%d (%s // %s)", new Object[] {Integer.valueOf(Block.getIdFromBlock(blockIn)), blockIn.getUnlocalizedName(), blockIn.getClass().getCanonicalName()});
-                        } catch (Throwable throwable1) {
-                            return "ID #" + Block.getIdFromBlock(blockIn);
-                        }
+                crashreportcategory.addCrashSectionCallable("Source block type", () -> {
+                    try {
+                        return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
+                                sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());
+                    } catch (Throwable var2) {
+                        return "ID #" + Block.getIdFromBlock(sourceBlock);
                     }
-                });*/
+                });
                 CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);
                 throw new ReportedException(crashreport);
             }
@@ -299,51 +268,39 @@ public final class CauseTracker {
     }
 
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
-        final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
-        final IBlockState currentState = chunk.getBlockState(pos);
-        if (currentState == newState) {
+        net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
+        Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
+        Block block = newState.getBlock();
+        IBlockState iblockstate = chunk.setBlockState(pos, newState);
+
+        if (iblockstate == null)
+        {
             return false;
         }
+        else
+        {
+            Block block1 = iblockstate.getBlock();
 
-        final Block block = newState.getBlock();
-        BlockSnapshot originalBlockSnapshot = null;
-
-        // Don't capture if we are restoring blocks
-        // uncomment when you want to handle block events. for now just want to set block state and
-        // track the phases
-        final PhaseData currentPhaseContext = this.getPhases().peek();
-        final IPhaseState phaseState = currentPhaseContext.getState();
-        final TrackingPhase phase = phaseState.getPhase();
-        final PhaseContext phaseContext = currentPhaseContext.getContext();
-        // This is going to be handled in the phase.
-        if (!minecraftWorld.isRemote && phase.requiresBlockCapturing(phaseState)) {
-            BlockStateTriplet pair = phase.captureBlockChange(this, currentState, newState, block, pos, flags, phaseContext, phaseState);
-            originalBlockSnapshot = pair.getBlockSnapshot();
-        }
-
-        int oldLight = currentState.getBlock().getLightValue();
-
-        IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, null);
-
-        if (iblockstate1 == null) {
-            if (originalBlockSnapshot != null) {
-                phaseContext.getCapturedBlocks().get().remove(originalBlockSnapshot);
-            }
-            return false;
-        } else {
-            Block block1 = iblockstate1.getBlock();
-
-            if (block.getLightOpacity() != block1.getLightOpacity() || block.getLightValue() != oldLight) {
+            if (block.getLightOpacity() != block1.getLightOpacity() || block.getLightValue() != block1.getLightValue())
+            {
                 minecraftWorld.theProfiler.startSection("checkLight");
                 minecraftWorld.checkLight(pos);
                 minecraftWorld.theProfiler.endSection();
             }
 
-            // Don't notify clients or update physics while capturing blockstates
-            if (originalBlockSnapshot == null) {
-                // Modularize client and physic updates
-                this.getMixinWorld().markAndNotifyNeighbors(pos, chunk, iblockstate1, newState, flags);
+            if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated())
+            {
+                minecraftWorld.markBlockForUpdate(pos);
+            }
+
+            if (!minecraftWorld.isRemote && (flags & 1) != 0)
+            {
+                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+
+                if (block.hasComparatorInputOverride())
+                {
+                    minecraftWorld.updateComparatorOutputLevel(pos, block);
+                }
             }
 
             return true;

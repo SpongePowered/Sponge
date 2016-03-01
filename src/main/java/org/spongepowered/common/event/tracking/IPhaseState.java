@@ -43,8 +43,6 @@ public interface IPhaseState {
 
     boolean isBusy();
 
-    boolean isManaged();
-
     int ordinal();
 
     default boolean canSwitchTo(IPhaseState state) {

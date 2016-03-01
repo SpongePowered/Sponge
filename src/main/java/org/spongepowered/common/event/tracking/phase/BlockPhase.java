@@ -61,11 +61,6 @@ public class BlockPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean isManaged() {
-            return this.managed;
-        }
-
-        @Override
         public boolean canSwitchTo(IPhaseState state) {
             return false;
         }

@@ -42,28 +42,13 @@ import javax.annotation.Nullable;
 public class PluginPhase extends TrackingPhase {
 
     public enum State implements IPhaseState, ISpawnableState {
-        BLOCK_WORKER(false),
+        BLOCK_WORKER(),
         CUSTOM_SPAWN,
         COMPLETE;
-
-        private final boolean managed;
-
-        State() {
-            this.managed = false;
-        }
-
-        State(boolean managed) {
-            this.managed = managed;
-        }
 
         @Override
         public boolean isBusy() {
             return this != COMPLETE;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return this.managed;
         }
 
         @Override

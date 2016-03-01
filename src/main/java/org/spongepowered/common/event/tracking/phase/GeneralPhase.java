@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -52,11 +51,6 @@ public class GeneralPhase extends TrackingPhase {
         @Override
         public boolean isBusy() {
             return this != COMPLETE;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return false;
         }
 
         @Override

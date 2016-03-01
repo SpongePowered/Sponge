@@ -26,14 +26,8 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -42,8 +36,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.ITickingState;
@@ -51,11 +43,8 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.world.CaptureType;
 
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -81,16 +70,15 @@ public class WorldPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean isManaged() {
-            return false;
-        }
-
-        @Override
         public boolean canSwitchTo(IPhaseState state) {
-            if (this == TERRAIN_GENERATION) {
+            if (this == TERRAIN_GENERATION || this == POPULATOR_RUNNING) {
                 if (state instanceof ITickingState) {
                     return true;
                 } else if (state == BlockPhase.State.BLOCK_DECAY) {
+                    return true;
+                } else if (state == BlockPhase.State.RESTORING_BLOCKS) {
+                    return true;
+                } else if (state == State.POPULATOR_RUNNING) {
                     return true;
                 }
                 // I'm sure there will be more cases.
@@ -173,13 +161,8 @@ public class WorldPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean isManaged() {
-            return false;
-        }
-
-        @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof BlockPhase.State || state instanceof SpawningPhase.State;
+            return state instanceof BlockPhase.State || state instanceof SpawningPhase.State || state == State.TERRAIN_GENERATION;
         }
 
     }

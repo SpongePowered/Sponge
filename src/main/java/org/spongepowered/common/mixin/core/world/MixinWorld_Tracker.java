@@ -234,11 +234,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         return this.getCauseTracker().processSpawnEntity(entity, cause);
     }
 
-    /**
-     * @author bloodmc - November 15th, 2015
-     *
-     * Purpose: Rewritten to pass the source block position.
-     */
+
     @Overwrite
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
         if (!isValid(pos)) {
@@ -246,60 +242,57 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote) {
-            for (EnumFacing facing : EnumFacing.values()) {
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-            return;
-        }
-
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
-        if (event.isCancelled()) {
-            return;
-        }
-
         for (EnumFacing facing : EnumFacing.values()) {
-            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
+            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
         }
+//
+//        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
+//        if (event.isCancelled()) {
+//            return;
+//        }
+//
+//        for (EnumFacing facing : EnumFacing.values()) {
+//            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+//            }
+//        }
     }
 
-    /**
-     * @author bloodmc - November 15th, 2015
-     *
-     * Purpose: Rewritten to pass the source block position.
-     */
-    @SuppressWarnings("rawtypes")
-    @Overwrite
-    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (!isValid(pos)) {
-            return;
-        }
-
-        EnumSet directions = EnumSet.allOf(EnumFacing.class);
-        directions.remove(skipSide);
-
-        final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote) {
-            for (Object obj : directions) {
-                EnumFacing facing = (EnumFacing) obj;
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-            return;
-        }
-
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-        if (event.isCancelled()) {
-            return;
-        }
-
-        for (EnumFacing facing : EnumFacing.values()) {
-            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-        }
-    }
+//    /**
+//     * @author bloodmc - November 15th, 2015
+//     *
+//     * Purpose: Rewritten to pass the source block position.
+//     */
+//    @SuppressWarnings("rawtypes")
+//    @Overwrite
+//    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
+//        if (!isValid(pos)) {
+//            return;
+//        }
+//
+//        EnumSet directions = EnumSet.allOf(EnumFacing.class);
+//        directions.remove(skipSide);
+//
+//        final CauseTracker causeTracker = this.getCauseTracker();
+//        if (this.isRemote) {
+//            for (Object obj : directions) {
+//                EnumFacing facing = (EnumFacing) obj;
+//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+//            }
+//            return;
+//        }
+//
+//        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
+//        if (event.isCancelled()) {
+//            return;
+//        }
+//
+//        for (EnumFacing facing : EnumFacing.values()) {
+//            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+//            }
+//        }
+//    }
 
     /**
      * @author bloodmc - November 15th, 2015

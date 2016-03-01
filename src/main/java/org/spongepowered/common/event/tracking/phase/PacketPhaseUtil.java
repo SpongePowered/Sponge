@@ -73,8 +73,7 @@ public final class PacketPhaseUtil {
         final ItemStackSnapshot lastCursor = phaseContext.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
-        // Handle empty slot clicks
-        // TODO move this sort of thing to a ContainerUtil or something
+
         final Container openContainer = player.openContainer;
         final List<SlotTransaction> slotTransactions = ContainerUtil.toMixin(openContainer).getCapturedTransactions();
         if (slotTransactions.size() == 0 && packetIn.getSlotId() >= 0) {
@@ -123,8 +122,6 @@ public final class PacketPhaseUtil {
             }
             slotTransactions.clear();
         }
-
-
     }
 
 

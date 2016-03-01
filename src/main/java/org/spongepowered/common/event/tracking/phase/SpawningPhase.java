@@ -36,7 +36,6 @@ import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -63,11 +62,6 @@ public class SpawningPhase extends TrackingPhase {
         @Override
         public boolean isBusy() {
             return true;
-        }
-
-        @Override
-        public boolean isManaged() {
-            return this.managed;
         }
 
         @Override
