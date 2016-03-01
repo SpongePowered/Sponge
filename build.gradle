@@ -19,7 +19,7 @@ buildscript {
     dependencies {
         // VanillaGradle contains a custom ForgeGradle extension for SpongeCommon (see below)
         classpath 'net.minecrell:VanillaGradle:2.0.3_1'
-        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-20160116.192356-17'
+        classpath 'net.minecraftforge.gradle:ForgeGradle:2.1-20160301.091124-26'
         classpath('nl.javadude.gradle.plugins:license-gradle-plugin:0.11.0') {
             exclude module: 'guava' // Older version of Guava conflicts with ForgeGradle
         }
@@ -45,7 +45,7 @@ version = api.version
 ext.apiVersion = version
 
 minecraft {
-    version = '1.8.9'
+    version = '1.9'
 }
 
 dependencies {
