@@ -96,6 +96,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // BUNGEECORD
     public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
 
+    // PATCHES
+    public static final String ITEM_STACK_PATCH = "itemstack-count-0-patch";
+
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
@@ -126,6 +129,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
     public static final String MODULE_BUNGEECORD = "bungeecord";
+    public static final String MODULE_PATCHES = "patches";
 
     // WORLD
     public static final String WORLD_PVP_ENABLED = "pvp-enabled";
@@ -250,8 +254,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
 
+        @Setting(MODULE_PATCHES)
+        private PatchesCategory patches = new PatchesCategory();
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
+        }
+
+        public PatchesCategory getPatches() {
+            return this.patches;
         }
 
         public SqlCategory getSql() {
@@ -563,6 +574,18 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public boolean getIpForwarding() {
             return this.ipForwarding;
+        }
+    }
+
+    @ConfigSerializable
+    public static class PatchesCategory extends Category {
+
+        @Setting(value = ITEM_STACK_PATCH, comment = "If enabled, use a Count of 1 when deserializing an ItemStack with no 'Count' tag, "
+                + "preventing the creation of an ItemStack with a Count of 0.")
+        private boolean stackPatch = true;
+
+        public boolean shouldItemStackPatch() {
+            return this.stackPatch;
         }
     }
 
