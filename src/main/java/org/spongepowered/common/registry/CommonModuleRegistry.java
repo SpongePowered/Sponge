@@ -49,6 +49,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
@@ -116,6 +117,7 @@ import org.spongepowered.common.entity.ai.SpongeSwimmingAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWanderAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
+import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
@@ -255,6 +257,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
             .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
             .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
+            .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
         ;
     }
 
