@@ -25,33 +25,22 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.event.ClickEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C12PacketUpdateSign;
-import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketUpdateSign;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumHand;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 public class PacketUtil {
@@ -133,7 +122,9 @@ public class PacketUtil {
     }
 
     public static boolean processSignPacket(CPacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
-        if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
+        // TODO: Check if this is still actually necessary
+
+        /*if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
             return true;
         }
         // Sign command exploit fix
@@ -153,7 +144,7 @@ public class PacketUtil {
                 }
             }
             packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
-        }
+        }*/
         return true;
 
     }
