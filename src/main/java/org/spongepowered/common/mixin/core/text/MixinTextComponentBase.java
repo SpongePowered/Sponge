@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.text;
 
-import static net.minecraft.util.EnumChatFormatting.BOLD;
-import static net.minecraft.util.EnumChatFormatting.ITALIC;
-import static net.minecraft.util.EnumChatFormatting.OBFUSCATED;
-import static net.minecraft.util.EnumChatFormatting.RESET;
-import static net.minecraft.util.EnumChatFormatting.STRIKETHROUGH;
-import static net.minecraft.util.EnumChatFormatting.UNDERLINE;
+import static net.minecraft.util.text.TextFormatting.BOLD;
+import static net.minecraft.util.text.TextFormatting.ITALIC;
+import static net.minecraft.util.text.TextFormatting.OBFUSCATED;
+import static net.minecraft.util.text.TextFormatting.RESET;
+import static net.minecraft.util.text.TextFormatting.STRIKETHROUGH;
+import static net.minecraft.util.text.TextFormatting.UNDERLINE;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
 import static org.spongepowered.common.text.SpongeTexts.COLOR_CHAR;
 
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
 import org.spongepowered.api.text.format.TextStyle;
@@ -45,18 +45,18 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinClickEvent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
-import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.ResolvedChatStyle;
+import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Iterator;
 import java.util.List;
 
-@Mixin(ChatComponentStyle.class)
-public abstract class MixinChatComponentStyle implements IMixinChatComponent {
+@Mixin(TextComponentBase.class)
+public abstract class MixinTextComponentBase implements IMixinChatComponent {
 
-    @Shadow private ChatStyle style;
-    @Shadow protected List<IChatComponent> siblings;
+    @Shadow private Style style;
+    @Shadow protected List<ITextComponent> siblings;
 
     protected Text.Builder createBuilder() {
         throw new UnsupportedOperationException();
@@ -64,12 +64,12 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Iterator<IChatComponent> childrenIterator() {
+    public Iterator<ITextComponent> childrenIterator() {
         return getSiblings().iterator();
     }
 
     @Override
-    public Iterable<IChatComponent> withChildren() {
+    public Iterable<ITextComponent> withChildren() {
         return new TextComponentIterable(this, true);
     }
 
@@ -77,7 +77,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
     public String toPlain() {
         StringBuilder builder = new StringBuilder();
 
-        for (IChatComponent component : withChildren()) {
+        for (ITextComponent component : withChildren()) {
             builder.append(component.getUnformattedTextForChat());
         }
 
@@ -88,7 +88,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
     public String getLegacyFormatting() {
         StringBuilder builder = new StringBuilder(14);
 
-        ChatStyle style = getChatStyle();
+        Style style = getChatStyle();
         apply(builder, COLOR_CHAR, defaultIfNull(style.getColor(), RESET));
         apply(builder, COLOR_CHAR, BOLD, style.getBold());
         apply(builder, COLOR_CHAR, ITALIC, style.getItalic());
@@ -104,10 +104,10 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
         StringBuilder builder = new StringBuilder();
 
         ResolvedChatStyle current = null;
-        ChatStyle previous = null;
+        Style previous = null;
 
-        for (IChatComponent component : withChildren()) {
-            ChatStyle newStyle = component.getChatStyle();
+        for (ITextComponent component : withChildren()) {
+            Style newStyle = component.getChatStyle();
             ResolvedChatStyle style = resolve(current, previous, newStyle);
             previous = newStyle;
 
@@ -145,7 +145,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
         return builder.toString();
     }
 
-    private static ResolvedChatStyle resolve(ResolvedChatStyle current, ChatStyle previous, ChatStyle style) {
+    private static ResolvedChatStyle resolve(ResolvedChatStyle current, Style previous, Style style) {
         if (current != null && style.parentStyle == previous) {
             return new ResolvedChatStyle(
                     defaultIfNull(style.color, current.color),
@@ -171,11 +171,11 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
         return b1 != null ? b1 : b2;
     }
 
-    private static void apply(StringBuilder builder, char code, EnumChatFormatting formatting) {
+    private static void apply(StringBuilder builder, char code, TextFormatting formatting) {
         builder.append(code).append(formatting.formattingCode);
     }
 
-    private static void apply(StringBuilder builder, char code, EnumChatFormatting formatting, boolean state) {
+    private static void apply(StringBuilder builder, char code, TextFormatting formatting, boolean state) {
         if (state) {
             apply(builder, code, formatting);
         }
@@ -203,7 +203,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
             }
         }
 
-        for (IChatComponent child : this.siblings) {
+        for (ITextComponent child : this.siblings) {
             builder.append(((IMixinChatComponent) child).toText());
         }
 

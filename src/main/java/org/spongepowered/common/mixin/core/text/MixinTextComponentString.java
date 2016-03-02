@@ -24,16 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.text;
 
-import net.minecraft.util.ChatComponentScore;
+import net.minecraft.util.text.TextComponentString;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChatComponentScore.class)
-public abstract class MixinChatComponentScore extends MixinChatComponentStyle {
+@Mixin(TextComponentString.class)
+public abstract class MixinTextComponentString extends MixinTextComponentBase {
+
+    @Shadow private String text;
 
     @Override
     protected Text.Builder createBuilder() {
-        return Text.builder();
+        return Text.builder(this.text);
     }
 
 }

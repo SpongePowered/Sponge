@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.text;
 
 import com.google.common.collect.Iterators;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,12 +38,12 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Iterator;
 import java.util.List;
 
-@Mixin(ChatComponentTranslation.class)
-public abstract class MixinChatComponentTranslation extends MixinChatComponentStyle {
+@Mixin(TextComponentTranslation.class)
+public abstract class MixinTextComponentTranslation extends MixinTextComponentBase {
 
     @Shadow @Final private String key;
     @Shadow @Final private Object[] formatArgs;
-    @Shadow List<IChatComponent> children;
+    @Shadow List<ITextComponent> children;
 
     @Shadow abstract void ensureInitialized();
 
@@ -53,13 +53,13 @@ public abstract class MixinChatComponentTranslation extends MixinChatComponentSt
     }
 
     @Override
-    public Iterator<IChatComponent> childrenIterator() {
+    public Iterator<ITextComponent> childrenIterator() {
         ensureInitialized();
         return Iterators.concat(this.children.iterator(), super.childrenIterator());
     }
 
     @Override
-    public Iterable<IChatComponent> withChildren() {
+    public Iterable<ITextComponent> withChildren() {
         return new TextComponentIterable(this, false);
     }
 

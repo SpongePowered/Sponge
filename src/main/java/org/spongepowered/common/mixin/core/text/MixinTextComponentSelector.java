@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(TextComponentSelector.class)
-public abstract class MixinTextComponentSelector extends MixinChatComponentStyle {
+public abstract class MixinTextComponentSelector extends MixinTextComponentBase {
 
     @Shadow @Final private String selector;
 
