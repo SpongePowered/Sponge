@@ -113,7 +113,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
             double z = position.getZ();
 
             for (Packet packet : packets) {
-                playerList.sendToAllNear(x, y, z, radius, this.provider.func_186058_p().getId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, this.provider.func_186058_p().getId(), packet);
             }
         }
     }

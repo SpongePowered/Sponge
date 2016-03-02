@@ -222,8 +222,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             } else {
                 // Sponge - ignore as this is handled in our damageEntityHook
                 if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.HEAD) != null) {
-                    this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.HEAD).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
+                    && this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
+                    this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.HEAD).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
                             amount * 2.0F), this.nmsEntityLiving);
                     amount *= 0.75F;
                 }
@@ -305,7 +305,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getDeathSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.func_184185_a(SoundEvents.func_187510_a(s), this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.func_184185_a(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
                     }
 
                     this.nmsEntityLiving.onDeath(source);
@@ -313,7 +313,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getHurtSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.func_184185_a(SoundEvents.func_187510_a(s), this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.func_184185_a(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
                     }
                 }
 
@@ -376,8 +376,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             damage = (float) event.getFinalDamage();
 
             // Helmet
-            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND) != null) {
-                this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND).damageItem(
+            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND) != null) {
+                this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND).damageItem(
                     (int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), this.nmsEntityLiving);
             }
 

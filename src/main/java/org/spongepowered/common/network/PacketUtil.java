@@ -36,11 +36,15 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.client.CPacketClientStatus;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -99,9 +103,9 @@ public class PacketUtil {
             StaticMixinHelper.lastCursor = cursor;
 
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
-            if (StaticMixinHelper.packetPlayer.getHeldItem() != null
-                && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
+            if (StaticMixinHelper.packetPlayer.getHeldItem(EnumHand.MAIN_HAND) != null
+                && (packetIn instanceof CPacketPlayerDigging || packetIn instanceof CPacketPlayerBlockPlacement)) {
+                StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem(EnumHand.MAIN_HAND));
             }
 
             world.getCauseTracker().setProcessingCaptureCause(true);
@@ -116,7 +120,7 @@ public class PacketUtil {
     }
 
     private static boolean creativeCheck(Packet packet) {
-        return packet instanceof C10PacketCreativeInventoryAction;
+        return packet instanceof CPacketCreativeInventoryAction;
     }
 
     public static void resetStaticData() {

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import com.google.common.collect.Lists;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.key.Keys;
@@ -45,14 +45,14 @@ import java.util.List;
 @Mixin(TileEntitySign.class)
 public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
-    @Shadow @Final public IChatComponent[] signText;
+    @Shadow @Final public ITextComponent[] signText;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
         List<String> lines = Lists.newArrayList();
-        for (IChatComponent line : this.signText) {
-            lines.add(IChatComponent.Serializer.componentToJson(line));
+        for (ITextComponent line : this.signText) {
+            lines.add(ITextComponent.Serializer.componentToJson(line));
         }
         container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;
