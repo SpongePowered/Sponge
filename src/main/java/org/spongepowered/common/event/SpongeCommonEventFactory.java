@@ -27,7 +27,6 @@ package org.spongepowered.common.event;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
@@ -488,7 +487,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
-        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
+        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector3i(pos));
         Map<Direction, BlockState> neighbors = new HashMap<Direction, BlockState>();
 
         if (notifiedSides != null) {
@@ -496,7 +495,7 @@ public class SpongeCommonEventFactory {
                 EnumFacing notifiedSide = (EnumFacing) obj;
                 BlockPos offset = pos.offset(notifiedSide);
                 Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<World>((World) world, VecHelper.toVector(offset));
+                Location<World> location = new Location<World>((World) world, VecHelper.toVector3i(offset));
                 if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                     neighbors.put(direction, location.getBlock());
                 }
@@ -540,10 +539,10 @@ public class SpongeCommonEventFactory {
             cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
         }
 
-        Location<World> impactPoint = new Location<World>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));
+        Location<World> impactPoint = new Location<World>((World) projectile.worldObj, VecHelper.toVector3d(movingObjectPosition.hitVec));
 
         if (movingObjectType == RayTraceResult.Type.BLOCK) {
-            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector(movingObjectPosition.getBlockPos()));
+            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
             Direction side = Direction.NONE;
             if (movingObjectPosition.sideHit != null) {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();

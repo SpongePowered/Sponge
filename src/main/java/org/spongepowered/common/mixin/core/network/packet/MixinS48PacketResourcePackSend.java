@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.network.packet;
 
-import net.minecraft.network.play.server.S48PacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketResourcePackSend;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +36,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
 import java.net.URISyntaxException;
 
-@Mixin(S48PacketResourcePackSend.class)
+@Mixin(SPacketResourcePackSend.class)
 public abstract class MixinS48PacketResourcePackSend implements IMixinPacketResourcePackSend {
 
     @Shadow private String url;

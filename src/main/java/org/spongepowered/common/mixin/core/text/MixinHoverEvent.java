@@ -27,12 +27,12 @@ package org.spongepowered.common.mixin.core.text;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Throwables;
-import net.minecraft.event.HoverEvent;
 import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.statistic.achievement.Achievement;
@@ -51,7 +51,7 @@ import java.util.UUID;
 public abstract class MixinHoverEvent implements IMixinHoverEvent {
 
     @Shadow @Final private HoverEvent.Action action;
-    @Shadow @Final private IChatComponent value;
+    @Shadow @Final private TextComponentString value;
 
     private HoverAction<?> handle;
     private boolean initialized;

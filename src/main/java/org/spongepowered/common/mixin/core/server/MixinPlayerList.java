@@ -37,27 +37,27 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S01PacketJoinGame;
-import net.minecraft.network.play.server.S05PacketSpawnPosition;
-import net.minecraft.network.play.server.S06PacketUpdateHealth;
-import net.minecraft.network.play.server.S07PacketRespawn;
-import net.minecraft.network.play.server.S09PacketHeldItemChange;
-import net.minecraft.network.play.server.S1DPacketEntityEffect;
-import net.minecraft.network.play.server.S1FPacketSetExperience;
-import net.minecraft.network.play.server.S2BPacketChangeGameState;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.network.play.server.S39PacketPlayerAbilities;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
-import net.minecraft.network.play.server.S40PacketDisconnect;
-import net.minecraft.network.play.server.S41PacketServerDifficulty;
+import net.minecraft.network.login.server.SPacketDisconnect;
+import net.minecraft.network.play.server.SPacketChangeGameState;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketEntityEffect;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketJoinGame;
+import net.minecraft.network.play.server.SPacketPlayerAbilities;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketRespawn;
+import net.minecraft.network.play.server.SPacketServerDifficulty;
+import net.minecraft.network.play.server.SPacketSetExperience;
+import net.minecraft.network.play.server.SPacketSpawnPosition;
+import net.minecraft.network.play.server.SPacketUpdateHealth;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.storage.IPlayerFileData;
@@ -92,9 +92,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.network.IMixinS38PacketPlayerListItem$AddPlayerData;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -112,8 +112,8 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 @NonnullByDefault
-@Mixin(ServerConfigurationManager.class)
-public abstract class MixinServerConfigurationManager {
+@Mixin(PlayerList.class)
+public abstract class MixinPlayerList {
 
     private static final String WRITE_PLAYER_DATA =
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
@@ -130,7 +130,7 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract void setPlayerGameTypeBasedOnOther(EntityPlayerMP playerIn, @Nullable EntityPlayerMP other, net.minecraft.world.World worldIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
-    @Shadow public abstract void sendChatMsg(IChatComponent component);
+    @Shadow public abstract void sendChatMsg(ITextComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
@@ -152,16 +152,16 @@ public abstract class MixinServerConfigurationManager {
     }
 
     private void disconnectClient(NetworkManager netManager, Optional<Text> disconnectMessage, @Nullable GameProfile profile) {
-        IChatComponent reason;
+        ITextComponent reason;
         if (disconnectMessage.isPresent()) {
             reason = SpongeTexts.toComponent(disconnectMessage.get());
         } else {
-            reason = new ChatComponentTranslation("disconnect.disconnected");
+            reason = new TextComponentTranslation("disconnect.disconnected");
         }
 
         try {
             logger.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
-            netManager.sendPacket(new S40PacketDisconnect(reason));
+            netManager.sendPacket(new SPacketDisconnect(reason));
             netManager.closeChannel(reason);
         } catch (Exception exception) {
             logger.error("Error whilst disconnecting player", exception);
@@ -233,7 +233,7 @@ public abstract class MixinServerConfigurationManager {
         }
 
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
-        playerIn.dimension = worldserver.provider.getDimensionId();
+        playerIn.dimension = worldserver.provider.func_186058_p().func_186068_a();
         // Sponge end
 
         playerIn.setWorld(worldserver);
@@ -245,7 +245,7 @@ public abstract class MixinServerConfigurationManager {
         }
 
         logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.getDimensionId()
+                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.func_186058_p().func_186068_a()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
         BlockPos blockpos = worldserver.getSpawnPoint();
@@ -258,20 +258,20 @@ public abstract class MixinServerConfigurationManager {
         playerIn.playerNetServerHandler = handler;
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionId(), worldserver, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.func_186058_p().func_186068_a(), worldserver, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
         }
 
-        handler.sendPacket(new S01PacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
+        handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
                 .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
                 .getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
-        handler.sendPacket(new S3FPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
+        handler.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
                 .getServerInstance().getServerModName())));
-        handler.sendPacket(new S41PacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
-        handler.sendPacket(new S05PacketSpawnPosition(blockpos));
-        handler.sendPacket(new S39PacketPlayerAbilities(playerIn.capabilities));
-        handler.sendPacket(new S09PacketHeldItemChange(playerIn.inventory.currentItem));
+        handler.sendPacket(new SPacketServerDifficulty(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        handler.sendPacket(new SPacketSpawnPosition(blockpos));
+        handler.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
+        handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         playerIn.getStatFile().func_150877_d();
         playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
@@ -302,22 +302,22 @@ public abstract class MixinServerConfigurationManager {
 
         ((IMixinEntityPlayerMP) playerIn).initScoreboard();
 
-        ChatComponentTranslation chatcomponenttranslation;
+        TextComponentTranslation chatcomponenttranslation;
 
         if (!playerIn.getName().equalsIgnoreCase(s))
         {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
+            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined.renamed", playerIn.getDisplayName(), s);
         }
         else
         {
-            chatcomponenttranslation = new ChatComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
+            chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
-        chatcomponenttranslation.getChatStyle().setColor(EnumChatFormatting.YELLOW);
+        chatcomponenttranslation.getChatStyle().setColor(TextFormatting.YELLOW);
 
         for (Object o : playerIn.getActivePotionEffects()) {
             PotionEffect potioneffect = (PotionEffect) o;
-            handler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+            handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
 
         // Fire PlayerJoinEvent
@@ -370,7 +370,7 @@ public abstract class MixinServerConfigurationManager {
         // Keep players out of blocks
         Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
-        while (!((WorldServer) location.getExtent()).getCollidingBoundingBoxes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
+        while (!((WorldServer) location.getExtent()).func_184144_a(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
             playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }
@@ -379,7 +379,7 @@ public abstract class MixinServerConfigurationManager {
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
         playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
-        playerIn.getServerForPlayer().getPlayerManager().removePlayer(playerIn);
+        playerIn.getServerForPlayer().func_184164_w().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
 
@@ -409,32 +409,32 @@ public abstract class MixinServerConfigurationManager {
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
 
-        playerIn.dimension = targetWorld.provider.getDimensionId();
+        playerIn.dimension = targetWorld.provider.func_186058_p().func_186068_a();
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
-        targetWorld.theChunkProviderServer.loadChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        targetWorld.getChunkProvider().func_186026_b((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.getDimensionId(), targetWorld, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.func_186058_p().func_186068_a(), targetWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(targetWorld, playerIn, dimension);
         }
 
-        playerIn.playerNetServerHandler.sendPacket(new S07PacketRespawn(dimension, targetWorld.getDifficulty(), targetWorld
+        playerIn.playerNetServerHandler.sendPacket(new SPacketRespawn(dimension, targetWorld.getDifficulty(), targetWorld
                 .getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
         playerIn.isDead = false;
         playerIn.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 playerIn.rotationYaw, playerIn.rotationPitch);
 
         final BlockPos spawnLocation = targetWorld.getSpawnPoint();
-        playerIn.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(spawnLocation));
-        playerIn.playerNetServerHandler.sendPacket(new S1FPacketSetExperience(playerIn.experience, playerIn.experienceTotal,
+        playerIn.playerNetServerHandler.sendPacket(new SPacketSpawnPosition(spawnLocation));
+        playerIn.playerNetServerHandler.sendPacket(new SPacketSetExperience(playerIn.experience, playerIn.experienceTotal,
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
-        targetWorld.getPlayerManager().addPlayer(playerIn);
+        targetWorld.func_184164_w().addPlayer(playerIn);
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
         playerIn.addSelfToInternalCraftingInventory();
@@ -446,7 +446,7 @@ public abstract class MixinServerConfigurationManager {
 
         playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(1.0F);
         playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth.get().floatValue());
-        playerIn.playerNetServerHandler.sendPacket(new S06PacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
+        playerIn.playerNetServerHandler.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
 
         return playerIn;
     }
@@ -478,7 +478,7 @@ public abstract class MixinServerConfigurationManager {
                 playerIn.setLocationAndAngles(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D, 0.0F, 0.0F);
                 spawnPos = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
             } else { // Bed invalid
-                playerIn.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(0, 0.0F));
+                playerIn.playerNetServerHandler.sendPacket(new SPacketChangeGameState(0, 0.0F));
                 // Vanilla behaviour - Delete the known bed location if invalid
                 bedLoc = null; // null = remove location
             }
@@ -522,15 +522,15 @@ public abstract class MixinServerConfigurationManager {
     }
 
     @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
-    private void onPlayerSendPacket(ServerConfigurationManager manager, Packet<?> packet, EntityPlayerMP playerMP) {
+    private void onPlayerSendPacket(PlayerList manager, Packet<?> packet, EntityPlayerMP playerMP) {
         if (!((IMixinEntity) playerMP).isVanished()) {
-            manager.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerMP));
+            manager.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, playerMP));
         }
     }
 
     @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
     private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
-        S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
+        SPacketPlayerListItem packetPlayerListItem = (SPacketPlayerListItem) packet;
         EntityPlayerMP playerMP1 = ((IMixinS38PacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
         if (!((IMixinEntity) playerMP1).isVanished()) {
             netHandler.sendPacket(packet);

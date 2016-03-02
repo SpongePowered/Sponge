@@ -25,7 +25,7 @@
 package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.common.config.SpongeConfig;
 

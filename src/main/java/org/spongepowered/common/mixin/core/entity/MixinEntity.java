@@ -1036,7 +1036,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector3i(pos)), Direction.NONE);
         SpongeImpl.postEvent(event);
 
         if (!event.isCancelled()) {
@@ -1064,7 +1064,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector3i(pos)), Direction.NONE);
         SpongeImpl.postEvent(event);
 
         if (!event.isCancelled()) {
@@ -1087,7 +1087,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
         }
 
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.UP);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector3i(pos)), Direction.UP);
         SpongeImpl.postEvent(event);
 
         if (!event.isCancelled()) {

@@ -326,7 +326,7 @@
         "server.MixinNetHandlerHandshakeTCP",
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
-        "server.MixinServerConfigurationManager",
+        "server.management.MixinPlayerList",
         "server.network.MixinNetHandlerLoginServer",
         "server.network.MixinNetHandlerLoginServerAnonThread",
         "status.MixinMinecraftProtocolVersionIdentifier",

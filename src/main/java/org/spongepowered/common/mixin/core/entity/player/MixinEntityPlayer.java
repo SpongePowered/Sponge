@@ -133,7 +133,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             if (!this.worldObj.isRemote) {
                 SpongeImpl.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Cause.of(NamedCause.source(this)),
-                                                this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
+                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.playerLocation)), this));
             }
             return true;
         }

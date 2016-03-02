@@ -30,27 +30,23 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandHandler;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerSelector;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +56,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -98,7 +92,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) MinecraftServer.getServer().getCommandManager();
+        CommandHandler handler = (CommandHandler) ((ICommandSender) source).func_184102_h().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
@@ -111,7 +105,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         int affectedEntities = 1;
         if (usernameIndex > -1) {
             @SuppressWarnings("unchecked")
-            List<Entity> list = PlayerSelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
+            List<Entity> list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
@@ -169,7 +163,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        return this.command.canCommandSenderUseCommand(WrapperICommandSender.of(source));
+        return this.command.func_184882_a(((ICommandSender) source).func_184102_h(), WrapperICommandSender.of(source));
     }
 
     @Override
@@ -214,7 +208,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
         }
         // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), null);
+        List<String> suggestions = this.command.func_184883_a(((ICommandSender) source).func_184102_h(), WrapperICommandSender.of(source), arguments
+                .split(" ", -1), null);
         if (suggestions == null) {
             return ImmutableList.of();
         }

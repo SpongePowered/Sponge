@@ -56,7 +56,7 @@ public final class VecHelper {
     }
     // === MC BlockPos --> Flow Vector3i ==
 
-    public static Vector3i toVector(BlockPos pos) {
+    public static Vector3i toVector3i(BlockPos pos) {
         return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
     }
 
@@ -68,25 +68,31 @@ public final class VecHelper {
 
     // === Rotations --> Flow Vector ===
 
-    public static Vector3d toVector(Rotations rotation) {
+    public static Vector3d toVector3d(Rotations rotation) {
         return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
     }
 
     // === MC Vec3i --> Flow Vector3i ===
 
-    public static Vector3i toVector(Vec3i vector) {
+    public static Vector3i toVector3i(Vec3i vector) {
         return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === Flow Vector3i --> MC Vec3i ===
 
-    public static Vec3i toVector(Vector3i vector) {
+    public static Vec3i toVec3i(Vector3i vector) {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    // === Flow Vector3d --> MC Vec3d ===
+
+    public static Vec3d toVec3d(Vector3d vector) {
+        return new Vec3d(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === MC ChunkCoordIntPair ---> Flow Vector3i ===
 
-    public static Vector3i toVector(ChunkCoordIntPair chunk) {
+    public static Vector3i toVec3i(ChunkCoordIntPair chunk) {
         return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
     }
 
@@ -98,13 +104,13 @@ public final class VecHelper {
 
     // === MC Vec3 --> flow Vector3d ==
 
-    public static Vector3d toVector(Vec3d vector) {
+    public static Vector3d toVector3d(Vec3d vector) {
         return new Vector3d(vector.xCoord, vector.yCoord, vector.zCoord);
     }
 
     // === Flow Vector3d --> MC Vec3 ==
 
-    public static Vec3i toVector(Vector3d vector) {
+    public static Vec3i toVec3i(Vector3d vector) {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
