@@ -24,25 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import com.google.gson.JsonObject;
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.UserListBansEntry;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
+import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.Date;
 
 @Mixin(UserListBansEntry.class)
-public abstract class MixinUserBanEntry extends BanEntry implements Ban.Profile {
+public abstract class MixinUserBanEntry extends UserListEntryBan implements Ban.Profile {
 
     public MixinUserBanEntry(Object valueIn, Date startDate, String banner, Date endDate, String banReason) {
         super(valueIn, startDate, banner, endDate, banReason);
