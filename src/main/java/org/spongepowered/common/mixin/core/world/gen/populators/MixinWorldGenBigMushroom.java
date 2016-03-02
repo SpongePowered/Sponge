@@ -92,7 +92,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
             z = random.nextInt(16) + 8;
             BlockPos pos = world.getHeight(chunkPos.add(x, 0, z));
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(pos));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);

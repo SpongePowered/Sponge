@@ -24,67 +24,66 @@
  */
 package org.spongepowered.common.world.gen.builders;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.feature.WorldGenSpikes;
+import net.minecraft.world.gen.feature.WorldGenEndIsland;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform;
-import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform.Builder;
+import org.spongepowered.api.world.gen.populator.EndIsland;
+import org.spongepowered.api.world.gen.populator.EndIsland.Builder;
 
+public class EndIslandBuilder implements EndIsland.Builder {
 
-public class EnderCrystalPlatformBuilder implements EnderCrystalPlatform.Builder {
-    
-    private double chance;
-    private VariableAmount height;
-    private VariableAmount radius;
-    
-    public EnderCrystalPlatformBuilder() {
+    private VariableAmount initial;
+    private VariableAmount decrement;
+    private BlockState state;
+
+    public EndIslandBuilder() {
         reset();
     }
 
     @Override
-    public Builder chance(double p) {
-        checkArgument(!Double.isNaN(p), "The probability must be a number.");
-        checkArgument(!Double.isInfinite(p), "The probability cannot be infinite.");
-        this.chance = p;
+    public Builder startingRadius(VariableAmount radius) {
+        this.initial = checkNotNull(radius);
         return this;
     }
 
     @Override
-    public Builder height(VariableAmount height) {
-        this.height = height;
+    public Builder radiusDecrement(VariableAmount radius) {
+        this.decrement = checkNotNull(radius);
         return this;
     }
 
     @Override
-    public Builder radius(VariableAmount radius) {
-        this.radius = radius;
+    public Builder islandBlock(BlockState state) {
+        this.state = checkNotNull(state, "state");
         return this;
     }
 
     @Override
-    public Builder from(EnderCrystalPlatform value) {
-        return chance(value.getSpawnProbability())
-            .height(value.getHeight())
-            .radius(value.getRadius());
+    public Builder from(EndIsland value) {
+        startingRadius(value.getStartingRadius());
+        radiusDecrement(value.getRadiusDecrement());
+        islandBlock(value.getIslandBlock());
+        return this;
     }
 
     @Override
     public Builder reset() {
-        this.chance = 0.2;
-        this.radius = VariableAmount.baseWithRandomAddition(1, 4);
-        this.height = VariableAmount.baseWithRandomAddition(6, 32);
+        this.initial = VariableAmount.baseWithRandomAddition(4, 3);
+        this.decrement = VariableAmount.baseWithRandomAddition(0.5, 2);
+        this.state = BlockTypes.END_STONE.getDefaultState();
         return this;
     }
 
     @Override
-    public EnderCrystalPlatform build() throws IllegalStateException {
-        EnderCrystalPlatform populator = (EnderCrystalPlatform) new WorldGenSpikes();
-        populator.setSpawnProbability(this.chance);
-        populator.setHeight(this.height);
-        populator.setRadius(this.radius);
-        return populator;
+    public EndIsland build() throws IllegalStateException {
+        EndIsland island = (EndIsland) new WorldGenEndIsland();
+        island.setIslandBlock(this.state);
+        island.setStartingRadius(this.initial);
+        island.setRadiusDecrement(this.decrement);
+        return island;
     }
 
 }

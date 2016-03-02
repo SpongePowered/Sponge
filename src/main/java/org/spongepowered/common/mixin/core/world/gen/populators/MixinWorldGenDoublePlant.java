@@ -121,7 +121,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
             if (worldIn.isAirBlock(blockpos1) && (!worldIn.provider.getHasNoSky() || blockpos1.getY() < 254)
                     && Blocks.double_plant.canPlaceBlockAt(worldIn, blockpos1)) {
                 if (this.override != null) {
-                    Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector(blockpos1));
+                    Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos1));
                     type = this.override.apply(pos);
                 } else {
                     result = this.types.get(rand);

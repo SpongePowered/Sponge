@@ -97,7 +97,7 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
             y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             blockpos = chunkPos.add(x, y, z);
             if(this.override != null) {
-                Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector(blockpos));
+                Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos));
                 type = this.override.apply(pos);
             } else {
                 result = this.flowers.get(random);

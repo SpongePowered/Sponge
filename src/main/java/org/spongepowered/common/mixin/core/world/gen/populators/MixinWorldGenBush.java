@@ -93,7 +93,7 @@ public abstract class MixinWorldGenBush implements Mushroom {
             y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() * 2);
             BlockPos height = chunkPos.add(x, y, z);
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(height));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(height));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);
