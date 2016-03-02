@@ -30,16 +30,16 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -221,8 +221,8 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createResistanceModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(Potion.resistance) && damageSource != DamageSource.outOfWorld) {
-            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(Potion.resistance));
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.resistance) && damageSource != DamageSource.outOfWorld) {
+            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.resistance));
             return Optional.of(new Tuple<>(DamageModifier.builder()
                                                .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
                                                .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
@@ -254,9 +254,9 @@ public class DamageEventHandler {
                 final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-                if (Enchantment.getEnchantmentById(enchantmentId) != null) {
+                if (Enchantment.func_185262_c(enchantmentId) != null) {
                     // Ok, we have an enchantment!
-                    final Enchantment enchantment = Enchantment.getEnchantmentById(enchantmentId);
+                    final Enchantment enchantment = Enchantment.func_185262_c(enchantmentId);
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
                         ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();
