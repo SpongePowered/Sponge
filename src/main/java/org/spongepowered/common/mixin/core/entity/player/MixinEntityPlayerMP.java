@@ -30,6 +30,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import io.netty.util.DefaultAttributeMap;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
@@ -39,17 +40,24 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
+import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketChat;
+import net.minecraft.network.play.server.SPacketResourcePackSend;
+import net.minecraft.network.play.server.SPacketSoundEffect;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
@@ -129,7 +137,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     @Shadow @Final public MinecraftServer mcServer;
-    @Shadow @Final public ItemInWorldManager theItemInWorldManager;
+    @Shadow @Final public PlayerInteractionManager theItemInWorldManager;
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
@@ -139,7 +147,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private boolean chatColours;
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
-    
+
     private WorldSettings.GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
@@ -156,7 +164,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @SuppressWarnings("rawtypes")
     @Redirect(method = "onDeath", at = @At(value = "INVOKE", target = "Lnet/minecraft/scoreboard/Scoreboard;getObjectivesFromCriteria(Lnet/minecraft/scoreboard/IScoreObjectiveCriteria;)Ljava/util/Collection;"))
-    public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreObjectiveCriteria criteria) {
+    public Collection onGetObjectivesFromCriteria(net.minecraft.scoreboard.Scoreboard this$0, IScoreCriteria criteria) {
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
@@ -194,7 +202,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     // Post before the player values are updated
     @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    public void processClientSettingsEvent(C15PacketClientSettings packet, CallbackInfo ci) {
+    public void processClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
         PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
                 (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
                 LanguageUtil.LOCALE_CACHE.getUnchecked(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
@@ -202,7 +210,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    public void processClientSettings(C15PacketClientSettings packet, CallbackInfo ci) {
+    public void processClientSettings(CPacketClientSettings packet, CallbackInfo ci) {
         this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
         this.viewDistance = packet.view;
     }
@@ -237,12 +245,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         checkNotNull(type, "type");
         checkNotNull(message, "message");
 
-        IChatComponent component = SpongeTexts.toComponent(message);
+        ITextComponent component = SpongeTexts.toComponent(message);
         if (type == ChatTypes.ACTION_BAR) {
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.playerNetServerHandler.sendPacket(new S02PacketChat(component, ((SpongeChatType) type).getByteId()));
+        this.playerNetServerHandler.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
     }
 
     @Override
@@ -397,7 +405,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void kick(Text message) {
-        final IChatComponent component = SpongeTexts.toComponent(message);
+        final ITextComponent component = SpongeTexts.toComponent(message);
         PlayerKickHelper.kickPlayer((EntityPlayerMP) (Object) this, component);
     }
 
@@ -413,13 +421,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playerNetServerHandler.sendPacket(new S29PacketSoundEffect(sound.getId(), position.getX(), position.getY(), position.getZ(),
+        this.playerNetServerHandler.sendPacket(new SPacketSoundEffect(sound.getId(), position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
     }
 
     @Override
     public void sendResourcePack(ResourcePack pack) {
-        S48PacketResourcePackSend packet = new S48PacketResourcePackSend();
+        SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((IMixinPacketResourcePackSend) packet).setResourcePack(pack);
         this.playerNetServerHandler.sendPacket(packet);
     }
@@ -479,7 +487,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         this.pendingGameType = (WorldSettings.GameType) (Object) event.getGameMode();
     }
-    
+
     /**
      * This injector must appear <b>after</b> {@link #onSetGameType} since it
      * assigns the {@link #pendingGameType} returned by the event to the actual
@@ -499,7 +507,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void resetAttributeMap() {
         // The name is wrong - it's used on the client and server
-        this.attributeMap = new ServersideAttributeMap();
+        this.attributeMap = new DefaultAttributeMap();
         this.applyEntityAttributes();
 
         // Re-create the array, so that attributes are properly re-added

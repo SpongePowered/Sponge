@@ -35,6 +35,7 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C16PacketClientStatus;
+import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
@@ -126,13 +127,13 @@ public class PacketUtil {
         StaticMixinHelper.ignoreCreativeInventoryPacket = false;
     }
 
-    public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
+    public static boolean processSignPacket(CPacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
         if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
             return true;
         }
         // Sign command exploit fix
-        for (int i = 0; i < packetIn.getLines().length; ++i) {
-            ChatStyle chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
+        for (int i = 0; i < packetIn.func_187017_b().length; ++i) {
+            ChatStyle chatstyle = packetIn.func_187017_b()[i] == null ? null : packetIn.func_187017_b()[i].getChatStyle();
 
             if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
                 ClickEvent clickevent = chatstyle.getChatClickEvent();
