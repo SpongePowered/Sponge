@@ -31,7 +31,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -106,14 +106,14 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            ServerConfigurationManager manager = MinecraftServer.getServer().getConfigurationManager();
+            PlayerList playerList = ((net.minecraft.world.World) (Object) this).getMinecraftServer().getPlayerList();
 
             double x = position.getX();
             double y = position.getY();
             double z = position.getZ();
 
             for (Packet packet : packets) {
-                manager.sendToAllNear(x, y, z, radius, this.provider.getDimensionId(), packet);
+                playerList.sendToAllNear(x, y, z, radius, this.provider.func_186058_p().getId(), packet);
             }
         }
     }

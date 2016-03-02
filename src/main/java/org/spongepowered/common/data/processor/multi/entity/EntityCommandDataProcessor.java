@@ -25,8 +25,8 @@
 package org.spongepowered.common.data.processor.multi.entity;
 
 import com.google.common.collect.Maps;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -83,7 +83,7 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
     @SuppressWarnings("unchecked")
     @Override
     protected boolean set(EntityMinecartCommandBlock entity, Map<Key<?>, Object> keyValues) {
-        CommandBlockLogic logic = entity.getCommandBlockLogic();
+        CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
         logic.setLastOutput(SpongeTexts.toComponent(((Optional<Text>) keyValues.get(Keys.LAST_COMMAND_OUTPUT)).orElse(Text.of())));
         logic.commandStored = (String) keyValues.get(Keys.COMMAND);
         logic.successCount = (int) keyValues.get(Keys.SUCCESS_COUNT);
@@ -94,7 +94,7 @@ public class EntityCommandDataProcessor extends AbstractEntityDataProcessor<Enti
 
     @Override
     protected Map<Key<?>, ?> getValues(EntityMinecartCommandBlock entity) {
-        CommandBlockLogic logic = entity.getCommandBlockLogic();
+        CommandBlockBaseLogic logic = entity.getCommandBlockLogic();
         Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(4);
         Optional<Text> lastCommandOutput = logic.getLastOutput() != null ? Optional.of(SpongeTexts.toText(logic.getLastOutput())) : Optional.empty();
         values.put(Keys.LAST_COMMAND_OUTPUT, lastCommandOutput);

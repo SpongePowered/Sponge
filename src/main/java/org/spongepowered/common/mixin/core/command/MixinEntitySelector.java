@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerSelector;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.command.WrapperCommandSource;
 
-@Mixin(PlayerSelector.class)
-public class MixinPlayerSelector {
+@Mixin(EntitySelector.class)
+public abstract class MixinEntitySelector {
 
     @Redirect(method = "matchEntities", at = @At(value = "INVOKE", target = "net.minecraft.command.ICommandSender.canCommandSenderUseCommand"
             + "(ILjava/lang/String;)Z"))

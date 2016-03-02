@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.network.packet;
 
-import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.network.play.server.SPacketScoreboardObjective;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,10 +33,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(S3BPacketScoreboardObjective.class)
-public class MixinS3BPacketScoreboardObjective {
+@Mixin(SPacketScoreboardObjective.class)
+public abstract class MixinSPacketScoreboardObjective {
 
-    @Shadow public IScoreObjectiveCriteria.EnumRenderType type;
+    @Shadow public IScoreCriteria.EnumRenderType type;
 
     @Inject(method = "<init>(Lnet/minecraft/scoreboard/ScoreObjective;I)V", at = @At("RETURN"), remap = false)
     public void onInit(ScoreObjective objective, int i, CallbackInfo ci) {

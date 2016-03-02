@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -43,7 +43,7 @@ import java.util.Optional;
 public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     public Vector3d origin;
-    public Vec3 position; // Added for Forge
+    public Vec3d position; // Added for Forge
     private boolean shouldBreakBlocks;
 
     @Shadow public boolean isFlaming;

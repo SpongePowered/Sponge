@@ -49,8 +49,9 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -340,7 +341,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<LargeFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3 lookVec = source.getLook(1);
+                Vec3d lookVec = source.getLook(1);
                 LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.worldObj, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 return doLaunch(loc.getExtent(), fireball, Cause.of(NamedCause.source(source)));
@@ -366,7 +367,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<WitherSkull> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3 lookVec = source.getLook(1);
+                Vec3d lookVec = source.getLook(1);
                 WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.worldObj, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 return doLaunch(loc.getExtent(), skull, Cause.of(NamedCause.source(source)));

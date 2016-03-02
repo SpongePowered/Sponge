@@ -30,8 +30,8 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.WeightedRandom;
-import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.entity.Entity;
@@ -57,8 +57,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
 
-@Mixin(SpawnerAnimals.class)
-public abstract class MixinSpawnerAnimals {
+@Mixin(WorldEntitySpawner.class)
+public abstract class MixinWorldEntitySpawner {
 
     private static final String WORLD_CAN_SPAWN_CREATURE = "Lnet/minecraft/world/WorldServer;canCreatureTypeSpawnHere("
         + "Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/BiomeGenBase$SpawnListEntry;Lnet/minecraft/util/BlockPos;)Z";
@@ -162,7 +162,7 @@ public abstract class MixinSpawnerAnimals {
      */
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = BIOME_CAN_SPAWN_ANIMAL))
     private static boolean onCanGenerate(EntityLiving.SpawnPlacementType type, World worldIn, BlockPos pos) {
-        return SpawnerAnimals.canCreatureTypeSpawnAtLocation(type, worldIn, pos) && check(pos, worldIn);
+        return WorldEntitySpawner.canCreatureTypeSpawnAtLocation(type, worldIn, pos) && check(pos, worldIn);
     }
 
     /**
