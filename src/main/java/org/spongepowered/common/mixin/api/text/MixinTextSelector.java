@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.text;
 
+import net.minecraft.util.text.TextComponentBase;
+import net.minecraft.util.text.TextComponentSelector;
 import org.spongepowered.api.text.SelectorText;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.asm.mixin.Final;
@@ -36,7 +38,7 @@ public abstract class MixinTextSelector extends MixinText {
     @Shadow @Final protected Selector selector;
 
     @Override
-    protected ChatComponentStyle createComponent() {
-        return new ChatComponentSelector(this.selector.toPlain());
+    protected TextComponentBase createComponent() {
+        return new TextComponentSelector(this.selector.toPlain());
     }
 }
