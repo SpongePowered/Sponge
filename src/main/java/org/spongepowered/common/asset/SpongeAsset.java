@@ -22,43 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.plugin;
+package org.spongepowered.common.asset;
 
-import com.google.common.base.Objects;
+import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.plugin.PluginContainer;
 
-public abstract class AbstractPluginContainer implements PluginContainer {
+import java.net.URL;
 
-    protected AbstractPluginContainer() {
+public final class SpongeAsset implements Asset {
+
+    final PluginContainer plugin;
+    final URL url;
+
+    protected SpongeAsset(PluginContainer plugin, URL url) {
+        this.plugin = plugin;
+        this.url = url;
     }
 
     @Override
-    public String getUnqualifiedId() {
-        // @minecrell: is this supposed to call the static method below?
-        return getId();
-    }
-
-    protected Objects.ToStringHelper toStringHelper() {
-        return Objects.toStringHelper("Plugin")
-                .omitNullValues()
-                .add("id", getId())
-                .add("name", getName())
-                .add("version", getVersion().orElse(null))
-                .add("description", getDescription().orElse(null))
-                .add("url", getUrl().orElse(null))
-                .add("assets", getAssetDirectory().orElse(null))
-                .add("authors", getAuthors().isEmpty() ? null : getAuthors())
-                .add("source", getSource().orElse(null));
+    public PluginContainer getOwner() {
+        return this.plugin;
     }
 
     @Override
-    public final String toString() {
-        return toStringHelper().toString();
-    }
-
-    public static String getUnqualifiedId(String id) {
-        int pos = id.lastIndexOf('.');
-        return pos >= 0 ? id.substring(pos + 1) : id;
+    public URL getUrl() {
+        return this.url;
     }
 
 }
