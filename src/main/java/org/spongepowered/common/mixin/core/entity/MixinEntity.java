@@ -93,6 +93,7 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.DamageEventHandler;
@@ -162,11 +163,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public int fireResistance;
     @Shadow public int fire;
     @Shadow public int dimension;
-    @Shadow public net.minecraft.entity.Entity riddenByEntity;
-    @Shadow public net.minecraft.entity.Entity ridingEntity;
+//    @Shadow public net.minecraft.entity.Entity riddenByEntity; // TODO rename these appropriately tomorrow
+//    @Shadow public net.minecraft.entity.Entity ridingEntity; // TODO rename this appropriately tomorrow
     @Shadow protected Random rand;
     @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn);
+//    @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn); // TODO rename this appropriately tomorrow
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
     @Shadow public abstract boolean getFlag(int flag);
@@ -223,7 +224,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             this.originalLava = DamageSource.lava;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.lava);
+                block.getBlock().getMaterial(block) == Material.lava);
             DamageSource.lava = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }
@@ -248,7 +249,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             this.originalInFire = DamageSource.inFire;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block == Blocks.fire || block == Blocks.flowing_lava || block == Blocks.lava);
+                block.getBlock() == Blocks.fire || block.getBlock() == Blocks.flowing_lava || block.getBlock() == Blocks.lava);
             DamageSource.inFire = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
         }
     }
@@ -643,7 +644,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public Optional<Entity> getPassenger() {
+    public List<Entity> getPassengers() {
         return Optional.ofNullable((Entity) this.riddenByEntity);
     }
 
@@ -659,14 +660,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         net.minecraft.entity.Entity baseVehicle = this.ridingEntity;
-        while (baseVehicle.ridingEntity != null) {
-            baseVehicle = baseVehicle.ridingEntity;
+        while (baseVehicle.func_184187_bx() != null) {
+            baseVehicle = baseVehicle.func_184187_bx();
         }
         return (Entity) baseVehicle;
     }
 
     @Override
-    public DataTransactionResult setPassenger(@Nullable Entity entity) {
+    public DataTransactionResult addPassenger(@Nullable Entity entity) {
         net.minecraft.entity.Entity passenger = (net.minecraft.entity.Entity) entity;
         if (this.riddenByEntity == null && entity == null) {
             return DataTransactionResult.successNoData();
@@ -676,11 +677,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (this.riddenByEntity != null) {
             final Entity previous = ((Entity) this.riddenByEntity);
             this.riddenByEntity.mountEntity(null); // eject current passenger
-            builder.replace(new ImmutableSpongeValue<>(Keys.PASSENGER, previous.createSnapshot()));
+            builder.replace(new ImmutableSpongeListValue<>(Keys.PASSENGER, ImmutableList.of(previous.createSnapshot())));
         }
         if (passenger != null) {
             passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
-            builder.success(new ImmutableSpongeValue<>(Keys.PASSENGER, ((Entity) passenger).createSnapshot()));
+            builder.success(new ImmutableSpongeListValue<>(Keys.PASSENGER,  ImmutableList.of(((Entity) passenger).createSnapshot())));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
 

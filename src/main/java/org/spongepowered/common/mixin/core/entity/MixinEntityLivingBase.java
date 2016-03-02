@@ -222,8 +222,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             } else {
                 // Sponge - ignore as this is handled in our damageEntityHook
                 if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND) != null) {
-                    this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
+                    && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.HEAD) != null) {
+                    this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.HEAD).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
                             amount * 2.0F), this.nmsEntityLiving);
                     amount *= 0.75F;
                 }
@@ -336,8 +336,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> hardHatFunction =
                 DamageEventHandler.createHardHatModifier(this.nmsEntityLiving, damageSource);
-            Optional<Tuple<DamageModifier, Function<? super Double, Double>>> blockingFunction =
-                DamageEventHandler.createBlockingModifier(this.nmsEntityLiving, damageSource);
             Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> armorFunction =
                 provideArmorModifiers(this.nmsEntityLiving, damageSource, damage);
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> resistanceFunction =
@@ -349,10 +347,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
             if (hardHatFunction.isPresent()) {
                 originalFunctions.add(hardHatFunction.get());
-            }
-
-            if (blockingFunction.isPresent()) {
-                originalFunctions.add(blockingFunction.get());
             }
 
             if (armorFunction.isPresent()) {
