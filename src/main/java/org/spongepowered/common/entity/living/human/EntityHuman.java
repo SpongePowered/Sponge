@@ -36,14 +36,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.server.SPacketSpawnPlayer;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -100,7 +105,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
     }
 
     @Override
@@ -216,7 +221,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public float getAIMoveSpeed() {
-        return (float) this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue();
+        return (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
     }
 
     @Override
@@ -254,7 +259,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     public boolean attackEntityAsMob(Entity entityIn) {
         super.attackEntityAsMob(entityIn);
         swingItem();
-        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase) {
@@ -300,7 +305,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return true;
     }
 
-    public void removeFromTabListDelayed(EntityPlayerMP player, S38PacketPlayerListItem removePacket) {
+    public void removeFromTabListDelayed(EntityPlayerMP player, SPacketPlayerListItem removePacket) {
         int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
         Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
@@ -349,9 +354,9 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new S13PacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(S38PacketPlayerListItem.Action.ADD_PLAYER));
+        this.pushPackets(new SPacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
-        removeFromTabListDelayed(null, this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
+        removeFromTabListDelayed(null, this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -374,19 +379,19 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      */
     public void onRemovedFrom(EntityPlayerMP player) {
         this.playerPacketMap.remove(player.getUniqueID());
-        player.playerNetServerHandler.sendPacket(this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
+        player.playerNetServerHandler.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
-     * Creates a {@link S0CPacketSpawnPlayer} packet.
+     * Creates a {@link SPacketSpawnPlayer} packet.
      *
      * Copied directly from the constructor of the packet, because that can't be
      * used as we're not an EntityPlayer.
      *
      * @return A new spawn packet
      */
-    public S0CPacketSpawnPlayer createSpawnPacket() {
-        S0CPacketSpawnPlayer packet = new S0CPacketSpawnPlayer();
+    public SPacketSpawnPlayer createSpawnPacket() {
+        SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
         packet.entityId = this.getEntityId();
         packet.playerId = this.fakeProfile.getId();
         packet.x = MathHelper.floor_double(this.posX * 32.0D);
@@ -401,14 +406,14 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     /**
-     * Creates a {@link S38PacketPlayerListItem} packet with the given action.
+     * Creates a {@link SPacketPlayerListItem} packet with the given action.
      *
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
     @SuppressWarnings("unchecked")
-    public S38PacketPlayerListItem createPlayerListPacket(S38PacketPlayerListItem.Action action) {
-        S38PacketPlayerListItem packet = new S38PacketPlayerListItem(action);
+    public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
+        SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
         packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, WorldSettings.GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }

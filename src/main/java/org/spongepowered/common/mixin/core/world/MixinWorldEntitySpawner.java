@@ -53,7 +53,6 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
@@ -65,7 +64,7 @@ public abstract class MixinWorldEntitySpawner {
         + "Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/BiomeGenBase$SpawnListEntry;Lnet/minecraft/util/math/BlockPos;)Z";
 
     private static final String BIOME_CAN_SPAWN_ANIMAL =
-        "Lnet/minecraft/world/SpawnerAnimals;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
+        "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
         + "Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)Z";
 
     private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/List;)"
@@ -154,7 +153,7 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     /**
-     * Redirects the canCreatureTypeSpawnAtLocation to add our event check after. This requires that the {@link #onGetRandom(Random, Collection)}
+     * Redirects the canCreatureTypeSpawnAtLocation to add our event check after. This requires that the {@link #onGetRandom(Random, List)}
      * is called before this to actively set the proper entity class.
      * @param type
      * @param worldIn
@@ -176,8 +175,8 @@ public abstract class MixinWorldEntitySpawner {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET))
-    private static WeightedRandom.Item onGetRandom(Random random, List collection) {
-        BiomeGenBase.SpawnListEntry entry = (BiomeGenBase.SpawnListEntry) WeightedRandom.getRandomItem(random, collection);
+    private static WeightedRandom.Item onGetRandom(Random random, List<BiomeGenBase.SpawnListEntry> collection) {
+        BiomeGenBase.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
         setEntityType(entry.entityClass);
         return entry;
     }
