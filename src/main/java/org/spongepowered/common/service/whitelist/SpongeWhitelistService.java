@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.whitelist;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
@@ -43,9 +44,10 @@ public class SpongeWhitelistService implements WhitelistService {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<GameProfile> getWhitelistedProfiles() {
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
         List<GameProfile> profiles = new ArrayList<>();
 
-        for (UserListWhitelistEntry entry: ((Collection<UserListWhitelistEntry>) MinecraftServer.getServer().getConfigurationManager().whiteListedPlayers.getValues().values())) {
+        for (UserListWhitelistEntry entry: ((Collection<UserListWhitelistEntry>) ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers().getValues().values())) {
             profiles.add((GameProfile) entry.getValue());
         }
 
@@ -75,6 +77,7 @@ public class SpongeWhitelistService implements WhitelistService {
     }
 
     private UserListWhitelist getWhitelist() {
-        return MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers();
     }
 }

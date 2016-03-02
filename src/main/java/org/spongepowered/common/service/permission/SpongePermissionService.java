@@ -26,11 +26,13 @@ package org.spongepowered.common.service.permission;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOps;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.MemorySubjectData;
@@ -89,11 +91,13 @@ public class SpongePermissionService implements PermissionService {
     }
 
     static UserListOps getOps() {
-        return MinecraftServer.getServer().getConfigurationManager().getOppedPlayers();
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getOppedPlayers();
     }
 
     int getServerOpLevel() {
-        return MinecraftServer.getServer().getOpPermissionLevel();
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        return ((MinecraftServer) Sponge.getServer()).getOpPermissionLevel();
     }
 
     public Subject getGroupForOpLevel(int level) {
