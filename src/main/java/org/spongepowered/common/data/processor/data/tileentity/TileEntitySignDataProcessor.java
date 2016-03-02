@@ -29,18 +29,18 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
@@ -59,7 +59,7 @@ public class TileEntitySignDataProcessor
 
     @Override
     protected Optional<List<Text>> getVal(TileEntitySign sign) {
-        final IChatComponent[] rawLines = sign.signText;
+        final ITextComponent[] rawLines = sign.signText;
         final List<Text> signLines = Lists.newArrayListWithExpectedSize(4);
         for (int i = 0; i < rawLines.length; i++) {
             signLines.add(i, rawLines[i] == null ? Text.EMPTY : SpongeTexts.toText(rawLines[i]));

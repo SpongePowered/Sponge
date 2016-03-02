@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.property.block.SolidCubeProperty;
@@ -44,7 +45,7 @@ public class SolidCubePropertyStore extends AbstractSpongePropertyStore<SolidCub
     @Override
     public Optional<SolidCubeProperty> getFor(Location<World> location) {
         final Block block = (Block) location.getBlockType();
-        return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
+        return Optional.of(block.getMaterial((IBlockState) location.getBlock()).isSolid() ? TRUE : FALSE);
     }
 
     @Override
