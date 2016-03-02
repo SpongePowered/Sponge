@@ -51,6 +51,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
@@ -135,7 +136,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Override
-    public int getLatency() {
+    public int getPing() {
         return this.playerEntity.ping;
     }
 
@@ -164,7 +165,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final SignData changedSignData = existingSignData.get().copy();
         final ListValue<Text> lines = changedSignData.lines();
         for (int i = 0; i < packetIn.func_187017_b().length; i++) {
-            lines.set(i, SpongeTexts.toText(packetIn.func_187017_b()[i]));
+            lines.set(i, SpongeTexts.toText(new TextComponentString(packetIn.func_187017_b()[i])));
         }
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
@@ -180,7 +181,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
         tileentitysign.markDirty();
-        worldserver.markBlockForUpdate(blockpos);
+        worldserver.func_184164_w().markBlockForUpdate(blockpos);
     }
 
     /**

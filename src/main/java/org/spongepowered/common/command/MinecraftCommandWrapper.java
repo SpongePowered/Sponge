@@ -92,7 +92,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) ((ICommandSender) source).getEntityWorld().getCommandManager();
+        CommandHandler handler = (CommandHandler) ((ICommandSender) source).getServer().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
@@ -163,7 +163,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        return this.command.func_184882_a(((ICommandSender) source).func_184102_h(), WrapperICommandSender.of(source));
+        ICommandSender sender = WrapperICommandSender.of(source);
+        return this.command.checkPermission(sender.getServer(), sender);
     }
 
     @Override
@@ -206,9 +207,11 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
+
+        ICommandSender sender = WrapperICommandSender.of(source);
         // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.func_184883_a(((ICommandSender) source).func_184102_h(), WrapperICommandSender.of(source), arguments
+        List<String> suggestions = this.command.getTabCompletionOptions(sender.getServer(), sender, arguments
                 .split(" ", -1), null);
         if (suggestions == null) {
             return ImmutableList.of();

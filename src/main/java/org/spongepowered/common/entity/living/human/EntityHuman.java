@@ -25,6 +25,7 @@
 
 package org.spongepowered.common.entity.living.human;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -51,6 +52,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
@@ -84,7 +86,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
                 @Override
                 public PropertyMap load(UUID uuid) throws Exception {
-                    return MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
+                    return ((MinecraftServer) Sponge.getServer()).getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
             });

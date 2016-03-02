@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -78,7 +79,7 @@ public class TileEntitySignDataProcessor
             sign.signText[i] = SpongeTexts.toComponent(line);
         }
         sign.markDirty();
-        sign.getWorld().func_184138_a(sign.getPos());
+        ((WorldServer) sign.getWorld()).func_184164_w().markBlockForUpdate(sign.getPos());
         return true;
     }
 

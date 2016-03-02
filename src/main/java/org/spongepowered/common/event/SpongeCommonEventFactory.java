@@ -37,6 +37,7 @@ import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -182,7 +183,7 @@ public class SpongeCommonEventFactory {
                         guiId = ((IInteractionObject) slot.inventory).getGuiID();
                     }
                     slot.inventory.openInventory(player);
-                    player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(player.openContainer.windowId, guiId, slot.inventory
+                    player.playerNetServerHandler.sendPacket(new SPacketOpenWindow(player.openContainer.windowId, guiId, slot.inventory
                             .getDisplayName(), slot.inventory.getSizeInventory()));
                     // resync data to client
                     player.sendContainerToPlayer(player.openContainer);

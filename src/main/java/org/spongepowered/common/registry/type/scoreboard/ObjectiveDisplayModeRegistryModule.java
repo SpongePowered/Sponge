@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.IScoreCriteria;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
@@ -43,8 +43,8 @@ public final class ObjectiveDisplayModeRegistryModule implements CatalogRegistry
     @RegisterCatalog(ObjectiveDisplayModes.class)
     private final Map<String, ObjectiveDisplayMode> objectiveDisplayModeMappings =
         new ImmutableMap.Builder<String, ObjectiveDisplayMode>()
-            .put("integer", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.INTEGER)
-            .put("hearts", (ObjectiveDisplayMode) (Object) IScoreObjectiveCriteria.EnumRenderType.HEARTS)
+            .put("integer", (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.INTEGER)
+            .put("hearts", (ObjectiveDisplayMode) (Object) IScoreCriteria.EnumRenderType.HEARTS)
             .build();
 
     @Override

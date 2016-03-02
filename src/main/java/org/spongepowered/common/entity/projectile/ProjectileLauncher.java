@@ -390,7 +390,8 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, 0);
+                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj);
+                ((EntityPotion) potion).thrower = source;
                 return doLaunch(loc.getExtent(), potion, Cause.of(NamedCause.source(source)));
             }
         });

@@ -35,6 +35,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -180,7 +181,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
-        world.markBlockForUpdate(pos);
+        ((WorldServer) world).func_184164_w().markBlockForUpdate(pos);
         if (this.compound != null) {
             final TileEntity te = world.getTileEntity(pos);
             if (te != null) {

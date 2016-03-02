@@ -84,10 +84,10 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createHardHatModifier(EntityLivingBase entityLivingBase,
                                                                                                           DamageSource damageSource) {
-        if ((damageSource instanceof FallingBlockDamageSource) && entityLivingBase.func_184582_a(EntityEquipmentSlot.HEAD) != null) {
+        if ((damageSource instanceof FallingBlockDamageSource) && entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
             DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.func_184582_a(EntityEquipmentSlot.HEAD)).createSnapshot())))
+                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot())))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new Tuple<>(modifier, HARD_HAT_FUNCTION));
@@ -102,7 +102,7 @@ public class DamageEventHandler {
         if (!damageSource.isDamageAbsolute()) {
             damage *= 25;
             net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer
-                                                       ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.field_184631_bt;
+                                                       ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
             List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
             List<DamageObject> damageObjects = new ArrayList<>();
             for (int index = 0; index < inventory.length; index++) {
@@ -180,7 +180,7 @@ public class DamageEventHandler {
      */
     public static void acceptArmorModifier(EntityLivingBase entity, DamageSource damageSource, DamageModifier modifier, double damage) {
         Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.field_184631_bt;
+        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.armorArray;
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
             net.minecraft.item.ItemStack stack = inventory[property.get().slot];
@@ -223,7 +223,7 @@ public class DamageEventHandler {
     private static double previousEnchantmentModifier = 0;
 
     public static Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> createEnchantmentModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource) {
-        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.field_184631_bt;
+        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
         if (EnchantmentHelper.getEnchantmentModifierDamage(Arrays.asList(inventory), damageSource) == 0) {
             return Optional.empty();
         }
@@ -242,9 +242,9 @@ public class DamageEventHandler {
                 final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-                if (Enchantment.func_185262_c(enchantmentId) != null) {
+                if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
                     // Ok, we have an enchantment!
-                    final Enchantment enchantment = Enchantment.func_185262_c(enchantmentId);
+                    final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
                         ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();

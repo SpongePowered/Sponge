@@ -175,11 +175,11 @@ public class SpongeBanService implements BanService {
     }
 
     private UserListBans getUserBanList() {
-        return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
+        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedPlayers();
     }
 
     private UserListIPBans getIPBanList() {
-        return MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
+        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedIPs();
     }
 
 }

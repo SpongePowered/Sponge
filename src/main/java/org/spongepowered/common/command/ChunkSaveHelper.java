@@ -32,6 +32,7 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
@@ -61,11 +62,11 @@ public class ChunkSaveHelper {
             for (World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
                 WorldServer world = (WorldServer) spongeWorld;
                 writer.beginObject();
-                writer.name("name").value(((WorldServer) spongeWorld).getSaveHandler().getWorldDirectoryName());
+                writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
                 writer.name("dimensionId").value(world.provider.func_186058_p().getId());
                 writer.name("players").value(world.playerEntities.size());
                 writer.name("loadedChunks").value(world.getChunkProvider().loadedChunks.size());
-                writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount()));
+                writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 
