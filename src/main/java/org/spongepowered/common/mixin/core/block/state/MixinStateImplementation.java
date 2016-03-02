@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.BlockStateBase;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -79,7 +80,7 @@ import javax.annotation.Nullable;
  * This shares implementation with {@link IMixinBlockState}, since this
  * all relies on Data API implementations.
  */
-@Mixin(net.minecraft.block.state.BlockState.StateImplementation.class)
+@Mixin(net.minecraft.block.state.BlockStateContainer.StateImplementation.class)
 public abstract class MixinStateImplementation extends BlockStateBase implements BlockState, IMixinBlockState {
 
     @Shadow @Final private Block block;
