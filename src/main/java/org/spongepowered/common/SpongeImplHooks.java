@@ -80,12 +80,8 @@ public final class SpongeImplHooks {
         return block instanceof ITileEntityProvider;
     }
 
-    public static int getBlockLightValue(Block block, BlockPos pos, IBlockAccess world) {
-        return block.getLightValue();
-    }
-
-    public static int getBlockLightOpacity(Block block, IBlockAccess world, BlockPos pos) {
-        return block.getLightOpacity();
+    public static int getBlockLightOpacity(Block block, IBlockState state, IBlockAccess world, BlockPos pos) {
+        return block.getLightOpacity(state);
     }
 
     public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {

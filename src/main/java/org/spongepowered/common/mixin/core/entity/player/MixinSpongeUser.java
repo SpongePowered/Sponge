@@ -25,7 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Preconditions;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -59,7 +61,8 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
 
     @Override
     public Optional<Player> getPlayer() {
-        return Optional.ofNullable((Player) MinecraftServer.getServer().getConfigurationManager().getPlayerByUUID(this.profile.getId()));
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        return Optional.ofNullable((Player) ((MinecraftServer) Sponge.getServer()).getPlayerList().getPlayerByUUID(this.profile.getId()));
     }
 
     @Override

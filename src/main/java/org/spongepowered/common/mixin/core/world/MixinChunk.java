@@ -459,7 +459,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             flag = j >= i1;
         }
 
-        int j1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
+        int j1 = SpongeImplHooks.getBlockLightOpacity(block, currentState, this.worldObj, pos);
 
         extendedblockstorage.set(i, j & 15, k, newState);
 

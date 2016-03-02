@@ -189,6 +189,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract boolean isBeingRidden();
 
 
     // @formatter:on

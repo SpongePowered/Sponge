@@ -821,8 +821,8 @@ public final class CauseTracker {
 
                 this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
-                if (captureType == CaptureType.PLACE && player != null && packet != null && player.func_184586_b(EnumHand.MAIN_HAND) != null) {
-                    player.addStat(StatList.func_188057_b(player.func_184586_b(EnumHand.MAIN_HAND).getItem()), 1);
+                if (captureType == CaptureType.PLACE && player != null && packet != null && player.getHeldItem(EnumHand.MAIN_HAND) != null) {
+                    player.addStat(StatList.func_188057_b(player.getHeldItem(EnumHand.MAIN_HAND).getItem()), 1);
                 }
             }
         }
