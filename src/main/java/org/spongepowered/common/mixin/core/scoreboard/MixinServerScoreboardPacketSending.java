@@ -26,17 +26,17 @@ package org.spongepowered.common.mixin.core.scoreboard;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
-import net.minecraft.network.play.server.S3CPacketUpdateScore;
-import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
-import net.minecraft.network.play.server.S3EPacketTeams;
+import net.minecraft.network.play.server.SPacketDisplayObjective;
+import net.minecraft.network.play.server.SPacketScoreboardObjective;
+import net.minecraft.network.play.server.SPacketTeams;
+import net.minecraft.network.play.server.SPacketUpdateScore;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.server.management.PlayerList;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +53,7 @@ import java.util.Set;
 @Mixin(ServerScoreboard.class)
 public abstract class MixinServerScoreboardPacketSending extends Scoreboard implements IMixinServerScoreboard {
 
-    private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+    private static final String SEND_PACKET_METHOD = "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String SET_CONTAINS = "Ljava/util/Set;contains(Ljava/lang/Object;)Z";
 
     @Shadow @Final private MinecraftServer scoreboardMCServer;
@@ -75,18 +75,18 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
 
     void sendScoreboard(EntityPlayerMP player) {
         for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
-            player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 0));
+            player.playerNetServerHandler.sendPacket(new SPacketTeams(team, 0));
         }
 
         for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
-            player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 0));
+            player.playerNetServerHandler.sendPacket(new SPacketScoreboardObjective(objective, 0));
             for (Score score: (Collection<Score>) this.getSortedScores(objective)) {
-                player.playerNetServerHandler.sendPacket(new S3CPacketUpdateScore(score));
+                player.playerNetServerHandler.sendPacket(new SPacketUpdateScore(score));
             }
         }
 
         for (int i = 0; i < 19; ++i) {
-            player.playerNetServerHandler.sendPacket(new S3DPacketDisplayScoreboard(i, this.getObjectiveInDisplaySlot(i)));
+            player.playerNetServerHandler.sendPacket(new SPacketDisplayObjective(i, this.getObjectiveInDisplaySlot(i)));
         }
     }
 
@@ -104,19 +104,19 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     @SuppressWarnings("unchecked")
     void removeTeams(EntityPlayerMP player) {
         for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
-            player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 1));
+            player.playerNetServerHandler.sendPacket(new SPacketTeams(team, 1));
         }
     }
 
     @SuppressWarnings("unchecked")
     void removeObjectives(EntityPlayerMP player) {
         for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
-            player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 1));
+            player.playerNetServerHandler.sendPacket(new SPacketScoreboardObjective(objective, 1));
         }
     }
 
     @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onUpdateScoreValue(ServerConfigurationManager manager, Packet packet) {
+    public void onUpdateScoreValue(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
@@ -126,32 +126,32 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveScore(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveScore(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveScoreForObjective(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     //@Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    /*public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet packet) {
+    /*public void onSetObjectiveInDisplaySlot(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }*/
 
     @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onAddPlayerToTeam(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onRemovePlayerFromTeam(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
+    public void onUpdateObjective(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
@@ -166,17 +166,17 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet packet) {
+    public void onBroadcastTeamCreated(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onSendTeamUpdate(ServerConfigurationManager manager, Packet packet) {
+    public void onSendTeamUpdate(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveTeam(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
@@ -62,7 +62,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     @Shadow public String registeredName;
     @Shadow public Set<String> membershipSet;
     @Shadow public String teamNameSPT;
-    @Shadow public EnumChatFormatting chatFormat;
+    @Shadow public TextFormatting chatFormat;
     @Shadow public String namePrefixSPT;
     @Shadow public String colorSuffix;
     @Shadow public boolean allowFriendlyFire;
@@ -289,7 +289,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     @Inject(method = "setChatFormat", at = @At("RETURN"))
-    private void onSetChatFormat(EnumChatFormatting format, CallbackInfo ci) {
+    private void onSetChatFormat(TextFormatting format, CallbackInfo ci) {
         this.color = TextColorRegistryModule.enumChatColor.get(format);
         // This isn't called by Vanilla, so we inject the call ourselves.
         this.doTeamUpdate();
