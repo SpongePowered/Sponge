@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.biome;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenForest;
-import net.minecraft.world.biome.BiomeGenMutated;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -48,9 +47,6 @@ public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         int base = -3;
         if (this.field_150632_aF == 1) {
             base = -1;

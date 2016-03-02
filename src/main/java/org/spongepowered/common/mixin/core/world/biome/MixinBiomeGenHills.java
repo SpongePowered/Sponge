@@ -30,7 +30,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenHills;
-import net.minecraft.world.biome.BiomeGenMutated;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.SeededVariableAmount;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -75,9 +74,6 @@ public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
         } , WorldGenConstants.GROUND_COVER_DEPTH));
 
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         Ore emerald = Ore.builder()
                 .ore((BlockState) Blocks.emerald_ore.getDefaultState())
                 .placementCondition(WorldGenConstants.STONE)

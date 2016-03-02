@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.BlockFlower;
 import net.minecraft.block.material.Material;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenFlowers;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -109,7 +109,7 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
             BlockFlower.EnumFlowerType enumflowertype = (BlockFlower.EnumFlowerType) (Object) type;
             BlockFlower blockflower = enumflowertype.getBlockType().getBlock();
 
-            if (enumflowertype != null && blockflower.getMaterial() != Material.air) {
+            if (enumflowertype != null && blockflower.getMaterial(blockflower.getDefaultState()) != Material.air) {
                 setGeneratedBlock(blockflower, enumflowertype);
                 generate(world, random, blockpos);
             }

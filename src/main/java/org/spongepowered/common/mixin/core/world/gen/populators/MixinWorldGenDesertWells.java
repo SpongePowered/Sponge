@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
-import net.minecraft.block.state.pattern.BlockStateHelper;
-import net.minecraft.util.BlockPos;
+import net.minecraft.block.state.pattern.BlockStateMatcher;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenDesertWells;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -48,7 +48,7 @@ import java.util.Random;
 @Mixin(WorldGenDesertWells.class)
 public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, PopulatorObject {
 
-    @Shadow @Final private static BlockStateHelper field_175913_a;
+    @Shadow @Final private static BlockStateMatcher field_175913_a;
 
     private double spawnProbability;
     private PopulatorObject obj;

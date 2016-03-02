@@ -28,7 +28,6 @@ import net.minecraft.block.BlockDirt;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.biome.BiomeGenTaiga;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.DoublePlantTypes;
@@ -87,9 +86,6 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
 
         }
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         for (Iterator<Shrub> it = gensettings.getPopulators(Shrub.class).iterator(); it.hasNext();) {
             Shrub next = it.next();
             if (next.getTypes().size() == 1) {

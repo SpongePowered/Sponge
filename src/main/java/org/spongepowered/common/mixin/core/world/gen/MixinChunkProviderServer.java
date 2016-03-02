@@ -45,7 +45,7 @@ public abstract class MixinChunkProviderServer {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         world.getCauseTracker().setProcessingCaptureCause(true);
         world.getCauseTracker().setCapturingTerrainGen(true);
-        serverChunkGenerator.populate(chunkProvider, x, z);
+        serverChunkGenerator.populate(x, z);
         world.getCauseTracker().setCapturingTerrainGen(false);
         world.getCauseTracker().setProcessingCaptureCause(false);
     }

@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
 import org.spongepowered.api.world.Chunk;

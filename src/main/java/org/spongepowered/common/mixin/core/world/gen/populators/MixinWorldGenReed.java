@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import com.google.common.base.Objects;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenReed;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -87,11 +87,11 @@ public class MixinWorldGenReed implements Reed {
 
             if (worldIn.isAirBlock(blockpos1)) {
                 BlockPos blockpos2 = blockpos1.down();
-
-                if (worldIn.getBlockState(blockpos2.west()).getBlock().getMaterial() == Material.water
-                        || worldIn.getBlockState(blockpos2.east()).getBlock().getMaterial() == Material.water
-                        || worldIn.getBlockState(blockpos2.north()).getBlock().getMaterial() == Material.water
-                        || worldIn.getBlockState(blockpos2.south()).getBlock().getMaterial() == Material.water) {
+                
+                if (worldIn.getBlockState(blockpos2.west()).func_185904_a() == Material.water
+                        || worldIn.getBlockState(blockpos2.east()).func_185904_a() == Material.water
+                        || worldIn.getBlockState(blockpos2.north()).func_185904_a() == Material.water
+                        || worldIn.getBlockState(blockpos2.south()).func_185904_a() == Material.water) {
                     // Sponge start
                     int j = this.height.getFlooredAmount(rand);
                     // Sponge end

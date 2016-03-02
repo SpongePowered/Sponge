@@ -52,15 +52,16 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
@@ -141,7 +142,7 @@ import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
@@ -178,7 +179,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
-    private SpongeChunkProvider spongegen;
+    private SpongeChunkGenerator spongegen;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -201,7 +202,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
-    @Shadow public abstract WorldChunkManager getWorldChunkManager();
+    @Shadow public abstract BiomeProvider getWorldChunkManager();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
@@ -544,10 +545,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkProvider) {
+        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkGenerator) {
             // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
             // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkProvider) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
+            if (WorldGenConstants.isValid((IChunkGenerator) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
                 ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
             }
         } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
@@ -568,12 +569,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
 
         ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
-        chunkProviderServer.serverChunkGenerator = this.spongegen;
+        chunkProviderServer.chunkGenerator = this.spongegen;
     }
 
     @Override
-    public SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator) {
-        return new SpongeChunkProvider((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
+    public SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator) {
+        return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
     }
 

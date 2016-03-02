@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.SpawnerAnimals;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
@@ -50,7 +50,7 @@ public class AnimalPopulator implements Populator {
         int z = chunk.getPosition().getZ();
         BiomeGenBase biomegenbase = worldObj.getBiomeGenForCoords(blockpos.add(16, 0, 16));
 
-        SpawnerAnimals.performWorldGenSpawning(worldObj, biomegenbase, x * 16 + 8, z * 16 + 8, 16, 16, random);
+        WorldEntitySpawner.performWorldGenSpawning(worldObj, biomegenbase, x * 16 + 8, z * 16 + 8, 16, 16, random);
     }
 
 }

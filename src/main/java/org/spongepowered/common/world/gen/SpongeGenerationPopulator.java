@@ -30,6 +30,7 @@ import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import net.minecraft.world.gen.ChunkProviderEnd;
@@ -46,7 +47,7 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
  */
 public final class SpongeGenerationPopulator implements GenerationPopulator {
 
-    private final IChunkProvider chunkGenerator;
+    private final IChunkGenerator chunkGenerator;
     private final World world;
 
     /**
@@ -59,17 +60,17 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
      * @param chunkGenerator The chunk generator.
      * @return The generator populator.
      */
-    public static GenerationPopulator of(World world, IChunkProvider chunkGenerator) {
+    public static GenerationPopulator of(World world, IChunkGenerator chunkGenerator) {
         if (WorldGenConstants.isValid(chunkGenerator, GenerationPopulator.class)) {
             return (GenerationPopulator) chunkGenerator;
         }
-        if (chunkGenerator instanceof SpongeChunkProvider) {
-            return ((SpongeChunkProvider) chunkGenerator).getBaseGenerationPopulator();
+        if (chunkGenerator instanceof SpongeChunkGenerator) {
+            return ((SpongeChunkGenerator) chunkGenerator).getBaseGenerationPopulator();
         }
         return new SpongeGenerationPopulator(world, chunkGenerator);
     }
 
-    private SpongeGenerationPopulator(World world, IChunkProvider chunkGenerator) {
+    private SpongeGenerationPopulator(World world, IChunkGenerator chunkGenerator) {
         this.world = checkNotNull(world, "world");
         this.chunkGenerator = checkNotNull(chunkGenerator, "chunkGenerator");
     }
@@ -139,7 +140,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
      * @throws IllegalArgumentException If the target world is not the world
      *         this chunk provider is bound to.`
      */
-    public IChunkProvider getHandle(World targetWorld) {
+    public IChunkGenerator getHandle(World targetWorld) {
         if (!this.world.equals(targetWorld)) {
             throw new IllegalArgumentException("Cannot reassign internal generator from world "
                     + getWorldName(this.world) + " to world " + getWorldName(targetWorld));

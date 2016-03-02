@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.world.gen.feature.WorldGenForest;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,8 +36,8 @@ import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Random;
 
-@Mixin(WorldGenForest.class)
-public abstract class MixinWorldGenForest extends MixinWorldGenAbstractTree implements PopulatorObject {
+@Mixin(WorldGenBirchTree.class)
+public abstract class MixinWorldGenBirchTree extends MixinWorldGenAbstractTree implements PopulatorObject {
 
     @Shadow
     public abstract boolean generate(net.minecraft.world.World worldIn, Random rand, BlockPos position);

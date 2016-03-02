@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;

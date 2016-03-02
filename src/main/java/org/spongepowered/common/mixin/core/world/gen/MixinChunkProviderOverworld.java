@@ -27,13 +27,13 @@ package org.spongepowered.common.mixin.core.world.gen;
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.Block;
+import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderGenerate;
+import net.minecraft.world.gen.ChunkProviderOverworld;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.MapGenBase;
 import net.minecraft.world.gen.structure.MapGenMineshaft;
@@ -56,13 +56,12 @@ import org.spongepowered.api.world.gen.populator.Dungeon;
 import org.spongepowered.api.world.gen.populator.Lake;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
+import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
@@ -74,10 +73,10 @@ import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
 import java.util.Random;
 
-@Mixin(ChunkProviderGenerate.class)
-public abstract class MixinChunkProviderGenerate implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderGenerate {
+@Mixin(ChunkProviderOverworld.class)
+public abstract class MixinChunkProviderOverworld implements IChunkProvider, GenerationPopulator, IPopulatorProvider, IChunkProviderOverworld {
 
-    @Shadow @Final private double[] field_147434_q;
+    @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
     @Shadow private net.minecraft.world.World worldObj;
     @Shadow private ChunkProviderSettings settings;
@@ -155,7 +154,7 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
                 BiomeGenBase biomegenbase = this.worldObj.getBiomeGenForCoords(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
-                return biomegenbase != BiomeGenBase.desert && biomegenbase != BiomeGenBase.desertHills;
+                return biomegenbase != Biomes.desert && biomegenbase != Biomes.desertHills;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
             generator.getPopulators().add(filtered);
@@ -214,8 +213,8 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
     }
 
     private BiomeGenBase[] getBiomesFromGenerator(int x, int z) {
-        if (this.biomegen instanceof WorldChunkManager) {
-            return ((WorldChunkManager) this.biomegen).getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
+        if (this.biomegen instanceof BiomeProvider) {
+            return ((BiomeProvider) this.biomegen).getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
         // If its not a WorldChunkManager then we have to perform a reverse of
         // the voronoi zoom biome generation layer to get a zoomed out version
@@ -244,7 +243,7 @@ public abstract class MixinChunkProviderGenerate implements IChunkProvider, Gene
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/WorldChunkManager;getBiomesForGeneration([Lnet/minecraft/world/biome/BiomeGenBase;IIII)[Lnet/minecraft/world/biome/BiomeGenBase;"))
-    private BiomeGenBase[] onSetBlocksGetBiomesIgnore(WorldChunkManager manager, BiomeGenBase[] biomes, int x, int z, int width, int height) {
+    private BiomeGenBase[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, BiomeGenBase[] biomes, int x, int z, int width, int height) {
         return biomes;
     }
 

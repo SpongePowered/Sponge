@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenShrub;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;

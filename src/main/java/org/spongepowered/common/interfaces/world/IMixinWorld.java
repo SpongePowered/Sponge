@@ -35,7 +35,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.world.CaptureType;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 import java.util.List;
@@ -66,7 +66,7 @@ public interface IMixinWorld {
 
     void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
 
-    SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
+    SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator);
 
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
 

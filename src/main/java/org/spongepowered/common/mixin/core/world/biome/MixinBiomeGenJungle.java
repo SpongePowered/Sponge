@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.biome;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenJungle;
-import net.minecraft.world.biome.BiomeGenMutated;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.TableEntry;
@@ -54,9 +53,6 @@ public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         super.buildPopulators(world, gensettings);
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         for (Iterator<Populator> it = gensettings.getPopulators().iterator(); it.hasNext();) {
             Populator next = it.next();
             if (next instanceof Shrub) {

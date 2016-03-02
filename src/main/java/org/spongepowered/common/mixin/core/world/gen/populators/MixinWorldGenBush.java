@@ -28,9 +28,9 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.BlockBush;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.GeneratorBushFeature;
+import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
@@ -54,8 +54,8 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-@Mixin(GeneratorBushFeature.class)
-public abstract class MixinGeneratorBushFeature implements Mushroom {
+@Mixin(WorldGenBush.class)
+public abstract class MixinWorldGenBush implements Mushroom {
 
     @Shadow public BlockBush field_175908_a;
 

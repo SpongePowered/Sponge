@@ -22,12 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.mixin.core.world.biome;
 
+import com.flowpowered.math.vector.Vector2i;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.BiomeProvider;
+import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.gen.BiomeGenerator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public interface IChunkProviderGenerate {
+@Mixin(BiomeProvider.class)
+public abstract class MixinBiomeProvider implements BiomeGenerator {
 
-    void setBiomeGenerator(BiomeGenerator biomes);
-    
+    @Shadow
+    public abstract BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] listToReuse, int x, int z, int width, int length, boolean cacheFlag);
+
+    @Override
+    public void generateBiomes(MutableBiomeArea buffer) {
+        Vector2i min = buffer.getBiomeMin();
+        Vector2i size = buffer.getBiomeSize();
+        int xStart = min.getX();
+        int zStart = min.getY();
+        int xSize = size.getX();
+        int zSize = size.getY();
+
+        BiomeGenBase[] biomes = getBiomeGenAt(null, xStart, zStart, xSize, zSize, true);
+
+        for (int i = 0; i < xSize; i++) {
+            for (int j = 0; j < zSize; j++) {
+                buffer.setBiome(xStart + i, zStart + j, (BiomeType) biomes[i + j * xSize]);
+            }
+        }
+    }
+
 }

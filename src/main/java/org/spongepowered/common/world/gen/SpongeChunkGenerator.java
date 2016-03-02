@@ -27,9 +27,7 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockFalling;
@@ -37,22 +35,19 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.IProgressUpdate;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
-import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -65,23 +60,20 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
-import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
+import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
-import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -91,7 +83,7 @@ import java.util.stream.Collectors;
  * Similar class to {@link ChunkProviderGenerate}, but instead gets its blocks
  * from a custom chunk generator.
  */
-public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
+public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     private static final Vector2i CHUNK_AREA = new Vector2i(16, 16);
 
@@ -107,7 +99,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
 
-    public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
+    public SpongeChunkGenerator(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
         this.baseGenerator = checkNotNull(base, "baseGenerator");
         this.biomeGenerator = checkNotNull(biomegen, "biomeGenerator");
@@ -123,9 +115,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         this.noise4 = new NoiseGeneratorPerlin(this.rand, 4);
         this.stoneNoise = new double[256];
 
-        this.world.provider.worldChunkMgr = CustomWorldChunkManager.of(this.biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
+        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(this.biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
     }
 
@@ -137,8 +129,8 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     @Override
     public void setBaseGenerationPopulator(GenerationPopulator baseGenerationPopulator) {
         this.baseGenerator = baseGenerationPopulator;
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
     }
 
@@ -176,9 +168,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     @Override
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
-        this.world.provider.worldChunkMgr = CustomWorldChunkManager.of(biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(biomeGenerator);
+        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -254,10 +246,10 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     }
 
     @Override
-    public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
+    public void populate(int chunkX, int chunkZ) {
         IMixinWorld world = (IMixinWorld) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
+        Cause populateCause = Cause.of(NamedCause.source(this));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -300,7 +292,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                 continue;
             }
             if (populator instanceof IFlaggedPopulator) {
-                ((IFlaggedPopulator) populator).populate(chunkProvider, chunk, this.rand, flags);
+                ((IFlaggedPopulator) populator).populate(chunk, this.rand, flags);
             } else {
                 populator.populate(chunk, this.rand);
             }
@@ -310,7 +302,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         // If we wrapped a custom chunk provider then we should call its
         // populate method so that its particular changes are used.
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
-            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkProvider, chunkX, chunkZ);
+            ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkX, chunkZ);
         }
 
         PopulateChunkEvent.Post event =
@@ -323,7 +315,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     }
 
     @Override
-    public boolean populateChunk(IChunkProvider chunkProvider, Chunk chunk, int chunkX, int chunkZ) {
+    public boolean populateChunk(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
@@ -360,48 +352,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         // TODO No structure support
     }
 
-    // Methods below are simply mirrors of the methods in ChunkProviderGenerate
-
-    @Override
-    public Chunk provideChunk(BlockPos blockPosIn) {
-        return provideChunk(blockPosIn.getX() >> 4, blockPosIn.getZ() >> 4);
-    }
-
-    @Override
-    public int getLoadedChunkCount() {
-        return 0;
-    }
-
-    @Override
-    public String makeString() {
-        return "RandomLevelSource";
-    }
-
-    @Override
-    public boolean canSave() {
-        return true;
-    }
-
-    @Override
-    public boolean saveChunks(boolean bool, IProgressUpdate progressUpdate) {
-        return true;
-    }
-
-    @Override
-    public void saveExtraData() {
-
-    }
-
-    @Override
-    public boolean unloadQueuedChunks() {
-        return false;
-    }
-
-    @Override
-    public boolean chunkExists(int x, int z) {
-        return true;
-    }
-
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {
         double d0 = 0.03125D;
         this.stoneNoise = this.noise4.func_151599_a(this.stoneNoise, (double) (x * 16), (double) (z * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
@@ -428,7 +378,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         int i = 0;
         for (int currentY = 255; currentY >= 0; --currentY) {
             IBlockState nextBlock = chunk.getBlockState(relativeZ, currentY, relativeX);
-            if (nextBlock.getBlock().getMaterial() == Material.air) {
+            if (nextBlock.func_185904_a() == Material.air) {
                 k = -1;
             } else if (nextBlock.getBlock() == Blocks.stone) {
                 if (k == -1) {

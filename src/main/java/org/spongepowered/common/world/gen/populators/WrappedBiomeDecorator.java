@@ -30,7 +30,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 

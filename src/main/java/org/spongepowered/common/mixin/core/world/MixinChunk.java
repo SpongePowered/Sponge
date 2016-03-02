@@ -36,16 +36,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ClassInheritanceMultiMap;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -145,7 +145,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
     @Shadow protected abstract void propagateSkylightOcclusion(int x, int z);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
-    @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
+    @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow(prefix = "shadow$")
@@ -256,7 +256,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         byte[] biomeArray = getBiomeArray();
         int i = x & 15;
         int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (((BiomeGenBase) biome).biomeID & 255);
+        biomeArray[j << 4 | i] = (byte) (BiomeGenBase.func_185362_a((BiomeGenBase) biome) & 255);
         setBiomeArray(biomeArray);
     }
 
