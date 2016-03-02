@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.IScoreCriteria;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.scoreboard.critieria.Criteria;
@@ -55,11 +55,11 @@ public final class CriteriaRegistryModule implements CatalogRegistryModule<Crite
 
     @Override
     public void registerDefaults() {
-        this.criteriaMap.put("dummy", (Criterion) IScoreObjectiveCriteria.DUMMY);
-        this.criteriaMap.put("trigger", (Criterion) IScoreObjectiveCriteria.TRIGGER);
-        this.criteriaMap.put("health", (Criterion) IScoreObjectiveCriteria.health);
-        this.criteriaMap.put("player_kills", (Criterion) IScoreObjectiveCriteria.playerKillCount);
-        this.criteriaMap.put("total_kills", (Criterion) IScoreObjectiveCriteria.totalKillCount);
-        this.criteriaMap.put("deaths", (Criterion) IScoreObjectiveCriteria.deathCount);
+        this.criteriaMap.put("dummy", (Criterion) IScoreCriteria.DUMMY);
+        this.criteriaMap.put("trigger", (Criterion) IScoreCriteria.TRIGGER);
+        this.criteriaMap.put("health", (Criterion) IScoreCriteria.health);
+        this.criteriaMap.put("player_kills", (Criterion) IScoreCriteria.playerKillCount);
+        this.criteriaMap.put("total_kills", (Criterion) IScoreCriteria.totalKillCount);
+        this.criteriaMap.put("deaths", (Criterion) IScoreCriteria.deathCount);
     }
 }
