@@ -30,7 +30,7 @@ import com.google.gson.JsonParser;
 import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
@@ -133,7 +133,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
         final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
         final IChunkProvider chunkProvider = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
-        final WorldChunkManager chunkManager = mcWorld.provider.worldChunkMgr;
+        final BiomeProvider chunkManager = mcWorld.provider.worldChunkMgr;
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
                 (BiomeGenerator) chunkManager,
                 SpongeGenerationPopulator.of((WorldServer) world, chunkProvider));

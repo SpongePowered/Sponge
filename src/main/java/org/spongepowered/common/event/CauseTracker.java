@@ -48,21 +48,21 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.server.S23PacketBlockChange;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.network.play.client.CPacketChatMessage;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.server.SPacketBlockChange;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.stats.StatList;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.ReportedException;
-import net.minecraft.world.chunk.EmptyChunk;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -444,16 +444,16 @@ public final class CauseTracker {
         handleBlockCaptures(cause);
 
         // Handle Player Toss
-        if (player != null && packetIn instanceof C07PacketPlayerDigging) {
-            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
-            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
+        if (player != null && packetIn instanceof CPacketPlayerDigging) {
+            CPacketPlayerDigging digPacket = (CPacketPlayerDigging) packetIn;
+            if (digPacket.getStatus() == CPacketPlayerDigging.Action.DROP_ITEM) {
                 StaticMixinHelper.destructItemDrop = false;
             }
         }
 
         // Handle Player kill commands
-        if (player != null && packetIn instanceof C01PacketChatMessage) {
-            C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
+        if (player != null && packetIn instanceof CPacketChatMessage) {
+            CPacketChatMessage chatPacket = (CPacketChatMessage) packetIn;
             if (chatPacket.getMessage().contains("kill")) {
                 if (!cause.contains(player)) {
                     cause = cause.with(NamedCause.of("Player", player));
@@ -463,9 +463,9 @@ public final class CauseTracker {
         }
 
         // Handle Player Entity destruct
-        if (player != null && packetIn instanceof C02PacketUseEntity) {
-            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
-            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
+        if (player != null && packetIn instanceof CPacketUseEntity) {
+            CPacketUseEntity packet = (CPacketUseEntity) packetIn;
+            if (packet.getAction() == CPacketUseEntity.Action.ATTACK) {
                 net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.getMinecraftWorld());
                 if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
                     Player spongePlayer = (Player) player;
@@ -486,14 +486,14 @@ public final class CauseTracker {
 
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
+            if (packetIn instanceof CPacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
                 SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                    (C10PacketCreativeInventoryAction) packetIn);
+                    (CPacketCreativeInventoryAction) packetIn);
             } else {
                 SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
-                if (packetIn instanceof C0EPacketClickWindow) {
+                if (packetIn instanceof CPacketCreativeInventoryAction) {
                     SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C0EPacketClickWindow) packetIn);
+                        (CPacketClickWindow) packetIn);
                 }
             }
         }
@@ -718,9 +718,9 @@ public final class CauseTracker {
 
                 if (player != null) {
                     CaptureType captureType = null;
-                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+                    if (packetIn instanceof CPacketPlayerBlockPlacement) {
                         captureType = CaptureType.PLACE;
-                    } else if (packetIn instanceof C07PacketPlayerDigging) {
+                    } else if (packetIn instanceof CPacketPlayerDigging) {
                         captureType = CaptureType.BREAK;
                     }
                     if (captureType != null) {
@@ -753,10 +753,10 @@ public final class CauseTracker {
                 captureType = CaptureType.PLACE;
             }
 
-            C08PacketPlayerBlockPlacement packet = null;
+            CPacketPlayerBlockPlacement packet = null;
 
-            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                packet = (C08PacketPlayerBlockPlacement) packetIn;
+            if (packetIn instanceof CPacketPlayerBlockPlacement) {
+                packet = (CPacketPlayerBlockPlacement) packetIn;
             }
 
             if (blockEvent.isCancelled()) {
@@ -795,7 +795,7 @@ public final class CauseTracker {
                             }
                         }
 
-                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
+                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof CPacketPlayerBlockPlacement) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                             IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(pos);
                             spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
@@ -821,8 +821,8 @@ public final class CauseTracker {
 
                 this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
-                if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
-                    player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
+                if (captureType == CaptureType.PLACE && player != null && packet != null && player.func_184586_b(EnumHand.MAIN_HAND) != null) {
+                    player.addStat(StatList.func_188057_b(player.func_184586_b(EnumHand.MAIN_HAND).getItem()), 1);
                 }
             }
         }
@@ -838,7 +838,7 @@ public final class CauseTracker {
             for (Transaction<BlockSnapshot> transaction : transactions) {
                 BlockSnapshot snapshot = transaction.getOriginal();
                 BlockPos pos = VecHelper.toBlockPos(snapshot.getPosition());
-                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.getMinecraftWorld(), pos));
+                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new SPacketBlockChange(this.getMinecraftWorld(), pos));
 
                 // Update any tile entity data for this block
                 net.minecraft.tileentity.TileEntity tileentity = this.getMinecraftWorld().getTileEntity(pos);
@@ -866,7 +866,7 @@ public final class CauseTracker {
         player.openContainer.detectAndSendChanges();
         player.isChangingQuantityOnly = false;
         // force client itemstack update if place event was cancelled
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
+        player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
             StaticMixinHelper.prePacketProcessItem));
     }
 
@@ -1050,10 +1050,10 @@ public final class CauseTracker {
                 if (!this.getMinecraftWorld().isRemote) {
                     if (StaticMixinHelper.packetPlayer != null) {
                         IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                        if (!(spongeChunk instanceof EmptyChunk)) {
+                        /*if (!(spongeChunk instanceof EmptyChunk)) {
                             spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, (User) StaticMixinHelper.packetPlayer,
                                     PlayerTracker.Type.NOTIFIER);
-                        }
+                        }*/
                     } else {
                         Object source = null;
                         if (this.hasTickingBlock()) {
@@ -1168,7 +1168,7 @@ public final class CauseTracker {
     private boolean shouldChainCause(Cause cause) {
         return !this.isCapturingTerrainGen() && !this.isWorldSpawnerRunning() && !this.isChunkSpawnerRunning()
                && !this.isProcessingBlockRandomTicks() && !this.isCaptureCommand() && this.hasTickingBlock() && this.pluginCause == null
-               && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof C03PacketPlayer);
+               && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof CPacketPlayer);
 
     }
 }

@@ -37,6 +37,8 @@ import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C16PacketClientStatus;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
@@ -206,7 +208,7 @@ public class SpongeCommonEventFactory {
         }
     }
 
-    public static void handleCreativeClickInventoryEvent(Cause cause, EntityPlayerMP player, C10PacketCreativeInventoryAction packetIn) {
+    public static void handleCreativeClickInventoryEvent(Cause cause, EntityPlayerMP player, CPacketCreativeInventoryAction packetIn) {
         IMixinWorld world = ((IMixinWorld) player.worldObj);
         ItemStackSnapshot newCursor =
                 player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
@@ -261,7 +263,7 @@ public class SpongeCommonEventFactory {
         ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
     }
 
-    public static void handleClickInteractInventoryEvent(Cause cause, EntityPlayerMP player, C0EPacketClickWindow packetIn) {
+    public static void handleClickInteractInventoryEvent(Cause cause, EntityPlayerMP player, CPacketClickWindow packetIn) {
         IMixinWorld world = ((IMixinWorld) player.worldObj);
         CauseTracker causeTracker = world.getCauseTracker();
         ItemStackSnapshot newCursor = player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
