@@ -30,11 +30,10 @@ import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
@@ -212,7 +211,7 @@ class UserDiscoverer {
     private static User getFromBanlist(UUID uniqueId) {
         GameProfile profile = null;
         UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        BanEntry banData = (BanEntry) banList.getEntry(new GameProfile(uniqueId, ""));
+        UserListEntryBan banData = (UserListEntryBan) banList.getEntry(new GameProfile(uniqueId, ""));
         if (banData instanceof UserListBansEntry) {
             profile = (GameProfile) banData.value;
         }

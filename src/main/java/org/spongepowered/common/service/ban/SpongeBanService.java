@@ -25,9 +25,9 @@
 package org.spongepowered.common.service.ban;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.BanList;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntry;
+import net.minecraft.server.management.UserListIPBans;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,7 +49,7 @@ import java.util.Optional;
  * The default implementation of {@link BanService}.
  *
  * <p>Many of the methods here are copied from {@link UserListBans}
- * or {@link BanList}, while the original methods have been changed
+ * or {@link UserListIPBans}, while the original methods have been changed
  * to delegate to the registered {@link BanService}. This allows bans to
  * function normally when the default {@link BanService} has not been replaced,
  * while allowing plugin-provided {@link BanService}s to be used for all aspects
@@ -90,7 +90,7 @@ public class SpongeBanService implements BanService {
 
     @Override
     public Optional<Ban.Ip> getBanFor(InetAddress address) {
-        BanList bans = this.getIPBanList();
+        UserListIPBans bans = this.getIPBanList();
 
         bans.removeExpired();
         return Optional.ofNullable((Ban.Ip) bans.getValues().get(bans.getObjectKey(bans.addressToString(new InetSocketAddress(address, 0)))));
@@ -106,7 +106,7 @@ public class SpongeBanService implements BanService {
 
     @Override
     public boolean isBanned(InetAddress address) {
-        BanList bans = this.getIPBanList();
+        UserListIPBans bans = this.getIPBanList();
 
         bans.removeExpired();
         return bans.getValues().containsKey(bans.getObjectKey(bans.addressToString(new InetSocketAddress(address, 0))));
@@ -122,7 +122,7 @@ public class SpongeBanService implements BanService {
 
     @Override
     public boolean pardon(InetAddress address) {
-        BanList banList = this.getIPBanList();
+        UserListIPBans banList = this.getIPBanList();
 
         banList.removeExpired();
         InetSocketAddress inetSocketAddress = new InetSocketAddress(address, 0);
@@ -178,7 +178,7 @@ public class SpongeBanService implements BanService {
         return MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
     }
 
-    private BanList getIPBanList() {
+    private UserListIPBans getIPBanList() {
         return MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
     }
 

@@ -68,7 +68,7 @@ public class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard build() throws IllegalStateException {
-        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(MinecraftServer.getServer());
+        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(Ded);
         for (Objective objective: this.objectives) {
             scoreboard.addObjective(objective);
         }
