@@ -112,7 +112,7 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDeathLogging()) {
             logInfo("Dim: {0} setDead(): {1}",
-                    entity.worldObj.provider.func_186058_p().func_186068_a(), entity);
+                    entity.worldObj.provider.func_186058_p().getId(), entity);
             logStack(config);
         }
     }
@@ -124,7 +124,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.func_186058_p().func_186068_a(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", entity.worldObj.provider.func_186058_p().getId(), reason, entity);
             logStack(config);
         }
     }
@@ -146,7 +146,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     entity.worldObj.getWorldInfo().getWorldName(),
-                    entity.worldObj.provider.func_186058_p().func_186068_a());
+                    entity.worldObj.provider.func_186058_p().getId());
             logStack(config);
         }
     }
@@ -160,7 +160,7 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
-                    world.getWorldInfo().getWorldName() + "(" + world.provider.func_186058_p().func_186068_a() + ")",
+                    world.getWorldInfo().getWorldName() + "(" + world.provider.func_186058_p().getId() + ")",
                     ((BlockType) block).getId(),
                     pos);
             logStack(config);
@@ -168,7 +168,7 @@ public class SpongeHooks {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
-                    world.provider.func_186058_p().func_186068_a(),
+                    world.provider.func_186058_p().getId(),
                     ((BlockType) block).getId(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
@@ -191,7 +191,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     world.getWorldInfo().getWorldName(),
-                    world.provider.func_186058_p().func_186068_a(),
+                    world.provider.func_186058_p().getId(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
             logStack(config);
@@ -205,7 +205,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk At [{0}] ({1}, {2})", world.provider.func_186058_p().func_186068_a(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", world.provider.func_186058_p().getId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -218,7 +218,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk At [{0}] ({1}, {2})", world.provider.func_186058_p().func_186068_a(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", world.provider.func_186058_p().getId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -386,7 +386,7 @@ public class SpongeHooks {
         public int dimensionId;
 
         public CollisionWarning(World world, Entity entity) {
-            this.dimensionId = world.provider.func_186058_p().func_186068_a();
+            this.dimensionId = world.provider.func_186058_p().getId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
@@ -465,7 +465,7 @@ public class SpongeHooks {
 
                     // If we've gotten here, see if this world's dimension's config is enabled.
                     final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.func_186058_p().func_186068_a());
+                            DimensionRegistryModule.getInstance().getConfig(world.provider.func_186058_p().getId());
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }
@@ -475,7 +475,7 @@ public class SpongeHooks {
                 } else {
                     // If we've gotten here, we have no world config so see if this world's dimension's config is enabled.
                     final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.func_186058_p().func_186068_a());
+                            DimensionRegistryModule.getInstance().getConfig(world.provider.func_186058_p().getId());
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }

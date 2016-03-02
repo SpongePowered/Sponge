@@ -148,7 +148,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract boolean isHardcore();
     @Shadow public abstract boolean isSinglePlayer();
     @Shadow public abstract String getFolderName();
-    @Shadow public abstract PlayerList func_184103_al();
+    @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
     @Shadow public abstract WorldSettings.GameType getGameType();
     @Shadow protected abstract void setUserMessage(String message);
@@ -206,12 +206,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean hasWhitelist() {
-        return this.func_184103_al().isWhiteListEnabled();
+        return this.getPlayerList().isWhiteListEnabled();
     }
 
     @Override
     public void setHasWhitelist(boolean enabled) {
-        this.func_184103_al().setWhiteListEnabled(enabled);
+        this.getPlayerList().setWhiteListEnabled(enabled);
     }
 
     @Override
@@ -222,26 +222,26 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings("unchecked")
     public Collection<Player> getOnlinePlayers() {
-        if (func_184103_al() == null || func_184103_al().getPlayerList() == null) {
+        if (getPlayerList() == null || getPlayerList().getPlayerList() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) func_184103_al().getPlayerList());
+        return ImmutableList.copyOf((List) getPlayerList().getPlayerList());
     }
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
-        if (func_184103_al() == null) {
+        if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) func_184103_al().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) getPlayerList().getPlayerByUUID(uniqueId));
     }
 
     @Override
     public Optional<Player> getPlayer(String name) {
-        if (func_184103_al() == null) {
+        if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) func_184103_al().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
     }
 
     @SuppressWarnings("deprecation")
@@ -252,10 +252,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public int getMaxPlayers() {
-        if (func_184103_al() == null) {
+        if (getPlayerList() == null) {
             return 0;
         }
-        return func_184103_al().getMaxPlayers();
+        return getPlayerList().getMaxPlayers();
     }
 
     @Override
@@ -449,7 +449,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         }
 
-        this.func_184103_al().setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
+        this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.preparingChunks = true;
         this.initialWorldChunkLoad();
@@ -596,7 +596,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     protected void prepareSpawnArea(WorldServer world) {
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", world.provider.func_186058_p().func_186068_a(), ((World) world).getName());
+        logger.info("Preparing start region for level {} ({})", world.provider.func_186058_p().getId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -766,7 +766,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
-        savehandler.saveWorldInfoWithPlayer(worldInfo, func_184103_al().getHostPlayerData());
+        savehandler.saveWorldInfoWithPlayer(worldInfo, getPlayerList().getHostPlayerData());
 
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)), settings,
             (WorldProperties) worldInfo));
@@ -807,7 +807,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         checkNotNull(world);
-        int dim = ((net.minecraft.world.World) world).provider.func_186058_p().func_186068_a();
+        int dim = ((net.minecraft.world.World) world).provider.func_186058_p().getId();
         if (DimensionManager.getWorldFromDimId(dim) != null) {
             final WorldServer worldServer = (WorldServer) world;
             if (!worldServer.playerEntities.isEmpty()) {

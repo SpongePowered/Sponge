@@ -373,7 +373,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                     ((EntityPlayerMP) thisEntity).closeContainer();
                 }
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.func_186058_p().func_186068_a(), forced);
+            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.func_186058_p().getId(), forced);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
@@ -389,7 +389,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         while (!passengers.isEmpty()) {
             net.minecraft.entity.Entity passengerEntity = passengers.remove();
             if (nmsWorld != null) {
-                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.func_186058_p().func_186068_a(), true);
+                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.func_186058_p().getId(), true);
             }
 
             if (passengerEntity instanceof EntityPlayerMP && !this.worldObj.isRemote) {
@@ -427,7 +427,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 } else {
                     this.visibilityTicks = 1;
                     this.pendingVisibilityUpdate = false;
-                    for (EntityPlayerMP entityPlayerMP : worldObj.getMinecraftServer().func_184103_al().getPlayerList()) {
+                    for (EntityPlayerMP entityPlayerMP : worldObj.getMinecraftServer().getPlayerList().getPlayerList()) {
                         if (((Object) this) == entityPlayerMP) {
                             continue;
                         }
@@ -715,7 +715,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
             fromWorld.func_184164_w().removePlayer((EntityPlayerMP) entity);
-            mcServer.func_184103_al().getPlayerList().remove(entity);
+            mcServer.getPlayerList().getPlayerList().remove(entity);
         } else {
             fromWorld.getEntityTracker().untrackEntity(entity);
         }
@@ -735,7 +735,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.func_186058_p().func_186068_a(), toWorld, entityplayermp1);
+            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.func_186058_p().getId(), toWorld, entityplayermp1);
             if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
                 DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
             } else {
@@ -755,10 +755,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
                 entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
-            mcServer.func_184103_al().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
+            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
             toWorld.func_184164_w().addPlayer(entityplayermp1);
             toWorld.spawnEntityInWorld(entityplayermp1);
-            mcServer.func_184103_al().getPlayerList().add(entityplayermp1);
+            mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
             entityplayermp1.theItemInWorldManager.setWorld(toWorld);
             entityplayermp1.addSelfToInternalCraftingInventory();
             entityplayermp1.setHealth(entityplayermp1.getHealth());

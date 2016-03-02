@@ -233,7 +233,7 @@ public abstract class MixinPlayerList {
         }
 
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
-        playerIn.dimension = worldserver.provider.func_186058_p().func_186068_a();
+        playerIn.dimension = worldserver.provider.func_186058_p().getId();
         // Sponge end
 
         playerIn.setWorld(worldserver);
@@ -245,7 +245,7 @@ public abstract class MixinPlayerList {
         }
 
         logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.func_186058_p().func_186068_a()
+                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.func_186058_p().getId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
         BlockPos blockpos = worldserver.getSpawnPoint();
@@ -258,7 +258,7 @@ public abstract class MixinPlayerList {
         playerIn.playerNetServerHandler = handler;
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.func_186058_p().func_186068_a(), worldserver, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.func_186058_p().getId(), worldserver, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
         }
@@ -409,7 +409,7 @@ public abstract class MixinPlayerList {
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
 
-        playerIn.dimension = targetWorld.provider.func_186058_p().func_186068_a();
+        playerIn.dimension = targetWorld.provider.func_186058_p().getId();
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
@@ -418,7 +418,7 @@ public abstract class MixinPlayerList {
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.func_186058_p().func_186068_a(), targetWorld, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.func_186058_p().getId(), targetWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(targetWorld, playerIn, dimension);
         }
