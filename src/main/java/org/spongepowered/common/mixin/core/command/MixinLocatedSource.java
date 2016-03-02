@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.command.source.LocatedSource;

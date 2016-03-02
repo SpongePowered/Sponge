@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.command;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.util.ChatComponentTranslation;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,14 +74,14 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
             + "(Lnet/minecraft/util/IChatComponent;)V", ordinal = 2), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
-                    ChatComponentTranslation comp, Throwable error) {
+                    TextComponentTranslation comp, Throwable error) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
     }
 
     @Surrogate
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
-                               Throwable error, ChatComponentTranslation comp) {
+                               Throwable error, TextComponentTranslation comp) {
         MinecraftCommandWrapper.setError(error);
         cir.setReturnValue(false);
     }
