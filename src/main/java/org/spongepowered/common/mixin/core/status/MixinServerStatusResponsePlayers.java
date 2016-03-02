@@ -35,8 +35,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collections;
 import java.util.List;
 
-@Mixin(ServerStatusResponse.PlayerCountData.class)
-public abstract class MixinPlayerCountData implements ClientPingServerEvent.Response.Players {
+@Mixin(ServerStatusResponse.Players.class)
+public abstract class MixinServerStatusResponsePlayers implements ClientPingServerEvent.Response.Players {
 
     @Shadow private int onlinePlayerCount;
     @Shadow private int maxPlayers;

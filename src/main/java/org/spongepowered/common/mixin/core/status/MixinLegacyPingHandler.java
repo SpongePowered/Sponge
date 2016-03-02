@@ -28,8 +28,8 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import net.minecraft.network.LegacyPingHandler;
 import net.minecraft.network.NetworkSystem;
-import net.minecraft.network.PingResponseHandler;
 import net.minecraft.network.ServerStatusResponse;
 import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
@@ -42,8 +42,8 @@ import org.spongepowered.common.network.status.SpongeStatusResponse;
 
 import java.net.InetSocketAddress;
 
-@Mixin(PingResponseHandler.class)
-public abstract class MixinPingResponseHandler extends ChannelInboundHandlerAdapter {
+@Mixin(LegacyPingHandler.class)
+public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapter {
 
     @Shadow @Final private static Logger logger;
     @Shadow private NetworkSystem networkSystem;

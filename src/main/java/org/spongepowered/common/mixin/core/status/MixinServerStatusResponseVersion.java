@@ -32,8 +32,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.ProtocolMinecraftVersion;
 import org.spongepowered.common.SpongeMinecraftVersion;
 
-@Mixin(ServerStatusResponse.MinecraftProtocolVersionIdentifier.class)
-public abstract class MixinMinecraftProtocolVersionIdentifier implements ProtocolMinecraftVersion {
+@Mixin(ServerStatusResponse.Version.class)
+public abstract class MixinServerStatusResponseVersion implements ProtocolMinecraftVersion {
 
     @Shadow @Final private String name;
     @Shadow @Final private int protocol;
