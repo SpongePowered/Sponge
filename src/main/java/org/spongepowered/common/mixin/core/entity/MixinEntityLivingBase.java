@@ -26,10 +26,13 @@ package org.spongepowered.common.mixin.core.entity;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.attributes.BaseAttributeMap;
+import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.init.SoundEvents;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
@@ -81,7 +84,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public boolean potionsNeedUpdate;
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
-    @Shadow protected BaseAttributeMap attributeMap;
+    @Shadow protected AbstractAttributeMap attributeMap;
     @Shadow protected ItemStack[] previousEquipment;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
@@ -214,14 +217,14 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
             if (this.nmsEntityLiving.getHealth() <= 0.0F) {
                 return false;
-            } else if (source.isFireDamage() && this.nmsEntityLiving.isPotionActive(Potion.fireResistance)) {
+            } else if (source.isFireDamage() && this.nmsEntityLiving.isPotionActive(MobEffects.fireResistance)) {
                 return false;
             } else {
                 // Sponge - ignore as this is handled in our damageEntityHook
                 if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.nmsEntityLiving.getEquipmentInSlot(4) != null) {
-                    this.nmsEntityLiving.getEquipmentInSlot(4).damageItem((int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
-                                                                          this.nmsEntityLiving);
+                    && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND) != null) {
+                    this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
+                            amount * 2.0F), this.nmsEntityLiving);
                     amount *= 0.75F;
                 }
 
@@ -302,7 +305,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getDeathSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(s, this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.func_184185_a(SoundEvents.func_187510_a(s), this.getSoundVolume(), this.getSoundPitch());
                     }
 
                     this.nmsEntityLiving.onDeath(source);
@@ -310,7 +313,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getHurtSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(s, this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.func_184185_a(SoundEvents.func_187510_a(s), this.getSoundVolume(), this.getSoundPitch());
                     }
                 }
 
@@ -379,8 +382,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             damage = (float) event.getFinalDamage();
 
             // Helmet
-            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.getEquipmentInSlot(4) != null) {
-                this.nmsEntityLiving.getEquipmentInSlot(4).damageItem(
+            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND) != null) {
+                this.nmsEntityLiving.func_184582_a(EntityEquipmentSlot.MAINHAND).damageItem(
                     (int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), this.nmsEntityLiving);
             }
 

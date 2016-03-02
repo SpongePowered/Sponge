@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -63,7 +63,6 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
