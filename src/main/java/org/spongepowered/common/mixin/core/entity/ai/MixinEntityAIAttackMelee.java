@@ -26,26 +26,13 @@ package org.spongepowered.common.mixin.core.entity.ai;
 
 import net.minecraft.entity.ai.EntityAIAttackMelee;
 import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
-import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityAIAttackMelee.class)
 public abstract class MixinEntityAIAttackMelee implements AttackLivingAITask {
-    @Shadow Class classTarget;
     @Shadow double speedTowardsTarget;
     @Shadow boolean longMemory;
-
-    @Override
-    public Class<? extends Living> getTargetClass() {
-        return (Class<? extends Living>) classTarget;
-    }
-
-    @Override
-    public AttackLivingAITask setTargetClass(Class<? extends Living> targetClass) {
-        this.classTarget = targetClass;
-        return this;
-    }
 
     @Override
     public double getSpeed() {

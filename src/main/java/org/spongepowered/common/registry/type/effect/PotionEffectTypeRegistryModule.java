@@ -28,11 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -68,25 +65,19 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     @SuppressWarnings("unchecked")
     @Override
     public void registerDefaults() {
-        for (Potion potion : Potion.potionTypes) {
+        for (Potion potion : Potion.potionRegistry) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
                 this.potionEffectTypeMap.put(potion.getName().toLowerCase(), potionEffectType);
             }
         }
-        ((Map<ResourceLocation, Potion>) Potion.field_180150_I).entrySet().stream()
-            .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase()))
-            .forEach(entry -> {
-                this.potionList.add((PotionEffectType) entry.getValue());
-                this.potionEffectTypeMap.put(entry.getKey().getResourcePath().toLowerCase(), (PotionEffectType) entry.getValue());
-            });
     }
 
     @SuppressWarnings("unchecked")
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
-        for (Potion potion : Potion.potionTypes) {
+        for (Potion potion : Potion.potionRegistry) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
@@ -95,12 +86,6 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 }
             }
         }
-        ((Map<ResourceLocation, Potion>) Potion.field_180150_I).entrySet().stream()
-            .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase()))
-            .forEach(entry -> {
-                this.potionList.add((PotionEffectType) entry.getValue());
-                this.potionEffectTypeMap.put(entry.getKey().getResourcePath().toLowerCase(), (PotionEffectType) entry.getValue());
-            });
     }
 
     @Override

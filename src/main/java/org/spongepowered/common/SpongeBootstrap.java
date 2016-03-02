@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
@@ -56,7 +55,7 @@ public final class SpongeBootstrap {
         registerService(SqlService.class, new SqlServiceImpl());
         registerService(PaginationService.class, new SpongePaginationService());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            registerService(RconService.class, new MinecraftRconService((DedicatedServer) MinecraftServer.getServer()));
+            registerService(RconService.class, new MinecraftRconService((DedicatedServer) Sponge.getServer()));
         }
         registerService(UserStorageService.class, new SpongeUserStorageService());
         registerService(BanService.class, new SpongeBanService());
