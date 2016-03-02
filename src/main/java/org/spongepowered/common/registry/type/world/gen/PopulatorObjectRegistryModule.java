@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-
 import net.minecraft.block.BlockLeaves;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockOldLog;
@@ -37,6 +36,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import net.minecraft.world.gen.feature.WorldGenDesertWells;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
@@ -89,8 +89,8 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         // Trees
         this.populatorObjectMappings.put("oak", (PopulatorObject) new WorldGenTrees(false));
         this.populatorObjectMappings.put("mega_oak", (PopulatorObject) new WorldGenBigTree(false));
-        this.populatorObjectMappings.put("birch", (PopulatorObject) new WorldGenForest(false, false));
-        this.populatorObjectMappings.put("mega_birch", (PopulatorObject) new WorldGenForest(false, true));
+        this.populatorObjectMappings.put("birch", (PopulatorObject) new WorldGenBirchTree(false, false));
+        this.populatorObjectMappings.put("mega_birch", (PopulatorObject) new WorldGenBirchTree(false, true));
         this.populatorObjectMappings.put("tall_taiga", (PopulatorObject) new WorldGenTaiga2(false));
         this.populatorObjectMappings.put("pointy_taiga", (PopulatorObject) new WorldGenTaiga1());
         this.populatorObjectMappings.put("mega_tall_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, true));
