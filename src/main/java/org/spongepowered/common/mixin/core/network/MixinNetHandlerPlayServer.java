@@ -27,17 +27,31 @@ package org.spongepowered.common.mixin.core.network;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
+import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -122,7 +136,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Override
-    public int getPing() {
+    public int getLatency() {
         return this.playerEntity.ping;
     }
 
@@ -181,12 +195,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processVanilla250Packet", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;"
                     + "Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V"), cancellable = true)
-    public void processCommandBlock(C17PacketCustomPayload packetIn, CallbackInfo ci) {
+    public void processCommandBlock(CPacketCustomPayload packetIn, CallbackInfo ci) {
         if ("MC|AdvCdm".equals(packetIn.getChannelName())) {
             PacketBuffer packetbuffer;
             try {
                 if (!this.serverController.isCommandBlockEnabled()) {
-                    this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.notEnabled", new Object[0]));
+                    this.playerEntity.addChatMessage(new TextComponentTranslation("advMode.notEnabled", new Object[0]));
                     // Sponge: Check permissions for command block usage TODO: Maybe throw an event instead?
                     // } else if (this.playerEntity.canCommandSenderUseCommand(2, "") && this.playerEntity.capabilities.isCreativeMode) {
                 } else {
@@ -194,7 +208,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
                     try {
                         byte b0 = packetbuffer.readByte();
-                        CommandBlockLogic commandblocklogic = null;
+                        CommandBlockBaseLogic commandblocklogic = null;
 
                         String permissionCheck = null; // Sponge
                         if (b0 == 0) {
@@ -232,11 +246,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                             commandblocklogic.setTrackOutput(flag);
 
                             if (!flag) {
-                                commandblocklogic.setLastOutput((IChatComponent) null);
+                                commandblocklogic.setLastOutput(null);
                             }
 
                             commandblocklogic.updateCommand();
-                            this.playerEntity.addChatMessage(new ChatComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
+                            this.playerEntity.addChatMessage(new TextComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                         }
                     } catch (Exception exception1) {
                         logger.error("Couldn\'t set command block", exception1);
@@ -264,7 +278,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+    public void proccesPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
@@ -347,7 +361,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
-    public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
+    public void onResourcePackStatus(CPacketResourcePackStatus packet, CallbackInfo ci) {
         String hash = packet.hash;
         ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack = this.sentResourcePacks.get(hash);
@@ -383,7 +397,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
-    public void injectBlockPlacement(C08PacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
+    public void injectBlockPlacement(CPacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
         // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
         // aimed at a block. We shouldn't need to get the second packet if the data is handled
         // but we cannot know what the client will do, so we might still get it
@@ -391,7 +405,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         // If the time between packets is small enough, and the 'signature' similar, we discard the
         // second one. This sadly has to remain until Mojang makes their packets saner. :(
         //  -- Grum
-        if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (!this.serverController.isCallingFromMinecraftThread()) {
             if (packetIn.getPlacedBlockDirection() == 255) {
                 if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
                     this.lastPacket = null;
@@ -405,32 +419,32 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
-    public void onBeforeSlotClick(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+    public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
     }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER))
-    public void onAfterSecondUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+    public void onAfterSecondUpdateCraftingInventory(CPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
     @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
-    public void onThirdUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
+    public void onThirdUpdateCraftingInventory(CPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
     @Inject(method = "processCreativeInventoryAction", at = @At(value = "HEAD"))
-    public void onProcessCreativeInventoryActionHead(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
+    public void onProcessCreativeInventoryActionHead(CPacketCreativeInventoryAction packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(true);
     }
 
     @Inject(method = "processCreativeInventoryAction", at = @At(value = "RETURN"))
-    public void onProcessCreativeInventoryActionReturn(C10PacketCreativeInventoryAction packetIn, CallbackInfo ci) {
+    public void onProcessCreativeInventoryActionReturn(CPacketCreativeInventoryAction packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
     @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
-    public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
+    public void onGetSlotId(CPacketHeldItemChange packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();
     }

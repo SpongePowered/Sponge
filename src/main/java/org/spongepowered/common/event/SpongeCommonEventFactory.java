@@ -33,19 +33,15 @@ import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketClientStatus;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
-import net.minecraft.network.play.server.S09PacketHeldItemChange;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -105,13 +101,6 @@ public class SpongeCommonEventFactory {
     public final static int CLICK_OUTSIDE = -999;
     public final static int CLICK_OUTSIDE_CREATIVE = -1;
 
-    public final static int MODE_CLICK = 0;
-    public final static int MODE_SHIFT_CLICK = 1;
-    public final static int MODE_HOTBAR = 2;
-    public final static int MODE_PICKBLOCK = 3;
-    public final static int MODE_DROP = 4;
-    public final static int MODE_DRAG = 5;
-    public final static int MODE_DOUBLE_CLICK = 6;
 
     public final static int DRAG_MODE_SPLIT_ITEMS = 0;
     public final static int DRAG_MODE_ONE_ITEM = 1;
@@ -122,7 +111,7 @@ public class SpongeCommonEventFactory {
     // Create Sponge Events
 
     public static ChangeInventoryEvent.Held callChangeInventoryHeldEvent(EntityPlayerMP player,
-                                                                         C09PacketHeldItemChange packetIn) {
+                                                                         CPacketHeldItemChange packetIn) {
         Slot sourceSlot = player.inventoryContainer.getSlot(player.inventory.currentItem + player.inventory.mainInventory.length);
         Slot targetSlot = player.inventoryContainer.getSlot(packetIn.getSlotId() + player.inventory.mainInventory.length);
         if (sourceSlot == null || targetSlot == null) {
@@ -146,7 +135,7 @@ public class SpongeCommonEventFactory {
         SpongeImpl.postEvent(event);
 
         if (event.isCancelled()) {
-            player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(player.inventory.currentItem));
+            player.playerNetServerHandler.sendPacket(new SPacketHeldItemChange(player.inventory.currentItem));
         } else {
             handleCustomSlot(player, event.getTransactions());
             player.inventory.currentItem = packetIn.getSlotId();
@@ -158,8 +147,8 @@ public class SpongeCommonEventFactory {
     // Open/Close
     public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet packetIn) {
         if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
-                || (packetIn instanceof C16PacketClientStatus
-                && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
+                || (packetIn instanceof CPacketClientStatus
+                && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT))) {
             ItemStackSnapshot newCursor =
                     player.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                             : ((org.spongepowered.api.item.inventory.ItemStack) player.inventory.getItemStack()).createSnapshot();
@@ -279,7 +268,7 @@ public class SpongeCommonEventFactory {
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
-        if (packetIn.getMode() == MODE_CLICK || packetIn.getMode() == MODE_PICKBLOCK) {
+        if (packetIn.func_186993_f() == MODE_CLICK || packetIn.getMode() == MODE_PICKBLOCK) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                     Iterator<Entity> iterator = causeTracker.getCapturedEntityItems().iterator();
@@ -428,7 +417,7 @@ public class SpongeCommonEventFactory {
                 nmsSlot.putStack(originalStack);
             }
 
-            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
+            player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
         }
     }
 
@@ -438,7 +427,7 @@ public class SpongeCommonEventFactory {
                         : (net.minecraft.item.ItemStack) customCursor
                         .createStack();
         player.inventory.setItemStack(cursor);
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+        player.playerNetServerHandler.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
     private static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
@@ -462,7 +451,7 @@ public class SpongeCommonEventFactory {
                     nmsSlot.putStack(customStack);
                 }
 
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
+                player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
             }
         }
     }
@@ -541,9 +530,9 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, ProjectileSource projectileSource, MovingObjectPosition
+    public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, ProjectileSource projectileSource, RayTraceResult
             movingObjectPosition) {
-        MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
+        RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         Cause cause = Cause.of(projectile, projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource);
         IMixinEntity spongeEntity = (IMixinEntity) projectile;
         Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -553,7 +542,7 @@ public class SpongeCommonEventFactory {
 
         Location<World> impactPoint = new Location<World>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));
 
-        if (movingObjectType == MovingObjectType.BLOCK) {
+        if (movingObjectType == RayTraceResult.Type.BLOCK) {
             BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector(movingObjectPosition.getBlockPos()));
             Direction side = Direction.NONE;
             if (movingObjectPosition.sideHit != null) {
