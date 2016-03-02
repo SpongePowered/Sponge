@@ -40,10 +40,10 @@ import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayer;
-import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
@@ -90,7 +90,6 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
-import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -279,7 +278,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
     public void proccesPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
-        if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
+        if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
@@ -289,11 +288,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 from = this.lastMoveLocation;
             }
 
-            Vector3d torot = new Vector3d(packetIn.getPitch(), packetIn.getYaw(), 0);
-            Location<World> to = new Location<>(player.getWorld(), packetIn.getPositionX(), packetIn.getPositionY(), packetIn.getPositionZ());
+            Vector3d torot = new Vector3d(packetIn.pitch, packetIn.yaw, 0);
+            Location<World> to = new Location<>(player.getWorld(), packetIn.x, packetIn.y, packetIn.z);
 
             // Minecraft sends a 0, 0, 0 position when rotation only update occurs, this needs to be recognized and corrected
-            boolean rotationOnly = !packetIn.isMoving() && packetIn.getRotating();
+            boolean rotationOnly = !packetIn.moving && packetIn.rotating;
             if (rotationOnly) {
                 // Correct the to location so it's not misrepresented to plugins, only when player rotates without moving
                 // In this case it's only a rotation update, which isn't related to the to location
@@ -302,7 +301,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             }
 
             // Minecraft does the same with rotation when it's only a positional update
-            boolean positionOnly = packetIn.isMoving() && !packetIn.getRotating();
+            boolean positionOnly = packetIn.moving && !packetIn.rotating;
             if (positionOnly) {
                 // Correct the new rotation to match the old rotation
                 torot = fromrot;
@@ -346,7 +345,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
-    public void onDisconnectHandler(ServerConfigurationManager this$0, IChatComponent component) {
+    public void onDisconnectHandler(PlayerList this$0, ITextComponent component) {
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
@@ -396,27 +395,31 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
-    public void injectBlockPlacement(CPacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
-        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-        // aimed at a block. We shouldn't need to get the second packet if the data is handled
-        // but we cannot know what the client will do, so we might still get it
-        //
-        // If the time between packets is small enough, and the 'signature' similar, we discard the
-        // second one. This sadly has to remain until Mojang makes their packets saner. :(
-        //  -- Grum
-        if (!this.serverController.isCallingFromMinecraftThread()) {
-            if (packetIn.getPlacedBlockDirection() == 255) {
-                if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
-                    this.lastPacket = null;
-                    ci.cancel();
-                }
-            } else {
-                this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
-                this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
-            }
-        }
-    }
+    // TODO 1.9 changes interaction. We need to evaluate the need for this anymore -- Zidane
+
+//    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
+//    public void injectBlockPlacement(CPacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
+//        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
+//        // aimed at a block. We shouldn't need to get the second packet if the data is handled
+//        // but we cannot know what the client will do, so we might still get it
+//        //
+//        // If the time between packets is small enough, and the 'signature' similar, we discard the
+//        // second one. This sadly has to remain until Mojang makes their packets saner. :(
+//        //  -- Grum
+//        if (!this.serverController.isCallingFromMinecraftThread()) {
+//            final ItemStack stack = playerEntity.func_184586_b(packetIn.func_187028_a());
+//
+//            if (packetIn.getPlacedBlockDirection() == 255) {
+//                if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
+//                    this.lastPacket = null;
+//                    ci.cancel();
+//                }
+//            } else {
+//                this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
+//                this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
+//            }
+//        }
+//    }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
@@ -468,7 +471,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Redirect(method = "onDisconnect(Lnet/minecraft/util/IChatComponent;)V", at = @At(value = "INVOKE",
             target = "Ljava/lang/StringBuilder;append(Ljava/lang/Object;)Ljava/lang/StringBuilder;", ordinal = 0, remap = false))
     private StringBuilder onDisconnectReasonToString(StringBuilder builder, Object reason) {
-        return builder.append(SpongeTexts.toLegacy((IChatComponent) reason));
+        return builder.append(SpongeTexts.toLegacy((ITextComponent) reason));
     }
 
 }

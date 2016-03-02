@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.SpawnerAnimals;
 import net.minecraft.world.World;

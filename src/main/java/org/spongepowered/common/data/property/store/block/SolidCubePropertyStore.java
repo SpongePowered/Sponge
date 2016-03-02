@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import org.spongepowered.api.data.property.block.SolidCubeProperty;
 import org.spongepowered.api.util.Direction;

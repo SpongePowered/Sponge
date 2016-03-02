@@ -30,7 +30,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import net.minecraft.command.PlayerSelector;
+import net.minecraft.command.EntitySelector;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentHolder;
@@ -153,7 +153,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
                 rawMap = ImmutableMap.of();
             } else {
                 rawMap =
-                        PlayerSelector.getArgumentMap(selector.substring(
+                        EntitySelector.getArgumentMap(selector.substring(
                                 argListIndex + 1, selector.length() - 1));
             }
             Map<ArgumentType<?>, Argument<?>> arguments =

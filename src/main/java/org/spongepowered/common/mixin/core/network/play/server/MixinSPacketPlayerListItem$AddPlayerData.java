@@ -22,23 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.text;
+package org.spongepowered.common.mixin.core.network.play.server;
 
-import net.minecraft.util.ChatComponentSelector;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.selector.Selector;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
 
-@Mixin(ChatComponentSelector.class)
-public abstract class MixinChatComponentSelector extends MixinChatComponentStyle {
+@Mixin(SPacketPlayerListItem.AddPlayerData.class)
+public abstract class MixinSPacketPlayerListItem$AddPlayerData implements IMixinSPacketPlayerListItem$AddPlayerData {
 
-    @Shadow @Final private String selector;
+    private EntityPlayerMP playerMP;
 
     @Override
-    protected Text.Builder createBuilder() {
-        return Text.builder(Selector.parse(this.selector));
+    public EntityPlayerMP getPlayer() {
+        return this.playerMP;
     }
 
+    @Override
+    public void setPlayer(EntityPlayerMP player) {
+        this.playerMP = player;
+    }
 }

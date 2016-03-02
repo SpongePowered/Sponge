@@ -28,9 +28,8 @@ import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.world.World;
@@ -63,9 +62,9 @@ public class ChunkSaveHelper {
                 WorldServer world = (WorldServer) spongeWorld;
                 writer.beginObject();
                 writer.name("name").value(((WorldServer) spongeWorld).getSaveHandler().getWorldDirectoryName());
-                writer.name("dimensionId").value(world.provider.getDimensionId());
+                writer.name("dimensionId").value(world.provider.func_186058_p().func_186068_a());
                 writer.name("players").value(world.playerEntities.size());
-                writer.name("loadedChunks").value(world.theChunkProviderServer.loadedChunks.size());
+                writer.name("loadedChunks").value(world.getChunkProvider().loadedChunks.size());
                 writer.name("activeChunks").value(world.activeChunkSet.size());
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
@@ -130,7 +129,7 @@ public class ChunkSaveHelper {
             writer.close();
             fileWriter.close();
         } catch (Throwable throwable) {
-            MinecraftServer.getServer().logSevere("Could not save chunk info report to " + file);
+            SpongeImpl.getLogger().error("Could not save chunk info report to " + file);
         }
     }
 

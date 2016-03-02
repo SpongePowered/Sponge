@@ -30,15 +30,14 @@ import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.command.CommandManager;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
@@ -164,7 +163,7 @@ public abstract class MixinServerCommandManager extends CommandHandler implement
     public List getTabCompletionOptions(ICommandSender sender, String input, BlockPos pos) {
         Location<World> location = null;
         if (pos != null) {
-            location = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector(pos));
+            location = new Location<>((World) sender.getEntityWorld(), VecHelper.toVector3i(pos));
         }
         return SpongeImpl.getGame().getCommandManager().getSuggestions((CommandSource) sender, input);
     }

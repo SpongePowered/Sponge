@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 
-public interface IMixinS38PacketPlayerListItem$AddPlayerData {
+public interface IMixinSPacketPlayerListItem$AddPlayerData {
 
     EntityPlayerMP getPlayer();
 

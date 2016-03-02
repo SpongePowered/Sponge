@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
@@ -73,7 +73,7 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
         this.displaySlotMappings.put("sidebar", new SpongeDisplaySlot("sidebar", null, 1));
         this.displaySlotMappings.put("below_name", new SpongeDisplaySlot("below_name", null, 2));
 
-        for (Map.Entry<EnumChatFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
+        for (Map.Entry<TextFormatting, SpongeTextColor> entry : TextColorRegistryModule.enumChatColor.entrySet()) {
             this.displaySlotMappings.put(entry.getValue().getId(),
                                          new SpongeDisplaySlot(entry.getValue().getId(), entry.getValue(), entry.getKey().getColorIndex() + 3));
         }

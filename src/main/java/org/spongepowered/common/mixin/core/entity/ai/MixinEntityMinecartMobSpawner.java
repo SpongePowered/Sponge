@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.ai.EntityMinecartMobSpawner;
+import net.minecraft.entity.item.EntityMinecartMobSpawner;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartMobSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;

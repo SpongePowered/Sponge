@@ -22,30 +22,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.text;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.util.IChatComponent;
-import org.spongepowered.common.interfaces.text.IMixinChatComponent;
+import net.minecraft.entity.ai.EntityAIAttackMelee;
+import org.spongepowered.api.entity.ai.task.builtin.creature.AttackLivingAITask;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Iterator;
+@Mixin(EntityAIAttackMelee.class)
+public abstract class MixinEntityAIAttackMelee implements AttackLivingAITask {
+    @Shadow Class classTarget;
+    @Shadow double speedTowardsTarget;
+    @Shadow boolean longMemory;
 
-public class ChatComponentIterable implements Iterable<IChatComponent> {
-
-    private final IMixinChatComponent component;
-    private final boolean includeSelf;
-
-    public ChatComponentIterable(IMixinChatComponent component, boolean includeSelf) {
-        this.component = component;
-        this.includeSelf = includeSelf;
+    @Override
+    public Class<? extends Living> getTargetClass() {
+        return (Class<? extends Living>) classTarget;
     }
 
     @Override
-    public Iterator<IChatComponent> iterator() {
-        if (this.includeSelf) {
-            return new ChatComponentIterator(this.component);
-        } else {
-            return new ChatComponentIterator(this.component.childrenIterator());
-        }
+    public AttackLivingAITask setTargetClass(Class<? extends Living> targetClass) {
+        this.classTarget = targetClass;
+        return this;
+    }
+
+    @Override
+    public double getSpeed() {
+        return speedTowardsTarget;
+    }
+
+    @Override
+    public AttackLivingAITask setSpeed(double speed) {
+        this.speedTowardsTarget = speed;
+        return this;
+    }
+
+    @Override
+    public boolean hasLongMemory() {
+        return longMemory;
+    }
+
+    @Override
+    public AttackLivingAITask setLongMemory(boolean longMemory) {
+        this.longMemory = longMemory;
+        return this;
     }
 
 }

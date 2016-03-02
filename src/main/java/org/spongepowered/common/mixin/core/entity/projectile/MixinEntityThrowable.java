@@ -27,8 +27,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,7 +46,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
     @Shadow private EntityLivingBase thrower;
     @Shadow private String throwerName;
     @Shadow public abstract EntityLivingBase getThrower();
-    @Shadow protected abstract void onImpact(MovingObjectPosition movingObjectPosition);
+    @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
 
     @Nullable
@@ -90,8 +89,8 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
     }
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/MovingObjectPosition;)V"))
-    public void onProjectileImpact(EntityThrowable projectile, MovingObjectPosition movingObjectPosition) {
-        if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == MovingObjectType.MISS) {
+    public void onProjectileImpact(EntityThrowable projectile, RayTraceResult movingObjectPosition) {
+        if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

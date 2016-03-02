@@ -30,7 +30,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S2APacketParticles;
+import net.minecraft.network.play.server.SPacketParticles;
 import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -119,7 +119,7 @@ public final class SpongeParticleHelper {
             }
 
             if (size == 0f) {
-                return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
+                return Lists.<Packet>newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
                         extra));
             }
 
@@ -129,7 +129,7 @@ public final class SpongeParticleHelper {
             Color color1 = ((SpongeParticleType.Colorable) type).getDefaultColor();
 
             if (color0.equals(color1)) {
-                return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
+                return Lists.<Packet>newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
                         extra));
             }
 
@@ -145,7 +145,7 @@ public final class SpongeParticleHelper {
             float note = ((SpongeNotePitch) ((SpongeParticleEffect.Note) effect).getNote()).getByteId();
 
             if (note == 0f) {
-                return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f,
+                return Lists.<Packet>newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f,
                         count, extra));
             }
 
@@ -163,7 +163,7 @@ public final class SpongeParticleHelper {
             }
 
             if (mx == 0f && my == 0f && mz == 0f) {
-                return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
+                return Lists.<Packet>newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
                         extra));
             } else {
                 f0 = mx;
@@ -174,7 +174,7 @@ public final class SpongeParticleHelper {
 
         // Is this check necessary?
         if (f0 == 0f && f1 == 0f && f2 == 0f) {
-            return Lists.<Packet>newArrayList(new S2APacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
+            return Lists.<Packet>newArrayList(new SPacketParticles(internal, true, px, py, pz, (float) ox, (float) oy, (float) oz, 0f, count,
                     extra));
         }
 
@@ -182,7 +182,7 @@ public final class SpongeParticleHelper {
 
         if (ox == 0f && oy == 0f && oz == 0f) {
             for (int i = 0; i < count; i++) {
-                packets.add(new S2APacketParticles(internal, true, px, py, pz, (float) f0, (float) f1, (float) f2, 1f, 0, extra));
+                packets.add(new SPacketParticles(internal, true, px, py, pz, (float) f0, (float) f1, (float) f2, 1f, 0, extra));
             }
         } else {
             Random random = new Random();
@@ -192,7 +192,7 @@ public final class SpongeParticleHelper {
                 double py0 = (py + (random.nextFloat() * 2f - 1f) * oy);
                 double pz0 = (pz + (random.nextFloat() * 2f - 1f) * oz);
 
-                packets.add(new S2APacketParticles(internal, true, (float) px0, (float) py0, (float) pz0, (float) f0, (float) f1, (float) f2, 1f, 0,
+                packets.add(new SPacketParticles(internal, true, (float) px0, (float) py0, (float) pz0, (float) f0, (float) f1, (float) f2, 1f, 0,
                         extra));
             }
         }

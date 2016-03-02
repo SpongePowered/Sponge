@@ -27,7 +27,7 @@ package org.spongepowered.common.text;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.UnmodifiableIterator;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 
 import java.util.Iterator;
@@ -35,17 +35,17 @@ import java.util.NoSuchElementException;
 
 import javax.annotation.Nullable;
 
-public class ChatComponentIterator extends UnmodifiableIterator<IChatComponent> {
+public class TextComponentIterator extends UnmodifiableIterator<ITextComponent> {
 
     private IMixinChatComponent component;
-    private Iterator<IChatComponent> children;
-    @Nullable private Iterator<IChatComponent> currentChildIterator;
+    private Iterator<ITextComponent> children;
+    @Nullable private Iterator<ITextComponent> currentChildIterator;
 
-    public ChatComponentIterator(IMixinChatComponent component) {
+    public TextComponentIterator(IMixinChatComponent component) {
         this.component = checkNotNull(component, "component");
     }
 
-    public ChatComponentIterator(Iterator<IChatComponent> children) {
+    public TextComponentIterator(Iterator<ITextComponent> children) {
         this.children = checkNotNull(children, "children");
     }
 
@@ -56,14 +56,14 @@ public class ChatComponentIterator extends UnmodifiableIterator<IChatComponent> 
 
     @Override
     @SuppressWarnings("unchecked")
-    public IChatComponent next() {
+    public ITextComponent next() {
         if (!hasNext()) {
             throw new NoSuchElementException();
         }
         if (this.component != null) {
             this.children = this.component.childrenIterator();
 
-            IChatComponent result = this.component;
+            ITextComponent result = this.component;
             this.component = null;
             return result;
         } else if (this.currentChildIterator == null || !this.currentChildIterator.hasNext()) {

@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinClickEvent;
 import org.spongepowered.common.interfaces.text.IMixinHoverEvent;
-import org.spongepowered.common.text.ChatComponentIterable;
+import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.ResolvedChatStyle;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
@@ -70,7 +70,7 @@ public abstract class MixinChatComponentStyle implements IMixinChatComponent {
 
     @Override
     public Iterable<IChatComponent> withChildren() {
-        return new ChatComponentIterable(this, true);
+        return new TextComponentIterable(this, true);
     }
 
     @Override

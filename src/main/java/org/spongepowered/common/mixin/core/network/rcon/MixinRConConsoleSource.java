@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.network.rcon;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadClient;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -75,7 +75,7 @@ public abstract class MixinRConConsoleSource implements ICommandSender, IMixinCo
      * @param component
      */
     @Inject(method = "addChatMessage", at = @At("RETURN"))
-    public void addNewlines(IChatComponent component, CallbackInfo ci) {
+    public void addNewlines(ITextComponent component, CallbackInfo ci) {
         this.buffer.append('\n');
     }
 

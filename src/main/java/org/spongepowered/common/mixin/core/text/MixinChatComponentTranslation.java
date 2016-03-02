@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
-import org.spongepowered.common.text.ChatComponentIterable;
+import org.spongepowered.common.text.TextComponentIterable;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Iterator;
@@ -60,7 +60,7 @@ public abstract class MixinChatComponentTranslation extends MixinChatComponentSt
 
     @Override
     public Iterable<IChatComponent> withChildren() {
-        return new ChatComponentIterable(this, false);
+        return new TextComponentIterable(this, false);
     }
 
     private static Object[] wrapFormatArgs(Object... formatArgs) {

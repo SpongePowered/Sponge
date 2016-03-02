@@ -22,18 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.play.client;
+package org.spongepowered.common.mixin.core.text;
 
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.util.text.TextComponentSelector;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.selector.Selector;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(C08PacketPlayerBlockPlacement.class)
-public abstract class MixinC08PacketPlayerBlockPlacement implements IMixinC08PacketPlayerBlockPlacement {
-    public final long timestamp = System.currentTimeMillis();
+@Mixin(TextComponentSelector.class)
+public abstract class MixinTextComponentSelector extends MixinChatComponentStyle {
+
+    @Shadow @Final private String selector;
 
     @Override
-    public long getTimeStamp() {
-        return this.timestamp;
+    protected Text.Builder createBuilder() {
+        return Text.builder(Selector.parse(this.selector));
     }
+
 }

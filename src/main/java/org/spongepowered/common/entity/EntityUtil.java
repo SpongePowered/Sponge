@@ -29,21 +29,15 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S10PacketSpawnPainting;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -101,7 +95,7 @@ public final class EntityUtil {
         EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
         for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
-            S13PacketDestroyEntities packet = new S13PacketDestroyEntities(painting.getEntityId());
+            SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
             player.playerNetServerHandler.sendPacket(packet);
             playerMPs.add(player);
         }
@@ -111,7 +105,7 @@ public final class EntityUtil {
             SpongeImpl.getGame().getScheduler().createTaskBuilder()
                 .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
                 .execute(() -> {
-                    final S10PacketSpawnPainting packet = new S10PacketSpawnPainting(painting);
+                    final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
                     playerMP.playerNetServerHandler.sendPacket(packet);
                 })
                 .submit(SpongeImpl.getPlugin());
