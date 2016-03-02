@@ -73,7 +73,7 @@ public final class SpongeImpl {
     public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8.9", 47);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.9", 107);
 
     @Nullable
     private static SpongeImpl instance;

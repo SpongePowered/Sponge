@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.api.text.title;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S45PacketTitle;
-import org.spongepowered.api.entity.living.player.Player;
+import net.minecraft.network.play.server.SPacketTitle;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.asm.mixin.Final;
@@ -36,7 +35,6 @@ import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -51,32 +49,32 @@ public abstract class MixinTitle implements IMixinTitle {
     @Shadow @Final protected boolean clear;
     @Shadow @Final protected boolean reset;
 
-    private List<S45PacketTitle> packets;
+    private List<SPacketTitle> packets;
 
     @Override
     public void send(EntityPlayerMP player) {
-        for (S45PacketTitle packet : this.getPackets()) {
+        for (SPacketTitle packet : this.getPackets()) {
             player.playerNetServerHandler.sendPacket(packet);
         }
     }
 
-    private List<S45PacketTitle> getPackets() {
+    private List<SPacketTitle> getPackets() {
         if (this.packets == null) {
-            this.packets = new ArrayList<S45PacketTitle>();
+            this.packets = new ArrayList<SPacketTitle>();
             if (this.clear) {
-                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.CLEAR, null));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.CLEAR, null));
             }
             if (this.reset) {
-                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.RESET, null));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.RESET, null));
             }
             if (this.fadeIn.isPresent() || this.stay.isPresent() || this.fadeOut.isPresent()) {
-                this.packets.add(new S45PacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20)));
+                this.packets.add(new SPacketTitle(this.fadeIn.orElse(20), this.stay.orElse(60), this.fadeOut.orElse(20)));
             }
             if (this.subtitle.isPresent()) {
-                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent()));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.SUBTITLE, ((IMixinText) this.subtitle.get()).toComponent()));
             }
             if (this.title.isPresent()) {
-                this.packets.add(new S45PacketTitle(S45PacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));
+                this.packets.add(new SPacketTitle(SPacketTitle.Type.TITLE, ((IMixinText) this.title.get()).toComponent()));
             }
         }
         return this.packets;
