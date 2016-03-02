@@ -52,7 +52,7 @@ public class PlayerKickHelper {
                                                                   future -> ply.playerNetServerHandler.getNetworkManager().closeChannel(component));
         ply.playerNetServerHandler.getNetworkManager().disableAutoRead();
         // fix this getServer.
-        Futures.getUnchecked(MinecraftServer.getServer().addScheduledTask(() -> ply.playerNetServerHandler.getNetworkManager().checkDisconnected()));
+        Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.playerNetServerHandler.getNetworkManager().checkDisconnected()));
 
     }
 

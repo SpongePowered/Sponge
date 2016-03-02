@@ -860,6 +860,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
+    @Override
     public String getDefaultWorldName() {
         return getFolderName();
     }

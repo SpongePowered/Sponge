@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import net.minecraft.util.datafix.DataFixer;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
@@ -32,6 +33,7 @@ import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.io.File;
 
@@ -39,8 +41,10 @@ import java.io.File;
 @Mixin(AnvilSaveHandler.class)
 public abstract class MixinAnvilSaveHandler extends SaveHandler {
 
-    public MixinAnvilSaveHandler(File savesDirectory, String directoryName, boolean playersDirectoryIn) {
-        super(savesDirectory, directoryName, playersDirectoryIn);
+    @Shadow private DataFixer field_186341_a;
+
+    public MixinAnvilSaveHandler(File p_i46648_1_, String p_i46648_2_, boolean p_i46648_3_, DataFixer p_i46648_4_) {
+        super(p_i46648_1_, p_i46648_2_, p_i46648_3_, p_i46648_4_);
     }
 
     @Override
@@ -50,6 +54,6 @@ public abstract class MixinAnvilSaveHandler extends SaveHandler {
         // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
         // for the world container with provider.getSaveFolder().
         // This allows users to remove our mod and maintain world compatibility.
-        return new AnvilChunkLoader(this.getWorldDirectory());
+        return new AnvilChunkLoader(this.getWorldDirectory(),this.field_186341_a);
     }
 }

@@ -30,6 +30,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -203,7 +204,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             // Sponge Start
             if (this.fishingRod != null) {
                 this.fishingRod.damageItem(b0, this.angler);
-                this.angler.swingItem();
+                this.angler.func_184609_a(EnumHand.MAIN_HAND);
                 this.fishingRod = null;
             }
             // Sponge End

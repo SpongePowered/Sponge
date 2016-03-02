@@ -114,7 +114,7 @@ public class WrapperICommandSender implements ICommandSender {
     }
 
     @Override
-    public MinecraftServer func_184102_h() {
+    public MinecraftServer getServer() {
         final World world = getEntityWorld();
         if (world != null) {
             return world.getMinecraftServer();

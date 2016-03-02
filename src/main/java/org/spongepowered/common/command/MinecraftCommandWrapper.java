@@ -92,7 +92,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) ((ICommandSender) source).func_184102_h().getCommandManager();
+        CommandHandler handler = (CommandHandler) ((ICommandSender) source).getEntityWorld().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);

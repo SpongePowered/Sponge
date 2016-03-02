@@ -52,6 +52,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -213,6 +214,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract MinecraftServer getMinecraftServer();
 
     // @formatter:on
 
@@ -221,7 +223,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             CallbackInfo ci) {
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
+            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), providerIn.func_186058_p().getId()));
         }
     }
 
@@ -244,7 +246,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();
-        Location<World> location = new Location<>((World) this, VecHelper.toVector(pos));
+        Location<World> location = new Location<>((World) this, VecHelper.toVector3i(pos));
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())
@@ -299,8 +301,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(x, z)) {
-            chunk = worldserver.theChunkProviderServer.provideChunk(x, z);
+        if (worldserver.getChunkProvider().chunkExists(x, z)) {
+            chunk = worldserver.getChunkProvider().provideChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }
@@ -317,8 +319,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(x, z) || shouldGenerate) {
-            chunk = worldserver.theChunkProviderServer.loadChunk(x, z);
+        if (worldserver.getChunkProvider().chunkExists(x, z) || shouldGenerate) {
+            chunk = worldserver.getChunkProvider().loadChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }
@@ -720,7 +722,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(this.provider.getDimensionId()) != null;
+        return DimensionManager.getWorldFromDimId(this.provider.func_186058_p().getId()) != null;
     }
 
     @Override

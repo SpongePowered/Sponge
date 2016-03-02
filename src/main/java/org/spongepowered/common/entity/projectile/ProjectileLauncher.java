@@ -43,6 +43,7 @@ import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
@@ -289,7 +290,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Arrow arrow = (Arrow) new EntityArrow(source.worldObj, source, 2);
+                Arrow arrow = (Arrow) new EntityTippedArrow(source.worldObj, source);
                 return doLaunch(loc.getExtent(), arrow, Cause.of(NamedCause.source(source)));
             }
         });

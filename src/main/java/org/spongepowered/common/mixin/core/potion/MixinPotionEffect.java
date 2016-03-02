@@ -51,7 +51,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public PotionEffectType getType() {
-        return (PotionEffectType) Potion.potionTypes[getPotionID()];
+        return (PotionEffectType) Potion.getPotionById(this.getPotionID());
     }
 
     @Intrinsic
@@ -83,7 +83,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, Potion.potionTypes[getPotionID()].getName())
+                .set(DataQueries.POTION_TYPE, Potion.getPotionById(this.getPotionID()).getName())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)

@@ -65,7 +65,7 @@ public class ChunkSaveHelper {
                 writer.name("dimensionId").value(world.provider.func_186058_p().getId());
                 writer.name("players").value(world.playerEntities.size());
                 writer.name("loadedChunks").value(world.getChunkProvider().loadedChunks.size());
-                writer.name("activeChunks").value(world.activeChunkSet.size());
+                writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount()));
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 

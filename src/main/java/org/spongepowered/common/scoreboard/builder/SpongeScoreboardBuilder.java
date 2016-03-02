@@ -26,8 +26,10 @@ package org.spongepowered.common.scoreboard.builder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.scoreboard.ServerScoreboard;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
@@ -68,7 +70,7 @@ public class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard build() throws IllegalStateException {
-        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard(Ded);
+        Scoreboard scoreboard = (Scoreboard) new ServerScoreboard((MinecraftServer) Sponge.getServer());
         for (Objective objective: this.objectives) {
             scoreboard.addObjective(objective);
         }

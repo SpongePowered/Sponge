@@ -78,7 +78,7 @@ public class TileEntitySignDataProcessor
             sign.signText[i] = SpongeTexts.toComponent(line);
         }
         sign.markDirty();
-        sign.getWorld().markBlockForUpdate(sign.getPos());
+        sign.getWorld().func_184138_a(sign.getPos());
         return true;
     }
 
