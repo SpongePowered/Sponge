@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.network;
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -151,8 +152,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @param tileentity Injected tilentity param
      * @param tileentitysign Injected tileentitysign param
      */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
-    public void callSignChangeEvent(CPacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    public void callSignChangeEvent(CPacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, IBlockState iblockstate, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
         if (!PacketUtil.processSignPacket(packetIn, ci, tileentitysign, this.playerEntity)) {
             return;
@@ -278,7 +279,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccesPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
+    public void processPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
@@ -469,7 +470,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     // Format disconnection message properly, causes weird messages with our console colors
     // Also see https://bugs.mojang.com/browse/MC-59535
-    @Redirect(method = "onDisconnect(Lnet/minecraft/util/IChatComponent;)V", at = @At(value = "INVOKE",
+    @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
             target = "Ljava/lang/StringBuilder;append(Ljava/lang/Object;)Ljava/lang/StringBuilder;", ordinal = 0, remap = false))
     private StringBuilder onDisconnectReasonToString(StringBuilder builder, Object reason) {
         return builder.append(SpongeTexts.toLegacy((ITextComponent) reason));

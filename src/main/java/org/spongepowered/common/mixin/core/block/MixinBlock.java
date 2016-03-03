@@ -71,12 +71,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow private boolean needsRandomTick;
 
-    @Shadow public abstract boolean isBlockNormalCube();
-    @Shadow public abstract boolean getEnableStats();
-    @Shadow public abstract int getLightValue();
     @Shadow public abstract String getUnlocalizedName();
-    @Shadow public abstract IBlockState getStateFromMeta(int meta);
-    @Shadow public abstract Material getMaterial();
+    @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
 
