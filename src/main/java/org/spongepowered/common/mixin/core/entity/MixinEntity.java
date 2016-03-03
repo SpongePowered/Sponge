@@ -370,7 +370,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     ((EntityPlayerMP) thisEntity).closeContainer();
                 }
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.func_186058_p().getId(), forced);
+            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.getDimensionType().getId(), forced);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
@@ -685,7 +685,7 @@ public abstract class MixinEntity implements IMixinEntity {
         final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.func_184164_w().removePlayer((EntityPlayerMP) entity);
+            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) entity);
             mcServer.getPlayerList().getPlayerList().remove(entity);
         } else {
             fromWorld.getEntityTracker().untrackEntity(entity);
@@ -706,7 +706,7 @@ public abstract class MixinEntity implements IMixinEntity {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.func_186058_p().getId(), toWorld, entityplayermp1);
+            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionType().getId(), toWorld, entityplayermp1);
             if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
                 DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
             } else {
@@ -727,7 +727,7 @@ public abstract class MixinEntity implements IMixinEntity {
                 entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.func_184164_w().addPlayer(entityplayermp1);
+            toWorld.getPlayerChunkManager().addPlayer(entityplayermp1);
             toWorld.spawnEntityInWorld(entityplayermp1);
             mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
             entityplayermp1.theItemInWorldManager.setWorld(toWorld);

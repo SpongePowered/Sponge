@@ -118,7 +118,7 @@ public class DimensionManager {
         // Grab provider name if available
         try {
             WorldProvider worldProvider = provider.newInstance();
-            worldType = worldProvider.func_186058_p().func_186065_b().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+            worldType = worldProvider.getDimensionType().getName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
         } catch (Exception e) {
             // ignore
         }

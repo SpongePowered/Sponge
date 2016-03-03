@@ -204,7 +204,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             // Sponge Start
             if (this.fishingRod != null) {
                 this.fishingRod.damageItem(b0, this.angler);
-                this.angler.func_184609_a(EnumHand.MAIN_HAND);
+                this.angler.swingArm(EnumHand.MAIN_HAND);
                 this.fishingRod = null;
             }
             // Sponge End

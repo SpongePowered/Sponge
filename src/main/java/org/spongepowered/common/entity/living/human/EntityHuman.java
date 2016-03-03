@@ -112,12 +112,10 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     protected void entityInit() {
         super.entityInit();
-        //this.dataWatcher.addObject(16, (byte) 0);
-        this.dataWatcher.register(EntityPlayer.field_184829_a, 0.0F); // absorption
-        this.dataWatcher.register(EntityPlayer.field_184830_b, 0); // score
-        this.dataWatcher.register(EntityPlayer.field_184828_bq, Byte.valueOf((byte)1)); // hand
-        // Enables all skin features
-        this.dataWatcher.register(EntityPlayer.field_184827_bp, (byte) 0xFF);
+        this.dataWatcher.register(EntityPlayer.ABSORPTION, 0.0F);
+        this.dataWatcher.register(EntityPlayer.PLAYER_SCORE, 0);
+        this.dataWatcher.register(EntityPlayer.MAIN_HAND, (byte) 1);
+        this.dataWatcher.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
     }
 
     @Override
@@ -177,15 +175,13 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return 80;
     }
 
-    // Swim sound
     @Override
-    protected SoundEvent func_184184_Z() {
+    protected SoundEvent getSwimSound() {
         return SoundEvents.entity_player_swim;
     }
 
-    // Splash sound
     @Override
-    protected SoundEvent func_184181_aa() {
+    protected SoundEvent getSplashSound() {
         return SoundEvents.entity_player_splash;
     }
 
@@ -208,15 +204,13 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         }
     }
 
-    // Hurt sound
     @Override
-    protected SoundEvent func_184601_bQ() {
+    protected SoundEvent getHurtSound() {
         return SoundEvents.entity_player_hurt;
     }
 
-    // Death sound
     @Override
-    protected SoundEvent func_184615_bR() {
+    protected SoundEvent getDeathSound() {
         return SoundEvents.entity_player_death;
     }
 
@@ -231,7 +225,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    protected SoundEvent func_184588_d(int p_184588_1_) {
+    protected SoundEvent getFallSound(int p_184588_1_) {
         return p_184588_1_ > 4 ? SoundEvents.entity_player_big_fall : SoundEvents.entity_player_small_fall;
     }
     @Override
@@ -241,7 +235,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataManager().get(EntityPlayer.field_184829_a);
+        return this.getDataManager().get(EntityPlayer.ABSORPTION);
     }
 
     @Override
@@ -249,7 +243,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataManager().set(EntityPlayer.field_184829_a, Float.valueOf(amount));
+        this.getDataManager().set(EntityPlayer.ABSORPTION, amount);
     }
 
     @Override
@@ -263,7 +257,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         super.attackEntityAsMob(entityIn);
-        this.func_184609_a(EnumHand.MAIN_HAND);
+        this.swingArm(EnumHand.MAIN_HAND);
         float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         int i = 0;
 

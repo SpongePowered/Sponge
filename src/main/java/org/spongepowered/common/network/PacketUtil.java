@@ -128,8 +128,8 @@ public class PacketUtil {
             return true;
         }
         // Sign command exploit fix
-        for (int i = 0; i < packetIn.func_187017_b().length; ++i) {
-            TextStyl chatstyle = packetIn.func_187017_b()[i] == null ? null : packetIn.func_187017_b()[i].getChatStyle();
+        for (int i = 0; i < packetIn.getLines().length; ++i) {
+            TextStyl chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
 
             if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
                 ClickEvent clickevent = chatstyle.getChatClickEvent();

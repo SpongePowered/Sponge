@@ -352,7 +352,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         for (int dim : idList) {
-            WorldProvider provider = DimensionType.func_186069_a(dim).func_186070_d();
+            WorldProvider provider = DimensionType.getById(dim).createDimension();
             String worldFolder;
             if (dim == 0) {
                 worldFolder = overworldFolder;
@@ -596,7 +596,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     protected void prepareSpawnArea(WorldServer world) {
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", world.provider.func_186058_p().getId(), ((World) world).getName());
+        logger.info("Preparing start region for level {} ({})", world.provider.getDimensionType().getId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -807,7 +807,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         checkNotNull(world);
-        int dim = ((net.minecraft.world.World) world).provider.func_186058_p().getId();
+        int dim = ((net.minecraft.world.World) world).provider.getDimensionType().getId();
         if (DimensionManager.getWorldFromDimId(dim) != null) {
             final WorldServer worldServer = (WorldServer) world;
             if (!worldServer.playerEntities.isEmpty()) {

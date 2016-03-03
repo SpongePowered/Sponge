@@ -181,7 +181,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
-        ((WorldServer) world).func_184164_w().markBlockForUpdate(pos);
+        ((WorldServer) world).getPlayerChunkManager().markBlockForUpdate(pos);
         if (this.compound != null) {
             final TileEntity te = world.getTileEntity(pos);
             if (te != null) {

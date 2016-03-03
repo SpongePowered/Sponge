@@ -450,7 +450,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
         boolean flag = false;
 
-        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.field_186036_a) {
+        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
             if (block == Blocks.air) {
                 return null;
             }

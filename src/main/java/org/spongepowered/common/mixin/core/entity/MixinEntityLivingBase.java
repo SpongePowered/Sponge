@@ -305,7 +305,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getDeathSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.func_184185_a(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.playSound(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
                     }
 
                     this.nmsEntityLiving.onDeath(source);
@@ -313,7 +313,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     s = this.getHurtSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.func_184185_a(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
+                        this.nmsEntityLiving.playSound(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
                     }
                 }
 

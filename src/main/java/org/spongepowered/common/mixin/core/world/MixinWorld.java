@@ -222,7 +222,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             CallbackInfo ci) {
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), providerIn.func_186058_p().getId()));
+            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), providerIn.getDimensionType().getId()));
         }
     }
 
@@ -717,7 +717,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(this.provider.func_186058_p().getId()) != null;
+        return DimensionManager.getWorldFromDimId(this.provider.getDimensionType().getId()) != null;
     }
 
     @Override

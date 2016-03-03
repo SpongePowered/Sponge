@@ -57,10 +57,10 @@ public class FireworkUtils {
             .build();
 
     public static ItemStack getItem(EntityFireworkRocket firework) {
-        ItemStack item = firework.getDataManager().get(EntityFireworkRocket.field_184566_a).orNull();
+        ItemStack item = firework.getDataManager().get(EntityFireworkRocket.FIREWORK_ITEM).orNull();
         if (item == null) {
             item = (ItemStack) new SpongeItemStackBuilder().itemType(ItemTypes.FIREWORKS).build();
-            firework.getDataManager().set(EntityFireworkRocket.field_184566_a, com.google.common.base.Optional.of(item));
+            firework.getDataManager().set(EntityFireworkRocket.FIREWORK_ITEM, com.google.common.base.Optional.of(item));
         }
         return item;
     }

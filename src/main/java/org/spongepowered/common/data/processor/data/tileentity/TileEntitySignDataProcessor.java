@@ -79,7 +79,7 @@ public class TileEntitySignDataProcessor
             sign.signText[i] = SpongeTexts.toComponent(line);
         }
         sign.markDirty();
-        ((WorldServer) sign.getWorld()).func_184164_w().markBlockForUpdate(sign.getPos());
+        ((WorldServer) sign.getWorld()).getPlayerChunkManager().markBlockForUpdate(sign.getPos());
         return true;
     }
 

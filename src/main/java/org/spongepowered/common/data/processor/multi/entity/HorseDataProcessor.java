@@ -69,7 +69,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
 
         int variant = HorseUtils.getInternalVariant(horseColor, horseStyle);
 
-        entity.func_184778_a(horseVariant.getType());
+        entity.setType(horseVariant.getType());
         entity.setHorseVariant(variant);
 
         return true;
@@ -80,7 +80,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         return ImmutableMap.<Key<?>, Object>of(
                 Keys.HORSE_COLOR, HorseUtils.getHorseColor(entity),
                 Keys.HORSE_STYLE, HorseUtils.getHorseStyle(entity),
-                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.func_184781_cZ())
+                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.getType())
         );
     }
 

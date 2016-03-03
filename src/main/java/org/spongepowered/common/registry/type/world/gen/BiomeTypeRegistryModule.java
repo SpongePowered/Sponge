@@ -136,7 +136,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
         for (BiomeGenBase biome : BiomeGenBase.biomeRegistry) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
-                this.biomeTypeMappings.put(biome.func_185359_l().toLowerCase(), (BiomeType) biome);
+                this.biomeTypeMappings.put(biome.getBiomeName().toLowerCase(), (BiomeType) biome);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

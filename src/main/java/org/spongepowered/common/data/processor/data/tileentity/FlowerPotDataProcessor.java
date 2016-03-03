@@ -81,7 +81,7 @@ public class FlowerPotDataProcessor extends
             flowerPot.setFlowerPotData(item, meta);
         }
         flowerPot.markDirty();
-        flowerPot.getWorld().func_184138_a(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
+        flowerPot.getWorld().notifyBlockUpdate(flowerPot.getPos(), flowerPot.getWorld().getBlockState(flowerPot.getPos()), flowerPot.getWorld()
                 .getBlockState(flowerPot.getPos()), 3);
         return true;
     }

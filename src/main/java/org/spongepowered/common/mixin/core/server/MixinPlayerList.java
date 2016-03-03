@@ -233,7 +233,7 @@ public abstract class MixinPlayerList {
         }
 
         playerIn.setPositionAndRotation(x, y, z, yaw, pitch);
-        playerIn.dimension = worldserver.provider.func_186058_p().getId();
+        playerIn.dimension = worldserver.provider.getDimensionType().getId();
         // Sponge end
 
         playerIn.setWorld(worldserver);
@@ -245,7 +245,7 @@ public abstract class MixinPlayerList {
         }
 
         logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.func_186058_p().getId()
+                + worldserver.getWorldInfo().getWorldName() + "(" + worldserver.provider.getDimensionType().getId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         WorldInfo worldinfo = worldserver.getWorldInfo();
         BlockPos blockpos = worldserver.getSpawnPoint();
@@ -258,7 +258,7 @@ public abstract class MixinPlayerList {
         playerIn.playerNetServerHandler = handler;
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.func_186058_p().getId(), worldserver, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(worldserver.provider.getDimensionType().getId(), worldserver, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
         }
@@ -379,7 +379,7 @@ public abstract class MixinPlayerList {
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
         playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
-        playerIn.getServerForPlayer().func_184164_w().removePlayer(playerIn);
+        playerIn.getServerForPlayer().getPlayerChunkManager().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
 
@@ -409,7 +409,7 @@ public abstract class MixinPlayerList {
         }
         final WorldServer targetWorld = (WorldServer) location.getExtent();
 
-        playerIn.dimension = targetWorld.provider.func_186058_p().getId();
+        playerIn.dimension = targetWorld.provider.getDimensionType().getId();
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
@@ -418,7 +418,7 @@ public abstract class MixinPlayerList {
         // ### PHASE 5 ### Respawn player in new world
 
         // Support vanilla clients logging into custom dimensions
-        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.func_186058_p().getId(), targetWorld, playerIn);
+        int dimension = DimensionManager.getClientDimensionToSend(targetWorld.provider.getDimensionType().getId(), targetWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
             DimensionManager.sendDimensionRegistration(targetWorld, playerIn, dimension);
         }
@@ -434,7 +434,7 @@ public abstract class MixinPlayerList {
         playerIn.playerNetServerHandler.sendPacket(new SPacketSetExperience(playerIn.experience, playerIn.experienceTotal,
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
-        targetWorld.func_184164_w().addPlayer(playerIn);
+        targetWorld.getPlayerChunkManager().addPlayer(playerIn);
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
         playerIn.addSelfToInternalCraftingInventory();

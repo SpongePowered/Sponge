@@ -164,8 +164,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
         final SignData changedSignData = existingSignData.get().copy();
         final ListValue<Text> lines = changedSignData.lines();
-        for (int i = 0; i < packetIn.func_187017_b().length; i++) {
-            lines.set(i, SpongeTexts.toText(new TextComponentString(packetIn.func_187017_b()[i])));
+        for (int i = 0; i < packetIn.getLines().length; i++) {
+            lines.set(i, SpongeTexts.toText(new TextComponentString(packetIn.getLines()[i])));
         }
         changedSignData.set(lines);
         // I pass changedSignData in here twice to emulate the fact that even-though the current sign data doesn't have the lines from the packet
@@ -181,7 +181,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
         tileentitysign.markDirty();
-        worldserver.func_184164_w().markBlockForUpdate(blockpos);
+        worldserver.getPlayerChunkManager().markBlockForUpdate(blockpos);
     }
 
     /**

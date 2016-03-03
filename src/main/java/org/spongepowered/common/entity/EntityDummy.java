@@ -56,7 +56,7 @@ public final class EntityDummy extends Entity {
     }
 
     @Override
-    public void func_184185_a(SoundEvent event, float volume, float pitch) {
+    public void playSound(SoundEvent event, float volume, float pitch) {
     }
 
     @Override

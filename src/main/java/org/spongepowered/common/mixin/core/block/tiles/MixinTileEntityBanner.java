@@ -93,7 +93,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     public void markDirtyAndUpdate() {
         this.markDirty();
         if (this.worldObj != null) {
-            ((WorldServer) this.worldObj).func_184164_w().markBlockForUpdate(this.getPos());
+            ((WorldServer) this.worldObj).getPlayerChunkManager().markBlockForUpdate(this.getPos());
         }
     }
 
