@@ -132,9 +132,9 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
 
     public void validateProvider(WorldProvider provider) {
         if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
-            int providerId = DimensionManager.getProviderType(provider.getDimensionId());
+            int providerId = DimensionManager.getProviderType(provider.func_186058_p().getId());
             if (!isConfigRegistered(providerId)) {
-                String providerName = provider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+                String providerName = provider.func_186058_p().func_186065_b().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
                         SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
                 registerConfig(providerId, config);
