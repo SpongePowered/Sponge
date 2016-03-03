@@ -203,8 +203,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public boolean loadChunk(boolean generate) {
         WorldServer worldserver = (WorldServer) this.worldObj;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(this.xPosition, this.zPosition) || generate) {
-            chunk = worldserver.theChunkProviderServer.loadChunk(this.xPosition, this.zPosition);
+        if (worldserver.getChunkProvider().chunkExists(this.xPosition, this.zPosition) || generate) {
+            chunk = worldserver.getChunkProvider().loadChunk(this.xPosition, this.zPosition);
         }
 
         return chunk != null;

@@ -109,7 +109,7 @@ public final class SpongeImplHooks {
 
                 if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
                     iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
-                } else if (iblockstate.getBlock().isNormalCube()) {
+                } else if (iblockstate.getBlock().isNormalCube(iblockstate)) {
                     blockpos1 = blockpos1.offset(enumfacing);
                     iblockstate = world.getBlockState(blockpos1);
 
