@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event;
 
+import com.google.common.collect.Iterables;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -101,10 +102,10 @@ public class DamageEventHandler {
                                                                                                                DamageSource damageSource, double damage) {
         if (!damageSource.isDamageAbsolute()) {
             damage *= 25;
-            net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer
-                                                       ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
+            net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(), net.minecraft.item.ItemStack.class);
             List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
             List<DamageObject> damageObjects = new ArrayList<>();
+
             for (int index = 0; index < inventory.length; index++) {
                 net.minecraft.item.ItemStack itemStack = inventory[index];
                 if (itemStack == null) {
@@ -120,6 +121,7 @@ public class DamageEventHandler {
                     damageObjects.add(object);
                 }
             }
+
             boolean first = true;
             double ratio = 0;
 

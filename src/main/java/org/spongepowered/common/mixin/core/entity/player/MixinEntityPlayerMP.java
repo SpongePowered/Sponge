@@ -503,6 +503,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.applyEntityAttributes();
 
         // Re-create the array, so that attributes are properly re-added
-        this.previousEquipment = new ItemStack[5];
+        this.armorArray = new ItemStack[5];
     }
 }
