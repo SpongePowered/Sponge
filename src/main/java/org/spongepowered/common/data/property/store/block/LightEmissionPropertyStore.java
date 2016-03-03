@@ -38,7 +38,7 @@ public class LightEmissionPropertyStore extends AbstractBlockPropertyStore<Light
 
     @Override
     protected Optional<LightEmissionProperty> getForBlock(Block block) {
-        return Optional.of(new LightEmissionProperty(block.getLightValue()));
+        return Optional.of(new LightEmissionProperty(block.getLightValue(block.getDefaultState())));
     }
 
 }

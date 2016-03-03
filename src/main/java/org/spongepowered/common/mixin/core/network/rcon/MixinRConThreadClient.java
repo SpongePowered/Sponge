@@ -68,7 +68,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     private void initSource() {
-        this.source = new RConConsoleSource();
+        this.source = new RConConsoleSource((MinecraftServer) Sponge.getServer());
         Object clientThread = this;
         ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) clientThread);
     }

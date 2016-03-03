@@ -335,7 +335,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlock(x, y, z);
+        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
     }
 
     @Override
@@ -391,7 +391,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Not all entities have a single World parameter as their constructor
         if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
-            entity = (Entity) new EntityLightningBolt(world, x, y, z);
+            entity = (Entity) new EntityLightningBolt(world, x, y, z, false);
         } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
             EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
             tempEntity.posY -= tempEntity.getEyeHeight();
@@ -427,11 +427,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
 
-        // Last chance to fix null fields
-        if (entity instanceof EntityPotion) {
-            // make sure EntityPotion.potionDamage is not null
-            ((EntityPotion) entity).getPotionDamage();
-        } else if (entity instanceof EntityPainting) {
+        if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
             ((EntityPainting) entity).art = EnumArt.KEBAB;
