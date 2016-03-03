@@ -416,7 +416,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void playSound(SoundType sound, SoundCategoryType category, Vector3d position, double volume, double pitch, double minVolume) {
         this.playerNetServerHandler.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), (SoundCategory) (Object) category, position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
-    }m
+    }
 
     @Override
     public void sendResourcePack(ResourcePack pack) {
