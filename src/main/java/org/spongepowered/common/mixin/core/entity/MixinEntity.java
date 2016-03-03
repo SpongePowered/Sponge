@@ -83,6 +83,9 @@ import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -111,7 +114,6 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -119,11 +121,13 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
-public abstract class MixinEntity implements Entity, IMixinEntity {
+@Implements(@Interface(iface = Entity.class, prefix = "entity$"))
+public abstract class MixinEntity implements IMixinEntity {
 
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;lava:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
@@ -164,11 +168,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public int fireResistance;
     @Shadow public int fire;
     @Shadow public int dimension;
-//    @Shadow public net.minecraft.entity.Entity riddenByEntity; // TODO rename these appropriately tomorrow
-//    @Shadow public net.minecraft.entity.Entity ridingEntity; // TODO rename this appropriately tomorrow
     @Shadow protected Random rand;
+    @Shadow public Entity ridingEntity;
     @Shadow public abstract void setPosition(double x, double y, double z);
-//    @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn); // TODO rename this appropriately tomorrow
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
     @Shadow public abstract boolean getFlag(int flag);
@@ -192,7 +194,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void setEating(boolean eating);
     @Shadow public abstract boolean isBeingRidden();
     @Shadow public abstract SoundCategory func_184176_by();
-
+    @Shadow(prefix = "shadow$")
+    public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
+    @Shadow public abstract Entity getLowestRidingEntity();
+    @Shadow public abstract Entity getRidingEntity();
+    @Shadow public abstract void dismountRidingEntity();
 
     // @formatter:on
 
@@ -333,6 +339,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     public boolean setLocation(Location<World> location, boolean forced) {
+        // TODO 1.9 Update - Re-write to properly handle world changes --Zidane
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
             return false;
@@ -351,21 +358,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 location = safeLocation.get();
             }
         }
-        // detach passengers
-        net.minecraft.entity.Entity passenger = thisEntity.func_184179_bs();
-        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
-        while (passenger != null) {
-            if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
-                ((EntityPlayerMP) passenger).mountEntity(null);
-            }
-            net.minecraft.entity.Entity nextPassenger = null;
-            if (passenger.riddenByEntity != null) {
-                nextPassenger = passenger.riddenByEntity;
-                this.riddenByEntity.mountEntity(null);
-            }
-            passengers.add(passenger);
-            passenger = nextPassenger;
-        }
+
+        final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
+        thisEntity.removePassengers();
 
         net.minecraft.world.World nmsWorld = null;
         if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
@@ -387,22 +382,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             }
         }
 
-        // re-attach passengers
-        net.minecraft.entity.Entity lastPassenger = thisEntity;
-        while (!passengers.isEmpty()) {
-            net.minecraft.entity.Entity passengerEntity = passengers.remove();
-            if (nmsWorld != null) {
-                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.func_186058_p().getId(), true);
-            }
-
-            if (passengerEntity instanceof EntityPlayerMP && !this.worldObj.isRemote) {
-                // The actual mount is handled in our event as mounting must be set after client fully loads.
-                ((IMixinEntity) passengerEntity).setIsTeleporting(true);
-                ((IMixinEntity) passengerEntity).setTeleportVehicle(lastPassenger);
-            } else {
-                passengerEntity.mountEntity(lastPassenger);
-            }
-            lastPassenger = passengerEntity;
+        // Re-attach passengers
+        for (net.minecraft.entity.Entity passenger : passengers) {
+            passenger.startRiding(thisEntity, true);
         }
 
         return true;
@@ -646,9 +628,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.entityUniqueID;
     }
 
-    @Override
-    public List<Entity> getPassengers() {
-        return Optional.ofNullable((Entity) this.riddenByEntity);
+    @Intrinsic
+    public List<Entity> entity$getPassengers() {
+        return (List<Entity>) (Object) shadow$getPassengers();
     }
 
     @Override
@@ -658,53 +640,40 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Entity getBaseVehicle() {
-        if (this.ridingEntity == null) {
-            return this;
-        }
-
-        net.minecraft.entity.Entity baseVehicle = this.ridingEntity;
-        while (baseVehicle.func_184187_bx() != null) {
-            baseVehicle = baseVehicle.func_184187_bx();
-        }
-        return (Entity) baseVehicle;
+        return getLowestRidingEntity();
     }
 
     @Override
-    public DataTransactionResult addPassenger(@Nullable Entity entity) {
-        net.minecraft.entity.Entity passenger = (net.minecraft.entity.Entity) entity;
-        if (this.riddenByEntity == null && entity == null) {
-            return DataTransactionResult.successNoData();
-        }
-        Entity thisEntity = this;
-        DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (this.riddenByEntity != null) {
-            final Entity previous = ((Entity) this.riddenByEntity);
-            this.riddenByEntity.mountEntity(null); // eject current passenger
-            builder.replace(new ImmutableSpongeListValue<>(Keys.PASSENGER, ImmutableList.of(previous.createSnapshot())));
-        }
-        if (passenger != null) {
-            passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
-            builder.success(new ImmutableSpongeListValue<>(Keys.PASSENGER,  ImmutableList.of(((Entity) passenger).createSnapshot())));
-        }
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    public DataTransactionResult addPassenger(Entity entity) {
+        checkNotNull(entity);
+        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
+        passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
 
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
+            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(entity
+                    .createSnapshot()))).build();
+        }
+
+        passengerSnapshotsBuilder.add(entity.createSnapshot());
+
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+                .build())).build();
     }
 
     @Override
     public DataTransactionResult setVehicle(@Nullable Entity entity) {
-        if (this.ridingEntity == null && entity == null) {
+        if (getRidingEntity() == null && entity == null) {
             return DataTransactionResult.successNoData();
         }
-        DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (this.ridingEntity != null) {
-            Entity formerVehicle = (Entity) this.ridingEntity;
-            mountEntity(null);
-            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, formerVehicle.createSnapshot()));
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (getRidingEntity() != null) {
+            final EntitySnapshot previousVehicleSnapshot = ((Entity) getRidingEntity()).createSnapshot();
+            dismountRidingEntity();
+            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
         }
         if (entity != null) {
-            net.minecraft.entity.Entity newVehicle = ((net.minecraft.entity.Entity) entity);
-            mountEntity(newVehicle);
-            builder.success(new ImmutableSpongeValue<>(Keys.VEHICLE, entity.createSnapshot()));
+            builder.from(entity.addPassenger((Entity) (Object) this));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
     }

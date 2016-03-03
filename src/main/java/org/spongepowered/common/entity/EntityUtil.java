@@ -32,14 +32,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
@@ -51,42 +48,6 @@ public final class EntityUtil {
     public static final Entity USELESS_ENTITY_FOR_MIXINS = new EntityDummy(null);
 
     private EntityUtil() {
-    }
-
-    public static boolean setPassenger(Entity vehicle, @Nullable Entity passenger) {
-        if (vehicle.riddenByEntity == null) { // no existing passenger
-            if (passenger == null) {
-                return true;
-            }
-            passenger.mountEntity(vehicle);
-        } else { // passenger already exists
-            vehicle.riddenByEntity.mountEntity(null); // eject current passenger
-
-            if (passenger != null) {
-                passenger.mountEntity(vehicle);
-            }
-        }
-        return true;
-    }
-
-    public static boolean setVehicle(Entity passenger, @Nullable Entity vehicle) {
-        if (!passenger.worldObj.isRemote) {
-            passenger.mountEntity(vehicle);
-            return true;
-        }
-        return false;
-    }
-
-    public static EntitySnapshot getBaseVehicle(Entity passenger) {
-        if (passenger.ridingEntity == null) {
-            return null;
-        }
-        Entity baseVehicle = passenger.ridingEntity;
-        while (baseVehicle.ridingEntity != null) {
-            baseVehicle = baseVehicle.ridingEntity;
-        }
-
-        return ((org.spongepowered.api.entity.Entity) baseVehicle).createSnapshot();
     }
 
     @SuppressWarnings("unchecked")
