@@ -43,7 +43,6 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
@@ -315,7 +314,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public boolean populateChunk(Chunk chunk, int chunkX, int chunkZ) {
+    public boolean func_185933_a(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {

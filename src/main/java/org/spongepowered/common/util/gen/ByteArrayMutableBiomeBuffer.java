@@ -56,7 +56,6 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
     private boolean detached;
     private final byte[] biomes;
-    private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
 
     private void checkOpen() {
         checkState(!this.detached, "trying to use buffer after it's closed");
@@ -76,17 +75,16 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkOpen();
         checkRange(x, z);
 
-        this.biomes[getIndex(x, z)] = (byte) ((BiomeGenBase) biome).biomeID;
+        this.biomes[getIndex(x, z)] = (byte) BiomeGenBase.getIdForBiome((BiomeGenBase) biome);
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public BiomeType getBiome(int x, int z) {
         checkOpen();
         checkRange(x, z);
 
         byte biomeId = this.biomes[getIndex(x, z)];
-        BiomeType biomeType = (BiomeType) this.biomeById[biomeId & 0xff];
+        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(biomeId);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 

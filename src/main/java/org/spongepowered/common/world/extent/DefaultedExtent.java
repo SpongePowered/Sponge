@@ -41,8 +41,8 @@ import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.common.util.gen.ByteArrayImmutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-import org.spongepowered.common.util.gen.ShortArrayImmutableBlockBuffer;
-import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.CharArrayImmutableBlockBuffer;
+import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
@@ -115,7 +115,7 @@ public interface DefaultedExtent extends Extent {
     default MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ShortArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
+                return new CharArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
                     getBlockMin(), getBlockSize());
             case THREAD_SAFE:
             default:
@@ -125,7 +125,7 @@ public interface DefaultedExtent extends Extent {
 
     @Override
     default ImmutableBlockVolume getImmutableBlockCopy() {
-        return ShortArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
+        return CharArrayImmutableBlockBuffer.newWithoutArrayClone(ExtentBufferUtil.copyToArray(this, getBlockMin(), getBlockMax(), getBlockSize()),
             getBlockMin(), getBlockSize());
     }
 

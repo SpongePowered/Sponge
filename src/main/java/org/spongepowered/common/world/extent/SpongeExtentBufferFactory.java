@@ -30,7 +30,7 @@ import org.spongepowered.api.world.extent.ExtentBufferFactory;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
-import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 
 public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
@@ -51,7 +51,7 @@ public final class SpongeExtentBufferFactory implements ExtentBufferFactory {
 
     @Override
     public MutableBlockVolume createBlockBuffer(Vector3i size) {
-        return new ShortArrayMutableBlockBuffer(Vector3i.ZERO, size);
+        return new CharArrayMutableBlockBuffer(Vector3i.ZERO, size);
     }
 
     @Override

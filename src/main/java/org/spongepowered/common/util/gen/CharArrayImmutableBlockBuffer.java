@@ -39,21 +39,23 @@ import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 
+import java.util.Arrays;
+
 @NonnullByDefault
-public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
+public class CharArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
-    private final short[] blocks;
+    private final char[] blocks;
 
-    public ShortArrayImmutableBlockBuffer(short[] blocks, Vector3i start, Vector3i size) {
-        super(start, size);
-        this.blocks = blocks.clone();
-    }
-
-    private ShortArrayImmutableBlockBuffer(Vector3i start, Vector3i size, short[] blocks) {
+    private CharArrayImmutableBlockBuffer(Vector3i start, Vector3i size, char[] blocks) {
         super(start, size);
         this.blocks = blocks;
+    }
+
+    public CharArrayImmutableBlockBuffer(char[] blocks, Vector3i start, Vector3i size) {
+        super(start, size);
+        this.blocks = Arrays.copyOf(blocks, blocks.length);
     }
 
     @Override
@@ -89,7 +91,7 @@ public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implemen
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ShortArrayMutableBlockBuffer(this.blocks.clone(), this.start, this.size);
+                return new CharArrayMutableBlockBuffer(this.blocks.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
@@ -105,7 +107,7 @@ public class ShortArrayImmutableBlockBuffer extends AbstractBlockBuffer implemen
      * @param size The size of the volume
      * @return A new buffer using the same array reference
      */
-    public static ImmutableBlockVolume newWithoutArrayClone(short[] blocks, Vector3i start, Vector3i size) {
-        return new ShortArrayImmutableBlockBuffer(start, size, blocks);
+    public static ImmutableBlockVolume newWithoutArrayClone(char[] blocks, Vector3i start, Vector3i size) {
+        return new CharArrayImmutableBlockBuffer(start, size, blocks);
     }
 }
