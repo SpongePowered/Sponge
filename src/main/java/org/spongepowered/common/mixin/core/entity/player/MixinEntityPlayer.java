@@ -32,6 +32,7 @@ import net.minecraft.inventory.Container;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
@@ -58,7 +59,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String WORLD_PLAY_SOUND_AT =
-            "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
+            "Lnet/minecraft/world/World.func_184148_a(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
     @Shadow public int experienceLevel;
@@ -160,13 +161,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * This prevents sounds from being sent to the server by players who are invisible.
      */
-    // TODO: Update this, as the 'playSound' method is gone
-    /*@Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
-    public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
+    @Redirect(method = "func_184185_a", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
+    public void playSound(SoundEvent sound, float volume, float pitch) {
         if (!this.isVanished()) {
-            world.func_184148_a(player, name, volume, pitch);
+            this.worldObj.func_184148_a((EntityPlayer) (Object) this, this.posX, this.posY, this.posZ, sound, this.func_184176_by(), volume, pitch);
         }
-    }*/
+    }
 
     @Override
     public boolean affectsSpawning() {

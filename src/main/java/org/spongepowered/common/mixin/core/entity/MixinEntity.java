@@ -48,6 +48,7 @@ import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -190,6 +191,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
     @Shadow public abstract boolean isBeingRidden();
+    @Shadow public abstract SoundCategory func_184176_by();
 
 
     // @formatter:on
