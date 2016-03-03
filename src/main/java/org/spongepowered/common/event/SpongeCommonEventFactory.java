@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -100,7 +101,6 @@ public class SpongeCommonEventFactory {
     public final static int CLICK_DRAG_RIGHT = 6;
     public final static int CLICK_OUTSIDE = -999;
     public final static int CLICK_OUTSIDE_CREATIVE = -1;
-
 
     public final static int DRAG_MODE_SPLIT_ITEMS = 0;
     public final static int DRAG_MODE_ONE_ITEM = 1;
@@ -268,7 +268,7 @@ public class SpongeCommonEventFactory {
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
             }
         }
-        if (packetIn.func_186993_f() == MODE_CLICK || packetIn.getMode() == MODE_PICKBLOCK) {
+        if (packetIn.getClickType() == ClickType.PICKUP || packetIn.getClickType() == ClickType.CLONE) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                     Iterator<Entity> iterator = causeTracker.getCapturedEntityItems().iterator();
@@ -315,7 +315,7 @@ public class SpongeCommonEventFactory {
                                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
                                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
-        } else if (packetIn.getMode() == MODE_SHIFT_CLICK) {
+        } else if (packetIn.getClickType() == ClickType.QUICK_MOVE) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 clickEvent =
                         SpongeEventFactory.createClickInventoryEventShiftPrimary(cause, cursorTransaction,
@@ -327,12 +327,12 @@ public class SpongeCommonEventFactory {
                                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
                                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
-        } else if (packetIn.getMode() == MODE_HOTBAR) {
+        } else if (packetIn.getClickType() == ClickType.SWAP) {
             clickEvent =
                     SpongeEventFactory.createClickInventoryEventNumberPress(cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer,
                             ((IMixinContainer) player.openContainer).getCapturedTransactions(), packetIn.getUsedButton());
-        } else if (packetIn.getMode() == MODE_DROP) {
+        } else if (packetIn.getClickType() == ClickType.THROW) {
             if (packetIn.getUsedButton() == BUTTON_PRIMARY) {
                 clickEvent =
                         SpongeEventFactory.createClickInventoryEventPrimary(cause, cursorTransaction,
@@ -344,7 +344,7 @@ public class SpongeCommonEventFactory {
                                 (org.spongepowered.api.item.inventory.Container) player.openContainer,
                                 ((IMixinContainer) player.openContainer).getCapturedTransactions());
             }
-        } else if (packetIn.getMode() == MODE_DRAG) {
+        } else if (packetIn.getClickType() == ClickType.QUICK_CRAFT) {
             if (packetIn.getSlotId() == CLICK_OUTSIDE) {
                 if (packetIn.getUsedButton() == CLICK_DRAG_LEFT) {
                     clickEvent =
@@ -361,7 +361,7 @@ public class SpongeCommonEventFactory {
             if (clickEvent == null) {
                 return; // continue capturing drag
             }
-        } else if (packetIn.getMode() == MODE_DOUBLE_CLICK) {
+        } else if (packetIn.getClickType() == ClickType.PICKUP_ALL) {
             clickEvent =
                     SpongeEventFactory.createClickInventoryEventDouble(cause, cursorTransaction,
                             (org.spongepowered.api.item.inventory.Container) player.openContainer,
