@@ -33,15 +33,15 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -140,7 +140,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             final CauseTracker causeTracker = this.getCauseTracker();
             if (!this.isRemote && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
                 originalBlockSnapshot = null;
-                if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks()) && !causeTracker.isCapturingTerrainGen()) {
+                if (!(((IMixinMinecraftServer) Sponge.getServer()).isPreparingChunks()) && !causeTracker.isCapturingTerrainGen()) {
                     originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                             (IBlockAccess) this, pos), pos, flags);
 
@@ -172,7 +172,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
                 }
             }
 
-            int oldLight = currentState.getBlock().getLightValue();
+            int oldLight = currentState.getBlock().getLightValue(currentState);
 
             IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, newBlockSnapshot);
 
@@ -187,7 +187,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             } else {
                 Block block1 = iblockstate1.getBlock();
 
-                if (block.getLightOpacity() != block1.getLightOpacity() || block.getLightValue() != oldLight) {
+                if (block.getLightOpacity(iblockstate1) != block1.getLightOpacity(iblockstate1) || block.getLightValue(newState) != oldLight) {
                     this.theProfiler.startSection("checkLight");
                     this.checkLight(pos);
                     this.theProfiler.endSection();
@@ -233,7 +233,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         if (!this.isRemote && (flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, old.getBlock());
 
-            if (new_.getBlock().hasComparatorInputOverride()) {
+            if (new_.getBlock().hasComparatorInputOverride(new_)) {
                 this.updateComparatorOutputLevel(pos, new_.getBlock());
             }
         }

@@ -76,7 +76,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
         int z;
         int n = this.featureM.getMushroomsPerChunk().getFlooredAmount(random);
 
-        MushroomType type = MushroomTypes.BROWN;
+        MushroomType type;
         List<MushroomType> result;
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(16) + 8;
@@ -84,7 +84,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
             y = random.nextInt(128);
             BlockPos height = chunkPos.add(x, y, z);
             if (this.featureM.getSupplierOverride().isPresent()) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(height));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
             } else {
                 result = this.featureM.getTypes().get(random);

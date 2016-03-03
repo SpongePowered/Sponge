@@ -25,6 +25,7 @@
 package co.aikar.timings;
 
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -40,7 +41,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
     /**
      * Wraps an event executor and associates a timing handler to it.
      *
-     * @param executor
+     * @param listener
      * @param plugin
      * @param method
      * @param eventClass
@@ -59,7 +60,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     @Override
     public void handle(T event) throws Exception {
-        if (!Timings.isTimingsEnabled() || !MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (!Timings.isTimingsEnabled() || !((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread()) {
             this.listener.handle(event);
             return;
         }

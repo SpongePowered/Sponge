@@ -126,7 +126,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
                         IBlockState iblockstate = worldIn.getBlockState(position.add(i1, k, j1));
                         Block block = iblockstate.getBlock();
 
-                        if (iblockstate.func_185904_a() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
+                        if (iblockstate.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
                             this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.packed_ice.getDefaultState());
                         }
 
@@ -134,7 +134,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
                             iblockstate = worldIn.getBlockState(position.add(i1, -k, j1));
                             block = iblockstate.getBlock();
 
-                            if (iblockstate.func_185904_a() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
+                            if (iblockstate.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
                                 this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.packed_ice.getDefaultState());
                             }
                         }
@@ -164,7 +164,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
                     IBlockState iblockstate1 = worldIn.getBlockState(blockpos);
                     Block block1 = iblockstate1.getBlock();
 
-                    if (iblockstate1.func_185904_a() != Material.air && block1 != Blocks.dirt && block1 != Blocks.snow && block1 != Blocks.ice
+                    if (iblockstate1.getMaterial() != Material.air && block1 != Blocks.dirt && block1 != Blocks.snow && block1 != Blocks.ice
                             && block1 != Blocks.packed_ice) {
                         break;
                     }

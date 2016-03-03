@@ -88,10 +88,10 @@ public class MixinWorldGenReed implements Reed {
             if (worldIn.isAirBlock(blockpos1)) {
                 BlockPos blockpos2 = blockpos1.down();
                 
-                if (worldIn.getBlockState(blockpos2.west()).func_185904_a() == Material.water
-                        || worldIn.getBlockState(blockpos2.east()).func_185904_a() == Material.water
-                        || worldIn.getBlockState(blockpos2.north()).func_185904_a() == Material.water
-                        || worldIn.getBlockState(blockpos2.south()).func_185904_a() == Material.water) {
+                if (worldIn.getBlockState(blockpos2.west()).getMaterial() == Material.water
+                        || worldIn.getBlockState(blockpos2.east()).getMaterial() == Material.water
+                        || worldIn.getBlockState(blockpos2.north()).getMaterial() == Material.water
+                        || worldIn.getBlockState(blockpos2.south()).getMaterial() == Material.water) {
                     // Sponge start
                     int j = this.height.getFlooredAmount(rand);
                     // Sponge end

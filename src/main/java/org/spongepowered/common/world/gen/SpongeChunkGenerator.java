@@ -378,7 +378,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         int i = 0;
         for (int currentY = 255; currentY >= 0; --currentY) {
             IBlockState nextBlock = chunk.getBlockState(relativeZ, currentY, relativeX);
-            if (nextBlock.func_185904_a() == Material.air) {
+            if (nextBlock.getMaterial() == Material.air) {
                 k = -1;
             } else if (nextBlock.getBlock() == Blocks.stone) {
                 if (k == -1) {

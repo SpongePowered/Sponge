@@ -27,6 +27,7 @@ package co.aikar.timings;
 import co.aikar.util.LoadingIntMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeImpl;
 
 class TimingHandler implements Timing {
@@ -84,14 +85,14 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
-        if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread()) {
             startTiming();
         }
     }
 
     @Override
     public void stopTimingIfSync() {
-        if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread()) {
             stopTiming();
         }
     }
@@ -109,7 +110,7 @@ class TimingHandler implements Timing {
     @Override
     public void stopTiming() {
         if (this.enabled && --this.timingDepth == 0 && this.start != 0) {
-            if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+            if (((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread()) {
                 SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();
                 this.start = 0;

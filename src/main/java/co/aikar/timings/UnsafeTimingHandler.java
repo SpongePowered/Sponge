@@ -25,6 +25,7 @@
 package co.aikar.timings;
 
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 
 class UnsafeTimingHandler extends TimingHandler {
 
@@ -33,7 +34,7 @@ class UnsafeTimingHandler extends TimingHandler {
     }
 
     private static void checkThread() {
-        if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+        if (!((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread()) {
             throw new IllegalStateException("Calling Timings from Async Operation");
         }
     }

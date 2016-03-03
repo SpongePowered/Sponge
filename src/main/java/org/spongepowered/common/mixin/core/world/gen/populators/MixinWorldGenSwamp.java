@@ -49,7 +49,7 @@ public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree imple
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i;
         BlockPos position = new BlockPos(x, y, z);
-        for (i = 5; worldIn.getBlockState(position.down()).func_185904_a() == Material.water; position = position.down());
+        for (i = 5; worldIn.getBlockState(position.down()).getMaterial() == Material.water; position = position.down());
 
         boolean flag = true;
 

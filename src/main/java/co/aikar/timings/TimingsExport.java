@@ -36,6 +36,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
 import net.minecraft.server.MinecraftServer;
 import ninja.leaping.configurate.ConfigurationNode;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
@@ -90,15 +91,15 @@ class TimingsExport extends Thread {
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
                 .add("version", SpongeImpl.getGame().getPlatform().getImplementation().getVersion())
-                .add("maxplayers", SpongeImpl.getGame().getServer().getMaxPlayers())
+                .add("maxplayers", Sponge.getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", getServerName())
-                    .add("motd", SpongeImpl.getGame().getServer().getMotd().toPlain())
-                    .add("online-mode", SpongeImpl.getGame().getServer().getOnlineMode())
-                    .add("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon());
+                    .add("motd", Sponge.getServer().getMotd().toPlain())
+                    .add("online-mode", Sponge.getServer().getOnlineMode())
+                    .add("icon", ((MinecraftServer) Sponge.getServer()).getServerStatusResponse().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();

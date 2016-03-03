@@ -57,7 +57,7 @@ public class ToolTypeRegistryModule implements CatalogRegistryModule<ToolType> {
     @Override
     public void registerDefaults() {
         for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
-            if (toolMaterial == Item.ToolMaterial.EMERALD) {
+            if (toolMaterial == Item.ToolMaterial.DIAMOND) {
                 this.armorTypeMap.put("diamond", (ToolType) (Object) toolMaterial);
             }
             this.armorTypeMap.put(toolMaterial.name().toLowerCase(), (ToolType) (Object) toolMaterial);
