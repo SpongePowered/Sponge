@@ -304,7 +304,7 @@ public final class NbtDataUtil {
             final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
             final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
             if (enchantment == null) {
                 continue;
             }
@@ -328,7 +328,7 @@ public final class NbtDataUtil {
                 final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
                 final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
                 mergedMap.put(enchantment, (int) level);
             }
         }
@@ -338,7 +338,7 @@ public final class NbtDataUtil {
         final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
         for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
             newList.appendTag(enchantmentCompound);
         }
