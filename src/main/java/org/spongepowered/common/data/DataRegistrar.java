@@ -524,9 +524,6 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
                 ImmutableSpongeSnowedData.class, new SnowedDataProcessor());
 
-        dataManager.registerDualProcessor(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
-                ImmutableSpongeSuspendedData.class, new SuspendedDataProcessor());
-
         dataManager.registerDualProcessor(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
                 ImmutableSpongeOccupiedData.class, new OccupiedDataProcessor());
 
