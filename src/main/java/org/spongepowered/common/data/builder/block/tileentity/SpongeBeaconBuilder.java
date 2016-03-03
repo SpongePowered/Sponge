@@ -49,8 +49,8 @@ public class SpongeBeaconBuilder extends SpongeLockableBuilder<Beacon> {
                 return Optional.empty();
             }
             final BeaconData beaconData = null;
-            beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.PRIMARY).get()]));
-            beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.potionTypes[container.getInt(DataQueries.SECONDARY).get()]));
+            beaconData.set(Keys.BEACON_PRIMARY_EFFECT, Optional.of((PotionEffectType) Potion.getPotionById(container.getInt(DataQueries.PRIMARY).get())));
+            beaconData.set(Keys.BEACON_SECONDARY_EFFECT, Optional.of((PotionEffectType) Potion.getPotionById(container.getInt(DataQueries.SECONDARY).get())));
 
             beacon.offer(beaconData);
             ((TileEntityBeacon) beacon).validate();
