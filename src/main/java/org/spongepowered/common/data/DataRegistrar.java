@@ -595,10 +595,13 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
                 ImmutableSpongeDyeableData.class, dyeableDataProcessor);
 
-
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
+
+        dataManager.registerDataProcessorAndImpl(MobSpawnerData.class, SpongeMobSpawnerData.class, ImmutableMobSpawnerData.class,
+                ImmutableSpongeMobSpawnerData.class, new MobSpawnerDataProcessor());
+
 
         // Values
 
@@ -670,6 +673,15 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_REMAINING_DELAY, new SpawnerRemainingDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MINIMUM_DELAY, new SpawnerMinimumDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MAXIMUM_DELAY, new SpawnerMaximumDelayValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_SPAWN_COUNT, new SpawnerSpawnCountValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_MAXIMUM_NEARBY_ENTITIES, new SpawnerMaximumNearbyEntitiesValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_REQUIRED_PLAYER_RANGE, new SpawnerRequiredPlayerRangeValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_SPAWN_RANGE, new SpawnerSpawnRangeValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_NEXT_ENTITY_TO_SPAWN, new SpawnerNextEntityToSpawnValueProcessor());
+        dataManager.registerValueProcessor(Keys.SPAWNER_ENTITIES, new SpawnerEntitiesValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
