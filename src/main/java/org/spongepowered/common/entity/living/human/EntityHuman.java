@@ -25,7 +25,6 @@
 
 package org.spongepowered.common.entity.living.human;
 
-import com.google.common.base.Preconditions;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -39,16 +38,17 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
@@ -56,7 +56,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
@@ -113,11 +112,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     protected void entityInit() {
         super.entityInit();
-        this.dataWatcher.addObject(16, (byte) 0);
-        this.dataWatcher.addObject(17, 0.0F);
-        this.dataWatcher.addObject(18, 0);
+        //this.dataWatcher.addObject(16, (byte) 0);
+        this.dataWatcher.register(EntityPlayer.field_184829_a, 0.0F); // absorption
+        this.dataWatcher.register(EntityPlayer.field_184830_b, 0); // score
+        this.dataWatcher.register(EntityPlayer.field_184828_bq, Byte.valueOf((byte)1)); // hand
         // Enables all skin features
-        this.dataWatcher.addObject(10, (byte) 0xFF);
+        this.dataWatcher.register(EntityPlayer.field_184827_bp, (byte) 0xFF);
     }
 
     @Override
@@ -177,14 +177,16 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return 80;
     }
 
+    // Swim sound
     @Override
-    protected String getSwimSound() {
-        return "game.player.swim";
+    protected SoundEvent func_184184_Z() {
+        return SoundEvents.entity_player_swim;
     }
 
+    // Splash sound
     @Override
-    protected String getSplashSound() {
-        return "game.player.swim.splash";
+    protected SoundEvent func_184181_aa() {
+        return SoundEvents.entity_player_splash;
     }
 
     @Override
@@ -206,14 +208,16 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         }
     }
 
+    // Hurt sound
     @Override
-    protected String getHurtSound() {
-        return "game.player.hurt";
+    protected SoundEvent func_184601_bQ() {
+        return SoundEvents.entity_player_hurt;
     }
 
+    // Death sound
     @Override
-    protected String getDeathSound() {
-        return "game.player.die";
+    protected SoundEvent func_184615_bR() {
+        return SoundEvents.entity_player_death;
     }
 
     @Override
@@ -227,10 +231,9 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    protected String getFallSoundString(int damageValue) {
-        return damageValue > 4 ? "game.player.hurt.fall.big" : "game.player.hurt.fall.small";
+    protected SoundEvent func_184588_d(int p_184588_1_) {
+        return p_184588_1_ > 4 ? SoundEvents.entity_player_big_fall : SoundEvents.entity_player_small_fall;
     }
-
     @Override
     public float getEyeHeight() {
         return 1.62f;
@@ -238,7 +241,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataWatcher().getWatchableObjectFloat(17);
+        return this.getDataManager().get(EntityPlayer.field_184829_a);
     }
 
     @Override
@@ -246,12 +249,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataWatcher().updateObject(17, amount);
+        this.getDataManager().set(EntityPlayer.field_184829_a, Float.valueOf(amount));
     }
 
     @Override
-    protected float func_110146_f(float p_110146_1_, float p_110146_2_) {
-        float retValue = super.func_110146_f(p_110146_1_, p_110146_2_);
+    protected float updateDistance(float p_110146_1_, float p_110146_2_) {
+        float retValue = super.updateDistance(p_110146_1_, p_110146_2_);
         // Make the body rotation follow head rotation
         this.rotationYaw = this.rotationYawHead;
         return retValue;
@@ -260,12 +263,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         super.attackEntityAsMob(entityIn);
-        swingItem();
+        this.func_184609_a(EnumHand.MAIN_HAND);
         float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase) {
-            f += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase) entityIn).getCreatureAttribute());
+            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(EnumHand.MAIN_HAND), ((EntityLivingBase) entityIn).getCreatureAttribute());
             i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
@@ -318,7 +321,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     public boolean setSkinUuid(UUID skin) {
-        if (!MinecraftServer.getServer().isServerInOnlineMode()) {
+        if (!((MinecraftServer) Sponge.getServer()).isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
         }
@@ -396,14 +399,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
         packet.entityId = this.getEntityId();
         packet.playerId = this.fakeProfile.getId();
-        packet.x = MathHelper.floor_double(this.posX * 32.0D);
-        packet.y = MathHelper.floor_double(this.posY * 32.0D);
-        packet.z = MathHelper.floor_double(this.posZ * 32.0D);
+        packet.x = this.posX;
+        packet.y = this.posY;
+        packet.z = this.posZ;
         packet.yaw = (byte) ((int) (this.rotationYaw * 256.0F / 360.0F));
         packet.pitch = (byte) ((int) (this.rotationPitch * 256.0F / 360.0F));
-        ItemStack itemstack = (ItemStack) ((ArmorEquipable) this).getItemInHand().orElse(null);
-        packet.currentItem = itemstack == null ? 0 : Item.getIdFromItem(itemstack.getItem());
-        packet.watcher = this.getDataWatcher();
+        packet.watcher = this.getDataManager();
         return packet;
     }
 
