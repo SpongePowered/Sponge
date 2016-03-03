@@ -308,7 +308,6 @@
         "network.MixinPacketBuffer",
         "network.packet.MixinSPacketScoreboardObjective",
         "network.packet.MixinSPacketResourcePackSend",
-        "network.play.client.MixinCPacketPlayerBlockPlacement",
         "network.play.server.MixinSPacketPlayerListItem",
         "network.play.server.MixinSPacketPlayerListItem$AddPlayerData",
         "potion.MixinPotion",
