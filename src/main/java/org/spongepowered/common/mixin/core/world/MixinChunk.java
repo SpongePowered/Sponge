@@ -204,7 +204,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         WorldServer worldserver = (WorldServer) this.worldObj;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(this.xPosition, this.zPosition) || generate) {
-            chunk = worldserver.getChunkProvider().loadChunk(this.xPosition, this.zPosition);
+            chunk = worldserver.getChunkProvider().getLoadedChunk(this.xPosition, this.zPosition);
         }
 
         return chunk != null;
@@ -256,7 +256,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         byte[] biomeArray = getBiomeArray();
         int i = x & 15;
         int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (BiomeGenBase.func_185362_a((BiomeGenBase) biome) & 255);
+        biomeArray[j << 4 | i] = (byte) (BiomeGenBase.getIdForBiome((BiomeGenBase) biome) & 255);
         setBiomeArray(biomeArray);
     }
 
@@ -433,6 +433,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot) {
+
         int i = pos.getX() & 15;
         int j = pos.getY();
         int k = pos.getZ() & 15;
@@ -443,14 +444,13 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         int i1 = this.heightMap[l];
-
         // Sponge - remove blockstate check as we handle it in world.setBlockState
         Block block = newState.getBlock();
         Block block1 = currentState.getBlock();
         ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
         boolean flag = false;
 
-        if (extendedblockstorage == null) {
+        if (extendedblockstorage == net.minecraft.world.chunk.Chunk.field_186036_a) {
             if (block == Blocks.air) {
                 return null;
             }
@@ -459,36 +459,32 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             flag = j >= i1;
         }
 
-        int j1 = SpongeImplHooks.getBlockLightOpacity(block, currentState, this.worldObj, pos);
-
         extendedblockstorage.set(i, j & 15, k, newState);
 
-        // if (block1 != block)
-        {
-            if (!this.worldObj.isRemote) {
-                // Only fire block breaks when the block changes.
-                if (currentState.getBlock() != newState.getBlock()) {
-                    block1.breakBlock(this.worldObj, pos, currentState);
-                }
-                TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
-                    this.worldObj.removeTileEntity(pos);
-                }
-            } else if (SpongeImplHooks.blockHasTileEntity(block1, currentState)) {
-                TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-                if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
-                    this.worldObj.removeTileEntity(pos);
-                }
+        TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+
+        if (!this.worldObj.isRemote) {
+            if (block != block1) {
+                block1.breakBlock(this.worldObj, pos, currentState);
+            }
+
+            if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
+                this.worldObj.removeTileEntity(pos);
+            }
+        } else if (SpongeImplHooks.blockHasTileEntity(block1, currentState)) {
+            if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
+                this.worldObj.removeTileEntity(pos);
             }
         }
 
-        if (extendedblockstorage.getBlockByExtId(i, j & 15, k) != block) {
+        if (extendedblockstorage.get(i, j & 15, k).getBlock() != block) {
             return null;
         } else {
             if (flag) {
                 this.generateSkylightMap();
             } else {
-                int k1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
+                int j1 = SpongeImplHooks.getBlockLightOpacity(block, newState, this.worldObj, pos);
+                int k1 = currentState.getLightOpacity();
 
                 if (j1 > 0) {
                     if (j >= i1) {
@@ -503,13 +499,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 }
             }
 
-            TileEntity tileentity;
+            // Sponge start - Invalid previous TileEntity (if exists)
+            if (te != null) {
+                te.updateContainingBlockInfo();
+            }
+            // Sponge end
 
             if (!this.worldObj.isRemote && block1 != block) {
                 // Sponge start - Ignore block activations during block placement captures unless it's
-                // a BlockContainer. Prevents blocks such as TNT from activating when
-                // cancelled.
-                if (!((IMixinWorld)this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
+                if (!((IMixinWorld) this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     if (newBlockSnapshot == null) {
                         block.onBlockAdded(this.worldObj, pos, newState);
                     }
@@ -518,15 +517,16 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             }
 
             if (SpongeImplHooks.blockHasTileEntity(block, newState)) {
-                tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+                te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
 
-                if (tileentity == null) {
-                    tileentity = SpongeImplHooks.createTileEntity(block, this.worldObj, newState);
-                    this.worldObj.setTileEntity(pos, tileentity);
+                if (te == null) {
+                    te = SpongeImplHooks.createTileEntity(block, this.worldObj, newState);
+                    this.worldObj.setTileEntity(pos, te);
                 }
 
-                if (tileentity != null) {
-                    tileentity.updateContainingBlockInfo();
+                // Invalidate new TE (it'll get populated with correct data later)
+                if (te != null) {
+                    te.updateContainingBlockInfo();
                 }
             }
 
