@@ -7,8 +7,5 @@
         "MixinMinecraftServer",
         "MixinWorld",
         "MixinWorldServer"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }
