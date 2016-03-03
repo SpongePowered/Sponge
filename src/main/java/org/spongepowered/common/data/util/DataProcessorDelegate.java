@@ -26,7 +26,6 @@ package org.spongepowered.common.data.util;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
-import com.flowpowered.noise.module.combiner.Min;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.server.MinecraftServer;

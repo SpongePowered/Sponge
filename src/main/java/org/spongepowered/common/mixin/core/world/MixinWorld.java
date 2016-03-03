@@ -47,7 +47,6 @@ import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
@@ -302,7 +301,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(x, z)) {
-            chunk = worldserver.getChunkProvider().provideChunk(x, z);
+            chunk = worldserver.getChunkProvider().getLoadedChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }
@@ -320,7 +319,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(x, z) || shouldGenerate) {
-            chunk = worldserver.getChunkProvider().loadChunk(x, z);
+            chunk = worldserver.getChunkProvider().func_186028_c(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }

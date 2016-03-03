@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import org.spongepowered.common.config.SpongeConfig;
 
 public interface IMixinWorldProvider {
@@ -45,5 +45,5 @@ public interface IMixinWorldProvider {
 
     int getRespawnDimension(EntityPlayerMP playerIn);
 
-    IChunkProvider createChunkGenerator(String settings);
+    IChunkGenerator createChunkGenerator(String settings);
 }

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
@@ -62,12 +62,12 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @Shadow protected boolean hasNoSky;
     @Shadow private String generatorSettings;
     @Shadow public abstract String getDimensionName();
-    @Shadow public abstract IChunkProvider createChunkGenerator();
+    @Shadow public abstract IChunkGenerator func_186060_c();
 
     @Override
-    public IChunkProvider createChunkGenerator(String settings) {
+    public IChunkGenerator createChunkGenerator(String settings) {
         this.generatorSettings = settings;
-        return this.createChunkGenerator();
+        return this.func_186060_c();
     }
 
     @Override

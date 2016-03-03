@@ -31,7 +31,7 @@ import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
@@ -132,11 +132,11 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
     @Override
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
         final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-        final IChunkProvider chunkProvider = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
-        final BiomeProvider chunkManager = mcWorld.provider.worldChunkMgr;
+        final IChunkGenerator chunkGenerator = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
+        final BiomeProvider biomeProvider = mcWorld.provider.worldChunkMgr;
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
-                (BiomeGenerator) chunkManager,
-                SpongeGenerationPopulator.of((WorldServer) world, chunkProvider));
+                (BiomeGenerator) biomeProvider,
+                SpongeGenerationPopulator.of((WorldServer) world, chunkGenerator));
     }
 
     @Override
