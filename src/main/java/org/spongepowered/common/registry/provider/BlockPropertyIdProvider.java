@@ -192,7 +192,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockPane.WEST, "minecraft:pane_west");
         register(BlockStainedGlassPane.COLOR, "minecraft:stained_dyed_color");
         register(BlockQuartz.VARIANT, "minecraft:quartz_variant");
-        register(BlockPistonExtension.FACING, "minecraft:piston_extension_facing");
         register(BlockPistonExtension.TYPE, "minecraft:piston_extension_type");
         register(BlockPistonExtension.SHORT, "minecraft:piston_extension_short");
         register(BlockSandStone.TYPE, "minecraft:sand_stone_type");
@@ -211,7 +210,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockGrass.SNOWY, "minecraft:grass_snowy");
         register(BlockCauldron.LEVEL, "minecraft:cauldron_level");
         register(BlockBanner.ROTATION, "minecraft:banner_rotation");
-        register(BlockSkull.FACING, "minecraft:skull_facing");
         register(BlockSkull.NODROP, "minecraft:skull_no_drop");
         register(BlockStandingSign.ROTATION, "minecraft:standing_sign_rotation");
         register(BlockBrewingStand.HAS_BOTTLE[0], "minecraft:brewing_stand_1_has_bottle");
@@ -242,7 +240,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockSponge.WET, "minecraft:sponge_wet");
         register(BlockTripWireHook.ATTACHED, "minecraft:trip_wire_hook_attached");
         register(BlockTripWireHook.POWERED, "minecraft:trip_wire_hook_powered");
-        register(BlockDoor.FACING, "minecraft:door_facing");
         register(BlockDoor.OPEN, "minecraft:door_open");
         register(BlockDoor.HINGE, "minecraft:door_hinge");
         register(BlockDoor.POWERED, "minecraft:door_powered");
@@ -255,7 +252,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockBed.OCCUPIED, "minecraft:bed_occupied");
         register(BlockRedstoneComparator.MODE, "minecraft:comparator_mode");
         register(BlockRedstoneComparator.POWERED, "minecraft:comparator_powered");
-        register(BlockCocoa.AGE, "minecraft:cocoa_facing");
+        register(BlockCocoa.AGE, "minecraft:cocoa_age");
         register(BlockFenceGate.IN_WALL, "minecraft:fence_gate_in_wall");
         register(BlockFenceGate.OPEN, "minecraft:fence_gate_open");
         register(BlockFenceGate.POWERED, "minecraft:fence_gate_powered");

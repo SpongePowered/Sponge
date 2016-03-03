@@ -29,6 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
@@ -139,8 +140,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "func_184230_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
+    @Inject(method = "func_184230_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    public void callLeashEvent(EntityPlayer playerIn, ItemStack itemStack, EnumHand hand, CallbackInfo ci) {
         if (!playerIn.worldObj.isRemote) {
             Entity leashedEntity = (Entity)(Object) this;
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), leashedEntity);
