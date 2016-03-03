@@ -49,6 +49,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
@@ -56,6 +57,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.sound.SoundCategoryType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -401,20 +403,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume) {
-        this.playSound(sound, position, volume, 1);
+    public void playSound(SoundType sound, SoundCategoryType category, Vector3d position, double volume) {
+        this.playSound(sound, category, position, volume, 1);
     }
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume, double pitch) {
-        this.playSound(sound, position, volume, pitch, 0);
+    public void playSound(SoundType sound, SoundCategoryType category, Vector3d position, double volume, double pitch) {
+        this.playSound(sound, category, position, volume, pitch, 0);
     }
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playerNetServerHandler.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), position.getX(), position.getY(), position.getZ(),
+    public void playSound(SoundType sound, SoundCategoryType category, Vector3d position, double volume, double pitch, double minVolume) {
+        this.playerNetServerHandler.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), (SoundCategory) (Object) category, position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
-    }
+    }m
 
     @Override
     public void sendResourcePack(ResourcePack pack) {

@@ -160,12 +160,13 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      *
      * This prevents sounds from being sent to the server by players who are invisible.
      */
-    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
+    // TODO: Update this, as the 'playSound' method is gone
+    /*@Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
         if (!this.isVanished()) {
             world.func_184148_a(player, name, volume, pitch);
         }
-    }
+    }*/
 
     @Override
     public boolean affectsSpawning() {
