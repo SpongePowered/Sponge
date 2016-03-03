@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.init.Blocks;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
@@ -92,13 +90,14 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
         return this.getAverageGroundLevel();
     }
 
-    public boolean canCoordinateBeSpawn(int x, int z) {
-        if (this.terrainType.equals(GeneratorTypes.THE_END)) {
-            return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
-        } else {
-            return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)) == Blocks.grass;
-        }
-    }
+// TODO 1.9 Update - This may not be needed anymore --Zidane
+//    public boolean canCoordinateBeSpawn(int x, int z) {
+//        if (this.terrainType.equals(GeneratorTypes.THE_END)) {
+//            return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)).getMaterial().blocksMovement();
+//        } else {
+//            return this.worldObj.getGroundAboveSeaLevel(new BlockPos(x, 0, z)) == Blocks.grass;
+//        }
+//    }
 
     @Override
     public boolean doesWaterEvaporate() {

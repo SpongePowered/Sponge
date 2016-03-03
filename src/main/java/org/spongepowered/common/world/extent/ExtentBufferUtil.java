@@ -45,7 +45,7 @@ public class ExtentBufferUtil {
         int i = 0;
         for (int y = min.getY(); y <= max.getY(); y++) {
             for (int x = min.getX(); x <= max.getX(); x++) {
-                copy[i++] = (byte) ((BiomeGenBase) area.getBiome(x, y)).biomeID;
+                copy[i++] = (byte) BiomeGenBase.getIdForBiome((BiomeGenBase) area.getBiome(x, y));
             }
         }
         return copy;
