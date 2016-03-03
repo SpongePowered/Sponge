@@ -39,6 +39,7 @@ import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -92,13 +93,12 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected EntityPlayer attackingPlayer;
     @Shadow protected abstract void damageArmor(float p_70675_1_);
     @Shadow protected abstract void setBeenAttacked();
-    @Shadow protected abstract String getDeathSound();
+    @Shadow protected abstract SoundEvent getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract String getHurtSound();
+    @Shadow protected abstract SoundEvent getHurtSound();
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
-    @Shadow public abstract void removePotionEffect(int id);
     @Shadow protected abstract void markPotionsDirty();
     @Shadow public abstract void setCurrentItemOrArmor(int slotIn, ItemStack stack);
     @Shadow public abstract void clearActivePotions();
@@ -299,21 +299,16 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
                 }
 
-                String s;
 
                 if (this.nmsEntityLiving.getHealth() <= 0.0F) {
-                    s = this.getDeathSound();
-
-                    if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
+                    if (flag) {
+                        this.nmsEntityLiving.playSound(this.getDeathSound(), this.getSoundVolume(), this.getSoundPitch());
                     }
 
                     this.nmsEntityLiving.onDeath(source);
                 } else {
-                    s = this.getHurtSound();
-
-                    if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(SoundEvents.getRegisteredSoundEvent(s), this.getSoundVolume(), this.getSoundPitch());
+                    if (flag) {
+                        this.nmsEntityLiving.playSound(this.getHurtSound(), this.getSoundVolume(), this.getSoundPitch());
                     }
                 }
 
