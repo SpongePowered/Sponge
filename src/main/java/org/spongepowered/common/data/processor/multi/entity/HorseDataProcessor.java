@@ -67,10 +67,9 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         SpongeHorseStyle horseStyle = (SpongeHorseStyle) keyValues.get(Keys.HORSE_STYLE);
         SpongeHorseVariant horseVariant = (SpongeHorseVariant) keyValues.get(Keys.HORSE_VARIANT);
 
-        int type = horseVariant.type;
         int variant = HorseUtils.getInternalVariant(horseColor, horseStyle);
 
-        entity.setHorseType(type);
+        entity.func_184778_a(horseVariant.getType());
         entity.setHorseVariant(variant);
 
         return true;
@@ -81,7 +80,7 @@ public class HorseDataProcessor extends AbstractEntityDataProcessor<EntityHorse,
         return ImmutableMap.<Key<?>, Object>of(
                 Keys.HORSE_COLOR, HorseUtils.getHorseColor(entity),
                 Keys.HORSE_STYLE, HorseUtils.getHorseStyle(entity),
-                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.getHorseType())
+                Keys.HORSE_VARIANT, HorseUtils.getHorseVariant(entity.func_184781_cZ())
         );
     }
 

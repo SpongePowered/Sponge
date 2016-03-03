@@ -163,7 +163,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
         if (!this.isVanished()) {
-            world.playSoundToNearExcept(player, name, volume, pitch);
+            world.func_184148_a(player, name, volume, pitch);
         }
     }
 

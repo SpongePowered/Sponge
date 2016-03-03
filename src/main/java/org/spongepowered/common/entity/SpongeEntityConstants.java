@@ -25,12 +25,14 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.collect.Maps;
+import net.minecraft.entity.passive.HorseArmorType;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.entity.living.animal.Horse;
 
 import java.util.Map;
 
@@ -47,7 +49,7 @@ public class SpongeEntityConstants {
     public static final Map<String, HorseStyle> HORSE_STYLES = Maps.newHashMap();
     public static final Map<Integer, HorseStyle> HORSE_STYLE_IDMAP = Maps.newHashMap();
     public static final Map<String, HorseVariant> HORSE_VARIANTS = Maps.newHashMap();
-    public static final Map<Integer, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
+    public static final Map<HorseArmorType, HorseVariant> HORSE_VARIANT_IDMAP = Maps.newHashMap();
 
     // skeleton types
     public static final SpongeSkeletonType NORMAL_SKELETON = new SpongeSkeletonType(0, "NORMAL");
@@ -85,11 +87,11 @@ public class SpongeEntityConstants {
     public static final SpongeHorseStyle BLACK_DOTS = new SpongeHorseStyle(4, "BLACK_DOTS");
 
     // horse variants
-    public static final SpongeHorseVariant HORSE = new SpongeHorseVariant(0, "HORSE");
-    public static final SpongeHorseVariant DONKEY = new SpongeHorseVariant(1, "DONKEY");
-    public static final SpongeHorseVariant MULE = new SpongeHorseVariant(2, "MULE");
-    public static final SpongeHorseVariant UNDEAD_HORSE = new SpongeHorseVariant(3, "UNDEAD_HORSE");
-    public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, "SKELETON_HORSE");
+    public static final SpongeHorseVariant HORSE = new SpongeHorseVariant(0, HorseArmorType.HORSE, "HORSE");
+    public static final SpongeHorseVariant DONKEY = new SpongeHorseVariant(1, HorseArmorType.DONKEY, "DONKEY");
+    public static final SpongeHorseVariant MULE = new SpongeHorseVariant(2, HorseArmorType.MULE, "MULE");
+    public static final SpongeHorseVariant UNDEAD_HORSE = new SpongeHorseVariant(3, HorseArmorType.ZOMBIE, "UNDEAD_HORSE");
+    public static final SpongeHorseVariant SKELETON_HORSE = new SpongeHorseVariant(4, HorseArmorType.SKELETON, "SKELETON_HORSE");
 
     static {
         SKELETON_TYPES.put("normal", NORMAL_SKELETON);
@@ -158,10 +160,10 @@ public class SpongeEntityConstants {
         HORSE_VARIANTS.put("undead_horse", UNDEAD_HORSE);
         HORSE_VARIANTS.put("skeleton_horse", SKELETON_HORSE);
 
-        HORSE_VARIANT_IDMAP.put(0, HORSE);
-        HORSE_VARIANT_IDMAP.put(1, DONKEY);
-        HORSE_VARIANT_IDMAP.put(2, MULE);
-        HORSE_VARIANT_IDMAP.put(3, UNDEAD_HORSE);
-        HORSE_VARIANT_IDMAP.put(4, SKELETON_HORSE);
+        HORSE_VARIANT_IDMAP.put(HorseArmorType.HORSE, HORSE);
+        HORSE_VARIANT_IDMAP.put(HorseArmorType.DONKEY, DONKEY);
+        HORSE_VARIANT_IDMAP.put(HorseArmorType.MULE, MULE);
+        HORSE_VARIANT_IDMAP.put(HorseArmorType.ZOMBIE, UNDEAD_HORSE);
+        HORSE_VARIANT_IDMAP.put(HorseArmorType.SKELETON, SKELETON_HORSE);
     }
 }
