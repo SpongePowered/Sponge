@@ -169,7 +169,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
-    @Shadow public Entity ridingEntity;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -635,7 +634,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Optional<Entity> getVehicle() {
-        return Optional.ofNullable((Entity) this.ridingEntity);
+        return Optional.ofNullable((Entity) getRidingEntity());
     }
 
     @Override
