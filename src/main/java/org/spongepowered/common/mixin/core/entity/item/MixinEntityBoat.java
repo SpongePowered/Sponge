@@ -95,7 +95,8 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
         }
     }
 
-    @Inject(method = "onUpdate()V",
+    // TODO: Re-enable this with support for multiple riding
+    /*@Inject(method = "onUpdate()V",
             at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;riddenByEntity:Lnet/minecraft/entity/Entity;", ordinal = 0))
     public void implementCustomDeceleration(CallbackInfo ci) {
         if (!(this.riddenByEntity instanceof EntityLivingBase)) {
@@ -111,7 +112,7 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
                 this.motionZ = 0.0;
             }
         }
-    }
+    }*/
 
     @Override
     public boolean isInWater() {
