@@ -48,7 +48,8 @@ public class VillagerZombieProcessor
 
     @Override
     protected boolean set(EntityZombie entity, Boolean value) {
-        entity.setVillager(value);
+        // TODO - modify the data manipuatlor or add a new one to support this
+        entity.setVillagerType(0);
         return true;
     }
 
