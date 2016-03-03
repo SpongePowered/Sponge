@@ -61,5 +61,6 @@ public final class SkullTypeRegistryModule implements CatalogRegistryModule<Skul
         this.skullTypeMap.put("zombie", new SpongeSkullType((byte) 2, "zombie"));
         this.skullTypeMap.put("player", new SpongeSkullType((byte) 3, "player"));
         this.skullTypeMap.put("creeper", new SpongeSkullType((byte) 4, "creeper"));
+        this.skullTypeMap.put("ender_dragon", new SpongeSkullType((byte) 5, "ender_dragon"));
     }
 }
