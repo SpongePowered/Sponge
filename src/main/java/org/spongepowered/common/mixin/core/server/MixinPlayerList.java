@@ -340,7 +340,7 @@ public abstract class MixinPlayerList {
             if (entity != null) {
                 entity.forceSpawn = true;
                 worldserver.spawnEntityInWorld(entity);
-                playerIn.mountEntity(entity);
+                entity.startRiding(playerIn, true);
                 entity.forceSpawn = false;
             }
         }
@@ -413,7 +413,7 @@ public abstract class MixinPlayerList {
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
-        targetWorld.getChunkProvider().func_186026_b((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        targetWorld.getChunkProvider().getLoadedChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -444,8 +444,8 @@ public abstract class MixinPlayerList {
         final MutableBoundedValue<Integer> food = ((Player) playerIn).foodLevel();
         final MutableBoundedValue<Double> saturation = ((Player) playerIn).saturation();
 
-        playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(1.0F);
-        playerIn.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(maxHealth.get().floatValue());
+        playerIn.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(1.0F);
+        playerIn.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(maxHealth.get().floatValue());
         playerIn.playerNetServerHandler.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
 
         return playerIn;
