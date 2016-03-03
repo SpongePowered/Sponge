@@ -33,6 +33,7 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -118,7 +119,7 @@ public class ServerUtils {
             ((IMixinWorldInfo) info).setUUID(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) info);
-            ((IMixinMinecraftServer) MinecraftServer.getServer()).getHandler(this.newName).saveWorldInfo(info);
+            ((IMixinMinecraftServer) Sponge.getServer()).getHandler(this.newName).saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
 

@@ -52,21 +52,18 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsSuspendedFor(blockState), getIsAttachedFor(blockState),
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsAttachedFor(blockState),
                 getIsPoweredFor(blockState), getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableSuspendedData.class.isAssignableFrom(immutable) || ImmutableAttachedData.class.isAssignableFrom(immutable)
+        return ImmutableAttachedData.class.isAssignableFrom(immutable)
                 || ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableSuspendedData) {
-            return Optional.of((BlockState) blockState);
-        }
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
@@ -96,11 +93,6 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockTripWireHook.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableSuspendedData getIsSuspendedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil
-                .getManipulator(ImmutableSpongeSuspendedData.class, (Boolean) blockState.getValue(BlockTripWireHook.SUSPENDED));
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
