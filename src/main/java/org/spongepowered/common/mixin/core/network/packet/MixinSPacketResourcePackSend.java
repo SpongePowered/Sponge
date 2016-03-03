@@ -37,7 +37,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import java.net.URISyntaxException;
 
 @Mixin(SPacketResourcePackSend.class)
-public abstract class MixinS48PacketResourcePackSend implements IMixinPacketResourcePackSend {
+public abstract class MixinSPacketResourcePackSend implements IMixinPacketResourcePackSend {
 
     @Shadow private String url;
     @Shadow private String hash;

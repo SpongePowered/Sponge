@@ -32,7 +32,7 @@ import org.spongepowered.common.entity.living.human.EntityHuman;
 
 import java.util.UUID;
 
-@Mixin(targets = "net.minecraft.command.PlayerSelector$6")
+@Mixin(targets = "net.minecraft.command.EntitySelector$6")
 public class MixinPlayerSelectorScore {
 
     @Redirect(method = "apply", at = @At(value = "INVOKE", target = "Ljava/util/UUID;toString()Ljava/lang/String;"))

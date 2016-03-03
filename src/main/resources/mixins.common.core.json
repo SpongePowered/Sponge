@@ -176,7 +176,7 @@
         "command.MixinSignCommandSender",
         "command.MixinSubject",
         "command.MixinEntitySelector",
-        "command.MixinEntitySelectorScore",
+        "command.MixinPlayerSelectorScore",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAgeable",
