@@ -217,7 +217,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockFurnace.FACING, "minecraft:furnace_facing");
         register(BlockBanner.FACING, "minecraft:banner_facing");
         register(BlockBanner.ROTATION, "minecraft:banner_rotation");
-        register(BlockCommandBlock.TRIGGERED, "minecraft:command_block_triggered");
         register(BlockChest.FACING, "minecraft:chest_facing");
         register(BlockSkull.FACING, "minecraft:skull_facing");
         register(BlockSkull.NODROP, "minecraft:skull_no_drop");
@@ -240,13 +239,11 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockAnvil.FACING, "minecraft:anvil_facing");
         register(BlockCake.BITES, "minecraft:cake_bites");
         register(BlockFire.AGE, "minecraft:fire_age");
-        register(BlockFire.ALT, "minecraft:fire_alt");
         register(BlockFire.NORTH, "minecraft:fire_north");
         register(BlockFire.EAST, "minecraft:fire_east");
         register(BlockFire.SOUTH, "minecraft:fire_south");
         register(BlockFire.WEST, "minecraft:fire_west");
         register(BlockFire.UPPER, "minecraft:fire_upper");
-        register(BlockFire.FLIP, "minecraft:fire_flip");
         register(BlockSlab.HALF, "minecraft:slab_half");
         register(BlockStoneSlabNew.SEAMLESS, "minecraft:stone_slab_new_seamless");
         register(BlockStoneSlabNew.VARIANT, "minecraft:stone_slab_new_variant");
@@ -258,7 +255,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockTripWireHook.FACING, "minecraft:trip_wire_hook_facing");
         register(BlockTripWireHook.ATTACHED, "minecraft:trip_wire_hook_attached");
         register(BlockTripWireHook.POWERED, "minecraft:trip_wire_hook_powered");
-        register(BlockTripWireHook.SUSPENDED, "minecraft:trip_wire_hook_suspended");
         register(BlockDoor.FACING, "minecraft:door_facing");
         register(BlockDoor.OPEN, "minecraft:door_open");
         register(BlockDoor.HINGE, "minecraft:door_hinge");
@@ -282,7 +278,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockRedstoneWire.WEST, "minecraft:redstone_west");
         register(BlockRedstoneWire.POWER, "minecraft:redstone_power");
         register(BlockTripWire.POWERED, "minecraft:trip_wire_powered");
-        register(BlockTripWire.SUSPENDED, "minecraft:trip_wire_suspended");
         register(BlockTripWire.ATTACHED, "minecraft:trip_wire_attached");
         register(BlockTripWire.DISARMED, "minecraft:trip_wire_disarmed");
         register(BlockTripWire.NORTH, "minecraft:trip_wire_north");
