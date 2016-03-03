@@ -37,7 +37,7 @@ import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$A
 import java.util.List;
 
 @Mixin(SPacketPlayerListItem.class)
-public class MixinS38PacketPlayerListItem {
+public class MixinSPacketPlayerListItem {
 
     private static final String CTOR_VARARG =
             "<init>(Lnet/minecraft/network/play/server/S38PacketPlayerListItem$Action;[Lnet/minecraft/entity/player/EntityPlayerMP;)V";

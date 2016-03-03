@@ -40,7 +40,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import java.util.Optional;
 
 @Mixin(BlockRedstoneRepeater.class)
-public abstract class MixinBlockRedstoneRepeater extends MixinBlockDirectional {
+public abstract class MixinBlockRedstoneRepeater extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {

@@ -133,7 +133,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow @Final public Profiler theProfiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
-    @Shadow private boolean worldIsBeingDeleted;
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worldServers;
