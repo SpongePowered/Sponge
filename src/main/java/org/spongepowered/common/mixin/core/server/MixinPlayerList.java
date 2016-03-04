@@ -135,6 +135,7 @@ public abstract class MixinPlayerList {
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void func_187243_f(EntityPlayerMP p_187243_1_);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
@@ -273,6 +274,7 @@ public abstract class MixinPlayerList {
         handler.sendPacket(new SPacketSpawnPosition(blockpos));
         handler.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
         handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
+        this.func_187243_f(playerIn);
         playerIn.getStatFile().func_150877_d();
         playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
@@ -435,6 +437,7 @@ public abstract class MixinPlayerList {
         playerIn.playerNetServerHandler.sendPacket(new SPacketSetExperience(playerIn.experience, playerIn.experienceTotal,
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
+        this.func_187243_f(playerIn);
         targetWorld.getPlayerChunkManager().addPlayer(playerIn);
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);

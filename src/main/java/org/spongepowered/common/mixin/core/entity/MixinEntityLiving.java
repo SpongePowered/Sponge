@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -110,8 +111,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         this.canPickUpLoot = canPickupItems;
     }
 
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
-    public void onConstruct(CallbackInfo ci) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
+    public void onInitAi(EntityLiving this$0) {
         ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
         ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);

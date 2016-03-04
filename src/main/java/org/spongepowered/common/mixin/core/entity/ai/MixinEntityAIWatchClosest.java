@@ -90,7 +90,7 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
 
     @Nullable
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;findNearestEntityWithinAABB(Ljava/lang/Class;"
-            + "Lnet/minecraft/util/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Lnet/minecraft/entity/Entity;"))
+            + "Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Lnet/minecraft/entity/Entity;"))
     public net.minecraft.entity.Entity onFindNearestEntityWithinAABB(World world, Class clazz, AxisAlignedBB aabb, net.minecraft.entity.Entity entity) {
         net.minecraft.entity.Entity entity1 = null;
         double d0 = Double.MAX_VALUE;
