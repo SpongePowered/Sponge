@@ -27,6 +27,7 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Preconditions;
 import com.google.common.base.Throwables;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
@@ -37,6 +38,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.mixin.core.server.MixinMinecraftServer;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.DimensionManager;
@@ -76,6 +78,15 @@ public class ServerUtils {
         checkArgument(WorldPropertyRegistryModule.getInstance().isWorldRegistered(worldProperties.getUniqueId()), "World properties not registered");
         checkState(DimensionManager.getWorldFromDimId(((IMixinWorldInfo) worldProperties).getDimensionId()) == null, "World not unloaded");
         return SpongeScheduler.getInstance().submitAsyncTask(new DeleteWorldTask(worldProperties));
+    }
+
+    public static MinecraftServer getServer() {
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
+        return (MinecraftServer) Sponge.getServer();
+    }
+
+    public static boolean isCallingFromMainThread() {
+        return Sponge.isServerAvailable() && ((MinecraftServer) Sponge.getServer()).isCallingFromMinecraftThread();
     }
 
     private static class CopyWorldTask implements Callable<Optional<WorldProperties>> {

@@ -29,12 +29,10 @@ import static com.google.common.base.Preconditions.checkState;
 
 import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.Timing;
-import com.google.common.base.Preconditions;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Key;
@@ -49,6 +47,7 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
+import org.spongepowered.common.util.ServerUtils;
 
 import java.util.Optional;
 
@@ -58,37 +57,49 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        try (Timing timing = SpongeTimings.dataGetManipulator.startTiming()) {
-            final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
-            if (optional.isPresent()) {
-                return (Optional<T>) optional.get().from(this);
-            } else if (this instanceof IMixinCustomDataHolder) {
-                return ((IMixinCustomDataHolder) this).getCustom(containerClass);
-            }
-            return Optional.empty();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
+            SpongeTimings.dataGetManipulator.startTiming();
         }
+        final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
+        if (optional.isPresent()) {
+            final Optional<?> manipulator = optional.get().from(this);
+            if (callingFromMinecraftThread) {
+                SpongeTimings.dataGetManipulator.stopTiming();
+            }
+            return (Optional<T>) manipulator;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            final Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
+            if (callingFromMinecraftThread) {
+                SpongeTimings.dataGetManipulator.stopTiming();
+            }
+            return custom;
+        }
+        if (callingFromMinecraftThread) {
+            SpongeTimings.dataGetManipulator.stopTiming();
+        }
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetOrCreateManipulator.startTiming();
         }
 
         final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
         if (optional.isPresent()) {
             Optional<T> created = (Optional<T>) optional.get().createFrom(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataGetOrCreateManipulator.stopTiming();
             }
             return created;
         } else if (this instanceof IMixinCustomDataHolder) {
             Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
             if (custom.isPresent()) {
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataGetOrCreateManipulator.stopTiming();
                 }
                 return custom;
@@ -99,13 +110,13 @@ public abstract class MixinDataHolder implements DataHolder {
                 T manipulator = (T) builder.get().create();
                 // Basically at this point, it's up to plugins to validate whether it's supported
                 Optional<T> other = manipulator.fill(this).map(customManipulator -> (T) customManipulator);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataGetOrCreateManipulator.stopTiming();
                 }
                 return other;
             }
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetOrCreateManipulator.stopTiming();
         }
 
@@ -114,16 +125,15 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataSupportsManipulator.startTiming();
         }
 
         final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(holderClass);
         if (optional.isPresent()) {
             boolean supports = optional.get().supports(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataSupportsManipulator.stopTiming();
             }
             return supports;
@@ -131,7 +141,7 @@ public abstract class MixinDataHolder implements DataHolder {
         if (this instanceof IMixinCustomDataHolder) {
             Optional<?> custom = ((IMixinCustomDataHolder) this).getCustom(holderClass);
             if (custom.isPresent()) {
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataSupportsManipulator.stopTiming();
                 }
                 return true;
@@ -142,7 +152,7 @@ public abstract class MixinDataHolder implements DataHolder {
                 DataManipulator<?, ?> manipulator = builder.get().create();
                 // Basically at this point, it's up to plugins to validate whether it's supported
                 boolean present = manipulator.fill(this).isPresent();
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataSupportsManipulator.stopTiming();
                 }
                 return present;
@@ -154,26 +164,25 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferKey.startTiming();
         }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataManager.getInstance().getBaseValueProcessor(key);
         if (optional.isPresent()) {
             final DataTransactionResult result = optional.get().offerToStore(this, value);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataOfferKey.stopTiming();
             }
             return result;
         } else if (this instanceof IMixinCustomDataHolder) {
             final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(key, value);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataOfferKey.stopTiming();
             }
             return result;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferKey.stopTiming();
         }
         return DataTransactionResult.failNoData();
@@ -182,22 +191,21 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferManipulator.startTiming();
         }
         try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
             final Optional<DataProcessor> optional = SpongeDataManager.getInstance().getWildDataProcessor(valueContainer.getClass());
             if (optional.isPresent()) {
                 final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataOfferManipulator.stopTiming();
                 }
                 return result;
             } else if (this instanceof IMixinCustomDataHolder) {
                 final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     SpongeTimings.dataOfferManipulator.stopTiming();
                 }
                 return result;
@@ -208,9 +216,8 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferMultiManipulators.startTiming();
         }
         DataTransactionResult.Builder builder = DataTransactionResult.builder();
@@ -231,7 +238,7 @@ public abstract class MixinDataHolder implements DataHolder {
                 case UNDEFINED:
                 case ERROR:
                 case CANCELLED:
-                    if (server.isCallingFromMinecraftThread()) {
+                    if (callingFromMinecraftThread) {
                         SpongeTimings.dataOfferMultiManipulators.stopTiming();
                     }
                     return builder.build();
@@ -239,7 +246,7 @@ public abstract class MixinDataHolder implements DataHolder {
                     break;
             }
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferMultiManipulators.stopTiming();
         }
         return builder.build();
@@ -248,28 +255,27 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataRemoveManipulator.startTiming();
         }
 
         final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
         if (optional.isPresent()) {
             final DataTransactionResult result = optional.get().remove(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataRemoveManipulator.stopTiming();
             }
 
             return result;
         } else if (this instanceof IMixinCustomDataHolder) {
             final DataTransactionResult result = ((IMixinCustomDataHolder) this).removeCustom(containerClass);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataRemoveManipulator.stopTiming();
             }
             return result;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferMultiManipulators.stopTiming();
         }
         return DataTransactionResult.failNoData();
@@ -277,27 +283,26 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult remove(Key<?> key) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataRemoveKey.startTiming();
         }
         final Optional<ValueProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             final DataTransactionResult result = optional.get().removeFrom(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataRemoveKey.stopTiming();
             }
 
             return result;
         } else if (this instanceof IMixinCustomDataHolder) {
             final DataTransactionResult result = ((IMixinCustomDataHolder) this).removeCustom(key);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataRemoveKey.stopTiming();
             }
             return result;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataRemoveKey.stopTiming();
         }
         return DataTransactionResult.failNoData();
@@ -306,13 +311,12 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public DataTransactionResult undo(DataTransactionResult result) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferManipulator.startTiming();
         }
         if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataOfferManipulator.stopTiming();
             }
             return DataTransactionResult.successNoData();
@@ -324,7 +328,7 @@ public abstract class MixinDataHolder implements DataHolder {
         for (ImmutableValue<?> successful : result.getSuccessfulData()) {
             builder.absorbResult(remove(successful));
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferManipulator.stopTiming();
         }
 
@@ -338,26 +342,25 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetByKey.startTiming();
         }
         final Optional<ValueProcessor<E, ? extends BaseValue<E>>> optional = SpongeDataManager.getInstance().getBaseValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             final Optional<E> value = optional.get().getValueFromContainer(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataGetByKey.stopTiming();
             }
             return value;
         } else if (this instanceof IMixinCustomDataHolder) {
             final Optional<E> custom = ((IMixinCustomDataHolder) this).getCustom(key);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataGetByKey.stopTiming();
             }
             return custom;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetByKey.stopTiming();
         }
         return Optional.empty();
@@ -366,27 +369,26 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
-        MinecraftServer server = this.getServer();
-
-        if (server.isCallingFromMinecraftThread()) {
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetValue.startTiming();
         }
 
         final Optional<ValueProcessor<E, V>> optional = SpongeDataManager.getInstance().getValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             final Optional<V> value = optional.get().getApiValueFromContainer(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataGetValue.stopTiming();
             }
             return value;
         } else if (this instanceof IMixinCustomDataHolder) {
             final Optional<V> customValue = ((IMixinCustomDataHolder) this).getCustomValue(key);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataGetValue.stopTiming();
             }
             return customValue;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataGetValue.stopTiming();
         }
 
@@ -395,7 +397,7 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Key<?> key) {
-        MinecraftServer server = this.getServer();
+        MinecraftServer server = ServerUtils.getServer();
 
         if (server.isCallingFromMinecraftThread()) {
             SpongeTimings.dataSupportsKey.startTiming();
@@ -420,11 +422,6 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataSupportsKey.stopTiming();
         }
         return false;
-    }
-
-    private MinecraftServer getServer() {
-        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return (MinecraftServer) Sponge.getServer();
     }
 
 }
