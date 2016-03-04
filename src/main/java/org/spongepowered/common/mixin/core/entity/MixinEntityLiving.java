@@ -78,6 +78,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
+    @Shadow protected abstract void initEntityAI();
 
     public boolean isAiEnabled() {
         return !isAIDisabled();
@@ -117,6 +118,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
         ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
+        this.initEntityAI();
     }
 
     @Override
