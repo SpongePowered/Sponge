@@ -58,7 +58,7 @@ public abstract class MixinItemFishingRod extends Item {
         callbackInfoReturnable.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, itemStack));
     }
 
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;func_184148_a(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"), cancellable = true)
+    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"), cancellable = true)
     private void onThrowEvent(ItemStack itemStack, World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
         EntityFishHook fishHook = new EntityFishHook(world, player);
         EntitySnapshot fishHookSnapshot = ((Entity) fishHook).createSnapshot();

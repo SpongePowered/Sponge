@@ -73,7 +73,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
     @Shadow @Final public WorldProvider provider;
     @Shadow protected WorldInfo worldInfo;
 
-    @Shadow public abstract void func_184148_a(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onEffectsConstructed(ISaveHandler handler, WorldInfo info, WorldProvider provider, Profiler profiler, boolean client, CallbackInfo callbackInfo) {
@@ -94,7 +94,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
     @Override
     public void playSound(SoundType sound,  SoundCategoryType category, Vector3d position, double volume, double pitch, double minVolume) {
-        this.func_184148_a(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
+        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
     }
 
     @Override

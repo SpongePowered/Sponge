@@ -42,7 +42,7 @@ public abstract class MixinCommandWorldBorder {
     @Nullable private ICommandSender sender;
 
     @Inject(method = "execute", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/command/CommandWorldBorder;func_184931_a(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
+            target = "Lnet/minecraft/command/CommandWorldBorder;getWorldBorder(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
     private void beforeGetWorldBorder(MinecraftServer server, ICommandSender sender, String[] args, CallbackInfo ci) {
         this.sender = sender;
     }
@@ -52,7 +52,7 @@ public abstract class MixinCommandWorldBorder {
      * @reason Returns the correct worldborder for the current world of the command sender
      */
     @Overwrite
-    protected WorldBorder func_184931_a(MinecraftServer server) {
+    protected WorldBorder getWorldBorder(MinecraftServer server) {
         ICommandSender sender = this.sender;
         this.sender = null;
         return sender.getEntityWorld().getWorldBorder();

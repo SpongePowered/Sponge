@@ -59,7 +59,7 @@ import org.spongepowered.common.util.VecHelper;
 public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer {
 
     private static final String WORLD_PLAY_SOUND_AT =
-            "Lnet/minecraft/world/World;func_184148_a(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
+            "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
     @Shadow public int experienceLevel;
@@ -152,7 +152,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
     public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!this.isVanished()) {
-            this.worldObj.func_184148_a(player, d1, d2, d3, sound, category, volume, pitch);
+            this.worldObj.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
 
