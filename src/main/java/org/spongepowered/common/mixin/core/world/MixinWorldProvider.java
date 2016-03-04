@@ -130,7 +130,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public void setDimension(int dim) {
-        this.dimensionId = dim;
+        //this.dimensionId = dim;
     }
 
     @Override
