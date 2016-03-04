@@ -29,6 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AbstractAttributeMap;
 import net.minecraft.entity.ai.attributes.IAttribute;
 import net.minecraft.entity.ai.attributes.IAttributeInstance;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
@@ -88,7 +89,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
     @Shadow protected AbstractAttributeMap attributeMap;
-    @Shadow public ItemStack[] armorArray;
+    @Shadow @Final public ItemStack[] armorArray;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
@@ -269,8 +270,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     if (entity instanceof EntityPlayer) {
                         this.recentlyHit = 100;
                         this.attackingPlayer = (EntityPlayer) entity;
-                    } else if (entity instanceof net.minecraft.entity.passive.EntityTameable) {
-                        net.minecraft.entity.passive.EntityTameable entitywolf = (net.minecraft.entity.passive.EntityTameable) entity;
+                    } else if (entity instanceof EntityWolf) {
+                        EntityWolf entitywolf = (EntityWolf)entity;
 
                         if (entitywolf.isTamed()) {
                             this.recentlyHit = 100;
@@ -295,7 +296,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         }
 
                         this.nmsEntityLiving.attackedAtYaw = (float) (Math.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
-                        this.nmsEntityLiving.knockBack(entity, amount, d1, d0);
+                        this.nmsEntityLiving.knockBack(entity, 0.4f, d1, d0);
                     } else {
                         this.nmsEntityLiving.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
                     }
