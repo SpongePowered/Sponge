@@ -47,34 +47,34 @@ import java.util.UUID;
 public abstract class MixinCommandScoreboard extends CommandBase implements IMixinCommandBase {
 
     // The static method's owner is CommandScoreboard for some odd reason, despite it coming from CommandBase
-    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;getEntityName(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
+    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;func_184891_e(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
 
     private static final String ITERATOR_NEXT = "Ljava/util/Iterator;next()Ljava/lang/Object;";
 
     private String realName;
 
-    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "func_184916_f", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
     public Object onGetUUIDJoin(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);
         return entity;
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
     private Object onGetUUIDLeave(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);
         return entity;
     }
 
-    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameJoin(ICommandSender sender, String string) throws EntityNotFoundException {
-        return this.onGetEntityName(sender, string);
+    @Redirect(method = "func_184916_f", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    public String onGetEntityNameJoin(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        return this.onGetEntityName(server, sender, string);
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameLeaveFirst(ICommandSender sender, String string) throws EntityNotFoundException {
-        return this.onGetEntityName(sender, string);
+    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    public String onGetEntityNameLeaveFirst(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        return this.onGetEntityName(server, sender, string);
     }
 
     private void onGetUUID(Entity entity) {
@@ -83,18 +83,18 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         }
     }
 
-    private String onGetEntityName(ICommandSender sender, String string) throws EntityNotFoundException {
+    private String onGetEntityName(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
         if (this.realName != null) {
             String newString = this.realName;
             this.realName = null;
             return newString;
         }
-        return CommandBase.func_184891_e(sender.getServer(), sender, string);
+        return CommandBase.func_184891_e(server, sender, string);
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
-    public String onGetEntityNameLeaveSecond(ICommandSender sender, String string) throws EntityNotFoundException {
-        String entityName = CommandBase.func_184891_e(sender.getServer(), sender, string);
+    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
+    public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        String entityName = CommandBase.func_184891_e(server, sender, string);
         if (this.isExpandedSelector()) {
             try {
                 UUID uuid = UUID.fromString(entityName);

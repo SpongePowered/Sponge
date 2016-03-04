@@ -42,8 +42,8 @@ public abstract class MixinCommandWorldBorder {
     @Nullable private ICommandSender sender;
 
     @Inject(method = "execute", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/command/CommandWorldBorder;getWorldBorder()Lnet/minecraft/world/border/WorldBorder;"))
-    private void beforeGetWorldBorder(ICommandSender sender, String[] args, CallbackInfo ci) {
+            target = "Lnet/minecraft/command/CommandWorldBorder;func_184931_a(Lnet/minecraft/server/MinecraftServer;)Lnet/minecraft/world/border/WorldBorder;"))
+    private void beforeGetWorldBorder(MinecraftServer server, ICommandSender sender, String[] args, CallbackInfo ci) {
         this.sender = sender;
     }
 
