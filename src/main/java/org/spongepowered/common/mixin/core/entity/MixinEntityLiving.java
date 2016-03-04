@@ -110,7 +110,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         this.canPickUpLoot = canPickupItems;
     }
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
     public void onConstruct(CallbackInfo ci) {
         ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
