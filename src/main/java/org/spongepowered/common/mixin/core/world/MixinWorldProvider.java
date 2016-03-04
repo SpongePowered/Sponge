@@ -58,7 +58,6 @@ public abstract class MixinWorldProvider implements Dimension {
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();
     @Shadow public abstract boolean doesWaterVaporize();
-    @Shadow public abstract boolean getHasNoSky();
 
     @Override
     public String getName() {
@@ -112,7 +111,8 @@ public abstract class MixinWorldProvider implements Dimension {
         return !getHasNoSky();
     }
 
-    public boolean mixinworldprovider$getHasNoSky() {
+    @Overwrite
+    public boolean getHasNoSky() {
         return this.terrainType.equals(GeneratorTypes.NETHER) || getHasNoSky();
     }
 
