@@ -31,6 +31,7 @@ import net.minecraft.nbt.JsonToNBT;
 import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.entity.EntityType;
@@ -51,7 +52,7 @@ import java.util.UUID;
 public abstract class MixinHoverEvent implements IMixinHoverEvent {
 
     @Shadow @Final private HoverEvent.Action action;
-    @Shadow @Final private TextComponentString value;
+    @Shadow @Final private ITextComponent value;
 
     private HoverAction<?> handle;
     private boolean initialized;
