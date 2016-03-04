@@ -342,6 +342,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class, ImmutableBodyPartRotationalData.class, 
+                ImmutableSpongeBodyPartRotationalData.class, new ArmorStandBodyPartRotationalDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -595,7 +598,6 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
                 ImmutableSpongeDyeableData.class, dyeableDataProcessor);
 
-
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
@@ -670,6 +672,13 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
+        dataManager.registerValueProcessor(Keys.BODY_ROTATIONS, new BodyRotationsValueProcessor());
+        dataManager.registerValueProcessor(Keys.HEAD_ROTATION, new HeadRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.CHEST_ROTATION, new ChestRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.LEFT_ARM_ROTATION, new LeftArmRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.RIGHT_ARM_ROTATION, new RightArmRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.LEFT_LEG_ROTATION, new LeftLegRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.RIGHT_LEG_ROTATION, new RightLegRotationValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

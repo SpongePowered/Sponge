@@ -249,6 +249,7 @@ public final class CommonModuleRegistry {
             .registerModule(Art.class, new ArtRegistryModule())
             .registerModule(BanType.class, new BanTypeRegistryModule())
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
+            .registerModule(BodyPart.class, new BodyPartRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
             .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
             .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())

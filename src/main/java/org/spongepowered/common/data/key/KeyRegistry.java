@@ -42,6 +42,7 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.CoalType;
@@ -292,6 +293,13 @@ public class KeyRegistry {
         keyMap.put("hide_can_place", makeSingleKey(Boolean.class, Value.class, of("HideCanPlace")));
         keyMap.put("hide_miscellaneous", makeSingleKey(Boolean.class, Value.class, of("HideMiscellaneous")));
         keyMap.put("potion_effects", makeListKey(PotionEffect.class, of("PotionEffects")));
+        keyMap.put("body_rotations", makeMapKey(BodyPart.class, Vector3d.class, of("BodyRotations")));
+        keyMap.put("head_rotation", makeSingleKey(Vector3d.class, Value.class, of("HeadRotation")));
+        keyMap.put("chest_rotation", makeSingleKey(Vector3d.class, Value.class, of("ChestRotation")));
+        keyMap.put("left_arm_rotation", makeSingleKey(Vector3d.class, Value.class, of("LeftArmRotation")));
+        keyMap.put("right_arm_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightArmRotation")));
+        keyMap.put("left_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("LeftLegRotation")));
+        keyMap.put("right_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightLegRotation")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
