@@ -53,6 +53,7 @@ public abstract class MixinWorldProvider implements Dimension {
 
     @Shadow private String generatorSettings;
     @Shadow public WorldType terrainType;
+    @Shadow protected boolean hasNoSky;
     @Shadow protected World worldObj;
     @Shadow public abstract IChunkGenerator createChunkGenerator();
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
@@ -113,7 +114,7 @@ public abstract class MixinWorldProvider implements Dimension {
 
     @Overwrite
     public boolean getHasNoSky() {
-        return this.terrainType.equals(GeneratorTypes.NETHER) || getHasNoSky();
+        return this.terrainType.equals(GeneratorTypes.NETHER) || hasNoSky;
     }
 
     public String mixinworldprovider$getSaveFolder() {
