@@ -46,6 +46,9 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -67,6 +70,7 @@ import java.util.Random;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
+@Implements(@Interface(iface = BlockType.class, prefix = "block$"))
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow private boolean needsRandomTick;
@@ -106,10 +110,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return new SpongeTranslation(getUnlocalizedName() + ".name");
     }
 
-    @Override
-    @Overwrite
-    public boolean getTickRandomly() {
-        return this.needsRandomTick;
+    @Intrinsic
+    public boolean block$getTickRandomly() {
+        return this.getTickRandomly();
     }
 
     @Override

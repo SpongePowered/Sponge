@@ -30,15 +30,12 @@ import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.loot.LootContext;
 import net.minecraft.world.storage.loot.LootTableList;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.projectile.FishHook;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -46,29 +43,23 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.FishingEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
-import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 @Mixin(EntityFishHook.class)
-public abstract class MixinEntityFishHook extends MixinEntity implements FishHook, IMixinEntityFishHook {
+public abstract class MixinEntityFishHook extends MixinEntity implements FishHook {
 
     @Shadow private boolean inGround;
     @Shadow private EntityPlayer angler;
@@ -130,6 +121,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 this.func_184527_k();
                 this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
                 i = this.caughtEntity instanceof EntityItem ? 3 : 5;
+
             } else if (this.ticksCatchable > 0) {
                 LootContext.Builder lootcontext$builder = new LootContext.Builder((WorldServer)this.worldObj);
                 lootcontext$builder.withLuck((float) EnchantmentHelper.getLuckOfSeaModifier(this.angler) + this.angler.getLuck());
@@ -138,10 +130,13 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 // TODO 1.9: Figure out how we want experience to work here
                 List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().func_186521_a(LootTableList.GAMEPLAY_FISHING).func_186462_a(this.rand, lootcontext$builder.build());
                 FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
-                        this.createSnapshot(), this, (List) itemstacks.stream().map(s -> ((ItemStack) s).createSnapshot()).collect((Collector) Collectors.toList()), (Player) this.angler);
+                        this.createSnapshot(), this, itemstacks.stream().map(s -> {
+                            ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();
+                            return new Transaction<>(snapshot, snapshot);
+                        }).collect(Collectors.toList()), (Player) this.angler);
 
                 if (!SpongeImpl.postEvent(event)) {
-                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(t -> t.isValid()).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
+                    for (net.minecraft.item.ItemStack itemstack : event.getItemStackTransaction().stream().filter(Transaction::isValid).map(t -> (net.minecraft.item.ItemStack) t.getFinal().createStack()).collect(Collectors.toList())) {
                         EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY, this.posZ, itemstack);
                         double d0 = this.angler.posX - this.posX;
                         double d1 = this.angler.posY - this.posY;
@@ -166,21 +161,8 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
             this.setDead();
             this.angler.fishEntity = null;
-
-            // Sponge Start
-            if (this.fishingRod != null) {
-                this.fishingRod.damageItem(i, this.angler);
-                this.angler.swingArm(EnumHand.MAIN_HAND);
-                this.fishingRod = null;
-            }
-
             return i;
         }
-    }
-
-    @Override
-    public void setFishingRodItemStack(net.minecraft.item.ItemStack fishingRod) {
-        this.fishingRod = fishingRod;
     }
 
     @Override

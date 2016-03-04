@@ -29,7 +29,6 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFishingRod;
 import net.minecraft.item.ItemStack;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumHand;
@@ -41,22 +40,13 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.IMixinEntityFishHook;
 
 @Mixin(ItemFishingRod.class)
 public abstract class MixinItemFishingRod extends Item {
-
-    @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFishHook;handleHookRetraction()I"), cancellable = true)
-    private void onItemRightClickFirst(ItemStack itemStack, World worldIn, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
-        ((IMixinEntityFishHook) player.fishEntity).setFishingRodItemStack(itemStack);
-        player.fishEntity.handleHookRetraction();
-        callbackInfoReturnable.setReturnValue(new ActionResult<>(EnumActionResult.SUCCESS, itemStack));
-    }
 
     @Inject(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V"), cancellable = true)
     private void onThrowEvent(ItemStack itemStack, World world, EntityPlayer player, EnumHand hand, CallbackInfoReturnable<ActionResult<ItemStack>> callbackInfoReturnable) {
