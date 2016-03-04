@@ -40,7 +40,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
@@ -137,18 +136,6 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
                 (BiomeGenerator) biomeProvider,
                 SpongeGenerationPopulator.of((WorldServer) world, chunkGenerator));
-    }
-
-    @Override
-    public int getMinimumSpawnHeight(net.minecraft.world.World world) {
-        int spawnHeight = 64;
-
-        if (world.getWorldType() == WorldType.FLAT) {
-            spawnHeight = 4;
-        } else if (world.getWorldType() == GeneratorTypes.THE_END) {
-            spawnHeight = 50;
-        }
-        return spawnHeight;
     }
 
     @Override

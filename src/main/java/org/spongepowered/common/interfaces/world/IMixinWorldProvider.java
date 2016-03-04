@@ -33,13 +33,13 @@ public interface IMixinWorldProvider {
 
     String getSaveFolder();
 
-    void setDimension(int dim);
+    int getDimensionId();
+
+    void setDimensionId(int dim);
 
     void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
 
     SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
-
-    int getAverageGroundLevel();
 
     BlockPos getRandomizedSpawnPoint();
 
