@@ -83,6 +83,7 @@ public class SpongeCommand {
     private static final Text INDENT_TEXT = Text.of(INDENT);
     private static final Text NEWLINE_TEXT = Text.NEW_LINE;
     private static final Text SEPARATOR_TEXT = Text.of(", ");
+    private static final Text UNKNOWN = Text.of("Unknown");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -332,7 +333,8 @@ public class SpongeCommand {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
                     for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
-                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion()));
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), container.getVersion().isPresent
+                                () ? Text.of(container.getVersion().get()) : UNKNOWN);
                     }
 
                     src.sendMessage(builder.build());
