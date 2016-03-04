@@ -379,9 +379,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
             }
 
-            System.err.println("WorldFolder: " + worldFolder);
-            System.err.println("SavesDirectory: " + SpongeImpl.getGame().getSavesDirectory());
-            System.err.println("FolderName: " + getFolderName());
             final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
                             SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true, field_184112_s);
             WorldInfo worldInfo;
@@ -440,7 +437,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
-
+            ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
             worldServer.initialize(worldSettings);
             worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
