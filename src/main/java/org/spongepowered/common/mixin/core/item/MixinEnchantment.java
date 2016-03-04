@@ -28,6 +28,7 @@ import com.google.common.base.Objects;
 import net.minecraft.enchantment.EnumEnchantmentType;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -40,11 +41,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.IMixinEnchantment;
 
 @NonnullByDefault
 @Mixin(net.minecraft.enchantment.Enchantment.class)
 @Implements(@Interface(iface = Enchantment.class, prefix = "enchantment$"))
-public abstract class MixinEnchantment implements Enchantment {
+public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment {
 
     @Shadow protected String name;
     @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity weight;
@@ -58,9 +60,16 @@ public abstract class MixinEnchantment implements Enchantment {
 
     private String id = "";
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(net.minecraft.enchantment.Enchantment.Rarity rarityIn, EnumEnchantmentType typeIn, EntityEquipmentSlot[] slots, CallbackInfo ci) {
-        this.id = net.minecraft.enchantment.Enchantment.enchantmentRegistry.getNameForObject((net.minecraft.enchantment.Enchantment) (Object) this).toString();
+    @Inject(method = "registerEnchantments", at = @At("RETURN"))
+    private static void onRegister(CallbackInfo ci) {
+        for (ResourceLocation resourceLocation: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
+            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(resourceLocation)).setId(resourceLocation);
+        }
+    }
+
+    @Override
+    public void setId(ResourceLocation location) {
+        this.id = location.toString();
     }
 
     @Override

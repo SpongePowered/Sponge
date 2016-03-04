@@ -88,7 +88,7 @@ public abstract class MixinEntityThrowable extends MixinEntity implements Projec
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.thrower);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/MovingObjectPosition;)V"))
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityThrowable;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     public void onProjectileImpact(EntityThrowable projectile, RayTraceResult movingObjectPosition) {
         if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);

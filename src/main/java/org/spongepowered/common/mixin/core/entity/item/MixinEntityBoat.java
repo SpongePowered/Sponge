@@ -36,6 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
+// TODO 1.9: Refactor this for boat overhaul
 @Mixin(EntityBoat.class)
 public abstract class MixinEntityBoat extends MixinEntity implements Boat {
 

@@ -210,7 +210,6 @@
         "entity.effect.MixinEntityWeatherEffect",
         "entity.human.MixinEntityHuman",
         "entity.item.MixinEntityArmorStand",
-        "entity.item.MixinEntityBoat",
         "entity.item.MixinEntityEnderCrystal",
         "entity.item.MixinEntityEnderEye",
         "entity.item.MixinEntityEnderPearl",
