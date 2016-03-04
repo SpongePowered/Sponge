@@ -491,7 +491,7 @@ public final class CauseTracker {
                     (CPacketCreativeInventoryAction) packetIn);
             } else {
                 SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
-                if (packetIn instanceof CPacketCreativeInventoryAction) {
+                if (packetIn instanceof CPacketClickWindow) {
                     SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
                         (CPacketClickWindow) packetIn);
                 }
