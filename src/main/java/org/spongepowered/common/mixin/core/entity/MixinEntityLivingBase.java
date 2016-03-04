@@ -74,6 +74,8 @@ import java.util.function.Function;
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
+    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+
     private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
     private DamageSource lastDamageSource;
@@ -314,6 +316,18 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 return true;
             }
+        }
+    }
+
+    /**
+     * @author gabizou - January 4th, 2016
+     * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
+     */
+    @Redirect(method = "func_184584_a", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
+            double yOffset, double zOffset, int ... p_175688_14_) {
+        if (!this.isVanished()) {
+            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
         }
     }
 

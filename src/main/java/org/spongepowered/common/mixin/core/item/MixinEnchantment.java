@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.Objects;
 import net.minecraft.enchantment.EnumEnchantmentType;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -46,7 +47,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public abstract class MixinEnchantment implements Enchantment {
 
     @Shadow protected String name;
-    @Shadow @Final private int weight;
+    @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity weight;
 
     @Shadow public abstract int getMinLevel();
     @Shadow public abstract int getMaxLevel();
@@ -58,8 +59,8 @@ public abstract class MixinEnchantment implements Enchantment {
     private String id = "";
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(int id, ResourceLocation resLoc, int weight, EnumEnchantmentType type, CallbackInfo ci) {
-        this.id = resLoc.toString();
+    public void onConstructed(net.minecraft.enchantment.Enchantment.Rarity rarityIn, EnumEnchantmentType typeIn, EntityEquipmentSlot[] slots, CallbackInfo ci) {
+        this.id = net.minecraft.enchantment.Enchantment.enchantmentRegistry.getNameForObject((net.minecraft.enchantment.Enchantment) (Object) this).toString();
     }
 
     @Override
@@ -69,7 +70,7 @@ public abstract class MixinEnchantment implements Enchantment {
 
     @Override
     public int getWeight() {
-        return this.weight;
+        return this.weight.getWeight();
     }
 
     @Override

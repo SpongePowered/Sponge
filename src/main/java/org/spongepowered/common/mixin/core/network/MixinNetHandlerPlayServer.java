@@ -267,8 +267,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "org.apache.commons.lang3.StringUtils.normalizeSpace"
-            + "(Ljava/lang/String;)Ljava/lang/String;", remap = false))
+    @Redirect(method = "processChatMessage", at = @At(value = "INVOKE", target = "Lorg/apache/commons/lang3/StringUtils;normalizeSpace(Ljava/lang/String;)Ljava/lang/String;", remap = false))
     public String onNormalizeSpace(String input) {
         return input;
     }
@@ -278,6 +277,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         this.justTeleported = true;
     }
 
+    // TODO - 1.9 player movement packet changes
+    /*
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
     public void processPlayerMoved(CPacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.moving || packetIn.rotating && !this.playerEntity.isDead) {
@@ -343,10 +344,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 }
             }
         }
-    }
+    }*/
 
     @Redirect(method = "onDisconnect", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
+            target = "Lnet/minecraft/server/management/PlayerList;sendChatMsg(Lnet/minecraft/util/text/ITextComponent;)V"))
     public void onDisconnectHandler(PlayerList this$0, ITextComponent component) {
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
@@ -423,7 +424,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 //        }
 //    }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;func_184996_a(IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
     }
@@ -448,7 +449,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
+    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/CPacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
     public void onGetSlotId(CPacketHeldItemChange packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();

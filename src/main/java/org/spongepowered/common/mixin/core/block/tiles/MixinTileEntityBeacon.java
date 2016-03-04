@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
@@ -41,8 +42,8 @@ import java.util.List;
 @Mixin(TileEntityBeacon.class)
 public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon {
 
-    @Shadow private int primaryEffect;
-    @Shadow private int secondaryEffect;
+    @Shadow private Potion primaryEffect;
+    @Shadow private Potion secondaryEffect;
     @Shadow private int levels;
 
     @Override

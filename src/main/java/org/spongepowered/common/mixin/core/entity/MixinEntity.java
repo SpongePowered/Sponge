@@ -190,13 +190,12 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
-    @Shadow public abstract void setEating(boolean eating);
     @Shadow public abstract boolean isBeingRidden();
     @Shadow public abstract SoundCategory func_184176_by();
     @Shadow(prefix = "shadow$")
     public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
-    @Shadow public abstract Entity getLowestRidingEntity();
-    @Shadow public abstract Entity getRidingEntity();
+    @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
+    @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void dismountRidingEntity();
 
     // @formatter:on
@@ -639,7 +638,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Entity getBaseVehicle() {
-        return getLowestRidingEntity();
+        return (Entity) this.getLowestRidingEntity();
     }
 
     @Override
@@ -989,7 +988,7 @@ public abstract class MixinEntity implements IMixinEntity {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
-    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, entity);
@@ -1017,7 +1016,7 @@ public abstract class MixinEntity implements IMixinEntity {
         StaticMixinHelper.collidePlayer = null;
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
@@ -1046,7 +1045,7 @@ public abstract class MixinEntity implements IMixinEntity {
         StaticMixinHelper.collidePlayer = null;
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
         if (block == Blocks.air) {
             return;
@@ -1119,7 +1118,7 @@ public abstract class MixinEntity implements IMixinEntity {
      *
      * This prevents sounds from being sent to the server by entities that are invisible
      */
-    @Redirect(method = "playSound(Ljava/lang/String;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
         return entity.isSilent() || this.isVanished;
     }
