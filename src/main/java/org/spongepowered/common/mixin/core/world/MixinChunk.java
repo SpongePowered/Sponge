@@ -80,6 +80,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -506,7 +508,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                if (!((IMixinWorld)this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+                final PhaseData peek = causeTracker.getPhases().peek();
+                final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
+                if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     if (newBlockSnapshot == null) {
                         block.onBlockAdded(this.worldObj, pos, newState);
                     }

@@ -24,8 +24,44 @@
  */
 package org.spongepowered.common.event.tracking.phase.util;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
+import net.minecraft.network.Packet;
+import org.spongepowered.common.event.tracking.phase.PacketPhase;
 
-public interface ITerrainMarker extends IPhaseState {
+import java.util.Objects;
 
+public final class PacketContext {
+
+    public final Packet<?> packet;
+    public final PacketPhase.IPacketState packetState;
+
+    public PacketContext(Packet<?> packet, PacketPhase.IPacketState packetState) {
+        this.packet = packet;
+        this.packetState = packetState;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        PacketContext that = (PacketContext) o;
+        return Objects.equals(this.packet, that.packet) &&
+               Objects.equals(this.packetState, that.packetState);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.packet, this.packetState);
+    }
+
+    @Override
+    public String toString() {
+        return com.google.common.base.Objects.toStringHelper(this)
+                .add("packet", this.packet)
+                .add("packetState", this.packetState)
+                .toString();
+    }
 }
