@@ -145,11 +145,11 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      * @return
      */
     @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z"))
-    private boolean onAddEntityTask(List<EntityAITasks.EntityAITaskEntry> list, Object entry, int priority, EntityAIBase base) {
+    private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {
             // Event is fired in firePostConstructEvents
-            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
+            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()), priority, priority,
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
@@ -158,7 +158,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             ((IMixinEntityAIBase) base).setGoal(null);
             return false;
         } else {
-            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
+            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
         }
     }
 

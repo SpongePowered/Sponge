@@ -56,12 +56,11 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     private volatile Context dimContext;
 
     @Shadow protected World worldObj;
-    @Shadow protected int dimensionId;
+    @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow protected boolean isHellWorld;
     @Shadow public WorldType terrainType;
     @Shadow protected boolean hasNoSky;
     @Shadow private String generatorSettings;
-    @Shadow public abstract String getDimensionName();
     @Shadow public abstract IChunkGenerator func_186060_c();
 
     @Override
@@ -72,7 +71,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public String getName() {
-        return getDimensionName();
+        return this.getDimensionType().getName();
     }
 
     @Override
@@ -120,13 +119,13 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
 
     @Override
     public DimensionType getType() {
-        return DimensionRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this.dimensionId));
+        return DimensionRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this.getDimensionType().getId()));
     }
 
     @Override
     @Nullable
     public String getSaveFolder() {
-        return (this.dimensionId == 0 ? null : "DIM" + this.dimensionId);
+        return (this.getDimensionType().getId() == 0 ? null : "DIM" + this.getDimensionType().getId());
     }
 
     @Override
