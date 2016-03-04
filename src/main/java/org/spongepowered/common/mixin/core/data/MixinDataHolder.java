@@ -397,28 +397,28 @@ public abstract class MixinDataHolder implements DataHolder {
 
     @Override
     public boolean supports(Key<?> key) {
-        MinecraftServer server = ServerUtils.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataSupportsKey.startTiming();
         }
 
         final Optional<ValueProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildValueProcessor(checkNotNull(key));
         if (optional.isPresent()) {
             final boolean supports = optional.get().supports(this);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataSupportsKey.stopTiming();
             }
             return supports;
         }
         if (this instanceof IMixinCustomDataHolder) {
             final boolean customSupport = ((IMixinCustomDataHolder) this).supportsCustom(key);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 SpongeTimings.dataSupportsKey.stopTiming();
             }
             return customSupport;
         }
-        if (server.isCallingFromMinecraftThread()) {
+        if (callingFromMinecraftThread) {
             SpongeTimings.dataSupportsKey.stopTiming();
         }
         return false;

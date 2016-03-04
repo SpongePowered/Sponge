@@ -30,9 +30,9 @@ import com.mojang.authlib.Agent;
 import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.ProfileNotFoundException;
+import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +43,7 @@ import java.util.concurrent.Callable;
 public abstract class Query<V> implements Callable<V> {
 
     protected final boolean useCache;
-    protected final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+    protected final MinecraftServer server = SpongeImpl.getServer();
     protected final PlayerProfileCache cache = this.server.getPlayerProfileCache();
 
     public Query(boolean useCache) {

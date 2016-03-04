@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.service.ban;
 
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListIPBans;
@@ -37,6 +36,7 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.UserListUtils;
 
 import java.net.InetAddress;
@@ -175,11 +175,11 @@ public class SpongeBanService implements BanService {
     }
 
     private UserListBans getUserBanList() {
-        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedPlayers();
+        return SpongeImpl.getServer().getPlayerList().getBannedPlayers();
     }
 
     private UserListIPBans getIPBanList() {
-        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedIPs();
+        return SpongeImpl.getServer().getPlayerList().getBannedIPs();
     }
 
 }

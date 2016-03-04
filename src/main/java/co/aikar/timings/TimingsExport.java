@@ -34,7 +34,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import net.minecraft.block.Block;
-import net.minecraft.server.MinecraftServer;
 import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -90,7 +89,7 @@ class TimingsExport extends Thread {
     static void reportTimings(CommandSource sender) {
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", SpongeImpl.getGame().getPlatform().getImplementation().getVersion())
+                .add("version", Sponge.getPlatform().getImplementation().getVersion())
                 .add("maxplayers", Sponge.getServer().getMaxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
@@ -99,7 +98,7 @@ class TimingsExport extends Thread {
             builder.add("server", getServerName())
                     .add("motd", Sponge.getServer().getMotd().toPlain())
                     .add("online-mode", Sponge.getServer().getOnlineMode())
-                    .add("icon", ((MinecraftServer) Sponge.getServer()).getServerStatusResponse().getFavicon());
+                    .add("icon", SpongeImpl.getServer().getServerStatusResponse().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();

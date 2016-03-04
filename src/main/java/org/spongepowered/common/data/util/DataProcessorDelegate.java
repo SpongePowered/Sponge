@@ -26,10 +26,7 @@ package org.spongepowered.common.data.util;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timing;
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -42,6 +39,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.util.ServerUtils;
 
 import java.util.Optional;
 
@@ -64,18 +62,19 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public boolean supports(DataHolder dataHolder) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
+
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     tuple.getSecond().stopTiming();
                 }
                 return true;
             }
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
         }
@@ -89,15 +88,15 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public Optional<M> from(DataHolder dataHolder) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
                 final Optional<M> optional = tuple.getFirst().from(dataHolder);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     tuple.getSecond().stopTiming();
                 }
                 if (optional.isPresent()) {
@@ -105,32 +104,31 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
                 }
             }
 
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
-
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<M> fill(DataHolder dataHolder, M manipulator, MergeFunction overlap) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
                 final Optional<M> optional = tuple.getFirst().fill(dataHolder, manipulator, overlap);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     tuple.getSecond().stopTiming();
                 }
                 if (optional.isPresent()) {
                     return optional;
                 }
             }
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
 
@@ -140,14 +138,14 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public Optional<M> fill(DataContainer container, M m) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             final Optional<M> optional = tuple.getFirst().fill(container, m);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
             if (optional.isPresent()) {
@@ -159,22 +157,22 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult set(DataHolder dataHolder, M manipulator, MergeFunction function) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
                 final DataTransactionResult result = tuple.getFirst().set(dataHolder, manipulator, function);
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
-                    if (server.isCallingFromMinecraftThread()) {
+                    if (callingFromMinecraftThread) {
                         tuple.getSecond().stopTiming();
                     }
                     return result;
                 }
             }
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
         }
@@ -183,14 +181,14 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public Optional<I> with(Key<? extends BaseValue<?>> key, Object value, I immutable) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             final Optional<I> optional = tuple.getFirst().with(key, value, immutable);
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
             if (optional.isPresent()) {
@@ -203,22 +201,22 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public DataTransactionResult remove(DataHolder dataHolder) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
                 final DataTransactionResult result = tuple.getFirst().remove(dataHolder);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     tuple.getSecond().stopTiming();
                 }
                 if (!result.getType().equals(DataTransactionResult.Type.FAILURE)) {
                     return result;
                 }
             }
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
 
@@ -228,31 +226,26 @@ public final class DataProcessorDelegate<M extends DataManipulator<M, I>, I exte
 
     @Override
     public Optional<M> createFrom(DataHolder dataHolder) {
-        MinecraftServer server = this.getServer();
+        final boolean callingFromMinecraftThread = ServerUtils.isCallingFromMainThread();
 
         for (Tuple<DataProcessor<M, I>, Timing> tuple : this.processors) {
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().startTiming();
             }
             if (tuple.getFirst().supports(dataHolder)) {
                 final Optional<M> optional = tuple.getFirst().createFrom(dataHolder);
-                if (server.isCallingFromMinecraftThread()) {
+                if (callingFromMinecraftThread) {
                     tuple.getSecond().stopTiming();
                 }
                 if (optional.isPresent()) {
                     return optional;
                 }
             }
-            if (server.isCallingFromMinecraftThread()) {
+            if (callingFromMinecraftThread) {
                 tuple.getSecond().stopTiming();
             }
         }
         return Optional.empty();
-    }
-
-    private MinecraftServer getServer() {
-        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return (MinecraftServer) Sponge.getServer();
     }
 
 }

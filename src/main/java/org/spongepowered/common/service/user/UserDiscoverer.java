@@ -30,7 +30,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
 import net.minecraft.server.management.UserListBans;
@@ -41,6 +40,7 @@ import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.util.SpongeHooks;
@@ -99,7 +99,7 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
-        PlayerProfileCache cache = ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache();
+        PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
             GameProfile profile = cache.getGameProfileForUsername(username);
@@ -131,20 +131,20 @@ class UserDiscoverer {
                 continue;
             }
 
-            GameProfile profile = ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
+            GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
             if (profile != null) {
                 profiles.add((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
-        UserListWhitelist whiteList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         for (UserListWhitelistEntry entry : (Collection<UserListWhitelistEntry>) whiteList.getValues().values()) {
             profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
 
         // Add all banned users
-        UserListBans banList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedPlayers();
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         for (UserListEntryBan entry : banList.getValues().values()) {
             if (entry instanceof UserListBansEntry) {
                 profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
@@ -165,7 +165,7 @@ class UserDiscoverer {
     }
 
     private static User getOnlinePlayer(UUID uniqueId) {
-        PlayerList confMgr = ((MinecraftServer) Sponge.getServer()).getPlayerList();
+        PlayerList confMgr = SpongeImpl.getServer().getPlayerList();
         if (confMgr == null) { // Server not started yet
             return null;
         }
@@ -185,7 +185,7 @@ class UserDiscoverer {
         if (dataFile == null) {
             return null;
         }
-        GameProfile profile = ((MinecraftServer) Sponge.getServer()).getPlayerProfileCache().getProfileByUUID(uniqueId);
+        GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(uniqueId);
         if (profile != null) {
             User user = create(profile);
             try {
@@ -201,7 +201,7 @@ class UserDiscoverer {
 
     private static User getFromWhitelist(UUID uniqueId) {
         GameProfile profile = null;
-        UserListWhitelist whiteList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         UserListWhitelistEntry whiteListData = (UserListWhitelistEntry) whiteList.getEntry(new GameProfile(uniqueId, ""));
         if (whiteListData != null) {
             profile = (GameProfile) whiteListData.value;
@@ -214,7 +214,7 @@ class UserDiscoverer {
 
     private static User getFromBanlist(UUID uniqueId) {
         GameProfile profile = null;
-        UserListBans banList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedPlayers();
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         UserListEntryBan banData = (UserListEntryBan) banList.getEntry(new GameProfile(uniqueId, ""));
         if (banData instanceof UserListBansEntry) {
             profile = (GameProfile) banData.value;
@@ -251,13 +251,13 @@ class UserDiscoverer {
     }
 
     private static boolean deleteWhitelistEntry(UUID uniqueId) {
-        UserListWhitelist whiteList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         whiteList.removeEntry(new GameProfile(uniqueId, ""));
         return true;
     }
 
     private static boolean deleteBanlistEntry(UUID uniqueId) {
-        UserListBans banList = ((MinecraftServer) Sponge.getServer()).getPlayerList().getBannedPlayers();
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         banList.removeEntry(new GameProfile(uniqueId, ""));
         return true;
     }

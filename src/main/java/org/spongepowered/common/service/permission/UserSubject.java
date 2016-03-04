@@ -35,6 +35,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SingleParentMemorySubjectData;
 import org.spongepowered.common.service.permission.base.SpongeSubject;
 
@@ -90,7 +91,7 @@ public class UserSubject extends SpongeSubject {
     public Optional<CommandSource> getCommandSource() {
         if (Sponge.isServerAvailable()) {
             return Optional
-                    .ofNullable((CommandSource) ((MinecraftServer) Sponge.getServer()).getPlayerList().getPlayerByUUID(this.player.getId()));
+                    .ofNullable((CommandSource) SpongeImpl.getServer().getPlayerList().getPlayerByUUID(this.player.getId()));
         }
         return Optional.empty();
     }

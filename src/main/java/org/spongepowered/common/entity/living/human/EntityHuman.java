@@ -85,7 +85,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
                 @Override
                 public PropertyMap load(UUID uuid) throws Exception {
-                    return ((MinecraftServer) Sponge.getServer()).getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
+                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
             });

@@ -260,7 +260,7 @@ public class DimensionManager {
             tmp.add(entry.getValue());
         }
 
-        ((MinecraftServer) Sponge.getServer()).worldServers = tmp.toArray(new WorldServer[tmp.size()]);
+        SpongeImpl.getServer().worldServers = tmp.toArray(new WorldServer[tmp.size()]);
     }
 
     public static WorldServer[] getWorlds() {
@@ -301,7 +301,7 @@ public class DimensionManager {
         if (DimensionManager.getWorldFromDimId(0) != null) {
             return DimensionManager.getWorldFromDimId(0).getSaveHandler().getWorldDirectory();
         } else if (Sponge.isServerAvailable()) {
-            MinecraftServer srv = ((MinecraftServer) Sponge.getServer());
+            MinecraftServer srv = SpongeImpl.getServer();
             SaveHandler saveHandler = (SaveHandler) srv.getActiveAnvilConverter().getSaveLoader(srv.getFolderName(), false);
             return saveHandler.getWorldDirectory();
         } else {

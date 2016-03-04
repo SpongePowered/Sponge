@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
+import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
@@ -120,6 +121,10 @@ public final class SpongeImpl {
 
     public static SpongeGame getGame() {
         return (SpongeGame) getInstance().game;
+    }
+
+    public static MinecraftServer getServer() {
+        return (MinecraftServer) getGame().getServer();
     }
 
     public static SpongeGameRegistry getRegistry() {

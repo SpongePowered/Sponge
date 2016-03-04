@@ -24,15 +24,11 @@
  */
 package org.spongepowered.common.service.whitelist;
 
-import com.google.common.base.Preconditions;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.UserListUtils;
 
 import java.util.ArrayList;
@@ -44,10 +40,9 @@ public class SpongeWhitelistService implements WhitelistService {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<GameProfile> getWhitelistedProfiles() {
-        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
         List<GameProfile> profiles = new ArrayList<>();
 
-        for (UserListWhitelistEntry entry: ((Collection<UserListWhitelistEntry>) ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers().getValues().values())) {
+        for (UserListWhitelistEntry entry: SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers().getValues().values()) {
             profiles.add((GameProfile) entry.getValue());
         }
 
@@ -56,7 +51,7 @@ public class SpongeWhitelistService implements WhitelistService {
 
     @Override
     public boolean isWhitelisted(GameProfile profile) {
-        UserListWhitelist whitelist = this.getWhitelist();
+        UserListWhitelist whitelist = getWhitelist();
 
         whitelist.removeExpired();
         return whitelist.getValues().containsKey(whitelist.getObjectKey((com.mojang.authlib.GameProfile) profile));
@@ -65,19 +60,18 @@ public class SpongeWhitelistService implements WhitelistService {
     @Override
     public boolean addProfile(GameProfile profile) {
         boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.addEntry(this.getWhitelist(), new UserListWhitelistEntry((com.mojang.authlib.GameProfile) profile));
+        UserListUtils.addEntry(getWhitelist(), new UserListWhitelistEntry((com.mojang.authlib.GameProfile) profile));
         return wasWhitelisted;
     }
 
     @Override
     public boolean removeProfile(GameProfile profile) {
         boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.removeEntry(this.getWhitelist(), profile);
+        UserListUtils.removeEntry(getWhitelist(), profile);
         return wasWhitelisted;
     }
 
-    private UserListWhitelist getWhitelist() {
-        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
-        return ((MinecraftServer) Sponge.getServer()).getPlayerList().getWhitelistedPlayers();
+    private static UserListWhitelist getWhitelist() {
+        return SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
     }
 }
