@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
 import io.netty.buffer.Unpooled;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -60,6 +59,7 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
@@ -175,11 +175,14 @@ public abstract class MixinPlayerList {
         GameProfile gameprofile1 = playerprofilecache.getProfileByUUID(gameprofile.getId());
         String s = gameprofile1 == null ? gameprofile.getName() : gameprofile1.getName();
         playerprofilecache.addEntry(gameprofile);
-        // Sponge - save changes to offline User before reading player data
+
+        // Sponge start - save changes to offline User before reading player data
         SpongeUser user = (SpongeUser) ((IMixinEntityPlayerMP) playerIn).getUserObject();
         if (SpongeUser.dirtyUsers.contains(user)) {
             user.save();
         }
+        // Sponge end
+
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
         WorldServer worldserver = DimensionManager.getWorldFromDimId(playerIn.dimension);
 
@@ -219,6 +222,8 @@ public abstract class MixinPlayerList {
             return;
         }
 
+        // Sponge end
+
         // Join data
         Optional<Instant> firstJoined = SpongePlayerDataHandler.getFirstJoined(playerIn.getUniqueID());
         Instant lastJoined = Instant.now();
@@ -245,18 +250,23 @@ public abstract class MixinPlayerList {
             s1 = netManager.getRemoteAddress().toString();
         }
 
+        // Sponge start - add world name to message
         logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldserver.getWorldInfo().getWorldName() + "(" + ((IMixinWorldProvider) worldserver.provider).getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
+        // Sponge end
+
         WorldInfo worldinfo = worldserver.getWorldInfo();
         BlockPos blockpos = worldserver.getSpawnPoint();
         this.setPlayerGameTypeBasedOnOther(playerIn, null, worldserver);
 
+        // Sponge start
         if (handler == null) {
             // Create the handler here (so the player's gets set)
             handler = new NetHandlerPlayServer(this.mcServer, netManager, playerIn);
         }
         playerIn.playerNetServerHandler = handler;
+        // Sponge end
 
         // Support vanilla clients logging into custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(((IMixinWorldProvider) worldserver.provider).getDimensionId(), worldserver,
@@ -290,9 +300,6 @@ public abstract class MixinPlayerList {
         }
         // Sponge End
 
-        playerIn.addSelfToInternalCraftingInventory();
-
-
         // Sponge Start
 
         // Move logic for creating join message up here
@@ -318,8 +325,7 @@ public abstract class MixinPlayerList {
 
         chatcomponenttranslation.getChatStyle().setColor(TextFormatting.YELLOW);
 
-        for (Object o : playerIn.getActivePotionEffects()) {
-            PotionEffect potioneffect = (PotionEffect) o;
+        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
 
@@ -337,16 +343,45 @@ public abstract class MixinPlayerList {
         }
         // Sponge end
 
-        if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
-            Entity entity = EntityList.createEntityFromNBT(nbttagcompound.getCompoundTag("Riding"), worldserver);
+        if (nbttagcompound != null) {
+            if (nbttagcompound.hasKey("RootVehicle", 10)) {
+                NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
+                Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
 
-            if (entity != null) {
-                entity.forceSpawn = true;
-                worldserver.spawnEntityInWorld(entity);
-                entity.startRiding(playerIn, true);
-                entity.forceSpawn = false;
+                if (entity2 != null) {
+                    UUID uuid = nbttagcompound1.getUniqueId("Attach");
+
+                    if (entity2.getUniqueID().equals(uuid)) {
+                        playerIn.startRiding(entity2, true);
+                    } else {
+                        for (Entity entity : entity2.func_184182_bu()) {
+                            if (entity.getUniqueID().equals(uuid)) {
+                                playerIn.startRiding(entity, true);
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!playerIn.isRiding()) {
+                        logger.warn("Couldn\'t reattach entity to player");
+                        worldserver.removePlayerEntityDangerously(entity2);
+
+                        for (Entity entity3 : entity2.func_184182_bu()) {
+                            worldserver.removePlayerEntityDangerously(entity3);
+                        }
+                    }
+                }
+            } else if (nbttagcompound.hasKey("Riding", 10)) {
+                Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.getCompoundTag("Riding"), worldserver, true);
+
+                if (entity1 != null) {
+                    playerIn.startRiding(entity1, true);
+                }
             }
         }
+
+        playerIn.addSelfToInternalCraftingInventory();
+
     }
 
     // A temporary variable to transfer the 'isBedSpawn' variable between
@@ -356,6 +391,8 @@ public abstract class MixinPlayerList {
     @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
+
+        // Sponge start
 
         // ### PHASE 1 ### Get the location to spawn
 
@@ -379,12 +416,16 @@ public abstract class MixinPlayerList {
         }
         playerIn.setPosition(tempPos.getX(), tempPos.getY(), tempPos.getZ());
 
+        // Sponge end
+
         // ### PHASE 2 ### Remove player from current dimension
         playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
         playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
         playerIn.getServerForPlayer().getPlayerChunkManager().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
+
+        // Sponge start
 
         // ### PHASE 3 ### Reset player (if applicable)
         playerIn.playerConqueredTheEnd = false;
@@ -416,7 +457,7 @@ public abstract class MixinPlayerList {
         playerIn.setWorld(targetWorld);
         playerIn.theItemInWorldManager.setWorld(targetWorld);
 
-        targetWorld.getChunkProvider().getLoadedChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        targetWorld.getChunkProvider().func_186025_d((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -441,6 +482,7 @@ public abstract class MixinPlayerList {
         targetWorld.getPlayerChunkManager().addPlayer(playerIn);
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
+        this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);
         playerIn.addSelfToInternalCraftingInventory();
 
         // Reset the health.

@@ -39,6 +39,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -58,8 +59,8 @@ import java.util.Set;
 @Mixin(EntityAITasks.class)
 @Implements(value = @Interface(iface = Goal.class, prefix = "goal$"))
 public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
-    @Shadow private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
-    @Shadow private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
+    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
+    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
 
     @Shadow public abstract void addTask(int priority, EntityAIBase task);
 

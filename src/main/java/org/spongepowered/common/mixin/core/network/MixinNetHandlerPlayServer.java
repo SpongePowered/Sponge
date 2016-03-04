@@ -107,8 +107,8 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Shadow @Final private static Logger logger;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
+    @Shadow @Final private IntHashMap field_147372_n;
     @Shadow public EntityPlayerMP playerEntity;
-    @Shadow private IntHashMap field_147372_n;
 
     @Shadow public abstract void sendPacket(final Packet packetIn);
 

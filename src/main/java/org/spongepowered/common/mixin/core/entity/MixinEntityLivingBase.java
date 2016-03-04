@@ -89,7 +89,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
     @Shadow protected AbstractAttributeMap attributeMap;
-    @Shadow @Final public ItemStack[] armorArray;
+    @Shadow public ItemStack[] armorArray;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;

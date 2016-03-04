@@ -78,17 +78,17 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
 
     @Shadow @Final private double[] heightMap;
     @Shadow @Final private boolean mapFeaturesEnabled;
-    @Shadow private net.minecraft.world.World worldObj;
+    @Shadow @Final private net.minecraft.world.World worldObj;
     @Shadow private ChunkProviderSettings settings;
-    @Shadow private Random rand;
+    @Shadow @Final private Random rand;
 
-    @Shadow private MapGenBase caveGenerator;
-    @Shadow private MapGenStronghold strongholdGenerator;
-    @Shadow private MapGenVillage villageGenerator;
-    @Shadow private MapGenMineshaft mineshaftGenerator;
-    @Shadow private MapGenScatteredFeature scatteredFeatureGenerator;
-    @Shadow private MapGenBase ravineGenerator;
-    @Shadow private StructureOceanMonument oceanMonumentGenerator;
+    @Shadow @Final private MapGenBase caveGenerator;
+    @Shadow @Final private MapGenStronghold strongholdGenerator;
+    @Shadow @Final private MapGenVillage villageGenerator;
+    @Shadow @Final private MapGenMineshaft mineshaftGenerator;
+    @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
+    @Shadow @Final private MapGenBase ravineGenerator;
+    @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
     @Shadow private BiomeGenBase[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);

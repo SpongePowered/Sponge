@@ -59,6 +59,7 @@ import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
@@ -70,9 +71,9 @@ import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 @Mixin(BiomeGenBase.class)
 public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
-    @Shadow public String biomeName;
-    @Shadow public float temperature;
-    @Shadow public float rainfall;
+    @Shadow @Final public String biomeName;
+    @Shadow @Final public float temperature;
+    @Shadow @Final public float rainfall;
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;
