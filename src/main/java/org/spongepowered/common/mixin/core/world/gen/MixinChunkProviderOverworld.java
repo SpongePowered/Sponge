@@ -92,7 +92,6 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     @Shadow private BiomeGenBase[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
-    @Shadow public abstract void replaceBlocksForBiome(int p_180517_1_, int p_180517_2_, ChunkPrimer p_180517_3_, BiomeGenBase[] p_180517_4_);
 
     private BiomeGenerator biomegen;
 

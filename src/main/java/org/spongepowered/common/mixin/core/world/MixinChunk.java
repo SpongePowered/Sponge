@@ -145,11 +145,10 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
     @Shadow protected abstract void propagateSkylightOcclusion(int x, int z);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
+    @Shadow public abstract IBlockState getBlockState(final int p_186032_1_, final int p_186032_2_, final int p_186032_3_);
     @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
-    @Shadow(prefix = "shadow$")
-    public abstract Block shadow$getBlock(int x, int y, int z);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -246,7 +245,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public BiomeType getBiome(int x, int z) {
         checkBiomeBounds(x, z);
-        return (BiomeType) getBiome(new BlockPos(x, 0, z), this.worldObj.getWorldChunkManager());
+        return (BiomeType) getBiome(new BlockPos(x, 0, z), this.worldObj.getBiomeProvider());
     }
 
     @Override
@@ -281,7 +280,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
-        return (BlockType) shadow$getBlock(x, y, z);
+        return (BlockType) getBlockState(x, y, z).getBlock();
     }
 
     @Override

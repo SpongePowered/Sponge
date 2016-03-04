@@ -323,7 +323,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
      * @author gabizou - January 4th, 2016
      * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
      */
-    @Redirect(method = "func_184584_a", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
+    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
     public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
             double yOffset, double zOffset, int ... p_175688_14_) {
         if (!this.isVanished()) {

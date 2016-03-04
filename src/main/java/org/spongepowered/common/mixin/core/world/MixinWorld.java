@@ -68,7 +68,6 @@ import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -138,7 +137,6 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
-import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
@@ -188,7 +186,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public Random rand;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow @Final private net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
@@ -203,7 +200,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
-    @Shadow public abstract BiomeProvider getWorldChunkManager();
+    @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
@@ -222,9 +219,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
-        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), ((IMixinWorldProvider) providerIn).getDimensionId()));
-        }
     }
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
@@ -579,6 +573,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
+    }
+
+    @Override
+    public WorldProvider getWorldProvider() {
+        return this.provider;
     }
 
     @Override

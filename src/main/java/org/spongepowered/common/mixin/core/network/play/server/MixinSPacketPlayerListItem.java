@@ -40,7 +40,7 @@ import java.util.List;
 public class MixinSPacketPlayerListItem {
 
     private static final String CTOR_VARARG =
-            "<init>(Lnet/minecraft/network/play/server/S38PacketPlayerListItem$Action;[Lnet/minecraft/entity/player/EntityPlayerMP;)V";
+            "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;[Lnet/minecraft/entity/player/EntityPlayerMP;)V";
 
     @Shadow @Final private List<SPacketPlayerListItem.AddPlayerData> players;
 
@@ -54,7 +54,7 @@ public class MixinSPacketPlayerListItem {
         }
     }
 
-    @Inject(method = "<init>(Lnet/minecraft/network/play/server/S38PacketPlayerListItem$Action;Ljava/lang/Iterable;)V", at = @At("RETURN"))
+    @Inject(method = "<init>(Lnet/minecraft/network/play/server/SPacketPlayerListItem$Action;Ljava/lang/Iterable;)V", at = @At("RETURN"))
     private void onPlayerAdd(SPacketPlayerListItem.Action action, Iterable<EntityPlayerMP> players, CallbackInfo callbackInfo) {
         int index = 0;
         for (EntityPlayerMP playerMP : players) {

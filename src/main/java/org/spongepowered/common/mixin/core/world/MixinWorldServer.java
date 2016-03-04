@@ -30,12 +30,16 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
@@ -57,9 +61,12 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.border.PlayerBorderListener;
 
 import java.util.Collection;
 import java.util.Map;
@@ -79,9 +86,15 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
-
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn,
+            CallbackInfo ci) {
+        ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), ((IMixinWorldProvider) (
+                (IMixinWorld) (Object) this).getWorldProvider()).getDimensionId()));
+    }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {

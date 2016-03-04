@@ -47,22 +47,18 @@ import java.util.Random;
 @Mixin(ChunkProviderHell.class)
 public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow @Final private boolean field_177466_i;
-    @Shadow @Final public Random hellRNG;
+    @Shadow @Final private boolean field_185953_o;
+    @Shadow @Final public Random rand;
     @Shadow @Final private MapGenNetherBridge genNetherBridge;
-    @Shadow @Final private MapGenBase netherCaveGenerator;
-
-    @Shadow
-    public abstract void func_180515_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
-
-    @Shadow
-    public abstract void func_180516_b(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
+    @Shadow @Final private MapGenBase field_185939_I;
+    @Shadow public abstract void func_185936_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
+    @Shadow public abstract void func_185937_b(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
 
     @Override
     public void addPopulators(WorldGenerator generator) {
-        generator.getGenerationPopulators().add((GenerationPopulator) this.netherCaveGenerator);
+        generator.getGenerationPopulators().add((GenerationPopulator) this.field_185939_I);
 
-        if (this.field_177466_i) {
+        if (this.field_185953_o) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
             generator.getPopulators().add((Populator) this.genNetherBridge);
         }
@@ -73,9 +69,9 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
         int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
-        this.hellRNG.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-        this.func_180515_a(x, z, chunkprimer);
-        this.func_180516_b(x, z, chunkprimer);
+        this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
+        this.func_185936_a(x, z, chunkprimer);
+        this.func_185937_b(x, z, chunkprimer);
     }
 
 }

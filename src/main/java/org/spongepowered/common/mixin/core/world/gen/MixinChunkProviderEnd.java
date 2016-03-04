@@ -44,10 +44,8 @@ import java.util.Random;
 @Mixin(ChunkProviderEnd.class)
 public abstract class MixinChunkProviderEnd implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow public Random endRNG;
-
-    @Shadow
-    public abstract void func_180520_a(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);
+    @Shadow public Random rand;
+    @Shadow public abstract void setBlocksInChunk(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);
 
     @Override
     public void addPopulators(WorldGenerator generator) {
@@ -59,8 +57,8 @@ public abstract class MixinChunkProviderEnd implements IChunkProvider, Generatio
         int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
-        this.endRNG.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-        this.func_180520_a(x, z, chunkprimer);
+        this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
+        this.setBlocksInChunk(x, z, chunkprimer);
     }
 
 }

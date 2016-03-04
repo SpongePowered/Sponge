@@ -352,6 +352,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         for (int dim : idList) {
             WorldProvider provider = DimensionType.getById(dim).createDimension();
+            ((IMixinWorldProvider) provider).setDimensionId(dim);
             String worldFolder;
             if (dim == 0) {
                 worldFolder = overworldFolder;
@@ -378,6 +379,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
             }
 
+            System.err.println("WorldFolder: " + worldFolder);
+            System.err.println("SavesDirectory: " + SpongeImpl.getGame().getSavesDirectory());
+            System.err.println("FolderName: " + getFolderName());
             final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
                             SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true, field_184112_s);
             WorldInfo worldInfo;

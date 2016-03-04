@@ -53,26 +53,26 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
 
     private String realName;
 
-    @Redirect(method = "func_184916_f", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
     public Object onGetUUIDJoin(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);
         return entity;
     }
 
-    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
     private Object onGetUUIDLeave(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);
         return entity;
     }
 
-    @Redirect(method = "func_184916_f", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
     public String onGetEntityNameJoin(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
         return this.onGetEntityName(server, sender, string);
     }
 
-    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
     public String onGetEntityNameLeaveFirst(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
         return this.onGetEntityName(server, sender, string);
     }
@@ -92,7 +92,7 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         return CommandBase.func_184891_e(server, sender, string);
     }
 
-    @Redirect(method = "func_184911_g", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
     public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
         String entityName = CommandBase.func_184891_e(server, sender, string);
         if (this.isExpandedSelector()) {

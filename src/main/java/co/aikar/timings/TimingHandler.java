@@ -108,7 +108,7 @@ class TimingHandler implements Timing {
     @Override
     public void stopTiming() {
         if (this.enabled && --this.timingDepth == 0 && this.start != 0) {
-            if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();
                 this.start = 0;

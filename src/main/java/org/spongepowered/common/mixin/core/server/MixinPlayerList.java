@@ -531,6 +531,9 @@ public abstract class MixinPlayerList {
 
     @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
     private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
+        System.err.println(netHandler);
+        System.err.println(packet);
+        System.err.println(playerMP);
         SPacketPlayerListItem packetPlayerListItem = (SPacketPlayerListItem) packet;
         EntityPlayerMP playerMP1 = ((IMixinSPacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
         if (!((IMixinEntity) playerMP1).isVanished()) {
