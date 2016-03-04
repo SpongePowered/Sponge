@@ -53,12 +53,13 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(EntityAITasks.class)
 @Implements(value = @Interface(iface = Goal.class, prefix = "goal$"))
 public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
-    @Shadow private List<EntityAITasks.EntityAITaskEntry> taskEntries;
-    @Shadow private List<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
+    @Shadow private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
+    @Shadow private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
 
     @Shadow public abstract void addTask(int priority, EntityAIBase task);
 
@@ -129,7 +130,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     @Override
-    public List<EntityAITasks.EntityAITaskEntry> getTasksUnsafe() {
+    public Set<EntityAITasks.EntityAITaskEntry> getTasksUnsafe() {
         return this.taskEntries;
     }
 
@@ -143,7 +144,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      * @param base
      * @return
      */
-    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z"))
     private boolean onAddEntityTask(List<EntityAITasks.EntityAITaskEntry> list, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {

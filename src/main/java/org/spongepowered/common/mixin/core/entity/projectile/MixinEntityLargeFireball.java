@@ -49,7 +49,7 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
         return this.damage;
     }
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+    @ModifyArg(method = "onImpact",
         at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
     protected Entity newExplosion(Entity entityIn) {
         return (Entity) (Object) this;

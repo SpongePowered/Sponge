@@ -51,7 +51,7 @@ public abstract class MixinCommandWorldBorder {
      * @reason Returns the correct worldborder for the current world of the command sender
      */
     @Overwrite
-    protected WorldBorder getWorldBorder() {
+    protected WorldBorder func_184931_a() {
         ICommandSender sender = this.sender;
         this.sender = null;
         return sender.getEntityWorld().getWorldBorder();

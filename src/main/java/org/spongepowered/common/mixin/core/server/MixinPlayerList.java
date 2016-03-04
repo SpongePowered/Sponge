@@ -119,7 +119,7 @@ public abstract class MixinPlayerList {
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
     private static final String
             SERVER_SEND_PACKET_TO_ALL_PLAYERS =
-            "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
+            "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String NET_HANDLER_SEND_PACKET = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V";
     @Shadow @Final private static Logger logger;
     @Shadow @Final private MinecraftServer mcServer;

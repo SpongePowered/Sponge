@@ -71,8 +71,8 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         }
     }
 
-    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"
-            + "(Lnet/minecraft/util/IChatComponent;)V", ordinal = 2), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage(Lnet/minecraft/util/text/ITextComponent;)V",
+            ordinal = 2), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onCommandError(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> cir,
                     TextComponentTranslation comp, Throwable error) {
         MinecraftCommandWrapper.setError(error);

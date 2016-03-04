@@ -79,7 +79,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
-    
+
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
 
@@ -213,7 +213,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     private NextTickListEntry tmpScheduledObj;
 
-    @Redirect(method = "updateBlockTick(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+    @Redirect(method = "updateBlockTick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
         this.onCreateScheduledBlockUpdate(sbu, priority);

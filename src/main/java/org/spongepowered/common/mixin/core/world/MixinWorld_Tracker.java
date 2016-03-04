@@ -96,10 +96,10 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Shadow protected WorldInfo worldInfo;
 
     @Shadow public abstract boolean isValid(BlockPos pos);
-    @Shadow public abstract void markBlockForUpdate(BlockPos pos);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -227,7 +227,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Override
     public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags) {
         if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated())) {
-            this.markBlockForUpdate(pos);
+            this.notifyBlockUpdate(pos, old, new_, 3);
         }
 
         if (!this.isRemote && (flags & 1) != 0) {
