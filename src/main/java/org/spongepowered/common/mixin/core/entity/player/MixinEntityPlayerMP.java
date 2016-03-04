@@ -40,6 +40,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
@@ -109,6 +110,7 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -512,6 +514,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public TabList getTabList() {
         return this.tabList;
+    }
+
+
+    @Override
+    public void setTargetedLocation(@Nullable Vector3d vec) {
+        super.setTargetedLocation(vec);
+        this.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
     }
 
 }

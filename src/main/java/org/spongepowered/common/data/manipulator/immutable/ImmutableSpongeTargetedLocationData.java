@@ -24,29 +24,28 @@
  */
 package org.spongepowered.common.data.manipulator.immutable;
 
-import com.google.common.collect.ComparisonChain;
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeTargetedLocationData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
-public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Location<World>, ImmutableTargetedLocationData, TargetedLocationData>
-    implements ImmutableTargetedLocationData {
+public final class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingleData<Vector3d, ImmutableTargetedLocationData, TargetedLocationData>
+        implements ImmutableTargetedLocationData {
 
-    private final ImmutableValue<Location<World>> immutableValue = new ImmutableSpongeValue<>(Keys.TARGETED_LOCATION, this.value);
+    private final ImmutableValue<Vector3d> immutableValue;
 
-    public ImmutableSpongeTargetedLocationData(Location<World> value) {
+    public ImmutableSpongeTargetedLocationData(Vector3d value) {
         super(ImmutableTargetedLocationData.class, value, Keys.TARGETED_LOCATION);
+        this.immutableValue = new ImmutableSpongeValue<>(this.usedKey, this.value);
     }
 
     @Override
-    protected ImmutableValue<Location<World>> getValueGetter() {
-        return this.immutableValue;
+    protected ImmutableValue<Vector3d> getValueGetter() {
+        return this.target();
     }
 
     @Override
@@ -55,15 +54,13 @@ public class ImmutableSpongeTargetedLocationData extends AbstractImmutableSingle
     }
 
     @Override
-    public ImmutableValue<Location<World>> target() {
+    public ImmutableValue<Vector3d> target() {
         return this.immutableValue;
     }
 
     @Override
     public int compareTo(ImmutableTargetedLocationData o) {
-        return ComparisonChain.start()
-                .compare(o.get(Keys.TARGETED_LOCATION).get().getPosition(), this.getValue().getPosition())
-                .compare(o.get(Keys.TARGETED_LOCATION).get().getExtent().getName(), this.getValue().getExtent().getName())
-                .result();
+        return this.getValue().compareTo(o.target().get());
     }
+
 }
