@@ -407,7 +407,6 @@
         "world.gen.populators.MixinWorldGenReed",
         "world.gen.populators.MixinWorldGenSavannaTree",
         "world.gen.populators.MixinWorldGenShrub",
-        "world.gen.populators.MixinWorldGenSpikes",
         "world.gen.populators.MixinWorldGenSwamp",
         "world.gen.populators.MixinWorldGenTaiga1",
         "world.gen.populators.MixinWorldGenTaiga2",

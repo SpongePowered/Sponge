@@ -122,7 +122,6 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorTypeMappings.put("desert_well", new SpongePopulatorType("desert_well"));
         this.populatorTypeMappings.put("double_plant", new SpongePopulatorType("double_plant"));
         this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon"));
-        this.populatorTypeMappings.put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform"));
         this.populatorTypeMappings.put("end_island", new SpongePopulatorType("end_island"));
         this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower"));
         this.populatorTypeMappings.put("forest", new SpongePopulatorType("forest"));
@@ -146,6 +145,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         // internal
         this.populatorTypeMappings.put("animal", new SpongePopulatorType("animal"));
         this.populatorTypeMappings.put("bonus_chest", new SpongePopulatorType("bonus_chest"));
+        this.populatorTypeMappings.put("end_spike", new SpongePopulatorType("end_spike"));
         this.populatorTypeMappings.put("ender_dragon", new SpongePopulatorType("ender_dragon"));
         this.populatorTypeMappings.put("plains_grass", new SpongePopulatorType("plains_grass"));
         this.populatorTypeMappings.put("snow", new SpongePopulatorType("snow"));

@@ -73,8 +73,6 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
     @Shadow public String biomeName;
     @Shadow public float temperature;
     @Shadow public float rainfall;
-    @Shadow public float minHeight;
-    @Shadow public float maxHeight;
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;

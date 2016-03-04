@@ -228,7 +228,6 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(DesertWell.Builder.class, DesertWellBuilder::new)
             .registerBuilderSupplier(DoublePlant.Builder.class, DoublePlantBuilder::new)
             .registerBuilderSupplier(Dungeon.Builder.class, DungeonBuilder::new)
-            .registerBuilderSupplier(EnderCrystalPlatform.Builder.class, EnderCrystalPlatformBuilder::new)
             .registerBuilderSupplier(Flower.Builder.class, FlowerBuilder::new)
             .registerBuilderSupplier(Forest.Builder.class, ForestBuilder::new)
             .registerBuilderSupplier(Glowstone.Builder.class, GlowstoneBuilder::new)

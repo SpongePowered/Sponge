@@ -26,11 +26,10 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenEnd;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.gen.populator.EnderCrystalPlatform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
+import org.spongepowered.common.world.gen.populators.EndSpikePopulator;
 
 @Mixin(BiomeGenEnd.class)
 public abstract class MixinBiomeGenEnd extends MixinBiomeGenBase {
@@ -42,12 +41,6 @@ public abstract class MixinBiomeGenEnd extends MixinBiomeGenBase {
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
-        EnderCrystalPlatform platform = EnderCrystalPlatform.builder()
-                .chance(0.2)
-                .radius(VariableAmount.baseWithRandomAddition(1, 4))
-                .height(VariableAmount.baseWithRandomAddition(6, 32))
-                .build();
-        gensettings.getPopulators().add(platform);
-
+        gensettings.getPopulators().add(new EndSpikePopulator());
     }
 }
