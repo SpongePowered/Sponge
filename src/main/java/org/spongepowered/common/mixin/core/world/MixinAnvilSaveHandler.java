@@ -41,8 +41,6 @@ import java.io.File;
 @Mixin(AnvilSaveHandler.class)
 public abstract class MixinAnvilSaveHandler extends SaveHandler {
 
-    @Shadow private DataFixer field_186341_a;
-
     public MixinAnvilSaveHandler(File p_i46648_1_, String p_i46648_2_, boolean p_i46648_3_, DataFixer p_i46648_4_) {
         super(p_i46648_1_, p_i46648_2_, p_i46648_3_, p_i46648_4_);
     }
