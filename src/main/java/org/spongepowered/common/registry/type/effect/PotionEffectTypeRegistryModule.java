@@ -30,6 +30,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.potion.Potion;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -41,7 +42,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType> {
+public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType>,
+        AlternateCatalogRegistryModule<PotionEffectType> {
 
     public static PotionEffectTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -53,8 +55,21 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     private final Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
 
     @Override
+    public Map<String, PotionEffectType> provideCatalogMap() {
+        Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
+        for (Map.Entry<String, PotionEffectType> entry : this.potionEffectTypeMap.entrySet()) {
+            potionEffectTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return potionEffectTypeMap;
+    }
+
+
+    @Override
     public Optional<PotionEffectType> getById(String id) {
-        return Optional.ofNullable(this.potionEffectTypeMap.get(checkNotNull(id).toLowerCase()));
+        if (!checkNotNull(id).contains(":")) {
+            id = "minecraft:" + id; // assume vanilla
+        }
+        return Optional.ofNullable(this.potionEffectTypeMap.get(id.toLowerCase()));
     }
 
     @Override
@@ -69,7 +84,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(potion.getName().toLowerCase(), potionEffectType);
+                this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
             }
         }
     }
@@ -82,7 +97,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(potion.getName().toLowerCase(), potionEffectType);
+                    this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
                 }
             }
         }

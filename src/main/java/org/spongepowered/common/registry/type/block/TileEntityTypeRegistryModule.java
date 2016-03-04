@@ -56,6 +56,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         .put("RecordPlayer", "jukebox")
         .put("MobSpawner", "mob_spawner")
         .put("Music", "note")
+        .put("EndGateway", "end_gateway")
         .build();
 
     public static TileEntityTypeRegistryModule getInstance() {
