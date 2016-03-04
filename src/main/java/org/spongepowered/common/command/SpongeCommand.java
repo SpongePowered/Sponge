@@ -132,6 +132,7 @@ public class SpongeCommand {
                 ++successes;
             }
             if (args.hasAny("dimension")) {
+                // TODO 1.9 - This isn't right but I can't fix until I fix dimension configs.
                 for (DimensionType dimension : args.<DimensionType>getAll("dimension")) {
                     WorldProvider provider = DimensionManager.getWorldFromDimId(((SpongeDimensionType) dimension).getDimensionTypeId()).provider;
                     src.sendMessage(Text.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)

@@ -106,6 +106,7 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -369,7 +370,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     ((EntityPlayerMP) thisEntity).closeContainer();
                 }
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.getDimensionType().getId(), forced);
+            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorldProvider) nmsWorld.provider).getDimensionId(), forced);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
@@ -705,7 +706,7 @@ public abstract class MixinEntity implements IMixinEntity {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionType().getId(), toWorld, entityplayermp1);
+            int clientDimension = DimensionManager.getClientDimensionToSend(((IMixinWorldProvider) toWorld.provider).getDimensionId(), toWorld, entityplayermp1);
             if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
                 DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
             } else {

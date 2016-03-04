@@ -595,7 +595,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     protected void prepareSpawnArea(WorldServer world) {
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", world.provider.getDimensionType().getId(), ((World) world).getName());
+        logger.info("Preparing start region for level {} ({})", ((IMixinWorldProvider) world.provider).getDimensionId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -691,7 +691,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
 
         worldServer.initialize(settings);
-        ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
+        ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
 
         worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
@@ -806,7 +806,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         checkNotNull(world);
-        int dim = ((net.minecraft.world.World) world).provider.getDimensionType().getId();
+        int dim = ((IMixinWorldProvider) ((net.minecraft.world.World) world).provider).getDimensionId();
         if (DimensionManager.getWorldFromDimId(dim) != null) {
             final WorldServer worldServer = (WorldServer) world;
             if (!worldServer.playerEntities.isEmpty()) {

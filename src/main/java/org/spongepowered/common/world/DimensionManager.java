@@ -140,7 +140,7 @@ public class DimensionManager {
         try {
             if (dimensions.containsKey(dim)) {
                 WorldProvider provider = providers.get(getProviderType(dim)).newInstance();
-                ((IMixinWorldProvider) provider).setDimension(dim);
+                ((IMixinWorldProvider) provider).setDimensionId(dim);
                 return provider;
             } else {
                 throw new RuntimeException(String.format("No WorldProvider bound for dimension %d", dim));

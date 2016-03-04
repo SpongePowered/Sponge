@@ -32,7 +32,6 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -59,6 +58,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 
 import java.util.List;
 import java.util.Random;
@@ -118,7 +118,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
             double z = position.getZ();
 
             for (Packet packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, this.provider.getDimensionType().getId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((IMixinWorldProvider) this.provider).getDimensionId(), packet);
             }
         }
     }

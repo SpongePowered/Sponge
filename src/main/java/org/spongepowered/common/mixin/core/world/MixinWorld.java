@@ -129,6 +129,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -222,7 +223,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             CallbackInfo ci) {
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), providerIn.getDimensionType().getId()));
+            this.worldBorder.addListener(new PlayerBorderListener(this.getMinecraftServer(), ((IMixinWorldProvider) providerIn).getDimensionId()));
         }
     }
 
@@ -717,7 +718,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(this.provider.getDimensionType().getId()) != null;
+        return DimensionManager.getWorldFromDimId(((IMixinWorldProvider) this.provider).getDimensionId()) != null;
     }
 
     @Override
