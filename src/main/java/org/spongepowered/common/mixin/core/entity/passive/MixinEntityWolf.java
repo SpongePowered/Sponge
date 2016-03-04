@@ -72,14 +72,14 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         this.shadow$setAngry(angry);
     }
 
-    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;isTamed()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    @Inject(method = "func_184645_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;isTamed()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
         if (currentItemStack != null) {
             this.currentItemStack = currentItemStack.copy();
         }
     }
 
-    @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    @Redirect(method = "func_184645_a", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player) {
         int random = rand.nextInt(bound);
         if (random == 0 && !SpongeImpl

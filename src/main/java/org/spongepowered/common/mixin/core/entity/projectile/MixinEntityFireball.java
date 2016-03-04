@@ -85,7 +85,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/MovingObjectPosition;)V"))
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
     public void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
         if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
