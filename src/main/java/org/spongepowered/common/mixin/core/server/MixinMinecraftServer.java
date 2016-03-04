@@ -80,6 +80,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -1014,16 +1015,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List> cir, List<String> list, boolean flag, boolean flag1, List<String> list1) {
+    private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {
         TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
-                ImmutableList.copyOf(list), list, input);
+                ImmutableList.copyOf(completions), completions, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
             cir.setReturnValue(new ArrayList<>());
         } else {
             cir.setReturnValue(event.getTabCompletions());
         }
+    }
+
+    @Surrogate
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
+            List<String> list, boolean flag, boolean flag1, List<String> list1) {
+        onTabCompleteChat(sender, input, cir, list);
+    }
+
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
+            List<String> list, String[] a, String b, String[] c, int d, int e) {
+        onTabCompleteChat(sender, input, cir, list);
     }
 
     @Override

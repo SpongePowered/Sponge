@@ -24,21 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.world.biome;
 
+import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Overwrite;
+
+import java.util.Random;
 
 @Mixin(BiomeDecorator.class)
-public class MixinBiomeDecorator {
+public abstract class MixinBiomeDecorator {
 
-    // Cancel genDecorations just in case this does get called as all of these
-    // are handled already by populators.
-    @Inject(method = "genDecorations(Lnet/minecraft/world/biome/BiomeGenBase;)V", at = @At("HEAD") , cancellable = true)
-    protected void genDecorations(BiomeGenBase biomeGenBaseIn, CallbackInfo ci) {
-        ci.cancel();
+    /**
+     * @author Deamon
+     * @reason Cancel genDecorations just in case this does get called as all of these
+     *      are handled already by populators.
+     */
+    @Overwrite
+    protected void genDecorations(BiomeGenBase biomeGenBaseIn, World worldIn, Random random) {
+        // Cancel genDecorations just in case this does get called as all of these
+        // are handled already by populators.
     }
 
 }
