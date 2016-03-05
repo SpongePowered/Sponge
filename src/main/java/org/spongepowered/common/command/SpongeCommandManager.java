@@ -255,6 +255,14 @@ public class SpongeCommandManager implements CommandManager {
             return event.getResult();
         }
 
+        // Only the first part of argSplit is used at the moment, do the other in the future if needed.
+        argSplit[0] = event.getCommand();
+
+        commandLine = event.getCommand();
+        if (!event.getArguments().isEmpty()) {
+            commandLine = commandLine + ' ' + event.getArguments();
+        }
+
         try {
             try {
                 return this.dispatcher.process(source, commandLine);
