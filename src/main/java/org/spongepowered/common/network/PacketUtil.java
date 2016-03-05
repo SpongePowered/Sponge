@@ -57,7 +57,7 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (StaticMixinHelper.packetPlayer.theItemInWorldManager.isCreative() && (packetIn instanceof CPacketClientStatus
+            if (StaticMixinHelper.packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus
                   && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
                 StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn)) {

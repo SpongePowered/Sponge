@@ -446,7 +446,7 @@ public final class CauseTracker {
         // Handle Player Toss
         if (player != null && packetIn instanceof CPacketPlayerDigging) {
             CPacketPlayerDigging digPacket = (CPacketPlayerDigging) packetIn;
-            if (digPacket.getStatus() == CPacketPlayerDigging.Action.DROP_ITEM) {
+            if (digPacket.getAction() == CPacketPlayerDigging.Action.DROP_ITEM) {
                 StaticMixinHelper.destructItemDrop = false;
             }
         }

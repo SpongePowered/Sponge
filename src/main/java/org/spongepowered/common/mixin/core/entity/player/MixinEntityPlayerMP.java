@@ -129,7 +129,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
     @Shadow @Final public MinecraftServer mcServer;
-    @Shadow @Final public PlayerInteractionManager theItemInWorldManager;
+    @Shadow @Final public PlayerInteractionManager interactionManager;
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
@@ -472,7 +472,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Inject(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), cancellable = true)
     private void onSetGameType(WorldSettings.GameType gameType, CallbackInfo ci) {
         ChangeGameModeEvent.TargetPlayer event = SpongeEventFactory.createChangeGameModeEventTargetPlayer(Cause.of(NamedCause.source(this)),
-                (GameMode) (Object) this.theItemInWorldManager.getGameType(), (GameMode) (Object) gameType, this);
+                (GameMode) (Object) this.interactionManager.getGameType(), (GameMode) (Object) gameType, this);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             ci.cancel();

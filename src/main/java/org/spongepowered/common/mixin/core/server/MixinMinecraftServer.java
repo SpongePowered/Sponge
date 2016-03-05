@@ -440,7 +440,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                     this.theProfiler).init();
             ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
             worldServer.initialize(worldSettings);
-            worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+            worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
             // This code changes from Mojang's to account for per-world API-set GameModes.
             if (!this.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(WorldSettings.GameType.NOT_SET)) {
@@ -611,7 +611,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 ++i;
-                world.getChunkProvider().func_186025_d(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+                world.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
         }
 
@@ -695,7 +695,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         worldServer.initialize(settings);
         ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
 
-        worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+        worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         if (!isSinglePlayer()) {
             worldServer.getWorldInfo().setGameType(getGameType());

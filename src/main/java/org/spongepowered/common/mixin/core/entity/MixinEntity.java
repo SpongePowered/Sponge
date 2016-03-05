@@ -700,7 +700,7 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
 
-        toWorld.getChunkProvider().func_186025_d((int) entity.posX >> 4, (int) entity.posZ >> 4);
+        toWorld.getChunkProvider().provideChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
 
         if (entity instanceof EntityPlayer) {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
@@ -714,13 +714,13 @@ public abstract class MixinEntity implements IMixinEntity {
                 if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
                     entityplayermp1.playerNetServerHandler.sendPacket(
                         new SPacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
+                            entityplayermp1.interactionManager.getGameType()));
                 }
             }
 
             entityplayermp1.playerNetServerHandler.sendPacket(
                 new SPacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                    entityplayermp1.theItemInWorldManager.getGameType()));
+                    entityplayermp1.interactionManager.getGameType()));
             entity.setWorld(toWorld);
             entity.isDead = false;
             entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
@@ -730,7 +730,7 @@ public abstract class MixinEntity implements IMixinEntity {
             toWorld.getPlayerChunkManager().addPlayer(entityplayermp1);
             toWorld.spawnEntityInWorld(entityplayermp1);
             mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
-            entityplayermp1.theItemInWorldManager.setWorld(toWorld);
+            entityplayermp1.interactionManager.setWorld(toWorld);
             entityplayermp1.addSelfToInternalCraftingInventory();
             entityplayermp1.setHealth(entityplayermp1.getHealth());
         } else {

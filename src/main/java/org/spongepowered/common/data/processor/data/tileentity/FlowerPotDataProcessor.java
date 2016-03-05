@@ -75,7 +75,7 @@ public class FlowerPotDataProcessor extends
         } else {
             Item item = (Item) stackSnapshot.getType();
             int meta = ((SpongeItemStackSnapshot) stackSnapshot).getDamageValue();
-            if (!((BlockFlowerPot) Blocks.flower_pot).canNotContain(Block.getBlockFromItem(item), meta)) {
+            if (!((BlockFlowerPot) Blocks.flower_pot).canContain(Block.getBlockFromItem(item), meta)) {
                 return false;
             }
             flowerPot.setFlowerPotData(item, meta);

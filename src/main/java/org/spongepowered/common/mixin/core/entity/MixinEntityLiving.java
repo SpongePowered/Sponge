@@ -51,11 +51,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
@@ -143,7 +141,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "func_184230_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, ItemStack itemStack, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.worldObj.isRemote) {
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);

@@ -243,7 +243,7 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         playerIn.setWorld(worldserver);
-        playerIn.theItemInWorldManager.setWorld((WorldServer) playerIn.worldObj);
+        playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
         String s1 = "local";
 
         if (netManager.getRemoteAddress() != null) {
@@ -275,7 +275,7 @@ public abstract class MixinPlayerList {
             DimensionManager.sendDimensionRegistration(worldserver, playerIn, dimension);
         }
 
-        handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.theItemInWorldManager.getGameType(), worldinfo
+        handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
                 .isHardcoreModeEnabled(), dimension, worldserver.getDifficulty(), this.getMaxPlayers(), worldinfo
                 .getTerrainType(), worldserver.getGameRules().getBoolean("reducedDebugInfo")));
         handler.sendPacket(new SPacketCustomPayload("MC|Brand", (new PacketBuffer(Unpooled.buffer())).writeString(this
@@ -455,9 +455,9 @@ public abstract class MixinPlayerList {
 
         playerIn.dimension = ((IMixinWorldProvider) targetWorld.provider).getDimensionId();
         playerIn.setWorld(targetWorld);
-        playerIn.theItemInWorldManager.setWorld(targetWorld);
+        playerIn.interactionManager.setWorld(targetWorld);
 
-        targetWorld.getChunkProvider().func_186025_d((int) location.getX() >> 4, (int) location.getZ() >> 4);
+        targetWorld.getChunkProvider().provideChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
 
         // ### PHASE 5 ### Respawn player in new world
 
@@ -468,7 +468,7 @@ public abstract class MixinPlayerList {
         }
 
         playerIn.playerNetServerHandler.sendPacket(new SPacketRespawn(dimension, targetWorld.getDifficulty(), targetWorld
-                .getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
+                .getWorldInfo().getTerrainType(), playerIn.interactionManager.getGameType()));
         playerIn.isDead = false;
         playerIn.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                 playerIn.rotationYaw, playerIn.rotationPitch);

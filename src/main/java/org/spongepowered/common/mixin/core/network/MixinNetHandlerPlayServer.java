@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
@@ -40,7 +39,6 @@ import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
-import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.server.MinecraftServer;
@@ -59,13 +57,11 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -89,7 +85,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.network.PacketUtil;
@@ -367,7 +362,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         String hash = packet.hash;
         ResourcePackStatusEvent.ResourcePackStatus status;
         ResourcePack pack = this.sentResourcePacks.get(hash);
-        switch (packet.status) {
+        switch (packet.action) {
             case ACCEPTED:
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
                 break;

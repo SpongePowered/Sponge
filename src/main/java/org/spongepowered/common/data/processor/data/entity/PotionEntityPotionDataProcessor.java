@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -62,7 +61,7 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
 
     @Override
     protected Optional<List<PotionEffect>> getVal(EntityPotion dataHolder) {
-        ItemStack potionItem = dataHolder.func_184543_l();
+        ItemStack potionItem = dataHolder.getPotion();
         if (potionItem == null) {
             return Optional.empty();
         }
@@ -99,7 +98,7 @@ public class PotionEntityPotionDataProcessor extends AbstractSingleDataSingleTar
         }
         Optional<List<PotionEffect>> effects = getVal((EntityPotion) container);
         if (effects.isPresent()) {
-            ((EntityPotion) container).func_184541_a(new ItemStack(Items.potionitem, 1, 0));
+            ((EntityPotion) container).setItem(new ItemStack(Items.potionitem, 1, 0));
             return DataTransactionResult.successRemove(constructImmutableValue(effects.get()));
         }
         return DataTransactionResult.successNoData();

@@ -347,11 +347,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z) {
-        for (GenerationPopulator genpop : this.genpop) {
-            if (genpop instanceof MapGenStructure) {
-                ((MapGenStructure) genpop).func_186125_a(chunkIn.getWorld(), x, z, (ChunkPrimer) null);
-            }
-        }
+        this.genpop.stream().filter(genpop -> genpop instanceof MapGenStructure).forEach(genpop -> {
+            ((MapGenStructure) genpop).generate(chunkIn.getWorld(), x, z, (ChunkPrimer) null);
+        });
     }
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {

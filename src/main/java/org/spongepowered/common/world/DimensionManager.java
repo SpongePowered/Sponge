@@ -325,7 +325,7 @@ public class DimensionManager {
 
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
-        world.addWorldAccess(new WorldManager(mcServer, world));
+        world.addEventListener(new WorldManager(mcServer, world));
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());
