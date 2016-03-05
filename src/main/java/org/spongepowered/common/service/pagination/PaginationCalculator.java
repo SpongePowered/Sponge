@@ -25,34 +25,39 @@
 package org.spongepowered.common.service.pagination;
 
 import com.flowpowered.math.GenericMath;
-import com.google.common.base.Strings;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import ninja.leaping.configurate.loader.ConfigurationLoader;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.service.pagination.PaginationCalculator;
+import org.spongepowered.api.command.CommandMessageFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.TranslatableText;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.text.format.TextStyles;
-import org.spongepowered.api.command.CommandMessageFormatting;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 /**
  * Pagination calculator for players.
  */
-public class PlayerPaginationCalculator implements PaginationCalculator<Player> {
+public class PaginationCalculator {
     private static final String NON_UNICODE_CHARS;
     private static final int[] NON_UNICODE_CHAR_WIDTHS;
     private static final byte[] UNICODE_CHAR_WIDTHS;
     private static final int LINE_WIDTH = 320;
 
+    private final int linesPerPage;
+
+    public PaginationCalculator(int linesPerPage) {
+        this.linesPerPage = linesPerPage;
+    }
+
     static {
         ConfigurationLoader<CommentedConfigurationNode> loader = HoconConfigurationLoader.builder()
-                .setURL(PlayerPaginationCalculator.class.getResource("font-sizes.json"))
+                .setURL(PaginationCalculator.class.getResource("font-sizes.json"))
                 .setPreservesHeader(false).build();
         try {
             ConfigurationNode node = loader.load();
@@ -76,13 +81,11 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
         }
     }
 
-    @Override
-    public int getLinesPerPage(Player source) {
-        return 20;
+    public int getLinesPerPage(MessageReceiver source) {
+        return this.linesPerPage;
     }
 
-    @Override
-    public int getLines(Player source, Text text) {
+    public int getLines(MessageReceiver source, Text text) {
         return (int) Math.ceil((double) getLength(source, text) / LINE_WIDTH);
     }
 
@@ -111,7 +114,7 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
         return width;
     }
 
-    private int getLength(Player source, Text text) {
+    private int getLength(MessageReceiver source, Text text) {
         double columnCount = 0d;
         for (Text child : text.withChildren()) {
             final String txt;
@@ -131,17 +134,17 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
 
     }
 
-    @Override
-    public Text center(Player source, Text text, String padding) {
+    public Text center(MessageReceiver source, Text text, Text padding) {
         int length = getLength(source, text);
         if (length >= LINE_WIDTH) {
             return text;
         }
-        int paddingLength = getLength(source, Text.builder(padding).style(text.getStyle()).build());
+        int paddingLength = getLength(source, padding.toBuilder().style(text.getStyle()).build());
         double paddingNecessary = LINE_WIDTH - length;
+
         Text.Builder build =  Text.builder();
         if (length == 0) {
-            build.append(Text.of(Strings.repeat(padding, GenericMath.floor((double) LINE_WIDTH / paddingLength))));
+            build.append(Collections.nCopies(GenericMath.floor((double) LINE_WIDTH / paddingLength), padding));
         } else {
             paddingNecessary -= getWidth(' ', text.getStyle().contains(TextStyles.BOLD)) * 2;
             int paddingCount = GenericMath.floor(paddingNecessary / paddingLength);
@@ -149,7 +152,7 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
             int afterPadding = (int) Math.ceil(paddingCount / 2.0);
             if (beforePadding > 0) {
                 if (beforePadding > 1) {
-                    build.append(Text.of(Strings.repeat(padding, beforePadding)));
+                    build.append(Collections.nCopies(beforePadding, padding));
                 }
                 build.append(CommandMessageFormatting.SPACE_TEXT);
             }
@@ -157,7 +160,7 @@ public class PlayerPaginationCalculator implements PaginationCalculator<Player> 
             if (afterPadding > 0) {
                 build.append(CommandMessageFormatting.SPACE_TEXT);
                 if (afterPadding > 1) {
-                    build.append(Text.of(Strings.repeat(padding, afterPadding)));
+                    build.append(Collections.nCopies(afterPadding, padding));
                 }
             }
         }
