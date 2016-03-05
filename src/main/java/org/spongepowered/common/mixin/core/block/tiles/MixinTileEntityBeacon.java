@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block.tiles;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
+import net.minecraft.potion.Potion;
 import net.minecraft.tileentity.TileEntityBeacon;
 import org.spongepowered.api.block.tileentity.carrier.Beacon;
 import org.spongepowered.api.data.DataContainer;
@@ -33,6 +34,7 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.List;
@@ -49,6 +51,24 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     public int getCompletedLevels() {
         return this.levels < 0 ? 0 : this.levels;
     }
+
+    /**
+     * @author gabizou - March 4th, 2016
+     *
+     * Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
+     * prevented any non-vanilla beacon defined potions from being applied
+     * to a beacon. This method is used for both setfield and when reading from nbt.
+     */
+    @Overwrite
+    private int func_183001_h(int p_183001_1_) {
+        if (p_183001_1_ >= 0 && p_183001_1_ < Potion.potionTypes.length && Potion.potionTypes[p_183001_1_] != null) {
+            Potion potion = Potion.potionTypes[p_183001_1_];
+            return potion == null ? 0 : p_183001_1_;
+        } else {
+            return 0;
+        }
+    }
+
 
     @Override
     public DataContainer toContainer() {
@@ -67,6 +87,6 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        // TODO manipulators.add(getBeaconData());
+        manipulators.add(getBeaconData());
     }
 }

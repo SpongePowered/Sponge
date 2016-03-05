@@ -33,8 +33,11 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -44,11 +47,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.List;
 import java.util.Optional;
@@ -67,6 +71,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Nullable UUID entityId;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+    @Nullable List<ImmutableValue<?>> values;
 
     public SpongeEntitySnapshotBuilder() {
         super(EntitySnapshot.class, 1);
@@ -154,6 +159,17 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         return this;
     }
 
+    @Override
+    public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+        checkNotNull(key, "key");
+        checkState(this.entityType != null, "Must have a valid entity type before applying data!");
+        if (this.values == null) {
+            this.values = Lists.newArrayList();
+        }
+        this.values.add(new ImmutableSpongeValue<>(key, value));
+        return this;
+    }
+
     private void addManipulator(ImmutableDataManipulator<?, ?> manipulator) {
         if (this.manipulators == null) {
             this.manipulators = Lists.newArrayList();
@@ -234,7 +250,13 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
 
     @Override
     public EntitySnapshot build() {
-        return new SpongeEntitySnapshot(this);
+        EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
+        if(this.values != null) {
+            for (ImmutableValue<?> value : this.values) {
+                snapshot = snapshot.with(value).orElse(snapshot);
+            }
+        }
+        return snapshot;
     }
 
     @Override
