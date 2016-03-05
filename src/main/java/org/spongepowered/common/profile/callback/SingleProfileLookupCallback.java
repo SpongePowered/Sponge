@@ -22,32 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.query;
+package org.spongepowered.common.profile.callback;
 
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileCache;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.ProfileLookupCallback;
 
-public abstract class GameProfileQuery<T> extends Query<T> {
+import java.util.Optional;
 
-    protected GameProfileQuery(GameProfileCache cache, boolean useCache) {
-        super(cache, useCache);
+public final class SingleProfileLookupCallback implements ProfileLookupCallback {
+
+    private Optional<org.spongepowered.api.profile.GameProfile> result;
+
+    @Override
+    public void onProfileLookupSucceeded(GameProfile profile) {
+        this.result = Optional.of((org.spongepowered.api.profile.GameProfile) profile);
     }
 
-    public static final class SingleFill extends GameProfileQuery<GameProfile> {
+    @Override
+    public void onProfileLookupFailed(GameProfile profile, Exception exception) {
+        this.result = Optional.empty();
+    }
 
-        private final GameProfile profile;
-        private final boolean signed;
-
-        public SingleFill(GameProfileCache cache, GameProfile profile, boolean signed, boolean useCache) {
-            super(cache, useCache);
-            this.profile = profile;
-            this.signed = signed;
-        }
-
-        @Override
-        public GameProfile call() throws Exception {
-            return this.fillProfile(this.profile, this.signed);
-        }
+    public Optional<org.spongepowered.api.profile.GameProfile> getResult() {
+        return this.result;
     }
 
 }

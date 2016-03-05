@@ -22,32 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.profile.query;
+package org.spongepowered.common.interfaces.server.management;
 
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.profile.GameProfileCache;
+import com.mojang.authlib.GameProfile;
 
-public abstract class GameProfileQuery<T> extends Query<T> {
+import java.util.Date;
 
-    protected GameProfileQuery(GameProfileCache cache, boolean useCache) {
-        super(cache, useCache);
-    }
+public interface IMixinPlayerProfileCacheEntry {
 
-    public static final class SingleFill extends GameProfileQuery<GameProfile> {
+    GameProfile getGameProfile();
 
-        private final GameProfile profile;
-        private final boolean signed;
-
-        public SingleFill(GameProfileCache cache, GameProfile profile, boolean signed, boolean useCache) {
-            super(cache, useCache);
-            this.profile = profile;
-            this.signed = signed;
-        }
-
-        @Override
-        public GameProfile call() throws Exception {
-            return this.fillProfile(this.profile, this.signed);
-        }
-    }
+    Date getExpirationDate();
 
 }
