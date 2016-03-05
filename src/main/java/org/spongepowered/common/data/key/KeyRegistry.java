@@ -84,6 +84,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -102,6 +103,7 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class KeyRegistry {
@@ -300,6 +302,8 @@ public class KeyRegistry {
         keyMap.put("right_arm_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightArmRotation")));
         keyMap.put("left_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("LeftLegRotation")));
         keyMap.put("right_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightLegRotation")));
+        keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
+        keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
