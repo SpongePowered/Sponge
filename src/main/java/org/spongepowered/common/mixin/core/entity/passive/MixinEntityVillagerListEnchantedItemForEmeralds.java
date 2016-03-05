@@ -45,20 +45,20 @@ import java.util.Random;
 @Mixin(EntityVillager.ListEnchantedItemForEmeralds.class)
 public class MixinEntityVillagerListEnchantedItemForEmeralds implements TradeOfferGenerator {
 
-    @Shadow public ItemStack field_179407_a;
-    @Shadow public EntityVillager.PriceInfo field_179406_b;
+    @Shadow public ItemStack enchantedItemStack;
+    @Shadow public EntityVillager.PriceInfo priceInfo;
 
     @Override
     public TradeOffer apply(Random random) {
         checkNotNull(random, "Random cannot be null!");
         int emeraldCount = 1;
 
-        if (this.field_179406_b != null) {
-            emeraldCount = this.field_179406_b.getPrice(random);
+        if (this.priceInfo != null) {
+            emeraldCount = this.priceInfo.getPrice(random);
         }
 
         ItemStack itemstack = new ItemStack(Items.emerald, emeraldCount, 0);
-        ItemStack itemstack1 = new ItemStack(this.field_179407_a.getItem(), 1, this.field_179407_a.getMetadata());
+        ItemStack itemstack1 = new ItemStack(this.enchantedItemStack.getItem(), 1, this.enchantedItemStack.getMetadata());
         itemstack1 = EnchantmentHelper.addRandomEnchantment(random, itemstack1, 5 + random.nextInt(15));
         return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);
     }

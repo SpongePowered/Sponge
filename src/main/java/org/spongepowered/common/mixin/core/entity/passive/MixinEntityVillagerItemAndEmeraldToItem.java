@@ -44,9 +44,9 @@ import java.util.Random;
 @Mixin(EntityVillager.ItemAndEmeraldToItem.class)
 public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenerator {
 
-    @Shadow public ItemStack field_179411_a;
-    @Shadow public EntityVillager.PriceInfo field_179409_b;
-    @Shadow public ItemStack field_179410_c;
+    @Shadow public ItemStack buyingItemStack;
+    @Shadow public EntityVillager.PriceInfo buyingPriceInfo;
+    @Shadow public ItemStack sellingItemstack;
     @Shadow public EntityVillager.PriceInfo field_179408_d;
 
     @Override
@@ -54,8 +54,8 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
         checkNotNull(random, "Random cannot be null!");
         int buyingCount = 1;
 
-        if (this.field_179409_b != null) {
-            buyingCount = this.field_179409_b.getPrice(random);
+        if (this.buyingItemStack != null) {
+            buyingCount = this.buyingPriceInfo.getPrice(random);
         }
 
         int sellingCount = 1;
@@ -64,9 +64,9 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
             sellingCount = this.field_179408_d.getPrice(random);
         }
 
-        final ItemStack itemStackBuying = new ItemStack(this.field_179411_a.getItem(), buyingCount, this.field_179411_a.getMetadata());
+        final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
         final ItemStack emeraldStack = new ItemStack(Items.emerald);
-        final ItemStack itemStackSelling = new ItemStack(this.field_179410_c.getItem(), sellingCount, this.field_179410_c.getMetadata());
+        final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }
 }

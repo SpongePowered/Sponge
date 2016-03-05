@@ -60,7 +60,7 @@ public class UserCollection extends SpongeSubjectCollection {
 
     private GameProfile uuidToGameProfile(UUID uniqueId) {
         try {
-            return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true);
+            return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true).get();
         } catch (Exception e) {
             SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
             return null;

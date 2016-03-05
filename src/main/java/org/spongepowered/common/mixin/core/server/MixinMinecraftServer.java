@@ -159,7 +159,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private boolean preparingChunks = false;
-    private GameProfileManager profileManager = new SpongeProfileManager();
+    private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
     @Override
@@ -948,6 +948,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public GameProfileManager getGameProfileManager() {
+        if (this.profileManager == null) {
+            this.profileManager = new SpongeProfileManager();
+        }
         return this.profileManager;
     }
 
