@@ -116,6 +116,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+    @Shadow protected abstract void func_184581_c(net.minecraft.util.DamageSource p_184581_1_);
+    @Shadow protected abstract boolean func_184583_d(DamageSource p_184583_1_);
+    @Shadow protected abstract void func_184590_k(float p_184590_1_);
 
     @Override
     public Vector3d getHeadRotation() {
@@ -209,8 +212,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (source == null) {
             Thread.dumpStack();
         }
-        if (!hookModAttack(this.nmsEntityLiving, source, amount))
+        if (!hookModAttack(this.nmsEntityLiving, source, amount)) {
             return false;
+        }
         if (this.nmsEntityLiving.isEntityInvulnerable(source)) {
             return false;
         } else if (this.worldObj.isRemote) {
@@ -225,14 +229,34 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             } else {
                 // Sponge - ignore as this is handled in our damageEntityHook
                 if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
+                        && this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
                     this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.HEAD).damageItem((int) (amount * 4.0F + this.rand.nextFloat() *
                             amount * 2.0F), this.nmsEntityLiving);
                     amount *= 0.75F;
                 }
 
+                boolean flag = false;
+
+                if (amount > 0.0F && this.func_184583_d(source)) {
+                    this.func_184590_k(amount);
+
+                    if (source.isProjectile()) {
+                        amount = 0.0F;
+                    } else {
+                        amount *= 0.33F;
+
+                        if (source.getSourceOfDamage() instanceof EntityLivingBase) {
+                            ((EntityLivingBase) source.getSourceOfDamage())
+                                    .knockBack(this.nmsEntityLiving, 0.5F, this.posX - source.getSourceOfDamage().posX, this
+                                            .posZ - source.getSourceOfDamage().posZ);
+                        }
+                    }
+
+                    flag = true;
+                }
+
                 this.nmsEntityLiving.limbSwingAmount = 1.5F;
-                boolean flag = true;
+                boolean flag1 = true;
 
                 if ((float) this.hurtResistantTime > (float) this.nmsEntityLiving.maxHurtResistantTime / 2.0F) {
                     if (amount <= this.lastDamage) {
@@ -246,7 +270,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     // Sponge end
 
                     this.lastDamage = amount;
-                    flag = false;
+                    flag1 = false;
                 } else {
                     // Sponge start - reroute to our damage hook
                     if (!this.damageEntityHook(source, amount)) {
@@ -271,7 +295,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         this.recentlyHit = 100;
                         this.attackingPlayer = (EntityPlayer) entity;
                     } else if (entity instanceof EntityWolf) {
-                        EntityWolf entitywolf = (EntityWolf)entity;
+                        EntityWolf entitywolf = (EntityWolf) entity;
 
                         if (entitywolf.isTamed()) {
                             this.recentlyHit = 100;
@@ -280,10 +304,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
                 }
 
-                if (flag) {
-                    this.worldObj.setEntityState(this.nmsEntityLiving, (byte) 2);
+                if (flag1) {
+                    if (flag) {
+                        this.worldObj.setEntityState(this.nmsEntityLiving, (byte) 29);
+                    } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source)
+                            .getIsThornsDamage()) {
+                        this.worldObj.setEntityState(this.nmsEntityLiving, (byte) 33);
+                    } else {
+                        this.worldObj.setEntityState(this.nmsEntityLiving, (byte) 2);
+                    }
 
-                    if (source != DamageSource.drown) {
+                    if (source != DamageSource.drown && (!flag || amount > 0.0F)) {
                         this.setBeenAttacked();
                     }
 
@@ -295,27 +326,27 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                             d1 = (Math.random() - Math.random()) * 0.01D;
                         }
 
-                        this.nmsEntityLiving.attackedAtYaw = (float) (Math.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
-                        this.nmsEntityLiving.knockBack(entity, 0.4f, d1, d0);
+                        this.nmsEntityLiving.attackedAtYaw = (float) (net.minecraft.util.math.MathHelper.atan2(d0, d1) * (180D / Math.PI) - (double)
+                                this.rotationYaw);
+                        this.nmsEntityLiving.knockBack(entity, 0.4F, d1, d0);
                     } else {
                         this.nmsEntityLiving.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
                     }
                 }
 
+                if (this.getHealth() <= 0.0F) {
+                    SoundEvent soundevent = this.getDeathSound();
 
-                if (this.nmsEntityLiving.getHealth() <= 0.0F) {
-                    if (flag) {
-                        this.nmsEntityLiving.playSound(this.getDeathSound(), this.getSoundVolume(), this.getSoundPitch());
+                    if (flag1 && soundevent != null) {
+                        this.nmsEntityLiving.playSound(soundevent, this.getSoundVolume(), this.getSoundPitch());
                     }
 
                     this.nmsEntityLiving.onDeath(source);
-                } else {
-                    if (flag) {
-                        this.nmsEntityLiving.playSound(this.getHurtSound(), this.getSoundVolume(), this.getSoundPitch());
-                    }
+                } else if (flag1) {
+                    this.func_184581_c(source);
                 }
 
-                return true;
+                return !flag || amount > 0.0F;
             }
         }
     }
