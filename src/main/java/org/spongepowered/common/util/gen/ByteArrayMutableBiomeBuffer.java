@@ -84,7 +84,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkRange(x, z);
 
         byte biomeId = this.biomes[getIndex(x, z)];
-        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(biomeId);
+        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(biomeId & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 
