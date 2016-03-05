@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockCrops;
+import net.minecraft.block.properties.PropertyInteger;
 import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
@@ -34,6 +35,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableGrowthData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeGrowthData;
 
@@ -41,6 +43,9 @@ import java.util.Optional;
 
 @Mixin(BlockCrops.class)
 public abstract class MixinBlockCrops extends MixinBlock {
+
+    @Shadow protected abstract PropertyInteger func_185524_e();
+    @Shadow protected abstract int func_185526_g();
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -56,10 +61,10 @@ public abstract class MixinBlockCrops extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            if (growth > 7) {
-                growth = 7;
+            if (growth > func_185526_g()) {
+                growth = func_185526_g();
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCrops.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(func_185524_e(), growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -68,16 +73,16 @@ public abstract class MixinBlockCrops extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
-            if (growth > 7) {
-                growth = 7;
+            if (growth > func_185526_g()) {
+                growth = func_185526_g();
             }
-            return Optional.of((BlockState) blockState.withProperty(BlockCrops.AGE, growth));
+            return Optional.of((BlockState) blockState.withProperty(func_185524_e(), growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockCrops.AGE), 0, 7);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(func_185524_e()), 0, func_185526_g());
     }
 
 }
