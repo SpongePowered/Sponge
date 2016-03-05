@@ -22,26 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.mixin.core.entity;
 
-import net.minecraft.entity.monster.EntitySnowman;
-import org.spongepowered.api.entity.living.golem.SnowGolem;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.projectile.EntityLargeFireball;
+import net.minecraft.entity.projectile.EntitySmallFireball;
+import net.minecraft.entity.projectile.EntityWitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-@Mixin(EntitySnowman.class)
-public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
+@Mixin({ EntityLivingBase.class, EntityLargeFireball.class, EntityWitherSkull.class, EntitySmallFireball.class })
+public abstract class MixinGriefer implements IMixinGriefer {
 
-    // This behavior will have to be changed in 1.9
-    // then there will also be a "mobGriefing" rule check (says the changelog)
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MathHelper;floor_double(D)I", ordinal = 3),
-            cancellable = true)
-    private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
-            ci.cancel();
-        }
+    private boolean canGrief = true;
+
+    @Override
+    public boolean canGrief() {
+        return this.canGrief;
     }
+
+    @Override
+    public void setCanGrief(boolean grief) {
+        this.canGrief = grief;
+    }
+
 }

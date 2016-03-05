@@ -343,8 +343,11 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
 
-        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class, ImmutableBodyPartRotationalData.class, 
+        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class, ImmutableBodyPartRotationalData.class,
                 ImmutableSpongeBodyPartRotationalData.class, new ArmorStandBodyPartRotationalDataProcessor());
+
+        dataManager.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
+                ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
 
         // Item Processors
 
@@ -602,7 +605,7 @@ public class DataRegistrar {
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
-				
+
         final BeaconDataProcessor beaconDataProcessor = new BeaconDataProcessor();
         dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class, ImmutableBeaconData.class, ImmutableSpongeBeaconData.class,
                 beaconDataProcessor);

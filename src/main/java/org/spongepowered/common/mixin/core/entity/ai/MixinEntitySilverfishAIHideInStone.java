@@ -22,26 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.monster.EntitySnowman;
-import org.spongepowered.api.entity.living.golem.SnowGolem;
+import net.minecraft.block.BlockSilverfish;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.monster.EntitySilverfish;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-@Mixin(EntitySnowman.class)
-public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
+@Mixin(EntitySilverfish.AIHideInStone.class)
+public abstract class MixinEntitySilverfishAIHideInStone extends EntityAIBase {
 
-    // This behavior will have to be changed in 1.9
-    // then there will also be a "mobGriefing" rule check (says the changelog)
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MathHelper;floor_double(D)I", ordinal = 3),
-            cancellable = true)
-    private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
-            ci.cancel();
-        }
+    @Shadow(aliases = "this$0") private EntitySilverfish field_179485_a;
+
+    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish"
+            + "(Lnet/minecraft/block/state/IBlockState;)Z"))
+    private boolean onCanGrief(IBlockState blockState) {
+        return BlockSilverfish.canContainSilverfish(blockState) && this.field_179485_a.worldObj.getGameRules().getBoolean("mobGriefing")
+                && ((IMixinGriefer) this.field_179485_a).canGrief();
     }
 }

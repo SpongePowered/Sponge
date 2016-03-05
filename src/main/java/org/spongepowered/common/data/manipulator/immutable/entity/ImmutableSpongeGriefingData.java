@@ -22,26 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monster;
+package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import net.minecraft.entity.monster.EntitySnowman;
-import org.spongepowered.api.entity.living.golem.SnowGolem;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableGriefingData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GriefingData;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGriefingData;
 
-@Mixin(EntitySnowman.class)
-public abstract class MixinEntitySnowman extends MixinEntityGolem implements SnowGolem {
+public class ImmutableSpongeGriefingData extends AbstractImmutableBooleanData<ImmutableGriefingData, GriefingData>
+        implements ImmutableGriefingData {
 
-    // This behavior will have to be changed in 1.9
-    // then there will also be a "mobGriefing" rule check (says the changelog)
-    @Inject(method = "onLivingUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MathHelper;floor_double(D)I", ordinal = 3),
-            cancellable = true)
-    private void onCanGrief(CallbackInfo ci) {
-        if (!this.worldObj.getGameRules().getBoolean("mobGriefing") || !((IMixinGriefer) this).canGrief()) {
-            ci.cancel();
-        }
+    public ImmutableSpongeGriefingData(boolean value) {
+        super(ImmutableGriefingData.class, value, Keys.CAN_GRIEF, SpongeGriefingData.class, true);
     }
+
+    @Override
+    public ImmutableValue<Boolean> canGrief() {
+        return getValueGetter();
+    }
+
 }
