@@ -45,6 +45,7 @@ import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenStronghold;
+import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -287,7 +288,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
             StaticMixinHelper.runningGenerator = populator.getType();
-            if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
+            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
             }
             if (populator instanceof IFlaggedPopulator) {
@@ -304,8 +305,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkX, chunkZ);
         }
 
-        PopulateChunkEvent.Post event =
-                SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
+        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
         causeTracker.getCapturedPopulators().clear();
@@ -329,7 +329,6 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
         BiomeGenBase biome = this.world.getBiomeGenForCoords(pos);
-        @SuppressWarnings("unchecked")
         List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
         return creatures;
     }
@@ -347,8 +346,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public void recreateStructures(Chunk chunk, int chunkX, int chunkZ) {
-        // TODO No structure support
+    public void recreateStructures(Chunk chunkIn, int x, int z) {
+        for (GenerationPopulator genpop : this.genpop) {
+            if (genpop instanceof MapGenStructure) {
+                ((MapGenStructure) genpop).func_186125_a(chunkIn.getWorld(), x, z, (ChunkPrimer) null);
+            }
+        }
     }
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {
@@ -393,7 +396,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         continue;
                     }
 
-                    if (currentY >= seaLevel-1) {
+                    if (currentY >= seaLevel - 1) {
                         chunk.setBlockState(relativeZ, currentY, relativeX, currentPlacement);
                         ++i;
                         if (i < groundcover.size()) {

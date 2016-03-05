@@ -22,35 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.gen.populators;
+package org.spongepowered.common.world.gen.builders;
 
-import net.minecraft.entity.boss.EntityDragon;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import org.spongepowered.api.world.Chunk;
-import org.spongepowered.api.world.gen.Populator;
-import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.world.gen.InternalPopulatorTypes;
+import static com.google.common.base.Preconditions.checkArgument;
 
-import java.util.Random;
+import org.spongepowered.api.world.gen.populator.ChorusFlower;
+import org.spongepowered.api.world.gen.populator.ChorusFlower.Builder;
+import org.spongepowered.common.world.gen.populators.ChorusFlowerPopulator;
 
-public class EnderDragonPopulator implements Populator {
+public class ChorusFlowerBuilder implements ChorusFlower.Builder {
 
-    @Override
-    public PopulatorType getType() {
-        return InternalPopulatorTypes.ENDER_DRAGON;
+    private int exclusion = 64;
+    
+    public ChorusFlowerBuilder() {
+        reset();
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        BlockPos pos = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
-        if (pos.getX() == 0 && pos.getZ() == 0) {
-            EntityDragon entitydragon = new EntityDragon(world);
-            entitydragon.setLocationAndAngles(0.0D, 128.0D, 0.0D, random.nextFloat() * 360.0F, 0.0F);
-            world.spawnEntityInWorld(entitydragon);
-        }
-
+    public Builder exclusionRadius(int radius) {
+        checkArgument(radius >= 0, "Exclusion radius must be postive or zero");
+        this.exclusion = radius;
+        return this;
     }
 
+    @Override
+    public Builder from(ChorusFlower value) {
+        return this;
+    }
+
+    @Override
+    public Builder reset() {
+        this.exclusion = 1024;
+        return this;
+    }
+
+    @Override
+    public ChorusFlower build() throws IllegalStateException {
+        ChorusFlower pop = new ChorusFlowerPopulator();
+        pop.setExclusionRadius(this.exclusion);
+        return pop;
+    }
 }

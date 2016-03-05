@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.gen.MapGenBase;
 import org.spongepowered.api.world.World;
@@ -41,6 +42,7 @@ public abstract class MixinMapGenBase implements GenerationPopulator {
 
     @Override
     public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+        Preconditions.checkNotNull(world);
         int x = buffer.getBlockMin().getX() / 16;
         int z = buffer.getBlockMin().getZ() / 16;
         func_186125_a((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));

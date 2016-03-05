@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.gen.builders;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.world.gen.feature.WorldGenEndIsland;
@@ -38,6 +39,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
     private VariableAmount initial;
     private VariableAmount decrement;
     private BlockState state;
+    private int exclusion;
 
     public EndIslandBuilder() {
         reset();
@@ -62,6 +64,13 @@ public class EndIslandBuilder implements EndIsland.Builder {
     }
 
     @Override
+    public Builder exclusionRadius(int radius) {
+        checkArgument(radius >= 0, "Exclusion radius must be postive or zero");
+        this.exclusion = radius;
+        return this;
+    }
+
+    @Override
     public Builder from(EndIsland value) {
         startingRadius(value.getStartingRadius());
         radiusDecrement(value.getRadiusDecrement());
@@ -74,6 +83,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
         this.initial = VariableAmount.baseWithRandomAddition(4, 3);
         this.decrement = VariableAmount.baseWithRandomAddition(0.5, 2);
         this.state = BlockTypes.END_STONE.getDefaultState();
+        this.exclusion = 64;
         return this;
     }
 
@@ -83,6 +93,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
         island.setIslandBlock(this.state);
         island.setStartingRadius(this.initial);
         island.setRadiusDecrement(this.decrement);
+        island.setExclusionRadius(this.exclusion);
         return island;
     }
 

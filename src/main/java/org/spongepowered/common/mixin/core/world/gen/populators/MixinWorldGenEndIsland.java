@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3i;
@@ -52,12 +53,13 @@ import java.util.Random;
 @Mixin(WorldGenEndIsland.class)
 public abstract class MixinWorldGenEndIsland extends WorldGenerator implements EndIsland {
 
-    private NoiseGeneratorSimplex field_185973_o;
+    private NoiseGeneratorSimplex noise;
     private long lastSeed = -1;
 
     private VariableAmount initial;
     private VariableAmount decrement;
     private BlockState state;
+    private int exclusion = 64;
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
@@ -100,50 +102,64 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
     public void setIslandBlock(BlockState state) {
         this.state = checkNotNull(state);
     }
+    
+    @Override
+    public int getExclusionRadius() {
+        return this.exclusion;
+    }
+    
+    @Override
+    public void setExclusionRadius(int radius) {
+        checkArgument(radius >= 0);
+        this.exclusion = radius;
+    }
 
     @Override
     public void populate(Chunk chunk, Random rand) {
-        if (this.field_185973_o == null || chunk.getWorld().getProperties().getSeed() != this.lastSeed) {
+        if (this.noise == null || chunk.getWorld().getProperties().getSeed() != this.lastSeed) {
             this.lastSeed = chunk.getWorld().getProperties().getSeed();
-            this.field_185973_o = new NoiseGeneratorSimplex(new Random(this.lastSeed));
+            this.noise = new NoiseGeneratorSimplex(new Random(this.lastSeed));
         }
         Vector3i min = chunk.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
-        float f = this.func_185960_a(min.getX() / 16, min.getZ() / 16, 1, 1);
+        int chunkX = min.getX() / 16;
+        int chunkZ = min.getX() / 16;
+        if ((long) chunkX * (long) chunkX + (long) chunkZ * (long) chunkZ > this.exclusion * this.exclusion) {
+            float f = this.func_185960_a(chunkX, chunkZ, 1, 1);
 
-        if (f < -20.0F && rand.nextInt(14) == 0) {
-            generate((World) chunk.getWorld(), rand, chunkPos.add(rand.nextInt(16) + 8, 55 + rand.nextInt(16), rand.nextInt(16) + 8));
-
-            if (rand.nextInt(4) == 0) {
+            if (f < -20.0F && rand.nextInt(14) == 0) {
                 generate((World) chunk.getWorld(), rand, chunkPos.add(rand.nextInt(16) + 8, 55 + rand.nextInt(16), rand.nextInt(16) + 8));
+                if (rand.nextInt(4) == 0) {
+                    generate((World) chunk.getWorld(), rand, chunkPos.add(rand.nextInt(16) + 8, 55 + rand.nextInt(16), rand.nextInt(16) + 8));
+                }
             }
         }
     }
 
     /*
-     * Author: Deamon
-     * 
-     * Purpose: it use the initial radius, radius decrement, and block type fields
+     * Author: Deamon Purpose: it use the initial radius, radius decrement, and
+     * block type fields
      */
     @Override
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
-//        int i = rand.nextInt(3) + 4;
-        int i = this.initial.getFlooredAmount(rand);
-        float f = i;
+        // int radius = rand.nextInt(3) + 4;
+        double radius = this.initial.getFlooredAmount(rand);
 
-        for (int j = 0; f > 0.5F; --j) {
-            for (int k = MathHelper.floor_float(-f); k <= MathHelper.ceiling_float_int(f); ++k) {
-                for (int l = MathHelper.floor_float(-f); l <= MathHelper.ceiling_float_int(f); ++l) {
-                    if (k * k + l * l <= (f + 1.0F) * (f + 1.0F)) {
-//                        this.setBlockAndNotifyAdequately(worldIn, position.add(k, j, l), Blocks.end_stone.getDefaultState());
-                        this.setBlockAndNotifyAdequately(worldIn, position.add(k, j, l), (IBlockState) this.state);
+        for (int y = 0; radius > 0.5F; --y) {
+            for (int x = MathHelper.floor_double(-radius); x <= MathHelper.ceiling_double_int(radius); ++x) {
+                for (int z = MathHelper.floor_double(-radius); z <= MathHelper.ceiling_double_int(radius); ++z) {
+                    if (x * x + z * z <= (radius + 1.0F) * (radius + 1.0F)) {
+                        // this.setBlockAndNotifyAdequately(worldIn,
+                        // position.add(k, j, l),
+                        // Blocks.end_stone.getDefaultState());
+                        this.setBlockAndNotifyAdequately(worldIn, position.add(x, y, z), (IBlockState) this.state);
                     }
                 }
             }
 
-            f = (float) (f - this.decrement.getAmount(rand));
-//            f = (float)(f - (rand.nextInt(2) + 0.5D));
+            radius = (float) (radius - this.decrement.getAmount(rand));
+            // radius = (float)(radius - (rand.nextInt(2) + 0.5D));
         }
 
         return true;
@@ -167,7 +183,7 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
                 long k = p_185960_1_ + i;
                 long l = p_185960_2_ + j;
 
-                if (k * k + l * l > 4096L && this.field_185973_o.func_151605_a(k, l) < -0.8999999761581421D) {
+                if (k * k + l * l > 4096L && this.noise.func_151605_a(k, l) < -0.8999999761581421D) {
                     float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;

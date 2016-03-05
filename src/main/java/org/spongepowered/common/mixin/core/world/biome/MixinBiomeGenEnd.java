@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenEnd;
+import org.spongepowered.api.world.gen.populator.ChorusFlower;
+import org.spongepowered.api.world.gen.populator.EndIsland;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.EndBiomeGenerationPopulator;
@@ -42,5 +44,7 @@ public abstract class MixinBiomeGenEnd extends MixinBiomeGenBase {
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getGenerationPopulators().add(new EndBiomeGenerationPopulator());
         gensettings.getPopulators().add(new EndSpikePopulator());
+        gensettings.getPopulators().add(EndIsland.builder().build());
+        gensettings.getPopulators().add(ChorusFlower.builder().build());
     }
 }
