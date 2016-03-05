@@ -37,6 +37,7 @@ import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 
+import java.util.List;
 import java.util.Random;
 
 // Note that these mixins will not have to exist once mixing into interfaces is
@@ -59,5 +60,11 @@ public class MixinEntityVillagerListEnchantedBookForEmeralds implements TradeOff
         }
 
         return (TradeOffer) new MerchantRecipe(new ItemStack(Items.book), new ItemStack(Items.emerald, emeraldCount), itemstack);
+    }
+
+
+    @Override
+    public void accept(List<TradeOffer> tradeOffers, Random random) {
+        tradeOffers.add(apply(random));
     }
 }

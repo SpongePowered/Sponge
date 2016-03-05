@@ -33,9 +33,11 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import java.util.List;
 import java.util.Random;
 
 // Note that these mixins will not have to exist once mixing into interfaces is
@@ -59,5 +61,10 @@ public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
 
         final ItemStack buyingItem = new ItemStack(this.sellItem, buyingCount, 0);
         return (TradeOffer) new MerchantRecipe(buyingItem, Items.emerald);
+    }
+
+    @Override
+    public void accept(List<TradeOffer> tradeOffers, Random random) {
+        tradeOffers.add(apply(random));
     }
 }
