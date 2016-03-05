@@ -36,6 +36,7 @@ import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.effect.particle.*;
 import org.spongepowered.api.effect.potion.*;
+import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -332,6 +333,7 @@ public final class CommonModuleRegistry {
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
+            .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TextColor.class, new TextColorRegistryModule())

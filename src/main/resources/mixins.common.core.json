@@ -327,6 +327,8 @@
         "server.MixinPlayerList",
         "server.network.MixinNetHandlerLoginServer",
         "server.network.MixinNetHandlerLoginServerAnonThread",
+        "sound.MixinSoundCategory",
+        "sound.MixinSoundEvent",
         "status.MixinLegacyPingHandler",
         "status.MixinNetHandlerStatusServer",
         "status.MixinServerStatusResponse",

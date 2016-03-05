@@ -33,13 +33,12 @@ import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.effect.particle.ParticleEffect;
-import org.spongepowered.api.effect.sound.SoundCategoryType;
+import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -73,7 +72,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
     @Shadow @Final public WorldProvider provider;
     @Shadow protected WorldInfo worldInfo;
 
-    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onEffectsConstructed(ISaveHandler handler, WorldInfo info, WorldProvider provider, Profiler profiler, boolean client, CallbackInfo callbackInfo) {
@@ -83,18 +82,18 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
 
     @Override
-    public void playSound(SoundType sound, SoundCategoryType category, Vector3d position, double volume) {
+    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
         this.playSound(sound, category, position, volume, 1);
     }
 
     @Override
-    public void playSound(SoundType sound,  SoundCategoryType category, Vector3d position, double volume, double pitch) {
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch) {
         this.playSound(sound, category, position, volume, pitch, 0);
     }
 
     @Override
-    public void playSound(SoundType sound,  SoundCategoryType category, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
+        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
     }
 
     @Override
