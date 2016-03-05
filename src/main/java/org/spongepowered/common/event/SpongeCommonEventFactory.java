@@ -568,7 +568,7 @@ public class SpongeCommonEventFactory {
     public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             MovingObjectPosition movingObjectPosition) {
         MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
-        Cause cause = Cause.of(projectile, projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource);
+        Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();
         IMixinEntity spongeEntity = (IMixinEntity) projectile;
         Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {

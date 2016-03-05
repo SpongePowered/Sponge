@@ -230,7 +230,7 @@ public class ProjectileLauncher {
         if (projectile.get() instanceof EntityThrowable) {
             configureThrowable((EntityThrowable) projectile.get());
         }
-        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.of(source));
+        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.source(source).build());
     }
 
     private static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {

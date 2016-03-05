@@ -1017,7 +1017,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
             List<String> list, String astring[], String s) {
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
                 ImmutableList.copyOf(list), list, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
