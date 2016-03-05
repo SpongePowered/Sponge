@@ -1,5 +1,5 @@
 {
-    "required": false,
+    "required": true,
     "minVersion": "0.5.1",
     "package": "org.spongepowered.common.mixin.core",
     "refmap": "mixins.common.refmap.json",
@@ -423,5 +423,8 @@
         "network.rcon.MixinRConConsoleSource",
         "network.rcon.MixinRConThreadClient",
         "server.MixinDedicatedServer"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }

@@ -14,5 +14,8 @@
         "text.MixinTextSelector",
         "text.MixinTextTranslatable",
         "text.title.MixinTitle"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }
