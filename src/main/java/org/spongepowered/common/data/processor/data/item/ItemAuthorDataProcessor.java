@@ -35,7 +35,6 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeAuthorData;
 import org.spongepowered.common.data.processor.common.AbstractItemSingleDataProcessor;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -75,8 +74,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
             return Optional.empty();
         }
-        final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
-        final Text author = TextSerializers.JSON.deserialize(json);
+        final Text author = SpongeTexts.fromLegacy(itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR));
         return Optional.of(author);
     }
 
