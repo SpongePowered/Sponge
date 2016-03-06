@@ -126,6 +126,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
     public static final String MODULE_BUNGEECORD = "bungeecord";
+    public static final String MODULE_REALTIME = "realtime";
 
     // WORLD
     public static final String WORLD_PVP_ENABLED = "pvp-enabled";
@@ -777,6 +778,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("exploits")
         private boolean enableExploitPatches = true;
 
+        @Setting(value = MODULE_REALTIME, comment = "Use real (wall) time instead of ticks as much as possible")
+        private boolean pluginRealTime = false;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -807,6 +811,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setExploitPatches(boolean enableExploitPatches) {
             this.enableExploitPatches = enableExploitPatches;
+        }
+
+        public boolean usePluginRealTime() {
+            return this.pluginRealTime;
+        }
+
+        public void setPluginRealTime(boolean state) {
+            this.pluginRealTime = state;
         }
     }
 
