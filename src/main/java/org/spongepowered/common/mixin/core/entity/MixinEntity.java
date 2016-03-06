@@ -41,6 +41,7 @@ import net.minecraft.init.Blocks;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -170,6 +171,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
+    @Shadow protected EntityDataManager dataWatcher;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);

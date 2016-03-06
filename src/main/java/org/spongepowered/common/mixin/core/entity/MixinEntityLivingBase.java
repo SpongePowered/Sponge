@@ -38,6 +38,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.Potion;
 import net.minecraft.util.CombatTracker;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
@@ -119,6 +120,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void func_184581_c(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract boolean func_184583_d(DamageSource p_184583_1_);
     @Shadow protected abstract void func_184590_k(float p_184590_1_);
+    @Shadow public abstract void func_184598_c(EnumHand hand);
+    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow public abstract boolean func_184587_cr();
 
     @Override
     public Vector3d getHeadRotation() {
