@@ -95,6 +95,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     private GameProfile fakeProfile;
     private UUID skinUuid;
+    private boolean aiDisabled = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
@@ -111,11 +112,25 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     protected void entityInit() {
-        super.entityInit();
+        this.dataWatcher.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
+        this.dataWatcher.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
+        this.dataWatcher.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
+        this.dataWatcher.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
+        this.dataWatcher.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
         this.dataWatcher.register(EntityPlayer.ABSORPTION, 0.0F);
         this.dataWatcher.register(EntityPlayer.PLAYER_SCORE, 0);
         this.dataWatcher.register(EntityPlayer.MAIN_HAND, (byte) 1);
         this.dataWatcher.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
+    }
+
+    @Override
+    public boolean isLeftHanded() {
+        return this.dataWatcher.get(EntityPlayer.MAIN_HAND) == 0;
+    }
+
+    @Override
+    public boolean isAIDisabled() {
+        return this.aiDisabled;
     }
 
     @Override
