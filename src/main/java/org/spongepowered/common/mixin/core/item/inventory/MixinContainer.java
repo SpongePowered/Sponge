@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.item.inventory;
 
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ICrafting;
 import net.minecraft.inventory.Slot;
@@ -37,6 +39,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 
@@ -120,7 +123,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
         }
     }
 
-    @Inject(method = "putStackInSlot", at = @At(value = "HEAD") )
+    @Inject(method = "putStackInSlot", at = @At(value = "HEAD"))
     public void onPutStackInSlot(int slotId, ItemStack itemstack, CallbackInfo ci) {
         if (this.captureInventory) {
             Slot slot = getSlot(slotId);
@@ -131,6 +134,18 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                         itemstack == null ? ItemStackSnapshot.NONE : ((org.spongepowered.api.item.inventory.ItemStack) itemstack).createSnapshot();
                 SlotTransaction slotTransaction = new SlotTransaction(new SlotAdapter(slot), originalItem, newItem);
                 this.capturedSlotTransactions.add(slotTransaction);
+            }
+        }
+    }
+
+    @Inject(method = "slotClick", at = @At(value = "HEAD"), cancellable = true)
+    public void onSlotClick(int slotId, int clickedButton, int mode, EntityPlayer player, CallbackInfoReturnable<net.minecraft.item.ItemStack> ci) {
+        if (slotId >= inventorySlots.size()) {
+            // Kick the player who's sending invalid packets and cancel the click
+            if (player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).playerNetServerHandler
+                        .kickPlayerFromServer("You have been kicked for attempting to click an out of bounds slot.");
+                ci.setReturnValue(null);
             }
         }
     }
