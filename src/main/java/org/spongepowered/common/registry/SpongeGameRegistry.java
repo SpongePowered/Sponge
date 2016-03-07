@@ -47,6 +47,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.PluginProvidedRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -148,7 +149,7 @@ public class SpongeGameRegistry implements GameRegistry {
         checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
         this.catalogRegistryMap.put(catalogClass, registryModule);
         if (this.phase != RegistrationPhase.PRE_REGISTRY) {
-            if (catalogClass.getName().contains("org.spongepowered.api")) {
+            if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
             syncModules();
