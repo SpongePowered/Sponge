@@ -24,10 +24,31 @@
  */
 package org.spongepowered.common.mixin.core.server.management;
 
+import com.mojang.authlib.GameProfile;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.server.management.IMixinPlayerProfileCacheEntry;
 
+import java.util.Date;
+
 @Mixin(targets = "net/minecraft/server/management/PlayerProfileCache$ProfileEntry")
-public abstract class MixinPlayerProfileCacheEntry implements IMixinPlayerProfileCacheEntry {
+@Implements(@Interface(iface = IMixinPlayerProfileCacheEntry.class, prefix = "entry$"))
+public abstract class MixinPlayerProfileCacheEntry {
+
+    @Shadow public abstract GameProfile getGameProfile();
+    @Shadow public abstract Date getExpirationDate();
+
+    @Intrinsic
+    public GameProfile entry$getGameProfile() {
+        return this.getGameProfile();
+    }
+
+    @Intrinsic
+    public Date entry$getExpirationDate() {
+        return this.getExpirationDate();
+    }
 
 }
