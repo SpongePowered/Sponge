@@ -30,7 +30,6 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.resourcepack.ResourcePackFactory;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.io.FileInputStream;

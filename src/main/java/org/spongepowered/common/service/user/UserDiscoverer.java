@@ -44,7 +44,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.io.FileInputStream;

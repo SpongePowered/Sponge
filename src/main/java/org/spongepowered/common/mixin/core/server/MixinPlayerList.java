@@ -99,7 +99,6 @@ import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$A
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.SocketAddress;

@@ -107,13 +107,12 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.util.Collection;
 import java.util.EnumSet;
@@ -544,7 +543,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public boolean transferToWorld(UUID uuid, Vector3d position) {
         checkNotNull(uuid, "The world uuid cannot be null!");
         checkNotNull(position, "The position cannot be null!");
-        return transferToWorld(DimensionRegistryModule.getInstance().getWorldFolder(uuid), position);
+        return transferToWorld(DimensionTypeRegistryModule.getInstance().getWorldFolder(uuid), position);
     }
 
     @Override

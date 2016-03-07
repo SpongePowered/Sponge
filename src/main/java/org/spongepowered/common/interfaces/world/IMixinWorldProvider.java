@@ -24,26 +24,11 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.IChunkGenerator;
 import org.spongepowered.common.config.SpongeConfig;
 
 public interface IMixinWorldProvider {
 
-    String getSaveFolder();
-
-    int getDimensionId();
-
-    void setDimensionId(int dim);
-
     void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
 
     SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
-
-    BlockPos getRandomizedSpawnPoint();
-
-    int getRespawnDimension(EntityPlayerMP playerIn);
-
-    IChunkGenerator createChunkGenerator(String settings);
 }

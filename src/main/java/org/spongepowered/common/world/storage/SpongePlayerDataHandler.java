@@ -34,7 +34,6 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.io.FileInputStream;

@@ -71,7 +71,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -688,7 +688,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         this.uuid = new UUID(nbt.getLong(NbtDataUtil.WORLD_UUID_MOST), nbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
-        DimensionRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
+        DimensionTypeRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
                 .forEach(type -> this.dimensionType = type);
         this.trackedUniqueIdCount = 0;
         for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {

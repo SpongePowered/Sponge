@@ -62,8 +62,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
 import java.time.Instant;

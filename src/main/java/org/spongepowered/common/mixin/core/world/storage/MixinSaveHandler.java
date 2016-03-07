@@ -43,8 +43,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.util.StaticMixinHelper;
-import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.io.File;

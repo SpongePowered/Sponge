@@ -41,8 +41,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -75,7 +74,7 @@ public abstract class MixinWorldProvider implements Dimension {
     @Override
     public DimensionType getType() {
         final IMixinWorldProvider this$ = (IMixinWorldProvider) this;
-        return DimensionRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this$.getDimensionId()));
+        return DimensionTypeRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this$.getDimensionId()));
     }
 
     public IChunkGenerator mixinworldprovider$createChunkGenerator(String settings) {

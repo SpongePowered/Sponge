@@ -40,7 +40,6 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.io.FileFilter;

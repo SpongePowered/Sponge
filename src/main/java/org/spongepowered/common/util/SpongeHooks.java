@@ -62,7 +62,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.world.CaptureType;
 
 import java.io.File;
@@ -464,7 +464,7 @@ public class SpongeHooks {
 
                     // If we've gotten here, see if this world's dimension's config is enabled.
                     final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
+                            DimensionTypeRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }
@@ -474,7 +474,7 @@ public class SpongeHooks {
                 } else {
                     // If we've gotten here, we have no world config so see if this world's dimension's config is enabled.
                     final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
+                            DimensionTypeRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }
