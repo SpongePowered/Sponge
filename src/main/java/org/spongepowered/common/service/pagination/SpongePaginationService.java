@@ -30,7 +30,6 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
-import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;

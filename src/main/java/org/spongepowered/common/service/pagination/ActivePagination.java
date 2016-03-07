@@ -33,10 +33,10 @@ import org.spongepowered.api.text.format.TextColors;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.api.command.CommandException;
 
+import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -50,16 +50,19 @@ abstract class ActivePagination {
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
     private final Text prevPageText;
+    @Nullable
     private final Text title;
-    private final Optional<Text> header;
-    private final Optional<Text> footer;
+    @Nullable
+    private final Text header;
+    @Nullable
+    private final Text footer;
     private int currentPage;
     private final int maxContentLinesPerPage;
     protected final PaginationCalculator calc;
     private final Text padding;
 
     public ActivePagination(MessageReceiver src, PaginationCalculator calc, Text title,
-            Optional<Text> header, Optional<Text> footer, Text padding) {
+            Text header, Text footer, Text padding) {
         this.src = new WeakReference<>(src);
         this.calc = calc;
         this.title = title;
@@ -78,11 +81,11 @@ abstract class ActivePagination {
         if (title != null) {
             maxContentLinesPerPage -= calc.getLines(src, title);
         }
-        if (header.isPresent()) {
-            maxContentLinesPerPage -= calc.getLines(src, header.get());
+        if (header != null) {
+            maxContentLinesPerPage -= calc.getLines(src, header);
         }
-        if (footer.isPresent()) {
-            maxContentLinesPerPage -= calc.getLines(src, footer.get());
+        if (footer != null) {
+            maxContentLinesPerPage -= calc.getLines(src, footer);
         }
         this.maxContentLinesPerPage = maxContentLinesPerPage;
 
@@ -132,7 +135,9 @@ abstract class ActivePagination {
         if (title != null) {
             toSend.add(title);
         }
-        this.header.ifPresent(toSend::add);
+        if (this.header != null) {
+            toSend.add(this.header);
+        }
 
         for (Text line : getLines(page)) {
             toSend.add(line);
@@ -142,7 +147,9 @@ abstract class ActivePagination {
         if (footer != null) {
             toSend.add(this.calc.center(src, footer, this.padding));
         }
-        this.footer.ifPresent(toSend::add);
+        if (this.footer != null) {
+            toSend.add(this.footer);
+        }
         src.sendMessages(toSend);
     }
 

@@ -32,16 +32,14 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 public class SpongePaginationBuilder implements PaginationList.Builder {
     private final SpongePaginationService service;
     private Iterable<Text> contents;
     private Text title;
-    private Optional<Text> header;
-    private Optional<Text> footer;
+    private Text header;
+    private Text footer;
     private Text paginationSpacer = Text.of("=");
     private int linesPerPage = 20;
 
@@ -74,14 +72,14 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
 
     @Override
     public PaginationList.Builder header(@Nullable Text header) {
-        this.header = Optional.ofNullable(header);
+        this.header = header;
         this.paginationList = null;
         return this;
     }
 
     @Override
     public PaginationList.Builder footer(@Nullable Text footer) {
-        this.footer = Optional.ofNullable(footer);
+        this.footer = footer;
         this.paginationList = null;
         return this;
     }
@@ -123,9 +121,9 @@ public class SpongePaginationBuilder implements PaginationList.Builder {
     public PaginationList.Builder from(PaginationList list) {
         this.reset();
         this.contents = list.getContents();
-        this.title = list.getTitle();
-        this.header = list.getHeader();
-        this.footer = list.getFooter();
+        this.title = list.getTitle().orElse(null);
+        this.header = list.getHeader().orElse(null);
+        this.footer = list.getFooter().orElse(null);
         this.paginationSpacer = list.getPadding();
 
         this.paginationList = null;

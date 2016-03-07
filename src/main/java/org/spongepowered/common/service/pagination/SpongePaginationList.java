@@ -45,18 +45,18 @@ public class SpongePaginationList implements PaginationList {
 
     private final SpongePaginationService service;
     private Iterable<Text> contents;
-    private Text title;
+    private Optional<Text> title;
     private Optional<Text> header;
     private Optional<Text> footer;
     private Text paginationSpacer;
     private int linesPerPage;
 
-    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Optional<Text> header, Optional<Text> footer, Text paginationSpacer, int linesPerPage) {
+    public SpongePaginationList(SpongePaginationService service, Iterable<Text> contents, Text title, Text header, Text footer, Text paginationSpacer, int linesPerPage) {
         this.service = service;
         this.contents = contents;
-        this.title = title;
-        this.header = header;
-        this.footer = footer;
+        this.title = Optional.ofNullable(title);
+        this.header = Optional.ofNullable(header);
+        this.footer = Optional.ofNullable(footer);
         this.paginationSpacer = paginationSpacer;
         this.linesPerPage = linesPerPage;
     }
@@ -67,7 +67,7 @@ public class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public Text getTitle() {
+    public Optional<Text> getTitle() {
         return this.title;
     }
 
@@ -109,16 +109,16 @@ public class SpongePaginationList implements PaginationList {
             return Maps.immutableEntry(input, lines);
         }).collect(Collectors.toList());
 
-        Text title = this.title;
+        Text title = this.title.orElse(null);
         if (title != null) {
             title = calculator.center(receiver, title, this.paginationSpacer);
         }
 
         ActivePagination pagination;
         if (this.contents instanceof List) { // If it started out as a list, it's probably reasonable to copy it to another list
-            pagination = new ListPagination(receiver, calculator, ImmutableList.copyOf(counts), title, this.header, this.footer, this.paginationSpacer);
+            pagination = new ListPagination(receiver, calculator, ImmutableList.copyOf(counts), title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
         } else {
-            pagination = new IterablePagination(receiver, calculator, counts, title, this.header, this.footer, this.paginationSpacer);
+            pagination = new IterablePagination(receiver, calculator, counts, title, this.header.orElse(null), this.footer.orElse(null), this.paginationSpacer);
         }
 
         this.service.getPaginationState(receiver, true).put(pagination);
