@@ -39,6 +39,7 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 import org.spongepowered.api.entity.ai.task.AbstractAITask;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
@@ -46,6 +47,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.ExtraClassCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.util.PluginProvidedRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
@@ -137,6 +139,7 @@ public class SpongeGameRegistry implements GameRegistry {
         this.orderedModules.addAll(TopologicalOrder.createOrderedLoad(graph));
 
         registerModulePhase();
+        SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
     }
 
@@ -146,7 +149,7 @@ public class SpongeGameRegistry implements GameRegistry {
         checkArgument(!this.catalogRegistryMap.containsKey(catalogClass), "Already registered a registry module!");
         this.catalogRegistryMap.put(catalogClass, registryModule);
         if (this.phase != RegistrationPhase.PRE_REGISTRY) {
-            if (catalogClass.getName().contains("org.spongepowered.api")) {
+            if (catalogClass.getName().contains("org.spongepowered.api") && catalogClass.getAnnotation(PluginProvidedRegistryModule.class) == null) {
                 throw new UnsupportedOperationException("Cannot register a module for an API defined class! That's the implementation's job!");
             }
             syncModules();
@@ -377,6 +380,11 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public ValueFactory getValueFactory() {
         return SpongeValueFactory.getInstance();
+    }
+
+    @Override
+    public VillagerRegistry getVillagerRegistry() {
+        return SpongeVillagerRegistry.getInstance();
     }
 
     @Override

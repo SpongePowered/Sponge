@@ -132,6 +132,7 @@ public class DataRegistrar {
         dataManager.registerBuilder(Note.class, new SpongeNoteBuilder());
         dataManager.registerBuilder(Sign.class, new SpongeSignBuilder());
         dataManager.registerBuilder(Skull.class, new SpongeSkullBuilder());
+        dataManager.registerBuilder(Beacon.class, new SpongeBeaconBuilder());
 
         // Block stuff
         dataManager.registerBuilder(BlockSnapshot.class, new SpongeBlockSnapshotBuilder());
@@ -163,9 +164,8 @@ public class DataRegistrar {
 
         // Data Manipulators
 
-        final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         dataManager.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
         // Entity Processors
 
@@ -342,6 +342,15 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class, ImmutableBodyPartRotationalData.class,
+                ImmutableSpongeBodyPartRotationalData.class, new ArmorStandBodyPartRotationalDataProcessor());
+
+        dataManager.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
+                ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
+
+        dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
+                ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
         // Item Processors
 
@@ -598,6 +607,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
 
+        final BeaconDataProcessor beaconDataProcessor = new BeaconDataProcessor();
+        dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class, ImmutableBeaconData.class, ImmutableSpongeBeaconData.class,
+                beaconDataProcessor);
+
         // Values
 
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
@@ -667,6 +680,15 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.HIDE_CAN_DESTROY, new HideCanDestroyValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_CAN_PLACE, new HideCanPlaceValueProcessor());
         dataManager.registerValueProcessor(Keys.HIDE_MISCELLANEOUS, new HideMiscellaneousValueProcessor());
+        dataManager.registerValueProcessor(Keys.BODY_ROTATIONS, new BodyRotationsValueProcessor());
+        dataManager.registerValueProcessor(Keys.HEAD_ROTATION, new HeadRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.CHEST_ROTATION, new ChestRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.LEFT_ARM_ROTATION, new LeftArmRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.RIGHT_ARM_ROTATION, new RightArmRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.LEFT_LEG_ROTATION, new LeftLegRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.RIGHT_LEG_ROTATION, new RightLegRotationValueProcessor());
+        dataManager.registerValueProcessor(Keys.BEACON_PRIMARY_EFFECT, new BeaconPrimaryEffectValueProcessor());
+        dataManager.registerValueProcessor(Keys.BEACON_SECONDARY_EFFECT, new BeaconSecondaryEffectValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

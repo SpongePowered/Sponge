@@ -22,25 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.play.server;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.ai.EntityAIMoveToBlock;
+import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.world.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-@Mixin(SPacketPlayerListItem.AddPlayerData.class)
-public abstract class MixinSPacketPlayerListItem$AddPlayerData implements IMixinSPacketPlayerListItem$AddPlayerData {
+@Mixin(EntityRabbit.AIRaidFarm.class)
+public abstract class MixinEntityRabbitAIRaidFarm extends EntityAIMoveToBlock {
 
-    private EntityPlayerMP playerMP;
-
-    @Override
-    public EntityPlayerMP getPlayer() {
-        return this.playerMP;
+    public MixinEntityRabbitAIRaidFarm(EntityCreature entityCreature, double a, int b) {
+        super(entityCreature, a, b);
     }
 
-    @Override
-    public void setPlayer(EntityPlayerMP player) {
-        this.playerMP = player;
+    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.theEntity).canGrief();
     }
 }

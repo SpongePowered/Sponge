@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityArmorStand;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -33,9 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 
+import java.util.List;
+
 @Mixin(EntityArmorStand.class)
 @Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
-public abstract class MixinEntityArmorStand extends MixinEntityLivingBase {
+public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implements ArmorStand {
 
     @Shadow public abstract boolean isSmall();
     @Shadow public abstract boolean getShowArms();
@@ -45,6 +48,11 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase {
     @Shadow protected abstract void setNoGravity(boolean p_175425_1_);
     @Shadow public abstract void setSmall(boolean p_175420_1_);
     @Shadow public abstract void setShowArms(boolean p_175413_1_);
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        manipulators.add(getBodyPartRotationalData());
+    }
 
     @Intrinsic
     public boolean armor$isSmall() {

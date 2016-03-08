@@ -50,6 +50,7 @@ import org.spongepowered.api.entity.ai.task.builtin.creature.WatchClosestAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.horse.RunAroundLikeCrazyAITask;
 import org.spongepowered.api.entity.ai.task.builtin.creature.target.FindNearestAttackableTargetAITask;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
@@ -57,6 +58,8 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.EntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
+import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -71,7 +74,9 @@ import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.item.merchant.TradeOfferGenerator;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -82,6 +87,7 @@ import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.text.format.TextColor;
@@ -117,6 +123,7 @@ import org.spongepowered.common.entity.ai.SpongeSwimmingAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWanderAIBuilder;
 import org.spongepowered.common.entity.ai.SpongeWatchClosestAIBuilder;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
+import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.SpongeBlockDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeDamageSourceBuilder;
 import org.spongepowered.common.event.SpongeEntityDamageSourceBuilder;
@@ -127,11 +134,14 @@ import org.spongepowered.common.event.spawn.SpongeBreedingSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeEntitySpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeMobSpawnerSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
+import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
+import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
+import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
 import org.spongepowered.common.registry.factory.*;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
@@ -148,6 +158,8 @@ import org.spongepowered.common.registry.type.world.*;
 import org.spongepowered.common.registry.type.world.gen.*;
 import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.builder.*;
+import org.spongepowered.common.service.pagination.SpongePaginationBuilder;
+import org.spongepowered.common.service.pagination.SpongePaginationList;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldCreationSettingsBuilder;
 import org.spongepowered.common.world.gen.builders.*;
@@ -257,6 +269,10 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(MobSpawnerSpawnCause.Builder.class, SpongeMobSpawnerSpawnCauseBuilder::new)
             .registerBuilderSupplier(FluidStack.Builder.class, SpongeFluidStackBuilder::new)
             .registerBuilderSupplier(FluidStackSnapshot.Builder.class, SpongeFluidStackSnapshotBuilder::new)
+            .registerBuilderSupplier(TabListEntry.Builder.class, TabListEntryBuilder::new)
+            .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
+            .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
+            .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
         ;
     }
 
@@ -268,6 +284,7 @@ public final class CommonModuleRegistry {
             .registerModule(Art.class, new ArtRegistryModule())
             .registerModule(BanType.class, new BanTypeRegistryModule())
             .registerModule(BannerPatternShape.class, new BannerPatternShapeRegistryModule())
+            .registerModule(BodyPart.class, new BodyPartRegistryModule())
             .registerModule(BooleanTrait.class, BooleanTraitRegistryModule.getInstance())
             .registerModule(BigMushroomType.class, new BigMushroomRegistryModule())
             .registerModule(BiomeTreeType.class, new BiomeTreeTypeRegistryModule())
@@ -333,6 +350,7 @@ public final class CommonModuleRegistry {
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
+            .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
             .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
@@ -352,11 +370,11 @@ public final class CommonModuleRegistry {
             ;
     }
 
-    private CommonModuleRegistry() { }
+    CommonModuleRegistry() { }
 
     private static final class Holder {
 
-        private static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
+        static final CommonModuleRegistry INSTANCE = new CommonModuleRegistry();
     }
 
 }

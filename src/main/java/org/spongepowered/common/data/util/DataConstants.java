@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.util;
 
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.type.BigMushroomType;
@@ -48,6 +50,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.common.util.VecHelper;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -111,6 +114,13 @@ public final class DataConstants {
     
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
+
+    public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_HEAD_ROTATION);
+    public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_BODY_ROTATION);
+    public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
+    public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
+    public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
+    public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
 
     public static final class Catalog {
         private Catalog() {}

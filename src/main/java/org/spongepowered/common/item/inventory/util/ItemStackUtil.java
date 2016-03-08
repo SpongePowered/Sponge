@@ -26,6 +26,7 @@ package org.spongepowered.common.item.inventory.util;
 
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
 import java.util.Optional;
 
@@ -108,5 +109,12 @@ public abstract class ItemStackUtil {
     public static boolean compare(ItemStack stack1, ItemStack stack2) {
         return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), ItemStackUtil.toNative(stack2));
     }
-    
+
+    public static boolean compare(ItemStack stack1, net.minecraft.item.ItemStack stack2) {
+        return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), stack2);
+    }
+
+    public static ItemStackSnapshot createSnapshot(net.minecraft.item.ItemStack item) {
+        return ItemStackUtil.fromNative(item).createSnapshot();
+    }
 }

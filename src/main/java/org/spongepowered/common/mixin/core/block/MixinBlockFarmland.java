@@ -27,6 +27,10 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockFarmland;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.GameRules;
+import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -34,13 +38,20 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableMoistureData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeMoistureData;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
 import java.util.Optional;
 
 @Mixin(BlockFarmland.class)
 public abstract class MixinBlockFarmland extends MixinBlock {
+
+    private Entity currentGriefer;
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -78,5 +89,26 @@ public abstract class MixinBlockFarmland extends MixinBlock {
 
     private ImmutableMoistureData getMoistureData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeMoistureData.class, blockState.getValue(BlockFarmland.MOISTURE), 0, 7);
+    }
+
+    @Inject(method = "onFallenUpon", at = @At(value = "HEAD"))
+    private void onFallenUponHead(World worldIn, BlockPos pos, Entity entityIn, float fallDistance, CallbackInfo ci) {
+        this.currentGriefer = entityIn;
+    }
+
+    @Inject(method = "onFallenUpon", at = @At(value = "RETURN"))
+    private void onEntityFallenUponReturn(World worldIn, BlockPos pos, Entity entityIn, float fallDistance, CallbackInfo ci) {
+        this.currentGriefer = null;
+    }
+
+    @Redirect(method = "onFallenUpon", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        if (!gameRules.getBoolean(rule)) {
+            return false;
+        }
+        if (this.currentGriefer instanceof IMixinGriefer) {
+            return ((IMixinGriefer) currentGriefer).canGrief();
+        }
+        return true;
     }
 }

@@ -93,9 +93,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -132,7 +130,7 @@ public abstract class MixinPlayerList {
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(ITextComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
-    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Shadow public abstract void func_187243_f(EntityPlayerMP p_187243_1_);
@@ -567,20 +565,29 @@ public abstract class MixinPlayerList {
         }
     }
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
-    private void onPlayerSendPacket(PlayerList manager, Packet<?> packet, EntityPlayerMP playerMP) {
-        if (!((IMixinEntity) playerMP).isVanished()) {
-            manager.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, playerMP));
-        }
-    }
+    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
+                                                                           + "sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V", shift = At.Shift.BEFORE), cancellable = true)
+    public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
+        // Create a packet to be used for players without context data
+        SPacketPlayerListItem noSpecificViewerPacket = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, player);
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
-    private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
-        SPacketPlayerListItem packetPlayerListItem = (SPacketPlayerListItem) packet;
-        EntityPlayerMP playerMP1 = ((IMixinSPacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
-        if (!((IMixinEntity) playerMP1).isVanished()) {
-            netHandler.sendPacket(packet);
+        for (EntityPlayerMP viewer : this.playerEntityList) {
+            if (((Player) viewer).canSee((Player) player)) {
+                viewer.playerNetServerHandler.sendPacket(noSpecificViewerPacket);
+            }
+
+            if (((Player) player).canSee((Player) viewer)) {
+                player.playerNetServerHandler.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
+            }
         }
+
+        // Spawn player into level
+        WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        level.spawnEntityInWorld(player);
+        this.preparePlayer(player, null);
+
+        // We always want to cancel.
+        ci.cancel();
     }
 
     @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))

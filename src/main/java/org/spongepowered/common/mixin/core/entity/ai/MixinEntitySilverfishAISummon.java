@@ -22,14 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.network;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.ai.EntityAIBase;
+import net.minecraft.entity.monster.EntitySilverfish;
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-public interface IMixinSPacketPlayerListItem$AddPlayerData {
+@Mixin(EntitySilverfish.AISummonSilverfish.class)
+public abstract class MixinEntitySilverfishAISummon extends EntityAIBase {
 
-    EntityPlayerMP getPlayer();
+    @Shadow(aliases = "this$0") private EntitySilverfish silverfish;
 
-    void setPlayer(EntityPlayerMP player);
-
+    @Redirect(method = "updateTask", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.silverfish).canGrief();
+    }
 }

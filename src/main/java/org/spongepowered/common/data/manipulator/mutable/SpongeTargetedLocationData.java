@@ -24,22 +24,24 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
+import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableTargetedLocationData;
 import org.spongepowered.api.data.manipulator.mutable.TargetedLocationData;
 import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeTargetedLocationData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
-public class SpongeTargetedLocationData extends AbstractSingleData<Location<World>, TargetedLocationData, ImmutableTargetedLocationData>
-    implements TargetedLocationData {
+public final class SpongeTargetedLocationData extends AbstractSingleData<Vector3d, TargetedLocationData, ImmutableTargetedLocationData>
+        implements TargetedLocationData {
 
-    public SpongeTargetedLocationData(Location<World> value) {
+    public SpongeTargetedLocationData() {
+        this(Vector3d.ZERO);
+    }
+
+    public SpongeTargetedLocationData(Vector3d value) {
         super(TargetedLocationData.class, value, Keys.TARGETED_LOCATION);
     }
 
@@ -50,7 +52,7 @@ public class SpongeTargetedLocationData extends AbstractSingleData<Location<Worl
 
     @Override
     protected Value<?> getValueGetter() {
-        return target();
+        return this.target();
     }
 
     @Override
@@ -60,17 +62,18 @@ public class SpongeTargetedLocationData extends AbstractSingleData<Location<Worl
 
     @Override
     public int compareTo(TargetedLocationData o) {
-        return 0;
+        return this.getValue().compareTo(o.target().get());
     }
 
     @Override
-    public Value<Location<World>> target() {
-        return new SpongeValue<>(Keys.TARGETED_LOCATION, this.getValue());
+    public Value<Vector3d> target() {
+        return new SpongeValue<>(this.usedKey, this.getValue());
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.TARGETED_LOCATION, this.getValue());
+                .set(this.usedKey, this.getValue());
     }
+
 }

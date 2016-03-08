@@ -32,8 +32,11 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -79,6 +82,19 @@ public final class EntityUtil {
         entity.setInvisible(vanish);
         ((IMixinEntity) entity).setVanished(vanish);
         return true;
+    }
+
+    public static Profession validateProfession(int professionId) {
+        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (Profession profession : professions) {
+            if (profession instanceof SpongeProfession) {
+                if (professionId == ((SpongeProfession) profession).type) {
+                    return profession;
+                }
+            }
+        }
+        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
+                                        + " when the expected contain: " + professions);
     }
 
 }

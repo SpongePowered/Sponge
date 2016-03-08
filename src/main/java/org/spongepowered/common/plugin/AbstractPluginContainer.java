@@ -34,6 +34,7 @@ public abstract class AbstractPluginContainer implements PluginContainer {
 
     @Override
     public String getUnqualifiedId() {
+        // @minecrell: is this supposed to call the static method below?
         return getId();
     }
 
@@ -45,6 +46,7 @@ public abstract class AbstractPluginContainer implements PluginContainer {
                 .add("version", getVersion().orElse(null))
                 .add("description", getDescription().orElse(null))
                 .add("url", getUrl().orElse(null))
+                .add("assets", getAssetDirectory().orElse(null))
                 .add("authors", getAuthors().isEmpty() ? null : getAuthors())
                 .add("source", getSource().orElse(null));
     }

@@ -415,12 +415,6 @@ public class ExtentViewDownsize implements DefaultedExtent {
     }
 
     @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3i position) {
-        checkRange(position.getX(), position.getY(), position.getZ());
-        return this.extent.createEntity(type, position);
-    }
-
-    @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final Location<World> location = entity.getLocation();
         checkRange(location.getX(), location.getY(), location.getZ());

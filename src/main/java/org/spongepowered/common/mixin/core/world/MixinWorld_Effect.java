@@ -107,7 +107,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             PlayerList playerList = ((net.minecraft.world.World) (Object) this).getMinecraftServer().getPlayerList();

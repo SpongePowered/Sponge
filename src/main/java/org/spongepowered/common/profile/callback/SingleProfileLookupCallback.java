@@ -22,34 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.service.pagination;
+package org.spongepowered.common.profile.callback;
 
-import org.spongepowered.api.service.pagination.PaginationCalculator;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.command.CommandSource;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.ProfileLookupCallback;
 
-/**
- * A pagination calculator that has a fixed length per page.
- */
-class FixedLengthPaginationCalculator implements PaginationCalculator<CommandSource> {
-    private final int linesPerPage;
+import java.util.Optional;
 
-    public FixedLengthPaginationCalculator(int linesPerPage) {
-        this.linesPerPage = linesPerPage;
+public final class SingleProfileLookupCallback implements ProfileLookupCallback {
+
+    private Optional<org.spongepowered.api.profile.GameProfile> result;
+
+    @Override
+    public void onProfileLookupSucceeded(GameProfile profile) {
+        this.result = Optional.of((org.spongepowered.api.profile.GameProfile) profile);
     }
 
     @Override
-    public int getLinesPerPage(CommandSource source) {
-        return this.linesPerPage;
+    public void onProfileLookupFailed(GameProfile profile, Exception exception) {
+        this.result = Optional.empty();
     }
 
-    @Override
-    public int getLines(CommandSource source, Text text) {
-        return 1;
+    public Optional<org.spongepowered.api.profile.GameProfile> getResult() {
+        return this.result;
     }
 
-    @Override
-    public Text center(CommandSource source, Text text, String padding) {
-        return text;
-    }
 }

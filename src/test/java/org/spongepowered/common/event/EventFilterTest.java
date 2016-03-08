@@ -67,7 +67,7 @@ public class EventFilterTest {
     public void testSimpleEvent() throws Exception {
         SimpleListener listener = new SimpleListener();
         AnnotatedEventListener annotatedEventListener = this.getListener(listener, "onEvent");
-        annotatedEventListener.handle(new SubEvent(Cause.of(this)));
+        annotatedEventListener.handle(new SubEvent(Cause.source(this).build()));
 
         Assert.assertTrue("Simple listener was not called!", listener.called);
     }
@@ -75,7 +75,7 @@ public class EventFilterTest {
     @Test
     public void testCancelledEvent() throws Exception {
         CancelledListener listener = new CancelledListener();
-        SubEvent event = new SubEvent(Cause.of(this));
+        SubEvent event = new SubEvent(Cause.source(this).build());
 
         AnnotatedEventListener normalListener = this.getListener(listener, "normalListener");
         AnnotatedEventListener uncalledListener = this.getListener(listener, "uncalledListener");
@@ -117,8 +117,8 @@ public class EventFilterTest {
         AnnotatedEventListener includeListener = this.getListener(listener, "includeListener", TestEvent.class);
         AnnotatedEventListener excludeListener = this.getListener(listener, "excludeListener", TestEvent.class);
 
-        TestEvent testEvent = new TestEvent(Cause.of(this));
-        SubEvent subEvent = new SubEvent(Cause.of(this));
+        TestEvent testEvent = new TestEvent(Cause.source(this).build());
+        SubEvent subEvent = new SubEvent(Cause.source(this).build());
 
         includeListener.handle(testEvent);
         Assert.assertFalse("Listener annotated with @Include was called!", listener.includeListenerCalled);
@@ -148,8 +148,8 @@ public class EventFilterTest {
         AnnotatedEventListener lastCauseListenerInc = this.getListener(listener, "lastCauseListenerInclude", SubEvent.class, Entity.class);
         AnnotatedEventListener lastCauseListenerEx = this.getListener(listener, "lastCauseListenerExclude", SubEvent.class, Entity.class);
 
-        Cause cause1 = Cause.of("Foo", 'a');
-        Cause cause2 = Cause.of("Foo", mock(Player.class), 7);
+        Cause cause1 = Cause.of(NamedCause.of("foo", "Foo"), NamedCause.of("eh", 'a'));
+        Cause cause2 = Cause.of(NamedCause.of("foo", "Foo"), NamedCause.of("Player", mock(Player.class)), NamedCause.of("Seven", 7));
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -185,8 +185,8 @@ public class EventFilterTest {
         AnnotatedEventListener emptyListener = this.getListener(listener, "emptyListener", SubEvent.class, BiomeTypes[].class);
         AnnotatedEventListener allCauseListener = this.getListener(listener, "allCauseListener", SubEvent.class, Player[].class);
 
-        Cause cause1 = Cause.of(this);
-        Cause cause2 = Cause.of(mock(Player.class), "Hi", mock(Player.class));
+        Cause cause1 = Cause.source(this).build();
+        Cause cause2 = Cause.of(NamedCause.of("Player", mock(Player.class)), NamedCause.of("String", "Hi"), NamedCause.of("OtherPlayer", mock(Player.class)));
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -218,8 +218,8 @@ public class EventFilterTest {
         Player player2 = mock(Player.class);
         when(player2.supports(SkinData.class)).thenReturn(true);
 
-        Cause cause1 = Cause.of(player1);
-        Cause cause2 = Cause.of(player2);
+        Cause cause1 = Cause.source(player1).build();
+        Cause cause2 = Cause.source(player2).build();
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -249,8 +249,8 @@ public class EventFilterTest {
         Player player2 = mock(Player.class);
         when(player2.get(SkinData.class)).thenReturn(Optional.of(mock(SkinData.class)));
 
-        Cause cause1 = Cause.of(player1);
-        Cause cause2 = Cause.of(player2);
+        Cause cause1 = Cause.source(player1).build();
+        Cause cause2 = Cause.source(player2).build();
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -275,8 +275,8 @@ public class EventFilterTest {
         AnnotatedEventListener rootListenerInc = this.getListener(listener, "rootListenerInclude", SubEvent.class, Object.class);
         AnnotatedEventListener rootListenerEx = this.getListener(listener, "rootListenerExclude", SubEvent.class, Object.class);
 
-        Cause cause1 = Cause.of("Hi", mock(Player.class));
-        Cause cause2 = Cause.of(mock(Player.class), 5);
+        Cause cause1 = Cause.of(NamedCause.of("String", "Hi"), NamedCause.of("Player", mock(Player.class)));
+        Cause cause2 = Cause.source(mock(Player.class)).named("derp", 5).build();
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -310,8 +310,8 @@ public class EventFilterTest {
         AnnotatedEventListener afterCauseListenerInc = this.getListener(listener, "afterCauseListenerInclude", SubEvent.class, Entity.class);
         AnnotatedEventListener afterCauseListenerEx = this.getListener(listener, "afterCauseListenerExclude", SubEvent.class, Entity.class);
 
-        Cause cause1 = Cause.of("Foo", mock(Player.class), mock(Extent.class));
-        Cause cause2 = Cause.of("Me", mock(BlockState.class), mock(Entity.class));
+        Cause cause1 = Cause.source("Foo").named("Player", mock(Player.class)).named("Extent", mock(Extent.class)).build();
+        Cause cause2 = Cause.source("Me").named("State", mock(BlockState.class)).named("Entity", mock(Entity.class)).build();
 
         SubEvent event1 = new SubEvent(cause1);
         SubEvent event2 = new SubEvent(cause2);
@@ -404,7 +404,7 @@ public class EventFilterTest {
 
         @Override
         public Cause getCause() {
-            return Cause.of(this);
+            return Cause.source(this).build();
         }
     }
 
