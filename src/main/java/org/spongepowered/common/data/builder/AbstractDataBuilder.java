@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.util.persistence.DataBuilder;
-import org.spongepowered.api.util.persistence.DataContentUpdater;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.util.DataUtil;
 

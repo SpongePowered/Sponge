@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
@@ -42,15 +43,19 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
@@ -178,5 +183,22 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
             return;
         }
+    }
+
+    /**
+     * Redirects for block breaks to spawn entities with a custom spawn cause,
+     * this will redirect to use the SpongeAPI world spawn entity method instead.
+     *
+     * @param world
+     * @param entity
+     * @return
+     */
+    @Redirect(method = "dropXpOnBlockBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+    private boolean onSpawnEntityFromBlockBreak(net.minecraft.world.World world, Entity entity, net.minecraft.world.World worldIn, BlockPos posIn, int amount) {
+        BlockSpawnCause spawnCause = BlockSpawnCause.builder()
+                .block(BlockSnapshot.builder().from(new Location<>((World) world, VecHelper.toVector(posIn))).build())
+                .type(SpawnTypes.EXPERIENCE)
+                .build();
+        return ((World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
     }
 }

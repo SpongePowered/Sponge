@@ -31,13 +31,13 @@ import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidTankData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidTankData;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleMapData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
 import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidTankData;
 
 import java.util.List;
 import java.util.Map;
 
-public class ImmutableSpongeFluidTankData extends AbstractImmutableSingleMapData<Direction, List<FluidStackSnapshot>, ImmutableFluidTankData, FluidTankData>
+public class ImmutableSpongeFluidTankData extends AbstractImmutableMappedData<Direction, List<FluidStackSnapshot>, ImmutableFluidTankData, FluidTankData>
         implements ImmutableFluidTankData {
 
     public ImmutableSpongeFluidTankData() {

@@ -89,6 +89,7 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
+import org.spongepowered.common.data.processor.dual.entity.CustomNameVisibleDualProcessor;
 import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
@@ -163,9 +164,8 @@ public class DataRegistrar {
 
         // Data Manipulators
 
-        final DisplayNameDataProcessor displayNameDataProcessor = new DisplayNameDataProcessor();
         dataManager.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
-                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, displayNameDataProcessor);
+                ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
         // Entity Processors
 
@@ -348,6 +348,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
                 ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
+
+        dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
+                ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
         // Item Processors
 
@@ -602,6 +605,10 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
                 ImmutableSpongeDyeableData.class, dyeableDataProcessor);
 
+
+        dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
+                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleDualProcessor());
+
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
                 hideDataProcessor);
@@ -619,7 +626,6 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new ItemDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new TileEntityDisplayNameValueProcessor());
         dataManager.registerValueProcessor(Keys.DISPLAY_NAME, new EntityDisplayNameValueProcessor());
-        dataManager.registerValueProcessor(Keys.SHOWS_DISPLAY_NAME, new DisplayNameVisibleValueProcessor());
         dataManager.registerValueProcessor(Keys.FOOD_LEVEL, new FoodLevelValueProcessor());
         dataManager.registerValueProcessor(Keys.SATURATION, new FoodSaturationValueProcessor());
         dataManager.registerValueProcessor(Keys.EXHAUSTION, new FoodExhaustionValueProcessor());

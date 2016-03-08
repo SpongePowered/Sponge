@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -40,156 +38,141 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeDisplayNameData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeDisplayNameData;
-import org.spongepowered.common.data.processor.common.AbstractSpongeDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataProcessor;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-@SuppressWarnings("deprecation")
-public class DisplayNameDataProcessor extends AbstractSpongeDataProcessor<DisplayNameData, ImmutableDisplayNameData> {
+import javax.annotation.Nullable;
 
-    @Override
-    public boolean supports(DataHolder dataHolder) {
-        return dataHolder instanceof Entity || dataHolder instanceof ItemStack || dataHolder instanceof IWorldNameable;
+@SuppressWarnings("deprecation")
+public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, Value<Text>, DisplayNameData, ImmutableDisplayNameData> {
+
+    public DisplayNameDataProcessor() {
+        super(Keys.DISPLAY_NAME);
     }
 
     @Override
-    public Optional<DisplayNameData> from(DataHolder dataHolder) {
-        if (dataHolder instanceof Entity && ((Entity) dataHolder).hasCustomName()) {
-            final String displayName = ((Entity) dataHolder).getCustomNameTag();
-            final boolean shows = ((Entity) dataHolder).getAlwaysRenderNameTag();
-            final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(displayName), shows);
-            return Optional.of(data);
-        } else if (dataHolder instanceof ItemStack) {
-            if (((ItemStack) dataHolder).getItem() == Items.written_book) {
-                final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getTagCompound();
-                if (mainCompound == null) {
+    protected DisplayNameData createManipulator() {
+        return new SpongeDisplayNameData();
+    }
+
+    @Override
+    public boolean supports(DataHolder holder) {
+        return holder instanceof Entity || holder instanceof ItemStack || holder instanceof IWorldNameable;
+    }
+
+    @Override
+    public Optional<DisplayNameData> from(DataHolder holder) {
+        if (holder instanceof Entity) {
+            @Nullable Text displayName = ((IMixinEntity) holder).getDisplayNameText();
+            if (displayName != null) {
+                return Optional.of(new SpongeDisplayNameData(displayName));
+            } else {
+                return Optional.empty();
+            }
+        } else if (holder instanceof ItemStack) {
+            ItemStack stack = (ItemStack) holder;
+            if (!stack.hasDisplayName()) {
+                return Optional.empty();
+            }
+
+            if (stack.getItem() == Items.written_book) {
+                final NBTTagCompound compound = stack.getTagCompound();
+                if (compound == null) {
                     return Optional.empty(); // The book wasn't initialized.
                 }
-                final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
-                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(titleString));
-                return Optional.of(data);
+
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_BOOK_TITLE))));
             }
-            final NBTTagCompound mainCompound = ((ItemStack) dataHolder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
-            if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, 8)) {
-                final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
-                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(displayString));
+
+            final NBTTagCompound compound = ((ItemStack) holder).getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
+            if (compound != null && compound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, 8)) {
+                return Optional.of(new SpongeDisplayNameData(SpongeTexts.fromLegacy(compound.getString(NbtDataUtil.ITEM_DISPLAY_NAME))));
+            } else {
+                return Optional.empty();
+            }
+        } else if (holder instanceof IWorldNameable) {
+            if (((IWorldNameable) holder).hasCustomName()) {
+                final String customName = ((IWorldNameable) holder).getName();
+                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
                 return Optional.of(data);
             } else {
                 return Optional.empty();
             }
-        } else if (dataHolder instanceof IWorldNameable) {
-            if (((IWorldNameable) dataHolder).hasCustomName()) {
-                final String customName = ((IWorldNameable) dataHolder).getName();
-                final DisplayNameData data = new SpongeDisplayNameData(SpongeTexts.fromLegacy(customName));
-                return Optional.of(data);
-            }
         }
-        return Optional.empty();
-    }
 
-    @Override
-    public Optional<DisplayNameData> fill(DataHolder dataHolder, DisplayNameData manipulator, MergeFunction overlap) {
-        if (supports(dataHolder)) {
-            final DisplayNameData data = from(dataHolder).orElse(null);
-            final DisplayNameData newData = checkNotNull(overlap.merge(checkNotNull(manipulator), data));
-            final Text display = newData.displayName().get();
-            final boolean displays = newData.customNameVisible().get();
-            return Optional.of(manipulator.set(Keys.DISPLAY_NAME, display).set(Keys.SHOWS_DISPLAY_NAME, displays));
-        }
         return Optional.empty();
     }
 
     @Override
     public Optional<DisplayNameData> fill(DataContainer container, DisplayNameData displayNameData) {
         final String json = DataUtil.getData(container, Keys.DISPLAY_NAME, String.class);
-        final Text displayName = TextSerializers.JSON.deserialize(json);
-        final boolean shows = DataUtil.getData(container, Keys.SHOWS_DISPLAY_NAME);
-        return Optional.of(displayNameData.set(Keys.DISPLAY_NAME, displayName).set(Keys.SHOWS_DISPLAY_NAME, shows));
+        return Optional.of(displayNameData.set(Keys.DISPLAY_NAME, TextSerializers.JSON.deserialize(json)));
     }
 
     @Override
-    public DataTransactionResult set(DataHolder dataHolder, DisplayNameData manipulator, MergeFunction function) {
+    public DataTransactionResult set(DataHolder holder, DisplayNameData manipulator, MergeFunction function) {
         return DataTransactionResult.failResult(manipulator.getValues());
     }
 
     @Override
     public Optional<ImmutableDisplayNameData> with(Key<? extends BaseValue<?>> key, Object value, ImmutableDisplayNameData immutable) {
-        if (key == Keys.DISPLAY_NAME) {
-            return Optional.of(
-                    new ImmutableSpongeDisplayNameData((Text) value, immutable.customNameVisible().get()));
-        } else if (key == Keys.SHOWS_DISPLAY_NAME) {
-            return Optional.of(
-                    new ImmutableSpongeDisplayNameData(immutable.displayName().get(), (Boolean) value));
+        if (key == this.key) {
+            return Optional.of(new ImmutableSpongeDisplayNameData((Text) value));
         }
+
         return Optional.empty();
     }
 
     @Override
-    public DataTransactionResult remove(DataHolder dataHolder) {
-        if (dataHolder instanceof ItemStack) {
+    public DataTransactionResult remove(DataHolder holder) {
+        if (holder instanceof Entity) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<DisplayNameData> optional = from(dataHolder);
+            final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
                 try {
-                    ((ItemStack) dataHolder).clearCustomName();
+                    ((IMixinEntity) holder).setDisplayName(null);
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    SpongeImpl.getLogger().error("There was an issue removing the displayName from an ItemStack!", e);
+                    SpongeImpl.getLogger().error("There was an issue resetting the display name from an Entity!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
-        } else if (dataHolder instanceof Entity) {
+        } else if (holder instanceof ItemStack) {
             final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-            final Optional<DisplayNameData> optional = from(dataHolder);
+            final Optional<DisplayNameData> optional = this.from(holder);
             if (optional.isPresent()) {
                 try {
-                    ((Entity) dataHolder).setCustomNameTag("");
-                    ((Entity) dataHolder).setAlwaysRenderNameTag(false);
+                    ((ItemStack) holder).clearCustomName();
                     return builder.replace(optional.get().getValues()).result(DataTransactionResult.Type.SUCCESS).build();
                 } catch (Exception e) {
-                    SpongeImpl.getLogger().error("There was an issue resetting the custom name on an entity!", e);
+                    SpongeImpl.getLogger().error("There was an issue removing the display name from an ItemStack!", e);
                     return builder.result(DataTransactionResult.Type.ERROR).build();
                 }
             } else {
                 return builder.result(DataTransactionResult.Type.SUCCESS).build();
             }
         }
+
         return DataTransactionResult.failNoData();
     }
 
     @Override
-    public Optional<DisplayNameData> createFrom(DataHolder dataHolder) {
-        if (dataHolder instanceof Entity) {
-            if (((Entity) dataHolder).hasCustomName()) {
-                return from(dataHolder);
-            } else {
-                return Optional.of(new SpongeDisplayNameData());
-            }
-        } else if (dataHolder instanceof ItemStack) {
-            if (!((ItemStack) dataHolder).hasDisplayName()) {
-                return Optional.of(new SpongeDisplayNameData());
-            } else {
-                return from(dataHolder);
-            }
-        } else if (dataHolder instanceof IWorldNameable) {
-            return from(dataHolder);
-        }
-        return Optional.empty();
+    public boolean supports(EntityType type) {
+        return Entity.class.isAssignableFrom(type.getEntityClass());
     }
 
-    @Override
-    public boolean supports(EntityType entityType) {
-        return Entity.class.isAssignableFrom(entityType.getEntityClass());
-    }
 }

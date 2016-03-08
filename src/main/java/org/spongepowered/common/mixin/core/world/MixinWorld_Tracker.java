@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -72,7 +73,9 @@ import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.CaptureType;
 
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -86,6 +89,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
 
     private final CauseTracker causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
+    private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
 
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public Profiler theProfiler;
@@ -136,21 +140,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             final CauseTracker causeTracker = this.getCauseTracker();
             if (!this.isRemote && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()) {
                 originalBlockSnapshot = null;
-                if (causeTracker.isCapturingTerrainGen()) {
-                    if (StaticMixinHelper.runningGenerator != null) {
-                        originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                                (IBlockAccess) this, pos), pos, flags);
-
-                        if (causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator) == null) {
-                            causeTracker.getCapturedPopulators().put(StaticMixinHelper.runningGenerator, new LinkedHashMap<>());
-                        }
-
-                        ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.POPULATE;
-                        transaction = new Transaction<>(originalBlockSnapshot, originalBlockSnapshot.withState((BlockState) newState));
-                        populatorSnapshotList = causeTracker.getCapturedPopulators().get(StaticMixinHelper.runningGenerator);
-                        populatorSnapshotList.put(transaction.getOriginal().getPosition(), transaction);
-                    }
-                } else if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks())) {
+                if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks()) && !causeTracker.isCapturingTerrainGen()) {
                     originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                             (IBlockAccess) this, pos), pos, flags);
 
@@ -218,6 +208,22 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
+
+    @Override
+    public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
+        this.rotationUpdates.put(entity, rotation);
+    }
+
+    private void updateRotation(net.minecraft.entity.Entity entityIn) {
+        Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
+        if (rotationUpdate != null) {
+            entityIn.rotationPitch = (float) rotationUpdate.getX();
+            entityIn.rotationYaw = (float) rotationUpdate.getY();
+        }
+        this.rotationUpdates.remove(entityIn);
+    }
+
+
     @Override
     public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags) {
         if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated())) {
@@ -261,6 +267,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entityIn);
         entityIn.onUpdate();
+        updateRotation(entityIn);
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
         causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
         causeTracker.setCurrentTickEntity(null);
@@ -294,6 +301,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entity);
         entity.onUpdate();
+        updateRotation(entity);
         SpongeCommonEventFactory.handleEntityMovement(entity);
         causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         causeTracker.setCurrentTickEntity(null);

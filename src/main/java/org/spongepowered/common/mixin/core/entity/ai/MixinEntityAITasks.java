@@ -150,7 +150,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             // Event is fired in firePostConstructEvents
             return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
-        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.of(Sponge.getGame()), priority, priority,
+        final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.source(Sponge.getGame()).build(), priority, priority,
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {

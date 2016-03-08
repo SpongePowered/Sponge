@@ -25,11 +25,11 @@
 package org.spongepowered.common.service.permission;
 
 import com.mojang.authlib.GameProfile;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.service.permission.base.SpongeSubjectCollection;
-import org.spongepowered.common.profile.SpongeProfileManager;
 
 import java.util.UUID;
 
@@ -58,8 +58,13 @@ public class UserCollection extends SpongeSubjectCollection {
         return new UserSubject(profile, this);
     }
 
-    private GameProfile uuidToGameProfile(UUID uid) {
-        return (GameProfile) SpongeProfileManager.getProfile(uid, true);
+    private GameProfile uuidToGameProfile(UUID uniqueId) {
+        try {
+            return (GameProfile) Sponge.getServer().getGameProfileManager().get(uniqueId, true).get();
+        } catch (Exception e) {
+            SpongeImpl.getLogger().warn("Failed to lookup game profile for {}", uniqueId, e);
+            return null;
+        }
     }
 
     @Override

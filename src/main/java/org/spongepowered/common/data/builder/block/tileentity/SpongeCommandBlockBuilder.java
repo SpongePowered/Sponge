@@ -29,8 +29,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.text.SpongeTexts;
 

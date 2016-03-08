@@ -123,7 +123,6 @@ public class KeyRegistry {
         keyMap.put("color", makeSingleKey(Color.class, Value.class, of("Color")));
         keyMap.put("health", makeSingleKey(Double.class, MutableBoundedValue.class, of("Health")));
         keyMap.put("max_health", makeSingleKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
-        keyMap.put("shows_display_name", makeSingleKey(Boolean.class, Value.class, of("ShowDisplayName")));
         keyMap.put("display_name", makeSingleKey(Text.class, Value.class, of("DisplayName")));
         keyMap.put("career", makeSingleKey(Career.class, Value.class, of("Career")));
         keyMap.put("sign_lines", makeListKey(Text.class, of("SignLines")));
@@ -287,6 +286,7 @@ public class KeyRegistry {
         keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
         keyMap.put("fluid_item_stack", makeSingleKey(FluidStackSnapshot.class, Value.class, of("FluidItemContainerSnapshot")));
         keyMap.put("fluid_tank_contents", makeMapKey(Direction.class, List.class, of("FluidTankContents")));
+        keyMap.put("custom_name_visible", makeSingleKey(Boolean.class, Value.class, of("CustomNameVisible")));
         keyMap.put("first_date_played", makeSingleKey(Instant.class, Value.class, of("FirstTimeJoined")));
         keyMap.put("last_date_played", makeSingleKey(Instant.class, Value.class, of("LastTimePlayed")));
         keyMap.put("hide_enchantments", makeSingleKey(Boolean.class, Value.class, of("HideEnchantments")));
@@ -305,6 +305,7 @@ public class KeyRegistry {
         keyMap.put("right_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightLegRotation")));
         keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
         keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
+        keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

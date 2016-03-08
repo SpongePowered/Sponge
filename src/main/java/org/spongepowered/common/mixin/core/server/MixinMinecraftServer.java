@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.util.concurrent.ListenableFuture;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -122,6 +121,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
@@ -159,7 +159,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private boolean preparingChunks = false;
-    private GameProfileManager profileManager = new SpongeProfileManager();
+    private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
     @Override
@@ -858,7 +858,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
-    @Override
     public String getDefaultWorldName() {
         return getFolderName();
     }
@@ -894,7 +893,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ListenableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
+    public CompletableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
         return ServerUtils.copyWorld((MinecraftServer) (Object) this, checkNotNull(worldProperties, "worldProperties"),
                 checkNotNull(copyName, "copyName"));
     }
@@ -926,7 +925,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public ListenableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
+    public CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
         return ServerUtils.deleteWorld(checkNotNull(worldProperties, "worldProperties"));
     }
 
@@ -949,6 +948,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public GameProfileManager getGameProfileManager() {
+        if (this.profileManager == null) {
+            this.profileManager = new SpongeProfileManager();
+        }
         return this.profileManager;
     }
 
@@ -1015,7 +1017,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
             List<String> list, String astring[], String s) {
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
                 ImmutableList.copyOf(list), list, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {

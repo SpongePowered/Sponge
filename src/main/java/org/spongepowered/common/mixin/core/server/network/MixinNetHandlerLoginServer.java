@@ -33,6 +33,7 @@ import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -93,12 +94,14 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
 
     @Override
     public boolean fireAuthEvent() {
-        Optional<Text> disconnectMessage = Optional.of(Text.of("You are not allowed to log in to this server."));
-        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(Cause.of(NamedCause.source(this.loginGameProfile)),
-            disconnectMessage, disconnectMessage, (RemoteConnection) this.networkManager, (GameProfile) this.loginGameProfile);
+        Text disconnectMessage = Text.of("You are not allowed to log in to this server.");
+        ClientConnectionEvent.Auth event = SpongeEventFactory.createClientConnectionEventAuth(
+                Cause.of(NamedCause.source(this.loginGameProfile)), (RemoteConnection) this.networkManager,
+                new MessageEvent.MessageFormatter(disconnectMessage), (GameProfile) this.loginGameProfile, false
+        );
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            this.disconnectClient(event.getMessage());
+            this.disconnectClient(event.isMessageCancelled() ? Optional.empty() : Optional.of(event.getMessage()));
         }
         return event.isCancelled();
     }

@@ -26,20 +26,17 @@ package org.spongepowered.common.data.manipulator.immutable.item;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePagedData;
 import org.spongepowered.api.data.manipulator.mutable.item.PagedData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePagedData;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.List;
 
-public class ImmutableSpongePagedData extends AbstractImmutableSingleListData<Text, ImmutablePagedData, PagedData> implements ImmutablePagedData {
+public class ImmutableSpongePagedData extends AbstractImmutableListData<Text, ImmutablePagedData, PagedData> implements ImmutablePagedData {
 
     public ImmutableSpongePagedData() {
         this(ImmutableList.of(Text.of()));
@@ -47,11 +44,6 @@ public class ImmutableSpongePagedData extends AbstractImmutableSingleListData<Te
 
     public ImmutableSpongePagedData(List<Text> pages) {
         super(ImmutablePagedData.class, pages, Keys.BOOK_PAGES, SpongePagedData.class);
-    }
-
-    @Override
-    public ImmutableListValue<Text> pages() {
-        return getValueGetter();
     }
 
     @Override

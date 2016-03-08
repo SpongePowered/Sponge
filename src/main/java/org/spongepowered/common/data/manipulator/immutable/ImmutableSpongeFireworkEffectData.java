@@ -25,26 +25,20 @@
 package org.spongepowered.common.data.manipulator.immutable;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableFireworkEffectData;
 import org.spongepowered.api.data.manipulator.mutable.FireworkEffectData;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.item.FireworkEffect;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.SpongeFireworkEffectData;
 
 import java.util.List;
 
-public class ImmutableSpongeFireworkEffectData extends AbstractImmutableSingleListData<FireworkEffect, ImmutableFireworkEffectData, FireworkEffectData> implements ImmutableFireworkEffectData {
+public class ImmutableSpongeFireworkEffectData extends AbstractImmutableListData<FireworkEffect, ImmutableFireworkEffectData, FireworkEffectData>
+    implements ImmutableFireworkEffectData {
 
     public ImmutableSpongeFireworkEffectData(List<FireworkEffect> effects) {
         super(ImmutableFireworkEffectData.class, effects, Keys.FIREWORK_EFFECTS, SpongeFireworkEffectData.class);
-    }
-
-    @Override
-    public ImmutableListValue<FireworkEffect> effects() {
-        return getValueGetter();
     }
 
     @Override

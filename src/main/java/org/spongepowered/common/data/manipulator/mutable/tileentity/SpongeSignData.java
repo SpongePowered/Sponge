@@ -26,81 +26,37 @@ package org.spongepowered.common.data.manipulator.mutable.tileentity;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.data.manipulator.immutable.tileentity.ImmutableSpongeSignData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
-import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
-import org.spongepowered.common.data.value.mutable.SpongeListValue;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @ImplementationRequiredForTest
 @NonnullByDefault
-public class SpongeSignData extends AbstractData<SignData, ImmutableSignData> implements SignData {
-    private final List<Text> lines;
+public class SpongeSignData extends AbstractListData<Text, SignData, ImmutableSignData> implements SignData {
 
     public SpongeSignData() {
         this(Lists.newArrayList(Text.of(), Text.of(), Text.of(), Text.of()));
     }
 
     public SpongeSignData(List<Text> lines) {
-        super(SignData.class);
-        registerGettersAndSetters();
-        this.lines = lines;
-    }
-
-    @Override
-    public int compareTo(SignData o) {
-        return 0;
+        super(SignData.class, lines, Keys.SIGN_LINES, ImmutableSpongeSignData.class);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.SIGN_LINES.getQuery(), this.lines.stream()
+            .set(Keys.SIGN_LINES.getQuery(), this.asList().stream()
                 .map(TextSerializers.JSON::serialize)
                 .collect(Collectors.toList()));
     }
 
-    @Override
-    public ListValue<Text> lines() {
-        return new SpongeListValue<>(Keys.SIGN_LINES, Lists.newArrayList(this.lines));
-    }
-
-    @Override
-    public SignData copy() {
-        return new SpongeSignData(Lists.newArrayList(this.lines));
-    }
-
-    @Override
-    public ImmutableSignData asImmutable() {
-        return new ImmutableSpongeSignData(this.lines);
-    }
-
-    public List<Text> getLines() {
-        return Lists.newArrayList(this.lines);
-    }
-
-    public void setLines(List<Text> lines) {
-        for (int i = 0; i < 4; i++) {
-            this.lines.set(i, lines.get(i));
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    protected void registerGettersAndSetters() {
-        registerFieldGetter(Keys.SIGN_LINES, SpongeSignData.this::getLines);
-        registerFieldSetter(Keys.SIGN_LINES, SpongeSignData.this::setLines);
-        registerKeyValue(Keys.SIGN_LINES, SpongeSignData.this::lines);
-    }
 }

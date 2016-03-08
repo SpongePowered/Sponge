@@ -26,18 +26,16 @@ package org.spongepowered.common.data.manipulator.mutable.item;
 
 import com.google.common.collect.Lists;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
 import java.util.List;
 
-public class SpongeEnchantmentData extends AbstractSingleListData<ItemEnchantment, EnchantmentData, ImmutableEnchantmentData> implements EnchantmentData {
+public class SpongeEnchantmentData extends AbstractListData<ItemEnchantment, EnchantmentData, ImmutableEnchantmentData> implements EnchantmentData {
 
     public SpongeEnchantmentData() {
         this(Lists.<ItemEnchantment>newArrayList());
@@ -45,11 +43,6 @@ public class SpongeEnchantmentData extends AbstractSingleListData<ItemEnchantmen
 
     public SpongeEnchantmentData(List<ItemEnchantment> enchantments) {
         super(EnchantmentData.class, enchantments, Keys.ITEM_ENCHANTMENTS, ImmutableSpongeEnchantmentData.class);
-    }
-
-    @Override
-    public ListValue<ItemEnchantment> enchantments() {
-        return getValueGetter();
     }
 
     @Override

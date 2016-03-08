@@ -30,11 +30,10 @@ import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.MapMaker;
-import net.minecraft.entity.player.EntityPlayerMP;
-import org.spongepowered.api.service.pagination.PaginationBuilder;
-import org.spongepowered.api.service.pagination.PaginationCalculator;
+import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageReceiver;
 import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.StartsWithPredicate;
 import org.spongepowered.api.command.CommandResult;
@@ -44,8 +43,6 @@ import org.spongepowered.api.command.args.CommandArgs;
 import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.CommandElement;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.List;
@@ -84,18 +81,8 @@ public class SpongePaginationService implements PaginationService {
             return this.lastUuid;
         }
     }
-    final ConcurrentMap<Class<? extends CommandSource>, PaginationCalculator<?>> calculators = new ConcurrentHashMap<>();
-    final ConcurrentMap<CommandSource, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
+    final ConcurrentMap<MessageReceiver, SourcePaginations> activePaginations = new MapMaker().weakKeys().makeMap();
     private final AtomicBoolean commandRegistered = new AtomicBoolean();
-
-    public SpongePaginationService() {
-        registerDefaultPaginationCalculators();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private void registerDefaultPaginationCalculators() {
-        setPaginationCalculator((Class) EntityPlayerMP.class, new PlayerPaginationCalculator());
-    }
 
     void registerCommandOnce() {
         if (this.commandRegistered.compareAndSet(false, true)) {
@@ -127,32 +114,11 @@ public class SpongePaginationService implements PaginationService {
     }
 
     @Override
-    public PaginationBuilder builder() {
+    public PaginationList.Builder builder() {
         return new SpongePaginationBuilder(this);
     }
 
-    @Override
-    public <T extends CommandSource> void setPaginationCalculator(Class<T> type, PaginationCalculator<? super T> calculator) throws
-                                                                                                                             IllegalArgumentException {
-        PaginationCalculator<?> existing = this.calculators.putIfAbsent(type, calculator);
-        if (existing != null) {
-            throw new IllegalArgumentException("Pagination calculator already registered for the type " + type);
-        }
-    }
-
-    private static final PaginationCalculator<CommandSource> UNPAGINATED_CALCULATOR = new FixedLengthPaginationCalculator(-1);
-
-    @Override
-    public PaginationCalculator<CommandSource> getUnpaginatedCalculator() {
-        return UNPAGINATED_CALCULATOR;
-    }
-
-    @Override
-    public PaginationCalculator<CommandSource> getFixedLinesCalculator(int lines) {
-        return new FixedLengthPaginationCalculator(lines);
-    }
-
-    SourcePaginations getPaginationState(CommandSource source, boolean create) {
+    SourcePaginations getPaginationState(MessageReceiver source, boolean create) {
         SourcePaginations ret = this.activePaginations.get(source);
         if (ret == null && create) {
             ret = new SourcePaginations();

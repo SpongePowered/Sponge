@@ -36,7 +36,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeEnchantmentData;

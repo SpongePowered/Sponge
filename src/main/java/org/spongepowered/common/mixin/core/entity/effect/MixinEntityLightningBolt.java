@@ -60,7 +60,7 @@ import java.util.List;
 @Mixin(EntityLightningBolt.class)
 public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect implements Lightning, IMixinEntityLightningBolt {
 
-    public Cause cause = Cause.of(this);
+    public Cause cause = Cause.source(this).build();
 
     private final List<Entity> struckEntities = Lists.newArrayList();
     private final List<EntitySnapshot> struckEntitySnapshots = Lists.newArrayList();

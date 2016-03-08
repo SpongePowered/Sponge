@@ -71,6 +71,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -91,10 +92,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.network.IMixinS38PacketPlayerListItem$AddPlayerData;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -116,10 +115,7 @@ public abstract class MixinServerConfigurationManager {
 
     private static final String WRITE_PLAYER_DATA =
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
-    private static final String
-            SERVER_SEND_PACKET_TO_ALL_PLAYERS =
-            "Lnet/minecraft/server/management/ServerConfigurationManager;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
-    private static final String NET_HANDLER_SEND_PACKET = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V";
+
     @Shadow @Final private static Logger logger;
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
@@ -131,7 +127,7 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(IChatComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
-    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
@@ -192,19 +188,20 @@ public abstract class MixinServerConfigurationManager {
 
         // Sponge start - fire login event
         @Nullable String kickReason = allowUserToConnect(netManager.getRemoteAddress(), gameprofile);
-        Optional<Text> disconnectMessage;
+        Text disconnectMessage;
         if (kickReason != null) {
-            disconnectMessage = Optional.of(SpongeTexts.fromLegacy(kickReason));
+            disconnectMessage = SpongeTexts.fromLegacy(kickReason);
         } else {
-            disconnectMessage = Optional.of(Text.of("You are not allowed to log in to this server."));
+            disconnectMessage = Text.of("You are not allowed to log in to this server.");
         }
 
         Player player = (Player) playerIn;
         Transform<World> fromTransform = player.getTransform().setExtent((World) worldserver);
 
         ClientConnectionEvent.Login loginEvent = SpongeEventFactory.createClientConnectionEventLogin(
-            Cause.of(NamedCause.source(player)), disconnectMessage, disconnectMessage, fromTransform, fromTransform,
-            (RemoteConnection) netManager, (org.spongepowered.api.profile.GameProfile) gameprofile, player);
+                Cause.of(NamedCause.source(player)), fromTransform, fromTransform, (RemoteConnection) netManager,
+                new MessageEvent.MessageFormatter(disconnectMessage), (org.spongepowered.api.profile.GameProfile) gameprofile, player, false
+        );
 
         if (kickReason != null) {
             loginEvent.setCancelled(true);
@@ -212,7 +209,7 @@ public abstract class MixinServerConfigurationManager {
 
         SpongeImpl.postEvent(loginEvent);
         if (loginEvent.isCancelled()) {
-            disconnectClient(netManager, loginEvent.getMessage(), gameprofile);
+            disconnectClient(netManager, loginEvent.isMessageCancelled() ? Optional.empty() : Optional.of(loginEvent.getMessage()), gameprofile);
             return;
         }
 
@@ -319,13 +316,17 @@ public abstract class MixinServerConfigurationManager {
         }
 
         // Fire PlayerJoinEvent
-        Optional<Text> originalMessage = Optional.of(SpongeTexts.toText(chatcomponenttranslation));
+        Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(Cause.of(NamedCause.source(player)), originalChannel,
-                Optional.of(originalChannel), originalMessage, originalMessage, player);
+        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(
+                Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel),
+                new MessageEvent.MessageFormatter(originalMessage), player, false
+        );
         SpongeImpl.postEvent(event);
         // Send to the channel
-        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+        if (!event.isMessageCancelled()) {
+            event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
+        }
         // Sponge end
 
         if (nbttagcompound != null && nbttagcompound.hasKey("Riding", 10)) {
@@ -515,20 +516,29 @@ public abstract class MixinServerConfigurationManager {
         }
     }
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
-    private void onPlayerSendPacket(ServerConfigurationManager manager, Packet<?> packet, EntityPlayerMP playerMP) {
-        if (!((IMixinEntity) playerMP).isVanished()) {
-            manager.sendPacketToAllPlayers(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, playerMP));
-        }
-    }
+    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
+            + "sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V", shift = At.Shift.BEFORE), cancellable = true)
+    public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
+        // Create a packet to be used for players without context data
+        S38PacketPlayerListItem noSpecificViewerPacket = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, player);
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
-    private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
-        S38PacketPlayerListItem packetPlayerListItem = (S38PacketPlayerListItem) packet;
-        EntityPlayerMP playerMP1 = ((IMixinS38PacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
-        if (!((IMixinEntity) playerMP1).isVanished()) {
-            netHandler.sendPacket(packet);
+        for (EntityPlayerMP viewer : this.playerEntityList) {
+            if (((Player) viewer).canSee((Player) player)) {
+                viewer.playerNetServerHandler.sendPacket(noSpecificViewerPacket);
+            }
+
+            if (((Player) player).canSee((Player) viewer)) {
+                player.playerNetServerHandler.sendPacket(new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, viewer));
+            }
         }
+
+        // Spawn player into level
+        WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        level.spawnEntityInWorld(player);
+        this.preparePlayer(player, null);
+
+        // We always want to cancel.
+        ci.cancel();
     }
 
     @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))

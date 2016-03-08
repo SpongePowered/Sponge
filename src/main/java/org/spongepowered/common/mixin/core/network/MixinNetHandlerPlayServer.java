@@ -44,6 +44,7 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
+import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.tileentity.TileEntity;
@@ -67,6 +68,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -85,6 +87,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -136,12 +139,45 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Override
-    public int getPing() {
+    public int getLatency() {
         return this.playerEntity.ping;
     }
 
     /**
-     * @Author Zidane
+     * @param manager The player network connection
+     * @param packet The original packet to be sent
+     * @author kashike
+     */
+    @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    public void onSendPacket(NetworkManager manager, Packet packet) {
+        manager.sendPacket(this.rewritePacket(packet));
+    }
+
+    /**
+     * This method wraps packets being sent to perform any additional actions,
+     * such as rewriting data in the packet.
+     *
+     * @param packetIn The original packet to be sent
+     * @return The rewritten packet if we performed any changes, or the original
+     *     packet if we did not perform any changes
+     * @author kashike
+     */
+    private Packet rewritePacket(final Packet packetIn) {
+        // Update the tab list data
+        if (packetIn instanceof S38PacketPlayerListItem) {
+            ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((S38PacketPlayerListItem) packetIn);
+        }
+        // Store the resource pack for use when processing resource pack statuses
+        else if (packetIn instanceof IMixinPacketResourcePackSend) {
+            IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetIn;
+            this.sentResourcePacks.put(packet.setFakeHash(), packet.getResourcePack());
+        }
+
+        return packetIn;
+    }
+
+    /**
+     * @author Zidane
      *
      * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
      * @param packetIn Injected packet param
@@ -348,12 +384,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             target = "Lnet/minecraft/server/management/ServerConfigurationManager;sendChatMsg(Lnet/minecraft/util/IChatComponent;)V"))
     public void onDisconnectHandler(ServerConfigurationManager this$0, IChatComponent component) {
         final Player player = ((Player) this.playerEntity);
-        final Optional<Text> message = Optional.ofNullable(SpongeTexts.toText(component));
+        final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(Cause.of(NamedCause.source(player)),
-                originalChannel, Optional.of(originalChannel), message, message, player);
+        final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(
+                Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
+                player, false
+        );
         SpongeImpl.postEvent(event);
-        event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+        if (!event.isMessageCancelled()) {
+            event.getChannel().ifPresent(channel -> channel.send(player, event.getMessage()));
+        }
     }
 
     @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
@@ -382,14 +422,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
         SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.of(NamedCause.source(SpongeImpl.getGame())), pack,
             (Player)this.playerEntity, status));
-    }
-
-    @Inject(method = "sendPacket", at = @At("HEAD"))
-    public void onResourcePackSend(Packet packet, CallbackInfo ci) {
-        if (packet instanceof IMixinPacketResourcePackSend) {
-            IMixinPacketResourcePackSend p = (IMixinPacketResourcePackSend) packet;
-            this.sentResourcePacks.put(p.setFakeHash(), p.getResourcePack());
-        }
     }
 
     @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)

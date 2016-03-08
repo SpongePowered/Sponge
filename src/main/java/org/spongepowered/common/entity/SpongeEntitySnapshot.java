@@ -50,16 +50,19 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 
+import java.lang.ref.WeakReference;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -81,6 +84,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
+    @Nullable private final WeakReference<Entity> entityReference;
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
@@ -110,6 +114,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.position = builder.position == null ? null : builder.position;
         this.rotation = builder.rotation == null ? null : builder.rotation;
         this.scale = builder.scale == null ? null : builder.scale;
+        this.entityReference = builder.entityReference;
     }
 
     @Override
@@ -397,6 +402,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
 
     @Override
     public Optional<Entity> restore() {
+        if (this.entityReference != null) {
+            Entity entity = this.entityReference.get();
+            if (entity != null) {
+                return Optional.of(entity);
+            }
+        }
         Optional<World> world = SpongeImpl.getGame().getServer().getWorld(this.worldUuid);
         if (!world.isPresent()) {
             return Optional.empty();
@@ -414,7 +425,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
                 nmsEntity.readFromNBT(this.compound);
             }
 
-            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(world.get())));
+            boolean spawnResult = world.get().spawnEntity((Entity) nmsEntity, Cause.of(NamedCause.source(SpawnCause.builder()
+                    .type(SpawnTypes.PLUGIN).build()), NamedCause.owner(world)));
             if (spawnResult) {
                 return Optional.of((Entity) nmsEntity);
             }

@@ -28,7 +28,7 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartCommandBlock;
+import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,7 +38,7 @@ import org.spongepowered.common.mixin.core.entity.item.MixinEntityMinecart;
 import java.util.List;
 
 @Mixin(EntityMinecartCommandBlock.class)
-public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements MinecartCommandBlock, IMixinCommandSource {
+public abstract class MixinEntityMinecartCommandBlock extends MixinEntityMinecart implements CommandBlockMinecart, IMixinCommandSource {
 
     @Shadow @Final private CommandBlockLogic commandBlockLogic;
 

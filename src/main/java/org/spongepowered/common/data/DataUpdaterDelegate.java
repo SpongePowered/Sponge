@@ -26,7 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.util.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
 
 public class DataUpdaterDelegate implements DataContentUpdater {
 

@@ -30,22 +30,24 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.util.persistence.DataBuilder;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.util.Optional;
 
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
-    private ItemStack firstItem;
-    private ItemStack secondItem;
-    private ItemStack sellingItem;
+    private ItemStackSnapshot firstItem;
+    private ItemStackSnapshot secondItem;
+    private ItemStackSnapshot sellingItem;
     private int useCount;
     private int maxUses;
     private boolean allowsExperience;
@@ -58,20 +60,20 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     @Override
     public TradeOffer.Builder firstBuyingItem(ItemStack item) {
         checkNotNull(item, "Buying item cannot be null");
-        this.firstItem = item;
+        this.firstItem = item.createSnapshot();
         return this;
     }
 
     @Override
     public TradeOffer.Builder secondBuyingItem(ItemStack item) {
-        this.secondItem = item;
+        this.secondItem = item.createSnapshot();
         return this;
     }
 
     @Override
     public TradeOffer.Builder sellingItem(ItemStack item) {
         checkNotNull(item, "Selling item cannot be null");
-        this.sellingItem = item;
+        this.sellingItem = item.createSnapshot();
         return this;
     }
 
@@ -100,9 +102,11 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
         checkState(this.firstItem != null, "Trading item has not been set");
         checkState(this.sellingItem != null, "Selling item has not been set");
         checkState(this.useCount <= this.maxUses, "Usage count cannot be greater than the max usage count (%s)", this.maxUses);
-        MerchantRecipe recipe =
-                new MerchantRecipe((net.minecraft.item.ItemStack) this.firstItem, (net.minecraft.item.ItemStack) this.secondItem,
-                        (net.minecraft.item.ItemStack) this.sellingItem, this.useCount, this.maxUses);
+        final ItemStack first = this.firstItem.createStack();
+        final ItemStack second = this.secondItem == null ? null : this.secondItem.createStack();
+        final ItemStack selling = this.sellingItem.createStack();
+        MerchantRecipe recipe = new MerchantRecipe(ItemStackUtil.toNative(first), ItemStackUtil.toNative(second), ItemStackUtil.toNative(selling),
+                        this.useCount, this.maxUses);
         recipe.rewardsExp = this.allowsExperience;
         return (TradeOffer) recipe;
     }

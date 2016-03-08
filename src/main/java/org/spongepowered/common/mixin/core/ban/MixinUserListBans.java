@@ -61,7 +61,9 @@ public abstract class MixinUserListBans extends UserList<com.mojang.authlib.Game
     public String[] getKeys() {
         List<String> names = new ArrayList<>();
         for (Ban.Profile ban: Sponge.getServiceManager().provideUnchecked(BanService.class).getProfileBans()) {
-            names.add(ban.getProfile().getName());
+            if (ban.getProfile().getName().isPresent()) {
+                names.add(ban.getProfile().getName().get());
+            }
         }
         return names.toArray(new String[names.size()]);
     }
@@ -84,8 +86,10 @@ public abstract class MixinUserListBans extends UserList<com.mojang.authlib.Game
     @Overwrite
     public com.mojang.authlib.GameProfile isUsernameBanned(String username) {
         for (Ban.Profile ban: Sponge.getServiceManager().provideUnchecked(BanService.class).getProfileBans()) {
-            if (ban.getProfile().getName().equals(username)) {
-                return (com.mojang.authlib.GameProfile) ban.getProfile();
+            if (ban.getProfile().getName().isPresent()) {
+                if (ban.getProfile().getName().get().equals(username)) {
+                    return (com.mojang.authlib.GameProfile) ban.getProfile();
+                }
             }
         }
         return null;

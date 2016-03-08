@@ -46,6 +46,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     public static final Item NONE_ITEM = new Item().setUnlocalizedName("none").setMaxDamage(0).setMaxStackSize(1);
     public static final ItemStack NONE = (ItemStack) new net.minecraft.item.ItemStack(ItemTypeRegistryModule.NONE_ITEM);
+    public static final ItemStackSnapshot NONE_SNAPSHOT = NONE.createSnapshot();
 
     public static ItemTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -98,7 +99,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     }
 
     private void setItemNone() {
-        RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE.createSnapshot());
+        RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE_SNAPSHOT);
     }
 
     private ItemTypeRegistryModule() {

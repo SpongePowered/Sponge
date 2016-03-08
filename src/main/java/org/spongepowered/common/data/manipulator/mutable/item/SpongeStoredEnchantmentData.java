@@ -31,13 +31,12 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.common.data.manipulator.immutable.item.ImmutableSpongeStoredEnchantmentData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
 import java.util.List;
 
-public class SpongeStoredEnchantmentData extends AbstractSingleListData<ItemEnchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
+public class SpongeStoredEnchantmentData extends AbstractListData<ItemEnchantment, StoredEnchantmentData, ImmutableStoredEnchantmentData>
         implements StoredEnchantmentData {
 
     public SpongeStoredEnchantmentData(List<ItemEnchantment> value) {
@@ -46,11 +45,6 @@ public class SpongeStoredEnchantmentData extends AbstractSingleListData<ItemEnch
 
     public SpongeStoredEnchantmentData() {
         this(Lists.newArrayList());
-    }
-
-    @Override
-    public ListValue<ItemEnchantment> enchantments() {
-        return getValueGetter();
     }
 
     @Override

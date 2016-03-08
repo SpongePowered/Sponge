@@ -62,11 +62,9 @@ import java.util.zip.GZIPOutputStream;
 
 class TimingsExport extends Thread {
 
-    // private static final Joiner AUTHOR_LIST_JOINER = Joiner.on(", ");
+    private static final Joiner AUTHOR_LIST_JOINER = Joiner.on(", ");
     private static final Joiner RUNTIME_FLAG_JOINER = Joiner.on(" ");
     private static final Joiner CONFIG_PATH_JOINER = Joiner.on(".");
-    // Sponge doesn't have a server-name property
-    private static final String SERVER_NAME = "A Sponge Server";
 
     private final CommandSource sender;
     private final JsonObject out;
@@ -77,6 +75,10 @@ class TimingsExport extends Thread {
         this.sender = sender;
         this.out = out;
         this.history = history;
+    }
+
+    private static String getServerName() {
+        return SpongeImpl.getPlugin().getName() + " " + SpongeImpl.getPlugin().getVersion().orElse("");
     }
 
     /**
@@ -93,7 +95,7 @@ class TimingsExport extends Thread {
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
-            builder.add("server", SERVER_NAME)
+            builder.add("server", getServerName())
                     .add("motd", SpongeImpl.getGame().getServer().getMotd().toPlain())
                     .add("online-mode", SpongeImpl.getGame().getServer().getOnlineMode())
                     .add("icon", MinecraftServer.getServer().getServerStatusResponse().getFavicon());
@@ -161,13 +163,11 @@ class TimingsExport extends Thread {
         // Information about loaded plugins
 
         builder.add("plugins", JSONUtil.mapArrayToObject(SpongeImpl.getGame().getPluginManager().getPlugins(), (plugin) -> {
-            // TODO This is only available on Forge
-//            ModMetadata metadata = ((ModContainer) plugin).getMetadata();
             return JSONUtil.objectBuilder().add(plugin.getId(), JSONUtil.objectBuilder()
-                    .add("version", plugin.getVersion())
-//                    .add("description", metadata.description)
-//                    .add("website", metadata.url)
-//                    .add("authors", AUTHOR_LIST_JOINER.join(metadata.authorList))
+                    .add("version", plugin.getVersion().orElse(""))
+                    .add("description", plugin.getDescription().orElse(""))
+                    .add("website", plugin.getUrl().orElse(""))
+                    .add("authors", AUTHOR_LIST_JOINER.join(plugin.getAuthors()))
             ).build();
         }));
 
@@ -258,7 +258,7 @@ class TimingsExport extends Thread {
         try {
             HttpURLConnection con = (HttpURLConnection) new URL("http://timings.aikar.co/post").openConnection();
             con.setDoOutput(true);
-            con.setRequestProperty("User-Agent", "Sponge/" + SERVER_NAME + "/" + InetAddress.getLocalHost().getHostName());
+            con.setRequestProperty("User-Agent", "Sponge/" + getServerName() + "/" + InetAddress.getLocalHost().getHostName());
             con.setRequestMethod("POST");
             con.setInstanceFollowRedirects(false);
 

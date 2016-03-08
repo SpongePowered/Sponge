@@ -26,16 +26,17 @@ package org.spongepowered.common.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
+import org.spongepowered.api.util.RespawnLocation;
 
 import java.util.Map;
 import java.util.UUID;
 
 public interface ISpongeUser {
 
-    boolean setBedLocations(Map<UUID, Vector3d> value);
+    boolean setBedLocations(Map<UUID, RespawnLocation> value);
 
-    Map<UUID, Vector3d> getBedlocations();
+    Map<UUID, RespawnLocation> getBedlocations();
 
-    ImmutableMap<UUID, Vector3d> removeAllBeds();
+    ImmutableMap<UUID, RespawnLocation> removeAllBeds();
 
 }

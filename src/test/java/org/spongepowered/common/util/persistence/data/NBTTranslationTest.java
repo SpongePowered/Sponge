@@ -33,9 +33,9 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.util.persistence.DataBuilder;
+import org.spongepowered.api.data.persistence.DataBuilder;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Optional;
 

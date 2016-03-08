@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type.world.gen;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
@@ -47,7 +48,7 @@ import net.minecraft.world.gen.feature.WorldGenSwamp;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import net.minecraft.world.gen.feature.WorldGenTaiga2;
 import net.minecraft.world.gen.feature.WorldGenTrees;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.PopulatorObject;
@@ -59,7 +60,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class PopulatorObjectRegistryModule implements CatalogRegistryModule<PopulatorObject> {
+public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryModule<PopulatorObject> {
 
     @RegisterCatalog(PopulatorObjects.class) private final Map<String, PopulatorObject> populatorObjectMappings = new HashMap<>();
 
@@ -71,6 +72,14 @@ public class PopulatorObjectRegistryModule implements CatalogRegistryModule<Popu
     @Override
     public Collection<PopulatorObject> getAll() {
         return ImmutableList.copyOf(this.populatorObjectMappings.values());
+    }
+
+    @Override
+    public void registerAdditionalCatalog(PopulatorObject extraCatalog) {
+        checkNotNull(extraCatalog, "CatalogType cannot be null");
+        checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
+        checkArgument(!this.populatorObjectMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
+        this.populatorObjectMappings.put(extraCatalog.getId(), extraCatalog);
     }
 
     @Override

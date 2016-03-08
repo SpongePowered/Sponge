@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity.passive;
 
+import static com.google.common.base.Preconditions.checkState;
+
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
@@ -31,6 +33,9 @@ import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
+import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.item.merchant.VillagerRegistry;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -40,10 +45,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
 import org.spongepowered.common.interfaces.entity.IMixinVillager;
 import org.spongepowered.common.mixin.core.entity.MixinEntityAgeable;
+import org.spongepowered.common.registry.SpongeVillagerRegistry;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,7 +65,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow private boolean isPlaying;
     @Shadow private int careerId;
     @Shadow private int careerLevel;
-    @Shadow private MerchantRecipeList buyingList;
+    @Shadow @Nullable private MerchantRecipeList buyingList;
 
     @Shadow public abstract int getProfession();
     @Shadow public abstract void setProfession(int professionId);
@@ -68,12 +75,10 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Shadow public abstract MerchantRecipeList getRecipes(EntityPlayer player);
 
     private Profession profession;
-    private Career spongeCareer;
 
-    @SuppressWarnings("unchecked")
     @Inject(method = "setProfession(I)V", at = @At("RETURN"))
     public void onSetProfession(int professionId, CallbackInfo ci) {
-//        this.profession = ((List<? extends Profession>) Sponge.getGame().getRegistry().getAllOf(Profession.class)).get(professionId);
+        this.profession = EntityUtil.validateProfession(professionId);
     }
 
     @Override
@@ -113,6 +118,43 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
     @Override
     public Optional<Humanoid> getCustomer() {
         return Optional.ofNullable((Humanoid) this.shadow$getCustomer());
+    }
+
+    /**
+     * @author gabizou - January 13th, 2016
+     *
+     * This overwrites the current method using the multi-dimension array with
+     * our {@link VillagerRegistry} to handle career levels and registrations
+     * for {@link TradeOfferGenerator}s. Note that this takes over entirely
+     * whatever vanilla does, but this allows for maximum customization for
+     * plugins to handle gracefully.
+     */
+    @SuppressWarnings("unchecked")
+    @Overwrite
+    public void populateBuyingList() {
+        // Sponge
+        List<Career> careers = (List<Career>) this.profession.getCareers();
+
+        // EntityVillager.ITradeList[][][] aentityvillager$itradelist = DEFAULT_TRADE_LIST_MAP[this.getProfession()];
+
+        if (this.careerId != 0 && this.careerLevel != 0) {
+            ++this.careerLevel;
+        } else {
+            // Sponge change aentityvillager$itradelist to use this.profession.getCareers()
+            this.careerId = this.rand.nextInt(careers.size()) + 1;
+            this.careerLevel = 1;
+        }
+
+        if (this.buyingList == null) {
+            this.buyingList = new MerchantRecipeList();
+        }
+
+        // Sponge start - use our own registry stuffs
+        checkState(this.careerId <= careers.size(), "The villager career id is out of bounds fo the available Careers! Found: " + this.careerId
+                                                    + " when the current maximum is: " + careers.size());
+        final Career careerId = careers.get(this.careerId - 1);
+        SpongeVillagerRegistry.getInstance().populateOffers((List<TradeOffer>) (List<?>) this.buyingList, careerId, this.careerLevel, this.rand);
+        // Sponge end
     }
 
     @Override

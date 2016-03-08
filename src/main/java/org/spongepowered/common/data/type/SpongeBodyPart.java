@@ -34,9 +34,4 @@ public class SpongeBodyPart extends SpongeCatalogType implements BodyPart {
         super(id);
     }
 
-    @Override
-    public Translation getTranslation() {
-        throw new UnsupportedOperationException("No translation is present for this catalog type (this method will be removed in a later release of SpongeAPI)");
-    }
-
 }

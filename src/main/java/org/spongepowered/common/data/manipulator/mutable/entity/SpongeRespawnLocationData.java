@@ -24,33 +24,26 @@
  */
 package org.spongepowered.common.data.manipulator.mutable.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
-import org.spongepowered.api.data.value.mutable.MapValue;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeRespawnLocation;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleMapData;
-import org.spongepowered.common.data.value.mutable.SpongeMapValue;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractMappedData;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-public class SpongeRespawnLocationData extends AbstractSingleMapData<UUID, Vector3d, RespawnLocationData, ImmutableRespawnLocation>
+public class SpongeRespawnLocationData extends AbstractMappedData<UUID, RespawnLocation, RespawnLocationData, ImmutableRespawnLocation>
         implements RespawnLocationData {
 
     public SpongeRespawnLocationData() {
         this(Maps.newHashMap());
     }
 
-    public SpongeRespawnLocationData(Map<UUID, Vector3d> locations) {
+    public SpongeRespawnLocationData(Map<UUID, RespawnLocation> locations) {
         super(RespawnLocationData.class, locations, Keys.RESPAWN_LOCATIONS, ImmutableSpongeRespawnLocation.class);
     }
 
@@ -59,20 +52,4 @@ public class SpongeRespawnLocationData extends AbstractSingleMapData<UUID, Vecto
         return super.toContainer()
             .set(Keys.RESPAWN_LOCATIONS, getValue());
     }
-
-    @Override
-    public MapValue<UUID, Vector3d> respawnLocation() {
-        return new SpongeMapValue<>(Keys.RESPAWN_LOCATIONS, getValue());
-    }
-
-    @Override
-    public Optional<Vector3d> getForWorld(World world) {
-        return Optional.ofNullable(getValue().get(checkNotNull(world, "world").getUniqueId()));
-    }
-
-    @Override
-    public int compareTo(RespawnLocationData o) {
-        return 0;
-    }
-
 }

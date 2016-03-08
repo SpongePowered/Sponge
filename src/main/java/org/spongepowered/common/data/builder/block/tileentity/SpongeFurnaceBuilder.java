@@ -29,7 +29,7 @@ import net.minecraft.tileentity.TileEntityFurnace;
 import org.spongepowered.api.block.tileentity.carrier.Furnace;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;

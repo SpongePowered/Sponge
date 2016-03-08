@@ -211,7 +211,7 @@ public class TimingHistory {
             final Collection<Player> onlinePlayers = SpongeImpl.getGame().getServer().getOnlinePlayers();
             int totalPing = 0;
             for (Player player : onlinePlayers) {
-                totalPing += player.getConnection().getPing();
+                totalPing += player.getConnection().getLatency();
             }
             this.avg = onlinePlayers.isEmpty() ? 0 : totalPing / onlinePlayers.size();
         }

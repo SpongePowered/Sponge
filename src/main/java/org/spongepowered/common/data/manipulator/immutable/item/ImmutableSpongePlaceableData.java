@@ -28,12 +28,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.Booleans;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutablePlaceableData;
 import org.spongepowered.api.data.manipulator.mutable.item.PlaceableData;
 import org.spongepowered.api.data.value.immutable.ImmutableSetValue;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleSetData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableSingleSetData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongePlaceableData;
 
 import java.util.Set;

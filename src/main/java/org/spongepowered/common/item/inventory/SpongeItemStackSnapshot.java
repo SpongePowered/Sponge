@@ -52,8 +52,8 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;

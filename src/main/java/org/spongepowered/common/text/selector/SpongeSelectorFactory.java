@@ -27,10 +27,12 @@ package org.spongepowered.common.text.selector;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.command.PlayerSelector;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.text.selector.Argument;
 import org.spongepowered.api.text.selector.ArgumentHolder;
@@ -40,6 +42,7 @@ import org.spongepowered.api.text.selector.ArgumentTypes;
 import org.spongepowered.api.text.selector.Selector;
 import org.spongepowered.api.text.selector.SelectorFactory;
 import org.spongepowered.api.text.selector.SelectorType;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.SpongeImpl;
 
@@ -48,11 +51,13 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 @NonnullByDefault
 @SuppressWarnings("deprecation")
@@ -320,6 +325,36 @@ public class SpongeSelectorFactory implements SelectorFactory {
             created = createArgument(type, type.convert(value));
         }
         return created;
+    }
+    
+    @Override
+    public List<String> complete(String selector) {
+        if (!selector.startsWith("@") || selector.contains("]")) {
+            return ImmutableList.of();
+        }
+        Stream<String> choices;
+        if (!selector.contains("[")) {
+            // No arguments yet
+            choices = Sponge.getRegistry().getAllOf(SelectorType.class).stream().map(type -> "@" + type.getId());
+        } else {
+            int keyStart = Math.max(selector.indexOf("["), selector.lastIndexOf(",")) + 1;
+            int valueStart = selector.lastIndexOf("=") + 1;
+            final String prefix = selector.substring(Math.max(keyStart, valueStart));
+            if (keyStart > valueStart) {
+                // Tab completing key
+                choices = ArgumentTypes.values().stream().map(ArgumentType::getKey);
+            } else {
+                // Tab completing value
+                Optional<ArgumentType<?>> type = ArgumentTypes.valueOf(selector.substring(keyStart, valueStart - 1));
+                if (!type.isPresent()) {
+                    return ImmutableList.of();
+                }
+                // TODO How to get all the values of an argument type?
+                return ImmutableList.of();
+            }
+            choices = choices.map(input -> prefix + input);
+        }
+        return choices.filter(choice -> choice.startsWith(selector)).collect(GuavaCollectors.toImmutableList());
     }
 
 }

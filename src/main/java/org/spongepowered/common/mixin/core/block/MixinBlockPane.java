@@ -39,6 +39,7 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeConnectedDirectionData;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -46,7 +47,7 @@ import java.util.Set;
 public abstract class MixinBlockPane extends MixinBlock {
 
     @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
+    public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
         return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getConnectedDirectionData(blockState));
     }
 

@@ -29,21 +29,17 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -124,6 +120,19 @@ public final class EntityUtil {
         entity.setInvisible(vanish);
         ((IMixinEntity) entity).setVanished(vanish);
         return true;
+    }
+
+    public static Profession validateProfession(int professionId) {
+        List<Profession> professions = (List<Profession>) ProfessionRegistryModule.getInstance().getAll();
+        for (Profession profession : professions) {
+            if (profession instanceof SpongeProfession) {
+                if (professionId == ((SpongeProfession) profession).type) {
+                    return profession;
+                }
+            }
+        }
+        throw new IllegalStateException("Invalid Villager profession id is present! Found: " + professionId
+                                        + " when the expected contain: " + professions);
     }
 
 }

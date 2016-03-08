@@ -80,7 +80,8 @@ public class SpongeCommand {
     private static final String INDENT = "    ";
     private static final String LONG_INDENT = INDENT + INDENT;
 
-    private static final Text NEWLINE_TEXT = Text.of("\n");
+    private static final Text INDENT_TEXT = Text.of(INDENT);
+    private static final Text NEWLINE_TEXT = Text.NEW_LINE;
     private static final Text SEPARATOR_TEXT = Text.of(", ");
 
     /**
@@ -319,7 +320,8 @@ public class SpongeCommand {
 
     }
 
-    private static final Text IMPLEMENTATION_NAME = Text.of(TextColors.YELLOW, TextStyles.BOLD, Sponge.getPlatform().getImplementation().getName());
+    private static final Text IMPLEMENTATION_NAME = Text.of(TextColors.YELLOW, TextStyles.BOLD,
+            Sponge.getPlatform().getImplementation().getName());
 
     private static CommandSpec getVersionCommand() {
         return CommandSpec.builder()
@@ -329,7 +331,7 @@ public class SpongeCommand {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
                     for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
-                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion()));
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion().orElse("unknown")));
                     }
 
                     src.sendMessage(builder.build());
@@ -357,16 +359,13 @@ public class SpongeCommand {
 
         @Override
         protected Iterable<String> getChoices(CommandSource source) {
-            return SpongeImpl.getGame().getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
+            return Sponge.getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
         }
 
         @Override
         protected Object getValue(String choice) throws IllegalArgumentException {
-            Optional<PluginContainer> plugin = SpongeImpl.getGame().getPluginManager().getPlugin(choice);
-            if (!plugin.isPresent()) {
-                throw new IllegalArgumentException("Plugin " + choice + " was not valid");
-            }
-            return plugin.get();
+            Optional<PluginContainer> plugin = Sponge.getPluginManager().getPlugin(choice);
+            return plugin.orElseThrow(() -> new IllegalArgumentException("Plugin " + choice + " was not found"));
         }
     }
 
@@ -382,14 +381,20 @@ public class SpongeCommand {
                 .executor((src, args) -> {
                     if (args.hasAny("plugin")) {
                         for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
-                            Text.Builder build = Text.builder().append(title(container.getName()),
-                                    Text.of(" v" + container.getVersion()), NEWLINE_TEXT)
-                                    .append(Text.of(INDENT, title("ID: "), container.getId(), NEWLINE_TEXT,
-                                            INDENT, title("Main class: "), !container.getInstance().isPresent() ? " Virtual mod " :
-                                                    container.getInstance().get().getClass().getCanonicalName()));
-                            // TODO: Provide more metadata once it is exposed
-                            src.sendMessage(build.build());
+                            Text.Builder builder = Text.builder().append(title(container.getName()));
+                            container.getVersion().ifPresent(version -> builder.append(Text.of((" v" + version))));
 
+                            appendPluginMeta(builder, "ID", container.getId());
+                            appendPluginMeta(builder, "Description", container.getDescription());
+                            appendPluginMeta(builder, "URL", container.getUrl());
+
+                            if (!container.getAuthors().isEmpty()) {
+                                appendPluginMeta(builder, "Authors", String.join(", ", container.getAuthors()));
+                            }
+
+                            appendPluginMeta(builder, "Main class", container.getInstance().map(instance -> instance.getClass().getCanonicalName()));
+
+                            src.sendMessage(builder.build());
                         }
                     } else {
                         Collection<PluginContainer> plugins = SpongeImpl.getGame().getPluginManager().getPlugins();
@@ -400,16 +405,32 @@ public class SpongeCommand {
                                 build.append(SEPARATOR_TEXT);
                             }
                             first = false;
-                            build.append(Text.builder(next.getName())
-                                    .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()))
-                                    .onHover(TextActions.showText(Text.of("Version " + next.getVersion())))
-                                    .color(TextColors.GREEN).build());
+
+                            Text.Builder pluginBuilder = Text.builder(next.getName())
+                                    .color(TextColors.GREEN)
+                                    .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
+
+                            next.getVersion()
+                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + next.getVersion()))));
+
+                            build.append(pluginBuilder.build());
                         }
                         src.sendMessage(build.build());
                     }
                     return CommandResult.success();
                 }).build();
     }
+
+    private static void appendPluginMeta(Text.Builder builder, String key, Optional<String> value) {
+        if (value.isPresent()) {
+            appendPluginMeta(builder, key, value.get());
+        }
+    }
+
+    private static void appendPluginMeta(Text.Builder builder, String key, String value) {
+        builder.append(NEWLINE_TEXT, INDENT_TEXT, title(key + ": "), Text.of(value));
+    }
+
 
     private static CommandCallable getTimingsCommand() {
         return CommandSpec.builder()

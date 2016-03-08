@@ -25,19 +25,17 @@
 package org.spongepowered.common.data.manipulator.mutable;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
 import org.spongepowered.api.data.manipulator.mutable.PotionEffectData;
-import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongePotionEffectData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleListData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractListData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class SpongePotionEffectData extends AbstractSingleListData<PotionEffect, PotionEffectData, ImmutablePotionEffectData> implements PotionEffectData {
+public class SpongePotionEffectData extends AbstractListData<PotionEffect, PotionEffectData, ImmutablePotionEffectData> implements PotionEffectData {
 
     public SpongePotionEffectData() {
         this(new ArrayList<>());
@@ -45,11 +43,6 @@ public class SpongePotionEffectData extends AbstractSingleListData<PotionEffect,
 
     public SpongePotionEffectData(List<PotionEffect> effects) {
         super(PotionEffectData.class, effects, Keys.POTION_EFFECTS, ImmutableSpongePotionEffectData.class);
-    }
-
-    @Override
-    public ListValue<PotionEffect> effects() {
-        return getValueGetter();
     }
 
     @Override

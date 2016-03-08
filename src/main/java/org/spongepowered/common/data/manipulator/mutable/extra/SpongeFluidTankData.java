@@ -32,12 +32,12 @@ import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFlu
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidTankData;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.manipulator.immutable.extra.ImmutableSpongeFluidTankData;
-import org.spongepowered.common.data.manipulator.mutable.common.collection.AbstractSingleMapData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractMappedData;
 
 import java.util.List;
 import java.util.Map;
 
-public class SpongeFluidTankData extends AbstractSingleMapData<Direction, List<FluidStackSnapshot>, FluidTankData, ImmutableFluidTankData> implements FluidTankData {
+public class SpongeFluidTankData extends AbstractMappedData<Direction, List<FluidStackSnapshot>, FluidTankData, ImmutableFluidTankData> implements FluidTankData {
 
     public SpongeFluidTankData() {
         this(ImmutableMap.of());

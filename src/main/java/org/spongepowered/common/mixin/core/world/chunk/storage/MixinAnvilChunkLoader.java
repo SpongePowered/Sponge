@@ -24,25 +24,44 @@
  */
 package org.spongepowered.common.mixin.core.world.chunk.storage;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Map;
 
 @Mixin(AnvilChunkLoader.class)
 public class MixinAnvilChunkLoader {
+
+    private static final String ENTITY_LIST_CREATE_FROM_NBT =
+            "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
@@ -110,5 +129,44 @@ public class MixinAnvilChunkLoader {
             chunk.setTrackedIntPlayerPositions(trackedIntPlayerPositions);
             chunk.setTrackedShortPlayerPositions(trackedShortPlayerPositions);
         }
+    }
+
+    /**
+     * @author gabizou - January 30th, 2016
+     *
+     * Attempts to redirect EntityList spawning an entity. Forge rewrites this method to
+     * handle it in a different method, so this will not actually inject in SpongeForge.
+     *
+     * @param compound
+     * @param world
+     * @return
+     */
+    @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;",
+            at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
+    private Entity onReadEntity(NBTTagCompound compound, World world) {
+        if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
+            compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
+                    EntityMinecart.EnumMinecartType.byNetworkID(compound.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
+            compound.removeTag(NbtDataUtil.MINECART_TYPE);
+        }
+        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        if (entityClass == null) {
+            return null;
+        }
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(entityClass);
+        if (type == null) {
+            return null;
+        }
+        NBTTagList positionList = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        NBTTagList rotationList = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
+        Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
+        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);
+        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.CHUNK_LOAD).build();
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
+        if (event.isCancelled()) {
+            return null;
+        }
+        return EntityList.createEntityFromNBT(compound, world);
     }
 }

@@ -37,7 +37,8 @@ import org.spongepowered.common.interfaces.IMixinNetHandlerLoginServer;
 @Mixin(targets = "net/minecraft/server/network/NetHandlerLoginServer$2")
 public class MixinNetHandlerLoginServerAnonThread extends Thread {
 
-    @Shadow(aliases = "this$0") @Final
+    @Shadow(aliases = "this$0")
+    @Final
     private NetHandlerLoginServer field_180221_a;
 
     private IMixinNetHandlerLoginServer outerRef = (IMixinNetHandlerLoginServer) this.field_180221_a;

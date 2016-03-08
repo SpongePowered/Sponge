@@ -770,11 +770,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3i position) {
-        return this.world.createEntity(type, this.chunkPos.mul(16).add(position.min(15, this.blockMax.getY(), 15)));
-    }
-
-    @Override
     public Optional<org.spongepowered.api.entity.Entity> createEntity(DataContainer entityContainer) {
         return this.world.createEntity(entityContainer);
     }
