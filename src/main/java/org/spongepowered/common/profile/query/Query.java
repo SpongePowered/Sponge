@@ -31,7 +31,9 @@ import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.api.util.Identifiable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -53,32 +55,10 @@ public abstract class Query<V> implements Callable<V> {
     }
 
     protected List<GameProfile> fromUniqueIds(Collection<UUID> uniqueIds) throws ProfileNotFoundException {
-        final Set<UUID> mutableIds = Sets.newHashSet(uniqueIds);
-        final List<GameProfile> result = Lists.newArrayList();
-
         if (this.useCache) {
-            Set<UUID> cached = this.cache.getProfiles().stream()
-                    .map(Identifiable::getUniqueId)
-                    .filter(uniqueId -> uniqueId != null)
-                    .collect(Collectors.toSet());
-            mutableIds.stream()
-                    .filter(cached::contains)
-                    .forEach(uniqueId -> this.cache.getById(uniqueId).ifPresent(profile -> {
-                        result.add(profile);
-                        mutableIds.remove(uniqueId);
-                    }));
-
-            if (mutableIds.isEmpty()) {
-                return result;
-            }
+            return this.cache.getOrLookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
         }
-
-        result.addAll(this.cache.getByIds(mutableIds).entrySet().stream()
-                .map(entry -> entry.getValue().orElse(null))
-                .filter(profile -> profile != null)
-                .collect(Collectors.toList()));
-
-        return result;
+        return this.cache.lookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
     protected GameProfile fillProfile(GameProfile profile, boolean signed) throws ProfileNotFoundException {
@@ -102,32 +82,10 @@ public abstract class Query<V> implements Callable<V> {
     }
 
     protected List<GameProfile> fromNames(Collection<String> names) throws ProfileNotFoundException {
-        final Set<String> mutableNames = Sets.newHashSet(names);
-        final List<GameProfile> result = Lists.newArrayList();
-
         if (this.useCache) {
-            Set<String> cached = this.cache.getProfiles().stream()
-                    .filter(profile -> profile.getName().isPresent())
-                    .map(profile -> profile.getName().get())
-                    .collect(Collectors.toSet());
-            mutableNames.stream()
-                    .filter(name -> cached.contains(name.toLowerCase(Locale.ROOT)))
-                    .forEach(name -> this.cache.getByName(name).ifPresent(profile -> {
-                        result.add(profile);
-                        mutableNames.remove(name);
-                    }));
-
-            if (mutableNames.isEmpty()) {
-                return result;
-            }
+            return this.cache.getOrLookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
         }
-
-        result.addAll(this.cache.getByNames(mutableNames).entrySet().stream()
-                .map(entry -> entry.getValue().orElse(null))
-                .filter(profile -> profile != null)
-                .collect(Collectors.toList()));
-
-        return result;
+        return this.cache.lookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
 }
