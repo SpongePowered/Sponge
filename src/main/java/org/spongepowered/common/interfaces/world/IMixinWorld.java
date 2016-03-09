@@ -28,7 +28,6 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.cause.Cause;
@@ -43,6 +42,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 public interface IMixinWorld {
+
+    int getDimensionId();
+
+    void setDimensionId(int dimensionId);
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
 
@@ -71,6 +74,4 @@ public interface IMixinWorld {
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
 
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
-
-    WorldProvider getWorldProvider();
 }

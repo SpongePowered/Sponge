@@ -134,6 +134,7 @@ import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
@@ -177,6 +178,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean keepSpawnLoaded;
     private Context worldContext;
     private SpongeChunkGenerator spongegen;
+    private Integer dimensionId = null;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -478,6 +480,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
+    public int getDimensionId() {
+        return dimensionId;
+    }
+
+    @Override
+    public void setDimensionId(int dimensionId) {
+        if (this.dimensionId != null) {
+            throw new RuntimeException("Attempt was made to re-set dimension id on world!");
+        }
+
+        this.dimensionId = dimensionId;
+    }
+
+    @Override
     public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
@@ -571,11 +587,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
-    }
-
-    @Override
-    public WorldProvider getWorldProvider() {
-        return this.provider;
     }
 
     @Override
@@ -715,7 +726,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(((IMixinWorldProvider) this.provider).getDimensionId()) != null;
+        return DimensionManager.getWorldByDimensionId(getDimensionId()).isPresent();
     }
 
     @Override

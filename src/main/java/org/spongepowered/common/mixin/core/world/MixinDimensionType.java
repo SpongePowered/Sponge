@@ -33,6 +33,7 @@ import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,6 +41,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.world.DimensionManager;
+
+import java.util.Optional;
 
 @Mixin(DimensionType.class)
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
@@ -82,5 +86,21 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Override
     public Context getContext() {
         return this.context;
+    }
+
+    /**
+     * Author: Zidane
+     * Purpose: This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
+     *          instance ids. Since the DimensionManager tracks dimension instance ids by dimension type ids and Vanilla keeps
+     *          their ids 1:1, this is a safe change that ensures a mixup can't happen.
+     */
+    @Overwrite
+    public static DimensionType getById(int dimensionId) {
+        final Optional<DimensionType> optDimensionType = DimensionManager.getDimensionType(dimensionId);
+        if (!optDimensionType.isPresent()) {
+            throw new IllegalArgumentException("Invalid dimension id " + dimensionId);
+        }
+
+        return optDimensionType.get();
     }
 }

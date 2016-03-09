@@ -352,7 +352,7 @@ public class DimensionManager {
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
-            final WorldServer worldServer = (WorldServer) new WorldServer(server, saveHandler, worldInfo, dimensionType.getId(), server.theProfiler)
+            final WorldServer worldServer = (WorldServer) new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler)
                     .init();
 
             // WorldSettings is only non-null here if this is a newly generated WorldInfo and therefore we need to initialize to calculate spawn.
