@@ -35,7 +35,6 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 
 import java.io.File;
 import java.io.FileWriter;

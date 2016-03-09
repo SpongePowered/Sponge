@@ -38,7 +38,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 
 import java.io.File;

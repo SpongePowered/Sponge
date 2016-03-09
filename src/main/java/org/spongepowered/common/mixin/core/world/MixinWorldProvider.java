@@ -27,59 +27,54 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkGenerator;
-import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.world.DimensionManager;
+
+import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
-@Implements(@Interface(iface = IMixinWorldProvider.class, prefix = "mixinworldprovider$"))
 public abstract class MixinWorldProvider implements Dimension {
 
-    private boolean allowPlayerRespawns;
-    private SpongeConfig<SpongeConfig.DimensionConfig> dimensionConfig;
-    private volatile Context dimContext;
-
-    @Shadow private String generatorSettings;
     @Shadow public WorldType terrainType;
-    @Shadow protected boolean hasNoSky;
     @Shadow protected World worldObj;
-    @Shadow public abstract IChunkGenerator createChunkGenerator();
     @Shadow public abstract net.minecraft.world.DimensionType getDimensionType();
     @Shadow public abstract boolean canRespawnHere();
+    @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
+    @Shadow public abstract boolean getHasNoSky();
+
+    private net.minecraft.world.DimensionType dimensionType;
+
+    @SuppressWarnings("unchecked")
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruction(CallbackInfo ci) {
+        final Optional<net.minecraft.world.DimensionType> optDimensionType = DimensionManager.getDimensionType((Class<? extends WorldProvider>)
+                (Object) getClass());
+
+        if (!optDimensionType.isPresent()) {
+            throw new RuntimeException("Attempt was made to create an instance of a WorldProvider who has no registered type!");
+        }
+
+        this.dimensionType = optDimensionType.get();
+    }
 
     @Override
-    public String getName() {
-        return getDimensionType().getName();
+    public DimensionType getType() {
+        return (DimensionType) (Object) this.dimensionType;
     }
 
     @Override
     public GeneratorType getGeneratorType() {
         return (GeneratorType) this.terrainType;
-    }
-
-    @Override
-    public DimensionType getType() {
-        final IMixinWorldProvider this$ = (IMixinWorldProvider) this;
-        return DimensionTypeRegistryModule.getInstance().fromProviderId(DimensionManager.getProviderType(this$.getDimensionId()));
-    }
-
-    public IChunkGenerator mixinworldprovider$createChunkGenerator(String settings) {
-        this.generatorSettings = settings;
-        return this.createChunkGenerator();
     }
 
     @Override
@@ -92,18 +87,6 @@ public abstract class MixinWorldProvider implements Dimension {
         return this.getAverageGroundLevel();
     }
 
-    @Overwrite
-    public int getAverageGroundLevel() {
-        int spawnHeight = worldObj.getSeaLevel() + 1;
-
-        if (worldObj.getWorldType() == WorldType.FLAT) {
-            spawnHeight = 4;
-        } else if (worldObj.getWorldType() == GeneratorTypes.THE_END) {
-            spawnHeight = 50;
-        }
-        return spawnHeight;
-    }
-
     @Override
     public boolean doesWaterEvaporate() {
         return this.doesWaterVaporize();
@@ -112,31 +95,5 @@ public abstract class MixinWorldProvider implements Dimension {
     @Override
     public boolean hasSky() {
         return !getHasNoSky();
-    }
-
-    @Overwrite
-    public boolean getHasNoSky() {
-        return this.terrainType.equals(GeneratorTypes.NETHER) || hasNoSky;
-    }
-
-    public String mixinworldprovider$getSaveFolder() {
-        final IMixinWorldProvider this$ = (IMixinWorldProvider) this;
-        return (this$.getDimensionId() == 0 ? null : "DIM" + this$.getDimensionId());
-    }
-
-    public void mixinworldprovider$setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config) {
-        this.dimensionConfig = config;
-    }
-
-    public SpongeConfig<SpongeConfig.DimensionConfig> mixinworldprovider$getDimensionConfig() {
-        return this.dimensionConfig;
-    }
-
-    @Override
-    public Context getContext() {
-        if (this.dimContext == null) {
-            this.dimContext = new Context(Context.DIMENSION_KEY, getName());
-        }
-        return this.dimContext;
     }
 }

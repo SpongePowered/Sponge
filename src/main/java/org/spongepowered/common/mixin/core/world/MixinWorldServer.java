@@ -62,7 +62,6 @@ import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;

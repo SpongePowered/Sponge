@@ -60,7 +60,6 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.File;

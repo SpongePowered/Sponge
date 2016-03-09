@@ -47,7 +47,6 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.File;

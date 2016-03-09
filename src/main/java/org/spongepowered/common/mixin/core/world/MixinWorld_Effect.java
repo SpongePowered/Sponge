@@ -57,7 +57,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 
 import java.util.List;
 import java.util.Random;

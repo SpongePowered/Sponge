@@ -96,7 +96,6 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;

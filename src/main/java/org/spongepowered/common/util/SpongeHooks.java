@@ -61,7 +61,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.world.CaptureType;
 
