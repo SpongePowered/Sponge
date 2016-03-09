@@ -248,8 +248,8 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    protected float func_110146_f(float p_110146_1_, float p_110146_2_) {
-        float retValue = super.func_110146_f(p_110146_1_, p_110146_2_);
+    protected float updateDistance(float p_110146_1_, float p_110146_2_) {
+        float retValue = super.updateDistance(p_110146_1_, p_110146_2_);
         // Make the body rotation follow head rotation
         this.rotationYaw = this.rotationYawHead;
         return retValue;
@@ -263,7 +263,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase) {
-            f += EnchantmentHelper.func_152377_a(this.getHeldItem(), ((EntityLivingBase) entityIn).getCreatureAttribute());
+            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) entityIn).getCreatureAttribute());
             i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
