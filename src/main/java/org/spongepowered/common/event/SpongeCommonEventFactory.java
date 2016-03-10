@@ -251,7 +251,15 @@ public class SpongeCommonEventFactory {
                 ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, causeTracker.getCapturedEntityItems(),
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                if (entry.getKey().equals(NamedCause.SOURCE)) {
+                    builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                } else {
+                    builder.suggestNamed(entry.getKey(), entry.getValue());
+                }
+            }
+            event = SpongeEventFactory.createCreativeInventoryEventDrop(builder.build(), cursorTransaction, causeTracker.getCapturedEntityItems(),
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
@@ -316,8 +324,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropFull(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropFull(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -336,8 +352,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropSingle(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropSingle(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
