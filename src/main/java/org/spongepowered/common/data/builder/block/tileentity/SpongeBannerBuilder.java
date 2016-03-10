@@ -32,9 +32,9 @@ import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
 import org.spongepowered.api.data.meta.PatternLayer;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.value.mutable.ListValue;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeBannerData;
 import org.spongepowered.common.data.util.DataQueries;
 

@@ -26,7 +26,7 @@ package org.spongepowered.common.data.builder.util.weighted;
 
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
 

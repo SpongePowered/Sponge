@@ -50,9 +50,10 @@ import org.spongepowered.common.data.DataProcessor;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.SpongeGameDictionaryEntry;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 
 import java.util.Collection;
 import java.util.List;
@@ -141,7 +142,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemStack createStack() {
-        return this.privateStack.copy();
+        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
+        if(this.compound != null) {
+            nativeStack.setTagCompound((NBTTagCompound) this.compound.copy());
+        }
+        return ItemStackUtil.fromNative(nativeStack);
     }
 
     @Override

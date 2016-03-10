@@ -24,40 +24,21 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableRespawnLocation;
 import org.spongepowered.api.data.manipulator.mutable.entity.RespawnLocationData;
-import org.spongepowered.api.data.value.immutable.ImmutableMapValue;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleMapData;
+import org.spongepowered.api.util.RespawnLocation;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableMappedData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeRespawnLocationData;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeMapValue;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
-public class ImmutableSpongeRespawnLocation extends AbstractImmutableSingleMapData<UUID, Vector3d, ImmutableRespawnLocation, RespawnLocationData>
+public class ImmutableSpongeRespawnLocation extends AbstractImmutableMappedData<UUID, RespawnLocation, ImmutableRespawnLocation, RespawnLocationData>
         implements ImmutableRespawnLocation {
 
-    private final ImmutableMapValue<UUID, Vector3d> locations;
-
-    public ImmutableSpongeRespawnLocation(Map<UUID, Vector3d> locations) {
+    public ImmutableSpongeRespawnLocation(Map<UUID, RespawnLocation> locations) {
         super(ImmutableRespawnLocation.class, locations, Keys.RESPAWN_LOCATIONS, SpongeRespawnLocationData.class);
-        this.locations = new ImmutableSpongeMapValue<>(Keys.RESPAWN_LOCATIONS, locations);
-    }
-
-    @Override
-    public ImmutableMapValue<UUID, Vector3d> respawnLocation() {
-        return this.locations;
-    }
-
-    @Override
-    public Optional<Vector3d> getForWorld(World world) {
-        return Optional.ofNullable(this.getValue().get(checkNotNull(world, "world").getUniqueId()));
     }
 
 }

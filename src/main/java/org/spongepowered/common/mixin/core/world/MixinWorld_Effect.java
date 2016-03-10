@@ -103,7 +103,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             ServerConfigurationManager manager = MinecraftServer.getServer().getConfigurationManager();
@@ -112,7 +112,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
             double y = position.getY();
             double z = position.getZ();
 
-            for (Packet packet : packets) {
+            for (Packet<?> packet : packets) {
                 manager.sendToAllNear(x, y, z, radius, this.provider.getDimensionId(), packet);
             }
         }
@@ -153,16 +153,16 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
     }
 
     @Override
-    public void forecast(Weather weather) {
+    public void setWeather(Weather weather) {
         if (weather.equals(Weathers.CLEAR)) {
-            this.forecast(weather, (300 + this.rand.nextInt(600)) * 20);
+            this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
         } else {
-            this.forecast(weather, 0);
+            this.setWeather(weather, 0);
         }
     }
 
     @Override
-    public void forecast(Weather weather, long duration) {
+    public void setWeather(Weather weather, long duration) {
         if (weather.equals(Weathers.CLEAR)) {
             this.worldInfo.setCleanWeatherTime((int) duration);
             this.worldInfo.setRainTime(0);
@@ -193,9 +193,9 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
                     weather, weather, this.prevWeather, this);
             SpongeImpl.postEvent(event);
             if (event.isCancelled()) {
-                this.forecast(this.prevWeather);
+                this.setWeather(this.prevWeather);
             } else {
-                this.forecast(event.getWeather(), event.getDuration());
+                this.setWeather(event.getWeather(), event.getDuration());
                 this.prevWeather = event.getWeather();
                 this.weatherStartTime = this.worldInfo.getWorldTotalTime();
             }

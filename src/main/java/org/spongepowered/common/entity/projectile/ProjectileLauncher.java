@@ -77,6 +77,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.List;
@@ -229,10 +230,11 @@ public class ProjectileLauncher {
         if (projectile.get() instanceof EntityThrowable) {
             configureThrowable((EntityThrowable) projectile.get());
         }
-        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.of(source));
+        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.source(source).build());
     }
 
     private static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
+        SpongeCommonEventFactory.checkSpawnEvent(projectile, cause);
         LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(cause, projectile);
         SpongeImpl.getGame().getEventManager().post(event);
         if (!event.isCancelled() && extent.spawnEntity(projectile, cause)) {

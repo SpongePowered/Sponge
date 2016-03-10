@@ -33,23 +33,28 @@ import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.DataProcessor;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.util.persistence.NbtTranslator;
-import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,6 +72,8 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Nullable UUID entityId;
     @Nullable List<ImmutableDataManipulator<?, ?>> manipulators;
     @Nullable NBTTagCompound compound;
+    @Nullable List<ImmutableValue<?>> values;
+    @Nullable WeakReference<Entity> entityReference;
 
     public SpongeEntitySnapshotBuilder() {
         super(EntitySnapshot.class, 1);
@@ -117,6 +124,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
     @Override
     public SpongeEntitySnapshotBuilder from(Entity entity) {
         reset();
+        this.entityReference = new WeakReference<>(entity);
         this.worldId = entity.getWorld().getUniqueId();
         this.position = entity.getTransform().getPosition();
         this.rotation = entity.getTransform().getRotation();
@@ -151,6 +159,17 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
                 return this;
             }
         }
+        return this;
+    }
+
+    @Override
+    public <V> EntitySnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+        checkNotNull(key, "key");
+        checkState(this.entityType != null, "Must have a valid entity type before applying data!");
+        if (this.values == null) {
+            this.values = Lists.newArrayList();
+        }
+        this.values.add(new ImmutableSpongeValue<>(key, value));
         return this;
     }
 
@@ -229,12 +248,19 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
         this.entityId = null;
         this.manipulators = null;
         this.compound = null;
+        this.entityReference = null;
         return this;
     }
 
     @Override
     public EntitySnapshot build() {
-        return new SpongeEntitySnapshot(this);
+        EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
+        if(this.values != null) {
+            for (ImmutableValue<?> value : this.values) {
+                snapshot = snapshot.with(value).orElse(snapshot);
+            }
+        }
+        return snapshot;
     }
 
     @Override

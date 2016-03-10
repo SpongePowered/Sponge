@@ -42,6 +42,7 @@ import org.spongepowered.api.data.meta.ItemEnchantment;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.BigMushroomType;
+import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BrickType;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.CoalType;
@@ -83,6 +84,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.PatternListValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -101,6 +103,7 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 public class KeyRegistry {
@@ -120,7 +123,6 @@ public class KeyRegistry {
         keyMap.put("color", makeSingleKey(Color.class, Value.class, of("Color")));
         keyMap.put("health", makeSingleKey(Double.class, MutableBoundedValue.class, of("Health")));
         keyMap.put("max_health", makeSingleKey(Double.class, MutableBoundedValue.class, of("MaxHealth")));
-        keyMap.put("shows_display_name", makeSingleKey(Boolean.class, Value.class, of("ShowDisplayName")));
         keyMap.put("display_name", makeSingleKey(Text.class, Value.class, of("DisplayName")));
         keyMap.put("career", makeSingleKey(Career.class, Value.class, of("Career")));
         keyMap.put("sign_lines", makeListKey(Text.class, of("SignLines")));
@@ -137,6 +139,7 @@ public class KeyRegistry {
         keyMap.put("game_mode", makeSingleKey(GameMode.class, Value.class, of("GameMode")));
         keyMap.put("is_screaming", makeSingleKey(Boolean.class, Value.class, of("IsScreaming")));
         keyMap.put("can_fly", makeSingleKey(Boolean.class, Value.class, of("CanFly")));
+        keyMap.put("can_grief", makeSingleKey(Boolean.class, Value.class, of("CanGrief")));
         keyMap.put("shrub_type", makeSingleKey(ShrubType.class, Value.class, of("ShrubType")));
         keyMap.put("plant_type", makeSingleKey(PlantType.class, Value.class, of("PlantType")));
         keyMap.put("tree_type", makeSingleKey(TreeType.class, Value.class, of("TreeType")));
@@ -283,6 +286,7 @@ public class KeyRegistry {
         keyMap.put("can_breed", makeSingleKey(Boolean.class, Value.class, of("CanBreed")));
         keyMap.put("fluid_item_stack", makeSingleKey(FluidStackSnapshot.class, Value.class, of("FluidItemContainerSnapshot")));
         keyMap.put("fluid_tank_contents", makeMapKey(Direction.class, List.class, of("FluidTankContents")));
+        keyMap.put("custom_name_visible", makeSingleKey(Boolean.class, Value.class, of("CustomNameVisible")));
         keyMap.put("first_date_played", makeSingleKey(Instant.class, Value.class, of("FirstTimeJoined")));
         keyMap.put("last_date_played", makeSingleKey(Instant.class, Value.class, of("LastTimePlayed")));
         keyMap.put("hide_enchantments", makeSingleKey(Boolean.class, Value.class, of("HideEnchantments")));
@@ -292,6 +296,16 @@ public class KeyRegistry {
         keyMap.put("hide_can_place", makeSingleKey(Boolean.class, Value.class, of("HideCanPlace")));
         keyMap.put("hide_miscellaneous", makeSingleKey(Boolean.class, Value.class, of("HideMiscellaneous")));
         keyMap.put("potion_effects", makeListKey(PotionEffect.class, of("PotionEffects")));
+        keyMap.put("body_rotations", makeMapKey(BodyPart.class, Vector3d.class, of("BodyRotations")));
+        keyMap.put("head_rotation", makeSingleKey(Vector3d.class, Value.class, of("HeadRotation")));
+        keyMap.put("chest_rotation", makeSingleKey(Vector3d.class, Value.class, of("ChestRotation")));
+        keyMap.put("left_arm_rotation", makeSingleKey(Vector3d.class, Value.class, of("LeftArmRotation")));
+        keyMap.put("right_arm_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightArmRotation")));
+        keyMap.put("left_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("LeftLegRotation")));
+        keyMap.put("right_leg_rotation", makeSingleKey(Vector3d.class, Value.class, of("RightLegRotation")));
+        keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
+        keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
+        keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

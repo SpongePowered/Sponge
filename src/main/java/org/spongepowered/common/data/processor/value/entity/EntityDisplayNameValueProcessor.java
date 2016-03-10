@@ -25,20 +25,17 @@
 package org.spongepowered.common.data.processor.value.entity;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
 
@@ -49,48 +46,41 @@ public class EntityDisplayNameValueProcessor extends AbstractSpongeValueProcesso
     }
 
     @Override
-    protected Value<Text> constructValue(Text defaultValue) {
-        return new SpongeValue<>(Keys.DISPLAY_NAME, Text.of(), defaultValue);
+    protected Value<Text> constructValue(Text actualValue) {
+        return new SpongeValue<>(this.key, Text.of(), actualValue);
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected boolean set(Entity container, Text value) {
-        final String legacy = SpongeTexts.toLegacy(value);
-        container.setCustomNameTag(legacy);
+        ((IMixinEntity) container).setDisplayName(value);
         return true;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     protected Optional<Text> getVal(Entity container) {
-        if (container instanceof EntityPlayer) {
-            return Optional.of(SpongeTexts.fromLegacy(container.getName()));
-        }
-        return Optional.of(SpongeTexts.fromLegacy(container.getCustomNameTag()));
+        return Optional.ofNullable(((IMixinEntity) container).getDisplayNameText());
     }
 
     @Override
     protected ImmutableValue<Text> constructImmutableValue(Text value) {
-        return new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, Text.of(), value);
+        return new ImmutableSpongeValue<>(this.key, Text.of(), value);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        final Optional<Text> optional = getValueFromContainer(container);
+        final Optional<Text> optional = this.getValueFromContainer(container);
         if (optional.isPresent()) {
             try {
-                ((Entity) container).setCustomNameTag("");
-                ((Entity) container).setAlwaysRenderNameTag(false);
-                return builder.replace(new ImmutableSpongeValue<>(Keys.DISPLAY_NAME, optional.get()))
-                    .result(DataTransactionResult.Type.SUCCESS).build();
+                ((IMixinEntity) container).setDisplayName(null);
+                return builder.replace(new ImmutableSpongeValue<>(this.key, optional.get())).result(DataTransactionResult.Type.SUCCESS).build();
             } catch (Exception e) {
-                SpongeImpl.getLogger().error("There was an issue resetting the custom name on an entity!", e);
+                SpongeImpl.getLogger().error("There was an issue resetting the display name on an entity!", e);
                 return builder.result(DataTransactionResult.Type.ERROR).build();
             }
         } else {
             return builder.result(DataTransactionResult.Type.SUCCESS).build();
         }
     }
+
 }

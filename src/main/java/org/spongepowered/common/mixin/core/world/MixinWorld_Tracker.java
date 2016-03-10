@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -45,10 +46,10 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -63,8 +64,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
@@ -73,10 +74,8 @@ import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.StaticMixinHelper;
 
-import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -92,6 +91,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
 
     private final CauseTracker causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
+    private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
 
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public Profiler theProfiler;
@@ -114,14 +114,17 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (entityIn.isDead && this.getCauseTracker().getPhases().peek().getContext().firstNamed(TrackingHelper.TARGETED_ENTITY,
-                net.minecraft.entity.Entity.class).isPresent() && !(entityIn instanceof EntityLivingBase)) {
+        final PhaseContext context = this.getCauseTracker().getPhases().peek().getContext();
+        final Optional<net.minecraft.entity.Entity> targeted = context.firstNamed(TrackingHelper.TARGETED_ENTITY, net.minecraft.entity.Entity.class);
+        if (entityIn.isDead && targeted.isPresent() && !(entityIn instanceof EntityLivingBase)) {
             MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.of(NamedCause.source(this)), originalChannel,
-                    Optional.of(originalChannel), Optional.empty(), Optional.empty(), (Entity) entityIn);
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(this).build(), originalChannel,
+                    Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entityIn, true);
             SpongeImpl.getGame().getEventManager().post(event);
-            event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+            if (!event.isMessageCancelled()) {
+                event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
+            }
         }
     }
 
@@ -140,6 +143,22 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return this.getCauseTracker().setBlockState(pos, newState, flags);
         }
     }
+
+
+    @Override
+    public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
+        this.rotationUpdates.put(entity, rotation);
+    }
+
+    private void updateRotation(net.minecraft.entity.Entity entityIn) {
+        Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
+        if (rotationUpdate != null) {
+            entityIn.rotationPitch = (float) rotationUpdate.getX();
+            entityIn.rotationYaw = (float) rotationUpdate.getY();
+        }
+        this.rotationUpdates.remove(entityIn);
+    }
+
 
     @Override
     public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags) {
@@ -187,6 +206,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
 
         TrackingHelper.tickEntity(causeTracker, entityIn);
+        updateRotation(entityIn);
+        SpongeCommonEventFactory.handleEntityMovement(entityIn);
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -216,6 +237,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
 
         TrackingHelper.tickEntity(causeTracker, entity);
+        updateRotation(entity);
+        SpongeCommonEventFactory.handleEntityMovement(entity);
     }
 
     /**

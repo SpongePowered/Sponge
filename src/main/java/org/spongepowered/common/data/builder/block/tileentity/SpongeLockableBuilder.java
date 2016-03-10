@@ -29,8 +29,8 @@ import net.minecraft.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.carrier.TileEntityCarrier;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.List;

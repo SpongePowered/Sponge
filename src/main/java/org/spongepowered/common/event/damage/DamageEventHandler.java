@@ -366,7 +366,7 @@ public class DamageEventHandler {
             net.minecraft.entity.Entity source = damageSource.getEntity();
             Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-            List<Object> causeObjects = new ArrayList<>();
+            List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
             if (notifier.isPresent()) {
                 causeObjects.add(NamedCause.notifier(notifier.get()));
@@ -374,9 +374,9 @@ public class DamageEventHandler {
             if (owner.isPresent()) {
                 causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
             }
-            return Cause.of(causeObjects.toArray());
+            return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof BlockDamageSource) {
-            List<Object> causeObjects = new ArrayList<>();
+            List<NamedCause> causeObjects = new ArrayList<>();
             Location<org.spongepowered.api.world.World> location = ((BlockDamageSource) damageSource).getLocation();
             BlockPos blockPos = VecHelper.toBlockPos(location);
             Optional<User> owner = ((IMixinChunk) ((net.minecraft.world.World) location.getExtent())
@@ -390,7 +390,7 @@ public class DamageEventHandler {
             if (owner.isPresent()) {
                 causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
             }
-            return Cause.of(causeObjects.toArray());
+            return Cause.builder().addAll(causeObjects).build();
         } else {
             return Cause.of(NamedCause.source(damageSource));
         }

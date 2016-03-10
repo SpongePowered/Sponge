@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.human;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -33,8 +31,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
-
-import java.util.Optional;
 
 @Mixin(value = EntityHuman.class, remap = false)
 public abstract class MixinEntityHuman extends MixinEntityCreature implements Human {
@@ -45,26 +41,6 @@ public abstract class MixinEntityHuman extends MixinEntityCreature implements Hu
     @Override
     public String getName() {
         return this.fakeProfile.getName();
-    }
-
-    @Override
-    public boolean isViewingInventory() {
-        return this.openInventory != null;
-    }
-
-    @Override
-    public Optional<Inventory> getOpenInventory() {
-        return Optional.ofNullable(this.openInventory);
-    }
-
-    @Override
-    public void openInventory(Inventory inventory) {
-        this.openInventory = checkNotNull(inventory);
-    }
-
-    @Override
-    public void closeInventory() {
-        this.openInventory = null;
     }
 
 }

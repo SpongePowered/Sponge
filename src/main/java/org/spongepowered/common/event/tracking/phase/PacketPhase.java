@@ -339,7 +339,7 @@ public class PacketPhase extends TrackingPhase {
         CHAT,
         CREATIVE_INVENTORY,
         PLACE_BLOCK,
-        ;
+        OPEN_INVENTORY, REQUEST_RESPAWN;
 
         @Override
         public PacketPhase getPhase() {
@@ -456,7 +456,17 @@ public class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(C08PacketPlayerBlockPlacement.class, packet -> General.PLACE_BLOCK);
         this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> General.CREATIVE_INVENTORY);
         this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> Inventory.fromWindowPacket((C0EPacketClickWindow) packet));
-        this.packetTranslationMap.put(C16PacketClientStatus.class, packet -> )
+        this.packetTranslationMap.put(C16PacketClientStatus.class, packet -> {
+            final C16PacketClientStatus clientStatus = (C16PacketClientStatus) packet;
+            final C16PacketClientStatus.EnumState status = clientStatus.getStatus();
+            if ( status == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT) {
+                return General.OPEN_INVENTORY;
+            } else if ( status == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
+                return General.REQUEST_RESPAWN;
+            } else {
+                return General.IGNORED;
+            }
+        });
 
         this.packetUnwindMap.put(C02PacketUseEntity.class, PacketFunction.USE_ENTITY);
         this.packetUnwindMap.put(C07PacketPlayerDigging.class, PacketFunction.ACTION);

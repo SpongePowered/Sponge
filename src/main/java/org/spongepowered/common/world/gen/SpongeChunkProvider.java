@@ -113,7 +113,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     protected Random rand;
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
-    protected boolean prevRestoringBlocks;
 
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
@@ -330,16 +329,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
             ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkProvider, chunkX, chunkZ);
         }
 
-        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, Collections.emptyMap(), chunk);
+        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, populators, chunk);
         SpongeImpl.postEvent(event);
 
-        causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS, PhaseContext.start()
-            .add(sourceCause)
-            .add(chunkProviderCause)
-            .complete());
-        for (List<Transaction<BlockSnapshot>> transactions : event.getPopulatedTransactions().values()) {
-            causeTracker.markAndNotifyBlockPost(transactions, CaptureType.POPULATE, populateCause);
-        }
         causeTracker.completePhase();
 
         BlockFalling.fallInstantly = false;

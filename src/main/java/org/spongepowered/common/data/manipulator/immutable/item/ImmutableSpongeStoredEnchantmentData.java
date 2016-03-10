@@ -25,19 +25,17 @@
 package org.spongepowered.common.data.manipulator.immutable.item;
 
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableStoredEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.StoredEnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
-import org.spongepowered.api.data.value.immutable.ImmutableListValue;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.item.SpongeStoredEnchantmentData;
 
 import java.util.List;
 
 public class ImmutableSpongeStoredEnchantmentData
-        extends AbstractImmutableSingleListData<ItemEnchantment, ImmutableStoredEnchantmentData, StoredEnchantmentData>
+    extends AbstractImmutableListData<ItemEnchantment, ImmutableStoredEnchantmentData, StoredEnchantmentData>
         implements ImmutableStoredEnchantmentData {
 
     public ImmutableSpongeStoredEnchantmentData(List<ItemEnchantment> value) {
@@ -45,13 +43,8 @@ public class ImmutableSpongeStoredEnchantmentData
     }
 
     @Override
-    public ImmutableListValue<ItemEnchantment> enchantments() {
-        return getValueGetter();
-    }
-
-    @Override
     public DataContainer toContainer() {
-        return new MemoryDataContainer()
+        return super.toContainer()
                 .set(Keys.STORED_ENCHANTMENTS, getValue());
     }
 }

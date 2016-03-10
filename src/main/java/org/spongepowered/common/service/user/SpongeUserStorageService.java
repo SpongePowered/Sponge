@@ -55,13 +55,13 @@ public class SpongeUserStorageService implements UserStorageService {
 
     @Override
     public Optional<User> get(GameProfile profile) {
-        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(checkNotNull(profile, "profile").getUniqueId(), "profile UUID")));
+        return Optional.ofNullable(UserDiscoverer.findByUuid(checkNotNull(checkNotNull(profile, "profile").getUniqueId(), "profile id")));
     }
 
     @Override
     public User getOrCreate(GameProfile profile) {
         if (profile.getUniqueId() == null) {
-            String name = profile.getName();
+            String name = profile.getName().orElse(null);
             // Use Forge's FakePlayer UUID
             UUID uuid = UUID.fromString(FAKEPLAYER_UUID);
             profile = (GameProfile) new com.mojang.authlib.GameProfile(uuid, name);
@@ -95,7 +95,7 @@ public class SpongeUserStorageService implements UserStorageService {
         Collection<GameProfile> allProfiles = UserDiscoverer.getAllProfiles();
         Collection<GameProfile> matching = Sets.newHashSet();
         for (GameProfile profile : allProfiles) {
-            if (profile.getName().startsWith(lastKnownName)) {
+            if (profile.getName().isPresent() && profile.getName().get().startsWith(lastKnownName)) {
                 matching.add(profile);
             }
         }

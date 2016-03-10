@@ -58,7 +58,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     @Shadow @Final private Date banStartDate;
     @Shadow @Final private Date banEndDate;
 
-    private Text spongeReason;
+    private Optional<Text> spongeReason;
     private Text source;
 
     private Optional<CommandSource> commandSource = Optional.empty();
@@ -66,10 +66,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     @SuppressWarnings("deprecation")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
-        this.spongeReason = Text.of();
-        this.source = Text.of();
-
-        this.spongeReason = SpongeTexts.fromLegacy(this.reason);
+        this.spongeReason = this.reason == null ? Optional.empty() : Optional.of(SpongeTexts.fromLegacy(this.reason));
         this.source = SpongeTexts.fromLegacy(this.bannedBy);
 
         this.setSource();
@@ -86,7 +83,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
     }
 
     @Override
-    public Text getReason() {
+    public Optional<Text> getReason() {
         return this.spongeReason;
     }
 

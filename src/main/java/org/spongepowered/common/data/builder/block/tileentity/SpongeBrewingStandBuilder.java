@@ -30,7 +30,7 @@ import org.spongepowered.api.block.tileentity.carrier.BrewingStand;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BrewingStandData;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;

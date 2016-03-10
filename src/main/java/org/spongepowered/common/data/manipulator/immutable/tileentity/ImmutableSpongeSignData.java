@@ -24,23 +24,20 @@
  */
 package org.spongepowered.common.data.manipulator.immutable.tileentity;
 
-import static org.spongepowered.api.text.serializer.TextSerializers.JSON;
-
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableSignData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.immutable.ImmutableListValue;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.common.data.manipulator.immutable.common.collection.AbstractImmutableSingleListData;
+import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableListData;
 import org.spongepowered.common.data.manipulator.mutable.tileentity.SpongeSignData;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ImmutableSpongeSignData extends AbstractImmutableSingleListData<Text, ImmutableSignData, SignData> implements ImmutableSignData {
+public class ImmutableSpongeSignData extends AbstractImmutableListData<Text, ImmutableSignData, SignData> implements ImmutableSignData {
 
     public ImmutableSpongeSignData(List<Text> lines) {
         super(ImmutableSignData.class, lines, Keys.SIGN_LINES, SpongeSignData.class);

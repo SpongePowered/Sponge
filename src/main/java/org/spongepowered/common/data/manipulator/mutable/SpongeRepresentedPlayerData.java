@@ -24,18 +24,21 @@
  */
 package org.spongepowered.common.data.manipulator.mutable;
 
-import org.spongepowered.api.profile.GameProfile;
+import com.google.common.collect.Multimap;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutableRepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeRepresentedPlayerData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleData;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile, RepresentedPlayerData, ImmutableRepresentedPlayerData>
@@ -61,10 +64,22 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
         public DataContainer toContainer() {
             return new MemoryDataContainer();
         }
+
         @Override
-        public String getName() {
+        public Optional<String> getName() {
+            return Optional.empty();
+        }
+
+        @Override
+        public Multimap<String, ProfileProperty> getPropertyMap() {
             return null;
-        }};
+        }
+
+        @Override
+        public boolean isFilled() {
+            return false;
+        }
+    };
 
     public SpongeRepresentedPlayerData() {
         this(NULL_PROFILE);
@@ -90,8 +105,8 @@ public class SpongeRepresentedPlayerData extends AbstractSingleData<GameProfile,
         if (this.getValue().getUniqueId() != null) {
             container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_ID), this.getValue().getUniqueId().toString());
         }
-        if (this.getValue().getName() != null) {
-            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_NAME), this.getValue().getName());
+        if (this.getValue().getName().isPresent()) {
+            container.set(this.usedKey.getQuery().then(DataQueries.GAME_PROFILE_NAME), this.getValue().getName().get());
         }
         return container;
     }

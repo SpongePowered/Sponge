@@ -25,10 +25,13 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityArmorStand;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
+
+import java.util.List;
 
 @Mixin(EntityArmorStand.class)
 public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implements ArmorStand {
@@ -38,6 +41,11 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void setNoBasePlate(boolean p_175426_1_);
     @Shadow protected abstract void setNoGravity(boolean p_175425_1_);
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        manipulators.add(getBodyPartRotationalData());
+    }
 
     @Override
     public boolean isSmall() {

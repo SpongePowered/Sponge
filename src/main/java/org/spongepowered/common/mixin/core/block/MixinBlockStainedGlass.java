@@ -24,57 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockStainedGlass;
-import net.minecraft.block.state.IBlockState;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.data.manipulator.immutable.ImmutableColoredData;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.util.Color;
+import net.minecraft.block.material.Material;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.data.ImmutableDataCachingUtil;
-import org.spongepowered.common.data.manipulator.immutable.ImmutableSpongeColoredData;
-import org.spongepowered.common.util.ColorUtil;
-
-import java.util.Optional;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.block.IMixinDyeableBlock;
 
 @Mixin(BlockStainedGlass.class)
-public abstract class MixinBlockStainedGlass extends MixinBlock {
+public abstract class MixinBlockStainedGlass extends MixinBlock implements IMixinDyeableBlock {
 
-    @Override
-    public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getColoredData(blockState));
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onInit(Material material, CallbackInfo ci) {
+        this.setProperty(BlockStainedGlass.COLOR);
     }
 
-    @Override
-    public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableColoredData.class.isAssignableFrom(immutable);
-    }
-
-    @Override
-    public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableColoredData) {
-            final Color color = ((ImmutableColoredData) manipulator).color().get();
-            return Optional.of((BlockState) blockState.withProperty(BlockStainedGlass.COLOR, ColorUtil.fromColor(color)));
-        }
-        return super.getStateWithData(blockState, manipulator);
-    }
-
-    @Override
-    public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
-        if (key.equals(Keys.COLOR)) {
-            final Color color = (Color) value;
-            return Optional.of((BlockState) blockState.withProperty(BlockStainedGlass.COLOR, ColorUtil.fromColor(color)));
-        }
-        return super.getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableColoredData getColoredData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeColoredData.class,
-                ColorUtil.fromDyeColor((DyeColor) (Object) blockState.getValue(BlockStainedGlass.COLOR)));
-    }
 }

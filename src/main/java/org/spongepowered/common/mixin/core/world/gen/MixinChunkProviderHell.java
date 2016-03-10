@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.GenericMath;
+import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderHell;
@@ -39,9 +40,14 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 
+import java.util.List;
 import java.util.Random;
 
 @Mixin(ChunkProviderHell.class)

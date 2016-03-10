@@ -44,6 +44,7 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -52,7 +53,7 @@ public class SpongeBanBuilder implements Ban.Builder {
     private org.spongepowered.api.profile.GameProfile profile;
     private InetAddress address;
     private BanType banType;
-    private Text reason;
+    private Optional<Text> reason;
     private Instant start = Instant.now();
     @Nullable private Instant end;
     @Nullable private Text source;
@@ -86,9 +87,8 @@ public class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder reason(Text reason) {
-        checkNotNull(reason, "Reason cannot be null!");
-        this.reason = reason;
+    public Ban.Builder reason(@Nullable Text reason) {
+        this.reason = Optional.ofNullable(reason);
         return this;
     }
 
@@ -127,14 +127,14 @@ public class SpongeBanBuilder implements Ban.Builder {
         if (this.banType == BanTypes.PROFILE) {
             checkState(this.profile != null, "User cannot be null!");
             return (Ban) new UserListBansEntry((GameProfile) this.profile, Date.from(this.start), sourceName, this.toDate(this.end),
-                    SpongeTexts.toLegacy(this.reason));
+                    this.reason.isPresent() ? SpongeTexts.toLegacy(this.reason.get()) : null);
         } else {
             checkState(this.address != null, "Address cannot be null!");
 
             // This *should* be a static method, but apparently not...
             BanList ipBans = MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
             return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
-                    this.toDate(this.end), SpongeTexts.toLegacy(this.reason));
+                    this.toDate(this.end), this.reason.isPresent() ? SpongeTexts.toLegacy(this.reason.get()) : null);
         }
     }
 

@@ -34,6 +34,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -50,14 +51,14 @@ public interface PacketFunction {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
             net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
             if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
-                Player spongePlayer = (Player) player;
-                MessageChannel originalChannel = spongePlayer.getMessageChannel();
-                Cause cause = Cause.of(NamedCause.source(spongePlayer));
+                MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(cause, originalChannel, Optional.of(originalChannel),
-                        Optional.empty(), Optional.empty(), (Entity) entity);
+                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(player).build(), originalChannel,
+                        Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true);
                 SpongeImpl.getGame().getEventManager().post(event);
-                event.getMessage().ifPresent(text -> event.getChannel().ifPresent(channel -> channel.send(text)));
+                if (!event.isMessageCancelled()) {
+                    event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
+                }
             }
         } else if (state == PacketPhase.General.INTERACT_ENTITY) {
 

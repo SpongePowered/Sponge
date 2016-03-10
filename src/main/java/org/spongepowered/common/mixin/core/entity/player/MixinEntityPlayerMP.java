@@ -40,6 +40,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
@@ -60,6 +61,7 @@ import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
+import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -93,6 +95,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
@@ -110,6 +113,7 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Collection;
 import java.util.List;
@@ -142,7 +146,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private boolean chatColours;
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
-    
+    private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
+
     private WorldSettings.GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
@@ -225,26 +230,15 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void sendMessage(ChatType type, Text message) {
+        checkNotNull(type, "type");
+        checkNotNull(message, "message");
+
         IChatComponent component = SpongeTexts.toComponent(message);
         if (type == ChatTypes.ACTION_BAR) {
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
         this.playerNetServerHandler.sendPacket(new S02PacketChat(component, ((SpongeChatType) type).getByteId()));
-    }
-
-    @Override
-    public void sendMessages(ChatType type, Text... messages) {
-        for (Text text : messages) {
-            sendMessage(type, text);
-        }
-    }
-
-    @Override
-    public void sendMessages(ChatType type, Iterable<Text> messages) {
-        for (Text text : messages) {
-            sendMessages(type, text);
-        }
     }
 
     @Override
@@ -263,7 +257,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         checkNotNull(position, "The position cannot be null");
         checkArgument(radius > 0, "The radius has to be greater then zero!");
 
-        List<Packet> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
@@ -507,4 +501,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         // Re-create the array, so that attributes are properly re-added
         this.previousEquipment = new ItemStack[5];
     }
+
+    @Override
+    public TabList getTabList() {
+        return this.tabList;
+    }
+
+
+    @Override
+    public void setTargetedLocation(@Nullable Vector3d vec) {
+        super.setTargetedLocation(vec);
+        this.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
+    }
+
 }

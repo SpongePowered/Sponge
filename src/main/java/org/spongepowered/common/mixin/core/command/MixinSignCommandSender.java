@@ -39,7 +39,8 @@ import org.spongepowered.common.interfaces.IMixinCommandSource;
 @Mixin(targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinSignCommandSender implements ICommandSender, IMixinCommandSender, SignSource, IMixinCommandSource {
 
-    @Shadow(aliases = {"this$0", "field_174796_b"}) @Final
+    @Shadow(aliases = {"this$0", "field_174796_b"})
+    @Final
     private TileEntitySign sign;
 
     @Override

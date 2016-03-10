@@ -89,11 +89,11 @@ public abstract class AbstractSingleData<T, M extends DataManipulator<M, I>, I e
     @Override
     public abstract int compareTo(M o);
 
-    public T getValue() {
+    protected T getValue() {
         return this.value;
     }
 
-    public M setValue(T value) {
+    protected M setValue(T value) {
         this.value = checkNotNull(value);
         // double casting due to jdk 6 type inference
         return (M) this;

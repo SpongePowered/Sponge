@@ -84,8 +84,10 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -130,6 +132,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -423,11 +426,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3i position) {
-        return this.createEntity(type, position.toDouble());
-    }
-
-    @Override
     public Optional<Entity> createEntity(DataContainer entityContainer) {
         // TODO once entity containers are implemented
         return Optional.empty();
@@ -661,27 +659,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void sendMessage(ChatType type, Text message) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, message);
-        }
-    }
+        checkNotNull(type, "type");
+        checkNotNull(message, "message");
 
-    @Override
-    public void sendMessages(ChatType type, Text... messages) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, messages);
-        }
-    }
-
-    @Override
-    public void sendMessages(ChatType type, Iterable<Text> messages) {
-        for (Player player : getPlayers()) {
-            player.sendMessages(type, messages);
+        for (Player player : this.getPlayers()) {
+            player.sendMessage(type, message);
         }
     }
 
     @Override
     public void sendTitle(Title title) {
+        checkNotNull(title, "title");
+
         for (Player player : getPlayers()) {
             player.sendTitle(title);
         }
@@ -920,8 +909,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
             entityList.add((Entity) entity);
             snapshotBuilder.add(((Entity) entity).createSnapshot());
         }
+        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
         List<NamedCause> causes = new ArrayList<>();
-        causes.add(NamedCause.source(this));
+        causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
         SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList,
             snapshotBuilder.build(), this);

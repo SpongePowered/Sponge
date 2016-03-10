@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.Vec3;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
@@ -38,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
-import java.util.List;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)

@@ -56,7 +56,7 @@ public abstract class MixinUserListWhitelist extends UserList {
     public String[] getKeys() {
         List<String> names = new ArrayList<>();
         for (GameProfile profile: Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
-            names.add(profile.getName());
+            names.add(profile.getName().get());
         }
         return names.toArray(new String[names.size()]);
     }
@@ -79,7 +79,7 @@ public abstract class MixinUserListWhitelist extends UserList {
     @Overwrite
     public com.mojang.authlib.GameProfile getBannedProfile(String username) {
         for (GameProfile profile: Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
-            if (profile.getName().equals(username)) {
+            if (profile.getName().get().equals(username)) {
                 return (com.mojang.authlib.GameProfile) profile;
             }
         }

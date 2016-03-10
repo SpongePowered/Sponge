@@ -116,6 +116,14 @@ public abstract class ItemStackUtil {
         return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), ItemStackUtil.toNative(stack2));
     }
 
+    public static boolean compare(ItemStack stack1, net.minecraft.item.ItemStack stack2) {
+        return ItemStackUtil.compare(ItemStackUtil.toNative(stack1), stack2);
+    }
+
+    public static ItemStackSnapshot createSnapshot(net.minecraft.item.ItemStack item) {
+        return ItemStackUtil.fromNative(item).createSnapshot();
+    }
+
     public static ItemStackSnapshot snapshotOf(@Nullable net.minecraft.item.ItemStack itemStack) {
         return itemStack == null ? ItemStackSnapshot.NONE : fromNative(itemStack).createSnapshot();
     }

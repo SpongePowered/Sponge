@@ -38,17 +38,19 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
-import org.spongepowered.api.util.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.data.builder.AbstractDataBuilder;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.util.persistence.NbtTranslator;
 
 import java.util.Iterator;
 import java.util.List;
@@ -157,6 +159,17 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
             }
         }
         this.manipulators.add(manipulator);
+        return this;
+    }
+
+    @Override
+    public <V> BlockSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
+        checkNotNull(key, "key");
+        checkState(this.blockState != null);
+        this.blockState = this.blockState.with(key, value).orElse(this.blockState);
+        if(this.extendedState != null) {
+            this.extendedState = this.extendedState.with(key, value).orElse(this.extendedState);
+        }
         return this;
     }
 

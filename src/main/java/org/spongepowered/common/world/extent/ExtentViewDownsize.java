@@ -42,6 +42,7 @@ import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
@@ -54,7 +55,6 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.persistence.InvalidDataException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -412,12 +412,6 @@ public class ExtentViewDownsize implements DefaultedExtent {
     public Optional<TileEntity> getTileEntity(int x, int y, int z) {
         checkRange(x, y, z);
         return this.extent.getTileEntity(x, y, z);
-    }
-
-    @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3i position) {
-        checkRange(position.getX(), position.getY(), position.getZ());
-        return this.extent.createEntity(type, position);
     }
 
     @Override

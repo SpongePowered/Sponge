@@ -27,8 +27,6 @@ package org.spongepowered.common.interfaces.entity.player;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
-import java.time.Instant;
-
 import javax.annotation.Nullable;
 
 public interface IMixinEntityPlayer extends IMixinEntity {

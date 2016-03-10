@@ -127,7 +127,7 @@ public class SpongeCommandManager implements CommandManager {
 
         synchronized (this.lock) {
             // <namespace>:<alias> for all commands
-            List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 2);
+            List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
             for (String alias : aliases) {
                 final Collection<CommandMapping> ownedCommands = this.owners.get(container);
                 for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
@@ -135,8 +135,16 @@ public class SpongeCommandManager implements CommandManager {
                         throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
                     }
                 }
+
                 aliasesWithPrefix.add(alias);
-                aliasesWithPrefix.add(container.getId() + ":" + alias);
+
+                // Alias commands with unqualified ID and qualified ID
+                String unqualifiedId = container.getUnqualifiedId();
+                aliasesWithPrefix.add(unqualifiedId + ':' + alias);
+
+                if (!container.getId().equals(unqualifiedId)) {
+                    aliasesWithPrefix.add(container.getId() + ':' + alias);
+                }
             }
 
             Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback);
@@ -247,6 +255,14 @@ public class SpongeCommandManager implements CommandManager {
             return event.getResult();
         }
 
+        // Only the first part of argSplit is used at the moment, do the other in the future if needed.
+        argSplit[0] = event.getCommand();
+
+        commandLine = event.getCommand();
+        if (!event.getArguments().isEmpty()) {
+            commandLine = commandLine + ' ' + event.getArguments();
+        }
+
         try {
             try {
                 return this.dispatcher.process(source, commandLine);
@@ -265,9 +281,11 @@ public class SpongeCommandManager implements CommandManager {
                     source.sendMessage(error(text));
                 }
 
-                final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
-                if (mapping.isPresent()) {
-                    source.sendMessage(error(t("Usage: /%s %s", argSplit[0], mapping.get().getCallable().getUsage(source))));
+                if (ex.shouldIncludeUsage()) {
+                    final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
+                    if (mapping.isPresent()) {
+                        source.sendMessage(error(t("Usage: /%s %s", argSplit[0], mapping.get().getCallable().getUsage(source))));
+                    }
                 }
             }
         } catch (Throwable thr) {
@@ -298,7 +316,7 @@ public class SpongeCommandManager implements CommandManager {
         try {
             final String[] argSplit = arguments.split(" ", 2);
             List<String> suggestions = new ArrayList<>(this.dispatcher.getSuggestions(src, arguments));
-            final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Cause.of(src),
+            final TabCompleteEvent.Command event = SpongeEventFactory.createTabCompleteEventCommand(Cause.source(src).build(),
                     ImmutableList.copyOf(suggestions), suggestions, argSplit.length > 1 ? argSplit[1] : "", argSplit[0], arguments);
             Sponge.getGame().getEventManager().post(event);
             if (event.isCancelled()) {
