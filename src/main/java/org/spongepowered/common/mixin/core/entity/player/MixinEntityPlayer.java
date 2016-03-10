@@ -226,12 +226,12 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      * @param entity The entity item
      * @return True if the events and such succeeded
      */
-    @Redirect(method = "joinEntityItemWithWorld", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
+    /*@Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
     private boolean onDropItem(World world, net.minecraft.entity.Entity entity) {
         SpawnCause spawnCause = EntitySpawnCause.builder()
                 .entity(this)
                 .type(SpawnTypes.DROPPED_ITEM)
                 .build();
         return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
-    }
+    }*/
 }

@@ -49,7 +49,7 @@ import org.spongepowered.common.SpongeImpl;
 public class MixinBlockFalling {
 
     private static final String WORLD_IS_AREA_LOADED =
-            "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z";
+            "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
 
     private BlockSnapshot snapshot;

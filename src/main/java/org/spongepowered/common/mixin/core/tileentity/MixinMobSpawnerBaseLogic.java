@@ -52,7 +52,7 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String ENTITY_LIST_CREATE_ENTITY =
-            "Lnet/minecraft/entity/EntityList;createEntityByName(Ljava/lang/String;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
+            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoaderlspawnEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;)V";
 
     @Shadow private int spawnRange;
 
@@ -72,6 +72,8 @@ public abstract class MixinMobSpawnerBaseLogic {
      * @param world
      * @return
      */
+    /*
+    // TODO 1.9: Figure out how to update this
     @Redirect(method = "updateSpawner", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_ENTITY))
     private Entity onConstruct(String entityName, World world) {
         EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.stringToClassMapping.get(entityName));
@@ -96,7 +98,7 @@ public abstract class MixinMobSpawnerBaseLogic {
         }
         return EntityList.createEntityByName(entityName, world);
 
-    }
+    }*/
 
     @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;resetTimer()V"))
     private void onReset(CallbackInfo callbackInfo) {
@@ -112,12 +114,14 @@ public abstract class MixinMobSpawnerBaseLogic {
      * @param entity
      * @return
      */
+    // TODO 1.9: Re-add this
+    /*
     @Redirect(method = "spawnNewEntity", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
     private boolean onEntitySpawn(World world, Entity entity) {
         // TODO include the spawner data once implemented.
         SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
         return ((org.spongepowered.api.world.World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity),
                 Cause.of(NamedCause.source(cause)));
-    }
+    }*/
 
 }

@@ -52,6 +52,6 @@ public abstract class MixinAnvilSaveHandler extends SaveHandler {
         // we won't be generating a DIMXX folder for chunk loaders since this name is already generated
         // for the world container with provider.getSaveFolder().
         // This allows users to remove our mod and maintain world compatibility.
-        return new AnvilChunkLoader(this.getWorldDirectory(),this.field_186341_a);
+        return new AnvilChunkLoader(this.getWorldDirectory(), this.dataFixer);
     }
 }

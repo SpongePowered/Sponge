@@ -128,7 +128,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
                 // Sponge start
                 // TODO 1.9: Figure out how we want experience to work here
-                List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().func_186521_a(LootTableList.GAMEPLAY_FISHING).func_186462_a(this.rand, lootcontext$builder.build());
+                List<net.minecraft.item.ItemStack> itemstacks = this.worldObj.getLootTableManager().getLootTableFromLocation(LootTableList.GAMEPLAY_FISHING).generateLootForPools(this.rand, lootcontext$builder.build());
                 FishingEvent.Stop event = SpongeEventFactory.createFishingEventStop(Cause.of(NamedCause.source(this.angler)), 0, 0,
                         this.createSnapshot(), this, itemstacks.stream().map(s -> {
                             ItemStackSnapshot snapshot = ((ItemStack) s).createSnapshot();

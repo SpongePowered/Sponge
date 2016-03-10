@@ -132,7 +132,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         causeTracker.randomTickBlock(block, pos, state, rand);
     }
 
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/BlockPos;)Z"))
+    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onLightningCheck(WorldServer world, BlockPos blockPos) {
         if (world.isRainingAt(blockPos)) {
             Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) this,

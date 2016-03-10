@@ -344,7 +344,7 @@ public abstract class MixinPlayerList {
         if (nbttagcompound != null) {
             if (nbttagcompound.hasKey("RootVehicle", 10)) {
                 NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
-                Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
+                Entity entity2 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
 
                 if (entity2 != null) {
                     UUID uuid = nbttagcompound1.getUniqueId("Attach");
@@ -352,7 +352,7 @@ public abstract class MixinPlayerList {
                     if (entity2.getUniqueID().equals(uuid)) {
                         playerIn.startRiding(entity2, true);
                     } else {
-                        for (Entity entity : entity2.func_184182_bu()) {
+                        for (Entity entity : entity2.getRecursivePassengers()) {
                             if (entity.getUniqueID().equals(uuid)) {
                                 playerIn.startRiding(entity, true);
                                 break;
@@ -364,13 +364,13 @@ public abstract class MixinPlayerList {
                         logger.warn("Couldn\'t reattach entity to player");
                         worldserver.removePlayerEntityDangerously(entity2);
 
-                        for (Entity entity3 : entity2.func_184182_bu()) {
+                        for (Entity entity3 : entity2.getRecursivePassengers()) {
                             worldserver.removePlayerEntityDangerously(entity3);
                         }
                     }
                 }
             } else if (nbttagcompound.hasKey("Riding", 10)) {
-                Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.getCompoundTag("Riding"), worldserver, true);
+                Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound.getCompoundTag("Riding"), worldserver, true);
 
                 if (entity1 != null) {
                     playerIn.startRiding(entity1, true);
@@ -565,8 +565,7 @@ public abstract class MixinPlayerList {
         }
     }
 
-    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
-                                                                           + "sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V", shift = At.Shift.BEFORE), cancellable = true)
+    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS, shift = At.Shift.BEFORE), cancellable = true)
     public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
         // Create a packet to be used for players without context data
         SPacketPlayerListItem noSpecificViewerPacket = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, player);

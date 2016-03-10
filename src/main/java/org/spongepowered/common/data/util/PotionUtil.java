@@ -35,7 +35,7 @@ public final class PotionUtil {
 
     public static org.spongepowered.api.effect.potion.PotionEffect copyToApi(PotionEffect effect) {
         return (org.spongepowered.api.effect.potion.PotionEffect) new PotionEffect(effect.getPotion(), effect.getDuration(), effect.getAmplifier(),
-                effect.getIsAmbient(), effect.isShowParticles());
+                effect.getIsAmbient(), effect.doesShowParticles());
     }
 
     private PotionUtil() {

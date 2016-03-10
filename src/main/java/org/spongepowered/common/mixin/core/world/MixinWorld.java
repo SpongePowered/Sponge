@@ -316,7 +316,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(x, z) || shouldGenerate) {
-            chunk = worldserver.getChunkProvider().func_186028_c(x, z);
+            chunk = worldserver.getChunkProvider().loadChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }

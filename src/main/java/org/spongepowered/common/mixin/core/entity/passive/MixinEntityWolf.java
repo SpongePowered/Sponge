@@ -71,7 +71,7 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         this.shadow$setAngry(angry);
     }
 
-    @Redirect(method = "func_184645_a", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
         if (random == 0) {

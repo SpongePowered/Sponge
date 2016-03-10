@@ -182,7 +182,7 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
                 .collect(GuavaCollectors.toImmutableSet());
     }
 
-    @Redirect(method = "getGameProfile(Lnet/minecraft/server/MinecraftServer;Ljava/lang/String;)Lcom/mojang/authlib/GameProfile;",
+    @Redirect(method = "func_187319_a",
             at = @At(value = "INVOKE", target = "Lcom/mojang/authlib/GameProfileRepository;findProfilesByNames([Ljava/lang/String;"
                     + "Lcom/mojang/authlib/Agent;Lcom/mojang/authlib/ProfileLookupCallback;)V"))
     private static void onGetGameProfile(GameProfileRepository repository, String[] names, Agent agent, ProfileLookupCallback callback) {
