@@ -35,6 +35,7 @@ import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
 public abstract class MixinEntityZombie {
 
     private static final String ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD = "Lnet/minecraft/entity/monster/EntityZombie;getConversionTimeBoost()I";
+
     @Shadow protected abstract int getConversionTimeBoost();
 
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = ENTITY_ZOMBIE_GET_CONVERSION_BOOST_METHOD, ordinal = 0))

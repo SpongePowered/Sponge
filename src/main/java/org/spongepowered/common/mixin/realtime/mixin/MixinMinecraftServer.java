@@ -34,17 +34,17 @@ import org.spongepowered.common.mixin.realtime.IMixinMinecraftServer;
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer implements IMixinMinecraftServer {
 
-    private static long lastTickMillis = System.currentTimeMillis();
+    private static long lastTickNanos = System.nanoTime();
     private static long realTimeTicks = 1;
 
     @Inject(method = "tick", at = @At("HEAD"))
     public void tick(CallbackInfo ci) {
-        long currentMillis = System.currentTimeMillis();
-        realTimeTicks = (currentMillis - lastTickMillis) / 50;
+        long currentNanos = System.nanoTime();
+        realTimeTicks = (currentNanos - lastTickNanos) / 50000000;
         if (realTimeTicks < 1) {
             realTimeTicks = 1;
         }
-        lastTickMillis = currentMillis;
+        lastTickNanos = currentNanos;
     }
 
     @Override
