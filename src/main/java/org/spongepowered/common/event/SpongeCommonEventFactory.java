@@ -474,7 +474,7 @@ public class SpongeCommonEventFactory {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
             }*/
 
-            Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+            Slot nmsSlot = player.openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
@@ -508,7 +508,7 @@ public class SpongeCommonEventFactory {
                     slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
                 }*/
 
-                Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+                Slot nmsSlot = player.openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(customStack);
                 }
