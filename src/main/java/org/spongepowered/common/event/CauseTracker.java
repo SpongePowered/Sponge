@@ -579,26 +579,18 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            List<NamedCause> destructCauses = new ArrayList<>();
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    destructCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                } else {
-                    destructCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
             }
-            cause = Cause.of(destructCauses);
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
-            List<NamedCause> droppedCauses = new ArrayList<>();
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    droppedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                } else {
-                    droppedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
             }
-            cause = Cause.of(droppedCauses);
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         }
 
