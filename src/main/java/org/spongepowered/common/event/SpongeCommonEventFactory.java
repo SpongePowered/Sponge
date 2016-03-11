@@ -244,7 +244,15 @@ public class SpongeCommonEventFactory {
                 ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, causeTracker.getCapturedEntityItems(),
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                if (entry.getKey().equals(NamedCause.SOURCE)) {
+                    builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                } else {
+                    builder.suggestNamed(entry.getKey(), entry.getValue());
+                }
+            }
+            event = SpongeEventFactory.createCreativeInventoryEventDrop(builder.build(), cursorTransaction, causeTracker.getCapturedEntityItems(),
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
@@ -293,7 +301,7 @@ public class SpongeCommonEventFactory {
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
-            if (slot != null) {
+            if (slot != null && !slot.getHasStack()) {
                 SlotTransaction slotTransaction =
                         new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
@@ -309,8 +317,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropFull(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropFull(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -329,8 +345,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropSingle(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropSingle(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -443,7 +467,7 @@ public class SpongeCommonEventFactory {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
             }*/
 
-            Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+            Slot nmsSlot = player.openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
@@ -477,7 +501,7 @@ public class SpongeCommonEventFactory {
                     slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
                 }*/
 
-                Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+                Slot nmsSlot = player.openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(customStack);
                 }

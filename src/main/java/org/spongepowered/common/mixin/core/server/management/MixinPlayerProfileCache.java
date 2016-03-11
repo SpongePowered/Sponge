@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.ProfileLookupCallback;
@@ -131,6 +132,34 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
     }
 
     @Override
+    public Optional<GameProfile> getOrLookupById(UUID uniqueId) {
+        Optional<GameProfile> profile = this.getById(uniqueId);
+        if (profile.isPresent()) {
+            return profile;
+        } else {
+            return this.lookupById(uniqueId);
+        }
+    }
+
+    @Override
+    public Map<UUID, Optional<GameProfile>> getOrLookupByIds(Iterable<UUID> uniqueIds) {
+        checkNotNull(uniqueIds, "unique ids");
+
+        Collection<UUID> pending = Sets.newHashSet(uniqueIds);
+        Map<UUID, Optional<GameProfile>> result = Maps.newHashMap();
+
+        result.putAll(this.getByIds(pending));
+        result.forEach((uniqueId, profile) -> {
+            if (profile.isPresent()) {
+                pending.remove(uniqueId);
+            }
+        });
+        result.putAll(this.lookupByIds(pending));
+
+        return ImmutableMap.copyOf(result);
+    }
+
+    @Override
     public Optional<GameProfile> getByName(String name) {
         return Optional.ofNullable((GameProfile) this.getByNameNoLookup(checkNotNull(name, "name")));
     }
@@ -169,6 +198,37 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
     }
 
     @Override
+    public Optional<GameProfile> getOrLookupByName(String name) {
+        Optional<GameProfile> profile = this.getByName(name);
+        if (profile.isPresent()) {
+            return profile;
+        } else {
+            return this.lookupByName(name);
+        }
+    }
+
+    @Override
+    public Map<String, Optional<GameProfile>> getOrLookupByNames(Iterable<String> names) {
+        checkNotNull(names, "names");
+
+        Collection<String> pending = Sets.newHashSet(names);
+        Map<String, Optional<GameProfile>> result = Maps.newHashMap();
+
+        result.putAll(this.getByNames(pending));
+        result.forEach((name, profile) -> {
+            if (profile.isPresent()) {
+                pending.remove(name);
+            }
+        });
+        // lookupByNames can return a map with different keys than the names passes id
+        // (in the case where a name it actually capitalized differently). Therefore,
+        // lookupByName is used instead here.
+        pending.forEach(name -> result.put(name, this.lookupByName(name)));
+
+        return ImmutableMap.copyOf(result);
+    }
+
+    @Override
     public Optional<GameProfile> fillProfile(GameProfile profile, boolean signed) {
         checkNotNull(profile, "profile");
 
@@ -179,6 +239,16 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
     public Collection<GameProfile> getProfiles() {
         return this.usernameToProfileEntryMap.values().stream()
                 .map(entry -> (GameProfile) entry.getGameProfile())
+                .collect(GuavaCollectors.toImmutableSet());
+    }
+
+    @Override
+    public Collection<GameProfile> match(String name) {
+        final String search = checkNotNull(name, "name").toLowerCase(Locale.ROOT);
+
+        return this.getProfiles().stream()
+                .filter(profile -> profile.getName().isPresent())
+                .filter(profile -> profile.getName().get().toLowerCase(Locale.ROOT).startsWith(search))
                 .collect(GuavaCollectors.toImmutableSet());
     }
 

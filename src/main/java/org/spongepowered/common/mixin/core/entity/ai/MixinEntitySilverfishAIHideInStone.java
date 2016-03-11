@@ -37,12 +37,12 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 @Mixin(EntitySilverfish.AIHideInStone.class)
 public abstract class MixinEntitySilverfishAIHideInStone extends EntityAIBase {
 
-    @Shadow(aliases = "this$0") private EntitySilverfish field_179485_a;
+    @Shadow(aliases = "this$0") private EntitySilverfish silverfish;
 
     @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish"
             + "(Lnet/minecraft/block/state/IBlockState;)Z"))
     private boolean onCanGrief(IBlockState blockState) {
-        return BlockSilverfish.canContainSilverfish(blockState) && this.field_179485_a.worldObj.getGameRules().getBoolean("mobGriefing")
-                && ((IMixinGriefer) this.field_179485_a).canGrief();
+        return BlockSilverfish.canContainSilverfish(blockState) && this.silverfish.worldObj.getGameRules().getBoolean("mobGriefing")
+                && ((IMixinGriefer) this.silverfish).canGrief();
     }
 }
