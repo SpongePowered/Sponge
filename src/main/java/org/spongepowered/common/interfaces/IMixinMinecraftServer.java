@@ -35,6 +35,4 @@ public interface IMixinMinecraftServer {
     AnvilSaveHandler getHandler(String worldName);
 
     void setSaveEnabled(boolean enabled);
-
-    boolean isPreparingChunks();
 }
