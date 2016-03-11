@@ -308,7 +308,7 @@ public class SpongeCommonEventFactory {
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
-            if (slot != null) {
+            if (slot != null && !slot.getHasStack()) {
                 SlotTransaction slotTransaction =
                         new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
