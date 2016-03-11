@@ -26,6 +26,8 @@ package org.spongepowered.common.world;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.World;
@@ -55,32 +57,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
 import java.util.UUID;
 import java.util.WeakHashMap;
 
-import javax.annotation.Nullable;
-
 public class DimensionManager {
 
-    private static final Map<Integer, DimensionType> DIMENSION_TYPE_BY_TYPE_ID = new HashMap<>();
-    private static final Map<Integer, DimensionType> DIMENSION_TYPE_BY_DIMENSION_ID = new HashMap<>();
-    private static final Map<Integer, Path> DIMENSION_PATH_BY_DIMENSION_ID = new HashMap<>();
-    private static final Map<Integer, WorldServer> DIMENSION_ID_BY_WORLD = new HashMap<>();
-    private static final Map<String, WorldProperties> WORLD_PROPERTIES_BY_FOLDER_NAME = new HashMap<>();
-    private static final Map<UUID, WorldProperties> WORLD_PROPERTIES_BY_WORLD_UUID = new HashMap<>();
-    private static final BitSet DIMENSION_MAP = new BitSet(Long.SIZE << 4);
-    private static final Map<World, World> WEAK_WORLD_BY_WORLD = new WeakHashMap<>(3);
-    private static final Queue<Integer> UNLOAD_QUEUE = new ArrayDeque<>();
+    private static final TIntObjectHashMap<DimensionType> dimensionTypeByTypeId = new TIntObjectHashMap<>(3);
+    private static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
+    private static final TIntObjectHashMap<Path> dimensionPathByDimensionId = new TIntObjectHashMap<>(3);
+    private static final TIntObjectHashMap<WorldServer> dimensionIdByWorld = new TIntObjectHashMap<>(3);
+    private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>();
+    private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid = new HashMap<>();
+    private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
+    private static final Map<World, World> weakWorldByWorld = new WeakHashMap<>(3);
+    private static final Queue<Integer> unloadQueue = new ArrayDeque<>();
 
     static {
         registerDimensionType(0, DimensionType.OVERWORLD);
@@ -104,18 +101,18 @@ public class DimensionManager {
 
     public static RegisterDimensionTypeResult registerDimensionType(int dimensionTypeId, DimensionType type) {
         checkNotNull(type);
-        if (DIMENSION_TYPE_BY_TYPE_ID.containsKey(dimensionTypeId)) {
+        if (dimensionTypeByTypeId.containsKey(dimensionTypeId)) {
             return RegisterDimensionTypeResult.DIMENSION_TYPE_ALREADY_REGISTERED;
         }
 
-        DIMENSION_TYPE_BY_TYPE_ID.put(dimensionTypeId, type);
+        dimensionTypeByTypeId.put(dimensionTypeId, type);
         return RegisterDimensionTypeResult.DIMENSION_TYPE_REGISTERED;
     }
 
     private static Optional<Integer> getNextFreeDimensionTypeId() {
         Integer highestDimensionTypeId = null;
 
-        for (Integer dimensionTypeId : DIMENSION_TYPE_BY_TYPE_ID.keySet()) {
+        for (Integer dimensionTypeId : dimensionTypeByTypeId.keys()) {
             if (highestDimensionTypeId == null || highestDimensionTypeId < dimensionTypeId) {
                 highestDimensionTypeId = dimensionTypeId;
             }
@@ -128,7 +125,7 @@ public class DimensionManager {
     }
 
     private static Integer getNextFreeDimensionId() {
-        return DIMENSION_MAP.nextClearBit(0);
+        return dimensionBits.nextClearBit(0);
     }
 
     public static RegisterDimensionResult registerDimension(int dimensionId, DimensionType type) {
@@ -145,28 +142,28 @@ public class DimensionManager {
     public static RegisterDimensionResult registerDimension(int dimensionId, DimensionType type, Path dimensionDataRoot) {
         checkNotNull(type);
         checkNotNull(dimensionDataRoot);
-        if (!DIMENSION_TYPE_BY_TYPE_ID.containsValue(type)) {
+        if (!dimensionTypeByTypeId.containsValue(type)) {
             return RegisterDimensionResult.DIMENSION_TYPE_IS_NOT_REGISTERED;
         }
 
-        if (DIMENSION_TYPE_BY_DIMENSION_ID.containsKey(dimensionId)) {
+        if (dimensionTypeByDimensionId.containsKey(dimensionId)) {
             return RegisterDimensionResult.DIMENSION_ALREADY_REGISTERED;
         }
-        DIMENSION_TYPE_BY_DIMENSION_ID.put(dimensionId, type);
-        DIMENSION_PATH_BY_DIMENSION_ID.put(dimensionId, dimensionDataRoot);
+        dimensionTypeByDimensionId.put(dimensionId, type);
+        dimensionPathByDimensionId.put(dimensionId, dimensionDataRoot);
         if (dimensionId >= 0) {
-            DIMENSION_MAP.set(dimensionId);
+            dimensionBits.set(dimensionId);
         }
         return RegisterDimensionResult.DIMENSION_REGISTERED;
     }
 
     public static Optional<DimensionType> getDimensionType(int dimensionId) {
-        return Optional.ofNullable(DIMENSION_TYPE_BY_DIMENSION_ID.get(dimensionId));
+        return Optional.ofNullable(dimensionTypeByDimensionId.get(dimensionId));
     }
 
     public static Optional<DimensionType> getDimensionType(Class<? extends WorldProvider> providerClass) {
         checkNotNull(providerClass);
-        for (DimensionType dimensionType : DIMENSION_TYPE_BY_TYPE_ID.values()) {
+        for (DimensionType dimensionType : (DimensionType[]) dimensionTypeByTypeId.values()) {
             if (((org.spongepowered.api.world.DimensionType) (Object) dimensionType).getDimensionClass().equals(providerClass)) {
                 return Optional.of(dimensionType);
             }
@@ -176,12 +173,12 @@ public class DimensionManager {
     }
 
     public static Optional<Path> getWorldFolder(int dimensionId) {
-        return Optional.ofNullable(DIMENSION_PATH_BY_DIMENSION_ID.get(dimensionId));
+        return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
     }
 
     public static Optional<WorldProvider> createProviderForType(DimensionType type) {
         checkNotNull(type);
-        if (!DIMENSION_TYPE_BY_TYPE_ID.containsValue(type)) {
+        if (!dimensionTypeByTypeId.containsValue(type)) {
             return Optional.empty();
         }
 
@@ -196,23 +193,23 @@ public class DimensionManager {
     }
 
     public static boolean isDimensionRegistered(int dimensionId) {
-        return DIMENSION_TYPE_BY_DIMENSION_ID.containsKey(dimensionId);
+        return dimensionTypeByDimensionId.containsKey(dimensionId);
     }
 
-    public static Set<Map.Entry<Integer, DimensionType>> getRegisteredDimensions() {
-        return DIMENSION_TYPE_BY_DIMENSION_ID.entrySet();
+    public static TIntObjectIterator<DimensionType> dimensionsIterator() {
+        return dimensionTypeByDimensionId.iterator();
     }
 
-    public static Set<Map.Entry<Integer, WorldServer>> getLoadedWorlds() {
-        return DIMENSION_ID_BY_WORLD.entrySet();
+    public static TIntObjectIterator<WorldServer> worldsIterator() {
+        return dimensionIdByWorld.iterator();
     }
 
     public static Optional<WorldServer> getWorldByDimensionId(int dimensionId) {
-        return Optional.ofNullable(DIMENSION_ID_BY_WORLD.get(dimensionId));
+        return Optional.ofNullable(dimensionIdByWorld.get(dimensionId));
     }
 
     public static QueueWorldToUnloadResult queueWorldToUnload(int dimensionId) {
-        final World world = DIMENSION_ID_BY_WORLD.get(dimensionId);
+        final World world = dimensionIdByWorld.get(dimensionId);
         if (world == null) {
             return QueueWorldToUnloadResult.WORLD_IS_NOT_REGISTERED;
         }
@@ -225,42 +222,44 @@ public class DimensionManager {
             return QueueWorldToUnloadResult.WORLD_KEEPS_SPAWN_LOADED;
         }
 
-        UNLOAD_QUEUE.add(dimensionId);
+        unloadQueue.add(dimensionId);
         return QueueWorldToUnloadResult.WORLD_IS_QUEUED;
     }
 
     public static void registerWorldProperties(WorldProperties properties) {
         checkNotNull(properties);
-        WORLD_PROPERTIES_BY_FOLDER_NAME.put(properties.getWorldName(), properties);
-        WORLD_PROPERTIES_BY_WORLD_UUID.put(properties.getUniqueId(), properties);
+        worldPropertiesByFolderName.put(properties.getWorldName(), properties);
+        worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
     }
 
     public static void unregisterWorldProperties(WorldProperties properties) {
         checkNotNull(properties);
-        WORLD_PROPERTIES_BY_FOLDER_NAME.remove(properties.getWorldName());
-        WORLD_PROPERTIES_BY_WORLD_UUID.remove(properties.getUniqueId());
+        worldPropertiesByFolderName.remove(properties.getWorldName());
+        worldPropertiesByWorldUuid.remove(properties.getUniqueId());
     }
 
     public static Optional<WorldProperties> getWorldProperties(String folderName) {
         checkNotNull(folderName);
-        return Optional.ofNullable(WORLD_PROPERTIES_BY_FOLDER_NAME.get(folderName));
+        return Optional.ofNullable(worldPropertiesByFolderName.get(folderName));
     }
 
     public static Collection<WorldProperties> getAllWorldProperties() {
-        return Collections.unmodifiableCollection(WORLD_PROPERTIES_BY_FOLDER_NAME.values());
+        return Collections.unmodifiableCollection(worldPropertiesByFolderName.values());
     }
 
     public static Optional<WorldProperties> getWorldProperties(UUID uuid) {
         checkNotNull(uuid);
-        return Optional.ofNullable(WORLD_PROPERTIES_BY_WORLD_UUID.get(uuid));
+        return Optional.ofNullable(worldPropertiesByWorldUuid.get(uuid));
     }
 
     public static void loadAllWorlds(String saveName, long defaultSeed, WorldType defaultWorldType, String generatorOptions) {
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
 
-        for (Map.Entry<Integer, DimensionType> entry : getRegisteredDimensions()) {
-            final int dimensionId = entry.getKey();
-            final DimensionType dimensionType = entry.getValue();
+        for (TIntObjectIterator<DimensionType> iter = dimensionsIterator(); iter.hasNext();) {
+            iter.advance();
+
+            final int dimensionId = iter.key();
+            final DimensionType dimensionType = iter.value();
 
             // Skip all worlds besides dimension 0 if multi-world is disabled
             if (dimensionId != 0 && !((MinecraftServer) Sponge.getServer()).getAllowNether()) {
@@ -369,8 +368,8 @@ public class DimensionManager {
 
             SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
 
-            DIMENSION_ID_BY_WORLD.put(dimensionId, worldServer);
-            WEAK_WORLD_BY_WORLD.put(worldServer, worldServer);
+            dimensionIdByWorld.put(dimensionId, worldServer);
+            weakWorldByWorld.put(worldServer, worldServer);
 
             ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
@@ -378,76 +377,15 @@ public class DimensionManager {
                     (dimensionId).get().getName());
         }
 
-        ((MinecraftServer) Sponge.getServer()).worldServers = reorderWorldsVanillaFirst();
+        reorderWorldsVanillaFirst();
+        ((MinecraftServer) Sponge.getServer()).worldServers = (WorldServer[]) dimensionIdByWorld.values();
     }
 
-    public static Optional<WorldServer> createWorld(int dimensionId ) {
-        final Optional<WorldServer> optRootWorld = getWorldByDimensionId(0);
-        if (dimensionId != 0 && !optRootWorld.isPresent()) {
-            return Optional.empty();
-        }
+    private static void reorderWorldsVanillaFirst() {
+        final WorldServer[] worldServers = (WorldServer[]) dimensionIdByWorld.values();
+        final WorldServer[] sorted = new WorldServer[worldServers.length];
 
-        final Optional<DimensionType> optDimensionType = getDimensionType(dimensionId);
-        if (!optDimensionType.isPresent()) {
-            return Optional.empty();
-        }
 
-        final Optional<WorldProvider> optWorldProvider = createProviderForType(optDimensionType.get());
-        if (!optWorldProvider.isPresent()) {
-            return Optional.empty();
-        }
-
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
-
-        // TODO SaveHandler
-        // TODO WorldInfo
-        final WorldServer worldServer = new WorldServer((MinecraftServer) Sponge.getServer(), null, null, optDimensionType.get().getId(),
-                server.theProfiler);
-
-        return Optional.of(worldServer);
-    }
-
-    public static void setWorld(int dimensionId, @Nullable WorldServer worldServer) {
-        if (worldServer == null) {
-            final WorldServer removed = DIMENSION_ID_BY_WORLD.remove(dimensionId);
-            if (removed != null) {
-                ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().remove(dimensionId);
-                SpongeImpl.getLogger().info("Unloading world {} ({})", ((org.spongepowered.api.world.World) removed).getName(), getDimensionType
-                        (dimensionId).get().getName());
-            }
-        } else {
-            DIMENSION_ID_BY_WORLD.put(dimensionId, worldServer);
-            WEAK_WORLD_BY_WORLD.put(worldServer, worldServer);
-            ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
-            SpongeImpl.getLogger().info("Loading world {} ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
-                    (dimensionId).get().getName());
-        }
-
-        ((MinecraftServer) Sponge.getServer()).worldServers = reorderWorldsVanillaFirst();
-    }
-
-    private static WorldServer[] reorderWorldsVanillaFirst() {
-        final List<WorldServer> tmp = new ArrayList<>();
-
-        if (DIMENSION_ID_BY_WORLD.get(0) != null) {
-            tmp.add(DIMENSION_ID_BY_WORLD.get(0));
-        }
-        if (DIMENSION_ID_BY_WORLD.get(-1) != null) {
-            tmp.add(DIMENSION_ID_BY_WORLD.get(-1));
-        }
-        if (DIMENSION_ID_BY_WORLD.get(1) != null) {
-            tmp.add(DIMENSION_ID_BY_WORLD.get(1));
-        }
-
-        for (Map.Entry<Integer, WorldServer> entry : DIMENSION_ID_BY_WORLD.entrySet()) {
-            int dim = entry.getKey();
-            if (dim >= -1 && dim <= 1) {
-                continue;
-            }
-            tmp.add(entry.getValue());
-        }
-
-        return tmp.toArray(new WorldServer[tmp.size()]);
     }
 
     /**
