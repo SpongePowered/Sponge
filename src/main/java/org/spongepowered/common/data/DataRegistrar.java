@@ -59,6 +59,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.data.builder.block.state.SpongeBlockStateMetaContentUpdater;
 import org.spongepowered.common.data.builder.block.tileentity.*;
 import org.spongepowered.common.data.builder.item.SpongeFireworkEffectDataBuilder;
 import org.spongepowered.common.data.builder.data.meta.*;
@@ -161,6 +162,9 @@ public class DataRegistrar {
 
         dataManager.registerBuilder((Class<Location<World>>) (Class<?>) Location.class, new LocationBuilder());
         dataManager.registerBuilder(SpongePlayerData.class, new SpongePlayerData.Builder());
+
+        // Content Updaters
+        dataManager.registerContentUpdater(BlockState.class, new SpongeBlockStateMetaContentUpdater());
 
         // Data Manipulators
 

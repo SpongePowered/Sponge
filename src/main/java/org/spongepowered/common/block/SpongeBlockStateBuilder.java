@@ -27,7 +27,6 @@ package org.spongepowered.common.block;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.data.util.DataUtil.checkDataExists;
 
-import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -37,8 +36,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.builder.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
@@ -98,32 +96,12 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
 
     @Override
     protected Optional<BlockState> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(DataQueries.BLOCK_TYPE, DataQueries.BLOCK_STATE_UNSAFE_META)) {
+        if (!container.contains(DataQueries.BLOCK_STATE)) {
             return Optional.empty();
         }
-        checkDataExists(container, DataQueries.BLOCK_TYPE);
-        checkDataExists(container, DataQueries.BLOCK_STATE_UNSAFE_META);
-        /* todo write the deserializers for immutable data....
-        final ImmutableList<ImmutableDataManipulator<?, ?>> list;
-        if (container.contains(DataQueries.DATA_MANIPULATORS)) {
-            list = DataUtil.deserializeImmutableManipulatorList(container.getViewList(DataQueries.DATA_MANIPULATORS).get());
-        } else {
-            list = ImmutableList.of();
-        }
-        */
-        final String blockid = container.getString(DataQueries.BLOCK_TYPE).get();
-        final BlockType blockType = SpongeImpl.getGame().getRegistry().getType(BlockType.class, blockid).get();
-        final int meta = container.getInt(DataQueries.BLOCK_STATE_UNSAFE_META).get();
-        BlockState blockState = (BlockState) ((Block) blockType).getStateFromMeta(meta);
+        checkDataExists(container, DataQueries.BLOCK_STATE);
         try {
-            /*
-            if (!list.isEmpty() && false) {
-                for (ImmutableDataManipulator<?, ?> manipulator : list) {
-                    blockState = blockState.with(manipulator).get();
-                }
-            }
-            */
-            return Optional.of(blockState);
+            return container.getCatalogType(DataQueries.BLOCK_STATE, BlockState.class);
         } catch (Exception e) {
             throw new InvalidDataException("Could not retrieve a blockstate!", e);
         }
