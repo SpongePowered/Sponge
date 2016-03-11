@@ -32,7 +32,7 @@ import org.spongepowered.common.world.gen.populators.ChorusFlowerPopulator;
 
 public class ChorusFlowerBuilder implements ChorusFlower.Builder {
 
-    private int exclusion = 64;
+    private int exclusion = 1024;
     
     public ChorusFlowerBuilder() {
         reset();

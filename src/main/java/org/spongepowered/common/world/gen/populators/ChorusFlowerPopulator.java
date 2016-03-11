@@ -44,7 +44,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
 
     private NoiseGeneratorSimplex noise;
     private long lastSeed = -1;
-    private int exclusion = 64;
+    private int exclusion = 1024;
 
     @Override
     public PopulatorType getType() {
@@ -74,7 +74,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int chunkX = min.getX() / 16;
         int chunkZ = min.getZ() / 16;
-        if ((long) chunkX * (long) chunkX + (long) chunkZ * (long) chunkZ > this.exclusion * this.exclusion) {
+        if ((long) min.getX() * (long) min.getX() + (long) min.getZ() * (long) min.getZ() > this.exclusion * this.exclusion) {
             if (this.func_185960_a(chunkX, chunkZ, 1, 1) > 40.0F) {
                 int count = rand.nextInt(5);
 

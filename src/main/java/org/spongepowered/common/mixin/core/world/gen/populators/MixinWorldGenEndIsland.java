@@ -59,7 +59,7 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
     private VariableAmount initial;
     private VariableAmount decrement;
     private BlockState state;
-    private int exclusion = 64;
+    private int exclusion = 1024;
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
@@ -123,8 +123,8 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
         Vector3i min = chunk.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int chunkX = min.getX() / 16;
-        int chunkZ = min.getX() / 16;
-        if ((long) chunkX * (long) chunkX + (long) chunkZ * (long) chunkZ > this.exclusion * this.exclusion) {
+        int chunkZ = min.getZ() / 16;
+        if ((long) min.getX() * (long) min.getX() + (long) min.getZ() * (long) min.getZ() > this.exclusion * this.exclusion) {
             float f = this.func_185960_a(chunkX, chunkZ, 1, 1);
 
             if (f < -20.0F && rand.nextInt(14) == 0) {
