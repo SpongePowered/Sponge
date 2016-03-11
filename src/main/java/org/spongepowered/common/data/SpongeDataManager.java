@@ -128,9 +128,9 @@ public final class SpongeDataManager implements DataManager {
         checkState(!this.registrationComplete);
         if (!this.builders.containsKey(clazz)) {
             if (!(builder instanceof AbstractDataBuilder)) {
-                SpongeImpl.getLogger().warn("!!!Warning!!! A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that%n"
-                                            + "the custom data builder does extend it to gain automated content versioning updates and maintain%n"
-                                            + "simplicity. The offending builder's class is: %s%n", builder.getClass());
+                SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
+                                            + "the custom data builder does extend it to gain automated content versioning updates and maintain "
+                                            + "simplicity. The offending builder's class is: {}", builder.getClass());
             }
             this.builders.put(clazz, builder);
         } else {
