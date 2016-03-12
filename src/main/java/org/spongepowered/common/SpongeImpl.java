@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.api.Game;
@@ -75,6 +76,9 @@ public final class SpongeImpl {
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8.9", 47);
 
+    private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME); // TODO: Should this use ECOSYSTEM_ID like plugin loggers?
+    private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
+
     @Nullable
     private static SpongeImpl instance;
 
@@ -82,8 +86,6 @@ public final class SpongeImpl {
 
     private final Injector injector;
     private final Game game;
-    private final Logger logger;
-    private final org.slf4j.Logger slf4jLogger;
     private final PluginContainer plugin;
     private final PluginContainer minecraftPlugin;
 
@@ -91,22 +93,18 @@ public final class SpongeImpl {
     private static List<PluginContainer> components;
 
     @Inject
-    public SpongeImpl(Injector injector, Game game, Logger logger,
-                      @Named(SpongeImpl.ECOSYSTEM_ID) PluginContainer plugin, @Named(GAME_ID) PluginContainer minecraftPlugin) {
-
-        checkState(instance == null, "Sponge was already initialized");
+    public SpongeImpl(Injector injector, Game game, @Named(ECOSYSTEM_ID) PluginContainer plugin, @Named(GAME_ID) PluginContainer minecraftPlugin) {
+        checkState(instance == null, "SpongeImpl was already initialized");
         instance = this;
 
         this.injector = checkNotNull(injector, "injector");
         this.game = checkNotNull(game, "game");
-        this.logger = checkNotNull(logger, "logger");
-        this.slf4jLogger = LoggerFactory.getLogger(this.logger.getName());
         this.plugin = checkNotNull(plugin, "plugin");
         this.minecraftPlugin = checkNotNull(minecraftPlugin, "minecraftPlugin");
     }
 
     public static SpongeImpl getInstance() {
-        checkState(instance != null, "Sponge was not initialized");
+        checkState(instance != null, "SpongeImpl was not initialized");
         return instance;
     }
 
@@ -131,11 +129,11 @@ public final class SpongeImpl {
     }
 
     public static Logger getLogger() {
-        return getInstance().logger;
+        return logger;
     }
 
     public static org.slf4j.Logger getSlf4jLogger() {
-        return getInstance().slf4jLogger;
+        return slf4jLogger;
     }
 
     public static PluginContainer getPlugin() {
