@@ -24,22 +24,11 @@
  */
 package org.spongepowered.common.util;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.gen.PopulatorType;
-
-import java.util.Arrays;
 
 public class StaticMixinHelper {
 
@@ -56,16 +45,10 @@ public class StaticMixinHelper {
     public static Cause dropCause = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean convertingMapFormat = false;
-    public static boolean destructItemDrop = false;
 
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
     // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
     public static boolean lastPlayerInteractCancelled = false;
 
-    public static boolean setCustomNameTagSkip = false;
-
-    // For spawning
-    public static boolean gettingSpawnList;
-    public static boolean structureSpawning;
     public static boolean dispenserDispensing;
 }

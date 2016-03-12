@@ -958,25 +958,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
-        NBTTagCompound nbt = getSpongeData();
-        if (!nbt.hasKey(nbtKey)) {
-           return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
-            // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -1003,22 +985,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
-       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-       if (user.isPresent()) {
-           return Optional.of(user.get().getUniqueId());
-       } else {
-           return Optional.empty();
-       }
+       return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -1194,23 +1166,25 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.displayName;
     }
 
+    private boolean skipSettingCustomNameTag = false;
+
     @Override
     public void setDisplayName(@Nullable Text displayName) {
         this.displayName = displayName;
 
-        StaticMixinHelper.setCustomNameTagSkip = true;
+        this.skipSettingCustomNameTag = true;
         if (this.displayName == null) {
             this.setCustomNameTag("");
         } else {
             this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
         }
 
-        StaticMixinHelper.setCustomNameTagSkip = false;
+        this.skipSettingCustomNameTag = false;
     }
 
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))
     public void onSetCustomNameTag(String name, CallbackInfo ci) {
-        if (!StaticMixinHelper.setCustomNameTagSkip) {
+        if (!this.skipSettingCustomNameTag) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
     }

@@ -26,22 +26,22 @@ package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -69,9 +69,10 @@ public final class PhaseContext {
     }
 
     public PhaseContext addCaptures() {
-        add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new ArrayList<>()));
-        add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new ArrayList<>()));
-        add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new ArrayList<>()));
+        add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        add(NamedCause.of(TrackingHelper.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
         return this;
     }
 
@@ -106,22 +107,44 @@ public final class PhaseContext {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedEntities() {
-        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<List<Entity>>) (Class) List.class);
+        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<CapturedSupplier<Entity>> getCapturedEntitySupplier() {
+        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedItems() {
-        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<List<Entity>>) (Class) List.class);
+        return firstNamed(TrackingHelper.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
+    public Optional<CapturedSupplier<Entity>> getCapturedItemsSupplier() {
+        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
+    }
+
+
+    @SuppressWarnings("unchecked")
     public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
-        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<List<Transaction<BlockSnapshot>>>) (Class<?>) List.class);
+        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class)
+                .flatMap(supplier -> Optional.ofNullable(supplier.get()));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<CapturedSupplier<Transaction<BlockSnapshot>>> getInvalidTransactionSupplier() {
+        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<List<BlockSnapshot>> getCapturedBlocks() {
-        return firstNamed(TrackingHelper.CAPTURED_BLOCKS, (Class<List<BlockSnapshot>>) (Class<?>) List.class);
+        return firstNamed(TrackingHelper.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<CapturedSupplier<BlockSnapshot>> getCapturedBlockSupplier() {
+        return this.firstNamed(TrackingHelper.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
     }
 
     public Cause toCause() {
@@ -161,6 +184,68 @@ public final class PhaseContext {
                 .add("contextObjects", this.contextObjects)
                 .add("cause", this.cause)
                 .toString();
+    }
+
+    public static abstract class CapturedSupplier<T> implements Supplier<List<T>> {
+        @Nullable private List<T> captured;
+
+        CapturedSupplier() {
+        }
+
+        @Override
+        public final List<T> get() {
+            if (this.captured == null) {
+                this.captured = new ArrayList<>();
+            }
+            return this.captured;
+        }
+
+        public final boolean isEmpty() {
+            return this.captured == null || this.captured.isEmpty();
+        }
+
+        public final void ifPresent(Consumer<List<T>> consumer) {
+            if (this.captured != null) {
+                consumer.accept(this.captured);
+            }
+        }
+
+        public final List<T> orElse(List<T> list) {
+            return this.captured == null ? list : this.captured;
+        }
+
+        public final List<T> orEmptyList() {
+            return orElse(Collections.emptyList());
+        }
+
+        @Nullable
+        public final <U> U map(Function<List<T>, ? extends U> function) {
+            return this.captured == null ? null : function.apply(this.captured);
+        }
+    }
+
+    public static final class InvalidTransactionSupplier extends CapturedSupplier<Transaction<BlockSnapshot>> {
+
+        InvalidTransactionSupplier() {
+        }
+    }
+
+    public static final class CapturedItemsSupplier extends CapturedSupplier<Entity> {
+
+        CapturedItemsSupplier() {
+        }
+    }
+
+    public static final class CapturedBlocksSupplier extends CapturedSupplier<BlockSnapshot> {
+
+        CapturedBlocksSupplier() {
+        }
+    }
+
+    public static final class CapturedEntitiesSupplier extends CapturedSupplier<Entity> {
+
+        CapturedEntitiesSupplier() {
+        }
     }
 
 }

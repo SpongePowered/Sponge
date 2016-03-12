@@ -38,8 +38,6 @@ import java.util.UUID;
 
 public interface IMixinChunk {
 
-    Cause getCurrentPopulateCause();
-
     Map<Short, PlayerTracker> getTrackedShortPlayerPositions();
 
     Map<Integer, PlayerTracker> getTrackedIntPlayerPositions();

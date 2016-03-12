@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -63,6 +64,8 @@ public interface IMixinWorld {
     SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
 
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
+
+    boolean forceSpawnEntity(Entity entity, int chunkX, int chunkZ);
 
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 

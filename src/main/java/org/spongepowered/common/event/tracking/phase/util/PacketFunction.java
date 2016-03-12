@@ -50,11 +50,11 @@ public interface PacketFunction {
         if (state == PacketPhase.General.ATTACK_ENTITY) {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
             net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
+
             if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
                 MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(player).build(), originalChannel,
-                        Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true);
+                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(player).build(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true);
                 SpongeImpl.getGame().getEventManager().post(event);
                 if (!event.isMessageCancelled()) {
                     event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));

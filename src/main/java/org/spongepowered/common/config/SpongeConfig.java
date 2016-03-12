@@ -777,6 +777,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("exploits")
         private boolean enableExploitPatches = true;
 
+        @Setting("tracking")
+        private boolean tracking = true;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -807,6 +810,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setExploitPatches(boolean enableExploitPatches) {
             this.enableExploitPatches = enableExploitPatches;
+        }
+
+        public boolean useTracking() {
+            return this.tracking;
+        }
+
+        public void setTracking(boolean tracking) {
+            this.tracking = tracking;
         }
     }
 

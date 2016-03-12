@@ -32,13 +32,16 @@ import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -46,6 +49,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -66,6 +70,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.MoveToPhases;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
@@ -74,8 +79,11 @@ import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -89,18 +97,24 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
     private static final Vector2i BIOME_MIN = BLOCK_MIN.toVector2(true);
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
+    private static final String BLOCK_UPDATE_TICK =
+            "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V";
 
     private final CauseTracker causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
 
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public Profiler theProfiler;
+    @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
+    @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow protected WorldInfo worldInfo;
 
     @Shadow public abstract boolean isValid(BlockPos pos);
     @Shadow public abstract void markBlockForUpdate(BlockPos pos);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
     @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
+    @Shadow public abstract void updateAllPlayersSleepingFlag();
 
 
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -175,7 +189,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
-    @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
+    @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = BLOCK_UPDATE_TICK))
     public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData peek = causeTracker.getPhases().peek();
@@ -207,7 +221,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
         TrackingHelper.tickEntity(causeTracker, entityIn);
         updateRotation(entityIn);
-        SpongeCommonEventFactory.handleEntityMovement(entityIn);
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -238,23 +251,42 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
         TrackingHelper.tickEntity(causeTracker, entity);
         updateRotation(entity);
-        SpongeCommonEventFactory.handleEntityMovement(entity);
     }
 
     /**
-     * @author bloodmc
+     * @author gabizou March 11, 2016
      *
-     * Purpose: Redirects vanilla method to our method which includes a cause.
+     * The train of thought for how spawning is handled:
+     * 1) This method is called in implementation
+     * 2) handleVanillaSpawnEntity is called to associate various contextual SpawnCauses
+     * 3) {@link CauseTracker#processSpawnEntity(Entity, Cause)} is called to check if the entity is to
+     *    be "collected" or "captured" in the current {@link PhaseContext} of the current phase
+     * 4) If the entity is forced or is captured, {@code true} is returned, otherwise, the entity is
+     *    passed along normal spawning handling.
      */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return spawnEntity((Entity) entity, Cause.of(NamedCause.source(this)));
+        return MoveToPhases.handleVanillaSpawnEntity((net.minecraft.world.World) (Object) this, entity);
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public boolean spawnEntity(Entity entity, Cause cause) {
         return this.getCauseTracker().processSpawnEntity(entity, cause);
+    }
+
+    @Override
+    public boolean forceSpawnEntity(net.minecraft.entity.Entity entity, int chunkX, int chunkZ) {
+        if (entity instanceof EntityPlayer) {
+            EntityPlayer entityplayer = (EntityPlayer) entity;
+            this.playerEntities.add(entityplayer);
+            this.updateAllPlayersSleepingFlag();
+        }
+
+        this.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entity);
+        this.loadedEntityList.add(entity);
+        this.onSpongeEntityAdded(entity);
+        return true;
     }
 
 
@@ -268,54 +300,54 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         for (EnumFacing facing : EnumFacing.values()) {
             causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
         }
-//
-//        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
-//        if (event.isCancelled()) {
-//            return;
-//        }
-//
-//        for (EnumFacing facing : EnumFacing.values()) {
-//            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-//            }
-//        }
+
+        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
+        if (event.isCancelled()) {
+            return;
+        }
+
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+        }
     }
 
-//    /**
-//     * @author bloodmc - November 15th, 2015
-//     *
-//     * Purpose: Rewritten to pass the source block position.
-//     */
-//    @SuppressWarnings("rawtypes")
-//    @Overwrite
-//    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-//        if (!isValid(pos)) {
-//            return;
-//        }
-//
-//        EnumSet directions = EnumSet.allOf(EnumFacing.class);
-//        directions.remove(skipSide);
-//
-//        final CauseTracker causeTracker = this.getCauseTracker();
-//        if (this.isRemote) {
-//            for (Object obj : directions) {
-//                EnumFacing facing = (EnumFacing) obj;
-//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-//            }
-//            return;
-//        }
-//
-//        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-//        if (event.isCancelled()) {
-//            return;
-//        }
-//
-//        for (EnumFacing facing : EnumFacing.values()) {
-//            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-//                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-//            }
-//        }
-//    }
+    /**
+     * @author bloodmc - November 15th, 2015
+     *
+     * Purpose: Rewritten to pass the source block position.
+     */
+    @SuppressWarnings("rawtypes")
+    @Overwrite
+    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
+        if (!isValid(pos)) {
+            return;
+        }
+
+        EnumSet directions = EnumSet.allOf(EnumFacing.class);
+        directions.remove(skipSide);
+
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote) {
+            for (Object obj : directions) {
+                EnumFacing facing = (EnumFacing) obj;
+                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+            return;
+        }
+
+        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        for (EnumFacing facing : EnumFacing.values()) {
+            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
+                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+            }
+        }
+    }
 
     /**
      * @author bloodmc - November 15th, 2015

@@ -28,12 +28,10 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -59,7 +57,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -76,16 +73,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -95,6 +89,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWork
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -108,9 +103,6 @@ import javax.annotation.Nullable;
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk implements Chunk, IMixinChunk {
 
-    public Map<Integer, PlayerTracker> trackedIntBlockPositions = Maps.newHashMap();
-    public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
-    private Cause populateCause;
     private org.spongepowered.api.world.World world;
     private UUID uuid;
 
@@ -153,8 +145,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, WorldChunkManager chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
-    @Shadow(prefix = "shadow$")
-    public abstract Block shadow$getBlock(int x, int y, int z);
+    @Shadow public abstract Block shadow$getBlock(int x, int y, int z);
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -412,10 +403,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
-    @Override
-    public Cause getCurrentPopulateCause() {
-        return this.populateCause;
-    }
 
     @Nullable
     @Overwrite
@@ -537,221 +524,52 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
+    // These methods are enabled in MixinChunk_Tracker as a Mixin plugin
+
     @Override
     public void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType) {
-        if (this.worldObj.isRemote || !SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().isEnabled()) {
-            return;
-        } else {
-            IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-            if (spongeWorld.getCauseTracker().getPhases().peekState() == WorldPhase.State.TERRAIN_GENERATION) {
-                // Don't track chunk gen
-                return;
-            }
-        }
 
-        if (!SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType)block).getId())) {
-            SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, true);
-        } else {
-            SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, false);
-        }
-
-        final IMixinWorldInfo worldInfo = (IMixinWorldInfo) this.worldObj.getWorldInfo();
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedShortBlockPositions.get(blockPos).ownerIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                } else {
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                }
-            } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(worldInfo.getIndexForUniqueId(user.getUniqueId()), trackerType));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedIntBlockPositions.get(blockPos).ownerIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                } else {
-                    this.trackedIntBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                }
-            } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(worldInfo.getIndexForUniqueId(user.getUniqueId()), trackerType));
-            }
-        }
     }
 
     @Override
     public Map<Integer, PlayerTracker> getTrackedIntPlayerPositions() {
-        return this.trackedIntBlockPositions;
+        return Collections.emptyMap();
     }
 
     @Override
     public Map<Short, PlayerTracker> getTrackedShortPlayerPositions() {
-        return this.trackedShortBlockPositions;
+        return Collections.emptyMap();
     }
 
     @Override
     public Optional<User> getBlockOwner(BlockPos pos) {
-        if (this.trackedIntBlockPositions.get(blockPosToInt(pos)) != null) {
-            PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
-            if (uuid.isPresent()) {
-                return getUserFromId(uuid.get());
-            }
-        } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
-            PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
-            if (uuid.isPresent()) {
-                return getUserFromId(uuid.get());
-            }
-        }
-
         return Optional.empty();
-    }
-
-    private Optional<User> getUserFromId(UUID uuid) {
-        // get player if online
-        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-        if (player != null) {
-            return Optional.of((User) player);
-        }
-        // player is not online, get user from storage if one exists
-        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
     }
 
     @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
-        if (this.trackedIntBlockPositions.get(blockPosToInt(pos)) != null) {
-            PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
-            if (uuid.isPresent()) {
-                return getUserFromId(uuid.get());
-            }
-        } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
-            PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
-            if (uuid.isPresent()) {
-                return getUserFromId(uuid.get());
-            }
-        }
-
         return Optional.empty();
     }
 
-    // Special setter used by API
     @Override
     public void setBlockNotifier(BlockPos pos, @Nullable UUID uuid) {
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
-            } else {
-                this.trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
-                                PlayerTracker.Type.NOTIFIER));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
-            } else {
-                this.trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
-                                PlayerTracker.Type.NOTIFIER));
-            }
-        }
+
     }
 
-    // Special setter used by API
     @Override
     public void setBlockCreator(BlockPos pos, @Nullable UUID uuid) {
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
-            } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
-            } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
-            }
-        }
+
     }
 
     @Override
     public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
-        this.trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
     public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
-        this.trackedShortBlockPositions = trackedPositions;
     }
 
-    /**
-    * Modifies bits in an integer.
-    *
-    * @param num Integer to modify
-    * @param data Bits of data to add
-    * @param which Index of nibble to start at
-    * @param bitsToReplace The number of bits to replace starting from nibble index
-    * @return The modified integer
-    */
-    public int setNibble(int num, int data, int which, int bitsToReplace) {
-        return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
-    }
-
-    /**
-     * Serialize this BlockPos into a short value
-     */
-    public short blockPosToShort(BlockPos pos) {
-        short serialized = (short) setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = (short) setNibble(serialized, pos.getY() & Y_SHORT_MASK, 1, NUM_SHORT_Y_BITS);
-        serialized = (short) setNibble(serialized, pos.getZ() & XZ_MASK, 3, NUM_XZ_BITS);
-        return serialized;
-    }
-
-    /**
-     * Create a BlockPos from a serialized chunk position
-     */
-    public BlockPos blockPosFromShort(short serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
-        int y = (serialized >> Y_SHIFT) & Y_SHORT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_SHORT_SHIFT) & XZ_MASK);
-        return new BlockPos(x, y, z);
-    }
-
-    /**
-     * Serialize this BlockPos into an int value
-     */
-    public int blockPosToInt(BlockPos pos) {
-        int serialized = setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = setNibble(serialized, pos.getY() & Y_INT_MASK, 1, NUM_INT_Y_BITS);
-        serialized = setNibble(serialized, pos.getZ() & XZ_MASK, 7, NUM_XZ_BITS);
-        return serialized;
-    }
-
-    /**
-     * Create a BlockPos from a serialized chunk position
-     */
-    public BlockPos blockPosFromInt(int serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
-        int y = (serialized >> Y_SHIFT) & Y_INT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_INT_SHIFT) & XZ_MASK);
-        return new BlockPos(x, y, z);
-    }
+    // Continuing the rest of the implementation
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3d position) {

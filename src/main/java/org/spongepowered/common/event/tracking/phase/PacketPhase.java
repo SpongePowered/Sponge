@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase;
 import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
@@ -37,6 +38,7 @@ import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.world.World;
+import org.apache.http.annotation.Immutable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -118,12 +120,21 @@ public class PacketPhase extends TrackingPhase {
 
         boolean matches(int packetState);
 
+        default void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+
+        }
+
     }
 
     public enum Inventory implements IPacketState, ISpawnableState {
 
         INVENTORY,
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, false));
+            }
+
             @Override
             public ClickInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
@@ -334,11 +345,34 @@ public class PacketPhase extends TrackingPhase {
         },
         IGNORED,
         INTERACT_ENTITY,
-        ATTACK_ENTITY,
+        ATTACK_ENTITY() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
+                net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
+                context.add(NamedCause.of(TrackingHelper.TARGETED_ENTITY, entity));
+                context.add(NamedCause.of(TrackingHelper.TRACKED_ENTITY_ID, entity.getEntityId()));
+            }
+        },
         INTERACT_AT_ENTITY,
-        CHAT,
+        CHAT() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
+                if (chatMessage.getMessage().contains("kill")) {
+                    context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, true));
+                }
+            }
+        },
         CREATIVE_INVENTORY,
-        PLACE_BLOCK,
+        PLACE_BLOCK() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
+                context.add(NamedCause.of(TrackingHelper.ITEM_USED, ItemStackUtil.cloneDefensive(placeBlock.getStack())));
+                context.add(NamedCause.of(TrackingHelper.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
+            }
+        },
         OPEN_INVENTORY, REQUEST_RESPAWN;
 
         @Override
@@ -381,24 +415,7 @@ public class PacketPhase extends TrackingPhase {
     public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
         checkNotNull(packet, "Packet cannot be null!");
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
-        if (state == General.ATTACK_ENTITY) {
-            final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
-            net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(entityPlayerMP.worldObj);
-            context.add(NamedCause.of(TrackingHelper.TARGETED_ENTITY, entity));
-            context.add(NamedCause.of(TrackingHelper.TRACKED_ENTITY_ID, entity.getEntityId()));
-        } else if (state == General.CHAT) {
-            context.add(NamedCause.of("Player", entityPlayerMP));
-            C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
-            if (chatMessage.getMessage().contains("kill")) {
-                context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, true));
-            }
-        } else if (state == Inventory.DROP_ITEM) {
-            context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, false));
-        } else if (state == General.PLACE_BLOCK) {
-            final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
-            context.add(NamedCause.of(TrackingHelper.ITEM_USED, ItemStackUtil.cloneDefensive(placeBlock.getStack())));
-            context.add(NamedCause.of("", placeBlock.getPosition()));
-        }
+        ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
         return context;
     }
 
@@ -413,7 +430,7 @@ public class PacketPhase extends TrackingPhase {
         if (unwindFunction != null) {
             unwindFunction.unwind(packetIn, (IPacketState) phaseState, player, phaseContext);
         } else {
-            System.err.printf("Encountered an unmapped packet! Please fix! Packet: %s. PhaseContext: %s", packetIn, phaseContext);
+            System.err.printf("Encountered an unmapped packet! Please fix! Packet: %s%n. PhaseContext: %s%n", packetIn, phaseContext);
             SpongeImpl.getLogger().error("Shit happened yo.");
         }
     }
@@ -437,21 +454,8 @@ public class PacketPhase extends TrackingPhase {
         this.packetTranslationMap.put(C07PacketPlayerDigging.class, packet -> {
             final C07PacketPlayerDigging playerDigging = (C07PacketPlayerDigging) packet;
             final C07PacketPlayerDigging.Action action = playerDigging.getStatus();
-            if (action == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                return Inventory.DROP_ITEM;
-            } else if (action == C07PacketPlayerDigging.Action.DROP_ALL_ITEMS) {
-                return Inventory.DROP_INVENTORY;
-            } else if ( action == C07PacketPlayerDigging.Action.START_DESTROY_BLOCK) {
-                return General.INTERACTION;
-            } else if ( action == C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK) {
-                return General.INTERACTION;
-            } else if ( action == C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK) {
-                return General.INTERACTION;
-            } else if ( action == C07PacketPlayerDigging.Action.RELEASE_USE_ITEM) {
-                return General.INTERACTION;
-            } else {
-                return General.IGNORED;
-            }
+            final IPacketState state = INTERACTION_ACTION_MAPPINGS.get(action);
+            return state == null ? General.IGNORED : state;
         });
         this.packetTranslationMap.put(C08PacketPlayerBlockPlacement.class, packet -> General.PLACE_BLOCK);
         this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> General.CREATIVE_INVENTORY);
@@ -475,6 +479,15 @@ public class PacketPhase extends TrackingPhase {
 
     }
 
+
+    public static final ImmutableMap<C07PacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<C07PacketPlayerDigging.Action, IPacketState>builder()
+            .put(C07PacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
+            .put(C07PacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_INVENTORY)
+            .put(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, General.INTERACTION)
+            .build();
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return false;

@@ -36,6 +36,7 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -45,6 +46,11 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.util.DirectionChecker;
 import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Optional;
@@ -52,6 +58,10 @@ import java.util.Random;
 
 @Mixin(BlockDispenser.class)
 public abstract class MixinBlockDispenser extends MixinBlock {
+
+    public static final String
+            DISPENSE_ITEM =
+            "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V";
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -83,17 +93,20 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockDispenser.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockDispenser.FACING)));
     }
 
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V"))
+    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        StaticMixinHelper.dispenserDispensing = true;
+        ((IMixinWorld) worldIn).getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.DISPENSE, PhaseContext.start()
+            .add(NamedCause.source(worldIn.getTileEntity(pos)))
+            .addCaptures()
+            .complete());
     }
 
-    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V", shift = At.Shift.AFTER))
+    @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
     private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        StaticMixinHelper.dispenserDispensing = false;
+        ((IMixinWorld) worldIn).getCauseTracker().completePhase();
     }
 
 }

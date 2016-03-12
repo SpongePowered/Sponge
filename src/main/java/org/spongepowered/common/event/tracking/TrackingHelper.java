@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Slot;
@@ -46,10 +47,13 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -59,6 +63,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -89,17 +94,18 @@ public class TrackingHelper {
     public static final String IGNORING_CREATIVE = "IgnoringCreative";
     public static final String PACKET_PLAYER = "PacketPlayer";
 
-    // Capturing
+    // Capturing - All of these do not map to a List, they map to specific list suppliers
     public static final String CAPTURED_BLOCKS = "CapturedBlocks";
     public static final String CAPTURED_ENTITIES = "CapturedEntities";
     public static final String CAPTURED_ITEMS = "CapturedItems";
+    public static final String INVALID_TRANSACTIONS = "InvalidTransactions";
 
     // Context
     public static final String COMMAND = "Command";
     public static final String TARGETED_ENTITY = "TargetedEntity";
     public static final String TRACKED_ENTITY_ID = "TargetedEntityId";
     public static final String DESTRUCT_ITEM_DROPS = "DestructItemDrops";
-    public static final String INVALID_TRANSACTIONS = "InvalidTransactions";
+    public static final String PLACED_BLOCK_POSITION = "PlacedBlockPosition";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -300,4 +306,16 @@ public class TrackingHelper {
         causeTracker.completePhase();
     }
 
+    public static boolean addWeatherEffect(final net.minecraft.entity.Entity entity, World minecraftWorld) {
+        if (entity instanceof EntityLightningBolt) {
+            LightningEvent.Pre event = SpongeEventFactory.createLightningEventPre(((IMixinEntityLightningBolt) entity).getCause());
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                return minecraftWorld.addWeatherEffect(entity);
+            }
+        } else {
+            return minecraftWorld.addWeatherEffect(entity);
+        }
+        return false;
+    }
 }

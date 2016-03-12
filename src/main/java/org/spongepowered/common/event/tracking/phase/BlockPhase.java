@@ -40,20 +40,10 @@ import org.spongepowered.common.world.CaptureType;
 public class BlockPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
-        BLOCK_DECAY(false),
+        BLOCK_DECAY,
         RESTORING_BLOCKS,
         POST_NOTIFICATION_EVENT,
-        ;
-
-        private final boolean managed;
-
-        State() {
-            this.managed = false;
-        }
-
-        State(boolean managed) {
-            this.managed = managed;
-        }
+        DISPENSE;
 
         @Override
         public boolean isBusy() {
@@ -100,7 +90,7 @@ public class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public boolean ignoresEntitySpawns(IPhaseState currentState) {
+    public boolean doesStateIgnoreEntitySpawns(IPhaseState currentState) {
         return currentState == State.RESTORING_BLOCKS;
     }
 

@@ -51,11 +51,13 @@ public interface ISpawnableState extends IPhaseState {
 
     @Nullable
     default SpawnEntityEvent createEntityEvent(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext) {
-        World world = causeTracker.getWorld();
-        List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
+        final PhaseContext.CapturedSupplier<Entity> capturedEntitiesSupplier = phaseContext.getCapturedEntitySupplier().get();
+        if (capturedEntitiesSupplier.isEmpty()) {
+            return null;
+        }
         List<Transaction<BlockSnapshot>> invalidTransactions = phaseContext.getInvalidTransactions().get();
         final Tuple<List<EntitySnapshot>, Cause> listCauseTuple =
-                TrackingHelper.processSnapshotsForSpawning(cause, capturedEntities, invalidTransactions);
+                TrackingHelper.processSnapshotsForSpawning(cause, capturedEntitiesSupplier.get(), invalidTransactions);
         List<EntitySnapshot> entitySnapshots = listCauseTuple.getFirst();
         cause = listCauseTuple.getSecond();
         if (entitySnapshots.isEmpty()) {

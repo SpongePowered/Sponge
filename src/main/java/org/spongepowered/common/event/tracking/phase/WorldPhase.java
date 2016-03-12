@@ -44,6 +44,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -88,15 +89,14 @@ public class WorldPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
-                List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
-            if (this == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
-                return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
-            } else {
+            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> {
+                if (this == State.WORLD_SPAWNER_SPAWNING) {
+                    return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
+                }
                 return null;
-            }
+            });
         }
     }
 
@@ -142,12 +142,9 @@ public class WorldPhase extends TrackingPhase {
 
         @Nullable
         @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
-                List<EntitySnapshot> entitySnapshots) {
+        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext, List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
-
-            return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
+            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world));
         }
 
         @Override

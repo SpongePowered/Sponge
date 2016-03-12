@@ -33,11 +33,15 @@ import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
@@ -48,20 +52,28 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.CombatEntry;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
@@ -77,11 +89,14 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -164,125 +179,193 @@ public class MoveToPhases {
         }
     }
 
-    static boolean addWeatherEffect(final net.minecraft.entity.Entity entity, World minecraftWorld) {
-        if (entity instanceof EntityLightningBolt) {
-            LightningEvent.Pre event = SpongeEventFactory.createLightningEventPre(((IMixinEntityLightningBolt) entity).getCause());
-            SpongeImpl.postEvent(event);
-            if (!event.isCancelled()) {
-                return minecraftWorld.addWeatherEffect(entity);
+    public static boolean handleVanillaSpawnEntity(World nmsWorld, net.minecraft.entity.Entity nmsEntity) {
+        org.spongepowered.api.world.World world = (org.spongepowered.api.world.World) nmsWorld;
+        Entity entity = (Entity) nmsEntity;
+        List<NamedCause> list = new ArrayList<>();
+        final CauseTracker causeTracker = ((IMixinWorld) nmsWorld).getCauseTracker();
+        final PhaseData data = causeTracker.getPhases().peek();
+        final IPhaseState state = data.getState();
+        final PhaseContext context = data.getContext();
+
+        if (nmsWorld.isRemote || nmsEntity instanceof EntityPlayer) {
+            return causeTracker.processSpawnEntity(entity, Cause.source(InternalSpawnTypes.FORCED_SPAWN).build());
+        }
+        PopulatorType type = context.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+        if (type != null) {
+            if (InternalPopulatorTypes.ANIMAL.equals(type)) {
+                list.add(NamedCause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE));
+                list.add(NamedCause.of("AnimalSpawner", type));
+            } else {
+                list.add(NamedCause.source(InternalSpawnTypes.STRUCTURE_SPAWNING));
+                list.add(NamedCause.of("Structure", type));
             }
         } else {
-            return minecraftWorld.addWeatherEffect(entity);
-        }
-        return false;
-    }
-
-    static boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ, IPhaseState phaseState,
-        PhaseContext phaseContext) {
-        net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
-
-
-        // handle actual capturing
-        final List<Entity> capturedItems = phaseContext.getCapturedItems().orElse(Collections.emptyList());
-        final List<Entity> capturedEntities = phaseContext.getCapturedEntities().orElse(Collections.emptyList());
-        final World minecraftWorld = causeTracker.getMinecraftWorld();
-        if (false && phaseState.isBusy()) {
-            Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            Optional<Entity> currentTickEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
-            if (currentTickingBlock.isPresent()) {
-                BlockPos sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                Block targetBlock = minecraftWorld.getBlockState(entityIn.getPosition()).getBlock();
-                SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, currentTickingBlock.get(), entityIn, sourcePos,
-                    targetBlock, entityIn.getPosition(), PlayerTracker.Type.NOTIFIER);
-            }
-            if (currentTickEntity.isPresent()) {
-                Optional<User> creator = ((IMixinEntity) currentTickEntity.get()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-                }
-            }
-            if (entityIn instanceof EntityItem) {
-                capturedItems.add(entity);
-            } else {
-                capturedEntities.add(entity);
-            }
-            return true;
-        } else { // Custom
-
-            if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
-                // TODO MixinEntityFishHook.setShooter makes angler null
-                // sometimes, but that will cause NPE when ticking
-                return false;
-            }
-
-            EntityLivingBase specialCause = null;
-            String causeName = "";
-            // Special case for throwables
-            if (entityIn instanceof EntityThrowable) {
-                EntityThrowable throwable = (EntityThrowable) entityIn;
-                specialCause = throwable.getThrower();
-
-                if (specialCause != null) {
-                    causeName = NamedCause.THROWER;
-                    if (specialCause instanceof Player) {
-                        Player player = (Player) specialCause;
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+            final Optional<Entity> currentTickEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
+            final Optional<BlockSnapshot> currentTickBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+            final Optional<TileEntity> currentTickTileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
+            if (StaticMixinHelper.dispenserDispensing) {
+                if (currentTickBlock.isPresent()) {
+                    BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
+                            .block(currentTickBlock.get())
+                            .type(InternalSpawnTypes.DISPENSE)
+                            .build();
+                    list.add(NamedCause.source(blockSpawnCause));
+                } else if (currentTickTileEntity.isPresent()) {
+                    BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
+                            .block(currentTickTileEntity.get().getLocation().createSnapshot())
+                            .type(InternalSpawnTypes.DISPENSE)
+                            .build();
+                    list.add(NamedCause.source(blockSpawnCause));
+                } else if (currentTickEntity.isPresent()) {
+                    if  (currentTickEntity.get() == entity) {
+                        SpawnCause cause = InternalSpawnTypes.UNKNOWN_DISPENSE_SPAWN_CAUSE;
+                        list.add(NamedCause.source(cause));
+                    } else {
+                        EntitySpawnCause cause = EntitySpawnCause.builder()
+                                .entity(currentTickEntity.get())
+                                .type(InternalSpawnTypes.DISPENSE)
+                                .build();
+                        list.add(NamedCause.source(cause));
                     }
                 }
-            }
-            // Special case for TNT
-            else if (entityIn instanceof EntityTNTPrimed) {
-                EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
-                specialCause = tntEntity.getTntPlacedBy();
-                causeName = NamedCause.IGNITER;
-
-                if (specialCause instanceof Player) {
-                    Player player = (Player) specialCause;
-                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+            } else if (nmsEntity instanceof EntityItem) {
+                if (type != null) {
+                    // Just default to the structures placing it.
+                    list.add(NamedCause.source(InternalSpawnTypes.STRUCTURE_SPAWNING));
+                    return world.spawnEntity(entity, Cause.of(list));
                 }
-            }
-            // Special case for Tameables
-            else if (entityIn instanceof EntityTameable) {
-                EntityTameable tameable = (EntityTameable) entityIn;
-                if (tameable.getOwner() != null) {
-                    specialCause = tameable.getOwner();
-                    causeName = NamedCause.OWNER;
+                if (currentTickBlock.isPresent()) {
+                    BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
+                            .block(currentTickBlock.get())
+                            .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                            .build();
+                    list.add(NamedCause.source(blockSpawnCause));
+                } else if (currentTickTileEntity.isPresent()) {
+                    BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
+                            .block(currentTickTileEntity.get().getLocation().createSnapshot())
+                            .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                            .build();
+                    list.add(NamedCause.source(blockSpawnCause));
+                } else if (StaticMixinHelper.dropCause != null) {
+                    for (Map.Entry<String, Object> entry : StaticMixinHelper.dropCause.getNamedCauses().entrySet()) {
+                        list.add(NamedCause.of(entry.getKey(), entry.getValue()));
+                    }
+                } else if (currentTickEntity.isPresent()) {
+                    if  (currentTickEntity.get() == entity) {
+                        SpawnCause cause = SpawnCause.builder()
+                                .type(InternalSpawnTypes.CUSTOM)
+                                .build();
+                        list.add(NamedCause.source(cause));
+                    } else {
+                        EntitySpawnCause cause = EntitySpawnCause.builder()
+                                .entity(currentTickEntity.get())
+                                .type(InternalSpawnTypes.PASSIVE)
+                                .build();
+                        list.add(NamedCause.source(cause));
+                    }
                 }
-            }
-
-            if (specialCause != null && !cause.containsNamed(causeName)) {
-                cause = cause.with(NamedCause.of(causeName, specialCause));
-            }
-
-            org.spongepowered.api.event.Event event;
-            ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-            entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
-
-            final org.spongepowered.api.world.World spongeWorld = causeTracker.getWorld();
-            if (entityIn instanceof EntityItem) {
-//                capturedItems.add(entity);
-                event = SpongeEventFactory.createDropItemEventCustom(cause, capturedItems, entitySnapshotBuilder.build(), spongeWorld);
-            } else {
-//                capturedEntities.add(entity);
-                event = SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshotBuilder.build(), spongeWorld);
-            }
-            if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
-                if (entityIn instanceof EntityWeatherEffect) {
-                    return addWeatherEffect(entityIn, minecraftWorld);
-                }
-
-                minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entityIn);
-                minecraftWorld.loadedEntityList.add(entityIn);
-                causeTracker.getMixinWorld().onSpongeEntityAdded(entityIn);
-                if (entityIn instanceof EntityItem) {
-                    capturedItems.remove(entity);
+            } else if (nmsEntity instanceof EntityXPOrb) {
+                // This is almost always ALWAYS guaranteed to be experience, otherwise, someone
+                // can open a ticket to correct us with proof otherwise.
+                if (currentTickEntity.isPresent()) {
+                    Entity currentEntity = currentTickEntity.get();
+                    EntitySpawnCause spawnCause = EntitySpawnCause.builder()
+                            .entity(currentEntity)
+                            .type(InternalSpawnTypes.EXPERIENCE)
+                            .build();
+                    list.add(NamedCause.source(spawnCause));
+                    if (MoveToPhases.isEntityDead(currentEntity)) {
+                        if (currentEntity instanceof EntityLivingBase) {
+                            CombatEntry entry = ((EntityLivingBase) currentEntity).getCombatTracker().func_94544_f();
+                            if (entry != null) {
+                                if (entry.damageSrc != null) {
+                                    list.add(NamedCause.of("LastDamageSource", entry.damageSrc));
+                                }
+                            }
+                        }
+                    }
+                } else if (currentTickBlock.isPresent()) {
+                    BlockSpawnCause spawnCause = BlockSpawnCause.builder()
+                            .block(currentTickBlock.get())
+                            .type(InternalSpawnTypes.EXPERIENCE)
+                            .build();
+                    list.add(NamedCause.source(spawnCause));
+                } else if (currentTickTileEntity.isPresent()) {
+                    SpawnCause spawnCause = BlockSpawnCause.builder()
+                            .block(currentTickTileEntity.get().getLocation().createSnapshot())
+                            .type(InternalSpawnTypes.EXPERIENCE)
+                            .build();
+                    list.add(NamedCause.source(spawnCause));
                 } else {
-                    capturedEntities.remove(entity);
+                    SpawnCause spawnCause = SpawnCause.builder()
+                            .type(InternalSpawnTypes.EXPERIENCE)
+                            .build();
+                    list.add(NamedCause.source(spawnCause));
                 }
-                return true;
+            } else {
+                final Optional<ItemStack> usedItem = context.firstNamed(TrackingHelper.ITEM_USED, ItemStack.class);
+                if (usedItem.isPresent()) {
+                    SpawnCause cause;
+                    final EntityPlayerMP packetPlayer = StaticMixinHelper.packetPlayer;
+                    if (entity instanceof Projectile || entity instanceof EntityThrowable) {
+                        cause = EntitySpawnCause.builder()
+                                .entity(((Entity) packetPlayer))
+                                .type(InternalSpawnTypes.PROJECTILE)
+                                .build();
+                    } else if (usedItem.get().getItem() == Items.spawn_egg) {
+                        cause = EntitySpawnCause.builder()
+                                .entity((Entity) packetPlayer)
+                                .type(InternalSpawnTypes.SPAWN_EGG)
+                                .build();
+                    } else {
+                        cause = EntitySpawnCause.builder()
+                                .entity((Entity) packetPlayer)
+                                .type(InternalSpawnTypes.PLACEMENT)
+                                .build();
+                    }
+                    list.add(NamedCause.source(cause));
+                    list.add(NamedCause.of("UsedItem", usedItem.get().createSnapshot()));
+                    list.add(NamedCause.owner(packetPlayer));
+                } else if (currentTickBlock.isPresent()) { // We've exhausted our possibilities, now we just associate blindly
+                    BlockSpawnCause cause = BlockSpawnCause.builder().block(currentTickBlock.get())
+                            .type(InternalSpawnTypes.BLOCK_SPAWNING)
+                            .build();
+                    list.add(NamedCause.source(cause));
+                } else if (currentTickEntity.isPresent()) {
+                    Entity tickingEntity = currentTickEntity.get();
+                    if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) { // We should assume breeding
+                        EntitySpawnCause spawnCause = EntitySpawnCause.builder().entity(tickingEntity).type(InternalSpawnTypes.BREEDING).build();
+                        list.add(NamedCause.source(spawnCause));
+                        if (tickingEntity instanceof EntityAnimal) {
+                            if (((EntityAnimal) tickingEntity).getPlayerInLove() != null) {
+                                list.add(NamedCause.of("Player", ((EntityAnimal) tickingEntity).getPlayerInLove()));
+                            }
+                        }
+                    }
+                    EntitySpawnCause cause = EntitySpawnCause.builder().entity(currentTickEntity.get()).type(InternalSpawnTypes.CUSTOM).build();
+                    list.add(NamedCause.source(cause));
+                } else {
+                    list.add(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.CUSTOM).build()));
+                }
             }
+        }
+        if (list.isEmpty()) {
+            list.add(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.CUSTOM).build()));
+        }
+        return causeTracker.processSpawnEntity(entity, Cause.of(list));
+    }
 
-            return false;
+    private static boolean isEntityDead(Entity entity) {
+        return isEntityDead((net.minecraft.entity.Entity) entity);
+    }
+
+    private static boolean isEntityDead(net.minecraft.entity.Entity entity) {
+        if (entity instanceof EntityLivingBase) {
+            EntityLivingBase base = (EntityLivingBase) entity;
+            return base.getHealth() <= 0 || base.deathTime > 0 || base.dead;
+        } else {
+            return entity.isDead;
         }
     }
 }

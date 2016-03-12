@@ -35,6 +35,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
+import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -42,7 +43,7 @@ import javax.annotation.Nullable;
 public class PluginPhase extends TrackingPhase {
 
     public enum State implements IPhaseState, ISpawnableState {
-        BLOCK_WORKER(),
+        BLOCK_WORKER,
         CUSTOM_SPAWN,
         COMPLETE;
 
@@ -66,14 +67,14 @@ public class PluginPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
-            if (this == BLOCK_WORKER) {
-                return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
-            } else if (this == CUSTOM_SPAWN) {
-                return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
-            } else {
+            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> {
+                if (this == BLOCK_WORKER) {
+                    return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
+                } else if (this == CUSTOM_SPAWN) {
+                    return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
+                }
                 return null;
-            }
+            });
         }
     }
 

@@ -38,26 +38,18 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 public class SpawningPhase extends TrackingPhase {
 
     public enum State implements IPhaseState, ISpawnableState {
-        DEATH_DROPS_SPAWNING(true),
+        DEATH_DROPS_SPAWNING,
         DROP_ITEM,
         CHUNK_SPAWNING,
         ;
 
-        private final boolean managed;
-
-        State() {
-            this.managed = false;
-        }
-
-        State(boolean managed) {
-            this.managed = managed;
-        }
 
         @Override
         public boolean isBusy() {
@@ -79,19 +71,20 @@ public class SpawningPhase extends TrackingPhase {
         public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
                 List<EntitySnapshot> entitySnapshots) {
             final World world = causeTracker.getWorld();
-            final List<Entity> capturedEntities = phaseContext.getCapturedEntities().get();
-            if (this == CHUNK_SPAWNING) {
-                return SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, capturedEntities, entitySnapshots, world);
-            } else {
-                return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
-            }
+            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> {
+                if (this == CHUNK_SPAWNING) {
+                    return SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, capturedEntities, entitySnapshots, world);
+                } else {
+                    return SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world);
+                }
+            });
         }
     }
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        final List<Entity> spawnedEntities = phaseContext.getCapturedEntities().orElse(Collections.emptyList());
-        final List<Entity> spawnedItems = phaseContext.getCapturedItems().orElse(Collections.emptyList());
+        final List<Entity> spawnedEntities = phaseContext.getCapturedEntitySupplier().get().orEmptyList();
+        final List<Entity> spawnedItems = phaseContext.getCapturedItemsSupplier().get().orEmptyList();
         if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
             return;
         }
