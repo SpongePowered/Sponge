@@ -27,6 +27,7 @@ package org.spongepowered.common.data.builder.item;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.Queries;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -40,24 +41,15 @@ import org.spongepowered.common.data.util.DataUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffect> {
+public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<FireworkEffect> implements DataBuilder<FireworkEffect> {
     private final static int SUPPORTED_VERSION = 1;
 
+    public SpongeFireworkEffectDataBuilder() {
+        super(FireworkEffect.class, 1);
+    }
+
     @Override
-    public Optional<FireworkEffect> build(DataView container) throws InvalidDataException {
-        if (container.contains(Queries.CONTENT_VERSION)) {
-            final int contentVersion = DataUtil.getData(container, Queries.CONTENT_VERSION, Integer.class);
-            if (contentVersion < SUPPORTED_VERSION) {
-                Optional<DataContentUpdater> updater = SpongeDataManager
-                        .getInstance().getWrappedContentUpdater(FireworkEffect.class, contentVersion, SUPPORTED_VERSION);
-                if (!updater.isPresent()) {
-                    throw new InvalidDataException("Could not get an updater for ItemEnchantment data from the version: " + contentVersion
-                                                   + " to " + SUPPORTED_VERSION + ". "
-                                                   + "\nPlease notify the SpongePowered developers of this issue!");
-                }
-                container = updater.get().update(container);
-            }
-        }
+    protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(DataQueries.FIREWORK_SHAPE, DataQueries.FIREWORK_COLORS, DataQueries.FIREWORK_FADE_COLORS,
                 DataQueries.FIREWORK_FLICKERS, DataQueries.FIREWORK_TRAILS)) {
             final String fireworkShapeId = DataUtil.getData(container, DataQueries.FIREWORK_SHAPE, String.class);
@@ -81,4 +73,5 @@ public class SpongeFireworkEffectDataBuilder implements DataBuilder<FireworkEffe
         }
         return Optional.empty();
     }
+
 }

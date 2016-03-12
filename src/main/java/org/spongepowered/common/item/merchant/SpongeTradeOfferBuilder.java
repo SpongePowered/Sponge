@@ -35,9 +35,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.data.builder.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 

@@ -22,30 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.util.weighted;
+package org.spongepowered.common.data.util;
 
-import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
-import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.DataSerializable;
 
-import java.util.Optional;
+/**
+ * A common utility class for various versions of various
+ * {@link DataSerializable}s that are implemented in Sponge.
+ *
+ * Note that the organization is by groups, where a
+ * {@link org.spongepowered.api.block.BlockState} may have
+ * previous values based on damage values and a newer version
+ * eliminates the need for those damage values and uses
+ * the block state id. It helps to keep the constant names
+ * organized.
+ */
+public final class DataVersions {
 
-public class OptionalVarianceBuilder extends AbstractDataBuilder<VariableAmount.OptionalAmount> {
+    public static final class BlockState {
 
-    public OptionalVarianceBuilder() {
-        super(VariableAmount.OptionalAmount.class, 1);
-    }
+        public static final int BLOCK_TYPE_WITH_DAMAGE_VALUE = 1;
+        public static final int STATE_AS_CATALOG_ID = 2;
 
-    @Override
-    protected Optional<VariableAmount.OptionalAmount> buildContent(DataView container) throws InvalidDataException {
-        if (!container.contains(Queries.VARIABLE_BASE, Queries.VARIABLE_VARIANCE, Queries.VARIABLE_CHANCE)) {
-            return Optional.empty();
+        private BlockState() {
         }
-        final double base = container.getInt(Queries.VARIABLE_BASE).get();
-        final double chance = container.getDouble(Queries.VARIABLE_CHANCE).get();
-        final VariableAmount amount = container.getSerializable(Queries.VARIABLE_VARIANCE, VariableAmount.class).get();
-        return Optional.of((VariableAmount.OptionalAmount) VariableAmount.baseWithOptionalVariance(base, amount, chance));
     }
+
+    private DataVersions() {
+
+    }
+
 }

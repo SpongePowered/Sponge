@@ -229,7 +229,7 @@ public abstract class Element {
             if (!(action instanceof ShiftClickAction.InsertText)) {
                 throw new IllegalArgumentException("Shift-click action is not an insertion. Currently not supported!");
             }
-            currentElement.onShiftClick = "insert_text('" + action.getResult() + ')';
+            currentElement.onShiftClick = "insert_text('" + action.getResult() + "')";
         }
 
         if (text instanceof LiteralText) {

@@ -78,6 +78,7 @@ import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
@@ -270,7 +271,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean spawnEntity(Entity entity, Cause cause) {
         return this.getCauseTracker().processSpawnEntity(entity, cause);
     }

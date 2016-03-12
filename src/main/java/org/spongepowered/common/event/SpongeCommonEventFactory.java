@@ -329,7 +329,6 @@ public class SpongeCommonEventFactory {
     }
 
     public static void checkSpawnEvent(Entity entity, Cause cause) {
-        final Optional<SpawnCause> spawnCause = cause.first(SpawnCause.class);
         checkArgument(cause.root() instanceof SpawnCause, "The cause does not have a SpawnCause! It has instead: {}", cause.root().toString());
         checkArgument(cause.containsNamed(NamedCause.SOURCE), "The cause does not have a \"Source\" named object!");
         checkArgument(cause.get(NamedCause.SOURCE, SpawnCause.class).isPresent(), "The SpawnCause is not the \"Source\" of the cause!");
