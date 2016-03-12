@@ -57,7 +57,7 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     }
 
     @Override
-    public int func_186138_a(int x, int z) {
+    public int findGroundBlockIdx(int x, int z) {
         for (int y = 255; y >= 0; --y) {
             IBlockState iblockstate = getBlockState(x, y, z);
 

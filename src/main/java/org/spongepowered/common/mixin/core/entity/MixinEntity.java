@@ -38,9 +38,12 @@ import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -66,6 +69,7 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -73,6 +77,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
@@ -90,6 +100,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
@@ -105,6 +116,7 @@ import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -112,6 +124,7 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
@@ -131,6 +144,10 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
+    private static final String
+            ENTITY_ITEM_INIT =
+            "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
+    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
@@ -167,6 +184,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
+    @Shadow protected EntityDataManager dataWatcher;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -692,7 +710,7 @@ public abstract class MixinEntity implements IMixinEntity {
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         if (forced) {
-            while (!toWorld.func_184144_a(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+            while (!toWorld.getCubes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
                 entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
             }
         }
@@ -809,6 +827,9 @@ public abstract class MixinEntity implements IMixinEntity {
                 }
             }
         }
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
+            ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        }
     }
 
     /**
@@ -828,6 +849,9 @@ public abstract class MixinEntity implements IMixinEntity {
                 }
                 compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
+        }
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
+            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
     }
 
@@ -1167,6 +1191,76 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!StaticMixinHelper.setCustomNameTagSkip) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
+    }
+
+    @Override
+    public boolean canSee(Entity entity) {
+        // note: this implementation will be changing with contextual data
+        Optional<Boolean> optional = entity.get(Keys.INVISIBLE);
+        return (!optional.isPresent() || !optional.get()) && !((IMixinEntity) entity).isVanished();
+    }
+
+    @Nullable private ItemStackSnapshot custom;
+
+    /**
+     * @author gabizou - January 30th, 2016
+     *
+     * This redirects the call to get the Item of an item stack so we can
+     * throw an event and short circuit with a ConstructEntityEvent.PRE.
+     *
+     * @param itemStack The item stack coming in
+     * @param itemStackIn The originally passed item stack
+     * @param offsetY The offset
+     * @return The item type, if no events cancelled
+     */
+    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;"))
+    private Item onGetItem(ItemStack itemStack, ItemStack itemStackIn, float offsetY) {
+        if (itemStack.getItem() != null) {
+            // First we want to throw the DropItemEvent.PRE
+            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
+            List<ItemStackSnapshot> original = new ArrayList<>();
+            original.add(snapshot);
+            DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(this)),
+                    ImmutableList.of(snapshot), original);
+            if (dropEvent.isCancelled()) {
+                return null;
+            }
+            this.custom = dropEvent.getDroppedItems().get(0);
+
+            // Then throw the ConstructEntityEvent
+            Transform<World> suggested = new Transform<>(this.getWorld(), new Vector3d(this.posX, this.posY + (double) offsetY, this.posZ));
+            SpawnCause cause = EntitySpawnCause.builder().entity(this).type(SpawnTypes.DROPPED_ITEM).build();
+            ConstructEntityEvent.Pre event = SpongeEventFactory
+                    .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
+            SpongeImpl.postEvent(event);
+            return event.isCancelled() ? null : itemStack.getItem();
+        }
+        return null;
+    }
+
+    /**
+     * @author gabizou - January 30th, 2016
+     *
+     * Creates the argument where we can override the item stack being used to create
+     * the entity item. based on the previous event.
+     *
+     * @param itemStack The supposed item stack to drop, originally the original argument passed in
+     * @return The actual itemstack
+     */
+    @ModifyArg(method = "entityDropItem", at = @At(value = "INVOKE", target = ENTITY_ITEM_INIT))
+    private ItemStack onItemCreationFroDrop(ItemStack itemStack) {
+        ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
+        this.custom = null;
+        return stack;
+    }
+
+    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
+    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
+        SpawnCause cause = EntitySpawnCause.builder()
+                .entity(this)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
 }

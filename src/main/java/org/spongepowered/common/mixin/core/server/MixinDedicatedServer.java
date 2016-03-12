@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.server;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,9 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 
-import java.io.File;
 import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.Optional;
 
 @Mixin(DedicatedServer.class)
@@ -73,6 +70,24 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     @Inject(method = "systemExitNow", at = @At("HEAD"))
     public void postGameStoppingEvent(CallbackInfo ci) {
         SpongeImpl.postShutdownEvents();
+    }
+
+    /**
+     * @author zml
+     *
+     * Purpose: Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
+     * will apply to any world. Additionally, fire a spawn protection event
+     */
+    @Override
+    public boolean isBlockProtected(World worldIn, BlockPos pos, EntityPlayer playerIn) {
+        BlockPos spawnPoint = worldIn.getSpawnPoint();
+        int protectionRadius = getSpawnProtectionSize();
+
+        if (protectionRadius > 0 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <=
+                protectionRadius) {
+            return !((Player) playerIn).hasPermission("minecraft.spawn-protection.override");
+        }
+        return false;
     }
 
 }

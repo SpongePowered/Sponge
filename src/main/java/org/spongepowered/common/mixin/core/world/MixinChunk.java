@@ -203,7 +203,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         WorldServer worldserver = (WorldServer) this.worldObj;
         net.minecraft.world.chunk.Chunk chunk = null;
         if (worldserver.getChunkProvider().chunkExists(this.xPosition, this.zPosition) || generate) {
-            chunk = worldserver.getChunkProvider().func_186028_c(this.xPosition, this.zPosition);
+            chunk = worldserver.getChunkProvider().loadChunk(this.xPosition, this.zPosition);
         }
 
         return chunk != null;
@@ -766,11 +766,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3d position) {
         return this.world.createEntity(type, this.chunkPos.mul(16).toDouble().add(position.min(15, this.blockMax.getY(), 15)));
-    }
-
-    @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3i position) {
-        return this.world.createEntity(type, this.chunkPos.mul(16).add(position.min(15, this.blockMax.getY(), 15)));
     }
 
     @Override

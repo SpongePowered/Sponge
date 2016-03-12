@@ -43,7 +43,7 @@ public abstract class MixinWorldGenMegaJungle extends WorldGenHugeTrees implemen
 
     @Override
     public boolean canPlaceAt(World world, int x, int y, int z) {
-        return this.func_175929_a((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
+        return this.ensureGrowable((net.minecraft.world.World) world, null, new BlockPos(x, y, z), this.baseHeight);
     }
 
     @Override

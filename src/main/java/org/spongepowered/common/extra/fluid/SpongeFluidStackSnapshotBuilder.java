@@ -30,9 +30,11 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -84,6 +86,11 @@ public class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<FluidSt
 
     @Override
     public FluidStackSnapshot.Builder add(ImmutableDataManipulator<?, ?> manipulator) {
+        return this;
+    }
+
+    @Override
+    public <V> FluidStackSnapshot.Builder add(Key<? extends BaseValue<V>> key, V value) {
         return this;
     }
 

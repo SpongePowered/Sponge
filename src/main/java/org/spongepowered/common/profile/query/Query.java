@@ -31,93 +31,66 @@ import com.mojang.authlib.ProfileLookupCallback;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.util.Identifiable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public abstract class Query<V> implements Callable<V> {
 
+    protected GameProfileCache cache;
     protected final boolean useCache;
-    protected final MinecraftServer server = SpongeImpl.getServer();
-    protected final PlayerProfileCache cache = this.server.getPlayerProfileCache();
 
-    public Query(boolean useCache) {
+    public Query(GameProfileCache cache, boolean useCache) {
+        this.cache = cache;
         this.useCache = useCache;
     }
 
-    protected GameProfile fromUniqueId(UUID uniqueId) throws ProfileNotFoundException {
-        return this.fillProfile((GameProfile) new com.mojang.authlib.GameProfile(uniqueId, null), false);
+    protected List<GameProfile> fromUniqueIds(Collection<UUID> uniqueIds) throws ProfileNotFoundException {
+        if (this.useCache) {
+            return this.cache.getOrLookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
+        }
+        return this.cache.lookupByIds(uniqueIds).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
     protected GameProfile fillProfile(GameProfile profile, boolean signed) throws ProfileNotFoundException {
         if (this.useCache) {
-            GameProfile result = (GameProfile) this.cache.getProfileByUUID(profile.getUniqueId());
-            if (result != null) {
-                return result;
+            Optional<GameProfile> result = this.cache.getById(profile.getUniqueId());
+            if (result.isPresent() && result.get().isFilled()) {
+                return result.get();
             }
         }
 
-        com.mojang.authlib.GameProfile result = this.server.getMinecraftSessionService().fillProfileProperties((com.mojang.authlib.GameProfile) profile, signed);
-        if (result == null || !result.isComplete()) {
-            throw new ProfileNotFoundException("Profile: " + result);
+        Optional<GameProfile> result = this.cache.fillProfile(profile, signed);
+        if (result.isPresent() && result.get().isFilled()) {
+            GameProfile t = result.get();
+
+            this.cache.add(t);
+
+            return t;
+        } else {
+            throw new ProfileNotFoundException("Profile: " + profile);
         }
-
-        this.cache.addEntry(result);
-
-        return (GameProfile) result;
     }
 
-    protected List<GameProfile> fromNames(Set<String> names) throws ProfileNotFoundException {
-        final Set<String> mutableNames = Sets.newHashSet(names);
-        final List<GameProfile> result = Lists.newArrayList();
+    protected List<GameProfile> fromNames(Collection<String> names) throws ProfileNotFoundException {
         if (this.useCache) {
-            Set<String> cached = Sets.newHashSet(this.cache.getUsernames());
-            for (String name : mutableNames) {
-                GameProfile profile = null;
-                if (cached.contains(name.toLowerCase(Locale.ROOT))) {
-                    profile = (GameProfile) this.cache.getGameProfileForUsername(name);
-                }
-
-                if (profile != null) {
-                    result.add(profile);
-                    mutableNames.remove(name);
-                }
-            }
+            return this.cache.getOrLookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
         }
-
-        if (mutableNames.isEmpty()) {
-            return result;
-        }
-
-        final ProfileNotFoundException[] thrown = new ProfileNotFoundException[1];
-        this.server.getGameProfileRepository().findProfilesByNames(mutableNames.toArray(new String[mutableNames.size()]), Agent.MINECRAFT, new ProfileLookupCallback() {
-
-            @Override
-            public void onProfileLookupSucceeded(com.mojang.authlib.GameProfile profile) {
-                Query.this.cache.addEntry(profile);
-                if (thrown[0] == null) {
-                    result.add((GameProfile) profile);
-                }
-            }
-
-            @Override
-            public void onProfileLookupFailed(com.mojang.authlib.GameProfile profile, Exception exception) {
-                thrown[0] = new ProfileNotFoundException("Profile: " + profile, exception);
-            }
-        });
-
-        this.cache.save();
-
-        if (thrown[0] != null) {
-            throw thrown[0];
-        }
-
-        return result;
+        return this.cache.lookupByNames(names).values().stream().filter(Optional::isPresent).map(Optional::get).collect(Collectors.toList());
     }
 
 }

@@ -153,7 +153,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
     private boolean preparingChunks = false;
-    private GameProfileManager profileManager = new SpongeProfileManager();
+    private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
     @Override
@@ -779,6 +779,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public GameProfileManager getGameProfileManager() {
+        if (this.profileManager == null) {
+            this.profileManager = new SpongeProfileManager();
+        }
         return this.profileManager;
     }
 
@@ -843,7 +846,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {
-        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.of(sender),
+        TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
                 ImmutableList.copyOf(completions), completions, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {

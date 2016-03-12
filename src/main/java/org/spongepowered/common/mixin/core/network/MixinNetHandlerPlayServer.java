@@ -41,6 +41,7 @@ import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
@@ -83,6 +84,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
@@ -132,12 +134,45 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Override
-    public int getPing() {
+    public int getLatency() {
         return this.playerEntity.ping;
     }
 
     /**
-     * @Author Zidane
+     * @param manager The player network connection
+     * @param packet The original packet to be sent
+     * @author kashike
+     */
+    @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
+    public void onSendPacket(NetworkManager manager, Packet packet) {
+        manager.sendPacket(this.rewritePacket(packet));
+    }
+
+    /**
+     * This method wraps packets being sent to perform any additional actions,
+     * such as rewriting data in the packet.
+     *
+     * @param packetIn The original packet to be sent
+     * @return The rewritten packet if we performed any changes, or the original
+     *     packet if we did not perform any changes
+     * @author kashike
+     */
+    private Packet rewritePacket(final Packet packetIn) {
+        // Update the tab list data
+        if (packetIn instanceof SPacketPlayerListItem) {
+            ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
+        }
+        // Store the resource pack for use when processing resource pack statuses
+        else if (packetIn instanceof IMixinPacketResourcePackSend) {
+            IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetIn;
+            this.sentResourcePacks.put(packet.setFakeHash(), packet.getResourcePack());
+        }
+
+        return packetIn;
+    }
+
+    /**
+     * @author Zidane
      *
      * Invoke before {@code System.arraycopy(packetIn.getLines(), 0, tileentitysign.signText, 0, 4);} (line 1156 in source) to call SignChangeEvent.
      * @param packetIn Injected packet param

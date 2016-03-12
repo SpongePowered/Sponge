@@ -181,7 +181,7 @@ class TimingsExport extends Thread {
 
     static long getCost() {
         // Benchmark the users System.nanotime() for cost basis
-        int passes = 500000;
+        int passes = 200;
         TimingHandler SAMPLER1 = SpongeTimingsFactory.ofSafe("Timings Sampler 1");
         TimingHandler SAMPLER2 = SpongeTimingsFactory.ofSafe("Timings Sampler 2");
         TimingHandler SAMPLER3 = SpongeTimingsFactory.ofSafe("Timings Sampler 3");

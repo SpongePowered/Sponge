@@ -52,7 +52,7 @@ import java.util.Random;
 @Mixin(EntityOcelot.class)
 public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
 
-    @Redirect(method = "func_184645_a", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
     public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
         if (random == 0) {

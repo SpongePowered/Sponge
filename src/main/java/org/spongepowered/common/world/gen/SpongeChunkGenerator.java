@@ -314,7 +314,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     }
 
     @Override
-    public boolean func_185933_a(Chunk chunk, int chunkX, int chunkZ) {
+    public boolean generateStructures(Chunk chunk, int chunkX, int chunkZ) {
         boolean flag = false;
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {

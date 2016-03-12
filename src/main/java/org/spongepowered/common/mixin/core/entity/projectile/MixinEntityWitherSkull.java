@@ -26,11 +26,14 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
 @Mixin(EntityWitherSkull.class)
 public abstract class MixinEntityWitherSkull extends MixinEntityFireball implements WitherSkull {
@@ -80,4 +83,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
         }
     }
 
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    }
 }

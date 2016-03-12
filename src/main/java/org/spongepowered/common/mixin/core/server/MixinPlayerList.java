@@ -93,9 +93,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -130,7 +128,7 @@ public abstract class MixinPlayerList {
     @Shadow public abstract int getMaxPlayers();
     @Shadow public abstract void sendChatMsg(ITextComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
-    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
     @Shadow public abstract void func_187243_f(EntityPlayerMP p_187243_1_);
@@ -344,7 +342,7 @@ public abstract class MixinPlayerList {
         if (nbttagcompound != null) {
             if (nbttagcompound.hasKey("RootVehicle", 10)) {
                 NBTTagCompound nbttagcompound1 = nbttagcompound.getCompoundTag("RootVehicle");
-                Entity entity2 = AnvilChunkLoader.func_186051_a(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
+                Entity entity2 = AnvilChunkLoader.readWorldEntity(nbttagcompound1.getCompoundTag("Entity"), worldserver, true);
 
                 if (entity2 != null) {
                     UUID uuid = nbttagcompound1.getUniqueId("Attach");
@@ -352,7 +350,7 @@ public abstract class MixinPlayerList {
                     if (entity2.getUniqueID().equals(uuid)) {
                         playerIn.startRiding(entity2, true);
                     } else {
-                        for (Entity entity : entity2.func_184182_bu()) {
+                        for (Entity entity : entity2.getRecursivePassengers()) {
                             if (entity.getUniqueID().equals(uuid)) {
                                 playerIn.startRiding(entity, true);
                                 break;
@@ -364,13 +362,13 @@ public abstract class MixinPlayerList {
                         logger.warn("Couldn\'t reattach entity to player");
                         worldserver.removePlayerEntityDangerously(entity2);
 
-                        for (Entity entity3 : entity2.func_184182_bu()) {
+                        for (Entity entity3 : entity2.getRecursivePassengers()) {
                             worldserver.removePlayerEntityDangerously(entity3);
                         }
                     }
                 }
             } else if (nbttagcompound.hasKey("Riding", 10)) {
-                Entity entity1 = AnvilChunkLoader.func_186051_a(nbttagcompound.getCompoundTag("Riding"), worldserver, true);
+                Entity entity1 = AnvilChunkLoader.readWorldEntity(nbttagcompound.getCompoundTag("Riding"), worldserver, true);
 
                 if (entity1 != null) {
                     playerIn.startRiding(entity1, true);
@@ -408,7 +406,7 @@ public abstract class MixinPlayerList {
         // Keep players out of blocks
         Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
-        while (!((WorldServer) location.getExtent()).func_184144_a(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
+        while (!((WorldServer) location.getExtent()).getCubes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
             playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }
@@ -565,20 +563,28 @@ public abstract class MixinPlayerList {
         }
     }
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS))
-    private void onPlayerSendPacket(PlayerList manager, Packet<?> packet, EntityPlayerMP playerMP) {
-        if (!((IMixinEntity) playerMP).isVanished()) {
-            manager.sendPacketToAllPlayers(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, playerMP));
-        }
-    }
+    @Inject(method = "playerLoggedIn", at = @At(value = "INVOKE", target = SERVER_SEND_PACKET_TO_ALL_PLAYERS, shift = At.Shift.BEFORE), cancellable = true)
+    public void playerLoggedIn2(EntityPlayerMP player, CallbackInfo ci) {
+        // Create a packet to be used for players without context data
+        SPacketPlayerListItem noSpecificViewerPacket = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, player);
 
-    @Redirect(method = "playerLoggedIn", at = @At(value = "INVOKE", target = NET_HANDLER_SEND_PACKET))
-    private void onPlayerLoggedInNotifyOthers(NetHandlerPlayServer netHandler, Packet<?> packet, EntityPlayerMP playerMP) {
-        SPacketPlayerListItem packetPlayerListItem = (SPacketPlayerListItem) packet;
-        EntityPlayerMP playerMP1 = ((IMixinSPacketPlayerListItem$AddPlayerData) packetPlayerListItem.players.get(0)).getPlayer();
-        if (!((IMixinEntity) playerMP1).isVanished()) {
-            netHandler.sendPacket(packet);
+        for (EntityPlayerMP viewer : this.playerEntityList) {
+            if (((Player) viewer).canSee((Player) player)) {
+                viewer.playerNetServerHandler.sendPacket(noSpecificViewerPacket);
+            }
+
+            if (((Player) player).canSee((Player) viewer)) {
+                player.playerNetServerHandler.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
+            }
         }
+
+        // Spawn player into level
+        WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        level.spawnEntityInWorld(player);
+        this.preparePlayer(player, null);
+
+        // We always want to cancel.
+        ci.cancel();
     }
 
     @Inject(method = "writePlayerData", at = @At(target = WRITE_PLAYER_DATA, value = "INVOKE"))

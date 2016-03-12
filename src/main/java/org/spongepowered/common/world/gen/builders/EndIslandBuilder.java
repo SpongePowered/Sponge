@@ -83,7 +83,7 @@ public class EndIslandBuilder implements EndIsland.Builder {
         this.initial = VariableAmount.baseWithRandomAddition(4, 3);
         this.decrement = VariableAmount.baseWithRandomAddition(0.5, 2);
         this.state = BlockTypes.END_STONE.getDefaultState();
-        this.exclusion = 64;
+        this.exclusion = 1024;
         return this;
     }
 

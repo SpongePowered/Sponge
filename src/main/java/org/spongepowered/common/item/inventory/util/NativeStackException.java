@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.util;
 
-public class NativeStackException extends IllegalArgumentException {
+public class NativeStackException extends NativeException {
 
     private static final long serialVersionUID = 1L;
 

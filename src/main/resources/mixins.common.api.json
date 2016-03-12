@@ -7,7 +7,6 @@
         "ai.MixinAbstractAITask",
         "event.cause.damage.MixinAbstractDamageSource",
         "event.cause.damage.MixinAbstractEntityDamageSource",
-        "event.cause.damage.MixinAbstractIndirectEntityDamageSource",
         "text.MixinText",
         "text.MixinTextLiteral",
         "text.MixinTextScore",

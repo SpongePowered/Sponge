@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -62,7 +63,7 @@ public interface IMixinWorld {
     void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation);
 
     @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double distance);
+    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
 
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);

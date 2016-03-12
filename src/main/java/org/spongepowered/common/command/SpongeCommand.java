@@ -233,7 +233,7 @@ public class SpongeCommand {
                     protected Text getChunksInfo(WorldServer worldserver) {
                         return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionType().getId()), NEWLINE_TEXT,
                                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
-                                key("Active chunks: "), value(worldserver.getChunkProvider().func_152380_a().size()), NEWLINE_TEXT,
+                                key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
                                 key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
                                 key("Removed Entities:"), value(worldserver.unloadedEntityList.size()), NEWLINE_TEXT,

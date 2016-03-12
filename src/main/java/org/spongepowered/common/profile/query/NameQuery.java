@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.profile.query;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.GameProfileCache;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -33,16 +35,16 @@ import java.util.Iterator;
 
 public abstract class NameQuery<T> extends Query<T> {
 
-    protected NameQuery(boolean useCache) {
-        super(useCache);
+    protected NameQuery(GameProfileCache cache, boolean useCache) {
+        super(cache, useCache);
     }
 
-    public static class SingleGet extends NameQuery<GameProfile> {
+    public static final class SingleGet extends NameQuery<GameProfile> {
 
         private final String name;
 
-        public SingleGet(String name, boolean useCache) {
-            super(useCache);
+        public SingleGet(GameProfileCache cache, String name, boolean useCache) {
+            super(cache, useCache);
             this.name = name;
         }
 
@@ -52,19 +54,19 @@ public abstract class NameQuery<T> extends Query<T> {
         }
     }
 
-    public static class MultiGet extends NameQuery<Collection<GameProfile>> {
+    public static final class MultiGet extends NameQuery<Collection<GameProfile>> {
 
         private final Iterator<String> iterator;
 
-        public MultiGet(Iterable<String> iterable, boolean useCache) {
-            super(useCache);
+        public MultiGet(GameProfileCache cache, Iterable<String> iterable, boolean useCache) {
+            super(cache, useCache);
             this.iterator = iterable.iterator();
         }
 
         @Override
         public Collection<GameProfile> call() throws Exception {
             if (!this.iterator.hasNext()) {
-                return Collections.emptyList();
+                return ImmutableSet.of();
             }
 
             return this.fromNames(Sets.newHashSet(this.iterator));

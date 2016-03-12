@@ -22,14 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.network;
+package org.spongepowered.common.mixin.core.entity.ai;
 
-import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.ai.EntityAIMoveToBlock;
+import net.minecraft.entity.passive.EntityRabbit;
+import net.minecraft.world.GameRules;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
-public interface IMixinSPacketPlayerListItem$AddPlayerData {
+@Mixin(EntityRabbit.AIRaidFarm.class)
+public abstract class MixinEntityRabbitAIRaidFarm extends EntityAIMoveToBlock {
 
-    EntityPlayerMP getPlayer();
+    public MixinEntityRabbitAIRaidFarm(EntityCreature entityCreature, double a, int b) {
+        super(entityCreature, a, b);
+    }
 
-    void setPlayer(EntityPlayerMP player);
-
+    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private boolean onCanGrief(GameRules gameRules, String rule) {
+        return gameRules.getBoolean(rule) && ((IMixinGriefer) this.theEntity).canGrief();
+    }
 }

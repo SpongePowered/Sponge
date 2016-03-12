@@ -34,6 +34,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.GameState;
 import org.spongepowered.api.Server;
+import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.network.ChannelRegistrar;
 import org.spongepowered.common.command.SpongeCommandManager;
 import org.spongepowered.api.config.ConfigManager;
@@ -61,6 +62,7 @@ public abstract class SpongeGame implements Game {
 
     private final PluginManager pluginManager;
     private final EventManager eventManager;
+    private final AssetManager assetManager;
     private final SpongeGameRegistry gameRegistry;
     private final ServiceManager serviceManager;
     private final TeleportHelper teleportHelper;
@@ -70,11 +72,13 @@ public abstract class SpongeGame implements Game {
 
     private GameState state = GameState.CONSTRUCTION;
 
-    protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, SpongeGameRegistry gameRegistry,
-            ServiceManager serviceManager, TeleportHelper teleportHelper, ChannelRegistrar channelRegistrar, Logger logger) {
+    protected SpongeGame(Platform platform, PluginManager pluginManager, EventManager eventManager, AssetManager assetManager,
+            ServiceManager serviceManager, TeleportHelper teleportHelper, ChannelRegistrar channelRegistrar, Logger logger,
+            SpongeGameRegistry gameRegistry) {
         this.platform = checkNotNull(platform, "platform");
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
         this.eventManager = checkNotNull(eventManager, "eventManager");
+        this.assetManager = assetManager;
         this.gameRegistry = checkNotNull(gameRegistry, "gameRegistry");
         this.serviceManager = checkNotNull(serviceManager, "serviceManager");
         this.teleportHelper = checkNotNull(teleportHelper, "teleportHelper");
@@ -97,6 +101,11 @@ public abstract class SpongeGame implements Game {
     @Override
     public EventManager getEventManager() {
         return this.eventManager;
+    }
+
+    @Override
+    public AssetManager getAssetManager() {
+        return this.assetManager;
     }
 
     @Override

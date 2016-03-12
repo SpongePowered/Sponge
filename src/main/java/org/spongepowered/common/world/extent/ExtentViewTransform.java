@@ -426,11 +426,6 @@ public class ExtentViewTransform implements DefaultedExtent {
     }
 
     @Override
-    public Optional<Entity> createEntity(EntityType type, Vector3i position) {
-        return this.extent.createEntity(type, this.inverseTransform.transform(position));
-    }
-
-    @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final Location<World> location = entity.getLocation();
         entity.setLocation(new Location<>(location.getExtent(), inverseTransform(location.getPosition())));

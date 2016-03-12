@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityMinecartTNT;
-import org.spongepowered.api.entity.vehicle.minecart.MinecartTNT;
+import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(EntityMinecartTNT.class)
-public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart implements MinecartTNT {
+public abstract class MixinEntityMinecartTNT extends MixinEntityMinecart implements TNTMinecart {
 }

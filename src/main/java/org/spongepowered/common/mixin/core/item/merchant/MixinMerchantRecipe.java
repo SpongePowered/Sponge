@@ -29,6 +29,7 @@ import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,13 +38,15 @@ import org.spongepowered.common.data.util.DataQueries;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(MerchantRecipe.class)
 public abstract class MixinMerchantRecipe implements TradeOffer {
 
     @Shadow public abstract net.minecraft.item.ItemStack getItemToBuy();
     @Shadow public abstract boolean hasSecondItemToBuy();
-    @Shadow public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getSecondItemToBuy();
     @Shadow public abstract net.minecraft.item.ItemStack getItemToSell();
     @Shadow public abstract int getToolUses();
     @Shadow public abstract int getMaxTradeUses();
@@ -51,8 +54,8 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
     @Shadow public abstract boolean getRewardsExp();
 
     @Override
-    public ItemStack getFirstBuyingItem() {
-        return (ItemStack) getItemToBuy();
+    public ItemStackSnapshot getFirstBuyingItem() {
+        return ((ItemStack) getItemToBuy()).createSnapshot();
     }
 
     @Override
@@ -61,13 +64,17 @@ public abstract class MixinMerchantRecipe implements TradeOffer {
     }
 
     @Override
-    public Optional<ItemStack> getSecondBuyingItem() {
-        return Optional.ofNullable((ItemStack) getSecondItemToBuy());
+    public Optional<ItemStackSnapshot> getSecondBuyingItem() {
+        if (getSecondItemToBuy() == null) {
+            return Optional.empty();
+        } else {
+            return Optional.of(((ItemStack) getSecondItemToBuy()).createSnapshot());
+        }
     }
 
     @Override
-    public ItemStack getSellingItem() {
-        return (ItemStack) getItemToSell();
+    public ItemStackSnapshot getSellingItem() {
+        return ((ItemStack) getItemToSell()).createSnapshot();
     }
 
     @Override

@@ -76,6 +76,8 @@ import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -356,6 +358,15 @@ public final class CauseTracker {
         } else if (this.chunkSpawnerRunning) {
             event = SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots, this.getWorld());
         } else {
+            List<NamedCause> namedCauses = new ArrayList<>();
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                if (entry.getKey().equals(NamedCause.SOURCE)) {
+                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                } else {
+                    namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
+                }
+            }
+            cause = Cause.of(namedCauses);
             event = SpongeEventFactory.createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), this.getWorld());
         }
 
@@ -568,8 +579,18 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                builder.suggestNamed(entry.getKey(), entry.getValue());
+            }
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                builder.suggestNamed(entry.getKey(), entry.getValue());
+            }
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         }
 
@@ -898,6 +919,15 @@ public final class CauseTracker {
         int j = MathHelper.floor_double(entityIn.posZ / 16.0D);
         boolean flag = entityIn.forceSpawn;
 
+        List<NamedCause> namedCauses = new ArrayList<>();
+        for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+            if (entry.getKey().equals(NamedCause.SOURCE)) {
+                namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+            } else {
+                namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
+            }
+        }
+        cause = Cause.of(namedCauses);
         if (entityIn instanceof EntityPlayer) {
             flag = true;
         } else if (entityIn instanceof EntityLightningBolt) {
@@ -994,10 +1024,28 @@ public final class CauseTracker {
 
                 if (entityIn instanceof EntityItem) {
                     this.capturedEntityItems.add((Item) entityIn);
+                    final List<NamedCause> dropCauses = new ArrayList<>();
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            dropCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build()));
+                        } else {
+                            dropCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
+                        }
+                    }
+                    cause = Cause.of(namedCauses);
                     event = SpongeEventFactory.createDropItemEventCustom(cause, this.capturedEntityItems,
                             entitySnapshotBuilder.build(), this.getWorld());
                 } else {
                     this.capturedEntities.add((Entity) entityIn);
+                    final List<NamedCause> customCauses = new ArrayList<>();
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            customCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                        } else {
+                            customCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
+                        }
+                    }
+                    cause = Cause.of(customCauses);
                     event = SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                             entitySnapshotBuilder.build(), this.getWorld());
                 }

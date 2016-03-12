@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.play.server;
+package org.spongepowered.common.profile.callback;
 
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketPlayerListItem;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.network.IMixinSPacketPlayerListItem$AddPlayerData;
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.ProfileLookupCallback;
 
-@Mixin(SPacketPlayerListItem.AddPlayerData.class)
-public abstract class MixinSPacketPlayerListItem$AddPlayerData implements IMixinSPacketPlayerListItem$AddPlayerData {
+import java.util.Optional;
 
-    private EntityPlayerMP playerMP;
+public final class SingleProfileLookupCallback implements ProfileLookupCallback {
+
+    private Optional<org.spongepowered.api.profile.GameProfile> result;
 
     @Override
-    public EntityPlayerMP getPlayer() {
-        return this.playerMP;
+    public void onProfileLookupSucceeded(GameProfile profile) {
+        this.result = Optional.of((org.spongepowered.api.profile.GameProfile) profile);
     }
 
     @Override
-    public void setPlayer(EntityPlayerMP player) {
-        this.playerMP = player;
+    public void onProfileLookupFailed(GameProfile profile, Exception exception) {
+        this.result = Optional.empty();
     }
+
+    public Optional<org.spongepowered.api.profile.GameProfile> getResult() {
+        return this.result;
+    }
+
 }
