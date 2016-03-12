@@ -36,6 +36,7 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableEnchantmentData;
 import org.spongepowered.api.data.manipulator.mutable.item.EnchantmentData;
 import org.spongepowered.api.data.meta.ItemEnchantment;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -45,7 +46,11 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipulatorBuilder<ImmutableEnchantmentData, EnchantmentData> {
+public class ImmutableItemEnchantmentDataBuilder extends AbstractDataBuilder<ImmutableEnchantmentData> implements ImmutableDataManipulatorBuilder<ImmutableEnchantmentData, EnchantmentData> {
+
+    public ImmutableItemEnchantmentDataBuilder() {
+        super(ImmutableEnchantmentData.class, 1);
+    }
 
     @Override
     public ImmutableEnchantmentData createImmutable() {
@@ -76,12 +81,10 @@ public class ImmutableItemEnchantmentDataBuilder implements ImmutableDataManipul
     }
 
     @Override
-    public Optional<ImmutableEnchantmentData> build(DataView container) throws InvalidDataException {
+    protected Optional<ImmutableEnchantmentData> buildContent(DataView container) throws InvalidDataException {
         checkDataExists(container, Keys.ITEM_ENCHANTMENTS.getQuery());
-        DataManager dataManager = SpongeDataManager.getInstance();
-        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(),
-                                                                                 ItemEnchantment.class
-        ).get();
+        final List<ItemEnchantment> enchantments = container.getSerializableList(Keys.ITEM_ENCHANTMENTS.getQuery(), ItemEnchantment.class).get();
         return Optional.of(new ImmutableSpongeEnchantmentData(enchantments));
     }
+
 }
