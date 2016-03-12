@@ -69,7 +69,7 @@ public abstract class MixinCommandSummon extends CommandBase {
     private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double d1, double d2, double d3, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
         if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].func_184954_b());
+                    EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID));

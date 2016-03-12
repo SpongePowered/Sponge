@@ -254,7 +254,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     // Scores
 
     @Override
-    public Score getValueFromObjective(String name, ScoreObjective objective) {
+    public Score getOrCreateScore(String name, ScoreObjective objective) {
         return ((SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getOrCreateScore(SpongeTexts.fromLegacy(name)))
                 .getScoreFor(objective);
     }

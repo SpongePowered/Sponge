@@ -408,7 +408,7 @@ public abstract class MixinPlayerList {
         // Keep players out of blocks
         Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
-        while (!((WorldServer) location.getExtent()).func_184144_a(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
+        while (!((WorldServer) location.getExtent()).getCubes(playerIn, playerIn.getEntityBoundingBox()).isEmpty()) {
             playerIn.setPosition(playerIn.posX, playerIn.posY + 1.0D, playerIn.posZ);
             location = location.add(0, 1, 0);
         }

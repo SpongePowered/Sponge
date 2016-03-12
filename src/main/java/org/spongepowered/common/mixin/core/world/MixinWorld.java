@@ -271,8 +271,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "func_184144_a", at = @At("HEAD"), cancellable = true)
-    public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
+    @Inject(method = "getCubes", at = @At("HEAD"), cancellable = true)
+    public void onGetCubes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
         if (!entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
