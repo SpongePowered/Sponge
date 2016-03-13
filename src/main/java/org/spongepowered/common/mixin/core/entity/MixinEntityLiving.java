@@ -205,14 +205,13 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      *
      * @param entitylivingbaseIn The entity living base coming in
      */
-    @Overwrite
-    public void setAttackTarget(EntityLivingBase entitylivingbaseIn) {
+    @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
+    public void onSetAttackTarget(EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
         if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isVanished()
             && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
             this.attackTarget = null;
-            return;
+            ci.cancel();
         }
-        this.attackTarget = entitylivingbaseIn;
     }
 
     /**
