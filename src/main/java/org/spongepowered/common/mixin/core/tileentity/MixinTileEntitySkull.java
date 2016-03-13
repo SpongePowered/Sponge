@@ -51,7 +51,6 @@ public abstract class MixinTileEntitySkull {
     }
 
     public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile, boolean update) {
-        System.out.println(">>> setPlayerProfile()");
         this.skullType = 3;
         this.playerProfile = mcProfile;
         if (update) {
@@ -70,7 +69,6 @@ public abstract class MixinTileEntitySkull {
      */
     @Overwrite
     public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile) {
-        System.out.println(">>> setPlayerProfile()");
         setPlayerProfile(mcProfile, true);
     }
 
@@ -83,7 +81,6 @@ public abstract class MixinTileEntitySkull {
      */
     @Overwrite
     private void updatePlayerProfile() {
-        System.out.println(">>> updatePlayerProfile()");
         SkullUtil.updatePlayerProfile((IMixinTileEntitySkull) this);
     }
 

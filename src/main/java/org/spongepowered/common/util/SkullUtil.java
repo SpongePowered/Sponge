@@ -44,7 +44,6 @@ public class SkullUtil {
                     } else {
                         SpongeImpl.getLogger().warn("Could not update player GameProfile for Skull: ",
                                 thrown.getMessage());
-                        thrown.printStackTrace();
                     }
                     return newProfile;
                 });
