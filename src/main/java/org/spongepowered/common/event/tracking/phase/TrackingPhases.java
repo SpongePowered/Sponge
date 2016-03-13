@@ -24,24 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.event.tracking.CauseStack;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
-
-import java.util.ArrayDeque;
-import java.util.Deque;
-
-import javax.annotation.Nullable;
-
-public class TrackingPhases {
-
-    private static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
-    private static final PhaseData EMPTY_TUPLE = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
-
-    private static final int DEFAULT_QUEUE_SIZE = 16;
+public final class TrackingPhases {
 
     public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
     public static final SpawningPhase SPAWNING = new SpawningPhase(TrackingPhases.GENERAL);
@@ -50,37 +33,7 @@ public class TrackingPhases {
     public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
     public static final PluginPhase PLUGIN = new PluginPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
 
-    public final CauseStack states = new CauseStack(DEFAULT_QUEUE_SIZE);
-
-    public void push(IPhaseState state, PhaseContext context) {
-        this.states.push(state, context);
+    private TrackingPhases() {
     }
 
-    public IPhaseState popState() {
-        return this.states.pop().getState();
-    }
-
-    public PhaseData pop() {
-        return this.states.pop();
-    }
-
-    public TrackingPhase current() {
-        IPhaseState current = this.states.peekState();
-        return current == null ? TrackingPhases.GENERAL : current.getPhase();
-    }
-
-    public PhaseData peek() {
-        final PhaseData tuple = this.states.peek();
-        return tuple == null ? EMPTY_TUPLE : tuple;
-    }
-
-    public IPhaseState peekState() {
-        final IPhaseState state = this.states.peekState();
-        return state == null ? GeneralPhase.State.COMPLETE : state;
-    }
-
-    public PhaseContext peekContext() {
-        final PhaseContext context = this.states.peekContext();
-        return context == null ? EMPTY : context;
-    }
 }

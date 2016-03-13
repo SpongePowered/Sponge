@@ -30,11 +30,9 @@ import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.world.CaptureType;
 
 public class BlockPhase extends TrackingPhase {
@@ -72,26 +70,21 @@ public class BlockPhase extends TrackingPhase {
     }
 
     @Override
-    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block block, BlockPos pos,
-            int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+    public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
         // Only capture final state of decay, ignore the rest
-        BlockSnapshot originalBlockSnapshot;
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
-
-        originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
-                causeTracker.getMinecraftWorld(), pos), pos, flags);
-        if (block == Blocks.air) {
+        if (newBlock == Blocks.air) {
+            final IBlockState actualState = currentState.getBlock().getActualState(currentState, causeTracker.getMinecraftWorld(), pos);
+            BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
             ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
             phaseContext.getCapturedBlocks().get().add(originalBlockSnapshot);
-            return new BlockStateTriplet(originalBlockSnapshot, null);
-
+        } else {
+            super.captureBlockChange(causeTracker, currentState, newState, newBlock, pos, flags, phaseContext, phaseState);
         }
-        return super.captureBlockChange(causeTracker, currentState, newState, block, pos, flags, phaseContext, phaseState);
     }
 
     @Override
-    public boolean doesStateIgnoreEntitySpawns(IPhaseState currentState) {
-        return currentState == State.RESTORING_BLOCKS;
+    public boolean allowEntitySpawns(IPhaseState currentState) {
+        return currentState != State.RESTORING_BLOCKS;
     }
 
     @Override

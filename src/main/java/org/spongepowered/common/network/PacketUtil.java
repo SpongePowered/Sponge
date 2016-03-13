@@ -33,8 +33,10 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0APacketAnimation;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
+import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
@@ -49,7 +51,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -101,7 +103,7 @@ public class PacketUtil {
             //System.out.println("RECEIVED PACKET " + packetIn);
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
 
-            final IMixinWorld world = (IMixinWorld) packetPlayer.worldObj;
+            final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
             final ItemStack itemUsed;
             if ((packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 itemUsed = ItemStackUtil.cloneDefensiveNative(packetPlayer.getHeldItem());
@@ -110,7 +112,7 @@ public class PacketUtil {
             }
 
             final CauseTracker causeTracker = world.getCauseTracker();
-            if (packetIn instanceof C03PacketPlayer) {
+            if (packetIn instanceof C03PacketPlayer || packetIn instanceof C0APacketAnimation || packetIn instanceof C15PacketClientSettings) {
                 packetIn.processPacket(netHandler);
             } else {
                 PhaseContext context = PhaseContext.start()

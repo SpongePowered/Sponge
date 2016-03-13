@@ -37,14 +37,13 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.ITickingState;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -80,6 +79,8 @@ public class WorldPhase extends TrackingPhase {
                 } else if (state == BlockPhase.State.RESTORING_BLOCKS) {
                     return true;
                 } else if (state == State.POPULATOR_RUNNING) {
+                    return true;
+                } else if (state == SpawningPhase.State.CHUNK_SPAWNING) {
                     return true;
                 }
                 // I'm sure there will be more cases.

@@ -32,11 +32,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 import org.apache.logging.log4j.Level;
@@ -62,6 +62,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
@@ -83,14 +84,13 @@ import javax.annotation.Nullable;
  */
 public final class CauseTracker {
 
-    private final net.minecraft.world.World targetWorld;
+    public static final int DEFAULT_QUEUE_SIZE = 16;
+    private final WorldServer targetWorld;
 
-    private boolean captureBlocks = false;
+    private final CauseStack stack = new CauseStack(DEFAULT_QUEUE_SIZE);
 
-    private final TrackingPhases phases = new TrackingPhases();
-
-    public CauseTracker(net.minecraft.world.World targetWorld) {
-        if (((IMixinWorld) targetWorld).getCauseTracker() != null) {
+    public CauseTracker(WorldServer targetWorld) {
+        if (((IMixinWorldServer) targetWorld).getCauseTracker() != null) {
             throw new IllegalArgumentException("Attempting to create a new CauseTracker for a world that already has a CauseTracker!!");
         }
         this.targetWorld = targetWorld;
@@ -103,7 +103,7 @@ public final class CauseTracker {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (this.phases.states.size() > 6) {
+        if (this.stack.size() > 6) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
@@ -111,7 +111,7 @@ public final class CauseTracker {
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
             printer.add("  %s : %s", "Entering Phase", phase);
             printer.add("  %s : %s", "Entering State", state);
-            printer.addWrapped(60, "%s : %s", "Current phases", this.phases.states.currentStates());
+            printer.add("%s : %s", "Current phases", this.stack.currentStates());
             printer.add("  %s :", "Printing stack trace");
             Exception exception = new Exception("Stack trace");
             for (StackTraceElement element : exception.getStackTrace()) {
@@ -119,7 +119,7 @@ public final class CauseTracker {
             }
             printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
-        IPhaseState currentState = this.phases.peekState();
+        IPhaseState currentState = this.stack.peekState();
         if (!currentState.canSwitchTo(state)) {
             // This is to detect incompatible phase switches.
             PrettyPrinter printer = new PrettyPrinter(60);
@@ -129,7 +129,7 @@ public final class CauseTracker {
             printer.add("  %s : %s", "Current State", currentState);
             printer.add("  %s : %s", "Entering incompatible Phase", phase);
             printer.add("  %s : %s", "Entering incompatible State", state);
-            printer.addWrapped(60, "%s : %s", "Current phases", this.phases.states.currentStates());
+            printer.add("%s : %s", "Current phases", this.stack.currentStates());
             printer.add("  %s :", "Printing stack trace");
             Exception exception = new Exception("Stack trace");
             for (StackTraceElement element : exception.getStackTrace()) {
@@ -138,31 +138,45 @@ public final class CauseTracker {
             printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
 
-        this.phases.push(state, phaseContext);
+        this.stack.push(state, phaseContext);
     }
 
     public void completePhase() {
-        final PhaseData tuple = this.phases.peek();
+        final PhaseData tuple = this.stack.peek();
         IPhaseState state = tuple.getState();
-        if (this.phases.states.size() > 6) {
+        if (this.stack.size() > 6) {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
-            printer.addWrapped(60, "  %s : %s", "Completing phase", state);
-            printer.addWrapped(60, "  %s : %s", "Phases remaining", this.phases.states.currentStates());
+            printer.addWrapped(60, "%s : %s", "Completing phase", state);
+            printer.addWrapped(60, "%s : %s", "Phases remaining", this.stack.currentStates());
+            printer.add("Stacktrace:");
             Exception exception = new Exception("Stack trace");
             for (StackTraceElement element : exception.getStackTrace()) {
                 printer.add("     %s", element);
             }
             printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
         }
-        this.phases.pop();
+        this.stack.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
-        phase.unwind(this, state, tuple.getContext());
+        try {
+            phase.unwind(this, state, tuple.getContext());
+        } catch (Exception e) {
+            final PrettyPrinter printer = new PrettyPrinter(40);
+            printer.add("Exception exiting phase").centre().hr();
+            printer.add("Something happened when trying to unwind the phase %s", state);
+            printer.addWrapped(40, "   %s : %s", "PhaseContext", tuple.getContext());
+            printer.addWrapped(60, "   %s : %s", "Phases remaining", this.stack.currentStates());
+            printer.add("Stacktrace:");
+            for (StackTraceElement element : e.getStackTrace()) {
+                printer.add("    %s", element);
+            }
+            printer.print(System.err).log(SpongeImpl.getLogger(), Level.ERROR);
+        }
     }
 
     // ----------------- SIMPLE GETTERS --------------------------------------
@@ -177,11 +191,11 @@ public final class CauseTracker {
     }
 
     /**
-     * Gets the {@link World} as a Minecraft {@link net.minecraft.world.World}.
+     * Gets the {@link World} as a Minecraft {@link WorldServer}.
      *
      * @return The world as it's original object
      */
-    public net.minecraft.world.World getMinecraftWorld() {
+    public WorldServer getMinecraftWorld() {
         return this.targetWorld;
     }
 
@@ -190,20 +204,12 @@ public final class CauseTracker {
      *
      * @return The world casted as a mixin world
      */
-    public IMixinWorld getMixinWorld() {
-        return (IMixinWorld) this.targetWorld;
+    public IMixinWorldServer getMixinWorld() {
+        return (IMixinWorldServer) this.targetWorld;
     }
 
-    public TrackingPhases getPhases() {
-        return this.phases;
-    }
-
-    public boolean isCapturingBlocks() {
-        return this.captureBlocks;
-    }
-
-    public void setCaptureBlocks(boolean captureBlocks) {
-        this.captureBlocks = captureBlocks;
+    public CauseStack getPhases() {
+        return this.stack;
     }
 
     // --------------------- DELEGATED WORLD METHODS -------------------------
@@ -223,7 +229,7 @@ public final class CauseTracker {
                             spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(), PlayerTracker.Type.NOTIFIER);
                         }
                     } else {
-                        final PhaseContext context = this.phases.peekContext();
+                        final PhaseContext context = this.stack.peekContext();
                         final Object source;
 
                         final Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
@@ -279,36 +285,56 @@ public final class CauseTracker {
         }
     }
 
-    public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
+    public boolean setBlockState(final BlockPos pos, final IBlockState newState, final int flags) {
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
         final Block newBlock = newState.getBlock();
-        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
-
-        if (iblockstate == null) {
+        // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
+        // Some micro optimization in case someone is trying to set the new state to the exact same
+        // original current state
+        final IBlockState currentState = chunk.getBlockState(pos);
+        final Block currentBlock = currentState.getBlock();
+        if (currentState == newState) {
             return false;
+        }
+
+        // Now we need to do some of our own logic to see if we need to capture.
+        final PhaseData phaseData = this.getPhases().peek();
+        final IPhaseState phaseState = phaseData.getState();
+        final TrackingPhase phase = phaseState.getPhase();
+        if (phase.requiresBlockCapturing(phaseState)) {
+            phase.captureBlockChange(this, currentState, newState, newBlock, pos, flags, phaseData.getContext(), phaseState);
+            return true; // Default, this means we've captured the block. Keeping with the semantics
+            // of the original method where true means it successfully changed.
         } else {
-            final Block currentblock = iblockstate.getBlock();
+            // Sponge End - continue with vanilla mechanics
+            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
-            if (newBlock.getLightOpacity() != currentblock.getLightOpacity() || newBlock.getLightValue() != currentblock.getLightValue()) {
-                minecraftWorld.theProfiler.startSection("checkLight");
-                minecraftWorld.checkLight(pos);
-                minecraftWorld.theProfiler.endSection();
-            }
+            if (iblockstate == null) {
+                return false;
+            } else {
+                final Block currentblock = iblockstate.getBlock();
 
-            if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
-                minecraftWorld.markBlockForUpdate(pos);
-            }
-
-            if (!minecraftWorld.isRemote && (flags & 1) != 0) {
-                minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-                if (newBlock.hasComparatorInputOverride()) {
-                    minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+                if (newBlock.getLightOpacity() != currentblock.getLightOpacity() || newBlock.getLightValue() != currentblock.getLightValue()) {
+                    minecraftWorld.theProfiler.startSection("checkLight");
+                    minecraftWorld.checkLight(pos);
+                    minecraftWorld.theProfiler.endSection();
                 }
-            }
 
-            return true;
+                if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
+                    minecraftWorld.markBlockForUpdate(pos);
+                }
+
+                if (!minecraftWorld.isRemote && (flags & 1) != 0) {
+                    minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
+
+                    if (newBlock.hasComparatorInputOverride()) {
+                        minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
+                    }
+                }
+
+                return true;
+            }
         }
     }
 
@@ -316,7 +342,7 @@ public final class CauseTracker {
         checkNotNull(entity, "Entity cannot be null!");
         checkNotNull(cause, "Cause cannot be null!");
 
-        // Very first thing - fire events that are from entity construction
+        // Sponge Start - handle construction phases
         if (((IMixinEntity) entity).isInConstructPhase()) {
             ((IMixinEntity) entity).firePostConstructEvents();
         }
@@ -328,10 +354,11 @@ public final class CauseTracker {
         final IPhaseState phaseState = phaseData.getState();
         final PhaseContext context = phaseData.getContext();
         final TrackingPhase phase = phaseState.getPhase();
-        if (!minecraftWorld.isRemote && minecraftEntity instanceof EntityItem && phase.doesStateIgnoreEntitySpawns(phaseState)) {
+        if (!minecraftWorld.isRemote && !phase.allowEntitySpawns(phaseState)) {
             return false;
         }
 
+        // Sponge End - continue with vanilla mechanics
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
         final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
@@ -341,30 +368,24 @@ public final class CauseTracker {
         }
 
         if (!isForced && !minecraftWorld.isChunkLoaded(chunkX, chunkZ, true)) {
-            // don't spawn any entities if there's no chunks loaded and it's not forced, quite simple.
             return false;
         } else {
             if (minecraftEntity instanceof EntityPlayer) {
-                // Players should NEVER EVER EVER be cause tracked, period.
                 EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
                 minecraftWorld.playerEntities.add(entityplayer);
                 minecraftWorld.updateAllPlayersSleepingFlag();
             }
-            final IMixinWorld mixinWorld = this.getMixinWorld();
             // First, check if the owning world is a remote world. Then check if the spawn is forced. Then finally check
             // that the phase does not need to actually capture the entity spawn (at which case
-            if (minecraftWorld.isRemote || isForced) {
-                if (phase.captureEntitySpawn(phaseState, context, entity, chunkX, chunkZ)) {
-                    return true;
-                }
-                // Basically, if it's forced, or it's remote, OR we're already spawning death drops, then go ahead.
-                minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
-                minecraftWorld.loadedEntityList.add(minecraftEntity);
-                mixinWorld.onSpongeEntityAdded(minecraftEntity);
+            if (!isForced && phase.attemptEntitySpawnCapture(phaseState, context, entity, chunkX, chunkZ)) {
                 return true;
             }
-
-            return false;
+            // Sponge end - continue on with the checks.
+            minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
+            minecraftWorld.loadedEntityList.add(minecraftEntity);
+            // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+            getMixinWorld().onSpongeEntityAdded(minecraftEntity);
+            return true;
         }
     }
 

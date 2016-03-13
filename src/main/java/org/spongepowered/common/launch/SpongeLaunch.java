@@ -73,6 +73,7 @@ public class SpongeLaunch {
                 .addConfiguration("mixins.common.bungeecord.json")
                 .addConfiguration("mixins.common.exploit.json")
                 .addConfiguration("mixins.common.tracking.json")
+                .addConfiguration("mixins.common.chunkfix.json")
                 .addConfiguration("mixins.common.timings.json");
     }
 

@@ -56,20 +56,19 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -85,7 +84,6 @@ public class TrackingHelper {
 
     public static final String CURRENT_TICK_BLOCK = "CurrentTickBlock";
     public static final String RESTORING_BLOCK = "RestoringBlock";
-    public static final String POPULATOR_CAPTURE_MAP = "PopulatorCaptureMap";
     public static final String CAPTURED_POPULATOR = "PopulatorType";
     public static final String CAPTURED_PACKET = "Packet";
     public static final String OPEN_CONTAINER = "OpenContainer";
@@ -106,12 +104,15 @@ public class TrackingHelper {
     public static final String TRACKED_ENTITY_ID = "TargetedEntityId";
     public static final String DESTRUCT_ITEM_DROPS = "DestructItemDrops";
     public static final String PLACED_BLOCK_POSITION = "PlacedBlockPosition";
+    public static final String CHUNK_PROVIDER = "ChunkProvider";
+    public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
+    public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final World minecraftWorld = causeTracker.getMinecraftWorld();
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
                 minecraftWorld, event.getPosition()), event.getPosition(), 3);
         final PhaseContext phaseContext = PhaseContext.start()
@@ -130,7 +131,7 @@ public class TrackingHelper {
     }
 
     public static void randomTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state,
                 minecraftWorld, pos), pos, 0);
@@ -143,7 +144,7 @@ public class TrackingHelper {
     }
 
     public static void updateTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {
-        final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
+        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.TICKING_BLOCK, PhaseContext.start()
@@ -165,9 +166,7 @@ public class TrackingHelper {
                     break;
                 }
             }
-            if (invalid) {
-                return true;
-            }
+            return invalid;
         }
         return false;
     }
@@ -258,7 +257,6 @@ public class TrackingHelper {
 
     public static Tuple<List<EntitySnapshot>, Cause> processSnapshotsForSpawning(Cause cause, List<Entity> capturedEntities, List<Transaction<BlockSnapshot>> invalidTransactions) {
         Iterator<Entity> iter = capturedEntities.iterator();
-        ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
             if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
@@ -276,11 +274,9 @@ public class TrackingHelper {
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
             }
-            entitySnapshotBuilder.add(currentEntity.createSnapshot());
         }
 
-        List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
-        return new Tuple<>(entitySnapshots, cause);
+        return new Tuple<>(ImmutableList.of(), cause);
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
@@ -317,5 +313,21 @@ public class TrackingHelper {
             return minecraftWorld.addWeatherEffect(entity);
         }
         return false;
+    }
+
+    public static void associateEntityCreator(PhaseContext context, net.minecraft.entity.Entity minecraftEntity, World minecraftWorld) {
+        context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(tickingSnapshot -> {
+            BlockPos sourcePos = VecHelper.toBlockPos(tickingSnapshot.getPosition());
+            Block targetBlock = minecraftWorld.getBlockState(minecraftEntity.getPosition()).getBlock();
+            SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, tickingSnapshot, minecraftEntity, sourcePos, targetBlock, minecraftEntity.getPosition(), PlayerTracker.Type.NOTIFIER);
+
+        });
+        context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(tickingEntity -> {
+            Optional<User> creator = ((IMixinEntity) tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
+                ((IMixinEntity) minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
+            }
+        });
+
     }
 }

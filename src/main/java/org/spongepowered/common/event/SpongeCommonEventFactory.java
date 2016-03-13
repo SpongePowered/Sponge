@@ -93,6 +93,7 @@ import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
@@ -112,47 +113,15 @@ import javax.annotation.Nullable;
 
 public class SpongeCommonEventFactory {
 
-
-    public static ChangeInventoryEvent.Held callChangeInventoryHeldEvent(EntityPlayerMP player,
-            C09PacketHeldItemChange packetIn) {
-        final Container inventoryContainer = player.inventoryContainer;
-        final InventoryPlayer inventory = player.inventory;
-        Slot sourceSlot = inventoryContainer.getSlot(inventory.currentItem + inventory.mainInventory.length);
-        Slot targetSlot = inventoryContainer.getSlot(packetIn.getSlotId() + inventory.mainInventory.length);
-        if (sourceSlot == null || targetSlot == null) {
-            return null; // should never happen but just in case it does
-        }
-
-        ItemStackSnapshot sourceSnapshot =
-                sourceSlot.getStack() != null ? ((org.spongepowered.api.item.inventory.ItemStack) sourceSlot.getStack()).createSnapshot()
-                                              : ItemStackSnapshot.NONE;
-        ItemStackSnapshot targetSnapshot = targetSlot.getStack() != null
-                                           ? ((org.spongepowered.api.item.inventory.ItemStack) targetSlot.getStack()).createSnapshot() : ItemStackSnapshot.NONE;
-        SlotTransaction sourceTransaction = new SlotTransaction(new SlotAdapter(sourceSlot), sourceSnapshot, sourceSnapshot);
-        SlotTransaction targetTransaction = new SlotTransaction(new SlotAdapter(targetSlot), targetSnapshot, targetSnapshot);
-        ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
-        ChangeInventoryEvent.Held event = SpongeEventFactory.createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
-        SpongeImpl.postEvent(event);
-
-        if (event.isCancelled()) {
-            player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(inventory.currentItem));
-        } else {
-            PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
-            inventory.currentItem = packetIn.getSlotId();
-            player.markPlayerActive();
-        }
-        return event;
-    }
-
     @SuppressWarnings("unchecked")
     @Nullable
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
                                                             List<net.minecraft.entity.Entity> entities) {
-        Cause cause = null;
+        final Cause cause;
         if (sourceEntity != null) {
             cause = Cause.of(NamedCause.source(sourceEntity));
         } else {
-            IMixinWorld spongeWorld = (IMixinWorld) world;
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) world;
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
             PhaseContext context = causeTracker.getPhases().peekContext();
 
@@ -165,6 +134,8 @@ public class SpongeCommonEventFactory {
                 cause = Cause.of(NamedCause.source(currentTickingTileEntity.get()));
             } else if (currentTickingEntity.isPresent()) {
                 cause = Cause.of(NamedCause.source(currentTickingEntity.get()));
+            } else {
+                cause = null;
             }
 
             if (cause == null) {
@@ -181,7 +152,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
-        final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData currentPhase = causeTracker.getPhases().peek();
         Optional<User> playerNotifier = currentPhase.getContext().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
         BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));

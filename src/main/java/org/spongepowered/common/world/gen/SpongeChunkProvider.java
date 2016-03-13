@@ -64,12 +64,14 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
@@ -83,6 +85,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -254,15 +257,12 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
-        IMixinWorld world = (IMixinWorld) this.world;
+        IMixinWorldServer world = (IMixinWorldServer) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        final NamedCause sourceCause = NamedCause.source(this);
-        final NamedCause chunkProviderCause = NamedCause.of("ChunkProvider", chunkProvider);
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
-                .add(sourceCause)
-                .add(chunkProviderCause)
-                .complete());
-        Cause populateCause = Cause.of(sourceCause, chunkProviderCause);
+        final Object source = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
+
+        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(TrackingHelper.CHUNK_PROVIDER, chunkProvider));
+
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -323,8 +323,6 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
         PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, populators, chunk);
         SpongeImpl.postEvent(event);
-
-        causeTracker.completePhase();
 
         BlockFalling.fallInstantly = false;
     }

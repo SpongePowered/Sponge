@@ -51,6 +51,7 @@ import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Optional;
@@ -59,8 +60,7 @@ import java.util.Random;
 @Mixin(BlockDispenser.class)
 public abstract class MixinBlockDispenser extends MixinBlock {
 
-    public static final String
-            DISPENSE_ITEM =
+    private static final String DISPENSE_ITEM =
             "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V";
 
     @Override
@@ -98,7 +98,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM))
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        ((IMixinWorld) worldIn).getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.DISPENSE, PhaseContext.start()
+        ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.DISPENSE, PhaseContext.start()
             .add(NamedCause.source(worldIn.getTileEntity(pos)))
             .addCaptures()
             .complete());
@@ -106,7 +106,7 @@ public abstract class MixinBlockDispenser extends MixinBlock {
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))
     private void onDispenseReturn(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
-        ((IMixinWorld) worldIn).getCauseTracker().completePhase();
+        ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
     }
 
 }

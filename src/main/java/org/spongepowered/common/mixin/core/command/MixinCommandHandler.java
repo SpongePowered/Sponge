@@ -44,6 +44,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 
@@ -55,7 +56,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
-            IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
+            IMixinWorldServer world = (IMixinWorldServer) sender.getEntityWorld();
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
                     .add(NamedCause.source(sender))
@@ -71,7 +72,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     @Inject(method = "tryExecute", at = @At(value = "RETURN"))
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
-            IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
+            IMixinWorldServer world = (IMixinWorldServer) sender.getEntityWorld();
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.completePhase();
         }

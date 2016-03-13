@@ -373,7 +373,6 @@
         "world.MixinWorld",
         "world.MixinWorld_Data",
         "world.MixinWorld_Effect",
-        "world.MixinWorld_Tracker",
         "world.MixinWorldBorder",
         "world.MixinWorldProvider",
         "world.MixinWorldServer",

@@ -112,6 +112,7 @@ import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.item.MixinItemStack;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -202,8 +203,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow(prefix = "shadow$")
-    protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
@@ -590,7 +590,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.
+            ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        }
         if (((Entity) this) instanceof EntityPlayerMP) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),

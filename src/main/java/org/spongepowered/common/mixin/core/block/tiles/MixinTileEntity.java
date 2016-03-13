@@ -58,6 +58,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -85,7 +86,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Inject(method = "markDirty", at = @At(value = "HEAD"))
     public void onMarkDirty(CallbackInfo ci) {
         if (this.worldObj != null && !this.worldObj.isRemote) {
-            IMixinWorld world = (IMixinWorld) this.worldObj;
+            IMixinWorldServer world = (IMixinWorldServer) this.worldObj;
             // This handles transfers to this TE from a source such as a Hopper
             world.getCauseTracker().getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, TileEntity.class).ifPresent(currentTick -> {
                 if (currentTick != this) {

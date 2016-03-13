@@ -31,7 +31,6 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.api.world.World;
 
 import java.util.List;
 
@@ -55,7 +54,7 @@ public interface ISpawnableState extends IPhaseState {
         if (capturedEntitiesSupplier.isEmpty()) {
             return null;
         }
-        List<Transaction<BlockSnapshot>> invalidTransactions = phaseContext.getInvalidTransactions().get();
+        List<Transaction<BlockSnapshot>> invalidTransactions = phaseContext.getInvalidTransactionSupplier().get().orEmptyList();
         final Tuple<List<EntitySnapshot>, Cause> listCauseTuple =
                 TrackingHelper.processSnapshotsForSpawning(cause, capturedEntitiesSupplier.get(), invalidTransactions);
         List<EntitySnapshot> entitySnapshots = listCauseTuple.getFirst();

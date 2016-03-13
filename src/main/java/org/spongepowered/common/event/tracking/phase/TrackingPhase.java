@@ -35,38 +35,29 @@ import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.BlockStateTriplet;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.CaptureType;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -98,72 +89,63 @@ public abstract class TrackingPhase {
         return true;
     }
 
-    public BlockStateTriplet captureBlockChange(CauseTracker causeTracker, IBlockState currentState,
-            IBlockState newState, Block block, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
-        BlockSnapshot originalBlockSnapshot = null;
-        Transaction<BlockSnapshot> transaction = null;
-        final IMixinWorld mixinWorld =  causeTracker.getMixinWorld();
-        final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-        if (!(((IMixinMinecraftServer) MinecraftServer.getServer()).isPreparingChunks()) || runningGenerator != null) {
-            final IBlockState actualState = currentState.getBlock().getActualState(currentState, causeTracker.getMinecraftWorld(), pos);
-            originalBlockSnapshot = mixinWorld.createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-            final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
-            if (phaseState == BlockPhase.State.BLOCK_DECAY) {
-                // Only capture final state of decay, ignore the rest
-                if (block == Blocks.air) {
-                    ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
-                    capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-                }
-            } else if (block == Blocks.air) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
-                capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-            } else if (block != currentState.getBlock()) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
-                capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-            } else {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
-                capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-            }
+    public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+        final IBlockState actualState = currentState.getBlock().getActualState(currentState,  causeTracker.getMinecraftWorld(), pos);
+        final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
+        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
+        if (newBlock == Blocks.air) {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+        } else if (newBlock != currentState.getBlock()) {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+        } else {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         }
-        return new BlockStateTriplet(originalBlockSnapshot, transaction);
+
     }
 
-    public boolean doesStateIgnoreEntitySpawns(IPhaseState currentState) {
-        return false;
+    public boolean allowEntitySpawns(IPhaseState currentState) {
+        return true;
     }
 
-    public boolean captureEntitySpawn(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    /**
+     * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
+     * and doesn't actually spawn an entity into the world until the current phase is unwound.
+     * The method itself should technically capture entity spawns, however, in the event it
+     * is required that the entity cannot be captured, returning {@code false} will mark it
+     * to spawn into the world, bypassing any of the bulk spawn events or capturing.
+     *
+     * <p>NOTE: This method should only be called and handled if and only if {@link #allowEntitySpawns(IPhaseState)}
+     * returns {@code true}. Violation of this will have unforseen consequences.</p>
+     *
+     * @param phaseState The current phase state
+     * @param context The current context
+     * @param entity The entity being captured
+     * @param chunkX The chunk x position
+     * @param chunkZ The chunk z position
+     * @return True if the entity was successfully captured
+     */
+    public boolean attemptEntitySpawnCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final World minecraftWorld = minecraftEntity.worldObj;
-        Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-        Optional<Entity> currentTickEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
-        if (currentTickingBlock.isPresent()) {
-            BlockPos sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-            Block targetBlock = minecraftWorld.getBlockState(minecraftEntity.getPosition()).getBlock();
-            SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, currentTickingBlock.get(), minecraftEntity, sourcePos, targetBlock, minecraftEntity.getPosition(), PlayerTracker.Type.NOTIFIER);
-        }
-        if (currentTickEntity.isPresent()) {
-            Optional<User> creator = ((IMixinEntity) currentTickEntity.get()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                ((IMixinEntity) minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-            }
-        }
-        final List<Entity> capturedEntities = context.getCapturedEntities().get();
-        final List<Entity> capturedItems = context.getCapturedItems().get();
+        TrackingHelper.associateEntityCreator(context, minecraftEntity, minecraftWorld);
         if (minecraftEntity instanceof EntityItem) {
-            capturedItems.add(entity);
+            context.getCapturedItemsSupplier().get().ifPresent(capturedItems -> capturedItems.add(entity));
         } else {
-            capturedEntities.add(entity);
+            context.getCapturedEntitySupplier().get().ifPresent(capturedEntities -> capturedEntities.add(entity));
         }
         return true;
     }
 
     public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
 
+    // TODO
     public boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ, IPhaseState phaseState,
             PhaseContext context) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final IMixinWorld mixinWorld = ((IMixinWorld) minecraftEntity.worldObj);
+        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) minecraftEntity.worldObj);
         // handle actual capturing
         final List<Entity> capturedItems = context.getCapturedItemsSupplier().get().orEmptyList();
         final List<Entity> capturedEntities = context.getCapturedEntities().get();
@@ -242,4 +224,8 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    // TODO
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
 }

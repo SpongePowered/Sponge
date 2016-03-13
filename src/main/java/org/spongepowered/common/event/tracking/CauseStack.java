@@ -27,15 +27,15 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 /**
  * A simple stack that couples a {@link IPhaseState} and
@@ -45,6 +45,9 @@ import javax.annotation.Nullable;
  * otherwise an {@link IllegalArgumentException} is thrown.
  */
 public final class CauseStack {
+
+    public static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
+    public static final PhaseData EMPTY_TUPLE = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
 
     private final Deque<PhaseData> states;
 
@@ -57,27 +60,28 @@ public final class CauseStack {
         return this.states.stream().map(PhaseData::getState).collect(Collectors.toList());
     }
 
-    @Nullable
-    public IPhaseState peekState() {
-        final PhaseData peek = this.states.peek();
-        return peek == null ? null : peek.getState();
+    public PhaseData peek() {
+        final PhaseData phase = this.states.peek();
+        return phase == null ? CauseStack.EMPTY_TUPLE : phase;
     }
 
-    @Nullable
+    public IPhaseState peekState() {
+        final PhaseData peek = this.states.peek();
+        return peek == null ? GeneralPhase.State.COMPLETE : peek.getState();
+    }
+
     public PhaseContext peekContext() {
         final PhaseData peek = this.states.peek();
-        return peek == null ? null : peek.getContext();
+        return peek == null ? CauseStack.EMPTY : peek.getContext();
     }
 
     public PhaseData pop() {
-        final PhaseData tuple = this.states.pop();
-        return tuple;
+        return this.states.pop();
     }
 
-    @Nullable
     public TrackingPhase current() {
         final PhaseData tuple = this.states.peek();
-        return tuple == null ? null : tuple.getState().getPhase();
+        return tuple == null ? TrackingPhases.GENERAL : tuple.getState().getPhase();
     }
 
     public CauseStack push(PhaseData tuple) {
@@ -123,8 +127,4 @@ public final class CauseStack {
                 .toString();
     }
 
-    @Nullable
-    public PhaseData peek() {
-        return this.states.peek();
-    }
 }

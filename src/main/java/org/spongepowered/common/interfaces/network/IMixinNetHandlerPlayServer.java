@@ -22,30 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.interfaces.network;
 
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.resourcepack.ResourcePack;
 
-import javax.annotation.Nullable;
+import java.util.Map;
 
-public final class BlockStateTriplet {
+public interface IMixinNetHandlerPlayServer {
 
-    @Nullable private final BlockSnapshot blockSnapshot;
-    @Nullable private final Transaction<BlockSnapshot> transaction;
+    Map<String, ResourcePack> getSentResourcePacks();
 
-    public BlockStateTriplet(@Nullable BlockSnapshot blockSnapshot, @Nullable Transaction<BlockSnapshot> transaction) {
-        this.blockSnapshot = blockSnapshot;
-        this.transaction = transaction;
-    }
-
-    @Nullable
-    public BlockSnapshot getBlockSnapshot() {
-        return this.blockSnapshot;
-    }
-
-    @Nullable
-    public Transaction<BlockSnapshot> getTransaction() {
-        return this.transaction;
-    }
 }

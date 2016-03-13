@@ -188,21 +188,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.user;
     }
 
-    // Post before the player values are updated
-    @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    public void processClientSettingsEvent(C15PacketClientSettings packet, CallbackInfo ci) {
-        PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
-                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
-                LanguageUtil.LOCALE_CACHE.getUnchecked(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
-        SpongeImpl.postEvent(event);
-    }
-
-    @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    public void processClientSettings(C15PacketClientSettings packet, CallbackInfo ci) {
-        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
-        this.viewDistance = packet.view;
-    }
-
     @Override
     public Locale getLocale() {
         return LanguageUtil.LOCALE_CACHE.getUnchecked(this.translator);

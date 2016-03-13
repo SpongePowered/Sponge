@@ -38,15 +38,8 @@ import javax.annotation.Nullable;
 public class GeneralPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
-        COMMAND(false),
-        PROCESSING(false),
-        COMPLETE(false);
-
-        private final boolean intermediate;
-
-        State(boolean intermediate) {
-            this.intermediate = intermediate;
-        }
+        COMMAND,
+        COMPLETE;
 
         @Override
         public boolean isBusy() {
@@ -56,10 +49,6 @@ public class GeneralPhase extends TrackingPhase {
         @Override
         public boolean canSwitchTo(IPhaseState state) {
             return !isBusy() || state instanceof BlockPhase.State;
-        }
-
-        public boolean isIntermediate() {
-            return this.intermediate;
         }
 
         @Override
@@ -86,7 +75,7 @@ public class GeneralPhase extends TrackingPhase {
             ICommandSender sender = cause.first(ICommandSender.class).get();
             checkState(command != null, "Cannot complete a command when there was no command executed!");
             checkState(sender != null, "Cannot complete a command when there was no command sender!");
-
+            // todo properly unwind the captured block changes and entity spawns.
         }
     }
 }

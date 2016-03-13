@@ -24,82 +24,49 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.effect.EntityLightningBolt;
-import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityTNTPrimed;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.init.Blocks;
 import net.minecraft.init.Items;
-import net.minecraft.inventory.Container;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S23PacketBlockChange;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Ageable;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.gen.PopulatorType;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
-import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -114,6 +81,7 @@ import javax.annotation.Nullable;
  */
 public class MoveToPhases {
 
+    // I'm guessing this is going to be put into PacketPhase for player block changes.
     static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions,
             IPhaseState phaseState, PhaseContext context) {
         final Optional<EntityPlayerMP> entityPlayerMP = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class);
@@ -143,6 +111,7 @@ public class MoveToPhases {
         }
     }
 
+    // Don't know where this was handled previously, but it feels like it just handles death drops.
     static void preProcessItemDrops(Cause cause, List<Transaction<BlockSnapshot>> invalidTransactions, Iterator<Entity> iter,
             ImmutableList.Builder<EntitySnapshot> builder) {
         while (iter.hasNext()) {
@@ -179,11 +148,13 @@ public class MoveToPhases {
         }
     }
 
+    // Todo this shouldn't be done like this, but rather should be considered for entering possible phase contexts.
+    // Ultimately, this is going to be delegated to the current phase to generate a cause with appropriate handling.
     public static boolean handleVanillaSpawnEntity(World nmsWorld, net.minecraft.entity.Entity nmsEntity) {
         org.spongepowered.api.world.World world = (org.spongepowered.api.world.World) nmsWorld;
         Entity entity = (Entity) nmsEntity;
         List<NamedCause> list = new ArrayList<>();
-        final CauseTracker causeTracker = ((IMixinWorld) nmsWorld).getCauseTracker();
+        final CauseTracker causeTracker = ((IMixinWorldServer) nmsWorld).getCauseTracker();
         final PhaseData data = causeTracker.getPhases().peek();
         final IPhaseState state = data.getState();
         final PhaseContext context = data.getContext();
@@ -307,7 +278,7 @@ public class MoveToPhases {
                 final Optional<ItemStack> usedItem = context.firstNamed(TrackingHelper.ITEM_USED, ItemStack.class);
                 if (usedItem.isPresent()) {
                     SpawnCause cause;
-                    final EntityPlayerMP packetPlayer = StaticMixinHelper.packetPlayer;
+                    final EntityPlayerMP packetPlayer = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class).get();
                     if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                         cause = EntitySpawnCause.builder()
                                 .entity(((Entity) packetPlayer))

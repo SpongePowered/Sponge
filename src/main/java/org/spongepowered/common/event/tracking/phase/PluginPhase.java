@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -35,7 +34,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-import java.util.Collections;
 import java.util.List;
 
 import javax.annotation.Nullable;

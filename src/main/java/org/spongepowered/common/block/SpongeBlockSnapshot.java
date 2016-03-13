@@ -61,6 +61,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 
@@ -173,7 +174,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
-        CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
                 PhaseContext.start()
                         .add(NamedCause.of(TrackingHelper.RESTORING_BLOCK, this))

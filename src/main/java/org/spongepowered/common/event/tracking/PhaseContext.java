@@ -122,14 +122,13 @@ public final class PhaseContext {
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Entity>> getCapturedItemsSupplier() {
-        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
+        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
     }
 
 
     @SuppressWarnings("unchecked")
     public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
-        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class)
-                .flatMap(supplier -> Optional.ofNullable(supplier.get()));
+        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
     }
 
     @SuppressWarnings("unchecked")

@@ -22,36 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.plugin;
 
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.asm.lib.tree.ClassNode;
+import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
+import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
+import org.spongepowered.common.SpongeImpl;
 
-import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 
-@NonnullByDefault
-public interface IMixinWorld {
+public class ChunkFixPlugin implements IMixinConfigPlugin {
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
+    @Override
+    public void onLoad(String mixinPackage) {
+    }
 
-    void updateWorldGenerator();
+    @Override
+    public String getRefMapperConfig() {
+        return null;
+    }
 
-    long getWeatherStartTime();
+    @Override
+    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+        return SpongeImpl.getGlobalConfig().getConfig().getModules().useTracking();
+    }
 
-    void setWeatherStartTime(long weatherStartTime);
+    @Override
+    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
+    }
 
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
+    @Override
+    public List<String> getMixins() {
+        return null;
+    }
 
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+    @Override
+    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    }
 
-    SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
+    @Override
+    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
+    }
 
 }

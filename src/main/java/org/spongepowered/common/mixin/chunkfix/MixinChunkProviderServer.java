@@ -22,46 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.util;
+package org.spongepowered.common.mixin.chunkfix;
 
-import net.minecraft.network.Packet;
-import org.spongepowered.common.event.tracking.phase.PacketPhase;
+import net.minecraft.util.LongHashMap;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Objects;
+@Mixin(value = ChunkProviderServer.class, priority = 1111)
+public abstract class MixinChunkProviderServer {
 
-public final class PacketContext {
+    @Shadow public WorldServer worldObj;
+    @Shadow private LongHashMap<Chunk> id2ChunkMap;
+    @Shadow private Chunk dummyChunk;
+    @Shadow public abstract Chunk loadChunk(int chunkX, int chunkZ);
 
-    public final Packet<?> packet;
-    public final PacketPhase.IPacketState packetState;
-
-    public PacketContext(Packet<?> packet, PacketPhase.IPacketState packetState) {
-        this.packet = packet;
-        this.packetState = packetState;
+    @Overwrite
+    public Chunk provideChunk(int x, int z) {
+        Chunk chunk = this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
+        return chunk == null ? (!this.worldObj.isFindingSpawnPoint() ? this.dummyChunk : this.loadChunk(x, z)) : chunk;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        PacketContext that = (PacketContext) o;
-        return Objects.equals(this.packet, that.packet) &&
-               Objects.equals(this.packetState, that.packetState);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(this.packet, this.packetState);
-    }
-
-    @Override
-    public String toString() {
-        return com.google.common.base.Objects.toStringHelper(this)
-                .add("packet", this.packet)
-                .add("packetState", this.packetState)
-                .toString();
-    }
 }

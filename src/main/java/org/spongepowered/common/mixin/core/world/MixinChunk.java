@@ -80,6 +80,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -419,48 +420,50 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
-        int i = pos.getX() & 15;
-        int j = pos.getY();
-        int k = pos.getZ() & 15;
-        int l = k << 4 | i;
+        int xPos = pos.getX() & 15;
+        int yPos = pos.getY();
+        int zPos = pos.getZ() & 15;
+        int combinedPos = zPos << 4 | xPos;
 
-        if (j >= this.precipitationHeightMap[l] - 1) {
-            this.precipitationHeightMap[l] = -999;
+        if (yPos >= this.precipitationHeightMap[combinedPos] - 1) {
+            this.precipitationHeightMap[combinedPos] = -999;
         }
 
-        int i1 = this.heightMap[l];
+        int currentHeight = this.heightMap[combinedPos];
 
         // Sponge - remove blockstate check as we handle it in world.setBlockState
-        Block block = newState.getBlock();
-        Block block1 = currentState.getBlock();
-        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
-        boolean flag = false;
+        Block newBlock = newState.getBlock();
+        Block currentBlock = currentState.getBlock();
+        ExtendedBlockStorage extendedblockstorage = this.storageArrays[yPos >> 4];
+        final boolean requiresNewLightCalculations;
 
         if (extendedblockstorage == null) {
-            if (block == Blocks.air) {
+            if (newBlock == Blocks.air) {
                 return null;
             }
 
-            extendedblockstorage = this.storageArrays[j >> 4] = new ExtendedBlockStorage(j >> 4 << 4, !this.worldObj.provider.getHasNoSky());
-            flag = j >= i1;
+            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, !this.worldObj.provider.getHasNoSky());
+            requiresNewLightCalculations = yPos >= currentHeight;
+        } else {
+            requiresNewLightCalculations = false;
         }
 
-        int j1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
+        int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newBlock, this.worldObj, pos);
 
-        extendedblockstorage.set(i, j & 15, k, newState);
+        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
 
         // if (block1 != block)
         {
             if (!this.worldObj.isRemote) {
                 // Only fire block breaks when the block changes.
                 if (currentState.getBlock() != newState.getBlock()) {
-                    block1.breakBlock(this.worldObj, pos, currentState);
+                    currentBlock.breakBlock(this.worldObj, pos, currentState);
                 }
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
                 }
-            } else if (SpongeImplHooks.blockHasTileEntity(block1, currentState)) {
+            } else if (SpongeImplHooks.blockHasTileEntity(currentBlock, currentState)) {
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
                     this.worldObj.removeTileEntity(pos);
@@ -468,49 +471,49 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             }
         }
 
-        if (extendedblockstorage.getBlockByExtId(i, j & 15, k) != block) {
+        if (extendedblockstorage.getBlockByExtId(xPos, yPos & 15, zPos) != newBlock) {
             return null;
         } else {
-            if (flag) {
+            if (requiresNewLightCalculations) {
                 this.generateSkylightMap();
             } else {
-                int k1 = SpongeImplHooks.getBlockLightOpacity(block, this.worldObj, pos);
+                int postNewBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newBlock, this.worldObj, pos);
 
-                if (j1 > 0) {
-                    if (j >= i1) {
-                        this.relightBlock(i, j + 1, k);
+                if (newBlockLightOpacity > 0) {
+                    if (yPos >= currentHeight) {
+                        this.relightBlock(xPos, yPos + 1, zPos);
                     }
-                } else if (j == i1 - 1) {
-                    this.relightBlock(i, j, k);
+                } else if (yPos == currentHeight - 1) {
+                    this.relightBlock(xPos, yPos, zPos);
                 }
 
-                if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
-                    this.propagateSkylightOcclusion(i, k);
+                if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+                    this.propagateSkylightOcclusion(xPos, zPos);
                 }
             }
 
             @Nullable TileEntity tileentity;
 
-            if (!this.worldObj.isRemote && block1 != block) {
+            if (!this.worldObj.isRemote && currentBlock != newBlock) {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+                final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
                 final PhaseData peek = causeTracker.getPhases().peek();
                 final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
-                if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                     if (newBlockSnapshot == null) {
-                        block.onBlockAdded(this.worldObj, pos, newState);
+                        newBlock.onBlockAdded(this.worldObj, pos, newState);
                     }
                 }
                 // Sponge end
             }
 
-            if (SpongeImplHooks.blockHasTileEntity(block, newState)) {
+            if (SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                 tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
 
                 if (tileentity == null) {
-                    tileentity = SpongeImplHooks.createTileEntity(block, this.worldObj, newState);
+                    tileentity = SpongeImplHooks.createTileEntity(newBlock, this.worldObj, newState);
                     this.worldObj.setTileEntity(pos, tileentity);
                 }
 

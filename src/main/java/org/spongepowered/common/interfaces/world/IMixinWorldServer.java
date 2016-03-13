@@ -22,10 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.util;
+package org.spongepowered.common.interfaces.world;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.util.BlockPos;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.common.event.tracking.CauseTracker;
 
-public interface ITerrainMarker extends IPhaseState {
+import javax.annotation.Nullable;
+
+public interface IMixinWorldServer extends IMixinWorld {
+
+    CauseTracker getCauseTracker();
+
+    void updateRotation(net.minecraft.entity.Entity entityIn);
+
+    void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
+
+    boolean forceSpawnEntity(Entity entity, int chunkX, int chunkZ);
+
+    void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
+
+    void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation);
+
+    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
 }

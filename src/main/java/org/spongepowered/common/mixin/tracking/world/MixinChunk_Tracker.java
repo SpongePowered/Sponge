@@ -42,6 +42,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.util.Map;
@@ -79,7 +80,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         if (this.worldObj.isRemote) {
             return;
         } else {
-            IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) this.worldObj;
             if (spongeWorld.getCauseTracker().getPhases().peekState().ignoresTracking()) {
                 // Don't track chunk gen
                 return;
