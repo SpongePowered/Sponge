@@ -362,6 +362,7 @@
         "text.MixinClickEvent",
         "text.MixinHoverEvent",
         "tileentity.MixinMobSpawnerBaseLogic",
+        "tileentity.MixinTileEntitySkull",
         "util.MixinClassInheritanceMultiMap",
         "util.MixinPacketThreadUtil",
         "whitelist.MixinUserListWhitelist",
