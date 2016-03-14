@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
 import net.minecraft.tileentity.TileEntityDaylightDetector;
 import org.spongepowered.api.block.tileentity.DaylightDetector;

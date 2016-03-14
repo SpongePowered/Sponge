@@ -22,34 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntitySkull;
-import org.spongepowered.api.block.tileentity.Skull;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
-import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import net.minecraft.tileentity.TileEntityDropper;
+import org.spongepowered.api.block.tileentity.carrier.Dropper;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.List;
-import java.util.Optional;
-
 @NonnullByDefault
-@Mixin(TileEntitySkull.class)
-public abstract class MixinTileEntitySkull extends MixinTileEntity implements Skull {
+@Mixin(TileEntityDropper.class)
+public abstract class MixinTileEntityDropper extends MixinTileEntityDispenser implements Dropper {
 
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSkullData());
-        Optional<DirectionalData> directionaData = get(DirectionalData.class);
-        if (directionaData.isPresent()) {
-            manipulators.add(directionaData.get());
-        }
-        Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
-        if (profileData.isPresent()) {
-            manipulators.add(profileData.get());
-        }
-    }
 }
