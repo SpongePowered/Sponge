@@ -339,7 +339,6 @@
         "text.MixinClickEvent",
         "text.MixinHoverEvent",
         "tileentity.MixinMobSpawnerBaseLogic",
-        "tileentity.MixinTileEntitySkull",
         "tileentity.MixinTileEntity",
         "tileentity.MixinTileEntityBanner",
         "tileentity.MixinTileEntityBeacon",
