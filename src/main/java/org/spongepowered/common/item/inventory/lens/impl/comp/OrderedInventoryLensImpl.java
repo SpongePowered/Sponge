@@ -58,6 +58,7 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
         super(base, size, adapterType, slots);
         checkArgument(stride > 0, "Invalid stride: %s", stride);
         this.stride = stride;
+        this.init(slots);
         this.cache();
     }
 
@@ -106,6 +107,11 @@ public class OrderedInventoryLensImpl extends MinecraftLens implements OrderedIn
     @Override
     public InventoryAdapter<IInventory, ItemStack> getAdapter(Fabric<IInventory> inv, Inventory parent) {
         return new OrderedInventoryAdapter(inv, this, parent);
+    }
+
+    @Override
+    protected boolean isDelayedInit() {
+        return true;
     }
 
 }
