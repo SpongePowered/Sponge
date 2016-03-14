@@ -24,38 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.base.Objects;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
-import com.typesafe.config.ConfigRenderOptions;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
-import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.util.persistence.JsonTranslator;
-import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-
-import java.io.BufferedWriter;
-import java.io.StringWriter;
-import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldType.class)
@@ -84,9 +73,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
             return new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, defaultSettings);
         }
         if ((Object) this == WorldType.CUSTOMIZED) {
-            // They easiest way to go from ChunkProviderSettings to
-            // DataContainer
-            // is via json and NBT
+            // They easiest way to go from ChunkProviderSettings to DataContainer is via json and NBT
             try {
                 String jsonString = ChunkProviderSettings.Factory.jsonToFactory("").toString();
                 return JsonTranslator.translateFrom(new JsonParser().parse(jsonString).getAsJsonObject());
@@ -96,45 +83,14 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
                 throw error;
             }
         }
+
         return new MemoryDataContainer();
     }
 
     @Override
     public WorldGenerator createGenerator(World world) {
-        return this.createGeneratorFromString(world, "");
-    }
-
-    @Override
-    public SpongeWorldGenerator createGenerator(World world, DataContainer settings) {
-        // Minecraft uses a string for world generator settings
-        // This string can be a JSON string, or be a string of a custom format
-
-        // Try to convert to custom format
-        Optional<String> optCustomSettings = settings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
-        if (optCustomSettings.isPresent()) {
-            return this.createGeneratorFromString(world, optCustomSettings.get());
-        }
-
-        final StringWriter writer = new StringWriter();
-        try {
-            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
-                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
-        } catch (Exception e) {
-            SpongeImpl.getLogger().warn("Failed to convert settings contained in [" + settings + "] for type [" + this + "] for world [" + world +
-                    "].", e);
-        }
-
-        return this.createGeneratorFromString(world, writer.toString());
-    }
-
-    @Override
-    public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
-        final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-        final IChunkGenerator chunkGenerator = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
-        final BiomeProvider biomeProvider = mcWorld.provider.worldChunkMgr;
-        return new SpongeWorldGenerator((net.minecraft.world.World) world,
-                (BiomeGenerator) biomeProvider,
-                SpongeGenerationPopulator.of((WorldServer) world, chunkGenerator));
+        checkNotNull(world);
+        return ((IMixinWorld) world).createWorldGenerator(getGeneratorSettings());
     }
 
     @Override

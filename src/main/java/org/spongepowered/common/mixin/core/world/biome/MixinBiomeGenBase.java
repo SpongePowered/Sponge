@@ -269,8 +269,8 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
             gensettings.getPopulators().add(waterLily);
         }
         ChanceTable<MushroomType> types = new ChanceTable<MushroomType>();
-        types.add(new WeightedObject<MushroomType>(MushroomTypes.BROWN, 2));
-        types.add(new WeightedObject<MushroomType>(MushroomTypes.RED, 1));
+        types.add(new WeightedObject<>(MushroomTypes.BROWN, 2));
+        types.add(new WeightedObject<>(MushroomTypes.RED, 1));
         types.add(new EmptyObject<>(5));
         Mushroom smallMushroom = Mushroom.builder()
                 .types(types)

@@ -43,6 +43,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
@@ -61,6 +62,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -195,6 +197,10 @@ public class DimensionManager {
         return Optional.empty();
     }
 
+    public static Collection<DimensionType> getDimensionTypes() {
+        return dimensionTypeByTypeId.valueCollection();
+    }
+
     public static Optional<Path> getWorldFolder(int dimensionId) {
         return Optional.ofNullable(dimensionPathByDimensionId.get(dimensionId));
     }
@@ -235,6 +241,16 @@ public class DimensionManager {
         return Optional.ofNullable(worldByDimensionId.get(dimensionId));
     }
 
+    public static Optional<WorldServer> getWorld(String worldName) {
+        for (WorldServer worldServer : getWorlds()) {
+            final org.spongepowered.api.world.World apiWorld = (org.spongepowered.api.world.World) worldServer;
+            if (apiWorld.getName().equals(worldName)) {
+                return Optional.of(worldServer);
+            }
+        }
+        return Optional.empty();
+    }
+
     public static void registerWorldProperties(WorldProperties properties) {
         checkNotNull(properties);
         worldPropertiesByFolderName.put(properties.getWorldName(), properties);
@@ -259,6 +275,51 @@ public class DimensionManager {
     public static Optional<WorldProperties> getWorldProperties(UUID uuid) {
         checkNotNull(uuid);
         return Optional.ofNullable(worldPropertiesByWorldUuid.get(uuid));
+    }
+
+    // TODO Some result mechanism
+    public static WorldProperties createWorldProperties(WorldCreationSettings settings) {
+        checkNotNull(settings);
+        final String worldName = ((IMixinWorldSettings) settings).getActualWorldName();
+        final Optional<WorldServer> optWorldServer = getWorld(worldName);
+        if (optWorldServer.isPresent()) {
+            return ((org.spongepowered.api.world.World) optWorldServer.get()).getProperties();
+        }
+
+        final Optional<WorldProperties> optWorldProperties = DimensionManager.getWorldProperties(worldName);
+
+        if (optWorldProperties.isPresent()) {
+            return optWorldProperties.get();
+        }
+
+        final ISaveHandler saveHandler = ((IMixinMinecraftServer) Sponge.getServer()).getHandler(worldName);
+        WorldInfo worldInfo = saveHandler.loadWorldInfo();
+
+        if (worldInfo != null) {
+            final Optional<WorldProperties> optExistingWorldProperties = DimensionManager.getWorldProperties(worldInfo.getWorldName());
+            if (!optExistingWorldProperties.isPresent()) {
+                DimensionManager.registerWorldProperties((WorldProperties) worldInfo);
+            }
+        } else {
+            worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
+        }
+
+        ((IMixinWorldInfo) worldInfo).createWorldConfig();
+        setUuidOnProperties((WorldProperties) worldInfo);
+        ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
+        ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
+        ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
+        ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
+        ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
+        registerWorldProperties((WorldProperties) worldInfo);
+
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), settings,
+                (WorldProperties) worldInfo));
+
+        saveHandler.saveWorldInfoWithPlayer(worldInfo, ((MinecraftServer) Sponge.getServer()).getPlayerList().getHostPlayerData());
+
+        return (WorldProperties) worldInfo;
+
     }
 
     public static boolean saveWorldProperties(WorldProperties properties) {
@@ -331,6 +392,94 @@ public class DimensionManager {
         }
 
         return worlds;
+    }
+
+    public static Optional<WorldServer> loadWorld(UUID uuid) {
+        checkNotNull(uuid);
+    }
+
+    public static Optional<WorldServer> loadWorld(String worldName) {
+        checkNotNull(worldName);
+    }
+
+    public static Optional<WorldServer> loadWorld(WorldProperties properties) {
+        checkNotNull(properties);
+        final Optional<org.spongepowered.api.world.World> optExisting = getWorld(worldName);
+        if (optExisting.isPresent()) {
+            return optExisting;
+        }
+
+        if (!getAllowNether() && !worldName.equals(getFolderName())) {
+            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multi-world is disabled via allow-nether.");
+            return Optional.empty();
+        }
+
+        final File file = new File(getFolderName(), worldName);
+        if ((file.exists()) && (!file.isDirectory())) {
+            throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
+        }
+
+        int dim;
+        WorldInfo worldInfo;
+        AnvilSaveHandler savehandler = getHandler(worldName);
+        final Optional<WorldProperties> worldProperties = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
+        if (worldProperties.isPresent()) {
+            worldInfo = (WorldInfo) worldProperties.get();
+        } else {
+            worldInfo = savehandler.loadWorldInfo();
+        }
+
+        if (worldInfo != null) {
+            ((IMixinWorldInfo) worldInfo).createWorldConfig();
+            // check if enabled
+            if (!((WorldProperties) worldInfo).isEnabled()) {
+                SpongeImpl.getLogger().error("World [{}] cannot be loaded as it is disabled.", worldName);
+                return Optional.empty();
+            }
+
+            dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
+            if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+                DimensionManager
+                        .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+            }
+            if (DimensionTypeRegistryModule.getInstance().getWorldFolder(dim) == null) {
+                DimensionTypeRegistryModule.getInstance().registerWorldDimensionId(dim, worldName);
+            }
+            if (!WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getUniqueId())) {
+                WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
+            }
+        } else {
+            return Optional.empty(); // no world data found
+        }
+
+        WorldSettings settings = new WorldSettings(worldInfo);
+
+        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
+            DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+        }
+
+        WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+
+        worldServer.initialize(settings);
+        ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
+
+        worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
+        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
+        if (!isSinglePlayer()) {
+            worldServer.getWorldInfo().setGameType(getGameType());
+        }
+        this.setDifficultyForAllWorlds(this.getDifficulty());
+
+        final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+        if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
+            if (activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+                this.prepareSpawnArea(worldServer);
+            }
+        } else {
+            this.prepareSpawnArea(worldServer);
+        }
+
+        return Optional.of((org.spongepowered.api.world.World) worldServer);
     }
 
     public static void loadAllWorlds(String saveName, long defaultSeed, WorldType defaultWorldType, String generatorOptions) {

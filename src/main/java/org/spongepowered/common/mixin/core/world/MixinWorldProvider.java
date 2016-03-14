@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
+import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionType;
@@ -36,13 +37,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.Optional;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
-public abstract class MixinWorldProvider implements Dimension {
+public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
 
     @Shadow public WorldType terrainType;
     @Shadow protected World worldObj;
@@ -51,6 +54,7 @@ public abstract class MixinWorldProvider implements Dimension {
     @Shadow public abstract int getAverageGroundLevel();
     @Shadow public abstract boolean doesWaterVaporize();
     @Shadow public abstract boolean getHasNoSky();
+    @Shadow private String generatorSettings;
 
     private net.minecraft.world.DimensionType dimensionType;
 
@@ -95,5 +99,16 @@ public abstract class MixinWorldProvider implements Dimension {
     @Override
     public boolean hasSky() {
         return !getHasNoSky();
+    }
+
+    @Override
+    public void setGeneratorSettings(String generatorSettings) {
+        this.generatorSettings = generatorSettings;
+    }
+
+    // TODO 1.9 - Make DimensionType a ContextSource and not dimension? -- Zidane
+    @Override
+    public Context getContext() {
+        return ((IMixinDimensionType) (Object) this.dimensionType).getContext();
     }
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -385,7 +386,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     ((EntityPlayerMP) thisEntity).closeContainer();
                 }
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorldProvider) nmsWorld.provider).getDimensionId(), forced);
+            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorld) nmsWorld).getDimensionId(), forced);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
@@ -539,27 +540,11 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public boolean transferToWorld(String worldName, Vector3d position) {
-        checkNotNull(worldName, "World name was null!");
+    public void transferToWorld(World world, Vector3d position) {
+        checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        Optional<WorldProperties> props = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
-        if (props.isPresent()) {
-            if (props.get().isEnabled()) {
-                Optional<World> world = SpongeImpl.getGame().getServer().loadWorld(worldName);
-                if (world.isPresent()) {
-                    Location<World> location = new Location<>(world.get(), position);
-                    return setLocationSafely(location);
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean transferToWorld(UUID uuid, Vector3d position) {
-        checkNotNull(uuid, "The world uuid cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-        return transferToWorld(DimensionTypeRegistryModule.getInstance().getWorldFolder(uuid), position);
+        checkState(world.isLoaded(), "World is not loaded!");
+        setLocation(new Location<>(world, position));
     }
 
     @Override
@@ -721,7 +706,8 @@ public abstract class MixinEntity implements IMixinEntity {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(((IMixinWorldProvider) toWorld.provider).getDimensionId(), toWorld, entityplayermp1);
+            int clientDimension = DimensionManager.getClientDimensionToSend(((IMixinWorldProvider) toWorld.provider).getDimensionId(), toWorld,
+                    entityplayermp1);
             if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
                 DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
             } else {

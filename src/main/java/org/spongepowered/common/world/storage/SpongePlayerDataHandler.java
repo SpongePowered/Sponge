@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
-import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.common.SpongeImpl;
@@ -43,7 +43,6 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,48 +63,44 @@ public final class SpongePlayerDataHandler {
     private final Map<UUID, SpongePlayerData> playerDataMap = new ConcurrentHashMap<>();
 
     public static void init() {
-        SpongePlayerDataHandler handlerInstance = Holder.INSTANCE;
-        if (handlerInstance.hasInitialized) {
+        final SpongePlayerDataHandler handlerInstance = Holder.INSTANCE;
+        if (!Sponge.isServerAvailable() || handlerInstance.hasInitialized) {
             return;
         }
-        @Nullable File root = DimensionManager.getCurrentSaveRootDirectory();
-        if (root == null) {
-            return;
-        }
-        final Path directoryRoot = root.toPath();
-        if (root != null) { // ok, we're on the server, guaranteed.
-            final String filePath = directoryRoot.toString() + File.separator + "data" + File.separator + SPONGE_DATA;
-            try {
-                handlerInstance.playerDir = Paths.get(filePath);
-                Path file = Files.createDirectories(handlerInstance.playerDir);
-                List<Path> playerFiles = new ArrayList<>();
-                try (DirectoryStream<Path> stream = Files.newDirectoryStream(file, "*.{dat}")) {
-                    for (Path entry : stream) {
-                        playerFiles.add(entry);
-                    }
-                } catch (DirectoryIteratorException e) {
-                    SpongeImpl.getLogger().log(Level.ERROR, "Something happened when trying to gather all player files", e);
-                }
-                for (Path playerFile : playerFiles) {
-                    File actualFile = playerFile.toFile();
-                    if (actualFile.exists() && actualFile.isFile()) {
-                        FileInputStream stream = new FileInputStream(actualFile);
-                        NBTTagCompound compound = CompressedStreamTools.readCompressed(stream);
-                        stream.close();
-                        DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
-                        SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
-                        handlerInstance.playerDataMap.put(data.uuid, data);
-                    }
-                }
-                playerFiles.clear();
 
-            } catch (FileAlreadyExistsException e) {
-                SpongeImpl.getLogger().printf(Level.ERROR, "Someone went and created a file for the desired path: {}", filePath);
-            } catch (Exception e) {
-                e.printStackTrace();
+        final Path filePath = SpongeImpl.getGame().getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
+
+        try {
+            handlerInstance.playerDir = filePath;
+            Files.createDirectories(handlerInstance.playerDir);
+
+            final List<Path> playerFiles = new ArrayList<>();
+            try (DirectoryStream<Path> stream = Files.newDirectoryStream(filePath, "*.{dat}")) {
+                for (Path entry : stream) {
+                    playerFiles.add(entry);
+                }
+            } catch (DirectoryIteratorException e) {
+                SpongeImpl.getLogger().error("Something happened when trying to gather all player files", e);
             }
+            for (Path playerFile : playerFiles) {
+                File actualFile = playerFile.toFile();
+                if (actualFile.exists() && actualFile.isFile()) {
+                    FileInputStream stream = new FileInputStream(actualFile);
+                    NBTTagCompound compound = CompressedStreamTools.readCompressed(stream);
+                    stream.close();
+                    DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
+                    SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
+                    handlerInstance.playerDataMap.put(data.uuid, data);
+                }
+            }
+            playerFiles.clear();
 
+        } catch (FileAlreadyExistsException e) {
+            SpongeImpl.getLogger().error("Someone went and created a file for the desired path: {}", filePath);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
+
         handlerInstance.hasInitialized = true;
     }
 
@@ -149,7 +144,7 @@ public final class SpongePlayerDataHandler {
                 CompressedStreamTools.writeCompressed(compound, stream);
                 if (finalFile.exists()) {
                     if (!finalFile.delete()) {
-                        SpongeImpl.getLogger().log(Level.WARN, "There was an issue deleting the previous file: " + finalFile.getAbsolutePath());
+                        SpongeImpl.getLogger().warn("There was an issue deleting the previous file: " + finalFile.getAbsolutePath());
                     }
                 }
                 if (!newFile.renameTo(finalFile)) {

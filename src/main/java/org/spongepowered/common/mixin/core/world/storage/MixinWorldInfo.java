@@ -91,18 +91,6 @@ import java.util.UUID;
 @Implements(@Interface(iface = WorldProperties.class, prefix = "worldproperties$"))
 public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo {
 
-    private UUID uuid;
-    private DimensionType dimensionType;
-    private boolean isMod;
-    private NBTTagCompound spongeRootLevelNbt;
-    private NBTTagCompound spongeNbt;
-    private NBTTagList playerUniqueIdNbt;
-    private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
-    private List<UUID> pendingUniqueIds = new ArrayList<>();
-    private int trackedUniqueIdCount = 0;
-    private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
-    private ServerScoreboard scoreboard;
-
     @Shadow private long randomSeed;
     @Shadow private WorldType terrainType;
     @Shadow private String generatorOptions;
@@ -142,6 +130,18 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     // TODO 1.9 Clone is an AWFUL NAME for this, its really fillCompound which takes a playerNbtCompound to use or if null, uses the player one
     // TODO 1.9 already in this info. It then populates a returned compound with the worldInfo's properties.
     @Shadow public abstract NBTTagCompound cloneNBTCompound(NBTTagCompound nbt);
+
+    private UUID uuid;
+    private DimensionType dimensionType;
+    private boolean isMod;
+    private NBTTagCompound spongeRootLevelNbt;
+    private NBTTagCompound spongeNbt;
+    private NBTTagList playerUniqueIdNbt;
+    private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
+    private List<UUID> pendingUniqueIds = new ArrayList<>();
+    private int trackedUniqueIdCount = 0;
+    private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
+    private ServerScoreboard scoreboard;
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
@@ -673,20 +673,14 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             } else {
                 this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
             }
-        } else {
-            // Migrate old NBT data to new location
-            // TODO Remove later
-            if (nbt.hasKey(SpongeImpl.ECOSYSTEM_NAME)) {
-                this.spongeNbt = nbt.getCompoundTag(SpongeImpl.ECOSYSTEM_NAME);
-            }
-            this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
         }
     }
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
+        // TODO Integrity checks
         this.uuid = new UUID(nbt.getLong(NbtDataUtil.WORLD_UUID_MOST), nbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+        this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
         DimensionTypeRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
                 .forEach(type -> this.dimensionType = type);
@@ -700,19 +694,13 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
+        this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
+        this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
-        if (this.dimensionType != null) {
-            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
-        }
-        if (this.uuid != null) {
-            this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
-            this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
-        }
-        if (this.isMod) {
-            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, true);
-        }
+        this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
+        this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
 
-        Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
+        final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
         while (iterator.hasNext()) {
             UUID uuidToAdd = iterator.next();
             NBTTagCompound valueNbt = new NBTTagCompound();

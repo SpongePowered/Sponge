@@ -46,9 +46,11 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -274,7 +276,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
         File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
         NBTTagCompound tag;
         if (dataFile.isFile()) {
@@ -292,7 +294,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             CompressedStreamTools.writeCompressed(tag, new FileOutputStream(dataFile));
             dirtyUsers.remove(this);
         } catch (IOException e) {
-            SpongeHooks.logWarning("Failed to save user file {}. {}", dataFile, e);
+            SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
     }
 

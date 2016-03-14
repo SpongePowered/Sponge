@@ -31,18 +31,19 @@ import net.minecraft.world.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.world.DimensionManager;
 
 @Mixin(ItemEmptyMap.class)
 public class MixinItemEmptyMap extends ItemMapBase {
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World worldIn, String key) {
-        return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
+        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 }

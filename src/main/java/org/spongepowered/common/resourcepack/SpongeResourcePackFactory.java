@@ -30,13 +30,13 @@ import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.resourcepack.ResourcePackFactory;
+import org.spongepowered.common.SpongeImpl;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.file.Files;
 
 public final class SpongeResourcePackFactory implements ResourcePackFactory {
 
@@ -65,8 +65,8 @@ public final class SpongeResourcePackFactory implements ResourcePackFactory {
 
     private static InputStream openStream(URI uri) throws IOException {
         if (uri.toString().startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
-            return new FileInputStream(new File(DimensionManager.getCurrentSaveRootDirectory().getParent(),
-                    uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length())));
+            return Files.newInputStream(SpongeImpl.getGameDir().resolve(uri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length
+                    ())));
         }
         return uri.toURL().openStream();
     }

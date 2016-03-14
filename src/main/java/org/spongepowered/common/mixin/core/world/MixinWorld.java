@@ -33,6 +33,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityHanging;
@@ -66,6 +67,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -74,6 +76,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -109,6 +112,7 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -124,11 +128,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
@@ -143,10 +149,13 @@ import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -541,10 +550,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void updateWorldGenerator() {
 
         IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
+
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
+        SpongeWorldGenerator newGenerator = createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -566,7 +576,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
         }
 
-        this.spongegen = createChunkProvider(newGenerator);
+        this.spongegen = createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
@@ -576,9 +586,42 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator) {
+    public SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator) {
         return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
                 newGenerator.getBiomeGenerator());
+    }
+
+    @Override
+    public SpongeWorldGenerator createWorldGenerator(DataContainer settings) {
+        // Minecraft uses a string for world generator settings
+        // This string can be a JSON string, or be a string of a custom format
+
+        // Try to convert to custom format
+        Optional<String> optCustomSettings = settings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        if (optCustomSettings.isPresent()) {
+            return this.createWorldGenerator(optCustomSettings.get());
+        }
+
+        final StringWriter writer = new StringWriter();
+        try {
+            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
+                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
+        } catch (Exception e) {
+            SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings, ((net
+                    .minecraft.world.World) (Object) this).getWorldType(), this, e);
+        }
+
+        return this.createWorldGenerator(writer.toString());
+    }
+
+    @Override
+    public SpongeWorldGenerator createWorldGenerator(String settings) {
+        final WorldServer worldServer = (WorldServer) (Object) this;
+        final WorldProvider worldProvider = worldServer.provider;
+        ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
+        final IChunkGenerator chunkGenerator = worldProvider.createChunkGenerator();
+        final BiomeProvider biomeProvider = worldServer.provider.worldChunkMgr;
+        return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
     }
 
     @Override

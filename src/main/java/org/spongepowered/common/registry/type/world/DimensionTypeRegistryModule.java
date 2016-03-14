@@ -50,9 +50,10 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
     }
 
     @Override
-    public void registerDefaults() {
-        for (Map.Entry<Integer, net.minecraft.world.DimensionType> type : DimensionManager.getRegisteredDimensions()) {
-            this.dimensionTypeMappings.put(type.getValue().getName(), (DimensionType) (Object) type.getValue());
+    public void registerDefaults() {;
+        for (net.minecraft.world.DimensionType dimensionType : DimensionManager.getDimensionTypes()) {
+            final DimensionType apiDimensionType = (DimensionType) (Object) dimensionType;
+            this.dimensionTypeMappings.put(apiDimensionType.getId(), apiDimensionType);
         }
     }
 
