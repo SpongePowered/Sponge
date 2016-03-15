@@ -31,6 +31,9 @@ import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.block.trait.BooleanTrait;
 import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
+import org.spongepowered.api.boss.BossBarColor;
+import org.spongepowered.api.boss.BossBarOverlay;
+import org.spongepowered.api.boss.ServerBossBar;
 import org.spongepowered.api.data.meta.PatternLayer;
 import org.spongepowered.api.data.persistence.DataFormat;
 import org.spongepowered.api.data.type.*;
@@ -103,6 +106,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.boss.ServerBossBarBuilder;
 import org.spongepowered.common.data.builder.data.meta.SpongePatternLayerBuilder;
 import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.effect.potion.SpongePotionBuilder;
@@ -123,6 +127,8 @@ import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
 import org.spongepowered.common.registry.type.block.*;
+import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
+import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
@@ -260,6 +266,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
+            .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
         ;
     }
 
@@ -356,6 +363,8 @@ public final class CommonModuleRegistry {
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
             .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())
+            .registerModule(BossBarColor.class, new BossBarColorRegistryModule())
+            .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
             ;
     }
 
