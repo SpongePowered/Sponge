@@ -149,7 +149,7 @@ public class SkullUtils {
 
     public static void updatePlayerProfile(IMixinTileEntitySkull skull) {
         GameProfile profile = (GameProfile) skull.getPlayerProfile();
-        if (profile.getName().isPresent()) {
+        if (profile != null && profile.getName().isPresent() && !profile.getName().get().isEmpty()) {
             if (profile.isFilled() && profile.getPropertyMap().containsKey("textures")) {
                 skull.markDirty();
             } else {

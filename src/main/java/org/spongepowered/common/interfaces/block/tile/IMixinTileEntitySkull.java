@@ -26,9 +26,11 @@ package org.spongepowered.common.interfaces.block.tile;
 
 import com.mojang.authlib.GameProfile;
 
+import javax.annotation.Nullable;
+
 public interface IMixinTileEntitySkull extends IMixinTileEntity {
 
-    GameProfile getPlayerProfile();
+    @Nullable GameProfile getPlayerProfile();
 
     void setPlayerProfile(GameProfile mcProfile, boolean update);
 
