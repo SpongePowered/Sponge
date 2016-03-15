@@ -259,6 +259,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
+            .registerBuilderSupplier(ServerBossBar.Builder.class, ServerBossBarBuilder::new)
         ;
     }
 
