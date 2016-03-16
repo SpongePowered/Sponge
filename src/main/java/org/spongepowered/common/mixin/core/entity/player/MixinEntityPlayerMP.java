@@ -30,6 +30,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
@@ -41,18 +42,21 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
+import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -595,4 +599,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());
     }
+
+    @Override
+    public void sendBlockChange(int x, int y, int z, BlockState state) {
+        checkNotNull(state, "state");
+        S23PacketBlockChange packet = new S23PacketBlockChange();
+        packet.blockPosition = new BlockPos(x, y, z);
+        packet.blockState = (IBlockState) state;
+        this.playerNetServerHandler.sendPacket(packet);
+    }
+
+    @Override
+    public void resetBlockChange(int x, int y, int z) {
+        S23PacketBlockChange packet = new S23PacketBlockChange(this.worldObj, new BlockPos(x, y, z));
+        this.playerNetServerHandler.sendPacket(packet);
+    }
+
 }
