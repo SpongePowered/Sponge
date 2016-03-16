@@ -67,6 +67,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             CallbackInfo ci) {
         this.origin = new Vector3d(this.explosionX, this.explosionY, this.explosionZ);
         this.shouldBreakBlocks = true; // by default, all explosions do this can be changed by the explosion builder
+        this.shouldDamageEntities = true;
     }
 
     @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true)
@@ -78,7 +79,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
 
     @Redirect(method = "doExplosionA", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"))
     private List<Entity> getEntities(net.minecraft.world.World world, Entity ignored, AxisAlignedBB axisAlignedBB) {
-        return this.shouldDamageEntities ? Collections.emptyList() : world.getEntitiesWithinAABBExcludingEntity(ignored, axisAlignedBB);
+        return this.shouldDamageEntities ? world.getEntitiesWithinAABBExcludingEntity(ignored, axisAlignedBB) : Collections.emptyList();
     }
 
     @Override
@@ -124,5 +125,10 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Override
     public void setShouldBreakBlocks(boolean shouldBreakBlocks) {
         this.shouldBreakBlocks = shouldBreakBlocks;
+    }
+
+    @Override
+    public void setShouldDamageEntities(boolean shouldDamageEntities) {
+        this.shouldDamageEntities = shouldDamageEntities;
     }
 }
