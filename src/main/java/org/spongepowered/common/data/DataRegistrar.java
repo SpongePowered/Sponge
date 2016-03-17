@@ -362,6 +362,21 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
                 ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
+        dataManager.registerDualProcessor(BasePlateData.class, SpongeBasePlateData.class,
+                ImmutableBasePlateData.class, ImmutableSpongeBasePlateData.class, new BasePlateDataProcessor());
+
+        dataManager.registerDualProcessor(GravityData.class, SpongeGravityData.class,
+                ImmutableGravityData.class, ImmutableSpongeGravityData.class, new GravityDataProcessor());
+
+        dataManager.registerDualProcessor(MarkerData.class, SpongeMarkerData.class,
+                ImmutableMarkerData.class, ImmutableSpongeMarkerData.class, new MarkerDataProcessor());
+
+        dataManager.registerDualProcessor(ShowArmsData.class, SpongeShowArmsData.class,
+                ImmutableShowArmsData.class, ImmutableSpongeShowArmsData.class, new ShowArmsDataProcessor());
+
+        dataManager.registerDualProcessor(SmallData.class, SpongeSmallData.class,
+                ImmutableSmallData.class, ImmutableSpongeSmallData.class, new SmallDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,

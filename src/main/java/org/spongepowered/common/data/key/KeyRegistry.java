@@ -308,6 +308,11 @@ public class KeyRegistry {
         keyMap.put("fuse_duration", makeSingleKey(Integer.class, Value.class, of("FuseDuration")));
         keyMap.put("ticks_remaining", makeSingleKey(Integer.class, Value.class, of("TicksRemaining")));
         keyMap.put("explosion_radius", makeSingleKey(Integer.class, Value.class, of("ExplosionRadius")));
+        keyMap.put("small", makeSingleKey(Boolean.class, Value.class, of("Small")));
+        keyMap.put("show_arms", makeSingleKey(Boolean.class, Value.class, of("ShowArms")));
+        keyMap.put("gravity", makeSingleKey(Boolean.class, Value.class, of("Gravity")));
+        keyMap.put("base_plate", makeSingleKey(Boolean.class, Value.class, of("BasePlate")));
+        keyMap.put("marker", makeSingleKey(Boolean.class, Value.class, of("Marker")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
