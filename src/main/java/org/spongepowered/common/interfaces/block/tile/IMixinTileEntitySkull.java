@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.interfaces.block.tile;
 
-import net.minecraft.tileentity.TileEntityEnderChest;
-import org.spongepowered.api.block.tileentity.EnderChest;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import com.mojang.authlib.GameProfile;
 
-@NonnullByDefault
-@Mixin(TileEntityEnderChest.class)
-public abstract class MixinTileEntityEnderChest extends MixinTileEntity implements EnderChest {
+import javax.annotation.Nullable;
+
+public interface IMixinTileEntitySkull extends IMixinTileEntity {
+
+    @Nullable GameProfile getPlayerProfile();
+
+    void setPlayerProfile(GameProfile mcProfile, boolean update);
 
 }

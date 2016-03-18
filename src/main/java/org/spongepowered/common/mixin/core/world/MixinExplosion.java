@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.Vec3;
 import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.world.World;
@@ -34,9 +35,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 @Mixin(net.minecraft.world.Explosion.class)
@@ -45,6 +50,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     public Vector3d origin;
     public Vec3 position; // Added for Forge
     private boolean shouldBreakBlocks;
+    private boolean shouldDamageEntities;
 
     @Shadow public boolean isFlaming;
     @Shadow public boolean isSmoking;
@@ -61,6 +67,7 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
             CallbackInfo ci) {
         this.origin = new Vector3d(this.explosionX, this.explosionY, this.explosionZ);
         this.shouldBreakBlocks = true; // by default, all explosions do this can be changed by the explosion builder
+        this.shouldDamageEntities = true;
     }
 
     @Inject(method = "doExplosionA", at = @At("HEAD"), cancellable = true)
@@ -68,6 +75,11 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
         if (!this.shouldBreakBlocks) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "doExplosionA", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;"))
+    private List<Entity> getEntities(net.minecraft.world.World world, Entity ignored, AxisAlignedBB axisAlignedBB) {
+        return this.shouldDamageEntities ? world.getEntitiesWithinAABBExcludingEntity(ignored, axisAlignedBB) : Collections.emptyList();
     }
 
     @Override
@@ -106,7 +118,17 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     }
 
     @Override
+    public boolean shouldDamageEntities() {
+        return this.shouldDamageEntities;
+    }
+
+    @Override
     public void setShouldBreakBlocks(boolean shouldBreakBlocks) {
         this.shouldBreakBlocks = shouldBreakBlocks;
+    }
+
+    @Override
+    public void setShouldDamageEntities(boolean shouldDamageEntities) {
+        this.shouldDamageEntities = shouldDamageEntities;
     }
 }

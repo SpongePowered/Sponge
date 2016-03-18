@@ -342,6 +342,10 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
+        if (this.baseGenerator instanceof IChunkProvider) {
+            return ((IChunkProvider) this.baseGenerator).getPossibleCreatures(creatureType, pos);
+        }
+
         BiomeGenBase biome = this.world.getBiomeGenForCoords(pos);
         List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
         return creatures;

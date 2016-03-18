@@ -24,74 +24,12 @@
  */
 package org.spongepowered.common.data.processor.value.item;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
 import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.SpongeValueFactory;
 
-import java.util.Optional;
-
-public class HideMiscellaneousValueProcessor extends AbstractSpongeValueProcessor<ItemStack, Boolean, Value<Boolean>> {
+public class HideMiscellaneousValueProcessor extends AbstractHideFlagsValueProcessor {
 
     public HideMiscellaneousValueProcessor() {
-        super(ItemStack.class, Keys.HIDE_MISCELLANEOUS);
-    }
-
-    @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return SpongeValueFactory.getInstance().createValue(Keys.HIDE_MISCELLANEOUS, actualValue, false);
-    }
-
-    @Override
-    protected boolean set(ItemStack container, Boolean value) {
-        if (!container.hasTagCompound()) {
-            container.setTagCompound(new NBTTagCompound());
-        }
-        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
-            if (value) {
-                container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag | DataConstants.HIDE_MISCELLANEOUS_FLAG);
-            } else {
-                container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS,
-                                flag - DataConstants.HIDE_MISCELLANEOUS_FLAG >= 0 ? flag - DataConstants.HIDE_MISCELLANEOUS_FLAG : 0);
-            }
-        } else {
-            if (value) {
-                container.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, 1);
-            }
-        }
-        return true;
-    }
-
-    @Override
-    protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
-            if (flag - DataConstants.HIDE_MISCELLANEOUS_FLAG >= 0) {
-                return Optional.of(true);
-            } else {
-                return Optional.of(false);
-            }
-        }
-        return Optional.of(false);
-    }
-
-    @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return constructValue(value).asImmutable();
-    }
-
-    @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+        super(Keys.HIDE_MISCELLANEOUS, DataConstants.HIDE_MISCELLANEOUS_FLAG);
     }
 }

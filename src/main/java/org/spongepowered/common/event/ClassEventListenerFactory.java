@@ -138,7 +138,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         }
         eventDescriptor += ")V";
 
-        ClassWriter cw = new ClassWriter(0);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
         FieldVisitor fv;
 
@@ -177,7 +177,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitLabel(l3);
             mv.visitFrame(F_SAME, 0, null, 0, null);
             mv.visitInsn(RETURN);
-            mv.visitMaxs(3, 1);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         {
@@ -187,7 +187,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitVarInsn(ALOAD, 1);
             mv.visitMethodInsn(INVOKESPECIAL, BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
             mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 2);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         {
@@ -213,7 +213,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitLabel(l2);
             mv.visitFrame(F_APPEND, 1, new Object[] {"[Ljava/lang/Object;"}, 0, null);
             mv.visitInsn(RETURN);
-            mv.visitMaxs(4, 3);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         cw.visitEnd();
@@ -227,7 +227,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         final String handleDescriptor = Type.getDescriptor(handle);
         final String eventName = Type.getInternalName(eventClass);
 
-        ClassWriter cw = new ClassWriter(0);
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, BASE_HANDLER, null);
@@ -239,7 +239,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitVarInsn(ALOAD, 1);
             mv.visitMethodInsn(INVOKESPECIAL, BASE_HANDLER, "<init>", "(Ljava/lang/Object;)V", false);
             mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 2);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         {
@@ -252,7 +252,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv.visitTypeInsn(CHECKCAST, eventName);
             mv.visitMethodInsn(INVOKEVIRTUAL, handleName, method.getName(), "(L" + eventName + ";)V", false);
             mv.visitInsn(RETURN);
-            mv.visitMaxs(2, 2);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
         cw.visitEnd();

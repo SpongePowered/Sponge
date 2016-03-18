@@ -88,36 +88,14 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         }
         Map<Key<?>, Boolean> map = Maps.newHashMap();
         int flag = dataHolder.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
-        if ((flag & DataConstants.HIDE_MISCELLANEOUS_FLAG) != 0) {
-            map.put(Keys.HIDE_MISCELLANEOUS, true);
-        } else {
-            map.put(Keys.HIDE_MISCELLANEOUS, false);
-        }
-        if ((flag & DataConstants.HIDE_CAN_PLACE_FLAG) != 0) {
-            map.put(Keys.HIDE_CAN_PLACE, true);
-        } else {
-            map.put(Keys.HIDE_CAN_PLACE, false);
-        }
-        if ((flag & DataConstants.HIDE_CAN_DESTROY_FLAG) != 0) {
-            map.put(Keys.HIDE_CAN_DESTROY, true);
-        } else {
-            map.put(Keys.HIDE_CAN_DESTROY, false);
-        }
-        if ((flag & DataConstants.HIDE_UNBREAKABLE_FLAG) != 0) {
-            map.put(Keys.HIDE_UNBREAKABLE, true);
-        } else {
-            map.put(Keys.HIDE_UNBREAKABLE, false);
-        }
-        if ((flag & DataConstants.HIDE_ATTRIBUTES_FLAG) != 0) {
-            map.put(Keys.HIDE_ATTRIBUTES, true);
-        } else {
-            map.put(Keys.HIDE_ATTRIBUTES, false);
-        }
-        if ((flag & DataConstants.HIDE_ENCHANTMENTS_FLAG) != 0) {
-            map.put(Keys.HIDE_ENCHANTMENTS, true);
-        } else {
-            map.put(Keys.HIDE_ENCHANTMENTS, false);
-        }
+
+        map.put(Keys.HIDE_MISCELLANEOUS, (flag & DataConstants.HIDE_MISCELLANEOUS_FLAG) != 0);
+        map.put(Keys.HIDE_CAN_PLACE, (flag & DataConstants.HIDE_CAN_PLACE_FLAG) != 0);
+        map.put(Keys.HIDE_CAN_DESTROY, (flag & DataConstants.HIDE_CAN_DESTROY_FLAG) != 0);
+        map.put(Keys.HIDE_UNBREAKABLE, (flag & DataConstants.HIDE_UNBREAKABLE_FLAG) != 0);
+        map.put(Keys.HIDE_ATTRIBUTES, (flag & DataConstants.HIDE_ATTRIBUTES_FLAG) != 0);
+        map.put(Keys.HIDE_ENCHANTMENTS, (flag & DataConstants.HIDE_ENCHANTMENTS_FLAG) != 0);
+
         return map;
     }
 

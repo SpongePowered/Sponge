@@ -22,15 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndPortal;
-import org.spongepowered.api.block.tileentity.EndPortal;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import net.minecraft.tileentity.TileEntityDaylightDetector;
+import org.spongepowered.api.block.tileentity.DaylightDetector;
 import org.spongepowered.asm.mixin.Mixin;
 
-@NonnullByDefault
-@Mixin(TileEntityEndPortal.class)
-public abstract class MixinTileEntityEndPortal extends MixinTileEntity implements EndPortal {
+@Mixin(TileEntityDaylightDetector.class)
+public abstract class MixinTileEntityDaylightDetector extends MixinTileEntity implements DaylightDetector {
 
 }

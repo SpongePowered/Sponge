@@ -163,7 +163,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         } else if (value instanceof DataView) {
             return containerToCompound((DataView) value);
         }
-        throw new IllegalArgumentException("Unable to translate object to NBTBase!");
+        throw new IllegalArgumentException("Unable to translate object to NBTBase: " + value);
     }
 
     @SuppressWarnings("unchecked")
