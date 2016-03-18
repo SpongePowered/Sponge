@@ -184,6 +184,7 @@ import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModu
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.VisibilityRegistryModule;
 import org.spongepowered.common.registry.type.text.*;
+import org.spongepowered.common.registry.type.tileentity.StructureModeRegistryModule;
 import org.spongepowered.common.registry.type.world.*;
 import org.spongepowered.common.registry.type.world.gen.BiomeTreeTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.gen.BiomeTypeRegistryModule;
@@ -424,6 +425,7 @@ public final class CommonModuleRegistry {
             .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
+            .registerModule(StructureMode.class, new StructureModeRegistryModule())
             ;
     }
 

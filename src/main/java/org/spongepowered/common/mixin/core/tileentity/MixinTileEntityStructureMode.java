@@ -22,5 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
 package org.spongepowered.common.mixin.core.tileentity;
+
+import net.minecraft.tileentity.TileEntityStructure;
+import org.apache.commons.lang3.StringUtils;
+import org.spongepowered.api.data.type.StructureMode;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+@Mixin(TileEntityStructure.Mode.class)
+public class MixinTileEntityStructureMode implements StructureMode {
+
+    @Shadow @Final private String modeName;
+    private String friendlyName;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void construct(String name, int id, CallbackInfo ci) {
+        this.friendlyName = StringUtils.capitalize(name);
+    }
+
+    @Override
+    public String getId() {
+        return this.modeName;
+    }
+
+    @Override
+    public String getName() {
+        return this.friendlyName;
+    }
+
+}

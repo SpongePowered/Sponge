@@ -22,5 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault
-package org.spongepowered.common.mixin.core.tileentity;
+package org.spongepowered.common.interfaces.block.tile;
+
+import com.flowpowered.math.vector.Vector3i;
+
+public interface IMixinTileEntityEndGateway {
+
+    Vector3i getExitPortal();
+
+    void setExitPortal(Vector3i exitPortal);
+
+    boolean isExactTeleport();
+
+    void setExactTeleport(boolean exactTeleport);
+
+    long getAge();
+
+    void setAge(long teleportCooldown);
+
+    int getTeleportCooldown();
+
+    void setTeleportCooldown(int teleportCooldown);
+
+}
