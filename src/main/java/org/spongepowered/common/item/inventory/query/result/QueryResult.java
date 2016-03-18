@@ -54,7 +54,7 @@ public interface QueryResult<TInventory, TStack> extends Result<TInventory, TSta
         protected void init(SlotProvider<TInventory, TStack> slots) {
             for (Lens<TInventory, TStack> result : this.resultSet) {
                 Collection<InventoryProperty<?, ?>> properties = this.resultSet.getProperties(result);
-                this.addChild(result, properties.toArray(new InventoryProperty[0]));
+                this.addSpanningChild(result, properties.toArray(new InventoryProperty[0]));
             }
         }
 
