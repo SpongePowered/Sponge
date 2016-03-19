@@ -213,9 +213,9 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         return Optional.empty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Set<Team> scoreboard$getTeams() {
-        return new HashSet<>((Set) this.teams.values());
+        return new HashSet(this.teams.values());
     }
 
     public Optional<Team> scoreboard$getMemberTeam(Text member) {
