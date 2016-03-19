@@ -323,24 +323,23 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     protected void initialWorldChunkLoad() {
-        for (WorldServer worldServer : DimensionManager.getWorlds()) {
-            final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
-
-            if (!activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
-                continue;
-            }
-
-            this.prepareSpawnArea(worldServer);
-        }
-
+        DimensionManager.getWorlds().forEach(this::prepareSpawnArea);
         this.clearCurrentTask();
     }
 
-    private void prepareSpawnArea(WorldServer world) {
+    @Override
+    public void prepareSpawnArea(WorldServer worldServer) {
+        final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
+
+        if (!activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
+            return;
+        }
+
+        this.preparingChunks = true;
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", ((IMixinWorld) world).getDimensionId(), ((World) world).getName());
-        BlockPos blockpos = world.getSpawnPoint();
+        logger.info("Preparing start region for level {} ({})", ((IMixinWorld) worldServer).getDimensionId(), ((World) worldServer).getName());
+        BlockPos blockpos = worldServer.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
         for (int k = -192; k <= 192 && this.isServerRunning(); k += 16) {
@@ -353,11 +352,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 ++i;
-                world.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+                worldServer.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
         }
 
         this.clearCurrentTask();
+        this.preparingChunks = false;
     }
 
     @Override

@@ -56,6 +56,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -90,9 +91,7 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -119,11 +118,11 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -327,71 +326,32 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void setLocation(Location<World> location) {
-        setLocation(location, true);
-    }
 
-    @Override
-    public boolean setLocationSafely(Location<World> location) {
-        return setLocation(location, false);
-    }
-
-    @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
-        setLocation(location);
-        setRotation(rotation);
-    }
-
-    @Override
-    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation) {
-        boolean relocated = setLocation(location, false);
-        setRotation(rotation);
-        return relocated;
-    }
-
-    @Override
-    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        return setLocationAndRotation(location, rotation, relativePositions, true);
-    }
-
-    public boolean setLocation(Location<World> location, boolean forced) {
         // TODO 1.9 Update - Re-write to properly handle world changes --Zidane
+
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
-            return false;
+            return;
         }
 
-        Entity spongeEntity = this;
-        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
-
-        if (!forced) {
-            // Validate
-            TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
-            Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
-            if (!safeLocation.isPresent()) {
-                return false;
-            } else {
-                location = safeLocation.get();
-            }
-        }
-
+        final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
         thisEntity.removePassengers();
 
-        net.minecraft.world.World nmsWorld = null;
-        if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
-            nmsWorld = (net.minecraft.world.World) location.getExtent();
-            if (thisEntity instanceof EntityPlayerMP) {
-                // Close open containers
-                if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
-                    ((EntityPlayerMP) thisEntity).closeContainer();
-                }
+        if (thisEntity instanceof EntityPlayerMP) {
+            // Close open containers
+            if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
+                ((EntityPlayerMP) thisEntity).closeContainer();
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorld) nmsWorld).getDimensionId(), forced);
+        }
+
+        if (location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
+            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorld) worldObj).getDimensionId());
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                    .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
+                        .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
+                                thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -401,13 +361,164 @@ public abstract class MixinEntity implements IMixinEntity {
         for (net.minecraft.entity.Entity passenger : passengers) {
             passenger.startRiding(thisEntity, true);
         }
+    }
 
+    // for sponge internal use only
+    @SuppressWarnings("unchecked")
+    @Override
+    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
+        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final WorldServer fromWorld = server.worldServerForDimension(currentDim);
+        final WorldServer toWorld = server.worldServerForDimension(targetDim);
+
+        // First remove us from where we come from
+        if (entity instanceof EntityPlayer) {
+            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
+            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) entity);
+            fromWorld.playerEntities.remove(entity);
+            fromWorld.updateAllPlayersSleepingFlag();
+        } else {
+            fromWorld.getEntityTracker().untrackEntity(entity);
+        }
+
+        if (entity.isBeingRidden())
+        {
+            entity.removePassengers();
+        }
+
+        if (entity.isRiding())
+        {
+            entity.dismountRidingEntity();
+        }
+
+        ((IMixinWorld) fromWorld).onSpongeEntityRemoved(entity);
+
+        int i = entity.chunkCoordX;
+        int j = entity.chunkCoordZ;
+
+        if (entity.addedToChunk && fromWorld.isChunkLoaded(i, j, true))
+        {
+            fromWorld.getChunkFromChunkCoords(i, j).removeEntity(entity);
+        }
+
+        if (!(entity instanceof EntityPlayerMP)) {
+            fromWorld.loadedEntityList.remove(entity);
+        }
+
+        // At this point, we've removed the entity from the previous world. Lets now put them in the new world.
+        entity.dimension = targetDim;
+        entity.setWorld(toWorld);
+
+        if (entity instanceof EntityPlayer) {
+            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
+
+            // Support vanilla clients going into custom dimensions
+            net.minecraft.world.DimensionType clientDimensionType = DimensionManager.getClientDimensionType(toWorld.provider.getDimensionType());
+            if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+                DimensionManager.sendDimensionRegistration(entityPlayerMP, clientDimensionType);
+            } else {
+                final int clientDimensionTypeId = clientDimensionType.getId();
+                // Force vanilla client to refresh their chunk cache if same dimension
+                if (currentDim != targetDim && (currentDim == clientDimensionTypeId || targetDim == clientDimensionTypeId)) {
+                    entityPlayerMP.playerNetServerHandler.sendPacket(
+                            new SPacketRespawn(clientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(), toWorld.getWorldInfo().
+                                    getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+                }
+            }
+
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(clientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
+                    getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+                    entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
+            entityPlayerMP.setSneaking(false);
+            server.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
+            toWorld.getPlayerChunkManager().addPlayer(entityPlayerMP);
+            entityPlayerMP.interactionManager.setWorld(toWorld);
+            entityPlayerMP.addSelfToInternalCraftingInventory();
+
+            toWorld.getChunkProvider().provideChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
+        } else {
+            entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
+        }
+
+        if (toWorld.spawnEntityInWorld(entity)) {
+            // Perform position corrections in-case we are in the ground
+            while (!toWorld.getCubes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
+            }
+        }
+
+        fromWorld.resetUpdateEntityTick();
+        toWorld.resetUpdateEntityTick();
         return true;
     }
 
     @Override
+    public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
+        setLocation(location);
+        setRotation(rotation);
+    }
+
+    @Override
     public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        setLocationAndRotation(location, rotation, relativePositions, false);
+        if (relativePositions.isEmpty()) {
+            setLocationAndRotation(location, rotation);
+        } else {
+            if (((Entity) this) instanceof EntityPlayerMP) {
+                // Players use different logic, as they support real relative movement.
+                EnumSet relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+
+                if (relativePositions.contains(RelativePositions.X)) {
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
+                }
+
+                if (relativePositions.contains(RelativePositions.Y)) {
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y);
+                }
+
+                if (relativePositions.contains(RelativePositions.Z)) {
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Z);
+                }
+
+                if (relativePositions.contains(RelativePositions.PITCH)) {
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
+                }
+
+                if (relativePositions.contains(RelativePositions.YAW)) {
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
+                }
+
+                ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
+                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+            } else {
+                Location<World> resultantLocation = getLocation();
+                Vector3d resultantRotation = getRotation();
+
+                if (relativePositions.contains(RelativePositions.X)) {
+                    resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
+                }
+
+                if (relativePositions.contains(RelativePositions.Y)) {
+                    resultantLocation = resultantLocation.add(0, location.getPosition().getY(), 0);
+                }
+
+                if (relativePositions.contains(RelativePositions.Z)) {
+                    resultantLocation = resultantLocation.add(0, 0, location.getPosition().getZ());
+                }
+
+                if (relativePositions.contains(RelativePositions.PITCH)) {
+                    resultantRotation = resultantRotation.add(rotation.getX(), 0, 0);
+                }
+
+                if (relativePositions.contains(RelativePositions.YAW)) {
+                    resultantRotation = resultantRotation.add(0, rotation.getY(), 0);
+                }
+
+                // From here just a normal teleport is needed.
+                setLocation(resultantLocation);
+                setRotation(resultantRotation);
+            }
+        }
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
@@ -448,74 +559,6 @@ public abstract class MixinEntity implements IMixinEntity {
         }
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions, boolean forced) {
-        boolean relocated = true;
-
-        if (relativePositions.isEmpty()) {
-            // This is just a normal teleport that happens to set both.
-            relocated = setLocation(location, forced);
-            setRotation(rotation);
-        } else {
-            if (((Entity) this) instanceof EntityPlayerMP) {
-                // Players use different logic, as they support real relative movement.
-                EnumSet relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
-
-                if (relativePositions.contains(RelativePositions.X)) {
-                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
-                }
-
-                if (relativePositions.contains(RelativePositions.Y)) {
-                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y);
-                }
-
-                if (relativePositions.contains(RelativePositions.Z)) {
-                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Z);
-                }
-
-                if (relativePositions.contains(RelativePositions.PITCH)) {
-                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
-                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
-                }
-
-                ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
-            } else {
-                Location<World> resultantLocation = getLocation();
-                Vector3d resultantRotation = getRotation();
-
-                if (relativePositions.contains(RelativePositions.X)) {
-                    resultantLocation = resultantLocation.add(location.getPosition().getX(), 0, 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.Y)) {
-                    resultantLocation = resultantLocation.add(0, location.getPosition().getY(), 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.Z)) {
-                    resultantLocation = resultantLocation.add(0, 0, location.getPosition().getZ());
-                }
-
-                if (relativePositions.contains(RelativePositions.PITCH)) {
-                    resultantRotation = resultantRotation.add(rotation.getX(), 0, 0);
-                }
-
-                if (relativePositions.contains(RelativePositions.YAW)) {
-                    resultantRotation = resultantRotation.add(0, rotation.getY(), 0);
-                }
-
-                // From here just a normal teleport is needed.
-                relocated = setLocation(resultantLocation, forced);
-                setRotation(resultantRotation);
-            }
-        }
-
-        return relocated;
-    }
-
     @Override
     public Vector3d getScale() {
         return Vector3d.ONE;
@@ -554,13 +597,17 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void setRotation(Vector3d rotation) {
-        checkNotNull(rotation, "Rotation was null!");
-        ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        checkNotNull(rotation, "The rotation was null!");
+        if (isRemoved()) {
+            return;
+        }
         if (((Entity) this) instanceof EntityPlayerMP) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
+            ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+
             // Let the entity tracker do its job, this just updates the variables
             shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
         }
@@ -672,75 +719,9 @@ public abstract class MixinEntity implements IMixinEntity {
             builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
         }
         if (entity != null) {
-            builder.from(entity.addPassenger((Entity) (Object) this));
+            builder.from(entity.addPassenger((Entity) this));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
-    }
-
-    // for sponge internal use only
-    @SuppressWarnings("unchecked")
-    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim, boolean forced) {
-        MinecraftServer mcServer = entity.getEntityWorld().getMinecraftServer();
-        final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
-        final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
-        if (entity instanceof EntityPlayer) {
-            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) entity);
-            mcServer.getPlayerList().getPlayerList().remove(entity);
-        } else {
-            fromWorld.getEntityTracker().untrackEntity(entity);
-        }
-
-        entity.worldObj.removePlayerEntityDangerously(entity);
-        entity.dimension = targetDim;
-        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        if (forced) {
-            while (!toWorld.getCubes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
-                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
-            }
-        }
-
-        toWorld.getChunkProvider().provideChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
-
-        if (entity instanceof EntityPlayer) {
-            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
-
-            // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(((IMixinWorldProvider) toWorld.provider).getDimensionId(), toWorld,
-                    entityplayermp1);
-            if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
-                DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
-            } else {
-                // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
-                    entityplayermp1.playerNetServerHandler.sendPacket(
-                        new SPacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.interactionManager.getGameType()));
-                }
-            }
-
-            entityplayermp1.playerNetServerHandler.sendPacket(
-                new SPacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                    entityplayermp1.interactionManager.getGameType()));
-            entity.setWorld(toWorld);
-            entity.isDead = false;
-            entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
-            entityplayermp1.setSneaking(false);
-            mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.getPlayerChunkManager().addPlayer(entityplayermp1);
-            toWorld.spawnEntityInWorld(entityplayermp1);
-            mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
-            entityplayermp1.interactionManager.setWorld(toWorld);
-            entityplayermp1.addSelfToInternalCraftingInventory();
-            entityplayermp1.setHealth(entityplayermp1.getHealth());
-        } else {
-            toWorld.spawnEntityInWorld(entity);
-        }
-
-        fromWorld.resetUpdateEntityTick();
-        toWorld.resetUpdateEntityTick();
-        return true;
     }
 
     /**

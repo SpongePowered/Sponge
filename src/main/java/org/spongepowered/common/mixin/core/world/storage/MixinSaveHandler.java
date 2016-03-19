@@ -43,6 +43,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.io.File;
@@ -151,7 +152,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
     private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Only save dimension data to root world
         if (this.worldDirectory.getParentFile() == null || (SpongeImpl.getGame().getPlatform().getType().isClient() && this.worldDirectory.getParentFile().equals(
-            SpongeImpl.getGame().getSavesDirectory()))) {
+            SpongeImpl.getGame().getSavesDirectory().toFile()))) {
             final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
             final NBTTagCompound customDimensionDataCompound = DimensionManager.saveDimensionDataMap();
             customWorldDataCompound.setTag("DimensionData", customDimensionDataCompound);

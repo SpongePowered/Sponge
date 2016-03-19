@@ -32,6 +32,7 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.MapMaker;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
@@ -43,7 +44,6 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
@@ -62,7 +62,6 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -100,6 +99,7 @@ public class DimensionManager {
     private static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>();
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid = new HashMap<>();
+    private static final Map<String, UUID> worldUuidByFolderName = new HashMap<>();
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
     private static final Queue<Integer> unloadQueue = new ArrayDeque<>();
@@ -255,12 +255,14 @@ public class DimensionManager {
         checkNotNull(properties);
         worldPropertiesByFolderName.put(properties.getWorldName(), properties);
         worldPropertiesByWorldUuid.put(properties.getUniqueId(), properties);
+        worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
     }
 
     public static void unregisterWorldProperties(WorldProperties properties) {
         checkNotNull(properties);
         worldPropertiesByFolderName.remove(properties.getWorldName());
         worldPropertiesByWorldUuid.remove(properties.getUniqueId());
+        worldUuidByFolderName.remove(properties.getWorldName());
     }
 
     public static Optional<WorldProperties> getWorldProperties(String folderName) {
@@ -275,6 +277,20 @@ public class DimensionManager {
     public static Optional<WorldProperties> getWorldProperties(UUID uuid) {
         checkNotNull(uuid);
         return Optional.ofNullable(worldPropertiesByWorldUuid.get(uuid));
+    }
+
+    public static Optional<UUID> getUuidForFolder(String folderName) {
+        return Optional.ofNullable(worldUuidByFolderName.get(folderName));
+    }
+
+    public static Optional<String> getFolderForUuid(UUID uuid) {
+        for (Map.Entry<String, UUID> entry : worldUuidByFolderName.entrySet()) {
+            if (entry.getValue().equals(uuid)) {
+                return Optional.of(entry.getKey());
+            }
+        }
+
+        return Optional.empty();
     }
 
     // TODO Some result mechanism
@@ -396,90 +412,88 @@ public class DimensionManager {
 
     public static Optional<WorldServer> loadWorld(UUID uuid) {
         checkNotNull(uuid);
+        // TODO UUID check
+        return Optional.empty();
     }
 
     public static Optional<WorldServer> loadWorld(String worldName) {
         checkNotNull(worldName);
+        return loadWorld(worldName, null, null);
     }
 
     public static Optional<WorldServer> loadWorld(WorldProperties properties) {
         checkNotNull(properties);
-        final Optional<org.spongepowered.api.world.World> optExisting = getWorld(worldName);
-        if (optExisting.isPresent()) {
-            return optExisting;
+        return loadWorld(properties.getWorldName(), null, properties);
+    }
+
+    private static Optional<WorldServer> loadWorld(String worldName, @Nullable ISaveHandler saveHandler, @Nullable WorldProperties properties) {
+        checkNotNull(worldName);
+        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final Optional<WorldServer> optExistingWorldServer = getWorld(worldName);
+        if (optExistingWorldServer.isPresent()) {
+            return optExistingWorldServer;
         }
 
-        if (!getAllowNether() && !worldName.equals(getFolderName())) {
-            SpongeImpl.getLogger().error("Unable to load world " + worldName + ". Multi-world is disabled via allow-nether.");
+        if (!server.getAllowNether()) {
+            SpongeImpl.getLogger().error("Unable to load world [{}]. Multi-world is disabled via [allow-nether] in [server.properties].", worldName);
             return Optional.empty();
         }
 
-        final File file = new File(getFolderName(), worldName);
-        if ((file.exists()) && (!file.isDirectory())) {
-            throw new IllegalArgumentException("File exists with the name '" + worldName + "' and isn't a folder");
+        final Path worldFolder = SpongeImpl.getGame().getSavesDirectory().resolve(worldName);
+        if (!Files.exists(worldFolder) || !Files.isDirectory(worldFolder)) {
+            SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", worldName, worldFolder);
+            return Optional.empty();
         }
 
-        int dim;
-        WorldInfo worldInfo;
-        AnvilSaveHandler savehandler = getHandler(worldName);
-        final Optional<WorldProperties> worldProperties = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
-        if (worldProperties.isPresent()) {
-            worldInfo = (WorldInfo) worldProperties.get();
-        } else {
-            worldInfo = savehandler.loadWorldInfo();
+        int dimensionId;
+
+        if (saveHandler == null) {
+            saveHandler = ((IMixinMinecraftServer) server).getHandler(worldName);
         }
 
-        if (worldInfo != null) {
-            ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            // check if enabled
-            if (!((WorldProperties) worldInfo).isEnabled()) {
-                SpongeImpl.getLogger().error("World [{}] cannot be loaded as it is disabled.", worldName);
-                return Optional.empty();
+        // We weren't given a properties, see if one is cached
+        if (properties == null) {
+            properties = worldPropertiesByFolderName.get(worldName);
+
+            // One wasn't cached, lets load one
+            if (properties == null) {
+                properties = (WorldProperties) saveHandler.loadWorldInfo();
+
+                // We tried :'(
+                if (properties == null) {
+                    SpongeImpl.getLogger().error("Unable to load world [{}]. No world properties was found!", worldName);
+                    return Optional.empty();
+                }
+
+                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+                registerDimension(((IMixinWorldInfo) properties).getDimensionId(), (DimensionType) (Object) properties.getDimensionType());
+                registerWorldProperties(properties);
             }
-
-            dim = ((IMixinWorldInfo) worldInfo).getDimensionId();
-            if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
-                DimensionManager
-                        .registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
-            }
-            if (DimensionTypeRegistryModule.getInstance().getWorldFolder(dim) == null) {
-                DimensionTypeRegistryModule.getInstance().registerWorldDimensionId(dim, worldName);
-            }
-            if (!WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getUniqueId())) {
-                WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) worldInfo);
-            }
-        } else {
-            return Optional.empty(); // no world data found
         }
 
-        WorldSettings settings = new WorldSettings(worldInfo);
+        dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
+        setUuidOnProperties(properties);
 
-        if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
-            DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
+        final WorldInfo worldInfo = (WorldInfo) properties;
+        ((IMixinWorldInfo) worldInfo).createWorldConfig();
+
+        // check if enabled
+        if (!((WorldProperties) worldInfo).isEnabled()) {
+            SpongeImpl.getLogger().error("Unable to load world [{}]. It is disabled.", worldName);
+            return Optional.empty();
         }
 
-        WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, null, true);
+        worldByDimensionId.put(dimensionId, worldServer);
+        weakWorldByWorld.put(worldServer, worldServer);
 
-        worldServer.initialize(settings);
-        ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
+        ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
-        worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
-        SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
-        if (!isSinglePlayer()) {
-            worldServer.getWorldInfo().setGameType(getGameType());
-        }
-        this.setDifficultyForAllWorlds(this.getDifficulty());
+        SpongeImpl.getLogger().info("Loading world {} ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
+                (dimensionId).get().getName());
 
-        final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(worldServer);
-        if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
-            if (activeConfig.getConfig().getWorld().getGenerateSpawnOnLoad()) {
-                this.prepareSpawnArea(worldServer);
-            }
-        } else {
-            this.prepareSpawnArea(worldServer);
-        }
-
-        return Optional.of((org.spongepowered.api.world.World) worldServer);
+        server.worldServers = reorderWorldsVanillaFirst();
+        return Optional.of(worldServer);
     }
 
     public static void loadAllWorlds(String saveName, long defaultSeed, WorldType defaultWorldType, String generatorOptions) {
@@ -573,7 +587,7 @@ public class DimensionManager {
             }
 
             // Step 7 - Finally, we can create the world and tell it to load
-            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings);
+            final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, worldInfo, worldSettings, false);
             worldByDimensionId.put(dimensionId, worldServer);
             weakWorldByWorld.put(worldServer, worldServer);
 
@@ -608,7 +622,7 @@ public class DimensionManager {
     }
 
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
-            worldSettings) {
+            worldSettings, boolean prepareSpawn) {
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
         final WorldServer worldServer = (WorldServer) new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler)
                 .init();
@@ -627,6 +641,9 @@ public class DimensionManager {
 
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) worldServer));
 
+        if (prepareSpawn) {
+            ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
+        }
         return worldServer;
     }
 
@@ -883,6 +900,53 @@ public class DimensionManager {
             }
         }
 
+    }
+
+    public static DimensionType getClientDimensionType(DimensionType serverDimensionType) {
+        switch (serverDimensionType) {
+            case OVERWORLD:
+            case NETHER:
+            case THE_END:
+                return serverDimensionType;
+            default:
+                return DimensionType.OVERWORLD;
+        }
+    }
+
+    public static void sendDimensionRegistration(EntityPlayerMP playerMP, DimensionType dimensionType) {
+        // Do nothing in Common
+    }
+
+    public static void loadDimensionDataMap(NBTTagCompound compound) {
+        dimensionBits.clear();
+        if (compound == null) {
+            for (int dimensionId : dimensionTypeByDimensionId.keys()) {
+                if (dimensionId >= 0) {
+                    dimensionBits.set(dimensionId);
+                }
+            }
+        } else {
+            final int[] intArray = compound.getIntArray("DimensionArray");
+            for (int i = 0; i < intArray.length; i++) {
+                for (int j = 0; j < Integer.SIZE; j++) {
+                    dimensionBits.set(i * Integer.SIZE + j, (intArray[i] & (1 << j)) != 0);
+                }
+            }
+        }
+    }
+
+    public static NBTTagCompound saveDimensionDataMap() {
+        int[] data = new int[(dimensionBits.length() + Integer.SIZE - 1 )/ Integer.SIZE];
+        NBTTagCompound dimMap = new NBTTagCompound();
+        for (int i = 0; i < data.length; i++) {
+            int val = 0;
+            for (int j = 0; j < Integer.SIZE; j++) {
+                val |= dimensionBits.get(i * Integer.SIZE + j) ? (1 << j) : 0;
+            }
+            data[i] = val;
+        }
+        dimMap.setIntArray("DimensionArray", data);
+        return dimMap;
     }
 
     public enum RegisterDimensionTypeResult {

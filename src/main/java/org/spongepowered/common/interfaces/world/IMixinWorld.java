@@ -72,6 +72,8 @@ public interface IMixinWorld {
 
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
 
+    void onSpongeEntityRemoved(net.minecraft.entity.Entity entity);
+
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
     SpongeWorldGenerator createWorldGenerator();

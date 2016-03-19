@@ -30,6 +30,8 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
@@ -76,7 +78,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
         return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
     }
 
-    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) { }
+    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    }
 
     /**
      * Read extra data (SpongeData) from the entity's NBT tag.
@@ -106,9 +109,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setUntargetable(boolean untargetable);
 
-    @Nullable
-    Text getDisplayNameText();
+    @Nullable Text getDisplayNameText();
 
     void setDisplayName(@Nullable Text displayName);
 
+    boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim);
 }

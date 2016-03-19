@@ -204,6 +204,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
@@ -628,6 +629,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
         this.onEntityAdded(entity);
     }
+
+    @Override
+    public void onSpongeEntityRemoved(net.minecraft.entity.Entity entity) {
+        this.onEntityRemoved(entity);
+    }
+
 
     @Override
     public WorldGenerator getWorldGenerator() {

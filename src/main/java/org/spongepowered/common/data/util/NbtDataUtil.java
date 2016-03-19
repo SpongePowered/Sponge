@@ -134,7 +134,7 @@ public final class NbtDataUtil {
     public static final String CAN_GRIEF = "CanGrief";
 
     // Compatibility tags for Forge
-    public static final String FORGE_DATA_TAG = "ForgeData";
+    public static final String FORGE_DATA = "ForgeData";
     public static final String UUID_MOST = "UUIDMost";
     public static final String UUID_LEAST = "UUIDLeast";
     public static final String DIMENSION_TYPE = "dimensionType";
@@ -211,8 +211,8 @@ public final class NbtDataUtil {
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
-            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
+        if (rootCompound.hasKey(FORGE_DATA, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA);
             if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
