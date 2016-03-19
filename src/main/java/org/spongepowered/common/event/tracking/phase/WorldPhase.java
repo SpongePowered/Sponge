@@ -29,29 +29,20 @@ import static com.google.common.base.Preconditions.checkArgument;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
-import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class WorldPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ISpawnableState {
+    public enum State implements IPhaseState {
         TERRAIN_GENERATION,
         POPULATOR_RUNNING,
         CHUNK_LOADING,
@@ -62,11 +53,6 @@ public class WorldPhase extends TrackingPhase {
         @Override
         public WorldPhase getPhase() {
             return TrackingPhases.WORLD;
-        }
-
-        @Override
-        public boolean isBusy() {
-            return this != IDLE;
         }
 
         @Override
@@ -88,21 +74,10 @@ public class WorldPhase extends TrackingPhase {
             return false;
         }
 
-        @Nullable
-        @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext, List<EntitySnapshot> entitySnapshots) {
-            final World world = causeTracker.getWorld();
-            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> {
-                if (this == State.WORLD_SPAWNER_SPAWNING) {
-                    return SpongeEventFactory.createSpawnEntityEventSpawner(cause, capturedEntities, entitySnapshots, world);
-                }
-                return null;
-            });
-        }
     }
 
     public enum Tick implements ITickingState {
-        TICKING_ENTITY() {
+        ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Optional<Entity> currentTickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
@@ -110,7 +85,7 @@ public class WorldPhase extends TrackingPhase {
                         phaseContext);
             }
         },
-        TICKING_TILE_ENTITY() {
+        TILE_ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Optional<TileEntity> currentTickingTileEntity = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class);
@@ -118,7 +93,7 @@ public class WorldPhase extends TrackingPhase {
                         phaseContext);
             }
         },
-        TICKING_BLOCK() {
+        BLOCK() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
@@ -126,7 +101,7 @@ public class WorldPhase extends TrackingPhase {
                         phaseContext);
             }
         },
-        RANDOM_TICK_BLOCK() {
+        RANDOM_BLOCK() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
@@ -141,21 +116,9 @@ public class WorldPhase extends TrackingPhase {
 
         }
 
-        @Nullable
-        @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext, List<EntitySnapshot> entitySnapshots) {
-            final World world = causeTracker.getWorld();
-            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> SpongeEventFactory.createSpawnEntityEvent(cause, capturedEntities, entitySnapshots, world));
-        }
-
         @Override
         public TrackingPhase getPhase() {
             return TrackingPhases.WORLD;
-        }
-
-        @Override
-        public boolean isBusy() {
-            return true;
         }
 
         @Override
@@ -176,7 +139,7 @@ public class WorldPhase extends TrackingPhase {
             final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
             final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
         } else if (state instanceof Tick) {
-            if (state == Tick.RANDOM_TICK_BLOCK) {
+            if (state == Tick.RANDOM_BLOCK) {
 
             }
         }

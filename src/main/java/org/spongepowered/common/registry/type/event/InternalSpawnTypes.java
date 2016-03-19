@@ -51,6 +51,7 @@ public final class InternalSpawnTypes {
     public static final SpawnType WORLD_SPAWNER = new SpongeSpawnType("WorldSpawner");
     public static final SpawnType PLUGIN = new SpongeSpawnType("Plugin");
     public static final SpawnType FORCED = new SpongeSpawnType("FORCED");
+    public static final SpawnType ENTITY_DEATH = new SpongeSpawnType("EntityDeath");
 
     // SpawnCauses used
     public static final SpawnCause FORCED_SPAWN = of(InternalSpawnTypes.FORCED);

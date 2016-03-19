@@ -36,7 +36,7 @@ import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -44,6 +44,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -85,9 +86,47 @@ public abstract class TrackingPhase {
         return this;
     }
 
+    /**
+     * The exit point of any phase. Every phase should have an unwinding
+     * process where if anything is captured, events should be thrown and
+     * processed accordingly. The outcome of each phase is dependent on
+     * the {@link IPhaseState} provded, as different states require different
+     * handling.
+     *
+     * <p>Examples of this include: {@link PacketPhase}, {@link WorldPhase}, etc.
+     * </p>
+     *
+     * <p>Note that the {@link CauseTracker} is only provided for easy access
+     * to the {@link WorldServer}, {@link IMixinWorldServer}, and
+     * {@link World} instances.</p>
+     *
+     * @param causeTracker The cause tracker instance
+     * @param state The state
+     * @param phaseContext The context of the current state being unwound
+     */
+    public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
+
+    // Default methods that are basic qualifiers, leaving up to the phase and state to decide
+    // whether they perform capturing.
+
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return true;
     }
+
+    // TODO
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return true;
+    }
+
+    public boolean allowEntitySpawns(IPhaseState currentState) {
+        return true;
+    }
+
+    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+        return false;
+    }
+
+    // Actual capture methods
 
     public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
         final IBlockState actualState = currentState.getBlock().getActualState(currentState,  causeTracker.getMinecraftWorld(), pos);
@@ -104,10 +143,6 @@ public abstract class TrackingPhase {
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         }
 
-    }
-
-    public boolean allowEntitySpawns(IPhaseState currentState) {
-        return true;
     }
 
     /**
@@ -129,27 +164,28 @@ public abstract class TrackingPhase {
      */
     public boolean attemptEntitySpawnCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final World minecraftWorld = minecraftEntity.worldObj;
+        final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
         TrackingHelper.associateEntityCreator(context, minecraftEntity, minecraftWorld);
         if (minecraftEntity instanceof EntityItem) {
-            context.getCapturedItemsSupplier().get().ifPresent(capturedItems -> capturedItems.add(entity));
+            return context.getCapturedItemsSupplier()
+                    .map(supplier -> supplier.get().add(entity))
+                    .orElse(false);
         } else {
-            context.getCapturedEntitySupplier().get().ifPresent(capturedEntities -> capturedEntities.add(entity));
+            return context.getCapturedEntitySupplier()
+                    .map(supplier -> supplier.get().add(entity))
+                    .orElse(false);
         }
-        return true;
     }
-
-    public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
 
     // TODO
     public boolean completeEntitySpawn(Entity entity, Cause cause, CauseTracker causeTracker, int chunkX, int chunkZ, IPhaseState phaseState,
             PhaseContext context) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
-        final IMixinWorldServer mixinWorld = ((IMixinWorldServer) minecraftEntity.worldObj);
+        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         // handle actual capturing
         final List<Entity> capturedItems = context.getCapturedItemsSupplier().get().orEmptyList();
         final List<Entity> capturedEntities = context.getCapturedEntities().get();
-        final World minecraftWorld = minecraftEntity.worldObj;
+        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
         if (minecraftEntity instanceof EntityFishHook && ((EntityFishHook) minecraftEntity).angler == null) {
             // TODO MixinEntityFishHook.setShooter makes angler null
@@ -200,7 +236,7 @@ public abstract class TrackingPhase {
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         entitySnapshotBuilder.add(((Entity) minecraftEntity).createSnapshot());
 
-        final org.spongepowered.api.world.World spongeWorld = causeTracker.getWorld();
+        final World spongeWorld = causeTracker.getWorld();
         if (minecraftEntity instanceof EntityItem) {
 //                capturedItems.add(entity);
             event = SpongeEventFactory.createDropItemEventCustom(cause, capturedItems, entitySnapshotBuilder.build(), spongeWorld);
@@ -222,10 +258,5 @@ public abstract class TrackingPhase {
         }
 
         return false;
-    }
-
-    // TODO
-    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return true;
     }
 }

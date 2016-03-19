@@ -64,6 +64,7 @@ import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
 
@@ -199,7 +200,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private boolean onSpawnEntityFromBlockBreak(net.minecraft.world.World world, Entity entity, net.minecraft.world.World worldIn, BlockPos posIn, int amount) {
         BlockSpawnCause spawnCause = BlockSpawnCause.builder()
                 .block(BlockSnapshot.builder().from(new Location<>((World) world, VecHelper.toVector(posIn))).build())
-                .type(SpawnTypes.EXPERIENCE)
+                .type(InternalSpawnTypes.EXPERIENCE)
                 .build();
         return ((World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
     }

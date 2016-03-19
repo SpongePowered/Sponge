@@ -24,31 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 
 public class PluginPhase extends TrackingPhase {
 
-    public enum State implements IPhaseState, ISpawnableState {
+    public enum State implements IPhaseState {
         BLOCK_WORKER,
         CUSTOM_SPAWN,
         COMPLETE;
-
-        @Override
-        public boolean isBusy() {
-            return this != COMPLETE;
-        }
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -60,20 +47,6 @@ public class PluginPhase extends TrackingPhase {
             return TrackingPhases.PLUGIN;
         }
 
-        @Nullable
-        @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
-                List<EntitySnapshot> entitySnapshots) {
-            final World world = causeTracker.getWorld();
-            return phaseContext.getCapturedEntitySupplier().get().map(capturedEntities -> {
-                if (this == BLOCK_WORKER) {
-                    return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
-                } else if (this == CUSTOM_SPAWN) {
-                    return SpongeEventFactory.createSpawnEntityEventCustom(cause, capturedEntities, entitySnapshots, world);
-                }
-                return null;
-            });
-        }
     }
 
     public PluginPhase(@Nullable TrackingPhase parent) {

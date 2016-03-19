@@ -318,7 +318,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
                             .add(NamedCause.source(this))
-                            .add(NamedCause.of("DamageSource", source))
+                            .add(NamedCause.of(TrackingHelper.DAMAGE_SOURCE, source))
                             .addCaptures()
                             .complete());
                     this.nmsEntityLiving.onDeath(source);

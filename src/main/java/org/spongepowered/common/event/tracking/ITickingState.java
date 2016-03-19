@@ -29,7 +29,7 @@ package org.spongepowered.common.event.tracking;
  * can have multiple state side effects, such as spawning other entities,
  * changing other blocks, calling other populators, etc.
  */
-public interface ITickingState extends IPhaseState, ISpawnableState {
+public interface ITickingState extends IPhaseState {
 
     void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext);
 

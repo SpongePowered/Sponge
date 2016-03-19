@@ -41,7 +41,6 @@ public class GeneralPhase extends TrackingPhase {
         COMMAND,
         COMPLETE;
 
-        @Override
         public boolean isBusy() {
             return this != COMPLETE;
         }

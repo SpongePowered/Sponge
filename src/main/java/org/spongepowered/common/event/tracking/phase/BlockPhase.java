@@ -44,11 +44,6 @@ public class BlockPhase extends TrackingPhase {
         DISPENSE;
 
         @Override
-        public boolean isBusy() {
-            return true;
-        }
-
-        @Override
         public boolean canSwitchTo(IPhaseState state) {
             return false;
         }
@@ -89,6 +84,9 @@ public class BlockPhase extends TrackingPhase {
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+        if (state == State.BLOCK_DECAY) {
+
+        }
 
     }
 

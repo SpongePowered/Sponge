@@ -50,9 +50,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -69,17 +67,16 @@ import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 
@@ -102,11 +99,13 @@ public interface PacketFunction {
             if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
                 MessageChannel originalChannel = MessageChannel.TO_NONE;
 
-                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(player).build(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true);
-                SpongeImpl.getGame().getEventManager().post(event);
-                if (!event.isMessageCancelled()) {
-                    event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
-                }
+                EventConsumer.supplyEvent(() -> SpongeEventFactory.createDestructEntityEvent(Cause.source(player).build(), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true))
+                    .nonCancelled(event -> {
+                        if (!event.isMessageCancelled()) {
+                            event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
+                        }
+                    })
+                    .buildAndPost();
             }
         } else if (state == PacketPhase.General.INTERACT_ENTITY) {
 
@@ -133,11 +132,11 @@ public interface PacketFunction {
                 final ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
                 final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
                 final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-                final CreativeInventoryEvent event;
                 final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
                 final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
                 final Container openContainer = player.openContainer;
                 final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
+                final CreativeInventoryEvent event;
                 if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
                     Iterator<Entity> iterator = capturedEntityItems.iterator();
                     ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
@@ -153,26 +152,27 @@ public interface PacketFunction {
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
                     event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer), capturedTransactions);
                 }
-                SpongeImpl.postEvent(event);
-                if (event.isCancelled()) {
-                    if (event instanceof CreativeInventoryEvent.Drop) {
-                        capturedEntityItems.clear();
-                    }
+                EventConsumer.event(event)
+                    .cancelled(creativeInventoryEvent -> {
+                        if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
+                            capturedEntityItems.clear();
+                        }
 
-                    // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+                        // Restore cursor
+                        PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getOriginal());
 
-                    // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, event.getTransactions());
-                } else {
-                    PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
+                        // Restore target slots
+                        PacketPhaseUtil.handleSlotRestore(player, creativeInventoryEvent.getTransactions());
+                    })
+                    .nonCancelled(creativeInventoryEvent -> {
+                        PacketPhaseUtil.handleCustomSlot(player, creativeInventoryEvent.getTransactions());
 
-                    // Custom cursor
-                    if (event.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                    }
-                }
-
+                        // Custom cursor
+                        if (event.getCursorTransaction().getCustom().isPresent()) {
+                            PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getFinal());
+                        }
+                    })
+                    .buildAndPost();
                 capturedTransactions.clear();
             }
         }
@@ -198,52 +198,51 @@ public interface PacketFunction {
         }
 
         if (inventoryEvent != null) {
-            SpongeImpl.postEvent(inventoryEvent);
-
-            if (inventoryEvent.isCancelled()) {
-                if (inventoryEvent instanceof ClickInventoryEvent.Drop) {
-                    capturedItems.clear();
-                }
-
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                }
-                if (inventoryEvent instanceof ClickInventoryEvent.Double) {
-                    ((ClickInventoryEvent.Double) inventoryEvent).getTransactions().clear();
-                    return;
-                }
-
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
-                }
-            } else {
-                if (inventoryEvent instanceof ChangeInventoryEvent) {
-                    PacketPhaseUtil.handleCustomSlot(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
-                }
-
-                // Custom cursor
-                if (inventoryEvent instanceof ClickInventoryEvent) {
-                    final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
-                    if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
+            EventConsumer.event(inventoryEvent)
+                .cancelled(event -> {
+                    if (event instanceof ClickInventoryEvent.Drop) {
+                        capturedItems.clear();
                     }
-                }
-            }
-            slotTransactions.clear();
+
+                    if (event instanceof ClickInventoryEvent) {
+                        // Restore cursor
+                        PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+                    }
+                    if (event instanceof ClickInventoryEvent.Double) {
+                        ((ClickInventoryEvent.Double) inventoryEvent).getTransactions().clear();
+                        return;
+                    }
+
+                    if (event instanceof ChangeInventoryEvent) {
+                        // Restore target slots
+                        PacketPhaseUtil.handleSlotRestore(player, ((ChangeInventoryEvent) event).getTransactions());
+                    }
+                })
+                .nonCancelled(event -> {
+                    if (inventoryEvent instanceof ChangeInventoryEvent) {
+                        PacketPhaseUtil.handleCustomSlot(player, ((ChangeInventoryEvent) inventoryEvent).getTransactions());
+                    }
+
+                    // Custom cursor
+                    if (inventoryEvent instanceof ClickInventoryEvent) {
+                        final ClickInventoryEvent clickInventory = (ClickInventoryEvent) inventoryEvent;
+                        if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
+                            PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
+                        }
+                    }
+                }).post(event -> slotTransactions.clear())
+                .buildAndPost();
         }
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
         final C08PacketPlayerBlockPlacement placePacket = (C08PacketPlayerBlockPlacement) packet;
-        context.getCapturedEntitySupplier().get().ifPresent(capturedEntities -> {
-            final Cause cause = Cause.source(EntitySpawnCause.builder().entity((Player) player).type(InternalSpawnTypes.SPAWN_EGG).build()).build();
-            final SpawnEntityEvent spawnEntityEvent =
-                    state.createSpawnEventPostProcess(cause, ((IMixinWorldServer) player.worldObj).getCauseTracker(), context, ImmutableList.of());
-            if (SpongeImpl.postEvent(spawnEntityEvent)) {
-                
-            }
-        });
+//        context.getCapturedEntitySupplier().get().ifPresent(capturedEntities -> {
+//            final Cause cause = Cause.source(EntitySpawnCause.builder().entity((Player) player).type(InternalSpawnTypes.SPAWN_EGG).build()).build();
+//            final SpawnEntityEvent spawnEntityEvent = state.createEntityEvent(cause, ((IMixinWorldServer) player.worldObj).getCauseTracker(), context);
+//            if (spawnEntityEvent != null && SpongeImpl.postEvent(spawnEntityEvent)) {
+//                final List<Entity> entities = spawnEntityEvent.getEntities();
+//            }
+//        });
 
     });
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
@@ -263,16 +262,14 @@ public interface PacketFunction {
         SlotTransaction sourceTransaction = new SlotTransaction(new SlotAdapter(sourceSlot), sourceSnapshot, sourceSnapshot);
         SlotTransaction targetTransaction = new SlotTransaction(new SlotAdapter(targetSlot), targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
-        ChangeInventoryEvent.Held event = SpongeEventFactory.createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions);
-        SpongeImpl.postEvent(event);
-
-        if (event.isCancelled()) {
-            player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(previousSlot));
-        } else {
-            PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
-            inventory.currentItem = itemChange.getSlotId();
-            player.markPlayerActive();
-        }
+        EventConsumer.supplyEvent(() -> SpongeEventFactory.createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions))
+            .cancelled(event -> player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(previousSlot)))
+            .nonCancelled(event -> {
+                PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
+                inventory.currentItem = itemChange.getSlotId();
+                player.markPlayerActive();
+            })
+            .buildAndPost();
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
         final Container container = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class).get();
@@ -280,29 +277,30 @@ public interface PacketFunction {
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
-        InteractInventoryEvent.Close event = SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container));
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            if (container.getSlot(0) != null) {
-                player.openContainer = container;
-                final Slot slot = container.getSlot(0);
-                String guiId = "unknown";
-                final IInventory slotInventory = slot.inventory;
-                if (slotInventory instanceof IInteractionObject) {
-                    guiId = ((IInteractionObject) slotInventory).getGuiID();
-                }
-                slotInventory.openInventory(player);
-                player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(container.windowId, guiId, slotInventory
+        EventConsumer.supplyEvent(() -> SpongeEventFactory.createInteractInventoryEventClose(cause, cursorTransaction, ContainerUtil.fromNative(container)))
+            .cancelled(event -> {
+                if (container.getSlot(0) != null) {
+                    player.openContainer = container;
+                    final Slot slot = container.getSlot(0);
+                    String guiId = "unknown";
+                    final IInventory slotInventory = slot.inventory;
+                    if (slotInventory instanceof IInteractionObject) {
+                        guiId = ((IInteractionObject) slotInventory).getGuiID();
+                    }
+                    slotInventory.openInventory(player);
+                    player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(container.windowId, guiId, slotInventory
                         .getDisplayName(), slotInventory.getSizeInventory()));
-                // resync data to client
-                player.sendContainerToPlayer(container);
-            }
-        } else {
-            // Custom cursor
-            if (event.getCursorTransaction().getCustom().isPresent()) {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-            }
-        }
+                    // resync data to client
+                    player.sendContainerToPlayer(container);
+                }
+            })
+            .nonCancelled(event -> {
+                // Custom cursor
+                if (event.getCursorTransaction().getCustom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                }
+            })
+            .buildAndPost();
     });
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
     });
@@ -318,16 +316,15 @@ public interface PacketFunction {
             final ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            final InteractInventoryEvent.Open event = SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction, ContainerUtil.fromNative(player.openContainer));
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                player.closeScreen();
-            } else {
-                // Custom cursor
-                if (event.getCursorTransaction().getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
-                }
-            }
+            EventConsumer.supplyEvent(() -> SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction, ContainerUtil.fromNative(player.openContainer)))
+                .cancelled(event -> player.closeScreen())
+                .nonCancelled(event -> {
+                    // Custom cursor
+                    if (event.getCursorTransaction().getCustom().isPresent()) {
+                        PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                    }
+                })
+                .buildAndPost();
         }
     });
     PacketFunction RESOURCE_PACKET = ((packet, state, player, context) -> {
@@ -356,8 +353,9 @@ public interface PacketFunction {
         if (status.wasSuccessful().isPresent()) {
             mixinHandler.getSentResourcePacks().remove(hash);
         }
-        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.of(NamedCause.source(SpongeImpl.getGame())), pack,
-                (Player) player, status));
+        final Cause cause = Cause.of(NamedCause.source(SpongeImpl.getGame()));
+        final ResourcePackStatusEvent event = SpongeEventFactory.createResourcePackStatusEvent(cause, pack, (Player) player, status);
+        SpongeImpl.postEvent(event);
     });
 
     void unwind(Packet<?> packet, PacketPhase.IPacketState state, EntityPlayerMP player, PhaseContext context);

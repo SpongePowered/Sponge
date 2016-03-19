@@ -107,6 +107,7 @@ public class TrackingHelper {
     public static final String CHUNK_PROVIDER = "ChunkProvider";
     public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
     public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
+    public static final String DAMAGE_SOURCE = "DamageSource";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -123,7 +124,7 @@ public class TrackingHelper {
             phaseContext.add(NamedCause.notifier(user));
         }
         phaseContext.complete();
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_BLOCK, phaseContext);
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.BLOCK, phaseContext);
         boolean result = worldIn.fireBlockEvent(event);
         causeTracker.completePhase();
         trackedBlockEvents.remove(event.getPosition());
@@ -135,7 +136,7 @@ public class TrackingHelper {
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         final BlockSnapshot currentTickBlock = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state,
                 minecraftWorld, pos), pos, 0);
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_TICK_BLOCK, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_BLOCK, PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
                 .addCaptures()
                 .complete());
@@ -147,7 +148,7 @@ public class TrackingHelper {
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
         final World minecraftWorld = causeTracker.getMinecraftWorld();
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
-        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.TICKING_BLOCK, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.BLOCK, PhaseContext.start()
                 .add(NamedCause.source(snapshot))
                 .addCaptures()
                 .complete());
@@ -249,7 +250,7 @@ public class TrackingHelper {
             final IPhaseState state = currentPhase.getState();
             final PhaseContext context = currentPhase.getContext();
             Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            return state == WorldPhase.Tick.TICKING_BLOCK && currentTickingBlock.isPresent()
+            return state == WorldPhase.Tick.BLOCK && currentTickingBlock.isPresent()
                    && !context.first(PluginContainer.class).isPresent() && !cause.contains(currentTickingBlock);
         }
         return false;
@@ -280,7 +281,7 @@ public class TrackingHelper {
     }
 
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_TILE_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(tile))
                 .addCaptures()
                 .complete());
@@ -293,7 +294,7 @@ public class TrackingHelper {
     public static void tickEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entityIn) {
         checkArgument(entityIn instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entityIn);
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
-        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TICKING_ENTITY, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
                 .addCaptures()
                 .complete());

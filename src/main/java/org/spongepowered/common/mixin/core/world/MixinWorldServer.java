@@ -208,8 +208,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final PhaseData currentPhase = causeTracker.getPhases().peek();
         final IPhaseState phaseState = currentPhase.getState();
         final PhaseContext context = currentPhase.getContext();
-        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
+        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return;
         }
 
@@ -634,6 +633,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.loadedEntityList.add(entity);
         this.onSpongeEntityAdded(entity);
         return true;
+    }
+
+    @Override
+    public boolean forceSpawnEntity(Entity entity) {
+        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
+        final int x = minecraftEntity.getPosition().getX();
+        final int z = minecraftEntity.getPosition().getZ();
+        return forceSpawnEntity(minecraftEntity, x >> 4, z >> 4);
     }
 
     @Override

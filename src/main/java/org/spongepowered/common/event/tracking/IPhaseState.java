@@ -41,8 +41,6 @@ public interface IPhaseState {
 
     TrackingPhase getPhase();
 
-    boolean isBusy();
-
     int ordinal();
 
     default boolean canSwitchTo(IPhaseState state) {

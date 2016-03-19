@@ -63,7 +63,6 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -71,7 +70,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ISpawnableState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
@@ -133,7 +131,7 @@ public class PacketPhase extends TrackingPhase {
     final static int BUTTON_SECONDARY       = 0x01 << 0 << 1;
     final static int BUTTON_MIDDLE          = 0x01 << 0 << 2;
 
-    public interface IPacketState extends IPhaseState, ISpawnableState {
+    public interface IPacketState extends IPhaseState {
 
         boolean matches(int packetState);
 
@@ -143,7 +141,7 @@ public class PacketPhase extends TrackingPhase {
 
     }
 
-    public enum Inventory implements IPacketState, ISpawnableState {
+    public enum Inventory implements IPacketState, IPhaseState {
 
         INVENTORY,
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
@@ -168,7 +166,8 @@ public class PacketPhase extends TrackingPhase {
             }
         },
         DROP_ITEMS,
-        DROP_INVENTORY,
+        DROP_INVENTORY() {
+        },
         DROP_SINGLE_ITEM_FROM_INVENTORY(MODE_CLICK | MODE_PICKBLOCK | BUTTON_SECONDARY | CLICK_OUTSIDE_WINDOW) {
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
@@ -321,18 +320,6 @@ public class PacketPhase extends TrackingPhase {
         }
 
         @Override
-        public boolean isBusy() {
-            return true;
-        }
-
-        @Nullable
-        @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
-                List<EntitySnapshot> entitySnapshots) {
-            return null;
-        }
-
-        @Override
         public boolean matches(int packetState) {
             return this.stateMask != MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
         }
@@ -365,7 +352,7 @@ public class PacketPhase extends TrackingPhase {
 
     }
 
-    public enum General implements ISpawnableState, IPacketState {
+    public enum General implements IPacketState, IPhaseState {
         UNKNOWN,
         MOVEMENT,
         INTERACTION() {
@@ -427,17 +414,6 @@ public class PacketPhase extends TrackingPhase {
             return TrackingPhases.PACKET;
         }
 
-        @Override
-        public boolean isBusy() {
-            return true;
-        }
-
-        @Nullable
-        @Override
-        public SpawnEntityEvent createSpawnEventPostProcess(Cause cause, CauseTracker causeTracker, PhaseContext phaseContext,
-                List<EntitySnapshot> entitySnapshots) {
-            return null;
-        }
 
         @Override
         public boolean matches(int packetState) {
