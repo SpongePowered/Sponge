@@ -72,6 +72,7 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.projectile.LaunchProjectileEvent;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -79,6 +80,7 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 import java.util.Map;
@@ -218,7 +220,7 @@ public class ProjectileLauncher {
     }
 
     @SuppressWarnings("unchecked")
-    private static <P extends Projectile> Optional<P> defaultLaunch(ProjectileSource source, Class<P> projectileClass, Location<?> loc) {
+    static <P extends Projectile> Optional<P> defaultLaunch(ProjectileSource source, Class<P> projectileClass, Location<?> loc) {
         Optional<EntityType> opType = EntityTypeRegistryModule.getInstance().getEntity(projectileClass);
         if (!opType.isPresent()) {
             return Optional.empty();
@@ -230,10 +232,11 @@ public class ProjectileLauncher {
         if (projectile.get() instanceof EntityThrowable) {
             configureThrowable((EntityThrowable) projectile.get());
         }
-        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.source(source).build());
+        return doLaunch(loc.getExtent(), (P) projectile.get(), Cause.source(SpawnCause.builder().type(InternalSpawnTypes.PROJECTILE).build())
+                .named("ProjectileSource", source).build());
     }
 
-    private static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
+    static <P extends Projectile> Optional<P> doLaunch(Extent extent, P projectile, Cause cause) {
         SpongeCommonEventFactory.checkSpawnEvent(projectile, cause);
         LaunchProjectileEvent event = SpongeEventFactory.createLaunchProjectileEvent(cause, projectile);
         SpongeImpl.getGame().getEventManager().post(event);
@@ -244,6 +247,9 @@ public class ProjectileLauncher {
     }
 
     private static class DispenserSourceLogic implements ProjectileSourceLogic<Dispenser> {
+
+        DispenserSourceLogic() {
+        }
 
         @Override
         public <P extends Projectile> Optional<P> launch(ProjectileLogic<P> logic, Dispenser source, Class<P> projectileClass, Object... args) {

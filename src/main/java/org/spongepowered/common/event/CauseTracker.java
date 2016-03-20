@@ -912,7 +912,11 @@ public final class CauseTracker {
         List<NamedCause> namedCauses = new ArrayList<>();
         for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
             if (entry.getKey().equals(NamedCause.SOURCE)) {
-                namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                if (!(entry.getValue() instanceof SpawnCause)) {
+                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                } else {
+                    namedCauses.add(NamedCause.source(entry.getValue()));
+                }
             } else {
                 namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
             }
