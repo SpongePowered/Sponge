@@ -199,10 +199,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
         }
         UUID playerId = null;
-        if (compound.hasKey(NbtDataUtil.UUID_MOST, NbtDataUtil.TAG_LONG) && compound.hasKey(NbtDataUtil.UUID_LEAST, NbtDataUtil.TAG_LONG)) {
-            playerId = new UUID(compound.getLong(NbtDataUtil.UUID_MOST), compound.getLong(NbtDataUtil.UUID_LEAST));
-        } else if (compound.hasKey("UUID", NbtDataUtil.TAG_STRING)) {
-            playerId = UUID.fromString(compound.getString("UUID"));
+        if (compound.hasUniqueId(NbtDataUtil.UUID)) {
+            playerId = compound.getUniqueId(NbtDataUtil.UUID);
         }
         if (playerId != null) {
             Optional<Instant> savedFirst = SpongePlayerDataHandler.getFirstJoined(playerId);

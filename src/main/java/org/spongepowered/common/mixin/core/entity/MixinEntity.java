@@ -326,9 +326,6 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void setLocation(Location<World> location) {
-
-        // TODO 1.9 Update - Re-write to properly handle world changes --Zidane
-
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
             return;
@@ -336,7 +333,6 @@ public abstract class MixinEntity implements IMixinEntity {
 
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
-        thisEntity.removePassengers();
 
         if (thisEntity instanceof EntityPlayerMP) {
             // Close open containers
@@ -365,8 +361,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     // for sponge internal use only
     @SuppressWarnings("unchecked")
-    @Override
-    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
+    private boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
         final WorldServer fromWorld = server.worldServerForDimension(currentDim);
         final WorldServer toWorld = server.worldServerForDimension(targetDim);
@@ -380,6 +375,7 @@ public abstract class MixinEntity implements IMixinEntity {
         } else {
             fromWorld.getEntityTracker().untrackEntity(entity);
         }
+
 
         if (entity.isBeingRidden())
         {
@@ -881,8 +877,7 @@ public abstract class MixinEntity implements IMixinEntity {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
             net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
-            compound.setLong(NbtDataUtil.UUID_MOST, entity.getUniqueID().getMostSignificantBits());
-            compound.setLong(NbtDataUtil.UUID_LEAST, entity.getUniqueID().getLeastSignificantBits());
+            compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;
         } catch (Exception e) {
@@ -898,11 +893,11 @@ public abstract class MixinEntity implements IMixinEntity {
         } else {
             NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
 
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+            if (!creatorNbt.hasUniqueId(NbtDataUtil.UUID)) {
                 return Optional.empty();
             }
 
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+            UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
             // get player if online
             EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
             if (player != null) {

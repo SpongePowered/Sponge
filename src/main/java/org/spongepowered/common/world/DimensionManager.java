@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Throwables;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.hash.TIntObjectHashMap;
@@ -97,9 +99,9 @@ public class DimensionManager {
     private static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
     private static final TIntObjectHashMap<Path> dimensionPathByDimensionId = new TIntObjectHashMap<>(3);
     private static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
-    private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>();
-    private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid = new HashMap<>();
-    private static final Map<String, UUID> worldUuidByFolderName = new HashMap<>();
+    private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
+    private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
+    private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
     private static final Queue<Integer> unloadQueue = new ArrayDeque<>();
@@ -280,17 +282,13 @@ public class DimensionManager {
     }
 
     public static Optional<UUID> getUuidForFolder(String folderName) {
+        checkNotNull(folderName);
         return Optional.ofNullable(worldUuidByFolderName.get(folderName));
     }
 
     public static Optional<String> getFolderForUuid(UUID uuid) {
-        for (Map.Entry<String, UUID> entry : worldUuidByFolderName.entrySet()) {
-            if (entry.getValue().equals(uuid)) {
-                return Optional.of(entry.getKey());
-            }
-        }
-
-        return Optional.empty();
+        checkNotNull(uuid);
+        return Optional.ofNullable(worldUuidByFolderName.inverse().get(uuid));
     }
 
     // TODO Some result mechanism
@@ -440,7 +438,7 @@ public class DimensionManager {
         }
 
         final Path worldFolder = SpongeImpl.getGame().getSavesDirectory().resolve(worldName);
-        if (!Files.exists(worldFolder) || !Files.isDirectory(worldFolder)) {
+        if (!Files.isDirectory(worldFolder)) {
             SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", worldName, worldFolder);
             return Optional.empty();
         }
@@ -917,7 +915,7 @@ public class DimensionManager {
         // Do nothing in Common
     }
 
-    public static void loadDimensionDataMap(NBTTagCompound compound) {
+    public static void loadDimensionDataMap(@Nullable NBTTagCompound compound) {
         dimensionBits.clear();
         if (compound == null) {
             for (int dimensionId : dimensionTypeByDimensionId.keys()) {

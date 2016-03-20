@@ -99,7 +99,7 @@ public final class NbtDataUtil {
     public static final String USER_SPAWN_Z = "SpawnZ";
     public static final String USER_SPAWN_FORCED = "SpawnForced";
     public static final String USER_SPAWN_LIST = "Spawns";
-    public static final String USER_SPAWN_DIM = "Dim";
+    public static final String UUID = "UUID";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
@@ -135,8 +135,6 @@ public final class NbtDataUtil {
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";
-    public static final String UUID_MOST = "UUIDMost";
-    public static final String UUID_LEAST = "UUIDLeast";
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
     public static final String INVALID_TITLE = "invalid";

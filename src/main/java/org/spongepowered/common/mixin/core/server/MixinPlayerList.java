@@ -230,14 +230,12 @@ public abstract class MixinPlayerList {
         Instant lastJoined = Instant.now();
         SpongePlayerDataHandler.setPlayerInfo(playerIn.getUniqueID(), firstJoined.orElse(lastJoined), lastJoined);
 
+        worldServer = (WorldServer) loginEvent.getToTransform().getExtent();
         double x = loginEvent.getToTransform().getPosition().getX();
         double y = loginEvent.getToTransform().getPosition().getY();
         double z = loginEvent.getToTransform().getPosition().getZ();
         float pitch = (float) loginEvent.getToTransform().getPitch();
         float yaw = (float) loginEvent.getToTransform().getYaw();
-        if (worldServer != loginEvent.getToTransform().getExtent()) {
-            worldServer = (net.minecraft.world.WorldServer) loginEvent.getToTransform().getExtent();
-        }
 
         playerIn.dimension = ((IMixinWorld) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);

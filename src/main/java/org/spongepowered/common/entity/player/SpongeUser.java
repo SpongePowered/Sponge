@@ -99,18 +99,17 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             for (int i = 0; i < spawnList.tagCount(); i++) {
                 final NBTTagCompound spawnCompound = spawnList.getCompoundTagAt(i);
 
-                final long least = spawnCompound.getLong(NbtDataUtil.WORLD_UUID_LEAST);
-                final long most = spawnCompound.getLong(NbtDataUtil.WORLD_UUID_MOST);
+                final UUID uuid = spawnCompound.getUniqueId(NbtDataUtil.UUID);
 
-                if (least != 0 && most != 0) {
+                if (uuid.getLeastSignificantBits() != 0 && uuid.getMostSignificantBits() != 0) {
                     final double xPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_X);
                     final double yPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Y);
                     final double zPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Z);
                     final boolean forced = spawnCompound.getBoolean(NbtDataUtil.USER_SPAWN_FORCED);
-                    this.spawnLocations.put(new UUID(most, least), new RespawnLocation.Builder()
+                    this.spawnLocations.put(uuid, new RespawnLocation.Builder()
                             .forceSpawn(forced)
                             .position(new Vector3d(xPos, yPos, zPos))
-                            .world(new UUID(most, least))
+                            .world(uuid)
                             .build());
                 }
             }
@@ -132,8 +131,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             final RespawnLocation respawn = entry.getValue();
 
             final NBTTagCompound spawnCompound = new NBTTagCompound();
-            spawnCompound.setLong(NbtDataUtil.WORLD_UUID_LEAST, respawn.getWorldUniqueId().getLeastSignificantBits());
-            spawnCompound.setLong(NbtDataUtil.WORLD_UUID_MOST, respawn.getWorldUniqueId().getMostSignificantBits());
+            spawnCompound.setUniqueId(NbtDataUtil.UUID, entry.getKey());
             spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_X, respawn.getPosition().getX());
             spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Y, respawn.getPosition().getY());
             spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
