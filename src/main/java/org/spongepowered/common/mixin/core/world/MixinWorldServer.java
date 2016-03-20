@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
@@ -66,13 +65,11 @@ import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -91,9 +88,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
-import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -158,10 +153,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentTuple = causeTracker.getPhases().peek();
-        final Optional<BlockSnapshot> currentTickingblock = currentTuple.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         final IPhaseState phaseState = currentTuple.getState();
-        if (this.isRemote || currentTickingblock.isPresent() || phaseState == WorldPhase.State.TERRAIN_GENERATION
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
+        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
             block.randomTick(worldIn, pos, state, rand);
             return;
         }
@@ -192,10 +185,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentTuple = causeTracker.getPhases().peek();
-        final Optional<BlockSnapshot> currentTickingblock = currentTuple.getContext().firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
         final IPhaseState phaseState = currentTuple.getState();
-        if (this.isRemote || currentTickingblock.isPresent() || phaseState == WorldPhase.State.TERRAIN_GENERATION
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING) {
+        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
@@ -249,12 +240,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     // special handling for Pistons since they use their own event system
-    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
+    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
+        target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getPhases().peekState();
-        if (phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
+        if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
         return TrackingHelper.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
@@ -287,8 +278,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getPhases().peekState();
 
-        if (this.isRemote || phaseState == WorldPhase.State.TERRAIN_GENERATION || phaseState == WorldPhase.State.WORLD_SPAWNER_SPAWNING
-            || phaseState == SpawningPhase.State.CHUNK_SPAWNING) {
+        if (phaseState.getPhase().ignoresScheduledUpdates(phaseState)) {
             this.tmpScheduledObj = sbu;
             return;
         }

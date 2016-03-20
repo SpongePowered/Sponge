@@ -126,6 +126,14 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext context) {
+        return false;
+    }
+
+    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
+        return false;
+    }
+
     // Actual capture methods
 
     public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
@@ -259,4 +267,5 @@ public abstract class TrackingPhase {
 
         return false;
     }
+
 }

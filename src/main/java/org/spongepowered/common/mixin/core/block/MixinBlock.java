@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -39,12 +41,16 @@ import org.spongepowered.api.block.trait.BlockTrait;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.entity.EntityTypes;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -59,7 +65,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.EventConsumer;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -172,6 +182,34 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public Optional<BlockTrait<?>> getTrait(String blockTrait) {
         return getDefaultBlockState().getTrait(blockTrait);
+    }
+
+    @Inject(method = "dropBlockAsItem", at = @At("HEAD"))
+    private void preDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
+        if (worldIn instanceof IMixinWorldServer) {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+            mixinWorld.getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
+                .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
+                .addCaptures()
+                .add(NamedCause.of(TrackingHelper.BLOCK_BREAK_FORTUNE, fortune))
+                .add(NamedCause.of(TrackingHelper.BLOCK_BREAK_POSITION, pos))
+                .complete());
+        }
+    }
+
+    @Inject(method = "dropBlockAsItem", at = @At("RETURN"))
+    private void postDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
+        if (worldIn instanceof IMixinWorldServer) {
+            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
+        }
+    }
+
+    @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, double x, double y, double z) {
+        Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
+        EventConsumer.supplyEvent(() -> SpongeEventFactory.createConstructEntityEventPre(Cause.source(worldIn.getBlockState(pos)).build(), EntityTypes.ITEM, position))
+            .cancelled(event -> callbackInfo.cancel())
+            .buildAndPost();
     }
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)

@@ -27,7 +27,7 @@ package org.spongepowered.common.event.tracking.phase;
 public final class TrackingPhases {
 
     public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
-    public static final SpawningPhase SPAWNING = new SpawningPhase(TrackingPhases.GENERAL);
+    public static final EntityPhase SPAWNING = new EntityPhase(TrackingPhases.GENERAL);
     public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
     public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.SPAWNING).addChild(TrackingPhases.BLOCK);
     public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);

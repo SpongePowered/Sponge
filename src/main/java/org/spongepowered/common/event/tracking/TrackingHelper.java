@@ -108,6 +108,8 @@ public class TrackingHelper {
     public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
     public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
     public static final String DAMAGE_SOURCE = "DamageSource";
+    public static final String BLOCK_BREAK_FORTUNE = "BreakingBlockFortune";
+    public static final String BLOCK_BREAK_POSITION = "BreakingBlockPosition";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {

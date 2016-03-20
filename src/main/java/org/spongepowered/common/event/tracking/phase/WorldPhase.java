@@ -26,28 +26,52 @@ package org.spongepowered.common.event.tracking.phase;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.google.common.collect.ImmutableSet;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class WorldPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
-        TERRAIN_GENERATION,
-        POPULATOR_RUNNING,
+        TERRAIN_GENERATION(BlockPhase.State.BLOCK_DECAY, BlockPhase.State.RESTORING_BLOCKS, State.POPULATOR_RUNNING, State.WORLD_SPAWNER_SPAWNING),
+        POPULATOR_RUNNING(BlockPhase.State.BLOCK_DECAY, BlockPhase.State.RESTORING_BLOCKS, State.POPULATOR_RUNNING, State.WORLD_SPAWNER_SPAWNING),
         CHUNK_LOADING,
-        IDLE,
         WORLD_SPAWNER_SPAWNING;
+
+        private final Set<IPhaseState> compatibleStates;
+
+        State() {
+            this(ImmutableSet.of());
+        }
+
+        State(ImmutableSet<IPhaseState> states) {
+            this.compatibleStates = states;
+        }
+
+        State(IPhaseState... states) {
+            this(ImmutableSet.copyOf(states));
+        }
 
 
         @Override
@@ -57,21 +81,7 @@ public class WorldPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            if (this == TERRAIN_GENERATION || this == POPULATOR_RUNNING) {
-                if (state instanceof ITickingState) {
-                    return true;
-                } else if (state == BlockPhase.State.BLOCK_DECAY) {
-                    return true;
-                } else if (state == BlockPhase.State.RESTORING_BLOCKS) {
-                    return true;
-                } else if (state == State.POPULATOR_RUNNING) {
-                    return true;
-                } else if (state == SpawningPhase.State.CHUNK_SPAWNING) {
-                    return true;
-                }
-                // I'm sure there will be more cases.
-            }
-            return false;
+            return this.compatibleStates.contains(state);
         }
 
     }
@@ -80,33 +90,37 @@ public class WorldPhase extends TrackingPhase {
         ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-                final Optional<Entity> currentTickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class);
-                checkArgument(currentTickingEntity.isPresent(), "Not ticking on an Entity! Please analyze the current phase context: %n%s",
-                        phaseContext);
+                final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
+                    .orElseThrow(
+                        () -> new IllegalStateException("Not ticking on an Entity! Please analyze the current phase context: " + phaseContext));
+
             }
         },
         TILE_ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-                final Optional<TileEntity> currentTickingTileEntity = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class);
-                checkArgument(currentTickingTileEntity.isPresent(), "Not ticking on a TileEntity! Please analyze the current phase context: %n%s",
-                        phaseContext);
+                final TileEntity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
+                    .orElseThrow(
+                        () -> new IllegalStateException("Not ticking on a TileEntity! Please analyze the current phase context: " + phaseContext));
+
             }
         },
         BLOCK() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-                final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-                checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
-                        phaseContext);
+                final BlockSnapshot tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                    .orElseThrow(
+                        () -> new IllegalStateException("Not ticking on an Block! Please analyze the current phase context: " + phaseContext));
+
             }
         },
         RANDOM_BLOCK() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
-                final Optional<BlockSnapshot> currentTickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-                checkArgument(currentTickingBlock.isPresent(), "Not ticking on a block snapshot! Please analyze the current phase context: %n%s",
-                        phaseContext);
+                final BlockSnapshot tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                    .orElseThrow(
+                        () -> new IllegalStateException("Not ticking on an Block! Please analyze the current phase context: " + phaseContext));
+
             }
         };
 
@@ -123,24 +137,40 @@ public class WorldPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof BlockPhase.State || state instanceof SpawningPhase.State || state == State.TERRAIN_GENERATION;
+            return state instanceof BlockPhase.State || state instanceof EntityPhase.State || state == State.TERRAIN_GENERATION;
         }
 
     }
 
     @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
+    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
         if (state instanceof ITickingState) {
-            ((ITickingState) state).processPostTick(causeTracker, phaseContext);
+            ((ITickingState) state).processPostTick(causeTracker, context);
         }
         if (state == State.TERRAIN_GENERATION) {
+            final List<BlockSnapshot> changedBlocks = context.getCapturedBlockSupplier().get().orEmptyList();
+
 
         } else if (state == State.POPULATOR_RUNNING) {
-            final PopulatorType runningGenerator = phaseContext.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+            final PopulatorType runningGenerator = context.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
             final IMixinWorld mixinWorld = causeTracker.getMixinWorld();
         } else if (state instanceof Tick) {
-            if (state == Tick.RANDOM_BLOCK) {
-
+            ((Tick) state).processPostTick(causeTracker, context);
+        } else if (state == State.WORLD_SPAWNER_SPAWNING) {
+            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().get().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().get().orEmptyList();
+            if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
+                return;
+            }
+            if (!spawnedEntities.isEmpty()) {
+                if (!spawnedItems.isEmpty()) { // We shouldn't separate the entities whatsoever.
+                    spawnedEntities.addAll(spawnedItems);
+                }
+                final List<EntitySnapshot> snapshots = spawnedEntities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
+                EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, snapshots, causeTracker.getWorld()))
+                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .buildAndPost();
             }
         }
 

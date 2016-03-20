@@ -29,11 +29,24 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.CaptureType;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class BlockPhase extends TrackingPhase {
 
@@ -41,7 +54,8 @@ public class BlockPhase extends TrackingPhase {
         BLOCK_DECAY,
         RESTORING_BLOCKS,
         POST_NOTIFICATION_EVENT,
-        DISPENSE;
+        DISPENSE,
+        BLOCK_DROP_ITEMS;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -86,6 +100,29 @@ public class BlockPhase extends TrackingPhase {
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_DECAY) {
 
+        } else if (state == State.BLOCK_DROP_ITEMS) {
+            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> {
+                final Cause cause = Cause.source(BlockSpawnCause.builder()
+                        .block(phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get())
+                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                        .build())
+                    .build();
+                final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+                EventConsumer.supplyEvent(() -> SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
+                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .buildAndPost();
+            });
+            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                final Cause cause = Cause.source(BlockSpawnCause.builder()
+                    .block(phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get())
+                    .type(InternalSpawnTypes.DROPPED_ITEM)
+                    .build())
+                    .build();
+                final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+                EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .buildAndPost();
+            });
         }
 
     }

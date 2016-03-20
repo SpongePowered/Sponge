@@ -32,12 +32,9 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.ITickingState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -45,22 +42,14 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class SpawningPhase extends TrackingPhase {
+public class EntityPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         DEATH_DROPS_SPAWNING,
-        DROP_ITEM,
-        CHUNK_SPAWNING,
         ;
 
-
         @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            return this == CHUNK_SPAWNING && state instanceof ITickingState;
-        }
-
-        @Override
-        public SpawningPhase getPhase() {
+        public EntityPhase getPhase() {
             return TrackingPhases.SPAWNING;
         }
 
@@ -117,27 +106,17 @@ public class SpawningPhase extends TrackingPhase {
                         .buildAndPost();
                 }
             }
-        } else if (state == State.CHUNK_SPAWNING) {
-            if (!spawnedEntities.isEmpty()) {
-                final List<EntitySnapshot> snapshots = spawnedEntities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World", causeTracker.getWorld()).build();
-                EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, snapshots, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                    .buildAndPost();
-            }
         }
-
-
 
     }
 
-    public SpawningPhase(TrackingPhase parent) {
+    public EntityPhase(TrackingPhase parent) {
         super(parent);
     }
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState == State.CHUNK_SPAWNING;
+        return false;
     }
 
 }

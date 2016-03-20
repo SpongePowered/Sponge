@@ -32,13 +32,20 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -249,6 +256,23 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
      */
     private int setNibble(int num, int data, int which, int bitsToReplace) {
         return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
+    }
+
+    @Inject(method = "onChunkLoad", at = @At("HEAD"))
+    private void startChunkLoad(CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().switchToPhase(TrackingPhases.WORLD, WorldPhase.State.CHUNK_LOADING, PhaseContext.start()
+                .add(NamedCause.source(this))
+                .addCaptures()
+                .complete());
+        }
+    }
+
+    @Inject(method = "onChunkLoad", at = @At("RETURN"))
+    private void endChunkLoad(CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            ((IMixinWorldServer) this.worldObj).getCauseTracker().completePhase();
+        }
     }
 
     /**

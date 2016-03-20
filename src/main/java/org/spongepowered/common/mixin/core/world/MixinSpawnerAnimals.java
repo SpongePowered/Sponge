@@ -40,8 +40,6 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,16 +50,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.event.tracking.phase.SpawningPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.Random;
@@ -71,15 +66,14 @@ import javax.annotation.Nullable;
 @Mixin(SpawnerAnimals.class)
 public abstract class MixinSpawnerAnimals {
 
-    private static final String WORLD_CAN_SPAWN_CREATURE = "Lnet/minecraft/world/WorldServer;canCreatureTypeSpawnHere("
-        + "Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/BiomeGenBase$SpawnListEntry;Lnet/minecraft/util/BlockPos;)Z";
+    private static final String WORLD_CAN_SPAWN_CREATURE =
+        "Lnet/minecraft/world/WorldServer;canCreatureTypeSpawnHere(Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/BiomeGenBase$SpawnListEntry;Lnet/minecraft/util/BlockPos;)Z";
 
     private static final String BIOME_CAN_SPAWN_ANIMAL =
-        "Lnet/minecraft/world/SpawnerAnimals;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"
-        + "Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z";
+        "Lnet/minecraft/world/SpawnerAnimals;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)Z";
 
-    private static final String WEIGHTED_RANDOM_GET = "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/Collection;)"
-        + "Lnet/minecraft/util/WeightedRandom$Item;";
+    private static final String WEIGHTED_RANDOM_GET =
+        "Lnet/minecraft/util/WeightedRandom;getRandomItem(Ljava/util/Random;Ljava/util/Collection;)Lnet/minecraft/util/WeightedRandom$Item;";
     private static final String WORLD_SERVER_SPAWN_ENTITY = "Lnet/minecraft/world/WorldServer;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
 
@@ -93,7 +87,7 @@ public abstract class MixinSpawnerAnimals {
     private void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
             .add(NamedCause.source(worldServer))
             .addCaptures()
             .complete());
@@ -113,7 +107,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, SpawningPhase.State.CHUNK_SPAWNING, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.SPAWNING, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
             .addCaptures()
             .add(NamedCause.source(worldServer))
             .complete());

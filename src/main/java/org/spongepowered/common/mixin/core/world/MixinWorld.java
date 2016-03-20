@@ -127,6 +127,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -232,8 +233,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
     @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType);
-    @Shadow public abstract void markBlockForUpdate(BlockPos pos);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
+    @Shadow public abstract void markBlockForUpdate(BlockPos pos);
 
     // @formatter:on
 
@@ -896,15 +897,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList,
-            snapshotBuilder.build(), this);
-        SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled()) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
-            }
-        }
+        EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
+            .nonCancelled(event -> {
+                for (Entity successful : event.getEntities()) {
+                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
+                }
+            })
+            .buildAndPost();
         callbackInfo.cancel();
     }
 
