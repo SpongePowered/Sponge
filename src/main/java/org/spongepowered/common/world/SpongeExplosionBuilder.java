@@ -30,28 +30,22 @@ import static com.google.common.base.Preconditions.checkState;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.common.interfaces.world.IMixinExplosion;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
 
-    private World world;
+    private Location<World> location;
     private Explosive sourceExplosive;
     private float radius;
-    private Vector3d origin;
     private boolean canCauseFire;
     private boolean shouldBreakBlocks;
     private boolean shouldSmoke;
 
     public SpongeExplosionBuilder() {
         reset();
-    }
-
-    @Override
-    public Explosion.Builder world(World world) {
-        this.world = checkNotNull(world, "world");
-        return this;
     }
 
     @Override
@@ -67,8 +61,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
-    public Explosion.Builder origin(Vector3d origin) {
-        this.origin = checkNotNull(origin, "origin");
+    public Explosion.Builder location(Location<World> location) {
+        this.location = checkNotNull(location, "location");
         return this;
     }
 
@@ -92,10 +86,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder from(Explosion value) {
-        this.world = value.getWorld();
+        this.location = value.getLocation();
         this.sourceExplosive = value.getSourceExplosive().orElse(null);
         this.radius = value.getRadius();
-        this.origin = value.getOrigin();
         this.canCauseFire = value.canCauseFire();
         this.shouldBreakBlocks = value.shouldBreakBlocks();
         this.shouldSmoke = value.shouldPlaySmoke();
@@ -104,10 +97,9 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public SpongeExplosionBuilder reset() {
-        this.world = null;
+        this.location = null;
         this.sourceExplosive = null;
         this.radius = 0;
-        this.origin = null;
         this.canCauseFire = false;
         this.shouldBreakBlocks = false;
         this.shouldSmoke = false;
@@ -117,11 +109,12 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     @Override
     public Explosion build() throws IllegalStateException {
         // TODO Check coordinates and if world is loaded here.
-        checkState(this.world != null, "World is null!");
-        checkState(this.origin != null, "Origin is null!");
+        checkState(this.location != null, "Location is null!");
 
-        final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) this.world,
-                (Entity) this.sourceExplosive, this.origin.getX(), this.origin.getY(), this.origin.getZ(), this.radius,
+        World world = this.location.getExtent();
+        Vector3d origin = this.location.getPosition();
+        final net.minecraft.world.Explosion explosion = new net.minecraft.world.Explosion((net.minecraft.world.World) world,
+                (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldSmoke);
         ((IMixinExplosion) explosion).setShouldBreakBlocks(this.shouldBreakBlocks);
         return (Explosion) explosion;
