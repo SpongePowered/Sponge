@@ -11,6 +11,7 @@ ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 
 dependencies {
     compile common
+    compile common.sourceSets.java6.output
 }
 
 // Add Common access transformers
