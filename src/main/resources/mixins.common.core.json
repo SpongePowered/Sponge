@@ -311,6 +311,7 @@
         "network.play.server.MixinSPacketPlayerListItem",
         "potion.MixinPotion",
         "potion.MixinPotionEffect",
+        "scoreboard.MixinCollisionRule",
         "scoreboard.MixinCriterion",
         "scoreboard.MixinEnumVisible",
         "scoreboard.MixinScore",

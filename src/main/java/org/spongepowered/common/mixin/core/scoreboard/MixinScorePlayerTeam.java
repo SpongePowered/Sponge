@@ -29,6 +29,7 @@ import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
@@ -68,6 +69,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     @Shadow public boolean canSeeFriendlyInvisibles;
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible nameTagVisibility;
     @Shadow public net.minecraft.scoreboard.Team.EnumVisible deathMessageVisibility;
+    @Shadow public net.minecraft.scoreboard.Team.CollisionRule collisionRule;
 
     @Shadow public abstract void setAllowFriendlyFire(boolean friendlyFire);
 
@@ -184,6 +186,15 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     public void team$setDeathMessageVisibility(Visibility visibility) {
         this.deathMessageVisibility= (EnumVisible) (Object) visibility;
+        this.doTeamUpdate();
+    }
+
+    public org.spongepowered.api.scoreboard.CollisionRule team$getCollisionRule() {
+        return (org.spongepowered.api.scoreboard.CollisionRule) (Object) this.collisionRule;
+    }
+
+    public void team$setCollisionRule(org.spongepowered.api.scoreboard.CollisionRule rule) {
+        this.collisionRule = (CollisionRule) (Object) rule;
         this.doTeamUpdate();
     }
 
