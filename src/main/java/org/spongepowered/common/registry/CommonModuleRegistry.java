@@ -401,6 +401,8 @@ public final class CommonModuleRegistry {
             .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
             .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             .registerModule(BlockPaletteType.class, new PaletteTypeRegistryModule())
+            .registerModule(WorldCreationSettings.class, WorldCreationSettingsRegistryModule.getInstance())
+            .registerModule(CollisionRule.class, new CollisionRuleRegistryModule())
             ;
     }
 

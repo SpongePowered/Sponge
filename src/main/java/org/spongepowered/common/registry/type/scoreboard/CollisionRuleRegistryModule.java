@@ -24,41 +24,41 @@
  */
 package org.spongepowered.common.registry.type.scoreboard;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import net.minecraft.scoreboard.Team;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.scoreboard.Visibilities;
-import org.spongepowered.api.scoreboard.Visibility;
+import org.spongepowered.api.scoreboard.CollisionRule;
+import org.spongepowered.api.scoreboard.CollisionRules;
 
 import java.util.Collection;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class VisibilityRegistryModule implements CatalogRegistryModule<Visibility> {
+import static com.google.common.base.Preconditions.checkNotNull;
 
-    @RegisterCatalog(Visibilities.class)
-    public static final Map<String, Visibility> visibilityMappings = Maps.newHashMap();
+public final class CollisionRuleRegistryModule implements CatalogRegistryModule<CollisionRule> {
 
-    @Override
-    public Optional<Visibility> getById(String id) {
-        return Optional.ofNullable(visibilityMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
-    }
-
-    @Override
-    public Collection<Visibility> getAll() {
-        return ImmutableList.copyOf(visibilityMappings.values());
-    }
+    @RegisterCatalog(CollisionRules.class)
+    public final Map<String, CollisionRule> collisionRules = Maps.newHashMap();
 
     @Override
     public void registerDefaults() {
-        visibilityMappings.put("always", (Visibility) (Object) Team.EnumVisible.ALWAYS);
-        visibilityMappings.put("never", (Visibility) (Object) Team.EnumVisible.NEVER);
-        visibilityMappings.put("hide_for_other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
-        visibilityMappings.put("hide_for_own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
+        this.collisionRules.put("always", (CollisionRule) (Object) Team.CollisionRule.ALWAYS);
+        this.collisionRules.put("never", (CollisionRule) (Object) Team.CollisionRule.NEVER);
+        this.collisionRules.put("push_other_teams", (CollisionRule) (Object) Team.CollisionRule.HIDE_FOR_OTHER_TEAMS);
+        this.collisionRules.put("push_own_team", (CollisionRule) (Object) Team.CollisionRule.HIDE_FOR_OWN_TEAM);
     }
+
+    @Override
+    public Optional<CollisionRule> getById(String id) {
+        return Optional.ofNullable(this.collisionRules.get(checkNotNull(id, "id").toLowerCase()));
+    }
+
+    @Override
+    public Collection<CollisionRule> getAll() {
+        return ImmutableSet.copyOf(this.collisionRules.values());
+    }
+
 }
