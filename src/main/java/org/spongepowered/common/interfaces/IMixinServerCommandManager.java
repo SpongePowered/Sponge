@@ -25,6 +25,7 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.command.ICommand;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.Game;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 
@@ -35,4 +36,7 @@ public interface IMixinServerCommandManager {
     void registerEarlyCommands(Game game);
 
     MinecraftCommandWrapper wrapCommand(ICommand command);
+
+    BlockPos getTabBlockPos();
+
 }

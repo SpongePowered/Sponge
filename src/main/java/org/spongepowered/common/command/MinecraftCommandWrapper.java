@@ -48,6 +48,7 @@ import org.spongepowered.api.command.InvocationCommandException;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
@@ -212,9 +213,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
-        // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), null);
+        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), ((IMixinServerCommandManager) MinecraftServer.getServer().getCommandManager()).getTabBlockPos());
         if (suggestions == null) {
             return ImmutableList.of();
         }
