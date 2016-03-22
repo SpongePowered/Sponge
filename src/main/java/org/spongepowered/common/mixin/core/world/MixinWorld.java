@@ -732,11 +732,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        checkNotNull(explosion.getOrigin(), "origin");
-
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), explosion
-                        .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
-                explosion.shouldBreakBlocks());
+        Location<World> origin = explosion.getLocation();
+        checkNotNull(origin, "location");
+        newExplosion(
+                (net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), origin.getX(),
+                origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
+                explosion.shouldBreakBlocks()
+        );
     }
 
     @Override
