@@ -32,6 +32,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +40,13 @@ public class GeneralPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         COMMAND,
+        /**
+         * A specific state that is introduced for the sake of
+         * preventing leaks into other phases as various phases
+         * are unwound. This state is specifically to ignore any
+         * transactions that may take place.
+         */
+        UNWINDING,
         COMPLETE;
 
         public boolean isBusy() {
@@ -76,5 +84,35 @@ public class GeneralPhase extends TrackingPhase {
             checkState(sender != null, "Cannot complete a command when there was no command sender!");
             // todo properly unwind the captured block changes and entity spawns.
         }
+    }
+
+    @Override
+    public boolean requiresBlockCapturing(IPhaseState currentState) {
+        return currentState == State.UNWINDING;
+    }
+
+    @Override
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return phaseData.getState() == State.UNWINDING;
+    }
+
+    @Override
+    public boolean allowEntitySpawns(IPhaseState currentState) {
+        return currentState != State.UNWINDING;
+    }
+
+    @Override
+    public boolean ignoresBlockEvent(IPhaseState phaseState) {
+        return phaseState == State.UNWINDING;
+    }
+
+    @Override
+    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext context) {
+        return phaseState == State.UNWINDING;
+    }
+
+    @Override
+    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
+        return phaseState == State.UNWINDING;
     }
 }

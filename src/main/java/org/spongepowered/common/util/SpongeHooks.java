@@ -76,6 +76,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+import javax.annotation.Nullable;
 import javax.management.MBeanServer;
 
 public class SpongeHooks {
@@ -175,7 +176,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause cause, World world, CaptureType type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(Cause cause, World world, @Nullable CaptureType type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }

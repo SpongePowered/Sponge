@@ -54,11 +54,13 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -68,13 +70,17 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 /**
  * A simple utility for aiding in tracking, either with resolving notifiers
@@ -332,5 +338,53 @@ public class TrackingHelper {
             }
         });
 
+    }
+
+    public static void processBlockSnapshots(List<BlockSnapshot> blockSnapshots, PhaseContext phaseContext) {
+
+    }
+
+
+    public static void markAndNotifyBlockPost(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable CaptureType type, Cause.Builder builder) {
+        // We have to use a proxy so that our pending changes are notified such that any accessors from block
+        // classes do not fail on getting the incorrect block state from the IBlockAccess
+        SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(causeTracker.getMinecraftWorld(), transactions);
+        for (Transaction<BlockSnapshot> transaction : transactions) {
+            if (!transaction.isValid()) {
+                continue; // Don't use invalidated block transactions during notifications, these only need to be restored
+            }
+            // Handle custom replacements
+            if (transaction.getCustom().isPresent()) {
+                transaction.getFinal().restore(true, false);
+            }
+
+            SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
+            SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
+            final Cause currentCause = builder.build();
+            SpongeHooks.logBlockAction(currentCause, causeTracker.getMinecraftWorld(), type, transaction);
+            int updateFlag = oldBlockSnapshot.getUpdateFlag();
+            BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
+            IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
+            IBlockState newState = (IBlockState) newBlockSnapshot.getState();
+            // Containers get placed automatically
+            if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+                final BlockSnapshot snapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(newState,
+                    newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
+                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
+                    .add(NamedCause.source(snapshot))
+                    .addCaptures());
+                newState.getBlock().onBlockAdded(causeTracker.getMinecraftWorld(), pos, newState);
+                if (shouldChainCause(causeTracker, currentCause)) {
+                    final Cause.Builder newBuilder = Cause.source(snapshot);
+                    for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
+                        newBuilder.suggestNamed(entry.getKey(), entry.getValue());
+                    }
+                }
+            }
+
+            proxyBlockAccess.proceed();
+            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
+
+        }
     }
 }

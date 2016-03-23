@@ -56,6 +56,7 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -164,7 +165,13 @@ public final class CauseTracker {
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
         try {
+            if (state != GeneralPhase.State.UNWINDING) {
+                switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.UNWINDING, PhaseContext.start().addCaptures().complete());
+            }
             phase.unwind(this, state, tuple.getContext());
+            if (state != GeneralPhase.State.UNWINDING) {
+                completePhase();
+            }
         } catch (Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(40);
             printer.add("Exception exiting phase").centre().hr();

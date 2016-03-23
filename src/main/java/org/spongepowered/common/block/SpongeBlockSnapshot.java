@@ -182,8 +182,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;
-        if (!force && (current.getBlock() != replaced.getBlock()
-            || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
+        if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
             causeTracker.completePhase();
             return false;
         }
