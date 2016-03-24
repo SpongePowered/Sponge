@@ -118,6 +118,7 @@ eclipse {
             whenMerged { classpath ->
                 def libs = classpath.entries.findAll { it.path.endsWith('SpongeCommon') || it.path.endsWith('SpongeAPI') }
                 def others = classpath.entries - libs
+                others.removeAll { it.path.contains('java6') }
                 classpath.entries = others + libs
             }
         }
