@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.util.GuavaJavaUtils;
 
 import java.util.Random;
 
@@ -50,7 +51,7 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
 
     @Shadow private IBlockState oreBlock;
     @Shadow private int numberOfBlocks;
-    @Shadow private Predicate<?> predicate;
+    @Shadow private Predicate<IBlockState> predicate;
 
     private VariableAmount size;
     private VariableAmount count;
@@ -120,15 +121,16 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
         this.height = height;
     }
 
-    @Override
     @SuppressWarnings("unchecked")
-    public Predicate<BlockState> getPlacementCondition() {
-        return (Predicate<BlockState>) this.predicate;
+    @Override
+    public java.util.function.Predicate<BlockState> getPlacementCondition() {
+        return (java.util.function.Predicate<BlockState>)(Object)GuavaJavaUtils.asJavaPredicate(this.predicate);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public void setPlacementCondition(Predicate<BlockState> condition) {
-        this.predicate = condition;
+    public void setPlacementCondition(java.util.function.Predicate<BlockState> condition) {
+        this.predicate = (Predicate<IBlockState>)(Object)GuavaJavaUtils.asGuavaPredicate(condition);
     }
 
     @Override

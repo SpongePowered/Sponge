@@ -27,7 +27,6 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Predicate;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
@@ -40,6 +39,7 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.SeaFloor;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class SeaFloorPopulator implements SeaFloor {
 
@@ -86,7 +86,7 @@ public class SeaFloorPopulator implements SeaFloor {
                     }
                     for (int y = pos.getY() - depth; y <= pos.getY() + depth; ++y) {
                         BlockPos blockpos1 = new BlockPos(x, y, z);
-                        if (this.check.apply((BlockState) world.getBlockState(blockpos1))) {
+                        if (this.check.test((BlockState) world.getBlockState(blockpos1))) {
                             world.setBlockState(blockpos1, (IBlockState) this.block, 2);
                         }
                     }

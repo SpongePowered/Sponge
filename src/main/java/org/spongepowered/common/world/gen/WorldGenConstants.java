@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.gen;
 
-import com.google.common.base.Predicate;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderFlat;
@@ -37,6 +36,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 public final class WorldGenConstants {
 
@@ -76,179 +76,147 @@ public final class WorldGenConstants {
 
     };
 
-    public static final Predicate<BlockState> DIRT_OR_GRASS = new Predicate<BlockState>() {
-
-        @Override
-        public boolean apply(BlockState input) {
-            return input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
-        }
-
+    public static final Predicate<BlockState> DIRT_OR_GRASS = (input) -> {
+        return input.getType().equals(BlockTypes.DIRT) || input.getType().equals(BlockTypes.GRASS);
     };
 
-    public static final Predicate<BlockState> DIRT = new Predicate<BlockState>() {
-
-        @Override
-        public boolean apply(BlockState input) {
-            return input.getType().equals(BlockTypes.DIRT);
-        }
-
+    public static final Predicate<BlockState> DIRT = (input) -> {
+        return input.getType().equals(BlockTypes.DIRT);
     };
 
-    public static final Predicate<BlockState> STONE = new Predicate<BlockState>() {
-
-        @Override
-        public boolean apply(BlockState input) {
-            return input.getType().equals(BlockTypes.STONE);
-        }
-
+    public static final Predicate<BlockState> STONE = (input) -> {
+        return input.getType().equals(BlockTypes.STONE);
     };
 
-    public static final Predicate<Location<World>> CAVE_LIQUIDS = new Predicate<Location<World>>() {
-
-        @Override
-        public boolean apply(Location<World> input) {
-            if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
-                return false;
-            }
-            if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE
-                    || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
-                    || (input.getBlock().getType() != BlockTypes.STONE && input
-                            .getBlock().getType() != BlockTypes.AIR)) {
-                return false;
-            }
-            int air = 0;
-            int stone = 0;
-            if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
-                stone++;
-            }
-            if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
-                stone++;
-            }
-            if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.STONE) {
-                stone++;
-            }
-            if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.STONE) {
-                stone++;
-            }
-            if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
-                air++;
-            }
-            if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
-                air++;
-            }
-            if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.AIR) {
-                air++;
-            }
-            if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.AIR) {
-                air++;
-            }
-            if (air == 1 && stone == 3) {
-                return true;
-            }
+    public static final Predicate<Location<World>> CAVE_LIQUIDS = (input) -> {
+        if (input.getBlockY() <= 0 || input.getBlockY() >= 255) {
             return false;
         }
-
-    };
-
-    public static final Predicate<Location<World>> HELL_LAVA = new Predicate<Location<World>>() {
-
-        @Override
-        public boolean apply(Location<World> input) {
-            if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
-                return false;
-            } else if (input.getBlockType() != BlockTypes.AIR
-                    && input.getBlockType() != BlockTypes.NETHERRACK) {
-                return false;
-            }
-            int i = 0;
-
-            if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            int j = 0;
-
-            if (input.add(-1, 0, 0).getBlockType() == BlockTypes.AIR) {
-                ++j;
-            }
-
-            if (input.add(1, 0, 0).getBlockType() == BlockTypes.AIR) {
-                ++j;
-            }
-
-            if (input.add(0, 0, -1).getBlockType() == BlockTypes.AIR) {
-                ++j;
-            }
-
-            if (input.add(0, 0, 1).getBlockType() == BlockTypes.AIR) {
-                ++j;
-            }
-
-            if (input.add(0, -1, 0).getBlockType() == BlockTypes.AIR) {
-                ++j;
-            }
-
-            if (i == 4 && j == 1) {
-                return true;
-            }
-
+        if (input.add(0, 1, 0).getBlock().getType() != BlockTypes.STONE || input.add(0, -1, 0).getBlock().getType() != BlockTypes.STONE
+                || (input.getBlock().getType() != BlockTypes.STONE && input.getBlock().getType() != BlockTypes.AIR)) {
             return false;
         }
+        int air = 0;
+        int stone = 0;
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
+            stone++;
+        }
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.STONE) {
+            stone++;
+        }
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.STONE) {
+            stone++;
+        }
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.STONE) {
+            stone++;
+        }
+        if (input.add(1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
+            air++;
+        }
+        if (input.add(-1, 0, 0).getBlock().getType() == BlockTypes.AIR) {
+            air++;
+        }
+        if (input.add(0, 0, 1).getBlock().getType() == BlockTypes.AIR) {
+            air++;
+        }
+        if (input.add(0, 0, -1).getBlock().getType() == BlockTypes.AIR) {
+            air++;
+        }
+        if (air == 1 && stone == 3) {
+            return true;
+        }
+        return false;
     };
 
-    public static final Predicate<Location<World>> HELL_LAVA_ENCLOSED = new Predicate<Location<World>>() {
-
-        @Override
-        public boolean apply(Location<World> input) {
-            if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
-                return false;
-            } else if (input.getBlockType() != BlockTypes.AIR
-                    && input.getBlockType() != BlockTypes.NETHERRACK) {
-                return false;
-            }
-            int i = 0;
-
-            if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
-                ++i;
-            }
-
-            if (i == 5) {
-                return true;
-            }
+    public static final Predicate<Location<World>> HELL_LAVA = (input) -> {
+        if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
+            return false;
+        } else if (input.getBlockType() != BlockTypes.AIR && input.getBlockType() != BlockTypes.NETHERRACK) {
             return false;
         }
+        int i = 0;
+
+        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        int j = 0;
+
+        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.AIR) {
+            ++j;
+        }
+
+        if (input.add(1, 0, 0).getBlockType() == BlockTypes.AIR) {
+            ++j;
+        }
+
+        if (input.add(0, 0, -1).getBlockType() == BlockTypes.AIR) {
+            ++j;
+        }
+
+        if (input.add(0, 0, 1).getBlockType() == BlockTypes.AIR) {
+            ++j;
+        }
+
+        if (input.add(0, -1, 0).getBlockType() == BlockTypes.AIR) {
+            ++j;
+        }
+
+        if (i == 4 && j == 1) {
+            return true;
+        }
+
+        return false;
+    };
+
+    public static final Predicate<Location<World>> HELL_LAVA_ENCLOSED = (input) -> {
+        if (input.add(0, 1, 0).getBlockType() != BlockTypes.NETHERRACK) {
+            return false;
+        } else if (input.getBlockType() != BlockTypes.AIR && input.getBlockType() != BlockTypes.NETHERRACK) {
+            return false;
+        }
+        int i = 0;
+
+        if (input.add(-1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(1, 0, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, 0, -1).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, 0, 1).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (input.add(0, -1, 0).getBlockType() == BlockTypes.NETHERRACK) {
+            ++i;
+        }
+
+        if (i == 5) {
+            return true;
+        }
+        return false;
     };
 
     private WorldGenConstants() {
