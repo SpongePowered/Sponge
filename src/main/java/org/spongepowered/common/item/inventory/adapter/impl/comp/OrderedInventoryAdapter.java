@@ -58,10 +58,14 @@ public class OrderedInventoryAdapter extends Adapter implements OrderedInventory
         if (index < 0) {
             return null;
         }
-        for (Lens<IInventory, net.minecraft.item.ItemStack> lens : orderedLens) {
-            if (lens.getSlots().contains(index)) {
-                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
+        try {
+            for (Lens<IInventory, net.minecraft.item.ItemStack> lens : orderedLens) {
+                if (lens.getSlots().contains(index)) {
+                    return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
+                }
             }
+        } catch (IndexOutOfBoundsException ex) {
+            return null;
         }
         return null;
     }
