@@ -60,7 +60,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
@@ -72,7 +71,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -86,7 +84,7 @@ import javax.annotation.Nullable;
  * A simple utility for aiding in tracking, either with resolving notifiers
  * and owners, or proxying out the logic for ticking a block, entity, etc.
  */
-public class TrackingHelper {
+public final class TrackingUtil {
 
     public static final String CURRENT_TICK_BLOCK = "CurrentTickBlock";
     public static final String RESTORING_BLOCK = "RestoringBlock";
@@ -116,6 +114,10 @@ public class TrackingHelper {
     public static final String DAMAGE_SOURCE = "DamageSource";
     public static final String BLOCK_BREAK_FORTUNE = "BreakingBlockFortune";
     public static final String BLOCK_BREAK_POSITION = "BreakingBlockPosition";
+    public static final String UNWINDING_STATE = "UnwindingState";
+    public static final String UNWINDING_CONTEXT = "UnwindingContext";
+    public static final String CAPTURED_GENERATOR = "CapturedGenerator";
+    public static final String CAPTURED_CHUNK_PROVIDER = "CapturedChunkProvider";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -226,7 +228,7 @@ public class TrackingHelper {
     }
 
     static void sendItemChangeToPlayer(EntityPlayerMP player, PhaseContext context) {
-        ItemStack preProcessItem = context.firstNamed(TrackingHelper.ITEM_USED, ItemStack.class).orElse(null);
+        ItemStack preProcessItem = context.firstNamed(TrackingUtil.ITEM_USED, ItemStack.class).orElse(null);
         if (preProcessItem == null) {
             return;
         }
@@ -268,7 +270,7 @@ public class TrackingHelper {
         Iterator<Entity> iter = capturedEntities.iterator();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
+            if (TrackingUtil.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
                 continue;
             }
             if (cause.first(User.class).isPresent()) {
@@ -345,7 +347,8 @@ public class TrackingHelper {
     }
 
 
-    public static void markAndNotifyBlockPost(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable CaptureType type, Cause.Builder builder) {
+    public static void dispatchPostBlockChanges(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable CaptureType type,
+            Cause.Builder builder, PhaseContext phaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(causeTracker.getMinecraftWorld(), transactions);
@@ -380,11 +383,15 @@ public class TrackingHelper {
                         newBuilder.suggestNamed(entry.getKey(), entry.getValue());
                     }
                 }
+                causeTracker.completePhase();
             }
 
             proxyBlockAccess.proceed();
             causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
         }
+    }
+
+    private TrackingUtil() {
     }
 }

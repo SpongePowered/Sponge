@@ -108,20 +108,17 @@ public final class CauseTracker {
             // This printing is to detect possibilities of a phase not being cleared properly
             // and resulting in a "runaway" phase state accumilation.
             PrettyPrinter printer = new PrettyPrinter(60);
-            printer.add("Switching to Incompatible Phase!!!").centre().hr();
+            printer.add("Switching Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
             printer.add("  %s : %s", "Entering Phase", phase);
             printer.add("  %s : %s", "Entering State", state);
             printer.add("%s : %s", "Current phases", this.stack.currentStates());
             printer.add("  %s :", "Printing stack trace");
-            Exception exception = new Exception("Stack trace");
-            for (StackTraceElement element : exception.getStackTrace()) {
-                printer.add("    %s", element);
-            }
-            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
+            printer.add(new Exception("Stack trace"));
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
         IPhaseState currentState = this.stack.peekState();
-        if (!currentState.canSwitchTo(state)) {
+        if (!currentState.canSwitchTo(state) || (state != GeneralPhase.Post.UNWINDING || currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Switching Phase").centre().hr();
@@ -132,11 +129,8 @@ public final class CauseTracker {
             printer.add("  %s : %s", "Entering incompatible State", state);
             printer.add("%s : %s", "Current phases", this.stack.currentStates());
             printer.add("  %s :", "Printing stack trace");
-            Exception exception = new Exception("Stack trace");
-            for (StackTraceElement element : exception.getStackTrace()) {
-                printer.add("    %s", element);
-            }
-            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
+            printer.add(new Exception("Stack trace"));
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
 
         this.stack.push(state, phaseContext);
@@ -154,35 +148,44 @@ public final class CauseTracker {
             printer.addWrapped(60, "%s : %s", "Completing phase", state);
             printer.addWrapped(60, "%s : %s", "Phases remaining", this.stack.currentStates());
             printer.add("Stacktrace:");
-            Exception exception = new Exception("Stack trace");
-            for (StackTraceElement element : exception.getStackTrace()) {
-                printer.add("     %s", element);
-            }
-            printer.print(System.err).log(SpongeImpl.getLogger(), Level.TRACE);
+            printer.add(new Exception("Stack trace"));
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
         this.stack.pop();
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
+        final PhaseContext context = tuple.getContext();
         try {
-            if (state != GeneralPhase.State.UNWINDING) {
-                switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.UNWINDING, PhaseContext.start().addCaptures().complete());
+            if (state != GeneralPhase.Post.UNWINDING) {
+                switchToPhase(TrackingPhases.GENERAL, GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
+                        .addCaptures()
+                        .complete());
             }
-            phase.unwind(this, state, tuple.getContext());
-            if (state != GeneralPhase.State.UNWINDING) {
+            try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
+                phase.unwind(this, state, context);
+            } catch (Exception e) {
+                final PrettyPrinter printer = new PrettyPrinter(40);
+                printer.add("Exception exiting phase").centre().hr();
+                printer.add("Something happened when trying to unwind the phase %s", state);
+                printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
+                printer.addWrapped(60, "   %s : %s", "Phases remaining", this.stack.currentStates());
+                printer.add("Stacktrace:");
+                printer.add(e);
+                printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
+            }
+            if (state != GeneralPhase.Post.UNWINDING) {
                 completePhase();
             }
         } catch (Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(40);
             printer.add("Exception exiting phase").centre().hr();
-            printer.add("Something happened when trying to unwind the phase %s", state);
-            printer.addWrapped(40, "   %s : %s", "PhaseContext", tuple.getContext());
+            printer.add("Something happened when trying to post dispatch state %s", state);
+            printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
             printer.addWrapped(60, "   %s : %s", "Phases remaining", this.stack.currentStates());
             printer.add("Stacktrace:");
-            for (StackTraceElement element : e.getStackTrace()) {
-                printer.add("    %s", element);
-            }
-            printer.print(System.err).log(SpongeImpl.getLogger(), Level.ERROR);
+            printer.add(e);
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
         }
     }
 
@@ -237,7 +240,7 @@ public final class CauseTracker {
         try {
             // Sponge start - prepare notification
             final Chunk chunkFromBlockCoords = this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-            final Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(TrackingHelper.PACKET_PLAYER, User.class);
+            final Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(TrackingUtil.PACKET_PLAYER, User.class);
             if (packetUser.isPresent()) {
                 IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
                 if (!(spongeChunk instanceof EmptyChunk)) {
@@ -427,7 +430,7 @@ public final class CauseTracker {
             // Handle custom replacements
             if (transaction.getCustom().isPresent()) {
                 switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS, PhaseContext.start()
-                        .add(NamedCause.of(TrackingHelper.RESTORING_BLOCK, transaction.getFinal()))
+                        .add(NamedCause.of(TrackingUtil.RESTORING_BLOCK, transaction.getFinal()))
                         .complete());
                 transaction.getFinal().restore(true, false);
                 completePhase();
@@ -450,7 +453,7 @@ public final class CauseTracker {
                     .add(NamedCause.source(blockSnapshot))
                     .complete());
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
-                if (TrackingHelper.shouldChainCause(this, cause)) {
+                if (TrackingUtil.shouldChainCause(this, cause)) {
                     Cause currentCause = cause;
                     List<NamedCause> causes = new ArrayList<>();
                     causes.add(NamedCause.source(currentTickingBlock));

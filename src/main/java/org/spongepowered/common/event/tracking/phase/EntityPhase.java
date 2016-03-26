@@ -36,13 +36,13 @@ import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class EntityPhase extends TrackingPhase {
+public final class EntityPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         DEATH_DROPS_SPAWNING,
@@ -64,13 +64,13 @@ public class EntityPhase extends TrackingPhase {
         }
         if (state == State.DEATH_DROPS_SPAWNING) {
             final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).get();
-            final DamageSource damageSource = phaseContext.firstNamed(TrackingHelper.DAMAGE_SOURCE, DamageSource.class).get();
+            final DamageSource damageSource = phaseContext.firstNamed(TrackingUtil.DAMAGE_SOURCE, DamageSource.class).get();
             { // Items
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                             .entity(dyingEntity)
                             .type(InternalSpawnTypes.DROPPED_ITEM)
                             .build())
-                        .named(TrackingHelper.DAMAGE_SOURCE, damageSource)
+                        .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
                         .build();
                 final List<EntitySnapshot> snapshots = spawnedItems.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 EventConsumer.supplyEvent(() -> SpongeEventFactory.createDropItemEventDestruct(cause, spawnedItems, snapshots, causeTracker.getWorld()))
@@ -85,7 +85,7 @@ public class EntityPhase extends TrackingPhase {
                                 .entity(dyingEntity)
                                 .type(InternalSpawnTypes.EXPERIENCE)
                                 .build())
-                            .named(TrackingHelper.DAMAGE_SOURCE, damageSource)
+                            .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
                             .build();
                     EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEvent(cause, experience, snapshots, causeTracker.getWorld()))
                         .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
@@ -99,7 +99,7 @@ public class EntityPhase extends TrackingPhase {
                                 .entity(dyingEntity)
                                 .type(InternalSpawnTypes.ENTITY_DEATH)
                                 .build())
-                            .named(TrackingHelper.DAMAGE_SOURCE, damageSource)
+                            .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
                             .build();
                     EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEvent(cause, other, snapshots, causeTracker.getWorld()))
                         .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
@@ -110,7 +110,7 @@ public class EntityPhase extends TrackingPhase {
 
     }
 
-    public EntityPhase(TrackingPhase parent) {
+    EntityPhase(TrackingPhase parent) {
         super(parent);
     }
 

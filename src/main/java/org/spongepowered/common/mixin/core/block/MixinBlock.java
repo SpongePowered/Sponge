@@ -48,9 +48,6 @@ import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.ConstructEntityEvent;
-import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -67,11 +64,10 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -191,8 +187,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
             mixinWorld.getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
                 .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
                 .addCaptures()
-                .add(NamedCause.of(TrackingHelper.BLOCK_BREAK_FORTUNE, fortune))
-                .add(NamedCause.of(TrackingHelper.BLOCK_BREAK_POSITION, pos))
+                .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_FORTUNE, fortune))
+                .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_POSITION, pos))
                 .complete());
         }
     }
@@ -205,7 +201,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, double x, double y, double z) {
+    private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
         EventConsumer.supplyEvent(() -> SpongeEventFactory.createConstructEntityEventPre(Cause.source(worldIn.getBlockState(pos)).build(), EntityTypes.ITEM, position))
             .cancelled(event -> callbackInfo.cancel())
@@ -240,6 +236,6 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 .block(BlockSnapshot.builder().from(new Location<>((World) world, VecHelper.toVector(posIn))).build())
                 .type(InternalSpawnTypes.EXPERIENCE)
                 .build();
-        return ((World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
+        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
     }
 }

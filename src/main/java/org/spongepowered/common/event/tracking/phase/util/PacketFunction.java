@@ -50,7 +50,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -69,7 +68,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -126,10 +125,10 @@ public interface PacketFunction {
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
         if (state == PacketPhase.General.CREATIVE_INVENTORY) {
-            boolean ignoringCreative = context.firstNamed(TrackingHelper.IGNORING_CREATIVE, Boolean.class).orElse(false);
+            boolean ignoringCreative = context.firstNamed(TrackingUtil.IGNORING_CREATIVE, Boolean.class).orElse(false);
             if (!ignoringCreative) {
                 final C10PacketCreativeInventoryAction packetIn = ((C10PacketCreativeInventoryAction) packet);
-                final ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
+                final ItemStackSnapshot lastCursor = context.firstNamed(TrackingUtil.CURSOR, ItemStackSnapshot.class).get();
                 final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
                 final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
                 final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
@@ -179,8 +178,8 @@ public interface PacketFunction {
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
-        final C0EPacketClickWindow packetIn = context.firstNamed(TrackingHelper.CAPTURED_PACKET, C0EPacketClickWindow.class).get();
-        final ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
+        final C0EPacketClickWindow packetIn = context.firstNamed(TrackingUtil.CAPTURED_PACKET, C0EPacketClickWindow.class).get();
+        final ItemStackSnapshot lastCursor = context.firstNamed(TrackingUtil.CURSOR, ItemStackSnapshot.class).get();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
@@ -247,7 +246,7 @@ public interface PacketFunction {
     });
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final C09PacketHeldItemChange itemChange = (C09PacketHeldItemChange) packet;
-        final int previousSlot = context.firstNamed(TrackingHelper.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class).get();
+        final int previousSlot = context.firstNamed(TrackingUtil.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class).get();
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.length);
@@ -272,8 +271,8 @@ public interface PacketFunction {
             .buildAndPost();
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
-        final Container container = context.firstNamed(TrackingHelper.OPEN_CONTAINER, Container.class).get();
-        ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
+        final Container container = context.firstNamed(TrackingUtil.OPEN_CONTAINER, Container.class).get();
+        ItemStackSnapshot lastCursor = context.firstNamed(TrackingUtil.CURSOR, ItemStackSnapshot.class).get();
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
@@ -313,7 +312,7 @@ public interface PacketFunction {
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
-            final ItemStackSnapshot lastCursor = context.firstNamed(TrackingHelper.CURSOR, ItemStackSnapshot.class).get();
+            final ItemStackSnapshot lastCursor = context.firstNamed(TrackingUtil.CURSOR, ItemStackSnapshot.class).get();
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             EventConsumer.supplyEvent(() -> SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction, ContainerUtil.fromNative(player.openContainer)))

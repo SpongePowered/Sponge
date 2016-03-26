@@ -84,21 +84,19 @@ import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
-import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -392,13 +390,13 @@ public final class DerpTracker {
     public void handlePostTickCaptures(Cause cause) {
         if (this.getMinecraftWorld().isRemote || this.restoringBlocks || this.spawningDeathDrops || cause == null) {
             return;
-        } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
-                   && StaticMixinHelper.packetPlayer == null) {
+        } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0) {
+//                   && StaticMixinHelper.packetPlayer == null) {
             return; // nothing was captured, return
         }
 
-        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet<?> packetIn = StaticMixinHelper.processingPacket;
+//        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
+//        Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
 //        // Attempt to find a Player cause if we do not have one
 //        if (!cause.first(User.class).isPresent() && !(this.capturedSpongeBlockSnapshots.size() > 0
@@ -446,75 +444,75 @@ public final class DerpTracker {
         // Handle Block Captures
         handleBlockCaptures(cause);
 
-        // Handle Player Toss
-        if (player != null && packetIn instanceof C07PacketPlayerDigging) {
-            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
-            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                StaticMixinHelper.destructItemDrop = false;
-            }
-        }
-
-        // Handle Player kill commands
-        if (player != null && packetIn instanceof C01PacketChatMessage) {
-            C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
-            if (chatPacket.getMessage().contains("kill")) {
-                if (!cause.contains(player)) {
-                    cause = cause.with(NamedCause.of("Player", player));
-                }
-                StaticMixinHelper.destructItemDrop = true;
-            }
-        }
-
-        // Handle Player Entity destruct
-        if (player != null && packetIn instanceof C02PacketUseEntity) {
-            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
-            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
-                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.getMinecraftWorld());
-                if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
-                    Player spongePlayer = (Player) player;
-                    MessageChannel originalChannel = spongePlayer.getMessageChannel();
-
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
-                        cause, originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true
-                    );
-                    SpongeImpl.getGame().getEventManager().post(event);
-                    if (!event.isMessageCancelled()) {
-                        event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
-                    }
-
-                    StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
-                }
-            }
-        }
+//        // Handle Player Toss
+//        if (player != null && packetIn instanceof C07PacketPlayerDigging) {
+//            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
+//            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
+////                StaticMixinHelper.destructItemDrop = false;
+//            }
+//        }
+//
+//        // Handle Player kill commands
+//        if (player != null && packetIn instanceof C01PacketChatMessage) {
+//            C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
+//            if (chatPacket.getMessage().contains("kill")) {
+//                if (!cause.contains(player)) {
+//                    cause = cause.with(NamedCause.of("Player", player));
+//                }
+////                StaticMixinHelper.destructItemDrop = true;
+//            }
+//        }
+//
+//        // Handle Player Entity destruct
+//        if (player != null && packetIn instanceof C02PacketUseEntity) {
+//            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
+//            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
+//                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.getMinecraftWorld());
+//                if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
+//                    Player spongePlayer = (Player) player;
+//                    MessageChannel originalChannel = spongePlayer.getMessageChannel();
+//
+//                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+//                        cause, originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true
+//                    );
+//                    SpongeImpl.getGame().getEventManager().post(event);
+//                    if (!event.isMessageCancelled()) {
+//                        event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
+//                    }
+//
+////                    StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
+//                }
+//            }
+//        }
 
         // Inventory Events
-        if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
-                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                    (C10PacketCreativeInventoryAction) packetIn);
-            } else {
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
-                if (packetIn instanceof C0EPacketClickWindow) {
-                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C0EPacketClickWindow) packetIn);
-                }
-            }
-        }
+//        if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
+//            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
+//                SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
+//                    (C10PacketCreativeInventoryAction) packetIn);
+//            } else {
+//                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
+//                if (packetIn instanceof C0EPacketClickWindow) {
+//                    SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
+//                        (C0EPacketClickWindow) packetIn);
+//                }
+//            }
+//        }
 
         // Handle Entity captures
         if (this.capturedEntityItems.size() > 0) {
-            if (StaticMixinHelper.dropCause != null) {
-                cause = StaticMixinHelper.dropCause;
-                StaticMixinHelper.destructItemDrop = true;
-            }
+//            if (StaticMixinHelper.dropCause != null) {
+//                cause = StaticMixinHelper.dropCause;
+////                StaticMixinHelper.destructItemDrop = true;
+//            }
             handleDroppedItems(cause);
         }
         if (this.capturedEntities.size() > 0) {
             handleEntitySpawns(cause);
         }
 
-        StaticMixinHelper.dropCause = null;
-        StaticMixinHelper.destructItemDrop = false;
+//        StaticMixinHelper.dropCause = null;
+//        StaticMixinHelper.destructItemDrop = false;
         this.invalidTransactions.clear();
     }
 
@@ -570,7 +568,7 @@ public final class DerpTracker {
         }
         DropItemEvent event;
 
-        if (StaticMixinHelper.destructItemDrop) {
+        if ( false) { //StaticMixinHelper.destructItemDrop) {
             final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
                 builder.suggestNamed(entry.getKey(), entry.getValue());
@@ -620,9 +618,9 @@ public final class DerpTracker {
                 iterator.remove();
             }
         } else {
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
-            }
+//            if (cause.root() == StaticMixinHelper.packetPlayer) {
+////                sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+//            }
             this.capturedEntityItems.clear();
         }
     }
@@ -641,8 +639,8 @@ public final class DerpTracker {
     }
 
     public void handleBlockCaptures(Cause cause) {
-        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet<?> packetIn = StaticMixinHelper.processingPacket;
+//        EntityPlayerMP player = StaticMixinHelper.packetPlayer;
+//        Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
         ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions;
         ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions;
@@ -660,25 +658,25 @@ public final class DerpTracker {
         List<ChangeBlockEvent> blockEvents = new ArrayList<>();
 
         Iterator<BlockSnapshot> iterator = this.capturedSpongeBlockSnapshots.iterator();
-        while (iterator.hasNext()) {
-            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) iterator.next();
-            CaptureType captureType = blockSnapshot.captureType;
-            BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
-            IBlockState currentState = this.getMinecraftWorld().getBlockState(pos);
-            Transaction<BlockSnapshot> transaction = new Transaction<>(blockSnapshot, this.getMixinWorld().createSpongeBlockSnapshot(currentState, currentState.getBlock()
-                .getActualState(currentState, this.getMinecraftWorld(), pos), pos, 0));
-            if (captureType == CaptureType.BREAK) {
-                breakBuilder.add(transaction);
-            } else if (captureType == CaptureType.DECAY) {
-                decayBuilder.add(transaction);
-            } else if (captureType == CaptureType.PLACE) {
-                placeBuilder.add(transaction);
-            } else if (captureType == CaptureType.MODIFY) {
-                modifyBuilder.add(transaction);
-            }
-            multiBuilder.add(transaction);
-            iterator.remove();
-        }
+//        while (iterator.hasNext()) {
+//            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) iterator.next(); // This is the snapshot of the ORIGINAL block
+//            CaptureType captureType = blockSnapshot.captureType;
+//            BlockPos pos = VecHelper.toBlockPos(blockSnapshot.getPosition());
+//            IBlockState currentState = this.getMinecraftWorld().getBlockState(pos); // Creates the snapshot for the replacement block
+//            Transaction<BlockSnapshot> transaction = new Transaction<>(blockSnapshot, this.getMixinWorld().createSpongeBlockSnapshot(currentState, currentState.getBlock()
+//                .getActualState(currentState, this.getMinecraftWorld(), pos), pos, 0));
+//            if (captureType == CaptureType.BREAK) {
+//                breakBuilder.add(transaction);
+//            } else if (captureType == CaptureType.DECAY) {
+//                decayBuilder.add(transaction);
+//            } else if (captureType == CaptureType.PLACE) {
+//                placeBuilder.add(transaction);
+//            } else if (captureType == CaptureType.MODIFY) {
+//                modifyBuilder.add(transaction);
+//            }
+//            multiBuilder.add(transaction);
+//            iterator.remove();
+//        }
 
         blockBreakTransactions = breakBuilder.build();
         blockDecayTransactions = decayBuilder.build();
@@ -729,17 +727,17 @@ public final class DerpTracker {
                     changeBlockEvent.getTransactions().listIterator(changeBlockEvent.getTransactions().size());
                 processList(listIterator);
 
-                if (player != null) {
-                    CaptureType captureType = null;
-                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                        captureType = CaptureType.PLACE;
-                    } else if (packetIn instanceof C07PacketPlayerDigging) {
-                        captureType = CaptureType.BREAK;
-                    }
-                    if (captureType != null) {
-                        handlePostPlayerBlockEvent(captureType, changeBlockEvent.getTransactions());
-                    }
-                }
+//                if (player != null) {
+//                    CaptureType captureType = null;
+//                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+//                        captureType = CaptureType.PLACE;
+//                    } else if (packetIn instanceof C07PacketPlayerDigging) {
+//                        captureType = CaptureType.BREAK;
+//                    }
+//                    if (captureType != null) {
+//                        handlePostPlayerBlockEvent(captureType, changeBlockEvent.getTransactions());
+//                    }
+//                }
 
                 // clear entity list and return to avoid spawning items
                 this.capturedEntities.clear();
@@ -768,9 +766,9 @@ public final class DerpTracker {
 
             C08PacketPlayerBlockPlacement packet = null;
 
-            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                packet = (C08PacketPlayerBlockPlacement) packetIn;
-            }
+//            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+//                packet = (C08PacketPlayerBlockPlacement) packetIn;
+//            }
 
             if (blockEvent.isCancelled()) {
                 // Restore original blocks
@@ -792,7 +790,7 @@ public final class DerpTracker {
                     } else {
                         if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                            for (EntityHanging hanging : SpongeHooks.findHangingEntities(this.getMinecraftWorld(), pos)) {
+                            for (EntityHanging hanging : EntityUtil.findHangingEntities(this.getMinecraftWorld(), pos)) {
                                 if (hanging != null) {
                                     if (hanging instanceof EntityItemFrame) {
                                         EntityItemFrame itemFrame = (EntityItemFrame) hanging;
@@ -808,14 +806,14 @@ public final class DerpTracker {
                             }
                         }
 
-                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
-                            BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
-                            IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(pos);
-                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
-                                (User) player, PlayerTracker.Type.OWNER);
-                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
-                                (User) player, PlayerTracker.Type.NOTIFIER);
-                        }
+//                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
+//                            BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+//                            IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(pos);
+//                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
+//                                (User) player, PlayerTracker.Type.OWNER);
+//                            spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,
+//                                (User) player, PlayerTracker.Type.NOTIFIER);
+//                        }
                     }
                 }
 
@@ -829,58 +827,42 @@ public final class DerpTracker {
                 }
 
                 if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
-                    StaticMixinHelper.destructItemDrop = true;
+//                    StaticMixinHelper.destructItemDrop = true;
                 }
 
-                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
+//                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
 
-                if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
-                    player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
-                }
+//                if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
+//                    player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
+//                }
             }
         }
     }
 
     private void handlePostPlayerBlockEvent(CaptureType captureType, List<Transaction<BlockSnapshot>> transactions) {
-        if (StaticMixinHelper.packetPlayer == null) {
-            return;
-        }
+//        if (StaticMixinHelper.packetPlayer == null) {
+//            return;
+//        }
 
         if (captureType == CaptureType.BREAK) {
             // Let the client know the blocks still exist
             for (Transaction<BlockSnapshot> transaction : transactions) {
                 BlockSnapshot snapshot = transaction.getOriginal();
                 BlockPos pos = VecHelper.toBlockPos(snapshot.getPosition());
-                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.getMinecraftWorld(), pos));
+//                StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.getMinecraftWorld(), pos));
 
                 // Update any tile entity data for this block
                 net.minecraft.tileentity.TileEntity tileentity = this.getMinecraftWorld().getTileEntity(pos);
                 if (tileentity != null) {
                     Packet<?> pkt = tileentity.getDescriptionPacket();
                     if (pkt != null) {
-                        StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(pkt);
+//                        StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(pkt);
                     }
                 }
             }
         } else if (captureType == CaptureType.PLACE) {
-            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+//            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
         }
-    }
-
-    private void sendItemChangeToPlayer(EntityPlayerMP player) {
-        if (StaticMixinHelper.prePacketProcessItem == null) {
-            return;
-        }
-
-        // handle revert
-        player.isChangingQuantityOnly = true;
-        player.inventory.mainInventory[player.inventory.currentItem] = StaticMixinHelper.prePacketProcessItem;
-        Slot slot = player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem);
-        player.openContainer.detectAndSendChanges();
-        player.isChangingQuantityOnly = false;
-        // force client itemstack update if place event was cancelled
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slot.slotNumber,
-            StaticMixinHelper.prePacketProcessItem));
     }
 
     private void processList(ListIterator<Transaction<BlockSnapshot>> listIterator) {
@@ -892,264 +874,15 @@ public final class DerpTracker {
         }
     }
 
-    public boolean processSpawnEntity(Entity entity, Cause cause) {
-        checkNotNull(entity, "Entity cannot be null!");
-        checkNotNull(cause, "Cause cannot be null!");
 
-        // Very first thing - fire events that are from entity construction
-        if (((IMixinEntity) entity).isInConstructPhase()) {
-            ((IMixinEntity) entity).firePostConstructEvents();
-        }
 
-        net.minecraft.entity.Entity entityIn = (net.minecraft.entity.Entity) entity;
-        // do not drop any items while restoring blocksnapshots. Prevents dupes
-        if (!this.getMinecraftWorld().isRemote && (entityIn == null || (entityIn instanceof net.minecraft.entity.item.EntityItem && this.restoringBlocks))) {
-            return false;
-        }
-
-        int i = MathHelper.floor_double(entityIn.posX / 16.0D);
-        int j = MathHelper.floor_double(entityIn.posZ / 16.0D);
-        boolean flag = entityIn.forceSpawn;
-
-        List<NamedCause> namedCauses = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-            if (entry.getKey().equals(NamedCause.SOURCE)) {
-                namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-            } else {
-                namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-            }
-        }
-        cause = Cause.of(namedCauses);
-        if (entityIn instanceof EntityPlayer) {
-            flag = true;
-        } else if (entityIn instanceof EntityLightningBolt) {
-            ((IMixinEntityLightningBolt) entityIn).setCause(cause);
-        }
-
-        if (!flag && !this.getMinecraftWorld().isChunkLoaded(i, j, true)) {
-            return false;
-        } else {
-            if (entityIn instanceof EntityPlayer) {
-                EntityPlayer entityplayer = (EntityPlayer) entityIn;
-                net.minecraft.world.World world = this.targetWorld;
-                world.playerEntities.add(entityplayer);
-                world.updateAllPlayersSleepingFlag();
-            }
-
-            if (this.getMinecraftWorld().isRemote || flag || this.spawningDeathDrops) {
-                this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
-                this.getMinecraftWorld().loadedEntityList.add(entityIn);
-                this.getMixinWorld().onSpongeEntityAdded(entityIn);
-                return true;
-            }
-
-            if (!flag && this.processingCaptureCause) {
-                if (this.currentTickBlock != null) {
-                    BlockPos sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-                    Block targetBlock = getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
-                    SpongeHooks
-                        .tryToTrackBlockAndEntity(this.getMinecraftWorld(), this.currentTickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(),
-                            PlayerTracker.Type.NOTIFIER);
-                }
-                if (this.currentTickEntity != null) {
-                    Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-                    }
-                }
-                if (entityIn instanceof EntityItem) {
-                    this.capturedEntityItems.add((Item) entityIn);
-                } else {
-                    this.capturedEntities.add((Entity) entityIn);
-                }
-                return true;
-            } else { // Custom
-
-                if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
-                    // TODO MixinEntityFishHook.setShooter makes angler null
-                    // sometimes, but that will cause NPE when ticking
-                    return false;
-                }
-
-                EntityLivingBase specialCause = null;
-                String causeName = "";
-                // Special case for throwables
-                if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityThrowable) {
-                    EntityThrowable throwable = (EntityThrowable) entityIn;
-                    specialCause = throwable.getThrower();
-
-                    if (specialCause != null) {
-                        causeName = NamedCause.THROWER;
-                        if (specialCause instanceof Player) {
-                            Player player = (Player) specialCause;
-                            ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-                        }
-                    }
-                }
-                // Special case for TNT
-                else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTNTPrimed) {
-                    EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
-                    specialCause = tntEntity.getTntPlacedBy();
-                    causeName = NamedCause.IGNITER;
-
-                    if (specialCause instanceof Player) {
-                        Player player = (Player) specialCause;
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-                    }
-                }
-                // Special case for Tameables
-                else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTameable) {
-                    EntityTameable tameable = (EntityTameable) entityIn;
-                    if (tameable.getOwner() != null) {
-                        specialCause = tameable.getOwner();
-                        causeName = NamedCause.OWNER;
-                    }
-                }
-
-                if (specialCause != null && !cause.containsNamed(causeName)) {
-                    cause = cause.with(NamedCause.of(causeName, specialCause));
-                }
-
-                org.spongepowered.api.event.Event event;
-                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-                entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
-
-                if (entityIn instanceof EntityItem) {
-                    this.capturedEntityItems.add((Item) entityIn);
-                    final List<NamedCause> dropCauses = new ArrayList<>();
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            dropCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build()));
-                        } else {
-                            dropCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                    cause = Cause.of(namedCauses);
-                    event = SpongeEventFactory.createDropItemEventCustom(cause, this.capturedEntityItems,
-                        entitySnapshotBuilder.build(), this.getWorld());
-                } else {
-                    this.capturedEntities.add((Entity) entityIn);
-                    final List<NamedCause> customCauses = new ArrayList<>();
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            customCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                        } else {
-                            customCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                    cause = Cause.of(customCauses);
-                    event = SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
-                        entitySnapshotBuilder.build(), this.getWorld());
-                }
-                if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
-                    if (entityIn instanceof EntityWeatherEffect) {
-                        return addWeatherEffect(entityIn, cause);
-                    }
-
-                    this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
-                    this.getMinecraftWorld().loadedEntityList.add(entityIn);
-                    this.getMixinWorld().onSpongeEntityAdded(entityIn);
-                    if (entityIn instanceof EntityItem) {
-                        this.capturedEntityItems.remove(entityIn);
-                    } else {
-                        this.capturedEntities.remove(entityIn);
-                    }
-                    return true;
-                }
-
-                return false;
-            }
-        }
-    }
-
-    public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
-        this.processingCaptureCause = true;
-        this.processingBlockRandomTicks = true;
-        this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
-        block.randomTick(this.getMinecraftWorld(), pos, state, random);
-        this.handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
-        this.processingBlockRandomTicks = false;
-    }
-
-    public void updateTickBlock(Block block, BlockPos pos, IBlockState state, Random rand) {
-        this.processingCaptureCause = true;
-        this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
-        block.updateTick(this.getMinecraftWorld(), pos, state, rand);
-        this.handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
-        this.currentTickBlock = null;
-        this.processingCaptureCause = false;
-    }
-
-    public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
-        if (!this.getMinecraftWorld().isRemote) {
-            IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
-
-            try {
-                if (!this.getMinecraftWorld().isRemote) {
-                    if (StaticMixinHelper.packetPlayer != null) {
-                        IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                        if (!(spongeChunk instanceof EmptyChunk)) {
-                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, (User) StaticMixinHelper.packetPlayer,
-                                PlayerTracker.Type.NOTIFIER);
-                        }
-                    } else {
-                        Object source = null;
-                        if (this.hasTickingBlock()) {
-                            source = this.getCurrentTickBlock().get();
-                            sourcePos = VecHelper.toBlockPos(this.getCurrentTickBlock().get().getPosition());
-                        } else if (this.hasTickingTileEntity()) {
-                            source = this.getCurrentTickTileEntity().get();
-                            sourcePos = ((net.minecraft.tileentity.TileEntity) this.getCurrentTickTileEntity().get()).getPos();
-                        } else if (this.hasTickingEntity()) { // Falling Blocks
-                            IMixinEntity spongeEntity = (IMixinEntity) this.getCurrentTickEntity().get();
-                            sourcePos = ((net.minecraft.entity.Entity) this.getCurrentTickEntity().get()).getPosition();
-                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-                            if (notifier.isPresent()) {
-                                IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-                            } else if (owner.isPresent()) {
-                                IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                            }
-                        }
-
-                        if (source != null) {
-                            SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, sourcePos, iblockstate.getBlock(), notifyPos,
-                                PlayerTracker.Type.NOTIFIER);
-                        }
-                    }
-                }
-
-                iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
-            } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-                // TODO
-                /*crashreportcategory.addCrashSectionCallable("Source block type", new Callable()
-                {
-                    public String call() {
-                        try {
-                            return String.format("ID #%d (%s // %s)", new Object[] {Integer.valueOf(Block.getIdFromBlock(blockIn)), blockIn.getUnlocalizedName(), blockIn.getClass().getCanonicalName()});
-                        } catch (Throwable throwable1) {
-                            return "ID #" + Block.getIdFromBlock(blockIn);
-                        }
-                    }
-                });*/
-                CrashReportCategory.addBlockInfo(crashreportcategory, notifyPos, iblockstate);
-                throw new ReportedException(crashreport);
-            }
-        }
-    }
 
 
 
     private boolean shouldChainCause(Cause cause) {
         return !this.isCapturingTerrainGen() && !this.isWorldSpawnerRunning() && !this.isChunkSpawnerRunning()
-               && !this.isProcessingBlockRandomTicks() && !this.isCaptureCommand() && this.hasTickingBlock() && this.pluginCause == null
-               && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof C03PacketPlayer);
+               && !this.isProcessingBlockRandomTicks() && !this.isCaptureCommand() && this.hasTickingBlock() && this.pluginCause == null;
+//               && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof C03PacketPlayer);
 
     }
 }

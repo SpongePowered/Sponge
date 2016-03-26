@@ -66,7 +66,7 @@ public final class PacketPhaseUtil {
         player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
     }
 
-    public static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+    static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
         for (SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
                 final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();

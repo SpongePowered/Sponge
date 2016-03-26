@@ -27,7 +27,6 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockFalling;
@@ -64,28 +63,22 @@ import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingHelper;
-import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Random;
 import java.util.stream.Collectors;
 
@@ -261,7 +254,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         final CauseTracker causeTracker = world.getCauseTracker();
         final Object source = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
 
-        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(TrackingHelper.CHUNK_PROVIDER, chunkProvider));
+        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(TrackingUtil.CHUNK_PROVIDER, chunkProvider));
 
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -301,7 +294,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                    .add(NamedCause.of(TrackingHelper.CAPTURED_POPULATOR, populator.getType()))
+                    .add(NamedCause.of(TrackingUtil.CAPTURED_POPULATOR, populator.getType()))
                     .addCaptures()
                     .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {

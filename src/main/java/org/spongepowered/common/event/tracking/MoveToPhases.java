@@ -84,7 +84,7 @@ public class MoveToPhases {
     // I'm guessing this is going to be put into PacketPhase for player block changes.
     static void handlePostPlayerBlockEvent(World minecraftWorld, @Nullable CaptureType captureType, List<Transaction<BlockSnapshot>> transactions,
             IPhaseState phaseState, PhaseContext context) {
-        final Optional<EntityPlayerMP> entityPlayerMP = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class);
+        final Optional<EntityPlayerMP> entityPlayerMP = context.firstNamed(TrackingUtil.PACKET_PLAYER, EntityPlayerMP.class);
         if (entityPlayerMP.isPresent()) {
             return;
         }
@@ -107,7 +107,7 @@ public class MoveToPhases {
                 }
             }
         } else if (captureType == CaptureType.PLACE) {
-            TrackingHelper.sendItemChangeToPlayer(playerMP, context);
+            TrackingUtil.sendItemChangeToPlayer(playerMP, context);
         }
     }
 
@@ -116,7 +116,7 @@ public class MoveToPhases {
             ImmutableList.Builder<EntitySnapshot> builder) {
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
-            if (TrackingHelper.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
+            if (TrackingUtil.doInvalidTransactionsExist(invalidTransactions, iter, currentEntity)) {
                 continue;
             }
 
@@ -162,7 +162,7 @@ public class MoveToPhases {
         if (nmsWorld.isRemote || nmsEntity instanceof EntityPlayer) {
             return causeTracker.processSpawnEntity(entity, Cause.source(InternalSpawnTypes.FORCED_SPAWN).build());
         }
-        PopulatorType type = context.firstNamed(TrackingHelper.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
+        PopulatorType type = context.firstNamed(TrackingUtil.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
         if (type != null) {
             if (InternalPopulatorTypes.ANIMAL.equals(type)) {
                 list.add(NamedCause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE));
@@ -204,7 +204,7 @@ public class MoveToPhases {
                 if (type != null) {
                     // Just default to the structures placing it.
                     list.add(NamedCause.source(InternalSpawnTypes.STRUCTURE_SPAWNING));
-                    return world.spawnEntity(entity, Cause.of(list));
+                    return causeTracker.processSpawnEntity(entity, Cause.of(list));
                 }
                 if (currentTickBlock.isPresent()) {
                     BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
@@ -275,10 +275,10 @@ public class MoveToPhases {
                     list.add(NamedCause.source(spawnCause));
                 }
             } else {
-                final Optional<ItemStack> usedItem = context.firstNamed(TrackingHelper.ITEM_USED, ItemStack.class);
+                final Optional<ItemStack> usedItem = context.firstNamed(TrackingUtil.ITEM_USED, ItemStack.class);
                 if (usedItem.isPresent()) {
                     SpawnCause cause;
-                    final EntityPlayerMP packetPlayer = context.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class).get();
+                    final EntityPlayerMP packetPlayer = context.firstNamed(TrackingUtil.PACKET_PLAYER, EntityPlayerMP.class).get();
                     if (entity instanceof Projectile || entity instanceof EntityThrowable) {
                         cause = EntitySpawnCause.builder()
                                 .entity(((Entity) packetPlayer))

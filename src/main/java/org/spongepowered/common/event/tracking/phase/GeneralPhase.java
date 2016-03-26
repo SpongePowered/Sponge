@@ -36,17 +36,10 @@ import org.spongepowered.common.event.tracking.PhaseData;
 
 import javax.annotation.Nullable;
 
-public class GeneralPhase extends TrackingPhase {
+public final class GeneralPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         COMMAND,
-        /**
-         * A specific state that is introduced for the sake of
-         * preventing leaks into other phases as various phases
-         * are unwound. This state is specifically to ignore any
-         * transactions that may take place.
-         */
-        UNWINDING,
         COMPLETE;
 
         public boolean isBusy() {
@@ -64,7 +57,33 @@ public class GeneralPhase extends TrackingPhase {
         }
     }
 
-    public GeneralPhase(@Nullable TrackingPhase parent) {
+    public enum Post implements IPhaseState {
+        /**
+         * A specific state that is introduced for the sake of
+         * preventing leaks into other phases as various phases
+         * are unwound. This state is specifically to ignore any
+         * transactions that may take place.
+         */
+        UNWINDING;
+
+
+        @Override
+        public TrackingPhase getPhase() {
+            return TrackingPhases.GENERAL;
+        }
+
+        @Override
+        public boolean canSwitchTo(IPhaseState state) {
+            return false;
+        }
+
+        @Override
+        public boolean ignoresBlockTracking() {
+            return false;
+        }
+    }
+
+    GeneralPhase(@Nullable TrackingPhase parent) {
         super(parent);
     }
 
@@ -88,31 +107,46 @@ public class GeneralPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState == State.UNWINDING;
+        return currentState == Post.UNWINDING;
     }
 
     @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return phaseData.getState() == State.UNWINDING;
+        return phaseData.getState() == Post.UNWINDING;
     }
 
     @Override
     public boolean allowEntitySpawns(IPhaseState currentState) {
-        return currentState != State.UNWINDING;
+        return currentState != Post.UNWINDING;
     }
 
     @Override
     public boolean ignoresBlockEvent(IPhaseState phaseState) {
-        return phaseState == State.UNWINDING;
+        return phaseState == Post.UNWINDING;
     }
 
     @Override
-    public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext context) {
-        return phaseState == State.UNWINDING;
+    public boolean alreadyCapturingBlockTicks(IPhaseState state, PhaseContext context) {
+        return state == Post.UNWINDING;
+    }
+
+    @Override
+    public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
+        return state == Post.UNWINDING;
+    }
+
+    @Override
+    public boolean alreadyCapturingEntityTicks(IPhaseState state) {
+        return state == Post.UNWINDING;
+    }
+
+    @Override
+    public boolean alreadyCapturingTileTicks(IPhaseState state) {
+        return state == Post.UNWINDING;
     }
 
     @Override
     public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
-        return phaseState == State.UNWINDING;
+        return phaseState == Post.UNWINDING;
     }
 }

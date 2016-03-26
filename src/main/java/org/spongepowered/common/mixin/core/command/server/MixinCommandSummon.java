@@ -55,7 +55,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(CommandSummon.class)
 public abstract class MixinCommandSummon extends CommandBase {
@@ -105,8 +108,7 @@ public abstract class MixinCommandSummon extends CommandBase {
 
     @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
     private boolean onSpawnEntity(World world, Entity entity, ICommandSender sender, String[] args) {
-        return ((org.spongepowered.api.world.World) world).spawnEntity((org.spongepowered.api.entity.Entity) entity,
-                Cause.of(NamedCause.source(getSpawnCause(sender))));
+        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity), Cause.source(getSpawnCause(sender)).build());
     }
 
     @Inject(method = "processCommand", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
@@ -127,16 +129,16 @@ public abstract class MixinCommandSummon extends CommandBase {
         if (commandSender instanceof Entity) {
             return EntitySpawnCause.builder()
                     .entity((org.spongepowered.api.entity.Entity) commandSender)
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         } else if (commandSender instanceof TileEntity) {
             return BlockSpawnCause.builder()
                     .block(((TileEntity) commandSender).getLocation().createSnapshot())
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         } else {
             return SpawnCause.builder()
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         }
     }

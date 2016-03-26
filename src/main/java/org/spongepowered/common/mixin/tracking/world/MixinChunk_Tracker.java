@@ -47,7 +47,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
@@ -88,7 +87,7 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
             return;
         } else {
             IMixinWorldServer spongeWorld = (IMixinWorldServer) this.worldObj;
-            if (spongeWorld.getCauseTracker().getPhases().peekState().ignoresTracking()) {
+            if (spongeWorld.getCauseTracker().getPhases().peekState().ignoresBlockTracking()) {
                 // Don't track chunk gen
                 return;
             }

@@ -52,7 +52,7 @@ import javax.annotation.Nullable;
  * {@link Cause} for an {@link Event} versus the context of which
  * a {@link IPhaseState} is being completed with.
  */
-public final class PhaseContext {
+public class PhaseContext {
 
     private boolean isCompleted = false;
     private final LinkedHashSet<NamedCause> contextObjects = new LinkedHashSet<>();
@@ -69,10 +69,10 @@ public final class PhaseContext {
     }
 
     public PhaseContext addCaptures() {
-        add(NamedCause.of(TrackingHelper.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
-        add(NamedCause.of(TrackingHelper.CAPTURED_ITEMS, new CapturedItemsSupplier()));
-        add(NamedCause.of(TrackingHelper.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        add(NamedCause.of(TrackingHelper.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
+        add(NamedCause.of(TrackingUtil.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        add(NamedCause.of(TrackingUtil.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        add(NamedCause.of(TrackingUtil.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        add(NamedCause.of(TrackingUtil.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
         return this;
     }
 
@@ -107,43 +107,43 @@ public final class PhaseContext {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedEntities() {
-        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
+        return firstNamed(TrackingUtil.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Entity>> getCapturedEntitySupplier() {
-        return firstNamed(TrackingHelper.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
+        return firstNamed(TrackingUtil.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedItems() {
-        return firstNamed(TrackingHelper.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
+        return firstNamed(TrackingUtil.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Entity>> getCapturedItemsSupplier() {
-        return firstNamed(TrackingHelper.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
+        return firstNamed(TrackingUtil.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
     }
 
 
     @SuppressWarnings("unchecked")
     public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
-        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
+        return firstNamed(TrackingUtil.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Transaction<BlockSnapshot>>> getInvalidTransactionSupplier() {
-        return firstNamed(TrackingHelper.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
+        return firstNamed(TrackingUtil.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<List<BlockSnapshot>> getCapturedBlocks() {
-        return firstNamed(TrackingHelper.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
+        return firstNamed(TrackingUtil.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<BlockSnapshot>> getCapturedBlockSupplier() {
-        return this.firstNamed(TrackingHelper.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
+        return this.firstNamed(TrackingUtil.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
     }
 
     public Cause toCause() {
@@ -154,7 +154,7 @@ public final class PhaseContext {
         return this.cause;
     }
 
-    private PhaseContext() {
+    PhaseContext() {
     }
 
     @Override

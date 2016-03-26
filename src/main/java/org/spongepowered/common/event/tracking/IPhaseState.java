@@ -47,7 +47,7 @@ public interface IPhaseState {
         return false;
     }
 
-    default boolean ignoresTracking() {
+    default boolean ignoresBlockTracking() {
         return false;
     }
 }

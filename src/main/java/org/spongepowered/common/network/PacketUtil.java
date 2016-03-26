@@ -48,15 +48,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 public class PacketUtil {
+
+    public static long lastInventoryOpenPacketTimeStamp = 0;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
@@ -75,10 +76,10 @@ public class PacketUtil {
             if (packetPlayer.theItemInWorldManager.isCreative()
                 && (packetIn instanceof C16PacketClientStatus
                     && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
-                StaticMixinHelper.lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
+                lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn, packetPlayer)) {
 
-                long packetDiff = System.currentTimeMillis() - StaticMixinHelper.lastInventoryOpenPacketTimeStamp;
+                long packetDiff = System.currentTimeMillis() - lastInventoryOpenPacketTimeStamp;
                 // If the time between packets is small enough, mark the current packet to be ignored for our event handler.
                 if (packetDiff < 100) {
                     ignoreCreative = true;
@@ -116,16 +117,16 @@ public class PacketUtil {
                 packetIn.processPacket(netHandler);
             } else {
                 PhaseContext context = PhaseContext.start()
-                        .add(NamedCause.of(TrackingHelper.PACKET_PLAYER, packetPlayer))
+                        .add(NamedCause.of(TrackingUtil.PACKET_PLAYER, packetPlayer))
                         .addCaptures()
-                        .add(NamedCause.of(TrackingHelper.CAPTURED_PACKET, packetIn))
-                        .add(NamedCause.of(TrackingHelper.CURSOR, cursor))
-                        .add(NamedCause.of(TrackingHelper.IGNORING_CREATIVE, ignoreCreative));
+                        .add(NamedCause.of(TrackingUtil.CAPTURED_PACKET, packetIn))
+                        .add(NamedCause.of(TrackingUtil.CURSOR, cursor))
+                        .add(NamedCause.of(TrackingUtil.IGNORING_CREATIVE, ignoreCreative));
                 if (packetPlayer.openContainer != null) {
-                    context.add(NamedCause.of(TrackingHelper.OPEN_CONTAINER, packetPlayer.openContainer));
+                    context.add(NamedCause.of(TrackingUtil.OPEN_CONTAINER, packetPlayer.openContainer));
                 }
                 if (itemUsed != null) {
-                    context.add(NamedCause.of(TrackingHelper.ITEM_USED, itemUsed));
+                    context.add(NamedCause.of(TrackingUtil.ITEM_USED, itemUsed));
                 }
                 final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);

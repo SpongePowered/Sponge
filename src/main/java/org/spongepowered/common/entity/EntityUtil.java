@@ -25,12 +25,17 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S10PacketSpawnPainting;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.util.AxisAlignedBB;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -51,6 +56,11 @@ public final class EntityUtil {
      * USED FOR OTHER PURPOSES AT ALL.
      */
     public static final Entity USELESS_ENTITY_FOR_MIXINS = new EntityDummy(null);
+
+    public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
+    public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
     private EntityUtil() {
     }
@@ -135,4 +145,43 @@ public final class EntityUtil {
                                         + " when the expected contain: " + professions);
     }
 
+    public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
+        return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).expand(1.1D, 1.1D, 1.1D),
+                entityIn -> {
+                    if (entityIn == null) {
+                        return false;
+                    }
+
+                    BlockPos entityPos = entityIn.getPosition();
+                    // Hanging Neighbor Entity
+                    if (entityPos.equals(pos.add(0, 1, 0))) {
+                        return true;
+                    }
+
+                    // Check around source block
+                    EnumFacing entityFacing = entityIn.getHorizontalFacing();
+
+                    if (entityFacing == EnumFacing.NORTH) {
+                        return entityPos.equals(pos.add(HANGING_OFFSET_NORTH));
+                    } else if (entityFacing == EnumFacing.SOUTH) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_SOUTH));
+                    } else if (entityFacing == EnumFacing.WEST) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_WEST));
+                    } else if (entityFacing == EnumFacing.EAST) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_EAST));
+                    }
+                    return false;
+                });
+    }
+
+    public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
+        if (!(tickingEntity instanceof Entity)) {
+            throw new IllegalArgumentException("Not a native Entity for this implementation!");
+        }
+        return (Entity) tickingEntity;
+    }
+
+    public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
+        return (org.spongepowered.api.entity.Entity) entity;
+    }
 }

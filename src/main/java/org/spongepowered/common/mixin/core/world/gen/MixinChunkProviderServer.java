@@ -24,21 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
-import net.minecraft.util.LongHashMap;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -69,10 +65,11 @@ public abstract class MixinChunkProviderServer {
     public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
         final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
         final NamedCause sourceCause = NamedCause.source(this);
-        final NamedCause chunkProviderCause = NamedCause.of(TrackingHelper.CHUNK_PROVIDER, chunkProvider);
+        final NamedCause chunkProviderCause = NamedCause.of(TrackingUtil.CHUNK_PROVIDER, chunkProvider);
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
                 .add(sourceCause)
                 .add(chunkProviderCause)
+                .addCaptures()
                 .complete());
         serverChunkGenerator.populate(chunkProvider, x, z);
         causeTracker.completePhase();

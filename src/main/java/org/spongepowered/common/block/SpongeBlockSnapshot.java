@@ -55,12 +55,11 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.CaptureType;
@@ -177,7 +176,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
                 PhaseContext.start()
-                        .add(NamedCause.of(TrackingHelper.RESTORING_BLOCK, this))
+                        .add(NamedCause.of(TrackingUtil.RESTORING_BLOCK, this))
                         .complete());
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);

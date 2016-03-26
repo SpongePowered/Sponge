@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking;
+package org.spongepowered.common.event.tracking.phase;
 
-/**
- * A specialized state that signifies that it is a "master" state that
- * can have multiple state side effects, such as spawning other entities,
- * changing other blocks, calling other populators, etc.
- */
-public interface ITickingState extends IPhaseState {
+import org.spongepowered.common.event.tracking.PhaseContext;
 
-    void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext);
+import java.util.function.Supplier;
 
+public final class PhaseUtil {
+
+    public static Supplier<IllegalStateException> createIllegalStateSupplierForTicking(String s, PhaseContext phaseContext) {
+        return () -> new IllegalStateException(s + " Please analyze the current phase context: " + phaseContext);
+    }
+
+    private PhaseUtil() {
+    }
 }

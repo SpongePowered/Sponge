@@ -35,20 +35,18 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.CaptureType;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BlockPhase extends TrackingPhase {
+public final class BlockPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         BLOCK_DECAY,
@@ -69,7 +67,7 @@ public class BlockPhase extends TrackingPhase {
 
     }
 
-    public BlockPhase(TrackingPhase parent) {
+    BlockPhase(TrackingPhase parent) {
         super(parent);
     }
 

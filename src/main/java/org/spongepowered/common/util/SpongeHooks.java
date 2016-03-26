@@ -25,7 +25,6 @@
 package org.spongepowered.common.util;
 
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Predicate;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -80,9 +79,6 @@ import javax.annotation.Nullable;
 import javax.management.MBeanServer;
 
 public class SpongeHooks {
-
-    public static int tickingDimension = 0;
-    public static ChunkCoordIntPair tickingChunk = null;
 
     private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<>();
 
@@ -517,36 +513,6 @@ public class SpongeHooks {
         return SpongeImpl.getGlobalConfig();
     }
 
-    public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
-    }
-
-    public static void setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        world.setBlockState(position, toBlockState(state), notifyNeighbors ? 3 : 2);
-    }
-
-    public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
-        setBlockState(chunk, new BlockPos(x, y, z), state, notifyNeighbors);
-    }
-
-    public static void setBlockState(Chunk chunk, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        if (notifyNeighbors) { // delegate to world
-            setBlockState(chunk.getWorld(), position, state, true);
-            return;
-        }
-        chunk.setBlockState(position, toBlockState(state));
-    }
-
-    private static IBlockState toBlockState(BlockState state) {
-        if (state instanceof IBlockState) {
-            return (IBlockState) state;
-        } else {
-            // TODO: Need to figure out what is sensible for other BlockState
-            // implementing classes.
-            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
-        }
-    }
-
     public static String getFriendlyCauseName(Cause cause) {
         String causedBy = "Unknown";
         Object rootCause = cause.root();
@@ -573,42 +539,6 @@ public class SpongeHooks {
             causedBy = rootCause.getClass().getName();
         }
         return causedBy;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
-        List<EntityHanging> list = worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, new BlockPos(pos.getX(), pos.getY(), pos.getZ())).expand(1.1D, 1.1D, 1.1D), new Predicate<EntityHanging>() {
-            @Override
-            public boolean apply(EntityHanging entityIn) {
-                if (entityIn == null) {
-                    return false;
-                }
-
-                BlockPos entityPos = entityIn.getPosition();
-                // Hanging Neighbor Entity
-                if (entityPos.equals(pos.add(0, 1, 0))) {
-                    return true;
-                }
-
-                // Check around source block
-                EnumFacing entityFacing = entityIn.getHorizontalFacing();
-
-                switch(entityFacing) {
-                    case NORTH:
-                        return entityPos.equals(pos.add(StaticMixinHelper.HANGING_OFFSET_NORTH));
-                    case SOUTH:
-                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_SOUTH));
-                    case WEST:
-                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_WEST));
-                    case EAST:
-                        return entityIn.getPosition().equals(pos.add(StaticMixinHelper.HANGING_OFFSET_EAST));
-                    default:
-                        return false;
-                }
-            }
-        });
-
-        return list;
     }
 
     public static Optional<User> tryToTrackBlock(World world, Object source, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {

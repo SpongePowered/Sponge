@@ -48,6 +48,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -211,14 +212,14 @@ public abstract class MixinSpawnerAnimals {
      */
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_SERVER_SPAWN_ENTITY))
     private boolean onSpawnEntityInWorld(WorldServer worldServer, net.minecraft.entity.Entity nmsEntity) {
-        return ((org.spongepowered.api.world.World) worldServer).spawnEntity(((Entity) nmsEntity),
+        return ((IMixinWorldServer) worldServer).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(nmsEntity),
                 Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).owner(worldServer).build());
     }
 
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
     private static boolean onSpawnEntityInWorldGen(World world, net.minecraft.entity.Entity entity) {
-        return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity,
-                Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).build());
+        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity),
+                Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).owner(world).build());
     }
 
 }

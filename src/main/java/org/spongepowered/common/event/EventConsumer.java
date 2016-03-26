@@ -58,10 +58,10 @@ public final class EventConsumer<E extends Event> {
 
     public static final class Builder<E extends Event> {
 
-        private final E event;
-        @Nullable private Consumer<E> cancelledConsumer;
-        @Nullable private Consumer<E> nonCancelledConsumer;
-        @Nullable private Consumer<E> postConsumer;
+        final E event;
+        @Nullable Consumer<E> cancelledConsumer;
+        @Nullable Consumer<E> nonCancelledConsumer;
+        @Nullable Consumer<E> postConsumer;
 
         Builder(E event) {
             this.event = checkNotNull(event, "Event cannot be null!");

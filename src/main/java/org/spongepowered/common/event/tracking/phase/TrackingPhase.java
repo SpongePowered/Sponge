@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -52,7 +53,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.CaptureType;
@@ -68,7 +69,7 @@ public abstract class TrackingPhase {
 
     private final List<TrackingPhase> children = new ArrayList<>();
 
-    public TrackingPhase(@Nullable TrackingPhase parent) {
+    TrackingPhase(@Nullable TrackingPhase parent) {
         this.parent = parent;
     }
 
@@ -115,7 +116,7 @@ public abstract class TrackingPhase {
 
     // TODO
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
-        return true;
+        return false;
     }
 
     public boolean allowEntitySpawns(IPhaseState currentState) {
@@ -126,11 +127,24 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
+        return false;
+    }
+
     public boolean alreadyCapturingBlockTicks(IPhaseState phaseState, PhaseContext context) {
         return false;
     }
 
-    public boolean ignoresScheduledUpdates(IPhaseState phaseState) {
+
+    public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
+        return false;
+    }
+
+    public boolean alreadyCapturingEntityTicks(IPhaseState state) {
+        return false;
+    }
+
+    public boolean alreadyCapturingTileTicks(IPhaseState state) {
         return false;
     }
 
@@ -173,7 +187,7 @@ public abstract class TrackingPhase {
     public boolean attemptEntitySpawnCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
-        TrackingHelper.associateEntityCreator(context, minecraftEntity, minecraftWorld);
+        TrackingUtil.associateEntityCreator(context, minecraftEntity, minecraftWorld);
         if (minecraftEntity instanceof EntityItem) {
             return context.getCapturedItemsSupplier()
                     .map(supplier -> supplier.get().add(entity))
@@ -254,7 +268,7 @@ public abstract class TrackingPhase {
         }
         if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
             if (minecraftEntity instanceof EntityWeatherEffect) {
-                return TrackingHelper.addWeatherEffect(minecraftEntity, minecraftWorld);
+                return TrackingUtil.addWeatherEffect(minecraftEntity, minecraftWorld);
             }
 
             if (minecraftEntity instanceof EntityItem) {
@@ -268,4 +282,9 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .toString();
+    }
 }

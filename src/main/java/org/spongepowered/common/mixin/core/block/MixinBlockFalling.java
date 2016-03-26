@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @Mixin(BlockFalling.class)
 public class MixinBlockFalling {
@@ -82,7 +83,7 @@ public class MixinBlockFalling {
                 .block(this.snapshot)
                 .type(SpawnTypes.FALLING_BLOCK)
                 .build();
-        return ((org.spongepowered.api.world.World) world).spawnEntity((org.spongepowered.api.entity.Entity) entity,
+        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity((org.spongepowered.api.entity.Entity) entity,
                 Cause.of(NamedCause.source(spawnCause)));
     }
 

@@ -60,7 +60,7 @@ import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
@@ -316,7 +316,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     causeTracker.switchToPhase(TrackingPhases.SPAWNING, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
                             .add(NamedCause.source(this))
-                            .add(NamedCause.of(TrackingHelper.DAMAGE_SOURCE, source))
+                            .add(NamedCause.of(TrackingUtil.DAMAGE_SOURCE, source))
                             .addCaptures()
                             .complete());
                     this.nmsEntityLiving.onDeath(source);

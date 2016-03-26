@@ -71,7 +71,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -84,7 +84,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class PacketPhase extends TrackingPhase {
+public final class PacketPhase extends TrackingPhase {
 
     // Inventory static fields
     final static int MAGIC_CLICK_OUTSIDE_SURVIVAL = -999;
@@ -147,7 +147,7 @@ public class PacketPhase extends TrackingPhase {
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, false));
+                context.add(NamedCause.of(TrackingUtil.DESTRUCT_ITEM_DROPS, false));
             }
 
             @Override
@@ -264,7 +264,7 @@ public class PacketPhase extends TrackingPhase {
         SWITCH_HOTBAR_SCROLL() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                context.add(NamedCause.of(TrackingHelper.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem));
+                context.add(NamedCause.of(TrackingUtil.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem));
             }
 
             @Override
@@ -358,7 +358,7 @@ public class PacketPhase extends TrackingPhase {
         INTERACTION() {
             @Override
             public boolean canSwitchTo(IPhaseState state) {
-                return state == BlockPhase.State.BLOCK_DECAY;
+                return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
             }
         },
         IGNORED,
@@ -368,8 +368,8 @@ public class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
-                context.add(NamedCause.of(TrackingHelper.TARGETED_ENTITY, entity));
-                context.add(NamedCause.of(TrackingHelper.TRACKED_ENTITY_ID, entity.getEntityId()));
+                context.add(NamedCause.of(TrackingUtil.TARGETED_ENTITY, entity));
+                context.add(NamedCause.of(TrackingUtil.TRACKED_ENTITY_ID, entity.getEntityId()));
             }
         },
         INTERACT_AT_ENTITY,
@@ -378,7 +378,7 @@ public class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
                 if (chatMessage.getMessage().contains("kill")) {
-                    context.add(NamedCause.of(TrackingHelper.DESTRUCT_ITEM_DROPS, true));
+                    context.add(NamedCause.of(TrackingUtil.DESTRUCT_ITEM_DROPS, true));
                 }
             }
         },
@@ -387,9 +387,9 @@ public class PacketPhase extends TrackingPhase {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
-                context.add(NamedCause.of(TrackingHelper.ITEM_USED, ItemStackUtil.cloneDefensive(placeBlock.getStack())));
-                context.add(NamedCause.of(TrackingHelper.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
-                context.add(NamedCause.of(TrackingHelper.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
+                context.add(NamedCause.of(TrackingUtil.ITEM_USED, ItemStackUtil.cloneDefensive(placeBlock.getStack())));
+                context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
+                context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
             }
         },
         OPEN_INVENTORY,
@@ -445,8 +445,8 @@ public class PacketPhase extends TrackingPhase {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
-        final Packet<?> packetIn = phaseContext.firstNamed(TrackingHelper.CAPTURED_PACKET, Packet.class).get();
-        final EntityPlayerMP player = phaseContext.firstNamed(TrackingHelper.PACKET_PLAYER, EntityPlayerMP.class).get();
+        final Packet<?> packetIn = phaseContext.firstNamed(TrackingUtil.CAPTURED_PACKET, Packet.class).get();
+        final EntityPlayerMP player = phaseContext.firstNamed(TrackingUtil.PACKET_PLAYER, EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
         checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
@@ -465,7 +465,7 @@ public class PacketPhase extends TrackingPhase {
         }*/
     }
 
-    public PacketPhase(TrackingPhase parent) {
+    PacketPhase(TrackingPhase parent) {
         super(parent);
         this.packetTranslationMap.put(C00PacketKeepAlive.class, packet -> General.IGNORED);
         this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> General.HANDLED_EXTERNALLY);

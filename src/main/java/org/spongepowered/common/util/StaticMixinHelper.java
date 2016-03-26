@@ -32,10 +32,6 @@ import org.spongepowered.api.event.cause.Cause;
 
 public class StaticMixinHelper {
 
-    public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
-    public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
-    public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
-    public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
     public static EntityPlayerMP packetPlayer = null;
     @SuppressWarnings("rawtypes")
     public static Packet processingPacket = null;
@@ -43,7 +39,6 @@ public class StaticMixinHelper {
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static IBlockState breakEventExtendedState = null;
     public static Cause dropCause = null;
-    public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean convertingMapFormat = false;
 
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge

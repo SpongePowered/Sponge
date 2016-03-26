@@ -38,15 +38,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.command.MinecraftCommandWrapper;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-
-import java.util.ArrayList;
 
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler implements IMixinCommandHandler {
@@ -60,7 +57,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
             final CauseTracker causeTracker = world.getCauseTracker();
             causeTracker.switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
                     .add(NamedCause.source(sender))
-                    .add(NamedCause.of(TrackingHelper.COMMAND, command))
+                    .add(NamedCause.of(TrackingUtil.COMMAND, command))
                     .addCaptures()
                     .complete());
         }

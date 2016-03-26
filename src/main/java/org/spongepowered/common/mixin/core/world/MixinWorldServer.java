@@ -86,7 +86,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.MoveToPhases;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingHelper;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
@@ -159,7 +159,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        TrackingHelper.randomTickBlock(causeTracker, block, pos, state, rand);
+        TrackingUtil.randomTickBlock(causeTracker, block, pos, state, rand);
     }
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/BlockPos;)Z"))
@@ -190,7 +190,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             block.updateTick(worldIn, pos, state, rand);
             return;
         }
-        TrackingHelper.updateTickBlock(causeTracker, block, pos, state, rand);
+        TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
     }
 
     @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
@@ -203,7 +203,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        if (context.firstNamed(TrackingHelper.PACKET_PLAYER, User.class).isPresent()) {
+        if (context.firstNamed(TrackingUtil.PACKET_PLAYER, User.class).isPresent()) {
             // Add player to block event position
             if (isBlockLoaded(pos)) {
                 IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
@@ -248,7 +248,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
-        return TrackingHelper.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
+        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
     }
 
     @Override
@@ -436,7 +436,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             blockType.updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
             return;
         }
-        TrackingHelper.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
+        TrackingUtil.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
     }
@@ -524,44 +524,42 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
+    @SuppressWarnings("Duplicates")
     @Override
     protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        Optional<Entity> currentTickingEntity = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, Entity.class);
-        if (currentTickingEntity.isPresent()) {
+        final IPhaseState state = causeTracker.getPhases().peekState();
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entityIn.onUpdate();
             return;
         }
-
-        TrackingHelper.tickEntity(causeTracker, entityIn);
+        TrackingUtil.tickEntity(causeTracker, entityIn);
         updateRotation(entityIn);
     }
 
     @Override
     protected void onUpdateTileEntities(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        Optional<TileEntity> currentTickingTileEntity = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, TileEntity.class);
-        if (currentTickingTileEntity.isPresent()) {
+        final IPhaseState state = causeTracker.getPhases().peekState();
+        if (state.getPhase().alreadyCapturingTileTicks(state)) {
             tile.update();
             return;
         }
 
-        TrackingHelper.tickTileEntity(causeTracker, tile);
+        TrackingUtil.tickTileEntity(causeTracker, tile);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings("Duplicates")
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData tuple = causeTracker.getPhases().peek();
-        Optional<Entity> currentTickingEntity = tuple.getContext().firstNamed(NamedCause.SOURCE, Entity.class);
-        Optional<Packet> currentPacket = tuple.getContext().firstNamed("Packet", Packet.class);
-        if (currentTickingEntity.isPresent() || currentPacket.isPresent()) {
+        final IPhaseState state = causeTracker.getPhases().peekState();
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
             entity.onUpdate();
             return;
         }
 
-        TrackingHelper.tickEntity(causeTracker, entity);
+        TrackingUtil.tickEntity(causeTracker, entity);
         updateRotation(entity);
     }
 
@@ -608,7 +606,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
-        return this.getCauseTracker().processSpawnEntity(entity, cause);
+        final CauseTracker causeTracker = this.getCauseTracker();
+        final IPhaseState state = causeTracker.getPhases().peekState();
+        if (!state.getPhase().alreadyCapturingEntitySpawns(state)) {
+            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.CUSTOM_SPAWN, PhaseContext.start()
+                .add(NamedCause.source(cause))
+                .addCaptures()
+                .complete());
+            causeTracker.processSpawnEntity(entity, cause);
+            causeTracker.completePhase();
+            return true;
+        }
+        return causeTracker.processSpawnEntity(entity, cause);
     }
 
     @Override

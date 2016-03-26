@@ -22,47 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking;
 
-import org.spongepowered.common.event.tracking.CauseTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.api.event.cause.NamedCause;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-public final class PluginPhase extends TrackingPhase {
+final class UnwindingPhaseContext extends PhaseContext {
 
-    public enum State implements IPhaseState {
-        BLOCK_WORKER,
-        CUSTOM_SPAWN,
-        COMPLETE;
-
-        @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            return false;
-        }
-
-        @Override
-        public PluginPhase getPhase() {
-            return TrackingPhases.PLUGIN;
-        }
-
+    static PhaseContext unwind(IPhaseState state, PhaseContext context) {
+        return new UnwindingPhaseContext(state, context);
     }
 
-    public PluginPhase(@Nullable TrackingPhase parent) {
-        super(parent);
+    UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext unwindingContext) {
+        add(NamedCause.of(TrackingUtil.UNWINDING_CONTEXT, unwindingContext));
+        add(NamedCause.of(TrackingUtil.UNWINDING_STATE, unwindingState));
+    }
+
+
+    @Override
+    public <T> Optional<T> first(Class<T> tClass) {
+        return Stream.of(super.first(tClass), super.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get().first(tClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
     }
 
     @Override
-    public PluginPhase addChild(TrackingPhase child) {
-        super.addChild(child);
-        return this;
+    public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
+        return Stream.of(super.firstNamed(name, tClass), super.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get().firstNamed(name, tClass))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
     }
 
-    @Override
-    public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        if (state == State.BLOCK_WORKER) {
-
-        }
-    }
 }
