@@ -174,6 +174,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             StaticMixinHelper.destructItemDrop = true;
             world.getCauseTracker().handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)));
             StaticMixinHelper.destructItemDrop = false;
+        } else if (!this.worldObj.getGameRules().getBoolean("keepInventory")) {
+            // This is normally performed in CauseTracker#handleDroppedItems. However, if a mod removes
+            // all drops, then the player's inventory is not cleared as usual - despite it still containing items.
+            // TODO gabizou: Possibly find a better solution with the CauseTracking refactor
+            this.inventory.clear();
         }
     }
 
@@ -484,7 +489,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         this.pendingGameType = (WorldSettings.GameType) (Object) event.getGameMode();
     }
-    
+
     /**
      * This injector must appear <b>after</b> {@link #onSetGameType} since it
      * assigns the {@link #pendingGameType} returned by the event to the actual
