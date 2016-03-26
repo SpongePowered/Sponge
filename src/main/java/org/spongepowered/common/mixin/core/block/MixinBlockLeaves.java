@@ -66,7 +66,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
+        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
                     .addCaptures()
@@ -84,7 +84,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        final boolean isBlockAlready = causeTracker.getPhases().current() != TrackingPhases.BLOCK;
+        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
                     .addCaptures()

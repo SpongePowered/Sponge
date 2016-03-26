@@ -255,7 +255,7 @@ public final class TrackingUtil {
     }
 
     static boolean shouldChainCause(CauseTracker tracker, Cause cause) {
-        final PhaseData currentPhase = tracker.getPhases().peek();
+        final PhaseData currentPhase = tracker.getStack().peek();
         if (currentPhase != null) {
             final IPhaseState state = currentPhase.getState();
             final PhaseContext context = currentPhase.getContext();

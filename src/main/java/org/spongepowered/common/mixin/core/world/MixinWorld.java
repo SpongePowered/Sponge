@@ -182,7 +182,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
-    private SpongeChunkProvider spongegen;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -497,43 +496,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return (WorldCreationSettings) (Object) settings;
     }
 
-    @Override
-    public void updateWorldGenerator() {
 
-        IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
-        // Get the default generator for the world type
-        DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-
-        SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
-        // If the base generator is an IChunkProvider which implements
-        // IPopulatorProvider we request that it add its populators not covered
-        // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkProvider) {
-            // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
-            // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkProvider) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
-                ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
-            }
-        } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
-            // If its not a chunk provider but is a populator provider then we call it as well
-            ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
-        }
-
-        // Re-apply all world generator modifiers
-        WorldCreationSettings creationSettings = this.getCreationSettings();
-
-        for (WorldGeneratorModifier modifier : this.getProperties().getGeneratorModifiers()) {
-            modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
-        }
-
-        this.spongegen = createChunkProvider(newGenerator);
-        this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
-        this.spongegen.setPopulators(newGenerator.getPopulators());
-        this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
-
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
-        chunkProviderServer.serverChunkGenerator = this.spongegen;
-    }
 
     @Override
     public SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator) {
@@ -542,10 +505,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
 
-    @Override
-    public WorldGenerator getWorldGenerator() {
-        return this.spongegen;
-    }
 
     @Override
     public WorldProperties getProperties() {
@@ -911,7 +870,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
         if (!this.isRemote) {
-            final PhaseContext context = ((IMixinWorldServer) this).getCauseTracker().getPhases().peek().getContext();
+            final PhaseContext context = ((IMixinWorldServer) this).getCauseTracker().getStack().peek().getContext();
             final Optional<net.minecraft.entity.Entity>
                     targeted =
                     context.firstNamed(TrackingUtil.TARGETED_ENTITY, net.minecraft.entity.Entity.class);

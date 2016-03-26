@@ -46,6 +46,7 @@ public class MixinItemFirework extends Item {
     private boolean onSpawnEntityInWorld(World world, Entity firework, ItemStack stack, EntityPlayer player, World worldIn, BlockPos pos,
             EnumFacing side, float hitX, float hitY, float hitZ) {
         ((Firework) firework).setShooter((ProjectileSource) player);
+        // TODO direct this appropriately
         return world.spawnEntityInWorld(firework);
     }
 

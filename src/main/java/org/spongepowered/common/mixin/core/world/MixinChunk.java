@@ -499,7 +499,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
                 final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
-                final PhaseData peek = causeTracker.getPhases().peek();
+                final PhaseData peek = causeTracker.getStack().peek();
                 final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
                 if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                     if (newBlockSnapshot == null) {

@@ -185,6 +185,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
                 entityitem1.motionX = d1 * d9;
                 entityitem1.motionY = d3 * d9 + MathHelper.sqrt_double(d7) * 0.08D;
                 entityitem1.motionZ = d5 * d9;
+                // TODO direct this appropriately
                 this.worldObj.spawnEntityInWorld(entityitem1);
                 this.angler.worldObj.spawnEntityInWorld(
                         new EntityXPOrb(this.angler.worldObj, this.angler.posX, this.angler.posY + 0.5D, this.angler.posZ + 0.5D,

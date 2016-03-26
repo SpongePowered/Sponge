@@ -201,25 +201,4 @@ public abstract class MixinSpawnerAnimals {
         return !event.isCancelled();
     }
 
-    /**
-     * @author gabizou - January 30th, 2016
-     *
-     * Redirects the spawning here to note that it's from the world spawner.
-     *
-     * @param worldServer The world server coming in
-     * @param nmsEntity The nms entity
-     * @return True if the world spawn was successful
-     */
-    @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_SERVER_SPAWN_ENTITY))
-    private boolean onSpawnEntityInWorld(WorldServer worldServer, net.minecraft.entity.Entity nmsEntity) {
-        return ((IMixinWorldServer) worldServer).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(nmsEntity),
-                Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).owner(worldServer).build());
-    }
-
-    @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private static boolean onSpawnEntityInWorldGen(World world, net.minecraft.entity.Entity entity) {
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity),
-                Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).owner(world).build());
-    }
-
 }

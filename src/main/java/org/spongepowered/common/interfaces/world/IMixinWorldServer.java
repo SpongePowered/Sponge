@@ -35,6 +35,8 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
 
+    void updateWorldGenerator();
+
     CauseTracker getCauseTracker();
 
     void updateRotation(net.minecraft.entity.Entity entityIn);
@@ -42,8 +44,6 @@ public interface IMixinWorldServer extends IMixinWorld {
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
-
-    boolean forceSpawnEntity(Entity entity, int chunkX, int chunkZ);
 
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
 

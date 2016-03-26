@@ -72,7 +72,6 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -83,7 +82,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
@@ -114,15 +112,12 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.mixin.core.item.MixinItemStack;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 
@@ -780,12 +775,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             entityplayermp1.setSneaking(false);
             mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
             toWorld.getPlayerManager().addPlayer(entityplayermp1);
+            // TODO need to direct this appropriately in cause tracking
             toWorld.spawnEntityInWorld(entityplayermp1);
             mcServer.getConfigurationManager().getPlayerList().add(entityplayermp1);
             entityplayermp1.theItemInWorldManager.setWorld(toWorld);
             entityplayermp1.addSelfToInternalCraftingInventory();
             entityplayermp1.setHealth(entityplayermp1.getHealth());
         } else {
+            // TODO need to direct this appropriately in cause tracking
             toWorld.spawnEntityInWorld(entity);
         }
 
@@ -1252,15 +1249,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
         this.custom = null;
         return stack;
-    }
-
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(InternalSpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity), Cause.source(cause).build());
     }
 
 }

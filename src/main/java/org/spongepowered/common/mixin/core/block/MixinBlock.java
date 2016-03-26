@@ -210,32 +210,16 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)
     public void onDropBlockAsItemWithChance(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, float chance, int fortune, CallbackInfo ci) {
-        if (((IMixinWorldServer) worldIn).getCauseTracker().getPhases().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (((IMixinWorldServer) worldIn).getCauseTracker().getStack().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
             ci.cancel();
         }
     }
 
     @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"), cancellable = true)
     private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (((IMixinWorldServer) worldIn).getCauseTracker().getPhases().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
+        if (((IMixinWorldServer) worldIn).getCauseTracker().getStack().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
             ci.cancel();
         }
     }
 
-    /**
-     * Redirects for block breaks to spawn entities with a custom spawn cause,
-     * this will redirect to use the SpongeAPI world spawn entity method instead.
-     *
-     * @param world
-     * @param entity
-     * @return
-     */
-    @Redirect(method = "dropXpOnBlockBreak", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean onSpawnEntityFromBlockBreak(net.minecraft.world.World world, Entity entity, net.minecraft.world.World worldIn, BlockPos posIn, int amount) {
-        BlockSpawnCause spawnCause = BlockSpawnCause.builder()
-                .block(BlockSnapshot.builder().from(new Location<>((World) world, VecHelper.toVector(posIn))).build())
-                .type(InternalSpawnTypes.EXPERIENCE)
-                .build();
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
-    }
 }

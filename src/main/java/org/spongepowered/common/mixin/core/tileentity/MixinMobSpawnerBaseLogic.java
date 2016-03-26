@@ -108,19 +108,4 @@ public abstract class MixinMobSpawnerBaseLogic {
         this.posZ = 0;
     }
 
-    /**
-     * Redirects the entity spawn to ours since we know the cause already.
-     *
-     * @param world
-     * @param entity
-     * @return
-     */
-    @Redirect(method = "spawnNewEntity", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onEntitySpawn(World world, Entity entity) {
-        // TODO include the spawner data once implemented.
-        SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity), Cause.source(cause).build());
-
-    }
-
 }

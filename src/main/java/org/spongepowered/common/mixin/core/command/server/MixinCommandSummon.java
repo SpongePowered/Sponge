@@ -45,7 +45,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -104,11 +103,6 @@ public abstract class MixinCommandSummon extends CommandBase {
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
         SpongeImpl.postEvent(event);
         return event.isCancelled() ? null : EntityList.createEntityFromNBT(nbt, world);
-    }
-
-    @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntity(World world, Entity entity, ICommandSender sender, String[] args) {
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity), Cause.source(getSpawnCause(sender)).build());
     }
 
     @Inject(method = "processCommand", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,

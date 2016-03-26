@@ -252,7 +252,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
         IMixinWorldServer world = (IMixinWorldServer) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        final Object source = causeTracker.getPhases().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
+        final Object source = causeTracker.getStack().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
 
         final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(TrackingUtil.CHUNK_PROVIDER, chunkProvider));
 

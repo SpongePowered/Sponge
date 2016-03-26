@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry.type.event;
 
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.common.data.type.SpongeSpawnType;
@@ -59,6 +60,7 @@ public final class InternalSpawnTypes {
     public static final SpawnCause STRUCTURE_SPAWNING = of(InternalSpawnTypes.STRUCTURE);
     public static final SpawnCause CUSTOM_SPAWN = of(InternalSpawnTypes.CUSTOM);
     public static final SpawnCause WORLD_SPAWNER_CAUSE = of(InternalSpawnTypes.WORLD_SPAWNER);
+    public static final Cause UNKNOWN_CAUSE = Cause.source(InternalSpawnTypes.CUSTOM).build();
 
     private static SpawnCause of(SpawnType spawnType) {
         return new SpongeSpawnCauseBuilder().type(spawnType).build();

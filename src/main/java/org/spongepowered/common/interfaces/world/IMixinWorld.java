@@ -24,23 +24,16 @@
  */
 package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 import javax.annotation.Nullable;
 
-@NonnullByDefault
 public interface IMixinWorld {
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
-
-    void updateWorldGenerator();
 
     long getWeatherStartTime();
 

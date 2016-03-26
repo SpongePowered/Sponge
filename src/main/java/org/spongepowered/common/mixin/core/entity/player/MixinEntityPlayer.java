@@ -40,7 +40,6 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.World;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -230,21 +229,4 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
-    /**
-     * @author gabizou - January 30th, 2016
-     *
-     * Redirects the dropped item spawning to use our world spawning since we know the cause.
-     *
-     * @param world The world
-     * @param entity The entity item
-     * @return True if the events and such succeeded
-     */
-    @Redirect(method = "joinEntityItemWithWorld", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onDropItem(World world, net.minecraft.entity.Entity entity) {
-        SpawnCause spawnCause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((IMixinWorldServer) world).getCauseTracker().processSpawnEntity(EntityUtil.fromNative(entity), Cause.source(spawnCause).build());
-    }
 }

@@ -54,6 +54,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
@@ -218,7 +219,7 @@ public final class CauseTracker {
         return (IMixinWorldServer) this.targetWorld;
     }
 
-    public CauseStack getPhases() {
+    public CauseStack getStack() {
         return this.stack;
     }
 
@@ -235,7 +236,7 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
         final IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
 
-        final PhaseData phaseContextTuple = this.getPhases().peek(); // Sponge
+        final PhaseData phaseContextTuple = this.getStack().peek(); // Sponge
 
         try {
             // Sponge start - prepare notification
@@ -319,7 +320,7 @@ public final class CauseTracker {
         }
 
         // Now we need to do some of our own logic to see if we need to capture.
-        final PhaseData phaseData = this.getPhases().peek();
+        final PhaseData phaseData = this.getStack().peek();
         final IPhaseState phaseState = phaseData.getState();
         final TrackingPhase phase = phaseState.getPhase();
         if (phase.requiresBlockCapturing(phaseState)) {
@@ -359,25 +360,26 @@ public final class CauseTracker {
     }
 
     /**
-     * The replacement of {@link net.minecraft.world.World#spawnEntityInWorld(net.minecraft.entity.Entity)}
-     * that adds various checks for phase capturing.
+     * This is the replacement of {@link WorldServer#spawnEntityInWorld(net.minecraft.entity.Entity)}
+     * where it captures into phases. The causes and relations are processed by the phases.
      *
-     * @param entity
-     * @param cause
-     * @return
+     * The difference between {@link #spawnEntityWithCause(Entity, Cause)} is that it bypasses
+     * any phases and directly throws a spawn entity event.
+     *
+     * @param entity The entity
+     * @return True if the entity spawn was successful
      */
-    public boolean processSpawnEntity(Entity entity, Cause cause) {
+    public boolean spawnEntity(Entity entity) {
         checkNotNull(entity, "Entity cannot be null!");
-        checkNotNull(cause, "Cause cannot be null!");
 
         // Sponge Start - handle construction phases
         if (((IMixinEntity) entity).isInConstructPhase()) {
             ((IMixinEntity) entity).firePostConstructEvents();
         }
 
-        final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
+        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = this.getMinecraftWorld();
-        final PhaseData phaseData = this.getPhases().peek();
+        final PhaseData phaseData = this.getStack().peek();
         final IPhaseState phaseState = phaseData.getState();
         final PhaseContext context = phaseData.getContext();
         final TrackingPhase phase = phaseState.getPhase();
@@ -390,12 +392,6 @@ public final class CauseTracker {
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
         final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
-
-        // Sponge Start - set lightning spawn cause
-        if (minecraftEntity instanceof EntityLightningBolt) {
-            ((IMixinEntityLightningBolt) minecraftEntity).setCause(cause);
-        }
-        // Sponge End
 
         if (!isForced && !minecraftWorld.isChunkLoaded(chunkX, chunkZ, true)) {
             return false;
@@ -412,6 +408,49 @@ public final class CauseTracker {
                 return true;
             }
             // Sponge end - continue on with the checks.
+            minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
+            minecraftWorld.loadedEntityList.add(minecraftEntity);
+            getMixinWorld().onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+            return true;
+        }
+    }
+
+    /**
+     * The core implementation of {@link World#spawnEntity(Entity, Cause)} that
+     * bypasses any sort of cause tracking and throws an event directly
+     *
+     * @param entity
+     * @param cause
+     * @return
+     */
+    public boolean spawnEntityWithCause(Entity entity, Cause cause) {
+        checkNotNull(entity, "Entity cannot be null!");
+        checkNotNull(cause, "Cause cannot be null!");
+
+        // Sponge Start - handle construction phases
+        if (((IMixinEntity) entity).isInConstructPhase()) {
+            ((IMixinEntity) entity).firePostConstructEvents();
+        }
+
+        final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
+        final WorldServer minecraftWorld = this.getMinecraftWorld();
+        final PhaseData phaseData = this.getStack().peek();
+        final IPhaseState phaseState = phaseData.getState();
+        // Sponge End - continue with vanilla mechanics
+
+        final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
+        final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
+        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
+
+        if (!isForced && !minecraftWorld.isChunkLoaded(chunkX, chunkZ, true)) {
+            return false;
+        } else {
+            if (minecraftEntity instanceof EntityPlayer) {
+                EntityPlayer entityplayer = (EntityPlayer) minecraftEntity;
+                minecraftWorld.playerEntities.add(entityplayer);
+                minecraftWorld.updateAllPlayersSleepingFlag();
+            }
+
             minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
             minecraftWorld.loadedEntityList.add(minecraftEntity);
             getMixinWorld().onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
@@ -480,14 +519,15 @@ public final class CauseTracker {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            final PhaseData peekedPhase = this.getPhases().peek();
+            final PhaseData peekedPhase = this.getStack().peek();
             final Optional<PluginContainer> pluginContainer = peekedPhase.getContext().firstNamed(NamedCause.SOURCE, PluginContainer.class);
-            final Optional<PhaseContext.CapturedSupplier<Entity>> capturedEntities = this.getPhases().peekContext().getCapturedEntitySupplier();
+            final Optional<PhaseContext.CapturedSupplier<Entity>> capturedEntities = this.getStack().peekContext().getCapturedEntitySupplier();
             if (!capturedEntities.isPresent() || !capturedEntities.get().isEmpty() && !pluginContainer.isPresent()) {
                 // TODO tell the phase to handle any captures.
             }
 
         }
     }
+
 
 }
