@@ -57,9 +57,9 @@ public final class CriteriaRegistryModule implements CatalogRegistryModule<Crite
     public void registerDefaults() {
         this.criteriaMap.put("dummy", (Criterion) IScoreCriteria.DUMMY);
         this.criteriaMap.put("trigger", (Criterion) IScoreCriteria.TRIGGER);
-        this.criteriaMap.put("health", (Criterion) IScoreCriteria.health);
-        this.criteriaMap.put("player_kills", (Criterion) IScoreCriteria.playerKillCount);
-        this.criteriaMap.put("total_kills", (Criterion) IScoreCriteria.totalKillCount);
-        this.criteriaMap.put("deaths", (Criterion) IScoreCriteria.deathCount);
+        this.criteriaMap.put("health", (Criterion) IScoreCriteria.HEALTH);
+        this.criteriaMap.put("player_kills", (Criterion) IScoreCriteria.PLAYER_KILL_COUNT);
+        this.criteriaMap.put("total_kills", (Criterion) IScoreCriteria.TOTAL_KILL_COUNT);
+        this.criteriaMap.put("deaths", (Criterion) IScoreCriteria.DEATH_COUNT);
     }
 }

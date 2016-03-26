@@ -34,7 +34,6 @@ import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -83,7 +82,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     // the call and do it ourselves.
     private void doTeamUpdate() {
         if (this.theScoreboard != null) {
-            this.theScoreboard.sendTeamUpdate((ScorePlayerTeam) (Object) this);
+            this.theScoreboard.broadcastTeamInfoUpdate((ScorePlayerTeam) (Object) this);
         }
     }
 

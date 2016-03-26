@@ -398,7 +398,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (worldInfo == null) {
                 worldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                worldSettings.setWorldName(generatorOptions); // setGeneratorOptions
+                worldSettings.setGeneratorOptions(generatorOptions); // setGeneratorOptions
                 ((IMixinWorldSettings) (Object) worldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {

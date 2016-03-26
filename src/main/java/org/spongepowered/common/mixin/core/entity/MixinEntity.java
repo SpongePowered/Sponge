@@ -713,7 +713,7 @@ public abstract class MixinEntity implements IMixinEntity {
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         if (forced) {
-            while (!toWorld.getCubes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+            while (!toWorld.getCollisionBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
                 entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
             }
         }

@@ -37,10 +37,9 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.inventory.ClickType;
-import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Items;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.inventory.ContainerPlayer;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -52,7 +51,6 @@ import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -64,8 +62,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -81,7 +77,6 @@ import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -790,7 +785,7 @@ public class SpongeCommonEventFactory {
                     list.add(NamedCause.source(spawnCause));
                     if (isEntityDead(currentEntity)) {
                         if (currentEntity instanceof EntityLivingBase) {
-                            CombatEntry entry = ((EntityLivingBase) currentEntity).getCombatTracker().func_94544_f();
+                            CombatEntry entry = ((EntityLivingBase) currentEntity).getCombatTracker().getBestCombatEntry();
                             if (entry != null) {
                                 if (entry.damageSrc != null) {
                                     list.add(NamedCause.of("LastDamageSource", entry.damageSrc));

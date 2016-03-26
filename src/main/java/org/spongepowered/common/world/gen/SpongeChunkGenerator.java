@@ -115,7 +115,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.noise4 = new NoiseGeneratorPerlin(this.rand, 4);
         this.stoneNoise = new double[256];
 
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(this.biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(this.biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
@@ -168,7 +168,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }

@@ -132,7 +132,7 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
         final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
         final IChunkGenerator chunkGenerator = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
-        final BiomeProvider biomeProvider = mcWorld.provider.worldChunkMgr;
+        final BiomeProvider biomeProvider = mcWorld.provider.biomeProvider;
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
                 (BiomeGenerator) biomeProvider,
                 SpongeGenerationPopulator.of((WorldServer) world, chunkGenerator));
