@@ -22,38 +22,45 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
 import static org.spongepowered.api.data.DataQuery.of;
 
-import net.minecraft.tileentity.TileEntityNote;
-import org.spongepowered.api.block.tileentity.Note;
+import net.minecraft.tileentity.TileEntityEnchantmentTable;
+import org.spongepowered.api.block.tileentity.EnchantmentTable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntityNote.class)
-public abstract class MixinTileEntityNote extends MixinTileEntity implements Note {
+@Mixin(TileEntityEnchantmentTable.class)
+public abstract class MixinTileEntityEnchantmentTable extends MixinTileEntity implements EnchantmentTable, IMixinCustomNameable {
 
-    @Shadow public byte note;
+    @Shadow private String customName;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(DataQueries.TILE_NOTE_ID, this.note);
+        container.set(of("CustomName"), this.customName);
         return container;
     }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getNoteData());
+        if (((TileEntityEnchantmentTable) (Object) this).hasCustomName()) {
+            manipulators.add(get(DisplayNameData.class).get());
+        }
     }
 
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityEnchantmentTable) (Object) this).setCustomName(customName);
+    }
 }

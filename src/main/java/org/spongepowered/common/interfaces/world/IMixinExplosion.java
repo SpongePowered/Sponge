@@ -27,4 +27,6 @@ package org.spongepowered.common.interfaces.world;
 public interface IMixinExplosion {
 
     void setShouldBreakBlocks(boolean shouldBreakBlocks);
+
+    void setShouldDamageEntities(boolean shouldDamageEntities);
 }

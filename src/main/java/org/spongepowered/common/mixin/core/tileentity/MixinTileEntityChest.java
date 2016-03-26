@@ -22,55 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import com.google.common.collect.Lists;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.text.ITextComponent;
-import org.spongepowered.api.block.tileentity.Sign;
+import static org.spongepowered.api.data.DataQuery.of;
+
+import net.minecraft.tileentity.TileEntityChest;
+import org.spongepowered.api.block.tileentity.carrier.Chest;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 import java.util.List;
+import java.util.Optional;
 
 @NonnullByDefault
-@Mixin(TileEntitySign.class)
-public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
+@Mixin(TileEntityChest.class)
+public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable {
 
-    @Shadow @Final public ITextComponent[] signText;
+    @Shadow public String customName;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        List<String> lines = Lists.newArrayList();
-        for (ITextComponent line : this.signText) {
-            lines.add(ITextComponent.Serializer.componentToJson(line));
+        if (this.customName != null) {
+            container.set(of("CustomName"), this.customName);
         }
-        container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;
-    }
-
-    @Override
-    public String getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_COMMAND_BLOCK;
-    }
-
-    @Override
-    public Tristate permDefault(String permission) {
-        return Tristate.TRUE;
     }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSignData());
+        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
+        if (connectedChestData.isPresent()) {
+            manipulators.add(connectedChestData.get());
+        }
     }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityChest) (Object) this).setCustomName(customName);
+    }
+
 }

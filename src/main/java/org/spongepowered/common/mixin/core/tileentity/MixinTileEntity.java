@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -42,6 +42,9 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -66,6 +69,7 @@ import java.util.List;
 
 @NonnullByDefault
 @Mixin(net.minecraft.tileentity.TileEntity.class)
+@Implements(@Interface(iface = IMixinTileEntity.class, prefix = "tile$"))
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
@@ -78,7 +82,12 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
-    @Shadow public abstract void markDirty();
+    @Override @Shadow public abstract void markDirty();
+
+    @Intrinsic
+    public void tile$markDirty() {
+        this.markDirty();
+    }
 
     @Inject(method = "markDirty", at = @At(value = "HEAD"))
     public void onMarkDirty(CallbackInfo ci) {

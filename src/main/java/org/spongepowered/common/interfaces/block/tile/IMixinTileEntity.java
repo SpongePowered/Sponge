@@ -80,4 +80,7 @@ public interface IMixinTileEntity {
      * @param dataView The data view to set all data api related data
      */
     void sendDataToContainer(DataView dataView);
+
+    void markDirty();
+
 }

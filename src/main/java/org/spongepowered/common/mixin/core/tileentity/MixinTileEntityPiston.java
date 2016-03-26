@@ -22,26 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityFlowerPot;
-import org.spongepowered.api.block.tileentity.FlowerPot;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import net.minecraft.tileentity.TileEntityPiston;
+import org.spongepowered.api.block.tileentity.Piston;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.List;
-import java.util.Optional;
+@Mixin(TileEntityPiston.class)
+public abstract class MixinTileEntityPiston extends MixinTileEntity implements Piston {
 
-@Mixin(TileEntityFlowerPot.class)
-public abstract class MixinTileEntityFlowerPot extends MixinTileEntity implements FlowerPot {
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
-        if (flowerItemData.isPresent()) {
-            manipulators.add(flowerItemData.get());
-        }
-    }
 }

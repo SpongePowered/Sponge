@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResu
 import org.spongepowered.api.item.inventory.type.OrderedInventory;
 import org.spongepowered.common.item.inventory.adapter.impl.Adapter;
 import org.spongepowered.common.item.inventory.lens.Fabric;
+import org.spongepowered.common.item.inventory.lens.Lens;
 import org.spongepowered.common.item.inventory.lens.comp.OrderedInventoryLens;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
@@ -57,11 +58,12 @@ public class OrderedInventoryAdapter extends Adapter implements OrderedInventory
         if (index < 0) {
             return null;
         }
-        try {
-            return this.orderedLens.getSlot(index);
-        } catch (IndexOutOfBoundsException ex) {
-            return null;
+        for (Lens<IInventory, net.minecraft.item.ItemStack> lens : orderedLens) {
+            if (lens.getSlots().contains(index)) {
+                return (SlotLens<IInventory, net.minecraft.item.ItemStack>) lens;
+            }
         }
+        return null;
     }
 
     protected SlotLens<IInventory, net.minecraft.item.ItemStack> getSlotLens(SlotIndex index) {

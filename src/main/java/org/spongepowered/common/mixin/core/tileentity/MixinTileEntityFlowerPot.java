@@ -22,10 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * A majority of these interfaces are to aid in manipulating block states and blocks
- * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
- * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
- * for the benefit of being able to "reset" the block to a "default state".
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
+
+import net.minecraft.tileentity.TileEntityFlowerPot;
+import org.spongepowered.api.block.tileentity.FlowerPot;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.asm.mixin.Mixin;
+
+import java.util.List;
+import java.util.Optional;
+
+@Mixin(TileEntityFlowerPot.class)
+public abstract class MixinTileEntityFlowerPot extends MixinTileEntity implements FlowerPot {
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
+        if (flowerItemData.isPresent()) {
+            manipulators.add(flowerItemData.get());
+        }
+    }
+}

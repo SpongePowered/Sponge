@@ -31,7 +31,9 @@ import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
+@ImplementationRequiredForTest
 public class SpongeVillagerZombieData extends AbstractSingleCatalogData<Profession, VillagerZombieData, ImmutableVillagerZombieData> implements VillagerZombieData {
 
     public SpongeVillagerZombieData() {

@@ -29,15 +29,13 @@ import static org.spongepowered.common.data.util.DataUtil.getData;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
-import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -47,25 +45,16 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-public class SpongeItemStackSnapshotBuilder implements DataBuilder<ItemStackSnapshot> {
+public class SpongeItemStackSnapshotBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
     private final static int SUPPORTED_VERSION = 1;
 
+    public SpongeItemStackSnapshotBuilder() {
+        super(ItemStackSnapshot.class, SUPPORTED_VERSION);
+    }
+
     @Override
-    public Optional<ItemStackSnapshot> build(DataView container) throws InvalidDataException {
-        if (container.contains(Queries.CONTENT_VERSION)) {
-            final int contentVersion = DataUtil.getData(container, Queries.CONTENT_VERSION, Integer.class);
-            if (contentVersion < SUPPORTED_VERSION) {
-                Optional<DataContentUpdater> updater = SpongeDataManager
-                        .getInstance().getWrappedContentUpdater(ItemStackSnapshot.class, contentVersion, SUPPORTED_VERSION);
-                if (!updater.isPresent()) {
-                    throw new InvalidDataException("Could not get an updater for ItemEnchantment data from the version: " + contentVersion
-                                                   + " to " + SUPPORTED_VERSION + ". "
-                                                   + "\nPlease notify the SpongePowered developers of this issue!");
-                }
-                container = updater.get().update(container);
-            }
-        }
+    protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(DataQueries.ITEM_TYPE, DataQueries.ITEM_COUNT)) {
             final String itemString = getData(container, DataQueries.ITEM_TYPE, String.class);
             final ItemType itemType = SpongeImpl.getRegistry().getType(ItemType.class, itemString).get();

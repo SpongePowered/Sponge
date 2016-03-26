@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl.comp;
 
-import org.spongepowered.api.item.inventory.InventoryProperty;
-
 import org.spongepowered.api.data.Property.Operator;
 import static com.google.common.base.Preconditions.*;
 import net.minecraft.inventory.IInventory;
@@ -38,7 +36,6 @@ import org.spongepowered.common.item.inventory.adapter.impl.comp.Inventory2DAdap
 import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.Inventory2DLens;
-import org.spongepowered.common.item.inventory.lens.impl.struct.LensHandle;
 import org.spongepowered.common.item.inventory.lens.slots.SlotLens;
 
 public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inventory2DLens<IInventory, net.minecraft.item.ItemStack> {
@@ -126,15 +123,8 @@ public class Inventory2DLensImpl extends OrderedInventoryLensImpl implements Inv
         if (pos.getOperator() != Operator.EQUAL) {
             return null;
         }
-        
-        for (LensHandle<IInventory, ItemStack> slot : this.slotCache) {
-            InventoryProperty<Object, Object> slotPos = slot.getProperty(SlotPos.class);
-            if (slotPos != null && pos.matches(slotPos)) {
-                return (SlotLens<IInventory, ItemStack>) slot.lens;
-            }
-        }
-        
-        return null;
+
+        return (SlotLens<IInventory, ItemStack>) this.spanningChildren.get(pos.getY()).lens.getLens(pos.getX());
     }
 
     @Override

@@ -34,6 +34,8 @@ import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
@@ -45,6 +47,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
@@ -185,9 +188,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public Text getUsage(CommandSource source) {
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getCommandUsage(mcSender);
+        if (usage == null) { // Silly modders
+            return Text.of();
+        }
+
         Translation translation = SpongeImpl.getGame().getRegistry().getTranslationById(usage).get();
         if (source instanceof Player) {
-            usage = translation.get(((Player) source).getLocale());
+            usage = translation.get(source.getLocale());
         } else {
             usage = translation.get(Locale.getDefault());
         }
@@ -207,12 +214,9 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
-
-        ICommandSender sender = WrapperICommandSender.of(source);
-        // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.getTabCompletionOptions(sender.getServer(), sender, arguments
-                .split(" ", -1), null);
+        List<String> suggestions = this.command.getTabCompletionOptions((MinecraftServer) Sponge.getServer(), WrapperICommandSender.of(source),
+                arguments.split(" ", -1), ((IMixinServerCommandManager) ((MinecraftServer) Sponge.getServer()).getCommandManager()).getTabBlockPos());
         if (suggestions == null) {
             return ImmutableList.of();
         }

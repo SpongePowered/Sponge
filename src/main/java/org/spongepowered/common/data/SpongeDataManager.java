@@ -44,12 +44,15 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
+import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
@@ -125,7 +128,15 @@ public final class SpongeDataManager implements DataManager {
         checkNotNull(builder);
         checkState(!this.registrationComplete);
         if (!this.builders.containsKey(clazz)) {
+            if (!(builder instanceof AbstractDataBuilder || builder instanceof SpongeDataManipulatorBuilder || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
+                SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
+                                            + "the custom data builder does extend it to gain automated content versioning updates and maintain "
+                                            + "simplicity. The offending builder's class is: {}", builder.getClass());
+            }
             this.builders.put(clazz, builder);
+        } else {
+            SpongeImpl.getLogger().warn("A DataBuilder has already been registered for %s. Attempted to register %s instead.%n", clazz,
+                    builder.getClass());
         }
     }
 
