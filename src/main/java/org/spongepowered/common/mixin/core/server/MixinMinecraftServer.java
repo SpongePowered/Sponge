@@ -112,6 +112,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private boolean enableBonusChest;
     @Shadow private int tickCounter;
     @Shadow private String motd;
+    @Shadow public WorldServer[] worldServers;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(ITextComponent message);
@@ -320,7 +321,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     protected void initialWorldChunkLoad() {
-        DimensionManager.getWorlds().forEach(this::prepareSpawnArea);
+        for (WorldServer worldServer: this.worldServers) {
+            this.prepareSpawnArea(worldServer);
+        }
         this.clearCurrentTask();
     }
 
