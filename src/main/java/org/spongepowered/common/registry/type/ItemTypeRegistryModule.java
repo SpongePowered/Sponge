@@ -67,7 +67,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     @Override
     public Optional<ItemType> getById(String id) {
         checkNotNull(id);
-        if (!id.contains(":")) {
+        if (!id.contains(":") && !id.equals("none")) {
             id = "minecraft:" + id; // assume vanilla
         }
         return Optional.ofNullable(this.itemTypeMappings.get(id));
