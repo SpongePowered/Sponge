@@ -33,6 +33,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
 import gnu.trove.iterator.TIntObjectIterator;
+import gnu.trove.map.TIntObjectMap;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
@@ -80,6 +81,7 @@ import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -227,8 +229,21 @@ public class DimensionManager {
         return dimensionTypeByDimensionId.containsKey(dimensionId);
     }
 
-    public static TIntObjectIterator<DimensionType> dimensionsIterator() {
-        return dimensionTypeByDimensionId.iterator();
+    public static Map<Integer, DimensionType> sortedDimensionMap() {
+        TIntObjectMap<DimensionType> copy = new TIntObjectHashMap<>(dimensionTypeByDimensionId);
+
+        HashMap<Integer, DimensionType> newMap = new LinkedHashMap<>();
+
+        newMap.put(0, copy.remove(0));
+        newMap.put(-1, copy.remove(-1));
+        newMap.put(1, copy.remove(1));
+
+        for (TIntObjectIterator<DimensionType> it = copy.iterator(); it.hasNext();) {
+            it.advance();
+            newMap.put(it.key(), it.value());
+        }
+
+        return newMap;
     }
 
     public static TIntObjectIterator<WorldServer> worldsIterator() {
@@ -509,11 +524,10 @@ public class DimensionManager {
 
         registerExistingSpongeDimensions();
 
-        for (TIntObjectIterator<DimensionType> iter = dimensionsIterator(); iter.hasNext();) {
-            iter.advance();
+        for (Map.Entry<Integer, DimensionType> entry: sortedDimensionMap().entrySet()) {
 
-            final int dimensionId = iter.key();
-            final DimensionType dimensionType = iter.value();
+            final int dimensionId = entry.getKey();
+            final DimensionType dimensionType = entry.getValue();
 
             // Skip all worlds besides dimension 0 if multi-world is disabled
             if (dimensionId != 0 && !((MinecraftServer) Sponge.getServer()).getAllowNether()) {
