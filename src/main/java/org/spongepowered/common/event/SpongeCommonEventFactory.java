@@ -426,6 +426,12 @@ public class SpongeCommonEventFactory {
                             ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
 
+        // TODO - properly handle unknown flags (this will come with the CauseTracking refactor)
+        if (clickEvent == null) {
+            ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
+            return;
+        }
+
         SpongeImpl.postEvent(clickEvent);
 
         if (clickEvent.isCancelled()) {
