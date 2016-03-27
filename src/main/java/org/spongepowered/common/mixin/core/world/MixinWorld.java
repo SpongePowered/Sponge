@@ -36,7 +36,6 @@ import com.google.common.collect.Lists;
 import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -53,7 +52,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
@@ -281,8 +279,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "getCubes", at = @At("HEAD"), cancellable = true)
-    public void onGetCubes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
+    @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
+    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
         if (!entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
@@ -422,6 +420,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
 
+        // TODO - replace this with an actual check
+        /*
         if (entity instanceof EntityHanging) {
             if (((EntityHanging) entity).facingDirection == null) {
                 // TODO Some sort of detection of a valid direction?
@@ -431,7 +431,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!((EntityHanging) entity).onValidSurface()) {
                 return Optional.empty();
             }
-        }
+        }*/
 
         if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
@@ -621,7 +621,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         final WorldProvider worldProvider = worldServer.provider;
         ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
         final IChunkGenerator chunkGenerator = worldProvider.createChunkGenerator();
-        final BiomeProvider biomeProvider = worldServer.provider.worldChunkMgr;
+        final BiomeProvider biomeProvider = worldServer.provider.biomeProvider;
         return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
     }
 

@@ -52,7 +52,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected boolean set(EntityMinecart container, BlockState value) {
-        container.func_174899_a((IBlockState) value);
+        container.setDisplayTile((IBlockState) value);
         return true;
     }
 

@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.init.Biomes;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.gen.layer.IntCache;
@@ -38,6 +39,7 @@ import org.spongepowered.common.util.gen.ObjectArrayMutableBiomeBuffer;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Implementation of {@link BiomeProvider} based on a {@link BiomeGenerator}.
@@ -152,6 +154,39 @@ public final class CustomBiomeProvider extends BiomeProvider {
         }
 
         return true;
+    }
+
+    @Override
+    public BlockPos findBiomePosition(int xCenter, int zCenter, int range, List<BiomeGenBase> biomes, Random random) {
+        IntCache.resetIntCache();
+        int xStartSegment = xCenter - range >> 2;
+        int zStartSegment = zCenter - range >> 2;
+        int xMaxSegment = xCenter + range >> 2;
+        int zMaxSegment = zCenter + range >> 2;
+        int xSizeSegments = xMaxSegment - xStartSegment + 1;
+        int zSizeSegments = zMaxSegment - zStartSegment + 1;
+
+        ByteArrayMutableBiomeBuffer buffer = getBiomeBuffer(xStartSegment << 2, zStartSegment << 2, xSizeSegments << 2, zSizeSegments << 2);
+        this.biomeGenerator.generateBiomes(buffer);
+        byte[] aint = buffer.detach();
+
+        BlockPos blockpos = null;
+        int k1 = 0;
+
+        for (int l1 = 0; l1 < xSizeSegments * zSizeSegments; ++l1)
+        {
+            int i2 = xStartSegment + l1 % xSizeSegments << 2;
+            int j2 = zStartSegment + l1 / xSizeSegments << 2;
+            BiomeGenBase biomegenbase = BiomeGenBase.getBiome(aint[l1]);
+
+            if (biomes.contains(biomegenbase) && (blockpos == null || random.nextInt(k1 + 1) == 0))
+            {
+                blockpos = new BlockPos(i2, 0, j2);
+                ++k1;
+            }
+        }
+
+        return blockpos;
     }
 
     @Override

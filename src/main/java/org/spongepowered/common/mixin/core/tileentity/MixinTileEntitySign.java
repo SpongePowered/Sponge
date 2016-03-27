@@ -22,66 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import net.minecraft.potion.Potion;
-import net.minecraft.tileentity.TileEntityBeacon;
-import org.spongepowered.api.block.tileentity.carrier.Beacon;
+import com.google.common.collect.Lists;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.text.ITextComponent;
+import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinSubject;
 
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntityBeacon.class)
-public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon {
+@Mixin(TileEntitySign.class)
+public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
-    @Shadow private Potion primaryEffect;
-    @Shadow private Potion secondaryEffect;
-    @Shadow private int levels;
-
-    @Override
-    public int getCompletedLevels() {
-        return this.levels < 0 ? 0 : this.levels;
-    }
-
-    /**
-     * @author gabizou - March 7th, 2016
-     *
-     * Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
-     * prevented any non-vanilla beacon defined potions from being applied
-     * to a beacon. This method is used for both setfield and when reading from nbt.
-     */
-    @Overwrite
-    private static Potion isBeaconEffect(int p_184279_0_) {
-        return Potion.getPotionById(p_184279_0_);
-    }
-
+    @Shadow @Final public ITextComponent[] signText;
 
     @Override
     public DataContainer toContainer() {
         DataContainer container = super.toContainer();
-        container.set(of("effect1"), getField(1));
-        container.set(of("effect2"), getField(2));
+        List<String> lines = Lists.newArrayList();
+        for (ITextComponent line : this.signText) {
+            lines.add(ITextComponent.Serializer.componentToJson(line));
+        }
+        container.set(Keys.SIGN_LINES.getQuery(), lines);
         return container;
     }
 
     @Override
-    public void sendDataToContainer(DataView dataView) {
-        dataView.set(of("effect1"), getField(1));
-        dataView.set(of("effect2"), getField(2));
+    public String getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_COMMAND_BLOCK;
+    }
+
+    @Override
+    public Tristate permDefault(String permission) {
+        return Tristate.TRUE;
     }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getBeaconData());
+        manipulators.add(getSignData());
     }
 }

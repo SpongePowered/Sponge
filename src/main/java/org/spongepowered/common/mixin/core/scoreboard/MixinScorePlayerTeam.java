@@ -34,7 +34,6 @@ import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -77,13 +76,13 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     private Text suffix;
     private TextColor color;
 
-    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;sendTeamUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on theScoreboard, so we redirect
     // the call and do it ourselves.
     private void doTeamUpdate() {
         if (this.theScoreboard != null) {
-            this.theScoreboard.sendTeamUpdate((ScorePlayerTeam) (Object) this);
+            this.theScoreboard.broadcastTeamInfoUpdate((ScorePlayerTeam) (Object) this);
         }
     }
 

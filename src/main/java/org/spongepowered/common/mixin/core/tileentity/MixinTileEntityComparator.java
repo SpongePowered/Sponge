@@ -22,39 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import net.minecraft.tileentity.TileEntityFurnace;
-import org.spongepowered.api.block.tileentity.carrier.Furnace;
-import org.spongepowered.api.data.DataContainer;
+import net.minecraft.tileentity.TileEntityComparator;
+import org.spongepowered.api.block.tileentity.Comparator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 @NonnullByDefault
-@Mixin(TileEntityFurnace.class)
-public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
+@Mixin(TileEntityComparator.class)
+public abstract class MixinTileEntityComparator extends MixinTileEntity implements Comparator {
 
-    @Shadow private String furnaceCustomName;
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("BurnTime"), this.getField(0));
-        container.set(of("BurnTimeTotal"), this.getField(1));
-        container.set(of("CookTime"), this.getField(3) - this.getField(2));
-        container.set(of("CookTimeTotal"), this.getField(3));
-        if (this.furnaceCustomName != null) {
-            container.set(of("CustomName"), this.furnaceCustomName);
-        }
-        return container;
-    }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
-    }
 }

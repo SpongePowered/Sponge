@@ -22,13 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityPiston;
-import org.spongepowered.api.block.tileentity.Piston;
+import static org.spongepowered.api.data.DataQuery.of;
+
+import net.minecraft.tileentity.TileEntityNote;
+import org.spongepowered.api.block.tileentity.Note;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
 
-@Mixin(TileEntityPiston.class)
-public abstract class MixinTileEntityPiston extends MixinTileEntity implements Piston {
+import java.util.List;
+
+@NonnullByDefault
+@Mixin(TileEntityNote.class)
+public abstract class MixinTileEntityNote extends MixinTileEntity implements Note {
+
+    @Shadow public byte note;
+
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        container.set(DataQueries.TILE_NOTE_ID, this.note);
+        return container;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getNoteData());
+    }
 
 }

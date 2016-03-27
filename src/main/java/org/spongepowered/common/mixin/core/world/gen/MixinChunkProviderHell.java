@@ -55,6 +55,7 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
 
     @Shadow @Final private boolean field_185953_o;
     @Shadow @Final public Random rand;
+    @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Final private MapGenNetherBridge genNetherBridge;
     @Shadow @Final private MapGenBase field_185939_I;
     @Shadow public abstract void func_185936_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
@@ -67,6 +68,8 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
         if (this.field_185953_o) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
             generator.getPopulators().add((Populator) this.genNetherBridge);
+            // TODO: Remove once structures are properly implemented
+            this.genNetherBridge.worldObj = world;
         }
     }
 

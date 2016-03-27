@@ -60,7 +60,7 @@ public class MinecartBlockDataProcessor extends AbstractEntityDataProcessor<Enti
         int offset = (Integer) keyValues.get(Keys.OFFSET);
 
         entity.setDisplayTileOffset(offset);
-        entity.func_174899_a((IBlockState) type);
+        entity.setDisplayTile((IBlockState) type);
 
         return true;
     }

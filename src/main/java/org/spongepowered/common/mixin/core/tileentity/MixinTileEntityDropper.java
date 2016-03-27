@@ -22,15 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityEndPortal;
-import org.spongepowered.api.block.tileentity.EndPortal;
+import net.minecraft.tileentity.TileEntityDropper;
+import org.spongepowered.api.block.tileentity.carrier.Dropper;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 
 @NonnullByDefault
-@Mixin(TileEntityEndPortal.class)
-public abstract class MixinTileEntityEndPortal extends MixinTileEntity implements EndPortal {
+@Mixin(TileEntityDropper.class)
+public abstract class MixinTileEntityDropper extends MixinTileEntityDispenser implements Dropper {
 
 }

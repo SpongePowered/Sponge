@@ -22,15 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.tileentity.TileEntityEnderChest;
-import org.spongepowered.api.block.tileentity.EnderChest;
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.tileentity.TileEntityDispenser;
+import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.entity.projectile.ProjectileLauncher;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
+
+import java.util.Optional;
 
 @NonnullByDefault
-@Mixin(TileEntityEnderChest.class)
-public abstract class MixinTileEntityEnderChest extends MixinTileEntity implements EnderChest {
+@Mixin(TileEntityDispenser.class)
+public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser, IMixinCustomNameable {
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
+        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
+        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityDispenser) (Object) this).setCustomName(customName);
+    }
 
 }

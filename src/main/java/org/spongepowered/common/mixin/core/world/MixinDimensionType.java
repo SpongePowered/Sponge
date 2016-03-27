@@ -57,7 +57,8 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     private volatile Context context;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstruct(int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn, CallbackInfo ci) {
+    public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
+            CallbackInfo ci) {
         this.sanitizedId = this.getName().toLowerCase().replaceAll(" ", "_").replace("[^A-Za-z0-9_]", "");
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType$getId
                 ()).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);

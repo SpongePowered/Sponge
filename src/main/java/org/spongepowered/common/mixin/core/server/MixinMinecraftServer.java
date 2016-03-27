@@ -135,7 +135,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
-    private boolean preparingChunks = false;
     private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
@@ -190,7 +189,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
         if (getPlayerList() == null || getPlayerList().getPlayerList() == null) {
             return ImmutableList.of();
@@ -311,9 +310,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldByDimensionId(0).get()});
             this.setDifficultyForAllWorlds(this.getDifficulty());
-            this.preparingChunks = true;
             this.initialWorldChunkLoad();
-            this.preparingChunks = false;
         }
     }
 
@@ -335,7 +332,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
 
-        this.preparingChunks = true;
+        ((IMixinWorld) worldServer).getCauseTracker().setCapturingTerrainGen(false);
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
         logger.info("Preparing start region for level {} ({})", ((IMixinWorld) worldServer).getDimensionId(), ((World) worldServer).getName());
@@ -357,7 +354,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         this.clearCurrentTask();
-        this.preparingChunks = false;
+        ((IMixinWorld) worldServer).getCauseTracker().setCapturingTerrainGen(false);
     }
 
     @Override
@@ -543,10 +540,5 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
-    }
-
-    @Override
-    public boolean isPreparingChunks() {
-        return this.preparingChunks;
     }
 }

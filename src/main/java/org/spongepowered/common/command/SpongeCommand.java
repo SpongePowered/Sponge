@@ -409,8 +409,7 @@ public class SpongeCommand {
                                     .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
 
                             next.getVersion()
-                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + next.getVersion().get()))));
-
+                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
                             build.append(pluginBuilder.build());
                         }
                         src.sendMessage(build.build());

@@ -44,7 +44,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
-import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -184,7 +183,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
-    @Shadow protected EntityDataManager dataWatcher;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -327,9 +325,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public void setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
-        if (isRemoved()) {
-            return;
-        }
+        checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
+        checkState(!isRemoved(), "Trying to set location of already removed Entity!");
 
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
@@ -341,8 +338,9 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
 
-        if (location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
-            teleportEntity(thisEntity, location, thisEntity.dimension, ((IMixinWorld) worldObj).getDimensionId());
+        System.err.println("Are we going to same world? " + location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId()));
+        if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
+            teleportTo(location);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
@@ -361,70 +359,76 @@ public abstract class MixinEntity implements IMixinEntity {
 
     // for sponge internal use only
     @SuppressWarnings("unchecked")
-    private boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
+    private boolean teleportTo(Location<World> location) {
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
-        final WorldServer fromWorld = server.worldServerForDimension(currentDim);
-        final WorldServer toWorld = server.worldServerForDimension(targetDim);
+        final net.minecraft.entity.Entity this$ = (net.minecraft.entity.Entity) (Object) this;
+        final WorldServer fromWorld = (WorldServer) this$.getEntityWorld();
+        final WorldServer toWorld = (WorldServer) location.getExtent();
 
         // First remove us from where we come from
-        if (entity instanceof EntityPlayer) {
-            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) entity);
-            fromWorld.playerEntities.remove(entity);
+        if (this$ instanceof EntityPlayer) {
+            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) this$);
+            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) this$);
+            fromWorld.playerEntities.remove(this$);
             fromWorld.updateAllPlayersSleepingFlag();
         } else {
-            fromWorld.getEntityTracker().untrackEntity(entity);
+            fromWorld.getEntityTracker().untrackEntity(this$);
         }
 
-
-        if (entity.isBeingRidden())
+        if (this$.isBeingRidden())
         {
-            entity.removePassengers();
+            this$.removePassengers();
         }
 
-        if (entity.isRiding())
+        if (this$.isRiding())
         {
-            entity.dismountRidingEntity();
+            this$.dismountRidingEntity();
         }
 
-        ((IMixinWorld) fromWorld).onSpongeEntityRemoved(entity);
+        ((IMixinWorld) fromWorld).onSpongeEntityRemoved(this$);
 
-        int i = entity.chunkCoordX;
-        int j = entity.chunkCoordZ;
+        int i = this$.chunkCoordX;
+        int j = this$.chunkCoordZ;
 
-        if (entity.addedToChunk && fromWorld.isChunkLoaded(i, j, true))
+        if (this$.addedToChunk && fromWorld.isChunkLoaded(i, j, true))
         {
-            fromWorld.getChunkFromChunkCoords(i, j).removeEntity(entity);
+            fromWorld.getChunkFromChunkCoords(i, j).removeEntity(this$);
         }
 
-        if (!(entity instanceof EntityPlayerMP)) {
-            fromWorld.loadedEntityList.remove(entity);
+        if (!(this$ instanceof EntityPlayerMP)) {
+            fromWorld.loadedEntityList.remove(this$);
         }
 
         // At this point, we've removed the entity from the previous world. Lets now put them in the new world.
-        entity.dimension = targetDim;
-        entity.setWorld(toWorld);
+        this$.dimension = ((IMixinWorld) toWorld).getDimensionId();
+        this$.setWorld(toWorld);
 
-        if (entity instanceof EntityPlayer) {
-            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
+        if (this$ instanceof EntityPlayer) {
+            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) this$;
 
             // Support vanilla clients going into custom dimensions
-            net.minecraft.world.DimensionType clientDimensionType = DimensionManager.getClientDimensionType(toWorld.provider.getDimensionType());
+            final net.minecraft.world.DimensionType fromClientDimensionType = DimensionManager.getClientDimensionType(fromWorld.provider
+                    .getDimensionType());
+            final net.minecraft.world.DimensionType toClientDimensionType = DimensionManager.getClientDimensionType(toWorld.provider.getDimensionType
+                    ());
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-                DimensionManager.sendDimensionRegistration(entityPlayerMP, clientDimensionType);
+                DimensionManager.sendDimensionRegistration(entityPlayerMP, toClientDimensionType);
             } else {
-                final int clientDimensionTypeId = clientDimensionType.getId();
+                final int currentDim = ((IMixinWorld) fromWorld).getDimensionId();
+                final int targetDim = ((IMixinWorld) toWorld).getDimensionId();
+                final int fromClientDimensionTypeId = fromClientDimensionType.getId();
+                final int toClientDimensionTypeId = toClientDimensionType.getId();
                 // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && (currentDim == clientDimensionTypeId || targetDim == clientDimensionTypeId)) {
+                if (currentDim != targetDim && fromClientDimensionTypeId == toClientDimensionTypeId) {
                     entityPlayerMP.playerNetServerHandler.sendPacket(
-                            new SPacketRespawn(clientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(), toWorld.getWorldInfo().
+                            new SPacketRespawn(toClientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(), toWorld.getWorldInfo().
                                     getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
                 }
             }
 
-            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(clientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
                     getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+            entityPlayerMP.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
             entityPlayerMP.setSneaking(false);
             server.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
@@ -432,15 +436,15 @@ public abstract class MixinEntity implements IMixinEntity {
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
 
-            toWorld.getChunkProvider().provideChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
+            toWorld.getChunkProvider().provideChunk((int) this$.posX >> 4, (int) this$.posZ >> 4);
         } else {
-            entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
+            this$.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         }
 
-        if (toWorld.spawnEntityInWorld(entity)) {
+        if (toWorld.spawnEntityInWorld(this$)) {
             // Perform position corrections in-case we are in the ground
-            while (!toWorld.getCubes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
-                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
+            while (!toWorld.getCollisionBoxes(this$, this$.getEntityBoundingBox()).isEmpty() && this$.posY < 256.0D) {
+                this$.setPosition(this$.posX, this$.posY + 1.0D, this$.posZ);
             }
         }
 
@@ -582,7 +586,6 @@ public abstract class MixinEntity implements IMixinEntity {
     public void transferToWorld(World world, Vector3d position) {
         checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        checkState(world.isLoaded(), "World is not loaded!");
         setLocation(new Location<>(world, position));
     }
 
@@ -965,6 +968,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.motionX = checkNotNull(velocity).getX();
         this.motionY = velocity.getY();
         this.motionZ = velocity.getZ();
+        this.velocityChanged = true;
     }
 
     @Override

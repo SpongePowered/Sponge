@@ -34,7 +34,6 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -200,10 +199,10 @@ public class SpongeObjective implements Objective {
                     Map map1 = (Map) scoreboard.entitiesScoreObjectives.remove(name);
 
                     if (map1 != null) {
-                        scoreboard.func_96516_a(name);
+                        scoreboard.broadcastScoreUpdate(name);
                     }
                 } else if (score != null) {
-                    scoreboard.func_178820_a(name, objective);
+                    scoreboard.broadcastScoreUpdate(name, objective);
                 }
             }
             ((SpongeScore) spongeScore).removeScoreFor(objective);

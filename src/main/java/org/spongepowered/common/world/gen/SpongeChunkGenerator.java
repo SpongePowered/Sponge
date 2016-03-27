@@ -43,6 +43,7 @@ import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.ChunkProviderOverworld;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenStronghold;
 import net.minecraft.world.gen.structure.MapGenStructure;
@@ -80,7 +81,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 /**
- * Similar class to {@link ChunkProviderGenerate}, but instead gets its blocks
+ * Similar class to {@link ChunkProviderOverworld}, but instead gets its blocks
  * from a custom chunk generator.
  */
 public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
@@ -115,7 +116,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.noise4 = new NoiseGeneratorPerlin(this.rand, 4);
         this.stoneNoise = new double[256];
 
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(this.biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(this.biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
@@ -168,7 +169,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
     @Override
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = biomeGenerator;
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }
@@ -308,8 +309,6 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
         SpongeImpl.postEvent(event);
 
-        causeTracker.getCapturedPopulators().clear();
-
         BlockFalling.fallInstantly = false;
     }
 
@@ -328,6 +327,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public List<SpawnListEntry> getPossibleCreatures(EnumCreatureType creatureType, BlockPos pos) {
+        if (this.baseGenerator instanceof IChunkGenerator) {
+            return ((IChunkGenerator) this.baseGenerator).getPossibleCreatures(creatureType, pos);
+        }
+
         BiomeGenBase biome = this.world.getBiomeGenForCoords(pos);
         List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
         return creatures;

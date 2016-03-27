@@ -170,7 +170,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "broadcastTeamInfoUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onSendTeamUpdate(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }

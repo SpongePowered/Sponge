@@ -104,8 +104,7 @@ public class DimensionManager {
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
-    private static final Queue<Integer> unloadQueue = new ArrayDeque<>();
-
+    private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
     static {
         registerDimensionType(0, DimensionType.OVERWORLD);
         registerDimensionType(-1, DimensionType.NETHER);
@@ -190,7 +189,8 @@ public class DimensionManager {
 
     public static Optional<DimensionType> getDimensionType(Class<? extends WorldProvider> providerClass) {
         checkNotNull(providerClass);
-        for (DimensionType dimensionType : (DimensionType[]) dimensionTypeByTypeId.values()) {
+        for (Object rawDimensionType : dimensionTypeByTypeId.values()) {
+            final DimensionType dimensionType = (DimensionType) rawDimensionType;
             if (((org.spongepowered.api.world.DimensionType) (Object) dimensionType).getDimensionClass().equals(providerClass)) {
                 return Optional.of(dimensionType);
             }
@@ -351,30 +351,40 @@ public class DimensionManager {
         return true;
     }
 
+    public static void unloadQueuedWorlds() {
+        while (unloadQueue.peek() != null) {
+            final WorldServer worldServer = unloadQueue.poll();
+
+            unloadWorld(worldServer);
+        }
+
+        unloadQueue.clear();
+    }
+
     // TODO Result
-    public static boolean unloadWorld(WorldServer world) {
-        checkNotNull(world);
+    public static boolean unloadWorld(WorldServer worldServer) {
+        checkNotNull(worldServer);
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
 
-        if (worldByDimensionId.containsValue(world)) {
-            if (!world.playerEntities.isEmpty()) {
+        if (worldByDimensionId.containsValue(worldServer)) {
+            if (!worldServer.playerEntities.isEmpty()) {
                 return false;
             }
 
             try {
-                saveWorld(world);
+                saveWorld(worldServer);
             } catch (MinecraftException e) {
                 e.printStackTrace();
             }
             finally {
-                final int dimensionId = ((IMixinWorld) world).getDimensionId();
+                final int dimensionId = ((IMixinWorld) worldServer).getDimensionId();
                 worldByDimensionId.remove(dimensionId);
                 ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
-                SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, world.getWorldInfo().getWorldName());
+                SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
             }
 
             SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
-                    world));
+                    worldServer));
 
             return true;
         }
@@ -606,8 +616,7 @@ public class DimensionManager {
         ((IMixinWorldSettings) (Object) worldSettings).setDimensionId(dimensionId);
         ((IMixinWorldSettings) (Object) worldSettings).setDimensionType((org.spongepowered.api.world.DimensionType) (Object) dimensionType);
 
-        // Bad MCP mapping name. Actually is generatorOptions
-        worldSettings.setWorldName(generatorOptions);
+        worldSettings.setGeneratorOptions(generatorOptions);
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties((WorldProperties) worldInfo);

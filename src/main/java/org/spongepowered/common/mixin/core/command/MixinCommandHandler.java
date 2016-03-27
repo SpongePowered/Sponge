@@ -62,7 +62,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.of("Command", command), NamedCause.of("CommandSender", sender)));
+            world.getCauseTracker().handlePostTickCaptures(Cause.source(sender).named("Command", command).build());
             world.getCauseTracker().setProcessingCaptureCause(false);
             world.getCauseTracker().setCapturingCommand(false);
         }

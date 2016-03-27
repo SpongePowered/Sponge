@@ -22,38 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.data.DataQuery.of;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
-import org.spongepowered.api.entity.projectile.Projectile;
+import net.minecraft.tileentity.TileEntityFurnace;
+import org.spongepowered.api.block.tileentity.carrier.Furnace;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
-import java.util.Optional;
-
 @NonnullByDefault
-@Mixin(TileEntityDispenser.class)
-public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser, IMixinCustomNameable {
+@Mixin(TileEntityFurnace.class)
+public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
+
+    @Shadow private String furnaceCustomName;
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
-    }
-
-    @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        container.set(of("BurnTime"), this.getField(0));
+        container.set(of("BurnTimeTotal"), this.getField(1));
+        container.set(of("CookTime"), this.getField(3) - this.getField(2));
+        container.set(of("CookTimeTotal"), this.getField(3));
+        if (this.furnaceCustomName != null) {
+            container.set(of("CustomName"), this.furnaceCustomName);
+        }
+        return container;
     }
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityDispenser) (Object) this).setCustomName(customName);
+        ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
     }
-
 }

@@ -72,7 +72,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
         this.populators = Lists.newArrayList();
         this.generationPopulators = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }
@@ -107,7 +107,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
         // Replace biome generator with possible modified one
-        this.world.provider.worldChunkMgr = CustomBiomeProvider.of(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
         if (this.baseGenerator instanceof IChunkProviderOverworld) {
             ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }

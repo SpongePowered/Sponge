@@ -112,20 +112,20 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     protected void entityInit() {
-        this.dataWatcher.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
-        this.dataWatcher.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
-        this.dataWatcher.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
-        this.dataWatcher.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
-        this.dataWatcher.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
-        this.dataWatcher.register(EntityPlayer.ABSORPTION, 0.0F);
-        this.dataWatcher.register(EntityPlayer.PLAYER_SCORE, 0);
-        this.dataWatcher.register(EntityPlayer.MAIN_HAND, (byte) 1);
-        this.dataWatcher.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
+        this.dataManager.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
+        this.dataManager.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
+        this.dataManager.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
+        this.dataManager.register(EntityPlayer.ABSORPTION, 0.0F);
+        this.dataManager.register(EntityPlayer.PLAYER_SCORE, 0);
+        this.dataManager.register(EntityPlayer.MAIN_HAND, (byte) 1);
+        this.dataManager.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
     }
 
     @Override
     public boolean isLeftHanded() {
-        return this.dataWatcher.get(EntityPlayer.MAIN_HAND) == 0;
+        return this.dataManager.get(EntityPlayer.MAIN_HAND) == 0;
     }
 
     @Override

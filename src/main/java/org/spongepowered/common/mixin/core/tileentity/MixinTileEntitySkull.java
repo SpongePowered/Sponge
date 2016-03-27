@@ -22,22 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.tileentity.TileEntitySkull;
 import org.spongepowered.api.block.tileentity.Skull;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedPlayerData;
 import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.processor.common.SkullUtils;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntitySkull;
 
 import java.util.List;
 import java.util.Optional;
 
-@NonnullByDefault
 @Mixin(TileEntitySkull.class)
+@Implements(@Interface(iface = IMixinTileEntitySkull.class, prefix = "skull$"))
 public abstract class MixinTileEntitySkull extends MixinTileEntity implements Skull {
+
+    @Shadow private com.mojang.authlib.GameProfile playerProfile;
+    @Shadow private int skullType;
+
+    @Shadow public abstract com.mojang.authlib.GameProfile shadow$getPlayerProfile();
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
@@ -52,4 +65,44 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
             manipulators.add(profileData.get());
         }
     }
+
+    @Intrinsic
+    public com.mojang.authlib.GameProfile skull$getPlayerProfile() {
+        return shadow$getPlayerProfile();
+    }
+
+    public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile, boolean update) {
+        this.skullType = 3;
+        this.playerProfile = mcProfile;
+        if (update) {
+            updatePlayerProfile();
+        }
+    }
+
+    /**
+     * Overwrite this method to overload to
+     * {@link #setPlayerProfile(GameProfile, boolean)}. This allows to
+     * set the profile from {@link SkullUtils} without invoking another update.
+     *
+     * - windy 3/13/16
+     *
+     * @param mcProfile Minecraft GameProfile
+     */
+    @Overwrite
+    public void setPlayerProfile(com.mojang.authlib.GameProfile mcProfile) {
+        setPlayerProfile(mcProfile, true);
+    }
+
+    /**
+     * Overwrite this method to delegate profile updating to the
+     * {@link GameProfileManager} so skull updating can be handled
+     * asynchronously.
+     *
+     * - windy 3/13/16
+     */
+    @Overwrite
+    private void updatePlayerProfile() {
+        SkullUtils.updatePlayerProfile((IMixinTileEntitySkull) this);
+    }
+
 }

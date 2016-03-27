@@ -44,6 +44,7 @@ import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketJoinGame;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
@@ -63,7 +64,6 @@ import net.minecraft.world.storage.IPlayerFileData;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -386,24 +386,12 @@ public abstract class MixinPlayerList {
     @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP entityPlayerMP, int targetDimension, boolean conqueredEnd) {
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
-
-        // ### PHASE 1 ### Get the location to spawn.
 
         // Vanilla will always use overworld, set to the world the player was in
-        // UNLESS coming back from the end.
+        // UNLESS coming back from conquering the end.
         if (!conqueredEnd && targetDimension == 0) {
             targetDimension = entityPlayerMP.dimension;
         }
-
-        // ### PHASE 2 ### Remove player from current dimension.
-
-        final WorldServer fromWorld = entityPlayerMP.getServerForPlayer();
-
-        fromWorld.getEntityTracker().removePlayerFromTrackers(entityPlayerMP);
-        fromWorld.getPlayerChunkManager().removePlayer(entityPlayerMP);
-        fromWorld.playerEntities.remove(entityPlayerMP);
-        fromWorld.updateAllPlayersSleepingFlag();
 
         if (entityPlayerMP.isBeingRidden()) {
             entityPlayerMP.removePassengers();
@@ -413,42 +401,23 @@ public abstract class MixinPlayerList {
             entityPlayerMP.dismountRidingEntity();
         }
 
-        ((IMixinWorld) fromWorld).onSpongeEntityRemoved(entityPlayerMP);
-
-        int i = entityPlayerMP.chunkCoordX;
-        int j = entityPlayerMP.chunkCoordZ;
-
-        if (entityPlayerMP.addedToChunk && fromWorld.isChunkLoaded(i, j, true)) {
-            fromWorld.getChunkFromChunkCoords(i, j).removeEntity(entityPlayerMP);
-        }
-
-        fromWorld.loadedEntityList.remove(entityPlayerMP);
-
-        // ### PHASE 3 ### Reset player (if applicable).
-
-        if (!conqueredEnd) { // don't reset player if returning from end
+        if (!conqueredEnd) { // don't reset player if returning from conquering the end
             ((IMixinEntityPlayerMP) entityPlayerMP).reset();
         }
 
-        Transform<World> fromTransform = ((Player) entityPlayerMP).getTransform();
+        final Transform<World> fromTransform = ((Player) entityPlayerMP).getTransform();
         Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, DimensionManager.getWorldByDimensionId
                 (targetDimension).orElse(null)), Vector3d.ZERO, Vector3d.ZERO);
 
-        // Perform position corrections in-case we are in the ground
-        while (!((WorldServer) toTransform.getExtent()).getCubes(entityPlayerMP, entityPlayerMP.getEntityBoundingBox()).isEmpty() && entityPlayerMP
-                .posY < 256.0D) {
-            entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
-        }
-
-        toTransform = toTransform.setPosition(VecHelper.toVector3d(entityPlayerMP.getPosition()));
-
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
 
-        // ### PHASE 4 ### Fire event and set new location on the player
+        entityPlayerMP.isDead = false;
+
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
+
         toTransform = event.getToTransform();
 
         if (!(toTransform.getExtent() instanceof WorldServer)) {
@@ -456,7 +425,16 @@ public abstract class MixinPlayerList {
             toTransform = event.getFromTransform();
         }
 
+        if (((Player) entityPlayerMP).getTransform().getExtent().equals(toTransform.getExtent())) {
+            final WorldServer worldServer = (WorldServer) toTransform.getExtent();
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorld) worldServer).getDimensionId(), worldServer.getDifficulty(),
+                    worldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+            if (!worldServer.getEntityTracker().trackedEntityHashTable.containsItem(entityPlayerMP.getEntityId())) {
+                worldServer.getEntityTracker().trackEntity(entityPlayerMP);
+            }
+        }
         ((Player) entityPlayerMP).setTransform(toTransform);
+
 
         // TODO Following still needed?
         // Reset the health.
@@ -473,7 +451,9 @@ public abstract class MixinPlayerList {
 
     // Internal. Note: Has side-effects
     private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
+        System.err.println("TargetWorld: " + ((World) targetWorld).getName());
         final Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
+        System.err.println("PrevWorld Spawn: " + location);
         this.tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
             return location;
@@ -488,8 +468,14 @@ public abstract class MixinPlayerList {
             targetWorld = this.mcServer.worldServerForDimension(targetDimensionId);
         }
 
+        System.err.println("TargetDimension: " + targetDimension);
+        System.err.println("TargetDimensionId: " + targetDimensionId);
+        System.err.println("TargetWorld: " + ((World) targetWorld).getName());
+
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
+        System.err.println("TargetSpawnVec: " + targetSpawnVec);
         BlockPos bedPos = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimensionId);
+        System.err.println("BedPos: " + bedPos);
         if (bedPos != null) { // Player has a bed
             boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimensionId);
             BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);

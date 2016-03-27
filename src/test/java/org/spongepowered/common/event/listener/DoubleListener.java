@@ -22,21 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.event.listener;
 
-import net.minecraft.command.ICommand;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Game;
-import org.spongepowered.common.command.MinecraftCommandWrapper;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.item.inventory.ItemStack;
 
-public interface IMixinServerCommandManager {
+public class DoubleListener {
 
-    void registerLowPriorityCommands(Game game);
-
-    void registerEarlyCommands(Game game);
-
-    MinecraftCommandWrapper wrapCommand(ICommand command);
-
-    BlockPos getTabBlockPos();
+    @Listener
+    public void onEvent(ChangeBlockEvent.Break e, @First Player p, @First ItemStack stack) {
+        e.getClass();
+    }
 
 }

@@ -22,21 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.command.ICommand;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.Game;
-import org.spongepowered.common.command.MinecraftCommandWrapper;
+import net.minecraft.tileentity.TileEntityDaylightDetector;
+import org.spongepowered.api.block.tileentity.DaylightDetector;
+import org.spongepowered.asm.mixin.Mixin;
 
-public interface IMixinServerCommandManager {
-
-    void registerLowPriorityCommands(Game game);
-
-    void registerEarlyCommands(Game game);
-
-    MinecraftCommandWrapper wrapCommand(ICommand command);
-
-    BlockPos getTabBlockPos();
+@Mixin(TileEntityDaylightDetector.class)
+public abstract class MixinTileEntityDaylightDetector extends MixinTileEntity implements DaylightDetector {
 
 }

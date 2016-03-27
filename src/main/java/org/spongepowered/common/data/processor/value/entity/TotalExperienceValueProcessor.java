@@ -59,17 +59,34 @@ public class TotalExperienceValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected boolean set(EntityPlayer container, Integer value) {
-        int level = 0;
-        for (int i = value; true; i -= ExperienceHolderUtils.getExpBetweenLevels(level)) {
-            if (i - ExperienceHolderUtils.getExpBetweenLevels(level) <= 0) {
-                container.experience = (float) i / ExperienceHolderUtils.getExpBetweenLevels(level);
-                container.experienceLevel = level;
-                break;
-            }
-            level++;
-        }
+        int level = -1;
+
+        int experienceForCurrentLevel;
+        int experienceAtNextLevel = -1;
+
+        // We work iteratively to get the level. Remember, the level variable contains the CURRENT level and the method
+        // calculates what we need to get to the NEXT level, so we work our way up, summing up all these intervals, until
+        // we get an experience value that is larger than the value. This gives us our level.
+        //
+        // If the cumulative experience required for level+1 is still below that (or in the edge case, equal to) our
+        // value, we need to go up a level. So, if the boundary is at 7 exp, and we have 7 exp, we need one more loop
+        // to increment the level as we are at 100% and therefore should be at level+1.
+        do {
+            // We need this later.
+            experienceForCurrentLevel = experienceAtNextLevel;
+
+            // Increment level, as we know we are at least that level (in the first instance -1 -> 0)
+            // and add the next amount of experience to the variable.
+            experienceAtNextLevel += ExperienceHolderUtils.getExpBetweenLevels(++level);
+        } while (experienceAtNextLevel <= value);
+
+        // Once we're here, we have the correct level. The experience is the decimal fraction that we are through the
+        // current level. This is why we require the experienceForCurrentLevel variable, we need the difference between
+        // the current value and the beginning of the level.
+        container.experience = (float)(value - experienceForCurrentLevel) / ExperienceHolderUtils.getExpBetweenLevels(level);
+        container.experienceLevel = level;
         container.experienceTotal = value;
-        return false;
+        return true;
     }
 
     @Override
