@@ -1179,22 +1179,7 @@ public final class CauseTracker {
                         newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag));
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
                 if (shouldChainCause(cause)) {
-                    Cause currentCause = cause;
-                    List<NamedCause> causes = new ArrayList<>();
-                    causes.add(NamedCause.source(this.getCurrentTickBlock().get()));
-                    List<String> namesUsed = new ArrayList<>();
-                    int iteration = 1;
-                    for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
-                        String name = entry.getKey().equalsIgnoreCase("Source")
-                                      ? "AdditionalSource" : entry.getKey().equalsIgnoreCase("AdditionalSource")
-                                                             ? "PreviousSource" : entry.getKey();
-                        if (namesUsed.contains(name)) {
-                            name += iteration++;
-                        }
-                        namesUsed.add(name);
-                        causes.add(NamedCause.of(name, entry.getValue()));
-                    }
-                    cause = Cause.of(causes);
+                    cause = cause.merge(Cause.of(NamedCause.source(this.currentTickBlock)));
                 }
             }
 
@@ -1203,7 +1188,7 @@ public final class CauseTracker {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (this.getCapturedEntities().size() > 0 && this.pluginCause == null) {
+            if (this.getCapturedSpongeBlockSnapshots().size() > 0 && this.pluginCause == null) {
                 this.handlePostTickCaptures(cause);
             }
 
