@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
@@ -39,10 +40,8 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import org.apache.logging.log4j.Logger;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
@@ -86,14 +85,11 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -305,8 +301,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
                     + "dimensions besides [{}] will be skipped.", overworldFolder);
         } else {
-            final Path rootFolder = SpongeImpl.getGame().getSavesDirectory().resolve(overworldFolder);
-            WorldMigrator.migrateWorldsTo(rootFolder);
             DimensionManager.loadAllWorlds(worldName, seed, type, generatorOptions);
 
             this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldByDimensionId(0).get()});
@@ -411,6 +405,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public String getDefaultWorldName() {
+        checkState(getFolderName() != null, "Attempt made to grab default world name too early!");
         return getFolderName();
     }
 
@@ -459,25 +454,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             this.profileManager = new SpongeProfileManager();
         }
         return this.profileManager;
-    }
-
-    @Override
-    public AnvilSaveHandler getHandler(String worldName) {
-        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
-            return new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                                        true, getDataFixer());
-        } else {
-            return new AnvilSaveHandler(new File(getFolderName()), worldName, true, getDataFixer());
-        }
-    }
-
-    /**
-     * @author Zidane - March 13th, 2016
-     * Vanilla simply returns worldServers[0]/[1]/[2] here. We change this to ask the {@link DimensionManager}.
-     */
-    @Overwrite
-    public WorldServer worldServerForDimension(int dim) {
-        return DimensionManager.getWorldByDimensionId(dim).orElse(null);
     }
 
     @Override

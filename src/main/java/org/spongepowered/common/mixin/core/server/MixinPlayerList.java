@@ -183,13 +183,13 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = mcServer.worldServerForDimension(playerIn.dimension);
+        WorldServer worldServer = DimensionManager.getWorldByDimensionId(playerIn.dimension).orElse(null);
         BlockPos randomizedSpawnPos = null;
 
         if (worldServer == null) {
             SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded dimension [{}]. This is not safe so we have moved them to "
                     + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
-            worldServer = this.mcServer.worldServerForDimension(0);
+            worldServer = DimensionManager.getWorldByDimensionId(0).get();
             randomizedSpawnPos = ((IMixinWorldProvider) worldServer.provider).getRandomizedSpawnPoint();
         }
 
@@ -451,9 +451,7 @@ public abstract class MixinPlayerList {
 
     // Internal. Note: Has side-effects
     private Location<World> getPlayerRespawnLocation(EntityPlayerMP playerIn, @Nullable WorldServer targetWorld) {
-        System.err.println("TargetWorld: " + ((World) targetWorld).getName());
         final Location<World> location = ((World) playerIn.worldObj).getSpawnLocation();
-        System.err.println("PrevWorld Spawn: " + location);
         this.tempIsBedSpawn = false;
         if (targetWorld == null) { // Target world doesn't exist? Use global
             return location;
@@ -468,14 +466,8 @@ public abstract class MixinPlayerList {
             targetWorld = this.mcServer.worldServerForDimension(targetDimensionId);
         }
 
-        System.err.println("TargetDimension: " + targetDimension);
-        System.err.println("TargetDimensionId: " + targetDimensionId);
-        System.err.println("TargetWorld: " + ((World) targetWorld).getName());
-
         Vector3d targetSpawnVec = VecHelper.toVector3d(targetWorld.getSpawnPoint());
-        System.err.println("TargetSpawnVec: " + targetSpawnVec);
         BlockPos bedPos = ((IMixinEntityPlayer) playerIn).getBedLocation(targetDimensionId);
-        System.err.println("BedPos: " + bedPos);
         if (bedPos != null) { // Player has a bed
             boolean forceBedSpawn = ((IMixinEntityPlayer) playerIn).isSpawnForced(targetDimensionId);
             BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);

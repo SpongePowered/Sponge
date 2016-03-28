@@ -338,7 +338,6 @@ public abstract class MixinEntity implements IMixinEntity {
             }
         }
 
-        System.err.println("Are we going to same world? " + location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId()));
         if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
             teleportTo(location);
         } else {
