@@ -115,22 +115,24 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         }
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onUpdateScoreValue(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS))
+    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SET_CONTAINS))
     public boolean onUpdateScoreValue(Set set, Object object) {
         return true;
     }
 
-    @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "broadcastScoreUpdate(Ljava/lang/String;)V",
+            at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveScore(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "broadcastScoreUpdate(Ljava/lang/String;Lnet/minecraft/scoreboard/ScoreObjective;)V",
+            at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveScoreForObjective(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
@@ -175,7 +177,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
+    @Redirect(method = "broadcastTeamRemove", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
     public void onRemoveTeam(PlayerList manager, Packet packet) {
         this.sendToPlayers(packet);
     }
