@@ -129,7 +129,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)),
                     EntityTypes.LIGHTNING, transform);
             SpongeImpl.postEvent(event);
-            return event.isCancelled();
+            return !event.isCancelled();
         }
         return false;
     }
