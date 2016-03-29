@@ -196,7 +196,7 @@ public final class SpongePlayerDataHandler {
         return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.lastJoined));
     }
 
-    private SpongePlayerDataHandler() { }
+    SpongePlayerDataHandler() { }
 
     private static final class Holder {
         static final SpongePlayerDataHandler INSTANCE = new SpongePlayerDataHandler();

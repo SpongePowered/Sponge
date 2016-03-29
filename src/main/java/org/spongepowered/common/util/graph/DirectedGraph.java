@@ -157,7 +157,7 @@ public class DirectedGraph<D> {
     public static class DataNode<D> {
 
         private final List<DataNode<D>> adj = Lists.newArrayList();
-        private final D data;
+        final D data;
 
         public DataNode(D obj) {
             this.data = obj;

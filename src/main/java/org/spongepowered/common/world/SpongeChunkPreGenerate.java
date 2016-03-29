@@ -165,7 +165,7 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         private int totalCount;
         private long totalTime;
 
-        private ChunkPreGenerator(World world, Vector3d center, double diameter, int chunkCount, float tickPercent, @Nullable Logger logger) {
+        ChunkPreGenerator(World world, Vector3d center, double diameter, int chunkCount, float tickPercent, @Nullable Logger logger) {
             this.world = world;
             this.chunkRadius = GenericMath.floor(diameter / 32);
             this.chunkCount = chunkCount;

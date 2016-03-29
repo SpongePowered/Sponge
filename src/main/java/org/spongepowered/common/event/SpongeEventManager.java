@@ -89,7 +89,7 @@ public class SpongeEventManager implements EventManager {
         this.pluginManager = checkNotNull(pluginManager, "pluginManager");
     }
 
-    private RegisteredListener.Cache bakeHandlers(Class<?> rootEvent) {
+    RegisteredListener.Cache bakeHandlers(Class<?> rootEvent) {
         List<RegisteredListener<?>> handlers = Lists.newArrayList();
         @SuppressWarnings({"unchecked", "rawtypes"})
         Set<Class<?>> types = (Set) TypeToken.of(rootEvent).getTypes().rawTypes();

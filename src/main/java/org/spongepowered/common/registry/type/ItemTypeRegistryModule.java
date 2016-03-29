@@ -102,11 +102,11 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
         RegistryHelper.setFinalStatic(ItemStackSnapshot.class, "NONE", NONE_SNAPSHOT);
     }
 
-    private ItemTypeRegistryModule() {
+    ItemTypeRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final ItemTypeRegistryModule INSTANCE = new ItemTypeRegistryModule();
+        static final ItemTypeRegistryModule INSTANCE = new ItemTypeRegistryModule();
     }
 }

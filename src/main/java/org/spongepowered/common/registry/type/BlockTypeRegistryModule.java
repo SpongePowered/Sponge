@@ -133,9 +133,9 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
         }
     }
 
-    private BlockTypeRegistryModule() { }
+    BlockTypeRegistryModule() { }
 
     private static final class Holder {
-        private static final BlockTypeRegistryModule INSTANCE = new BlockTypeRegistryModule();
+        static final BlockTypeRegistryModule INSTANCE = new BlockTypeRegistryModule();
     }
 }

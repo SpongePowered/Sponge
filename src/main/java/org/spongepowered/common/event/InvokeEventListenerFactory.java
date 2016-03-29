@@ -55,7 +55,7 @@ public final class InvokeEventListenerFactory implements AnnotatedEventListener.
         private final Method method;
         private final EventFilter filter;
 
-        private InvokeEventHandler(Object handle, Method method, EventFilter filter) {
+        InvokeEventHandler(Object handle, Method method, EventFilter filter) {
             super(handle);
             this.method = checkNotNull(method, "method");
             this.filter = filter;

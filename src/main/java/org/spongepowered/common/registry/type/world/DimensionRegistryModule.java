@@ -143,11 +143,11 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
         }
     }
 
-    private DimensionRegistryModule() {
+    DimensionRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final DimensionRegistryModule instance = new DimensionRegistryModule();
+        static final DimensionRegistryModule instance = new DimensionRegistryModule();
     }
 }

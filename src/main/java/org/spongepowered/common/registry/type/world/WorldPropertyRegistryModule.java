@@ -112,12 +112,12 @@ public final class WorldPropertyRegistryModule {
         return Integer.MIN_VALUE;
     }
 
-    private WorldPropertyRegistryModule() {
+    WorldPropertyRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final WorldPropertyRegistryModule instance = new WorldPropertyRegistryModule();
+        static final WorldPropertyRegistryModule instance = new WorldPropertyRegistryModule();
     }
 
 }

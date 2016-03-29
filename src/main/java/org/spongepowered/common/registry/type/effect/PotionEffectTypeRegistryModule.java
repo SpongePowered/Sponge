@@ -116,11 +116,11 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
         this.potionEffectTypeMap.put(id.toLowerCase(), itemType);
     }
 
-    private PotionEffectTypeRegistryModule() {
+    PotionEffectTypeRegistryModule() {
 
     }
 
     private static final class Holder {
-        private static final PotionEffectTypeRegistryModule INSTANCE = new PotionEffectTypeRegistryModule();
+        static final PotionEffectTypeRegistryModule INSTANCE = new PotionEffectTypeRegistryModule();
     }
 }

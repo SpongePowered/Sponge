@@ -42,7 +42,7 @@ import java.util.function.Function;
  */
 public final class JSONUtil {
 
-    private static final Gson gson = new GsonBuilder().serializeNulls().create();
+    static final Gson gson = new GsonBuilder().serializeNulls().create();
 
     private JSONUtil() {
     }
