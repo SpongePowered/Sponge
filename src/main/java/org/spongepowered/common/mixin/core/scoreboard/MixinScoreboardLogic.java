@@ -137,6 +137,9 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     }
 
     public void scoreboard$updateDisplaySlot(@Nullable Objective objective, DisplaySlot displaySlot) {
+        if (objective != null && !objective.getScoreboards().contains(this)) {
+            throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
+        }
         int index = ((SpongeDisplaySlot) displaySlot).getIndex();
         this.objectiveDisplaySlots[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
         this.sendToPlayers(new S3DPacketDisplayScoreboard(index, this.objectiveDisplaySlots[index]));
