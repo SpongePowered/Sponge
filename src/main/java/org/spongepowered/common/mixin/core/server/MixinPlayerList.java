@@ -407,7 +407,7 @@ public abstract class MixinPlayerList {
 
         final Transform<World> fromTransform = ((Player) entityPlayerMP).getTransform();
         Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, DimensionManager.getWorldByDimensionId
-                (targetDimension).orElse(null)), Vector3d.ZERO, Vector3d.ZERO);
+                (targetDimension).orElse(null)), ((Player) entityPlayerMP).getRotation(), Vector3d.ZERO);
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
 
@@ -473,7 +473,6 @@ public abstract class MixinPlayerList {
             BlockPos bedSpawnLoc = EntityPlayer.getBedSpawnLocation(targetWorld, bedPos, forceBedSpawn);
             if (bedSpawnLoc != null) { // The bed exists and is not obstructed
                 this.tempIsBedSpawn = true;
-                playerIn.setLocationAndAngles(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D, 0.0F, 0.0F);
                 targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
             } else { // Bed invalid
                 playerIn.playerNetServerHandler.sendPacket(new SPacketChangeGameState(0, 0.0F));
