@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -63,7 +64,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
 
     @Override
     protected ImmutableValue<Art> constructImmutableValue(Art value) {
-        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, SpongeArtData.DEFAULT_ART);
+        return ImmutableDataCachingUtil.getValue(ImmutableSpongeValue.class, this.key, value, DataConstants.Catalog.DEFAULT_ART);
     }
 
     @Override
@@ -73,7 +74,7 @@ public class ArtDataProcessor extends AbstractEntitySingleDataProcessor<EntityPa
 
     @Override
     protected Value<Art> constructValue(Art actualValue) {
-        return new SpongeValue<>(Keys.ART, SpongeArtData.DEFAULT_ART, actualValue);
+        return new SpongeValue<>(Keys.ART, DataConstants.Catalog.DEFAULT_ART, actualValue);
     }
 
     @Override

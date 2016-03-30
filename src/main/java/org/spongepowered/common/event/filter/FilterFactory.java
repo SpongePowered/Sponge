@@ -65,7 +65,7 @@ public class FilterFactory {
         return this.cache.get(method);
     }
 
-    private Class<? extends EventFilter> createClass(Method method) {
+    Class<? extends EventFilter> createClass(Method method) {
         Class<?> handle = method.getDeclaringClass();
         Class<?> eventClass = method.getParameterTypes()[0];
         String name = this.targetPackage + eventClass.getSimpleName() + "Filter_" + handle.getSimpleName() + '_'

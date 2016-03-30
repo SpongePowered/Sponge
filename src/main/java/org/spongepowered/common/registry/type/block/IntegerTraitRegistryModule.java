@@ -75,7 +75,7 @@ public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalog
         this.integerTraitMap.put(propertyId, property);
     }
 
-    private IntegerTraitRegistryModule() { }
+    IntegerTraitRegistryModule() { }
 
     @Override
     public Map<String, IntegerTrait> provideCatalogMap() {
@@ -87,6 +87,6 @@ public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalog
     }
 
     private static final class Holder {
-        private final static IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();
+        final static IntegerTraitRegistryModule INSTANCE = new IntegerTraitRegistryModule();
     }
 }

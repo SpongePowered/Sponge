@@ -58,10 +58,10 @@ public final class DirectionFacingProvider implements TypeProvider<Direction, En
         return Optional.ofNullable(directionMap.inverse().get(checkNotNull(value)));
     }
 
-    private DirectionFacingProvider() { }
+    DirectionFacingProvider() { }
 
     private static final class Holder {
-        private static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
+        static final DirectionFacingProvider INSTANCE = new DirectionFacingProvider();
 
     }
 }

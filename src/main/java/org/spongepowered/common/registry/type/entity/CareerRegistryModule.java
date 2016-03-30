@@ -127,9 +127,9 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
                 new SpongeCareer(1, "leatherworker", ProfessionRegistryModule.BUTCHER, new SpongeTranslation("entity.Villager.leather"))));
     }
 
-    private CareerRegistryModule() { }
+    CareerRegistryModule() { }
 
     private static final class Holder {
-        private static final CareerRegistryModule INSTANCE = new CareerRegistryModule();
+        static final CareerRegistryModule INSTANCE = new CareerRegistryModule();
     }
 }

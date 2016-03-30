@@ -53,7 +53,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
     final ICommandSender sender;
     private final MemorySubjectData data;
 
-    private WrapperCommandSource(ICommandSender sender) {
+    WrapperCommandSource(ICommandSender sender) {
         this.sender = sender;
         this.data = new MemorySubjectData(SpongeImpl.getGame().getServiceManager().provide(PermissionService.class).get());
 

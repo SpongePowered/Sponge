@@ -93,11 +93,11 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         return newType;
     }
 
-    private GoalTypeModule() {
+    GoalTypeModule() {
     }
 
     private static final class Holder {
 
-        private static final GoalTypeModule INSTANCE = new GoalTypeModule();
+        static final GoalTypeModule INSTANCE = new GoalTypeModule();
     }
 }

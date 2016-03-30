@@ -55,7 +55,13 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
+import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
+import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -91,6 +97,10 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeGameModeData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeJoinData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
@@ -111,7 +121,9 @@ import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
@@ -137,10 +149,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow private String translator;
     @Shadow public NetHandlerPlayServer playerNetServerHandler;
     @Shadow public int lastExperience;
-    @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
-    @Shadow public abstract void sendPlayerAbilities();
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
+
+    @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
+    @Shadow public abstract void sendPlayerAbilities();
+
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
@@ -527,4 +541,42 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.playerNetServerHandler.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
     }
 
+    @Override
+    public JoinData getJoinData() {
+        return new SpongeJoinData(SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get(), Instant.now());
+    }
+
+    @Override
+    public Value<Instant> firstPlayed() {
+        return new SpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, SpongePlayerDataHandler.getFirstJoined(this.getUniqueID()).get());
+    }
+
+    @Override
+    public Value<Instant> lastPlayed() {
+        return new SpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, Instant.now());
+    }
+
+    // TODO implement with contextual data
+//    @Override
+//    public DisplayNameData getDisplayNameData() {
+//        return null;
+//    }
+
+    @Override
+    public GameModeData getGameModeData() {
+        return new SpongeGameModeData((GameMode) (Object) this.interactionManager.getGameType());
+    }
+
+    @Override
+    public Value<GameMode> gameMode() {
+        return new SpongeValue<>(Keys.GAME_MODE, DataConstants.Catalog.DEFAULT_GAMEMODE,
+                (GameMode) (Object) this.interactionManager.getGameType());
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getJoinData());
+        manipulators.add(getGameModeData());
+    }
 }

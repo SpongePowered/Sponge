@@ -103,7 +103,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
                 .newInstance(handle);
     }
 
-    private Class<? extends AnnotatedEventListener> createClass(Method method) throws Exception {
+    Class<? extends AnnotatedEventListener> createClass(Method method) throws Exception {
         Class<?> handle = method.getDeclaringClass();
         Class<?> eventClass = method.getParameterTypes()[0];
         String name = this.targetPackage

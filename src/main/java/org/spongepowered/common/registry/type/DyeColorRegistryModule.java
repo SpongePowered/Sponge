@@ -84,9 +84,9 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
         return Optional.empty();
     }
 
-    private DyeColorRegistryModule() { }
+    DyeColorRegistryModule() { }
 
     private static final class Holder {
-        private static final DyeColorRegistryModule INSTANCE = new DyeColorRegistryModule();
+        static final DyeColorRegistryModule INSTANCE = new DyeColorRegistryModule();
     }
 }

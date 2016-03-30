@@ -68,7 +68,7 @@ import javax.sql.DataSource;
 @NonnullByDefault
 public class SqlServiceImpl implements SqlService, Closeable {
 
-    private static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
+    static final Map<String, Properties> PROTOCOL_SPECIFIC_PROPS;
 
     static {
         ImmutableMap.Builder<String, Properties> build = ImmutableMap.builder();

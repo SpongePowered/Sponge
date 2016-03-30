@@ -108,9 +108,9 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
         this.professionMap.put("butcher", BUTCHER);
     }
 
-    private ProfessionRegistryModule() { }
+    ProfessionRegistryModule() { }
 
     private static final class Holder {
-        private static final ProfessionRegistryModule INSTANCE = new ProfessionRegistryModule();
+        static final ProfessionRegistryModule INSTANCE = new ProfessionRegistryModule();
     }
 }

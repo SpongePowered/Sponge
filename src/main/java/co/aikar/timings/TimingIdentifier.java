@@ -90,7 +90,7 @@ final class TimingIdentifier {
         final String name;
         ArrayDeque<TimingHandler> handlers = new ArrayDeque<>(64);
 
-        private TimingGroup(String name) {
+        TimingGroup(String name) {
             this.name = name;
         }
     }

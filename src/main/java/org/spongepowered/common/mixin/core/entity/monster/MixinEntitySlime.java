@@ -25,10 +25,15 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntitySlime;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.SlimeData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.living.monster.Slime;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSlimeData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLiving;
 
 import java.util.List;
@@ -36,9 +41,26 @@ import java.util.List;
 @Mixin(EntitySlime.class)
 public abstract class MixinEntitySlime extends MixinEntityLiving implements Slime {
 
+    @Shadow public abstract int getSlimeSize();
+
+    @Override
+    public MutableBoundedValue<Integer> slimeSize() {
+        return SpongeValueFactory.boundedBuilder(Keys.SLIME_SIZE)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .defaultValue(1)
+                .actualValue(getSlimeSize())
+                .build();
+    }
+
+    @Override
+    public SlimeData getSlimeData() {
+        return new SpongeSlimeData(getSlimeSize());
+    }
+
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(SlimeData.class).get());
+        manipulators.add(getSlimeData());
     }
 }

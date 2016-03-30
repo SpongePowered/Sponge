@@ -26,38 +26,52 @@ package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityCreeper;
 import net.minecraft.world.GameRules;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.explosive.IgnitableExplosive;
 import org.spongepowered.api.entity.living.monster.Creeper;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 
+import java.util.List;
+
 @Mixin(EntityCreeper.class)
+@Implements(@Interface(iface = IgnitableExplosive.class, prefix = "explosive$"))
 public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper {
 
     @Shadow private int timeSinceIgnited;
     @Shadow private int fuseTime = 30;
     @Shadow public abstract void explode();
-    @Override
-    @Shadow public abstract void ignite();
+    @Shadow public abstract void shadow$ignite();
+    @Shadow public abstract boolean getPowered();
 
-    public void creeper$detonate() {
-        this.explode();
-    }
-
-    public void creeper$ignite() {
-        this.ignite();
-    }
-
-    public void creeper$ignite(int fuseTicks) {
-        this.timeSinceIgnited = 0;
-        this.fuseTime = fuseTicks;
-        this.ignite();
+    @Intrinsic
+    public void explosive$ignite() {
+        shadow$ignite();
     }
 
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
         return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    }
+
+    @Override
+    public Value<Boolean> charged() {
+        return new SpongeValue<>(Keys.CREEPER_CHARGED, false, this.getPowered());
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(new SpongeChargedData(this.getPowered()));
     }
 }

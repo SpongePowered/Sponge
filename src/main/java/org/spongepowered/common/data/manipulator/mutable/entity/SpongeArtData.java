@@ -31,19 +31,14 @@ import org.spongepowered.api.data.type.Art;
 import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeArtData;
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
 @ImplementationRequiredForTest
 public class SpongeArtData extends AbstractSingleCatalogData<Art, ArtData, ImmutableArtData> implements ArtData {
 
-    /**
-     * Arbitrarily chosen "default" art since it is the first one in the
-     * resources file.
-     */
-    public static final Art DEFAULT_ART = Arts.KEBAB;
-
     public SpongeArtData() {
-        this(DEFAULT_ART);
+        this(DataConstants.Catalog.DEFAULT_ART);
     }
 
     public SpongeArtData(Art value) {
