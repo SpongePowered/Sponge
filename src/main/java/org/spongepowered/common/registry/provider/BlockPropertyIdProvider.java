@@ -135,7 +135,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         this.idPropertyMap.put(id.toLowerCase(), property);
     }
 
-    private BlockPropertyIdProvider() {
+    BlockPropertyIdProvider() {
         register(BlockHorizontal.FACING, "minecraft:horizontal_facing");
         register(BlockRotatedPillar.AXIS, "minecraft:pillar_axis");
         register(BlockDirectional.FACING, "minecraft:directional_facing");

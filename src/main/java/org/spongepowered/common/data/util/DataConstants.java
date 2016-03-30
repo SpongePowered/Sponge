@@ -28,6 +28,8 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.item.EntityArmorStand;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.type.Arts;
 import org.spongepowered.api.data.type.BigMushroomType;
 import org.spongepowered.api.data.type.BigMushroomTypes;
 import org.spongepowered.api.data.type.BrickType;
@@ -44,8 +46,18 @@ import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseColors;
+import org.spongepowered.api.data.type.HorseStyle;
+import org.spongepowered.api.data.type.HorseStyles;
+import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.RabbitType;
+import org.spongepowered.api.data.type.RabbitTypes;
+import org.spongepowered.api.data.type.SkeletonType;
+import org.spongepowered.api.data.type.SkeletonTypes;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.util.Axis;
@@ -123,6 +135,10 @@ public final class DataConstants {
     public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
 
     public static final class Catalog {
+
+        public static final SkeletonType DEFAULT_SKELETON = SkeletonTypes.NORMAL;
+        public static final DyeColor DEFAULT_SHEEP_COLOR = DyeColors.WHITE;
+
         private Catalog() {}
 
         public static final BigMushroomType DEFAULT_BIG_MUSHROOM_TYPE = BigMushroomTypes.ALL_OUTSIDE;
@@ -137,6 +153,32 @@ public final class DataConstants {
         public static final GameMode DEFAULT_GAMEMODE = GameModes.NOT_SET;
         public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
+        public static final Art DEFAULT_ART = Arts.KEBAB;
     }
 
+    public static final class Entity {}
+
+
+    public static final class Horse {
+
+        public static final HorseVariant DEFAULT_VARIANT = HorseVariants.HORSE;
+        public static final HorseStyle DEFAULT_STYLE = HorseStyles.NONE;
+        public static final HorseColor DEFAULT_COLOR = HorseColors.WHITE;
+        private Horse() {
+        }
+    }
+
+    public static final class Rabbit {
+
+        public static final RabbitType DEFAULT_TYPE = RabbitTypes.WHITE;
+
+        private Rabbit() {
+        }
+    }
+
+    public static final class Ocelot {
+
+        public static final OcelotType DEFAULT_TYPE = OcelotTypes.WILD_OCELOT;
+
+    }
 }

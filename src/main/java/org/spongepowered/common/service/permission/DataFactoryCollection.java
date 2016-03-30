@@ -42,10 +42,10 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 
 public class DataFactoryCollection extends SpongeSubjectCollection {
-    private final SpongePermissionService service;
+    final SpongePermissionService service;
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<String, MemorySubjectData> dataFactory;
-    private final Function<String, CommandSource> commandSourceFunction;
+    final Function<String, CommandSource> commandSourceFunction;
 
     protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<String, MemorySubjectData> dataFactory,
             Function<String, CommandSource> commandSourceFunction) {

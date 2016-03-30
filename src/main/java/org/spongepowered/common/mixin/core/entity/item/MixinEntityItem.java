@@ -28,16 +28,26 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
+
+import java.util.List;
 
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem extends MixinEntity implements Item {
@@ -176,5 +186,23 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     @Override
     public ItemType getItemType() {
         return (ItemType) getEntityItem().getItem();
+    }
+
+    // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
+
+    @Override
+    public RepresentedItemData getItemData() {
+        return new SpongeRepresentedItemData(ItemStackUtil.createSnapshot(getEntityItem()));
+    }
+
+    @Override
+    public Value<ItemStackSnapshot> item() {
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.createSnapshot(getEntityItem()));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getItemData());
     }
 }

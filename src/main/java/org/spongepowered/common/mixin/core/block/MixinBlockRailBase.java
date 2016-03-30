@@ -69,14 +69,12 @@ public abstract class MixinBlockRailBase extends MixinBlock {
             if (blockState.getBlock() instanceof BlockRail) {
                 return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
             } else if (blockState.getBlock() instanceof BlockRailPowered) {
-                if (railDirection == BlockRailBase.EnumRailDirection.NORTH_EAST || railDirection != BlockRailBase.EnumRailDirection.NORTH_WEST
-                        || railDirection == BlockRailBase.EnumRailDirection.SOUTH_EAST || railDirection == BlockRailBase.EnumRailDirection.SOUTH_WEST) {
+                if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
                     return Optional.empty();
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
             } else if (blockState.getBlock() instanceof BlockRailDetector) {
-                if (railDirection == BlockRailBase.EnumRailDirection.NORTH_EAST || railDirection != BlockRailBase.EnumRailDirection.NORTH_WEST
-                        || railDirection == BlockRailBase.EnumRailDirection.SOUTH_EAST || railDirection == BlockRailBase.EnumRailDirection.SOUTH_WEST) {
+                if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
                     return Optional.empty();
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
@@ -101,14 +99,12 @@ public abstract class MixinBlockRailBase extends MixinBlock {
             if (blockState.getBlock() instanceof BlockRail) {
                 return Optional.of((BlockState) blockState.withProperty(BlockRail.SHAPE, railDirection));
             } else if (blockState.getBlock() instanceof BlockRailPowered) {
-                if (railDirection == BlockRailBase.EnumRailDirection.NORTH_EAST || railDirection != BlockRailBase.EnumRailDirection.NORTH_WEST
-                        || railDirection == BlockRailBase.EnumRailDirection.SOUTH_EAST || railDirection == BlockRailBase.EnumRailDirection.SOUTH_WEST) {
+                if (!BlockRailPowered.SHAPE.getAllowedValues().contains(railDirection)) {
                     return Optional.empty();
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailPowered.SHAPE, railDirection));
             } else if (blockState.getBlock() instanceof BlockRailDetector) {
-                if (railDirection == BlockRailBase.EnumRailDirection.NORTH_EAST || railDirection != BlockRailBase.EnumRailDirection.NORTH_WEST
-                        || railDirection == BlockRailBase.EnumRailDirection.SOUTH_EAST || railDirection == BlockRailBase.EnumRailDirection.SOUTH_WEST) {
+                if (!BlockRailDetector.SHAPE.getAllowedValues().contains(railDirection)) {
                     return Optional.empty();
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));

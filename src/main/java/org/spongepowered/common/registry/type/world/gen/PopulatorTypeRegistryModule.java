@@ -96,7 +96,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
     public Function<Class<?>, PopulatorType> customTypeFunction;
 
-    private PopulatorTypeRegistryModule() {
+    PopulatorTypeRegistryModule() {
         this.customTypeFunction = (type) -> {
             return new SpongePopulatorType(type.getSimpleName(), type.getName().contains("net.minecraft.") ? "minecraft" : "unknown");
         };
@@ -236,6 +236,6 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
     private static final class Holder {
 
-        private static final PopulatorTypeRegistryModule INSTANCE = new PopulatorTypeRegistryModule();
+        static final PopulatorTypeRegistryModule INSTANCE = new PopulatorTypeRegistryModule();
     }
 }

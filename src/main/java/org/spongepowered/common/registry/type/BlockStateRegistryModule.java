@@ -60,7 +60,7 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
         }
     }
 
-    private BlockStateRegistryModule() {
+    BlockStateRegistryModule() {
     }
 
     private static final class Holder {

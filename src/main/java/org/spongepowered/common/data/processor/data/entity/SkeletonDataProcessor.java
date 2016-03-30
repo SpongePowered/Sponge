@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSkeletonData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.SpongeEntityConstants;
@@ -71,12 +72,12 @@ public class SkeletonDataProcessor
 
     @Override
     protected Value<SkeletonType> constructValue(SkeletonType actualValue) {
-        return new SpongeValue<>(Keys.SKELETON_TYPE, SkeletonTypes.NORMAL, actualValue);
+        return new SpongeValue<>(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, actualValue);
     }
 
     @Override
     protected ImmutableValue<SkeletonType> constructImmutableValue(SkeletonType value) {
-        return ImmutableSpongeValue.cachedOf(Keys.SKELETON_TYPE, SkeletonTypes.NORMAL, value);
+        return ImmutableSpongeValue.cachedOf(Keys.SKELETON_TYPE, DataConstants.Catalog.DEFAULT_SKELETON, value);
     }
 
     @Override

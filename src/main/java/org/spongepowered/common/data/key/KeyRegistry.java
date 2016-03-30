@@ -316,6 +316,8 @@ public class KeyRegistry {
     }
 
     private static final class PatternKey implements Key<PatternListValue> {
+        PatternKey() {
+        }
 
         @Override
         public Class<PatternListValue> getValueClass() {

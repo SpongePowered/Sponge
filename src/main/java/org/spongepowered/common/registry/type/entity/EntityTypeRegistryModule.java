@@ -229,12 +229,12 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         return this.entityClassToTypeMappings.get(clazz);
     }
 
-    private EntityTypeRegistryModule() {
+    EntityTypeRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final EntityTypeRegistryModule INSTANCE = new EntityTypeRegistryModule();
+        static final EntityTypeRegistryModule INSTANCE = new EntityTypeRegistryModule();
     }
 
     public Optional<EntityType> getEntity(Class<? extends org.spongepowered.api.entity.Entity> entityClass) {

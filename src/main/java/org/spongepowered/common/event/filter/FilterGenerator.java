@@ -90,7 +90,7 @@ public class FilterGenerator {
         return Holder.INSTANCE;
     }
 
-    private FilterGenerator() {
+    FilterGenerator() {
     }
 
     public byte[] generateClass(String name, Method method) {
@@ -377,7 +377,7 @@ public class FilterGenerator {
 
     private static final class Holder {
 
-        private static final FilterGenerator INSTANCE = new FilterGenerator();
+        static final FilterGenerator INSTANCE = new FilterGenerator();
     }
 
 }

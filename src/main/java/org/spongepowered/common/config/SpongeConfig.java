@@ -64,7 +64,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         DIMENSION(DimensionConfig.class),
         WORLD(WorldConfig.class);
 
-        private final Class<? extends ConfigBase> type;
+        final Class<? extends ConfigBase> type;
 
         Type(Class<? extends ConfigBase> type) {
             this.type = type;

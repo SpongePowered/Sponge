@@ -79,11 +79,11 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
         }
     }
 
-    private DisplaySlotRegistryModule() {
+    DisplaySlotRegistryModule() {
     }
 
     private static final class Holder {
 
-        private static final DisplaySlotRegistryModule INSTANCE = new DisplaySlotRegistryModule();
+        static final DisplaySlotRegistryModule INSTANCE = new DisplaySlotRegistryModule();
     }
 }
