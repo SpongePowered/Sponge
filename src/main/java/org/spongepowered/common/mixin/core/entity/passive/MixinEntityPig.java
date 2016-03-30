@@ -25,19 +25,36 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityPig;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.PigSaddleData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Pig;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongePigSaddleData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
 @Mixin(EntityPig.class)
 public abstract class MixinEntityPig extends MixinEntityAnimal implements Pig {
 
+    @Shadow public abstract boolean getSaddled();
+
+    @Override
+    public PigSaddleData getPigSaddleData() {
+        return new SpongePigSaddleData(this.getSaddled());
+    }
+
+    @Override
+    public Value<Boolean> saddled() {
+        return new SpongeValue<>(Keys.PIG_SADDLE, false, this.getSaddled());
+    }
+
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(PigSaddleData.class).get());
+        manipulators.add(this.getPigSaddleData());
     }
 }

@@ -29,8 +29,12 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.village.MerchantRecipeList;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.CareerData;
 import org.spongepowered.api.data.type.Career;
 import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Villager;
 import org.spongepowered.api.item.merchant.TradeOffer;
@@ -45,6 +49,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeCareerData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeCareer;
 import org.spongepowered.common.entity.SpongeEntityMeta;
@@ -162,4 +169,22 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
         this.setCustomer((EntityPlayer) humanoid);
     }
 
+    // Data delegated methods
+
+
+    @Override
+    public CareerData getCareerData() {
+        return new SpongeCareerData(getCareer());
+    }
+
+    @Override
+    public Value<Career> career() {
+        return new SpongeValue<>(Keys.CAREER, DataConstants.Catalog.CAREER_DEFAULT, getCareer());
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getCareerData());
+    }
 }

@@ -33,12 +33,16 @@ import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.DataManipulatorBuilder;
 import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.asm.mixin.Mixin;
@@ -48,7 +52,11 @@ import org.spongepowered.common.data.ValueProcessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {
@@ -396,6 +404,58 @@ public abstract class MixinDataHolder implements DataHolder {
             SpongeTimings.dataSupportsKey.stopTiming();
         }
         return false;
+    }
+
+    @Override
+    public Set<Key<?>> getKeys() {
+        return getContainers().stream().flatMap(container -> container.getKeys().stream()).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<ImmutableValue<?>> getValues() {
+        return getContainers().stream().flatMap(container -> container.getValues().stream()).collect(Collectors.toSet());
+    }
+
+    // The rest of these are default implemented in the event some implementation fails.
+
+    @Override
+    public boolean validateRawData(DataContainer container) {
+        return false;
+    }
+
+    @Override
+    public void setRawData(DataContainer container) throws InvalidDataException {
+
+    }
+
+    @Override
+    public Collection<DataManipulator<?, ?>> getContainers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public int getContentVersion() {
+        return 1;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return new MemoryDataContainer();
+    }
+
+    @Override
+    public <T extends Property<?, ?>> Optional<T> getProperty(Class<T> propertyClass) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Collection<Property<?, ?>> getApplicableProperties() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public DataHolder copy() {
+        return this;
     }
 
 }

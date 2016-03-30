@@ -25,10 +25,41 @@
 package org.spongepowered.common.mixin.core.entity.monster;
 
 import net.minecraft.entity.monster.EntityEndermite;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.living.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
+
+import java.util.List;
 
 @Mixin(EntityEndermite.class)
 public abstract class MixinEntityEndermite extends MixinEntityMob implements Endermite {
 
+    @Shadow public int lifetime;
+
+    @Override
+    public ExpirableData getExpirableData() {
+        return new SpongeExpirableData(this.lifetime, 2400);
+    }
+
+    @Override
+    public MutableBoundedValue<Integer> expireTicks() {
+        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
+                .minimum(0)
+                .maximum(2400)
+                .defaultValue(0)
+                .actualValue(this.lifetime)
+                .build();
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getExpirableData());
+    }
 }

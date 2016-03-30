@@ -35,7 +35,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpirableData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.weather.Lightning;
@@ -45,12 +48,15 @@ import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpirableData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.util.VecHelper;
@@ -67,6 +73,8 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
     private boolean effect = false;
 
+    @Shadow private int lightningState;
+
     @Override
     public boolean isEffect() {
         return this.effect;
@@ -75,11 +83,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void setEffect(boolean effect) {
         this.effect = effect;
-    }
-
-    @Override
-    public ExpirableData getExpiringData() {
-        return get(ExpirableData.class).get();
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
@@ -166,5 +169,28 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void setCause(Cause cause) {
         this.cause = cause;
+    }
+
+    // Data delegated methods
+
+    @Override
+    public ExpirableData getExpiringData() {
+        return new SpongeExpirableData(this.lightningState, 2);
+    }
+
+    @Override
+    public MutableBoundedValue<Integer> expireTicks() {
+        return SpongeValueFactory.boundedBuilder(Keys.EXPIRATION_TICKS)
+                .minimum((int) Short.MIN_VALUE)
+                .maximum(2)
+                .defaultValue(2)
+                .actualValue(this.lightningState)
+                .build();
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getExpiringData());
     }
 }

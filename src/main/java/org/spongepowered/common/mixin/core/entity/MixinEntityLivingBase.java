@@ -39,6 +39,12 @@ import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.DamageableData;
+import org.spongepowered.api.data.manipulator.mutable.entity.HealthData;
+import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
+import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -54,6 +60,9 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.DamageObject;
@@ -64,6 +73,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 @SuppressWarnings("rawtypes")
 @NonnullByDefault
@@ -106,7 +117,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract float getRotationYawHead();
     @Shadow public abstract void setRotationYawHead(float rotation);
     @Shadow public abstract Collection getActivePotionEffects();
-    @Shadow public abstract EntityLivingBase getLastAttacker();
+    @Shadow @Nullable public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
@@ -468,5 +479,55 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
 
+    }
+
+    // Data delegated methods
+
+
+    @Override
+    public HealthData getHealthData() {
+        return new SpongeHealthData(this.getHealth(), this.getMaxHealth());
+    }
+
+    @Override
+    public MutableBoundedValue<Double> health() {
+        return SpongeValueFactory.boundedBuilder(Keys.HEALTH)
+                .minimum(0D)
+                .maximum((double) this.getMaxHealth())
+                .defaultValue((double) this.getMaxHealth())
+                .actualValue((double) this.getHealth())
+                .build();
+    }
+
+    @Override
+    public MutableBoundedValue<Double> maxHealth() {
+        return SpongeValueFactory.boundedBuilder(Keys.MAX_HEALTH)
+                .minimum(1D)
+                .maximum((double) Float.MAX_VALUE)
+                .defaultValue(20D)
+                .actualValue((double) this.getMaxHealth())
+                .build();
+    }
+
+    // TODO uncomment when the processor is implemented
+//    @Override
+//    public DamageableData getMortalData() {
+//        return null;
+//    }
+
+    @Override
+    public OptionalValue<Living> lastAttacker() {
+        return new SpongeOptionalValue<>(Keys.LAST_ATTACKER, Optional.ofNullable((Living) this.getLastAttacker()));
+    }
+
+    @Override
+    public OptionalValue<Double> lastDamage() {
+        return new SpongeOptionalValue<>(Keys.LAST_DAMAGE, Optional.ofNullable(this.getLastAttacker() == null ? null : (double) this.lastDamage));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getHealthData());
     }
 }
