@@ -396,11 +396,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<WorldProperties> getDefaultWorld() {
-        final Optional<WorldServer> optWorldServer = DimensionManager.getWorldByDimensionId(0);
-        if (optWorldServer.isPresent()) {
-            return Optional.of(((World) optWorldServer.get()).getProperties());
-        }
-        return Optional.empty();
+        return DimensionManager.getWorldByDimensionId(0).map(worldServer -> ((World) worldServer).getProperties());
     }
 
     @Override
@@ -489,8 +485,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @SuppressWarnings("unchecked")
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
-        final Optional<WorldServer> optWorldServer = DimensionManager.getWorldByDimensionId(0);
-        return optWorldServer.isPresent() ? Optional.of((Scoreboard) optWorldServer.get().getScoreboard()) : Optional.empty();
+        return DimensionManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
     }
 
     private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {

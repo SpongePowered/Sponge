@@ -394,18 +394,18 @@ public class DimensionManager {
     public static Collection<WorldProperties> getUnloadedWorlds() throws IOException {
         final Optional<Path> optCurrentSavesDir = getCurrentSavesDirectory();
         checkState(optCurrentSavesDir.isPresent(), "Attempt made to get unloaded worlds too early!");
-        final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE);
-        final List<WorldProperties> worlds = new ArrayList<>();
 
-        for (Path worldFolder : stream) {
-            final String worldFolderName = worldFolder.getFileName().toString();
-            final WorldInfo worldInfo = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
-                    ((MinecraftServer) Sponge.getServer()).getDataFixer()).loadWorldInfo();
-            if (worldInfo != null) {
-                worlds.add((WorldProperties) worldInfo);
+        final List<WorldProperties> worlds = new ArrayList<>();
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
+            for (Path worldFolder : stream) {
+                final String worldFolderName = worldFolder.getFileName().toString();
+                final WorldInfo worldInfo = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
+                        ((MinecraftServer) Sponge.getServer()).getDataFixer()).loadWorldInfo();
+                if (worldInfo != null) {
+                    worlds.add((WorldProperties) worldInfo);
+                }
             }
         }
-
         return worlds;
     }
 
@@ -705,15 +705,11 @@ public class DimensionManager {
             if (!Files.exists(uidPath)) {
                 uuid = UUID.randomUUID();
             } else {
-                DataInputStream dis;
-
-                try {
-                    dis = new DataInputStream(Files.newInputStream(uidPath));
+                try(final DataInputStream dis = new DataInputStream(Files.newInputStream(uidPath))) {
                     uuid = new UUID(dis.readLong(), dis.readLong());
                 } catch (IOException e) {
-                    SpongeImpl.getLogger().error("World folder [{}] has an existing Bukkit unique identifier for it but we encountered issues "
-                                    + "parsing the file. We will have to use a new unique id. Please report this to Sponge ASAP.",
-                            properties.getWorldName(), e);
+                    SpongeImpl.getLogger().error("World folder [{}] has an existing Bukkit unique identifier for it but we encountered issues parsing "
+                            + "the file. We will have to use a new unique id. Please report this to Sponge ASAP.", properties.getWorldName(), e);
                     uuid = UUID.randomUUID();
                 }
             }
@@ -729,77 +725,75 @@ public class DimensionManager {
      * Handles registering existing Sponge dimensions that are not the root dimension (known as overworld).
      */
     private static void registerExistingSpongeDimensions(Path rootPath) {
-        final DirectoryStream<Path> stream;
-        try {
-            stream = Files.newDirectoryStream(rootPath, LEVEL_AND_SPONGE);
+        try (final DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, LEVEL_AND_SPONGE)) {
+            for (Path worldPath : stream) {
+                final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
+                final String worldFolderName = spongeLevelPath.getFileName().toString();
+
+                NBTTagCompound compound;
+                try {
+                    compound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
+                } catch (IOException e) {
+                    SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. Report to Sponge ASAP.", worldFolderName, e);
+                    continue;
+                }
+
+                final NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+
+                if (!compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+                    SpongeImpl.getLogger()
+                            .error("World [{}] has Sponge related data in the form of [level-sponge.dat] but the structure is not proper."
+                                            + " Generally, the data is within a [{}] tag but it is not for this world. Report to Sponge ASAP.",
+                                    worldFolderName, NbtDataUtil.SPONGE_DATA);
+                    continue;
+                }
+
+                if (!spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_ID)) {
+                    SpongeImpl.getLogger().error("World [{}] has no dimension id. Report this to Sponge ASAP.", worldFolderName);
+                    continue;
+                }
+
+                final int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
+
+                // We do not handle Vanilla dimensions, skip them
+                if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
+                    continue;
+                }
+
+                String dimensionTypeId = "overworld";
+
+                if (spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
+                    dimensionTypeId = spongeDataCompound.getString(NbtDataUtil.DIMENSION_TYPE);
+                } else {
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [overworld]...", worldFolderName,
+                            dimensionId);
+                }
+
+                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType = Sponge.getRegistry().getType(org.spongepowered.api.world
+                        .DimensionType.class, dimensionTypeId);
+                if (!optDimensionType.isPresent()) {
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
+                            worldFolderName, DimensionTypes.OVERWORLD.getId());
+                }
+                final DimensionType dimensionType = (DimensionType) (Object) optDimensionType.get();
+                spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
+
+                if (spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
+                            + "to Sponge ASAP.", worldFolderName, dimensionId);
+                    continue;
+                }
+
+                if (isDimensionRegistered(dimensionId)) {
+                    SpongeImpl.getLogger().error("World [{}] (DIM{}) has already been registered (likely by a mod). Going to print existing "
+                            + "registration", worldFolderName, dimensionId);
+                    continue;
+                }
+
+                registerDimension(dimensionId, dimensionType, rootPath.resolve(worldFolderName));
+            }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        for (Path worldPath : stream) {
-            final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
-            final String worldFolderName = spongeLevelPath.getFileName().toString();
-
-            NBTTagCompound compound;
-            try {
-                compound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
-            } catch (IOException e) {
-                SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. Report to Sponge ASAP.", worldFolderName, e);
-                continue;
-            }
-
-            final NBTTagCompound spongeDataCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-
-            if (!compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                SpongeImpl.getLogger().error("World [{}] has Sponge related data in the form of [level-sponge.dat] but the structure is not proper."
-                        + " Generally, the data is within a [{}] tag but it is not for this world. Report to Sponge ASAP.",
-                        worldFolderName, NbtDataUtil.SPONGE_DATA);
-                continue;
-            }
-
-            if (!spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_ID)) {
-                SpongeImpl.getLogger().error("World [{}] has no dimension id. Report this to Sponge ASAP.", worldFolderName);
-                continue;
-            }
-
-            final int dimensionId = spongeDataCompound.getInteger(NbtDataUtil.DIMENSION_ID);
-
-            // We do not handle Vanilla dimensions, skip them
-            if (dimensionId == 0 || dimensionId == -1 || dimensionId == 1) {
-                continue;
-            }
-
-            String dimensionTypeId = "overworld";
-
-            if (spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
-                dimensionTypeId = spongeDataCompound.getString(NbtDataUtil.DIMENSION_TYPE);
-            } else {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [overworld]...", worldFolderName,
-                        dimensionId);
-            }
-
-            final Optional<org.spongepowered.api.world.DimensionType> optDimensionType = Sponge.getRegistry().getType(org.spongepowered.api.world
-                    .DimensionType.class, dimensionTypeId);
-            if (!optDimensionType.isPresent()) {
-                SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
-                        worldFolderName, DimensionTypes.OVERWORLD.getId());
-            }
-            final DimensionType dimensionType = (DimensionType) (Object) optDimensionType.get();
-            spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
-
-            if (spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
-                SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
-                        + "to Sponge ASAP.", worldFolderName, dimensionId);
-                continue;
-            }
-
-            if (isDimensionRegistered(dimensionId)) {
-                SpongeImpl.getLogger().error("World [{}] (DIM{}) has already been registered (likely by a mod). Going to print existing "
-                        + "registration", worldFolderName, dimensionId);
-                continue;
-            }
-
-            registerDimension(dimensionId, dimensionType, rootPath.resolve(worldFolderName));
+            e.printStackTrace();
         }
     }
 

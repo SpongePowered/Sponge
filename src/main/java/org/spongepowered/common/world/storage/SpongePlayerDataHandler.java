@@ -37,8 +37,8 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileAlreadyExistsException;
@@ -85,11 +85,18 @@ public final class SpongePlayerDataHandler {
                 SpongeImpl.getLogger().error("Something happened when trying to gather all player files", e);
             }
             for (Path playerFile : playerFiles) {
-                File actualFile = playerFile.toFile();
-                if (actualFile.exists() && actualFile.isFile()) {
-                    FileInputStream stream = new FileInputStream(actualFile);
-                    NBTTagCompound compound = CompressedStreamTools.readCompressed(stream);
-                    stream.close();
+                if (Files.isReadable(playerFile)) {
+                    NBTTagCompound compound;
+
+                    try (final InputStream stream = Files.newInputStream(playerFile)) {
+                        compound = CompressedStreamTools.readCompressed(stream);
+                    }
+
+                    // TODO Hard exception? Logger entry?
+                    if (compound == null) {
+                        throw new RuntimeException("Failed to decompress player data within [" + playerFile + "]!");
+                    }
+
                     DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
                     SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
                     handlerInstance.playerDataMap.put(data.uuid, data);

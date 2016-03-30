@@ -43,8 +43,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.world.DimensionManager;
 
-import java.util.Optional;
-
 @Mixin(DimensionType.class)
 @Implements(value = @Interface(iface = org.spongepowered.api.world.DimensionType.class, prefix = "dimensionType$"))
 public abstract class MixinDimensionType implements IMixinDimensionType {
@@ -59,7 +57,7 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruct(String enumName, int ordinal, int idIn, String nameIn, String suffixIn, Class <? extends WorldProvider > clazzIn,
             CallbackInfo ci) {
-        this.sanitizedId = this.getName().toLowerCase().replaceAll(" ", "_").replace("[^A-Za-z0-9_]", "");
+        this.sanitizedId = this.getName().toLowerCase().replace(" ", "_").replaceAll("[^A-Za-z0-9_]", "");
         this.config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION, SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(dimensionType$getId
                 ()).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
         this.context = new Context(Context.DIMENSION_KEY, this.sanitizedId);
@@ -90,18 +88,13 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     }
 
     /**
-     * Author: Zidane
-     * Purpose: This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
-     *          instance ids. Since the DimensionManager tracks dimension instance ids by dimension type ids and Vanilla keeps
-     *          their ids 1:1, this is a safe change that ensures a mixup can't happen.
+     * Author: Zidane - March 30th, 2016
+     * This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
+     * instance ids. Since the DimensionManager tracks dimension instance ids by dimension type ids and Vanilla keeps
+     * their ids 1:1, this is a safe change that ensures a mixup can't happen.
      */
     @Overwrite
     public static DimensionType getById(int dimensionId) {
-        final Optional<DimensionType> optDimensionType = DimensionManager.getDimensionType(dimensionId);
-        if (!optDimensionType.isPresent()) {
-            throw new IllegalArgumentException("Invalid dimension id " + dimensionId);
-        }
-
-        return optDimensionType.get();
+        return DimensionManager.getDimensionType(dimensionId).orElseThrow(() -> new IllegalArgumentException("Invalid dimension id " + dimensionId));
     }
 }

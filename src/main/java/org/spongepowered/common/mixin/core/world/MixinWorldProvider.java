@@ -41,8 +41,6 @@ import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.world.DimensionManager;
 
-import java.util.Optional;
-
 @NonnullByDefault
 @Mixin(WorldProvider.class)
 public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvider {
@@ -61,14 +59,9 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        final Optional<net.minecraft.world.DimensionType> optDimensionType = DimensionManager.getDimensionType((Class<? extends WorldProvider>)
-                (Object) getClass());
-
-        if (!optDimensionType.isPresent()) {
-            throw new RuntimeException("Attempt was made to create an instance of a WorldProvider who has no registered type!");
-        }
-
-        this.dimensionType = optDimensionType.get();
+        this.dimensionType = DimensionManager.getDimensionType((Class<? extends WorldProvider>)
+                (Object) getClass()).orElseThrow(() -> new RuntimeException("Attempt was made to create an instance of a WorldProvider who has no "
+                + "registered type!"));
     }
 
     @Override
