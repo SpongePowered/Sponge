@@ -76,7 +76,7 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
             return Optional.empty();
         }
         final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
-        final Text author = TextSerializers.JSON.deserialize(json);
+        final Text author = TextSerializers.JSON.deserializeUnchecked(json);
         return Optional.of(author);
     }
 
