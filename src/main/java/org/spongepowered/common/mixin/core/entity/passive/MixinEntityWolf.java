@@ -41,10 +41,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
@@ -60,11 +57,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
 
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setAngry(boolean angry);
-
-    @Intrinsic
-    public boolean soft$isAngry() {
-        return this.shadow$isAngry();
-    }
 
     @Intrinsic
     public void soft$setAngry(boolean angry) {
