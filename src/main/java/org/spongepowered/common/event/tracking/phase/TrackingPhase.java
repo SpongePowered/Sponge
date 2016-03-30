@@ -25,38 +25,23 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,6 +92,38 @@ public abstract class TrackingPhase {
      */
     public abstract void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext);
 
+
+    /**
+     * This is the post dispatch method that is automatically handled for
+     * states that deem it necessary to have some post processing for
+     * advanced game mechanics. This is always performed when capturing
+     * has been turned on during a phases's
+     * {@link #unwind(CauseTracker, IPhaseState, PhaseContext)} is
+     * dispatched. The rules of post dispatch are as follows:
+     * - Entering extra phases is not allowed: This is to avoid
+     *  potential recursion in various corner cases.
+     * - The unwinding phase context is provided solely as a root
+     *  cause tracking for any nested notifications that require
+     *  association of causes
+     * - The unwinding phase is used with the unwinding state to
+     *  further exemplify during what state that was unwinding
+     *  caused notifications. This narrows down to the exact cause
+     *  of the notifications.
+     * - post dispatch may loop several times until no more notifications
+     *  are required to be dispatched. This may include block physics for
+     *  neighbor notification events.
+     *
+     * @param causeTracker The cause tracker responsible for the dispatch
+     * @param unwindingState The state that was unwinding
+     * @param unwindingContext The context of the state that was unwinding,
+     *     contains the root cause for the state
+     * @param postContext The post dispatch context captures containing any
+     *     extra captures that took place during the state's unwinding
+     */
+    public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
+
+    }
+
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide
     // whether they perform capturing.
 
@@ -148,6 +165,10 @@ public abstract class TrackingPhase {
         return false;
     }
 
+    public boolean requiresPost(IPhaseState state) {
+        return true;
+    }
+
     // Actual capture methods
 
     public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
@@ -155,13 +176,13 @@ public abstract class TrackingPhase {
         final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
         final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
         if (newBlock == Blocks.air) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.BREAK;
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         } else if (newBlock != currentState.getBlock()) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.PLACE;
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         } else {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.MODIFY;
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.MODIFY;
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         }
 
@@ -204,4 +225,5 @@ public abstract class TrackingPhase {
         return Objects.toStringHelper(this)
                 .toString();
     }
+
 }

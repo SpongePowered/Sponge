@@ -51,7 +51,7 @@ public final class CauseStack {
 
     private final Deque<PhaseData> states;
 
-    public CauseStack(int size) {
+    CauseStack(int size) {
         this.states = new ArrayDeque<>(size);
     }
 

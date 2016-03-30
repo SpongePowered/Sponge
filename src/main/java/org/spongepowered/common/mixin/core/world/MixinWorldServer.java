@@ -425,6 +425,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         checkBlockBounds(x, y, z);
         final PhaseContext context = PhaseContext.start()
+                .add(NamedCause.of(TrackingUtil.PLUGIN_CAUSE, cause))
+                .addCaptures()
                 .add(NamedCause.source(cause.root()));
         for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
             context.add(NamedCause.of(entry.getKey(), entry.getValue()));
@@ -432,6 +434,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         context.complete();
         causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, context);
         setBlockState(new BlockPos(x, y, z), (IBlockState) blockState, notifyNeighbors ? 3 : 2);
+        causeTracker.completePhase();
     }
 
     private void checkBlockBounds(int x, int y, int z) {

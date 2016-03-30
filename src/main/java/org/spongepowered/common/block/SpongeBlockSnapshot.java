@@ -62,7 +62,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.Collection;
 import java.util.List;
@@ -91,7 +91,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable final UUID notifierUniqueId;
     // Internal use only
     private int updateFlag;
-    public CaptureType captureType; // used for post event
+    public BlockChange blockChange; // used for post event
 
     // Internal use for restores
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, int flag) {

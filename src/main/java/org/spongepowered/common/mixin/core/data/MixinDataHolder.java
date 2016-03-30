@@ -49,6 +49,8 @@ import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Mixin(value = {TileEntity.class, Entity.class, ItemStack.class, SpongeUser.class}, priority = 999)
 public abstract class MixinDataHolder implements DataHolder {

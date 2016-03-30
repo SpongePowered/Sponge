@@ -38,7 +38,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+    public static void handleSlotRestore(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
         for (SlotTransaction slotTransaction : slotTransactions) {
             final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
             final int slotNumber = slot.slotNumber;
@@ -60,13 +60,13 @@ public final class PacketPhaseUtil {
         }
     }
 
-    static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
+    public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
         player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
     }
 
-    static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
+    public static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
         for (SlotTransaction slotTransaction : slotTransactions) {
             if (slotTransaction.isValid() && slotTransaction.getCustom().isPresent()) {
                 final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
@@ -90,7 +90,7 @@ public final class PacketPhaseUtil {
         }
     }
 
-    static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
+    public static void validateCapturedTransactions(int slotId, Container openContainer, List<SlotTransaction> capturedTransactions) {
         if (capturedTransactions.size() == 0 && slotId >= 0) {
             final Slot slot = openContainer.getSlot(slotId);
             if (slot != null) {

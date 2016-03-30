@@ -48,7 +48,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -56,7 +55,6 @@ import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -88,7 +86,7 @@ public abstract class MixinSpawnerAnimals {
     private void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.ENTITY, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
             .add(NamedCause.source(worldServer))
             .addCaptures()
             .complete());
@@ -108,7 +106,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.switchToPhase(TrackingPhases.SPAWNING, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
+        causeTracker.switchToPhase(TrackingPhases.ENTITY, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
             .addCaptures()
             .add(NamedCause.source(worldServer))
             .complete());

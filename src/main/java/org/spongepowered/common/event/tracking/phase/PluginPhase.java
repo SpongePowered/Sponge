@@ -27,6 +27,8 @@ package org.spongepowered.common.event.tracking.phase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
 
@@ -62,7 +64,10 @@ public final class PluginPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_WORKER) {
+            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> {
 
+            });
+            phaseContext.getCapturedBlockSupplier().get().ifPresent(snapshots -> GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
         }
     }
 }

@@ -117,6 +117,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+    @Shadow protected abstract void onDeathUpdate();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -314,7 +315,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                     // Sponge Start - notify the cause tracker
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
-                    causeTracker.switchToPhase(TrackingPhases.SPAWNING, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
+                    causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
                             .add(NamedCause.source(this))
                             .add(NamedCause.of(TrackingUtil.DAMAGE_SOURCE, source))
                             .addCaptures()
@@ -483,5 +484,24 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             worldServer.spawnParticle(particleTypes, xCoord, yCoord, zCoord, numberOfParticles, xOffset, yOffset, zOffset, particleSpeed, extraArgs);
         }
 
+    }
+
+    @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
+    private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
+        if (!entityLivingBase.worldObj.isRemote) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
+            causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
+                .addCaptures()
+                .add(NamedCause.source(entityLivingBase))
+                .complete());
+            ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
+            causeTracker.completePhase();
+        }
+    }
+
+
+    @Override
+    public void onSpongeDeathUpdate() {
+        this.onDeathUpdate();
     }
 }

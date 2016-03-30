@@ -24,8 +24,14 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
+import org.spongepowered.common.world.BlockChange;
+
+import javax.annotation.Nullable;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -49,5 +55,10 @@ public interface IPhaseState {
 
     default boolean ignoresBlockTracking() {
         return false;
+    }
+
+    default void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> snapshotTransaction,
+            PhaseContext context) {
+
     }
 }

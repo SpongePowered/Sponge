@@ -27,11 +27,11 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.MathHelper;
@@ -45,6 +45,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -56,21 +57,22 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -158,7 +160,8 @@ public final class CauseTracker {
         final TrackingPhase phase = state.getPhase();
         final PhaseContext context = tuple.getContext();
         try {
-            if (state != GeneralPhase.Post.UNWINDING) {
+            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
+                // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
                 switchToPhase(TrackingPhases.GENERAL, GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
                         .addCaptures()
                         .complete());
@@ -175,7 +178,7 @@ public final class CauseTracker {
                 printer.add(e);
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.ERROR);
             }
-            if (state != GeneralPhase.Post.UNWINDING) {
+            if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 completePhase();
             }
         } catch (Exception e) {
@@ -305,6 +308,15 @@ public final class CauseTracker {
         }
     }
 
+    /**
+     * Replacement of {@link WorldServer#setBlockState(BlockPos, IBlockState, int)}
+     * that adds cause tracking.
+     *
+     * @param pos The position of the block state to set
+     * @param newState The new state
+     * @param flags The notification flags
+     * @return True if the block was successfully set (or captured)
+     */
     public boolean setBlockState(final BlockPos pos, final IBlockState newState, final int flags) {
         final net.minecraft.world.World minecraftWorld = this.getMinecraftWorld();
         final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
@@ -314,8 +326,7 @@ public final class CauseTracker {
         final Block currentBlock = currentState.getBlock();
 
         if (currentState == newState) {
-            // Some micro optimization in case someone is trying to set the new state to the exact same
-            // original current state
+            // Some micro optimization in case someone is trying to set the new state to the same as current
             return false;
         }
 
@@ -451,16 +462,25 @@ public final class CauseTracker {
                 minecraftWorld.updateAllPlayersSleepingFlag();
             }
 
-            minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
-            minecraftWorld.loadedEntityList.add(minecraftEntity);
-            getMixinWorld().onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+            // Sponge Start - throw an event
+            EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), ImmutableList.of(entity.createSnapshot()), getWorld()))
+                .nonCancelled(event -> {
+                    // Sponge end
+                    minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
+                    minecraftWorld.loadedEntityList.add(minecraftEntity);
+                    // Sponge start
+                    getMixinWorld().onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
+                })
+                .process();
+                // Sponge end
+
             return true;
         }
     }
 
     // --------------------- POPULATOR DELEGATED METHODS ---------------------
 
-    public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, @Nullable CaptureType type, Cause cause) {
+    public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type, Cause cause) {
         SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(this.getMinecraftWorld(), transactions);
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
@@ -488,9 +508,9 @@ public final class CauseTracker {
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 final IBlockState extendedState = newState.getBlock().getActualState(newState, proxyBlockAccess, pos);
                 final BlockSnapshot blockSnapshot = this.getMixinWorld().createSpongeBlockSnapshot(newState, extendedState, pos, updateFlag);
-                switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
-                    .add(NamedCause.source(blockSnapshot))
-                    .complete());
+//                switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
+//                    .add(NamedCause.source(blockSnapshot))
+//                    .complete());
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
                 if (TrackingUtil.shouldChainCause(this, cause)) {
                     Cause currentCause = cause;
@@ -511,7 +531,7 @@ public final class CauseTracker {
                     }
                     cause = Cause.of(causes);
                 }
-                completePhase();
+//                completePhase();
             }
 
             proxyBlockAccess.proceed();

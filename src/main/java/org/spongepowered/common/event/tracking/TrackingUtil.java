@@ -68,7 +68,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.Iterator;
@@ -118,6 +118,7 @@ public final class TrackingUtil {
     public static final String UNWINDING_CONTEXT = "UnwindingContext";
     public static final String CAPTURED_GENERATOR = "CapturedGenerator";
     public static final String CAPTURED_CHUNK_PROVIDER = "CapturedChunkProvider";
+    public static final String PLUGIN_CAUSE = "PluginCause";
 
     public static boolean fireMinecraftBlockEvent(CauseTracker causeTracker, WorldServer worldIn, BlockEventData event,
             Map<BlockPos, User> trackedBlockEvents) {
@@ -184,8 +185,8 @@ public final class TrackingUtil {
 
     public static Cause identifyCauses(Cause cause, List<BlockSnapshot> capturedSnapshots, World world) {
         if (!cause.first(User.class).isPresent() && !(capturedSnapshots.size() > 0
-                                                      && ((SpongeBlockSnapshot) capturedSnapshots.get(0)).captureType
-                                                         == CaptureType.DECAY)) {
+                                                      && ((SpongeBlockSnapshot) capturedSnapshots.get(0)).blockChange
+                                                         == BlockChange.DECAY)) {
             if ((cause.first(BlockSnapshot.class).isPresent() || cause.first(TileEntity.class).isPresent())) {
                 // Check for player at pos of first transaction
                 Optional<BlockSnapshot> snapshot = cause.first(BlockSnapshot.class);
@@ -347,7 +348,7 @@ public final class TrackingUtil {
     }
 
 
-    public static void dispatchPostBlockChanges(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable CaptureType type,
+    public static void dispatchPostBlockChanges(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type,
             Cause.Builder builder, PhaseContext phaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
@@ -373,9 +374,9 @@ public final class TrackingUtil {
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 final BlockSnapshot snapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(newState,
                     newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
-                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
-                    .add(NamedCause.source(snapshot))
-                    .addCaptures());
+//                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
+//                    .add(NamedCause.source(snapshot))
+//                    .addCaptures());
                 newState.getBlock().onBlockAdded(causeTracker.getMinecraftWorld(), pos, newState);
                 if (shouldChainCause(causeTracker, currentCause)) {
                     final Cause.Builder newBuilder = Cause.source(snapshot);
@@ -383,7 +384,7 @@ public final class TrackingUtil {
                         newBuilder.suggestNamed(entry.getKey(), entry.getValue());
                     }
                 }
-                causeTracker.completePhase();
+//                causeTracker.completePhase();
             }
 
             proxyBlockAccess.proceed();

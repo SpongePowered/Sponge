@@ -100,28 +100,31 @@ public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
         }
 
         final IMixinWorldInfo worldInfo = (IMixinWorldInfo) this.worldObj.getWorldInfo();
+        final int indexForUniqueId = worldInfo.getIndexForUniqueId(user.getUniqueId());
         if (pos.getY() <= 255) {
             short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
+            final PlayerTracker playerTracker = this.trackedShortBlockPositions.get(blockPos);
+            if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedShortBlockPositions.get(blockPos).ownerIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
+                    playerTracker.ownerIndex = indexForUniqueId;
+                    playerTracker.notifierIndex = indexForUniqueId;
                 } else {
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
+                    playerTracker.notifierIndex = indexForUniqueId;
                 }
             } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(worldInfo.getIndexForUniqueId(user.getUniqueId()), trackerType));
+                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
             }
         } else {
             int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
+            final PlayerTracker playerTracker = this.trackedIntBlockPositions.get(blockPos);
+            if (playerTracker != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedIntBlockPositions.get(blockPos).ownerIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
+                    playerTracker.ownerIndex = indexForUniqueId;
                 } else {
-                    this.trackedIntBlockPositions.get(blockPos).notifierIndex = worldInfo.getIndexForUniqueId(user.getUniqueId());
+                    playerTracker.notifierIndex = indexForUniqueId;
                 }
             } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(worldInfo.getIndexForUniqueId(user.getUniqueId()), trackerType));
+                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(indexForUniqueId, trackerType));
             }
         }
     }

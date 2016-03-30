@@ -42,6 +42,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -217,31 +218,35 @@ public class PhaseContext {
             return orElse(Collections.emptyList());
         }
 
+        public final Stream<T> stream() {
+            return this.captured == null ? Stream.empty() : this.captured.stream();
+        }
+
         @Nullable
         public final <U> U map(Function<List<T>, ? extends U> function) {
             return this.captured == null ? null : function.apply(this.captured);
         }
     }
 
-    public static final class InvalidTransactionSupplier extends CapturedSupplier<Transaction<BlockSnapshot>> {
+    static final class InvalidTransactionSupplier extends CapturedSupplier<Transaction<BlockSnapshot>> {
 
         InvalidTransactionSupplier() {
         }
     }
 
-    public static final class CapturedItemsSupplier extends CapturedSupplier<Entity> {
+    static final class CapturedItemsSupplier extends CapturedSupplier<Entity> {
 
         CapturedItemsSupplier() {
         }
     }
 
-    public static final class CapturedBlocksSupplier extends CapturedSupplier<BlockSnapshot> {
+    static final class CapturedBlocksSupplier extends CapturedSupplier<BlockSnapshot> {
 
         CapturedBlocksSupplier() {
         }
     }
 
-    public static final class CapturedEntitiesSupplier extends CapturedSupplier<Entity> {
+    static final class CapturedEntitiesSupplier extends CapturedSupplier<Entity> {
 
         CapturedEntitiesSupplier() {
         }

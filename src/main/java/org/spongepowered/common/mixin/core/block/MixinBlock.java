@@ -203,9 +203,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     private static void checkSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack, CallbackInfo callbackInfo, float chance, double x, double y, double z) {
         Transform<World> position = new Transform<>((World) worldIn, new Vector3d(x, y, z));
-        EventConsumer.supplyEvent(() -> SpongeEventFactory.createConstructEntityEventPre(Cause.source(worldIn.getBlockState(pos)).build(), EntityTypes.ITEM, position))
+        EventConsumer.event(SpongeEventFactory.createConstructEntityEventPre(Cause.source(worldIn.getBlockState(pos)).build(), EntityTypes.ITEM, position))
             .cancelled(event -> callbackInfo.cancel())
-            .buildAndPost();
+            .process();
     }
 
     @Inject(method = "dropBlockAsItemWithChance", at = @At(value = "HEAD"), cancellable = true)

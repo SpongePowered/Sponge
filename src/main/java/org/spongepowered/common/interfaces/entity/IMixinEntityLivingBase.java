@@ -47,6 +47,8 @@ public interface IMixinEntityLivingBase {
 
     DamageSource getLastDamageSource();
 
+    void onSpongeDeathUpdate();
+
     void setMaxAir(int max);
 
     void setLastDamage(double damage);

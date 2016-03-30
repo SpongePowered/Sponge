@@ -22,15 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world;
+package org.spongepowered.common.event.tracking.phase.util;
 
+import org.spongepowered.common.event.tracking.PhaseContext;
 
-public enum CaptureType {
+import java.util.function.Supplier;
 
-    BREAK,
-    DECAY,
-    MODIFY,
-    PLACE,
-    POPULATE
+public final class PhaseUtil {
 
+    public static Supplier<IllegalStateException> createIllegalStateSupplier(String s, PhaseContext phaseContext) {
+        return () -> new IllegalStateException(s + " Please analyze the current phase context: " + phaseContext);
+    }
+
+    private PhaseUtil() {
+    }
 }

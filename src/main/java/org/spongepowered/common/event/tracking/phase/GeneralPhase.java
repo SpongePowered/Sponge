@@ -33,6 +33,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import javax.annotation.Nullable;
 
@@ -77,10 +78,6 @@ public final class GeneralPhase extends TrackingPhase {
             return false;
         }
 
-        @Override
-        public boolean ignoresBlockTracking() {
-            return false;
-        }
     }
 
     GeneralPhase(@Nullable TrackingPhase parent) {
@@ -102,6 +99,10 @@ public final class GeneralPhase extends TrackingPhase {
             checkState(command != null, "Cannot complete a command when there was no command executed!");
             checkState(sender != null, "Cannot complete a command when there was no command sender!");
             // todo properly unwind the captured block changes and entity spawns.
+        } else if (state == Post.UNWINDING) {
+            final IPhaseState unwindingState = phaseContext.firstNamed(TrackingUtil.UNWINDING_STATE, IPhaseState.class).get();
+            final PhaseContext unwindingContext = phaseContext.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get();
+            unwindingState.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
         }
     }
 

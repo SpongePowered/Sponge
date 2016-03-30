@@ -28,46 +28,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.passive.EntityTameable;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.server.S23PacketBlockChange;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
-import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.MathHelper;
-import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.EmptyChunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -77,26 +54,19 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -104,7 +74,6 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -753,15 +722,15 @@ public final class DerpTracker {
         }
 
         for (ChangeBlockEvent blockEvent : blockEvents) {
-            CaptureType captureType = null;
+            BlockChange blockChange = null;
             if (blockEvent instanceof ChangeBlockEvent.Break) {
-                captureType = CaptureType.BREAK;
+                blockChange = BlockChange.BREAK;
             } else if (blockEvent instanceof ChangeBlockEvent.Decay) {
-                captureType = CaptureType.DECAY;
+                blockChange = BlockChange.DECAY;
             } else if (blockEvent instanceof ChangeBlockEvent.Modify) {
-                captureType = CaptureType.MODIFY;
+                blockChange = BlockChange.MODIFY;
             } else if (blockEvent instanceof ChangeBlockEvent.Place) {
-                captureType = CaptureType.PLACE;
+                blockChange = BlockChange.PLACE;
             }
 
             C08PacketPlayerBlockPlacement packet = null;
@@ -777,7 +746,7 @@ public final class DerpTracker {
                     blockEvent.getTransactions().listIterator(blockEvent.getTransactions().size());
                 processList(listIterator);
 
-                handlePostPlayerBlockEvent(captureType, blockEvent.getTransactions());
+                handlePostPlayerBlockEvent(blockChange, blockEvent.getTransactions());
 
                 // clear entity list and return to avoid spawning items
                 this.capturedEntities.clear();
@@ -788,7 +757,7 @@ public final class DerpTracker {
                     if (!transaction.isValid()) {
                         this.invalidTransactions.add(transaction);
                     } else {
-                        if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
+                        if (blockChange == BlockChange.BREAK && cause.first(User.class).isPresent()) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
                             for (EntityHanging hanging : EntityUtil.findHangingEntities(this.getMinecraftWorld(), pos)) {
                                 if (hanging != null) {
@@ -823,7 +792,7 @@ public final class DerpTracker {
                         transaction.getOriginal().restore(true, false);
                         this.restoringBlocks = false;
                     }
-                    handlePostPlayerBlockEvent(captureType, this.invalidTransactions);
+                    handlePostPlayerBlockEvent(blockChange, this.invalidTransactions);
                 }
 
                 if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
@@ -839,12 +808,12 @@ public final class DerpTracker {
         }
     }
 
-    private void handlePostPlayerBlockEvent(CaptureType captureType, List<Transaction<BlockSnapshot>> transactions) {
+    private void handlePostPlayerBlockEvent(BlockChange blockChange, List<Transaction<BlockSnapshot>> transactions) {
 //        if (StaticMixinHelper.packetPlayer == null) {
 //            return;
 //        }
 
-        if (captureType == CaptureType.BREAK) {
+        if (blockChange == BlockChange.BREAK) {
             // Let the client know the blocks still exist
             for (Transaction<BlockSnapshot> transaction : transactions) {
                 BlockSnapshot snapshot = transaction.getOriginal();
@@ -860,7 +829,7 @@ public final class DerpTracker {
                     }
                 }
             }
-        } else if (captureType == CaptureType.PLACE) {
+        } else if (blockChange == BlockChange.PLACE) {
 //            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
         }
     }

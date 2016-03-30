@@ -22,18 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
-
-import org.spongepowered.common.event.tracking.PhaseContext;
-
-import java.util.function.Supplier;
-
-public final class PhaseUtil {
-
-    public static Supplier<IllegalStateException> createIllegalStateSupplierForTicking(String s, PhaseContext phaseContext) {
-        return () -> new IllegalStateException(s + " Please analyze the current phase context: " + phaseContext);
-    }
-
-    private PhaseUtil() {
-    }
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.event.tracking.phase.util;

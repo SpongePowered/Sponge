@@ -88,6 +88,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
             final CauseTracker causeTracker = mixinWorld.getCauseTracker();
             causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
                     .add(NamedCause.source(this))
+                    .addCaptures()
                     .complete());
         }
         for (int z = zMin; z <= zMax; z++) {

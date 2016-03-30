@@ -174,6 +174,7 @@ public final class EntityUtil {
                 });
     }
 
+    @Nullable
     public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
         if (!(tickingEntity instanceof Entity)) {
             throw new IllegalArgumentException("Not a native Entity for this implementation!");

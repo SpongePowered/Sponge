@@ -22,18 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase;
+package org.spongepowered.common.event.tracking.phase.function;
 
-public final class TrackingPhases {
+public class PluginFunction {
 
-    public static final WorldPhase WORLD = new WorldPhase(TrackingPhases.GENERAL).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
-    public static final EntityPhase ENTITY = new EntityPhase(TrackingPhases.GENERAL);
-    public static final BlockPhase BLOCK    = new BlockPhase(TrackingPhases.GENERAL);
-    public static final GeneralPhase GENERAL  = new GeneralPhase(null).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
-    public static final PacketPhase PACKET = new PacketPhase(TrackingPhases.GENERAL);
-    public static final PluginPhase PLUGIN = new PluginPhase(null).addChild(TrackingPhases.ENTITY).addChild(TrackingPhases.BLOCK);
 
-    private TrackingPhases() {
-    }
 
 }

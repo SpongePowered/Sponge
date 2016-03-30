@@ -72,7 +72,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.util.PacketFunction;
+import org.spongepowered.common.event.tracking.phase.function.PacketFunction;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 

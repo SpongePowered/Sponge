@@ -27,9 +27,7 @@ package org.spongepowered.common.util;
 import com.flowpowered.math.vector.Vector3i;
 import gnu.trove.map.hash.TObjectLongHashMap;
 import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
@@ -38,15 +36,11 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
@@ -63,7 +57,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -172,7 +166,7 @@ public class SpongeHooks {
         }
     }
 
-    public static void logBlockAction(Cause cause, World world, @Nullable CaptureType type, Transaction<BlockSnapshot> transaction) {
+    public static void logBlockAction(Cause cause, World world, @Nullable BlockChange type, Transaction<BlockSnapshot> transaction) {
         if (world.isRemote) {
             return;
         }
@@ -180,10 +174,9 @@ public class SpongeHooks {
         SpongeConfig<?> config = getActiveConfig(world);
         Optional<User> user = cause.first(User.class);
         SpongeConfig.LoggingCategory logging = config.getConfig().getLogging();
-        if (logging.blockBreakLogging() && type == CaptureType.BREAK
-            || logging.blockModifyLogging() && type == CaptureType.MODIFY
-            || logging.blockPlaceLogging() && type == CaptureType.PLACE
-            || logging.blockPopulateLogging() && type == CaptureType.POPULATE) {
+        if (logging.blockBreakLogging() && type == BlockChange.BREAK
+            || logging.blockModifyLogging() && type == BlockChange.MODIFY
+            || logging.blockPlaceLogging() && type == BlockChange.PLACE) {
 
             logInfo("Block " + type.name() + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}][OriginalState: {4}][NewState: {5}]",
                     getFriendlyCauseName(cause),

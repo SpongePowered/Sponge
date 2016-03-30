@@ -849,14 +849,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        EventConsumer.supplyEvent(() -> SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
             .nonCancelled(event -> {
                 for (Entity successful : event.getEntities()) {
                     this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
                     this.onEntityAdded((net.minecraft.entity.Entity) successful);
                 }
             })
-            .buildAndPost();
+            .process();
         callbackInfo.cancel();
     }
 
