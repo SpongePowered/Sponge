@@ -156,6 +156,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
+    private boolean isRespawning = false;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -326,8 +327,8 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
-        checkState(!isRemoved(), "Trying to set location of already removed Entity!");
-
+        checkState(isRemoved() && !isRespawning(), "Trying to set location of already removed Entity!");
+        checkState(!isRespawning(), "Trying to set location of Entity that is not in a consistent state!");
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
@@ -342,9 +343,8 @@ public abstract class MixinEntity implements IMixinEntity {
             teleportTo(location);
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                        .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                                thisEntity.rotationYaw, thisEntity.rotationPitch);
+                ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+                        thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
@@ -425,27 +425,28 @@ public abstract class MixinEntity implements IMixinEntity {
                 }
             }
 
+            toWorld.getChunkProvider().provideChunk((int) location.getX() >> 4, (int) location.getZ() >> 4);
+
             entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
                     getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-            entityPlayerMP.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+            entityPlayerMP.setLocationAndAngles(location.getX(), location.getY(), location.getZ(), entityPlayerMP.rotationYaw, entityPlayerMP
+                    .rotationPitch);
+            while (!toWorld.getCollisionBoxes(entityPlayerMP, entityPlayerMP.getEntityBoundingBox()).isEmpty() && entityPlayerMP.posY < 256.0D)
+            {
+                entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
+            }
+            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
             entityPlayerMP.setSneaking(false);
             server.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
-            toWorld.getPlayerChunkManager().addPlayer(entityPlayerMP);
             entityPlayerMP.interactionManager.setWorld(toWorld);
             entityPlayerMP.addSelfToInternalCraftingInventory();
-
-            toWorld.getChunkProvider().provideChunk((int) this$.posX >> 4, (int) this$.posZ >> 4);
+            toWorld.getPlayerChunkManager().addPlayer(entityPlayerMP);
         } else {
             this$.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         }
 
-        if (toWorld.spawnEntityInWorld(this$)) {
-            // Perform position corrections in-case we are in the ground
-            while (!toWorld.getCollisionBoxes(this$, this$.getEntityBoundingBox()).isEmpty() && this$.posY < 256.0D) {
-                this$.setPosition(this$.posX, this$.posY + 1.0D, this$.posZ);
-            }
-        }
+        toWorld.spawnEntityInWorld(this$);
 
         fromWorld.resetUpdateEntityTick();
         toWorld.resetUpdateEntityTick();
@@ -618,7 +619,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public boolean isRemoved() {
-        return this.isDead;
+        return ((WorldServer) worldObj).getEntityFromUuid(getUniqueID()) == null;
     }
 
     @Override
@@ -1149,6 +1150,16 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         StaticMixinHelper.setCustomNameTagSkip = false;
+    }
+
+    @Override
+    public boolean isRespawning() {
+        return this.isRespawning;
+    }
+
+    @Override
+    public void setRespawning(boolean respawning) {
+        this.isRespawning = respawning;
     }
 
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))

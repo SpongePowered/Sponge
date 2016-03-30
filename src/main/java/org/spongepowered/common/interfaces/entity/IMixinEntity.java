@@ -110,4 +110,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     @Nullable Text getDisplayNameText();
 
     void setDisplayName(@Nullable Text displayName);
+
+    boolean isRespawning();
+
+    void setRespawning(boolean respawning);
 }

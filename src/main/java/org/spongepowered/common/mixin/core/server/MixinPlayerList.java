@@ -93,6 +93,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
@@ -410,13 +411,14 @@ public abstract class MixinPlayerList {
                 (targetDimension).orElse(null)), ((Player) entityPlayerMP).getRotation(), Vector3d.ZERO);
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
-
         entityPlayerMP.isDead = false;
 
+        ((IMixinEntity) entityPlayerMP).setRespawning(true);
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
+        ((IMixinEntity) entityPlayerMP).setRespawning(false);
 
         toTransform = event.getToTransform();
 
@@ -425,16 +427,20 @@ public abstract class MixinPlayerList {
             toTransform = event.getFromTransform();
         }
 
-        if (((Player) entityPlayerMP).getTransform().getExtent().equals(toTransform.getExtent())) {
-            final WorldServer worldServer = (WorldServer) toTransform.getExtent();
-            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorld) worldServer).getDimensionId(), worldServer.getDifficulty(),
-                    worldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-            if (!worldServer.getEntityTracker().trackedEntityHashTable.containsItem(entityPlayerMP.getEntityId())) {
-                worldServer.getEntityTracker().trackEntity(entityPlayerMP);
-            }
+        final WorldServer toWorldServer = (WorldServer) toTransform.getExtent();
+        if (fromTransform.getExtent().equals(toTransform.getExtent())) {
+
+            toWorldServer.getChunkProvider().provideChunk((int) toTransform.getLocation().getX() >> 4, (int) toTransform.getLocation().getZ() >> 4);
+
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorld) toWorldServer).getDimensionId(), toWorldServer.getDifficulty(),
+                    toWorldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
         }
+
         ((Player) entityPlayerMP).setTransform(toTransform);
 
+        if (!toWorldServer.getEntityTracker().trackedEntityHashTable.containsItem(entityPlayerMP.getEntityId())) {
+            toWorldServer.getEntityTracker().trackEntity(entityPlayerMP);
+        }
 
         // TODO Following still needed?
         // Reset the health.
