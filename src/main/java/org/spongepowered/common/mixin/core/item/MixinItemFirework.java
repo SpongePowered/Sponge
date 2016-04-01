@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.item;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemFirework;
 import net.minecraft.item.ItemStack;
@@ -34,19 +35,36 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.Firework;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.entity.IMixinEntityFireworkRocket;
 
 @Mixin(ItemFirework.class)
 public class MixinItemFirework extends Item {
+
+    private static final String TARGET_CREATIVE_MODE = "Lnet/minecraft/entity/player/PlayerCapabilities;isCreativeMode:Z";
+
+    private boolean primeCancelled;
 
     @Redirect(method = "onItemUse", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
     private boolean onSpawnEntityInWorld(World world, Entity firework, ItemStack stack, EntityPlayer player, World worldIn, BlockPos pos,
             EnumFacing side, float hitX, float hitY, float hitZ) {
         ((Firework) firework).setShooter((ProjectileSource) player);
-        return world.spawnEntityInWorld(firework);
+        this.primeCancelled = !((IMixinEntityFireworkRocket) firework)
+                .shouldPrime(Cause.of(NamedCause.of(NamedCause.IGNITER, player)));
+        return !this.primeCancelled && world.spawnEntityInWorld(firework);
+    }
+
+    @Redirect(method = "onItemUse", at = @At(value = "FIELD", target = TARGET_CREATIVE_MODE, opcode = Opcodes.GETFIELD))
+    private boolean shouldNotDecreaseStack(PlayerCapabilities capabilities) {
+        boolean notCondition = capabilities.isCreativeMode || this.primeCancelled;
+        this.primeCancelled = false;
+        return notCondition;
     }
 
 }

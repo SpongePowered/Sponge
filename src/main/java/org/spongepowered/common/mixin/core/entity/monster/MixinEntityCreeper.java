@@ -24,54 +24,197 @@
  */
 package org.spongepowered.common.mixin.core.entity.monster;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.monster.EntityCreeper;
-import net.minecraft.world.GameRules;
-import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.value.mutable.Value;
-import org.spongepowered.api.entity.explosive.IgnitableExplosive;
+import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.monster.Creeper;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.data.manipulator.mutable.entity.SpongeChargedData;
-import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
-import java.util.List;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityCreeper.class)
-@Implements(@Interface(iface = IgnitableExplosive.class, prefix = "explosive$"))
-public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper {
+public abstract class MixinEntityCreeper extends MixinEntityMob implements Creeper, IMixinFusedExplosive {
+
+    private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
+            + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
+    private static final String TARGET_IGNITE = "Lnet/minecraft/entity/monster/EntityCreeper;ignite()V";
+    private static final String TARGET_DAMAGE_ITEM = "Lnet/minecraft/item/ItemStack;damageItem"
+            + "(ILnet/minecraft/entity/EntityLivingBase;)V";
+
+    private static final int DEFAULT_EXPLOSION_RADIUS = 3;
+    private static final int STATE_IDLE = -1;
+    private static final int STATE_PRIMED = 1;
 
     @Shadow private int timeSinceIgnited;
-    @Shadow private int fuseTime = 30;
+    @Shadow private int fuseTime;
+    @Shadow private int explosionRadius;
+
+    @Shadow public abstract void ignite();
     @Shadow public abstract void explode();
-    @Shadow public abstract void shadow$ignite();
-    @Shadow public abstract boolean getPowered();
+    @Shadow public abstract int getCreeperState();
+    @Shadow public abstract void setCreeperState(int state);
 
-    @Intrinsic
-    public void explosive$ignite() {
-        shadow$ignite();
-    }
+    private Cause primeCause;
+    private Cause detonationCause;
+    private Cause defuseCause;
+    private int fuseDuration = 30;
+    private boolean interactPrimeCancelled;
+    private boolean stateDirty;
+    private boolean detonationCancelled;
 
-    @Redirect(method = "explode", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
-    private boolean onCanGrief(GameRules gameRules, String rule) {
-        return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
+    // FusedExplosive Impl
+
+    @Nullable
+    private Cause getCause(@Nullable Cause type) {
+        if (type != null) {
+            return type;
+        } else if (getAttackTarget() != null) {
+            return Cause.source(getAttackTarget()).build();
+        }
+        return null;
     }
 
     @Override
-    public Value<Boolean> charged() {
-        return new SpongeValue<>(Keys.CREEPER_CHARGED, false, this.getPowered());
+    public Optional<Integer> getExplosionRadius() {
+        return Optional.of(this.explosionRadius);
     }
 
     @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(new SpongeChargedData(this.getPowered()));
+    public void setExplosionRadius(Optional<Integer> radius) {
+        this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
     }
+
+    @Override
+    public int getFuseDuration() {
+        return this.fuseDuration;
+    }
+
+    @Override
+    public void setFuseDuration(int fuseTicks) {
+        this.fuseDuration = fuseTicks;
+    }
+
+    @Override
+    public int getFuseTicksRemaining() {
+        return this.fuseTime - this.timeSinceIgnited;
+    }
+
+    @Override
+    public void setFuseTicksRemaining(int fuseTicks) {
+        // Note: The creeper will detonate when timeSinceIgnited >= fuseTime
+        // assuming it is within range of a player. Every tick that the creeper
+        // is not within a range of a player, timeSinceIgnited is decremented
+        // by one until zero.
+        this.timeSinceIgnited = 0;
+        this.fuseTime = fuseTicks;
+    }
+
+    @Override
+    public void prime(Cause cause) {
+        checkState(!isPrimed(), "already primed");
+        this.primeCause = checkNotNull(cause, "cause");
+        setCreeperState(STATE_PRIMED);
+    }
+
+    @Override
+    public void defuse(Cause cause) {
+        checkState(isPrimed(), "not primed");
+        this.defuseCause = checkNotNull(cause, "cause");
+        setCreeperState(STATE_IDLE);
+    }
+
+    @Override
+    public boolean isPrimed() {
+        return getCreeperState() == STATE_PRIMED;
+    }
+
+    @Override
+    public void detonate(Cause cause) {
+        this.detonationCause = checkNotNull(cause, "cause");
+        explode();
+    }
+
+    @Inject(method = "setCreeperState(I)V", at = @At("INVOKE"), cancellable = true)
+    protected void onStateChange(int state, CallbackInfo ci) {
+        setFuseDuration(this.fuseDuration);
+        if (!isPrimed() && state == STATE_PRIMED && !shouldPrime(getCause(this.primeCause))) {
+            ci.cancel();
+        } else if (isPrimed() && state == STATE_IDLE && !shouldDefuse(getCause(this.defuseCause))) {
+            ci.cancel();
+        } else if (getCreeperState() != state) {
+            stateDirty = true;
+        }
+    }
+
+    @Inject(method = "setCreeperState(I)V", at = @At("RETURN"))
+    protected void postStateChange(int state, CallbackInfo ci) {
+        if (stateDirty) {
+            if (state == STATE_PRIMED) {
+                postPrime(getCause(this.primeCause));
+            } else if (state == STATE_IDLE) {
+                postDefuse(getCause(this.defuseCause));
+            }
+            stateDirty = false;
+        }
+    }
+
+    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
+    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+            double y, double z, float strength, boolean smoking) {
+        return detonate(getCause(this.detonationCause), Explosion.builder()
+                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .sourceExplosive(this)
+                .radius(strength)
+                .shouldPlaySmoke(smoking)
+                .shouldBreakBlocks(smoking && ((IMixinGriefer) this).canGrief()))
+                .orElseGet(() -> {
+                    this.detonationCancelled = true;
+                    return null;
+                });
+    }
+
+    @Inject(method = "explode", at = @At("RETURN"))
+    protected void postExplode(CallbackInfo ci) {
+        if (this.detonationCancelled) {
+            this.detonationCancelled = this.isDead = false;
+        }
+    }
+
+    @Redirect(method = "interact", at = @At(value = "INVOKE", target = TARGET_IGNITE))
+    protected void onInteractIgnite(EntityCreeper self) {
+        this.interactPrimeCancelled = !shouldPrime(this.primeCause);
+        if (!this.interactPrimeCancelled) {
+            ignite();
+        }
+    }
+
+    @Redirect(method = "interact", at = @At(value = "INVOKE", target = TARGET_DAMAGE_ITEM))
+    protected void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
+        if (!this.interactPrimeCancelled) {
+            fas.damageItem(amount, player);
+            this.primeCause = Cause.of(NamedCause.of(NamedCause.IGNITER, player));
+            this.detonationCause = this.primeCause;
+        }
+        this.interactPrimeCancelled = false;
+    }
+
 }

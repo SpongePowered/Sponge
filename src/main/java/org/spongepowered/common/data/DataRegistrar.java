@@ -173,6 +173,12 @@ public class DataRegistrar {
 
         // Entity Processors
 
+        dataManager.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
+                ImmutableSpongeFuseData.class, new FuseDataProcessor());
+
+        dataManager.registerDualProcessor(ExplosionRadiusData.class, SpongeExplosionRadiusData.class, ImmutableExplosionRadiusData.class,
+                ImmutableSpongeExplosionRadiusData.class, new ExplosionRadiusDataProcessor());
+
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
                 ImmutableFireworkEffectData.class, ImmutableSpongeFireworkEffectData.class, new FireworkEffectDataProcessor());
 
@@ -623,6 +629,8 @@ public class DataRegistrar {
 
         // Values
 
+        dataManager.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
+        dataManager.registerValueProcessor(Keys.TICKS_REMAINING, new TicksRemainingValueProcessor());
         dataManager.registerValueProcessor(Keys.HEALTH, new HealthValueProcessor());
         dataManager.registerValueProcessor(Keys.MAX_HEALTH, new MaxHealthValueProcessor());
         dataManager.registerValueProcessor(Keys.FIRE_TICKS, new FireTicksValueProcessor());

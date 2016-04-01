@@ -22,16 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity;
+package org.spongepowered.common.interfaces.entity;
 
-import net.minecraft.entity.item.EntityFireworkRocket;
-import net.minecraft.entity.item.EntityMinecartTNT;
-import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.monster.EntityCreeper;
-import org.spongepowered.api.entity.explosive.FusedExplosive;
-import org.spongepowered.asm.mixin.Mixin;
+import net.minecraft.entity.EntityLivingBase;
+import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
-@Mixin({EntityTNTPrimed.class, EntityCreeper.class, EntityMinecartTNT.class, EntityFireworkRocket.class})
-public abstract class MixinFusedExplosive implements FusedExplosive {
+public interface IMixinEntityTNTPrimed extends IMixinFusedExplosive {
+
+    void setDetonator(EntityLivingBase detonator);
 
 }

@@ -24,58 +24,172 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static org.spongepowered.api.data.DataQuery.of;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
+import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityTNTPrimed;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.explosive.PrimedTNT;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.entity.IMixinEntityTNTPrimed;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityTNTPrimed.class)
-public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT {
+public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT, IMixinEntityTNTPrimed {
+
+    private static final String TARGET_NEW_EXPLOSION = "Lnet/minecraft/world/World;createExplosion"
+            + "(Lnet/minecraft/entity/Entity;DDDFZ)Lnet/minecraft/world/Explosion;";
+    private static final int DEFAULT_EXPLOSION_RADIUS = 4;
+    private static final BlockType BLOCK_TYPE = BlockTypes.TNT;
 
     @Shadow private int fuse;
-    @Shadow private EntityLivingBase tntPlacedBy;
+    @Shadow @Nullable private EntityLivingBase tntPlacedBy;
     @Shadow public abstract void explode();
 
-
-    private void setFuse(int fuse) {
-        checkArgument(fuse >= 0);
-        this.fuse = fuse;
-    }
-
-    @Override
-    public boolean validateRawData(DataContainer container) {
-        boolean doesSuper = super.validateRawData(container);
-        return doesSuper && container.contains(of("Fuse"));
-    }
+    @Nullable private EntityLivingBase detonator;
+    private Cause detonationCause;
+    private int explosionRadius = DEFAULT_EXPLOSION_RADIUS;
+    private int fuseDuration = 80;
+    private boolean detonationCancelled;
 
     @Override
-    public void setRawData(DataContainer container) throws InvalidDataException {
-        super.setRawData(container);
-        try {
-            setFuse(container.getInt(of("Fuse")).get());
-        } catch (Exception e) {
-            throw new InvalidDataException("Couldn't parse raw data", e);
-        }
-    }
-
-    @Override
-    public void detonate() {
-        this.setDead();
-        this.explode();
+    public void setDetonator(EntityLivingBase detonator) {
+        this.detonator = detonator;
     }
 
     @Override
     public Optional<Living> getDetonator() {
-        return Optional.ofNullable((Living) this.tntPlacedBy);
+        return Optional.ofNullable((Living) this.detonator);
     }
+
+    // FusedExplosive Impl
+
+    @Nullable
+    private Cause getCause(@Nullable Cause type) {
+        if (type != null) {
+            return type;
+        } else if (this.detonator != null) {
+            return Cause.of(NamedCause.of(NamedCause.IGNITER, this.detonator));
+        } else if (this.tntPlacedBy != null) {
+            return Cause.source(this.tntPlacedBy).build();
+        }
+        return null;
+    }
+
+    private void defuse() {
+        setDead();
+        // Place a TNT block at the Entity's position
+        getWorld().setBlock((int) this.posX, (int) this.posY, (int) this.posZ,
+                BlockState.builder().blockType(BLOCK_TYPE).build(), true);
+    }
+
+    @Override
+    public Optional<Integer> getExplosionRadius() {
+        return Optional.of(this.explosionRadius);
+    }
+
+    @Override
+    public void setExplosionRadius(Optional<Integer> radius) {
+        this.explosionRadius = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
+    }
+
+    @Override
+    public int getFuseDuration() {
+        return this.fuseDuration;
+    }
+
+    @Override
+    public void setFuseDuration(int fuseTicks) {
+        this.fuseDuration = fuseTicks;
+    }
+
+    @Override
+    public int getFuseTicksRemaining() {
+        return this.fuse;
+    }
+
+    @Override
+    public void setFuseTicksRemaining(int fuseTicks) {
+        this.fuse = fuseTicks;
+    }
+
+    @Override
+    public void prime(Cause cause) {
+        checkState(!isPrimed(), "already primed");
+        checkState(this.isDead, "tnt about to be primed");
+        getWorld().spawnEntity(this, checkNotNull(cause, "cause"));
+    }
+
+    @Override
+    public void defuse(Cause cause) {
+        checkState(isPrimed(), "not primed");
+        checkNotNull(cause, "cause");
+        if (shouldDefuse(checkNotNull(cause, "cause"))) {
+            defuse();
+            postDefuse(cause);
+        }
+    }
+
+    @Override
+    public boolean isPrimed() {
+        return this.fuse > 0 && this.fuse < this.fuseDuration && !this.isDead;
+    }
+
+    @Override
+    public void detonate(Cause cause) {
+        this.detonationCause = checkNotNull(cause, "cause");
+        setDead();
+        explode();
+    }
+
+    @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
+    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, Entity self, double x,
+                                                      double y, double z, float strength, boolean smoking) {
+        return detonate(getCause(this.detonationCause), Explosion.builder()
+                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .sourceExplosive(this)
+                .radius(this.explosionRadius)
+                .shouldPlaySmoke(smoking)
+                .shouldBreakBlocks(smoking))
+                .orElseGet(() -> {
+                    this.detonationCancelled = true;
+                    return null;
+                });
+    }
+
+    @Inject(method = "explode", at = @At("RETURN"))
+    protected void postExplode(CallbackInfo ci) {
+        if (this.detonationCancelled) {
+            defuse();
+            this.detonationCancelled = false;
+        }
+    }
+
+    @Inject(method = "onUpdate", at = @At("RETURN"))
+    protected void onUpdate(CallbackInfo ci) {
+        if (this.fuse == this.fuseDuration - 1) {
+            postPrime(getCause(null));
+        }
+    }
+
 }

@@ -80,8 +80,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
-    @Shadow private EntityLivingBase attackTarget;
-
+    @Shadow @Nullable private EntityLivingBase attackTarget;
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
@@ -198,6 +197,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @return The current attack target, if not null
      */
     @Overwrite
+    @Nullable
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
             if (((IMixinEntity) this.attackTarget).isVanished() && ((IMixinEntity) this.attackTarget).isUntargetable()) {

@@ -70,11 +70,6 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
     }
 
     @Override
-    public void detonate() {
-        this.onImpact(new MovingObjectPosition(null));
-    }
-
-    @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
         ProjectileSourceSerializer.readSourceFromNbt(compound, this);
