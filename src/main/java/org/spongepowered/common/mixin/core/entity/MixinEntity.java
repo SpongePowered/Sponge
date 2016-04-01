@@ -327,6 +327,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
+        checkState(!isRemoved(), "Trying to set location of removed entity!");
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
@@ -617,7 +618,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public boolean isRemoved() {
-        return ((WorldServer) worldObj).getEntityFromUuid(getUniqueID()) == null;
+        return this.isDead;
     }
 
     @Override
