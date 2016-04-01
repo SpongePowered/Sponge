@@ -307,6 +307,7 @@ public class DimensionManager {
 
         ((IMixinWorldInfo) worldInfo).createWorldConfig();
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
+        ((IMixinWorldInfo) worldInfo).setDimensionId(Integer.MIN_VALUE);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
         ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
@@ -446,8 +447,6 @@ public class DimensionManager {
             return Optional.empty();
         }
 
-        int dimensionId;
-
         if (saveHandler == null) {
             saveHandler = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldName, true, ((MinecraftServer)
                     Sponge.getServer()).getDataFixer());
@@ -467,13 +466,18 @@ public class DimensionManager {
                     return Optional.empty();
                 }
 
-                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
-                registerDimension(((IMixinWorldInfo) properties).getDimensionId(), (DimensionType) (Object) properties.getDimensionType(), worldFolder);
+                if (((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+                    ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
+                }
+
                 registerWorldProperties(properties);
+            }
+        } else {
+            if (((IMixinWorldInfo) properties).getDimensionId() == Integer.MIN_VALUE) {
+                ((IMixinWorldInfo) properties).setDimensionId(getNextFreeDimensionId());
             }
         }
 
-        dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
         setUuidOnProperties(getCurrentSavesDirectory().get(), properties);
 
         final WorldInfo worldInfo = (WorldInfo) properties;
@@ -485,14 +489,19 @@ public class DimensionManager {
             return Optional.empty();
         }
 
-        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, null, true);
+        final int dimensionId = ((IMixinWorldInfo) properties).getDimensionId();
+        registerDimension(dimensionId, (DimensionType) (Object) properties.getDimensionType(), worldFolder);
+
+        SpongeImpl.getLogger().info("Loading world [{}] ({})", properties.getWorldName(), getDimensionType
+                (dimensionId).get().getName());
+
+        final WorldServer worldServer = createWorldFromProperties(dimensionId, saveHandler, (WorldInfo) properties, null,
+                true);
+
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
         ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
-
-        SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
-                (dimensionId).get().getName());
 
         server.worldServers = reorderWorldsVanillaFirst();
         return Optional.of(worldServer);
@@ -728,7 +737,7 @@ public class DimensionManager {
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(rootPath, LEVEL_AND_SPONGE)) {
             for (Path worldPath : stream) {
                 final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
-                final String worldFolderName = spongeLevelPath.getFileName().toString();
+                final String worldFolderName = worldPath.getFileName().toString();
 
                 NBTTagCompound compound;
                 try {
@@ -765,22 +774,22 @@ public class DimensionManager {
                 if (spongeDataCompound.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
                     dimensionTypeId = spongeDataCompound.getString(NbtDataUtil.DIMENSION_TYPE);
                 } else {
-                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [overworld]...", worldFolderName,
-                            dimensionId);
+                    SpongeImpl.getLogger().warn("World [{}] (DIM{}) has no specified dimension type. Defaulting to [{}}]...", worldFolderName,
+                            dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
                 final Optional<org.spongepowered.api.world.DimensionType> optDimensionType = Sponge.getRegistry().getType(org.spongepowered.api.world
                         .DimensionType.class, dimensionTypeId);
                 if (!optDimensionType.isPresent()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
-                            worldFolderName, DimensionTypes.OVERWORLD.getId());
+                            worldFolderName, DimensionTypes.OVERWORLD.getName());
                 }
                 final DimensionType dimensionType = (DimensionType) (Object) optDimensionType.get();
                 spongeDataCompound.setString(NbtDataUtil.DIMENSION_TYPE, dimensionTypeId);
 
-                if (spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_MOST) && spongeDataCompound.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+                if (!spongeDataCompound.hasUniqueId(NbtDataUtil.UUID)) {
                     SpongeImpl.getLogger().error("World [{}] (DIM{}) has no valid unique identifier. This is a critical error and should be reported"
-                            + "to Sponge ASAP.", worldFolderName, dimensionId);
+                            + " to Sponge ASAP.", worldFolderName, dimensionId);
                     continue;
                 }
 

@@ -38,10 +38,12 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
         setNotificationData();
     }
 
-    public BiomeProvider getChunkManager(World world) {
+    @Override
+    public BiomeProvider getBiomeProvider(World world) {
         return new BiomeProviderSingle(Biomes.sky);
     }
 
+    @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
         return new ChunkProviderEnd(world, true, world.getSeed());
     }

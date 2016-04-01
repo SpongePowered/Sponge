@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.world.type;
 
+import net.minecraft.world.World;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 
 import java.util.Arrays;
 
@@ -45,4 +48,8 @@ public abstract class SpongeWorldType extends WorldType {
         worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
         return oldLen;
     }
+
+    public abstract BiomeProvider getBiomeProvider(World world);
+
+    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
 }

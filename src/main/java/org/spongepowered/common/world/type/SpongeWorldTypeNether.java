@@ -38,10 +38,12 @@ public class SpongeWorldTypeNether extends SpongeWorldType {
         setNotificationData();
     }
 
-    public BiomeProvider getChunkManager(World world) {
+    @Override
+    public BiomeProvider getBiomeProvider(World world) {
         return new BiomeProviderSingle(Biomes.hell);
     }
 
+    @Override
     public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
         return new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
     }

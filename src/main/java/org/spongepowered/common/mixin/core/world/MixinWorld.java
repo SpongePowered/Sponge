@@ -58,6 +58,7 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
@@ -134,7 +135,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
@@ -151,6 +151,7 @@ import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.common.world.type.SpongeWorldType;
 
 import java.io.BufferedWriter;
 import java.io.StringWriter;
@@ -505,8 +506,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 
-
-
     @Override
     public Optional<Entity> getEntity(UUID uuid) {
         // Note that MixinWorldServer is properly overriding this to use it's own mapping.
@@ -549,8 +548,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void updateWorldGenerator() {
-
-        IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
 
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
@@ -618,10 +615,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public SpongeWorldGenerator createWorldGenerator(String settings) {
         final WorldServer worldServer = (WorldServer) (Object) this;
-        final WorldProvider worldProvider = worldServer.provider;
-        ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
-        final IChunkGenerator chunkGenerator = worldProvider.createChunkGenerator();
-        final BiomeProvider biomeProvider = worldServer.provider.biomeProvider;
+        final WorldType worldType = worldServer.getWorldType();
+        final IChunkGenerator chunkGenerator;
+        final BiomeProvider biomeProvider;
+        if (worldType instanceof SpongeWorldType) {
+            chunkGenerator = ((SpongeWorldType) worldType).getChunkGenerator(worldServer, settings);
+            biomeProvider = ((SpongeWorldType) worldType).getBiomeProvider(worldServer);
+        } else {
+            final WorldProvider worldProvider = worldServer.provider;
+            ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
+            chunkGenerator = worldProvider.createChunkGenerator();
+            biomeProvider = worldServer.provider.biomeProvider;
+        }
         return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
     }
 

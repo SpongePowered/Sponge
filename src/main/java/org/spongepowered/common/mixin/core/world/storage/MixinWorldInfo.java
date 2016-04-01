@@ -679,7 +679,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
         // TODO Integrity checks
-        this.uuid = new UUID(nbt.getLong(NbtDataUtil.WORLD_UUID_MOST), nbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+        this.uuid = nbt.getUniqueId(NbtDataUtil.UUID);
         this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
         DimensionTypeRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
@@ -694,8 +694,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
-        this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
-        this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
+        this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
         this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);

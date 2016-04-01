@@ -327,8 +327,6 @@ public abstract class MixinEntity implements IMixinEntity {
     public void setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
-        checkState(isRemoved() && !isRespawning(), "Trying to set location of already removed Entity!");
-        checkState(!isRespawning(), "Trying to set location of Entity that is not in a consistent state!");
         final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
         final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
