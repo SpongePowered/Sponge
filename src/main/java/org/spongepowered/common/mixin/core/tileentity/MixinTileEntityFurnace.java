@@ -22,27 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.ai;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import net.minecraft.block.BlockSilverfish;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.monster.EntitySilverfish;
+import static org.spongepowered.api.data.DataQuery.of;
+
+import net.minecraft.tileentity.TileEntityFurnace;
+import org.spongepowered.api.block.tileentity.carrier.Furnace;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
-@Mixin(EntitySilverfish.AIHideInStone.class)
-public abstract class MixinEntitySilverfishAIHideInStone extends EntityAIBase {
+@NonnullByDefault
+@Mixin(TileEntityFurnace.class)
+public abstract class MixinTileEntityFurnace extends MixinTileEntityLockable implements Furnace, IMixinCustomNameable {
 
-    @Shadow(aliases = "this$0") private EntitySilverfish silverfish;
+    @Shadow private String furnaceCustomName;
 
-    @Redirect(method = "shouldExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/BlockSilverfish;canContainSilverfish"
-            + "(Lnet/minecraft/block/state/IBlockState;)Z"))
-    private boolean onCanGrief(IBlockState blockState) {
-        return BlockSilverfish.canContainSilverfish(blockState) && this.silverfish.worldObj.getGameRules().getBoolean("mobGriefing")
-                && ((IMixinGriefer) this.silverfish).canGrief();
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        container.set(of("BurnTime"), this.getField(0));
+        container.set(of("BurnTimeTotal"), this.getField(1));
+        container.set(of("CookTime"), this.getField(3) - this.getField(2));
+        container.set(of("CookTimeTotal"), this.getField(3));
+        if (this.furnaceCustomName != null) {
+            container.set(of("CustomName"), this.furnaceCustomName);
+        }
+        return container;
+    }
+
+    @Override
+    public void setCustomDisplayName(String customName) {
+        ((TileEntityFurnace) (Object) this).setCustomInventoryName(customName);
     }
 }

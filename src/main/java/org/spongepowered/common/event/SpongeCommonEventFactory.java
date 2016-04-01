@@ -37,7 +37,6 @@ import net.minecraft.entity.passive.EntityAnimal;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Items;
 import net.minecraft.inventory.ContainerPlayer;
@@ -63,8 +62,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.entity.living.Humanoid;
@@ -80,7 +77,6 @@ import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
@@ -183,7 +179,7 @@ public class SpongeCommonEventFactory {
     }
 
     // Open/Close
-    public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet packetIn) {
+    public static void handleInteractInventoryOpenCloseEvent(Cause cause, EntityPlayerMP player, Packet<?> packetIn) {
         if ((!(player.openContainer instanceof ContainerPlayer) && (StaticMixinHelper.lastOpenContainer instanceof ContainerPlayer)
                 || (packetIn instanceof C16PacketClientStatus
                 && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT))) {
@@ -251,7 +247,15 @@ public class SpongeCommonEventFactory {
                 ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, causeTracker.getCapturedEntityItems(),
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                if (entry.getKey().equals(NamedCause.SOURCE)) {
+                    builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                } else {
+                    builder.suggestNamed(entry.getKey(), entry.getValue());
+                }
+            }
+            event = SpongeEventFactory.createCreativeInventoryEventDrop(builder.build(), cursorTransaction, causeTracker.getCapturedEntityItems(),
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
@@ -300,7 +304,7 @@ public class SpongeCommonEventFactory {
         // Handle empty slot clicks
         if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
-            if (slot != null) {
+            if (slot != null && !slot.getHasStack()) {
                 SlotTransaction slotTransaction =
                         new SlotTransaction(new SlotAdapter(slot), ItemStackSnapshot.NONE, ItemStackSnapshot.NONE);
                 ((IMixinContainer) player.openContainer).getCapturedTransactions().add(slotTransaction);
@@ -316,8 +320,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropFull(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropFull(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -336,8 +348,16 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
+                        if (entry.getKey().equals(NamedCause.SOURCE)) {
+                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
+                        } else {
+                            builder.suggestNamed(entry.getKey(), entry.getValue());
+                        }
+                    }
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropSingle(cause, cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropSingle(builder.build(), cursorTransaction,
                                     causeTracker.getCapturedEntities(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -406,6 +426,12 @@ public class SpongeCommonEventFactory {
                             ((IMixinContainer) player.openContainer).getCapturedTransactions());
         }
 
+        // TODO - properly handle unknown flags (this will come with the CauseTracking refactor)
+        if (clickEvent == null) {
+            ((IMixinContainer) player.openContainer).getCapturedTransactions().clear();
+            return;
+        }
+
         SpongeImpl.postEvent(clickEvent);
 
         if (clickEvent.isCancelled()) {
@@ -450,7 +476,7 @@ public class SpongeCommonEventFactory {
                 slot.offer((org.spongepowered.api.item.inventory.ItemStack) originalStack);
             }*/
 
-            Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+            Slot nmsSlot = player.openContainer.getSlot(slotNumber);
             if (nmsSlot != null) {
                 nmsSlot.putStack(originalStack);
             }
@@ -484,7 +510,7 @@ public class SpongeCommonEventFactory {
                     slot.offer((org.spongepowered.api.item.inventory.ItemStack) customStack);
                 }*/
 
-                Slot nmsSlot = player.inventoryContainer.getSlot(slotNumber);
+                Slot nmsSlot = player.openContainer.getSlot(slotNumber);
                 if (nmsSlot != null) {
                     nmsSlot.putStack(customStack);
                 }
@@ -668,7 +694,6 @@ public class SpongeCommonEventFactory {
     }
 
     public static void checkSpawnEvent(Entity entity, Cause cause) {
-        final Optional<SpawnCause> spawnCause = cause.first(SpawnCause.class);
         checkArgument(cause.root() instanceof SpawnCause, "The cause does not have a SpawnCause! It has instead: {}", cause.root().toString());
         checkArgument(cause.containsNamed(NamedCause.SOURCE), "The cause does not have a \"Source\" named object!");
         checkArgument(cause.get(NamedCause.SOURCE, SpawnCause.class).isPresent(), "The SpawnCause is not the \"Source\" of the cause!");

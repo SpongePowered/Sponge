@@ -61,6 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.DataVersions;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.util.VecHelper;
@@ -321,20 +322,14 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
 
     @Override
     public int getContentVersion() {
-        return 1;
+        return DataVersions.BlockState.STATE_AS_CATALOG_ID;
     }
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = new MemoryDataContainer()
+        return new MemoryDataContainer()
             .set(Queries.CONTENT_VERSION, getContentVersion())
-            .set(DataQueries.BLOCK_TYPE, this.getType().getId())
-            .set(DataQueries.BLOCK_STATE_UNSAFE_META, this.getStateMeta());
-        final List<DataView> manipulators = DataUtil.getSerializedImmutableManipulatorList(getContainers());
-        if (!manipulators.isEmpty()) {
-            container.set(DataQueries.DATA_MANIPULATORS, manipulators);
-        }
-        return container;
+            .set(DataQueries.BLOCK_STATE, this.getId());
     }
 
     @Override

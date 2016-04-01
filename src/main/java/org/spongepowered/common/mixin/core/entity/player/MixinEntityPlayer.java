@@ -76,6 +76,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
     @Shadow public int experienceLevel;
@@ -83,14 +84,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public float experience;
     @Shadow public PlayerCapabilities capabilities;
     @Shadow public InventoryPlayer inventory;
+    @Shadow private BlockPos spawnChunk;
+    @Shadow private BlockPos playerLocation;
+    @Shadow protected FoodStats foodStats;
+
     @Shadow public abstract int xpBarCap();
     @Shadow public abstract GameProfile getGameProfile();
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
-    @Shadow private BlockPos spawnChunk;
-    @Shadow private BlockPos playerLocation;
-    @Shadow protected FoodStats foodStats;
+
     private boolean affectsSpawning = true;
     private Vector3d targetedLocation;
 
@@ -245,4 +248,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 .build();
         return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
     }
+
+
 }

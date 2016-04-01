@@ -22,50 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import net.minecraft.tileentity.TileEntityChest;
-import org.spongepowered.api.block.tileentity.carrier.Chest;
-import org.spongepowered.api.data.DataContainer;
+import net.minecraft.tileentity.TileEntityFlowerPot;
+import org.spongepowered.api.block.tileentity.FlowerPot;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
 import java.util.List;
 import java.util.Optional;
 
-@NonnullByDefault
-@Mixin(TileEntityChest.class)
-public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable {
-
-    @Shadow public String customName;
-
-    @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        if (this.customName != null) {
-            container.set(of("CustomName"), this.customName);
-        }
-        return container;
-    }
+@Mixin(TileEntityFlowerPot.class)
+public abstract class MixinTileEntityFlowerPot extends MixinTileEntity implements FlowerPot {
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
-        if (connectedChestData.isPresent()) {
-            manipulators.add(connectedChestData.get());
+        Optional<RepresentedItemData> flowerItemData = get(RepresentedItemData.class);
+        if (flowerItemData.isPresent()) {
+            manipulators.add(flowerItemData.get());
         }
     }
-
-    @Override
-    public void setCustomDisplayName(String customName) {
-        ((TileEntityChest) (Object) this).setCustomName(customName);
-    }
-
 }

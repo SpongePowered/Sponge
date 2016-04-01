@@ -77,12 +77,12 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 public class SpongeCommand {
-    private static final String INDENT = "    ";
-    private static final String LONG_INDENT = INDENT + INDENT;
+    static final String INDENT = "    ";
+    static final String LONG_INDENT = INDENT + INDENT;
 
-    private static final Text INDENT_TEXT = Text.of(INDENT);
-    private static final Text NEWLINE_TEXT = Text.NEW_LINE;
-    private static final Text SEPARATOR_TEXT = Text.of(", ");
+    static final Text INDENT_TEXT = Text.of(INDENT);
+    static final Text NEWLINE_TEXT = Text.NEW_LINE;
+    static final Text SEPARATOR_TEXT = Text.of(", ");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -124,6 +124,9 @@ public class SpongeCommand {
 
     // TODO: Have some sort of separator between outputs for each world/dimension/global/whatever (that are exactly one line?)
     private abstract static class ConfigUsingExecutor implements CommandExecutor {
+        ConfigUsingExecutor() {
+        }
+
         @Override
         public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
             int successes = 0;
@@ -369,7 +372,7 @@ public class SpongeCommand {
         }
     }
 
-    private static Text title(String title) {
+    static Text title(String title) {
         return Text.of(TextColors.GREEN, title);
     }
 
@@ -411,7 +414,7 @@ public class SpongeCommand {
                                     .onClick(TextActions.runCommand("/sponge:sponge plugins " + next.getId()));
 
                             next.getVersion()
-                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + next.getVersion()))));
+                                    .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
 
                             build.append(pluginBuilder.build());
                         }

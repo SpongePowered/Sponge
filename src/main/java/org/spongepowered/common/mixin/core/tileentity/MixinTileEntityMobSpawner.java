@@ -22,55 +22,42 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import com.google.common.collect.Lists;
-import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.IChatComponent;
-import org.spongepowered.api.block.tileentity.Sign;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.key.Keys;
+import net.minecraft.tileentity.MobSpawnerBaseLogic;
+import net.minecraft.tileentity.TileEntityMobSpawner;
+import org.spongepowered.api.block.tileentity.MobSpawner;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinSubject;
 
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntitySign.class)
-public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
+@Mixin(TileEntityMobSpawner.class)
+public abstract class MixinTileEntityMobSpawner extends MixinTileEntity implements MobSpawner {
 
-    @Shadow @Final public IChatComponent[] signText;
+    @Shadow public abstract MobSpawnerBaseLogic getSpawnerBaseLogic();
 
     @Override
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        List<String> lines = Lists.newArrayList();
-        for (IChatComponent line : this.signText) {
-            lines.add(IChatComponent.Serializer.componentToJson(line));
+    public void spawnEntityBatchImmediately(boolean force) {
+        if (force) {
+            final short oldMaxNearby = (short) getSpawnerBaseLogic().maxNearbyEntities;
+            getSpawnerBaseLogic().maxNearbyEntities = Short.MAX_VALUE;
+
+            getSpawnerBaseLogic().spawnDelay = 0;
+            getSpawnerBaseLogic().updateSpawner();
+
+            getSpawnerBaseLogic().maxNearbyEntities = oldMaxNearby;
+        } else {
+            getSpawnerBaseLogic().spawnDelay = 0;
         }
-        container.set(Keys.SIGN_LINES.getQuery(), lines);
-        return container;
-    }
-
-    @Override
-    public String getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_COMMAND_BLOCK;
-    }
-
-    @Override
-    public Tristate permDefault(String permission) {
-        return Tristate.TRUE;
     }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getSignData());
+        // TODO manipulators.add(getMobSpawnerData());
     }
 }

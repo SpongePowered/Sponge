@@ -33,6 +33,7 @@ import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
 
+import java.io.File;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,7 +51,7 @@ public final class SpongeAssetManager implements AssetManager {
         checkArgument(!name.isEmpty(), "name cannot be empty");
         PluginContainer plugin = Sponge.getPluginManager().fromInstance(instance).get();
         Path assetDir = plugin.getAssetDirectory().orElse(Paths.get(DEFAULT_ASSET_DIR).resolve(plugin.getId().replace('.', '/')));
-        URL url = CLASS_LOADER.getResource(assetDir.resolve(name).toString());
+        URL url = CLASS_LOADER.getResource(assetDir.resolve(name).toString().replace(File.separatorChar, '/'));
         if (url == null) {
             return Optional.empty();
         }

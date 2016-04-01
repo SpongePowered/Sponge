@@ -35,8 +35,11 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
@@ -47,6 +50,7 @@ import org.spongepowered.common.event.listener.BeforeAfterCauseListener;
 import org.spongepowered.common.event.listener.CancelledListener;
 import org.spongepowered.common.event.listener.DataHasListener;
 import org.spongepowered.common.event.listener.DataSupportsListener;
+import org.spongepowered.common.event.listener.DoubleListener;
 import org.spongepowered.common.event.listener.FirstLastCauseListener;
 import org.spongepowered.common.event.listener.IncludeExcludeListener;
 import org.spongepowered.common.event.listener.InvalidCancelledListener;
@@ -70,6 +74,12 @@ public class EventFilterTest {
         annotatedEventListener.handle(new SubEvent(Cause.source(this).build()));
 
         Assert.assertTrue("Simple listener was not called!", listener.called);
+    }
+
+    @Test
+    public void testDoubleListener() throws Exception {
+        DoubleListener listener = new DoubleListener();
+        AnnotatedEventListener annotatedEventListener = this.getListener(listener, "onEvent", ChangeBlockEvent.Break.class, Player.class, ItemStack.class);
     }
 
     @Test

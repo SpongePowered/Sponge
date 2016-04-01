@@ -22,38 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spongepowered.api.data.DataQuery.of;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.tileentity.TileEntityDispenser;
-import org.spongepowered.api.block.tileentity.carrier.Dispenser;
-import org.spongepowered.api.entity.projectile.Projectile;
+import net.minecraft.tileentity.TileEntityChest;
+import org.spongepowered.api.block.tileentity.carrier.Chest;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.block.ConnectedDirectionData;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.entity.projectile.ProjectileLauncher;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.data.IMixinCustomNameable;
 
+import java.util.List;
 import java.util.Optional;
 
 @NonnullByDefault
-@Mixin(TileEntityDispenser.class)
-public abstract class MixinTileEntityDispenser extends MixinTileEntityLockable implements Dispenser, IMixinCustomNameable {
+@Mixin(TileEntityChest.class)
+public abstract class MixinTileEntityChest extends MixinTileEntityLockable implements Chest, IMixinCustomNameable {
+
+    @Shadow public String customName;
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, null);
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        if (this.customName != null) {
+            container.set(of("CustomName"), this.customName);
+        }
+        return container;
     }
 
     @Override
-    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
-        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectileClass"), this, checkNotNull(velocity, "velocity"));
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        Optional<ConnectedDirectionData> connectedChestData = get(ConnectedDirectionData.class);
+        if (connectedChestData.isPresent()) {
+            manipulators.add(connectedChestData.get());
+        }
     }
 
     @Override
     public void setCustomDisplayName(String customName) {
-        ((TileEntityDispenser) (Object) this).setCustomName(customName);
+        ((TileEntityChest) (Object) this).setCustomName(customName);
     }
 
 }

@@ -35,22 +35,20 @@ import net.minecraft.command.ICommandSender;
 import net.minecraft.command.PlayerSelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.plugin.PluginContainer;
-import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.InvocationCommandException;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -60,8 +58,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 /**
  * Wrapper around ICommands so they fit into the Sponge command system.
@@ -190,9 +186,13 @@ public class MinecraftCommandWrapper implements CommandCallable {
     public Text getUsage(CommandSource source) {
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         String usage = this.command.getCommandUsage(mcSender);
+        if (usage == null) { // Silly modders
+            return Text.of();
+        }
+
         Translation translation = SpongeImpl.getGame().getRegistry().getTranslationById(usage).get();
         if (source instanceof Player) {
-            usage = translation.get(((Player) source).getLocale());
+            usage = translation.get(source.getLocale());
         } else {
             usage = translation.get(Locale.getDefault());
         }
@@ -212,9 +212,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
         if (!testPermission(source)) {
             return ImmutableList.of();
         }
-        // TODO Aaron1011: Pass in the proper BlockPos from somewhere
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), null);
+        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), ((IMixinServerCommandManager) MinecraftServer.getServer().getCommandManager()).getTabBlockPos());
         if (suggestions == null) {
             return ImmutableList.of();
         }

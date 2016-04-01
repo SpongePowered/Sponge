@@ -22,10 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-/**
- * A majority of these interfaces are to aid in manipulating block states and blocks
- * for a specific {@link org.spongepowered.api.data.manipulator.DataManipulator}. The one
- * requirement is that all block mixins extend {@link org.spongepowered.common.interfaces.block.IMixinBlock}
- * for the benefit of being able to "reset" the block to a "default state".
- */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
+
+import static org.spongepowered.api.data.DataQuery.of;
+
+import net.minecraft.tileentity.TileEntityNote;
+import org.spongepowered.api.block.tileentity.Note;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.util.DataQueries;
+
+import java.util.List;
+
+@NonnullByDefault
+@Mixin(TileEntityNote.class)
+public abstract class MixinTileEntityNote extends MixinTileEntity implements Note {
+
+    @Shadow public byte note;
+
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        container.set(DataQueries.TILE_NOTE_ID, this.note);
+        return container;
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getNoteData());
+    }
+
+}

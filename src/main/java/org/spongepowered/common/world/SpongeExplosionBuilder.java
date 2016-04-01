@@ -43,6 +43,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     private boolean canCauseFire;
     private boolean shouldBreakBlocks;
     private boolean shouldSmoke;
+    private boolean shouldDamageEntities;
 
     public SpongeExplosionBuilder() {
         reset();
@@ -73,6 +74,12 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
     }
 
     @Override
+    public Explosion.Builder shouldDamageEntities(boolean damage) {
+        this.shouldDamageEntities = damage;
+        return this;
+    }
+
+    @Override
     public Explosion.Builder shouldPlaySmoke(boolean smoke) {
         this.shouldSmoke = smoke;
         return this;
@@ -92,6 +99,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.canCauseFire = value.canCauseFire();
         this.shouldBreakBlocks = value.shouldBreakBlocks();
         this.shouldSmoke = value.shouldPlaySmoke();
+        this.shouldDamageEntities = value.shouldDamageEntities();
         return this;
     }
 
@@ -103,6 +111,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         this.canCauseFire = false;
         this.shouldBreakBlocks = false;
         this.shouldSmoke = false;
+        this.shouldDamageEntities = false;
         return this;
     }
 
@@ -117,6 +126,7 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
                 (Entity) this.sourceExplosive, origin.getX(), origin.getY(), origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldSmoke);
         ((IMixinExplosion) explosion).setShouldBreakBlocks(this.shouldBreakBlocks);
+        ((IMixinExplosion) explosion).setShouldDamageEntities(this.shouldDamageEntities);
         return (Explosion) explosion;
     }
 }

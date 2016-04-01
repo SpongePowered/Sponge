@@ -11,6 +11,7 @@ ext.apiSuffix = (api.version - '-SNAPSHOT') + '-BETA'
 
 dependencies {
     compile common
+    compile common.sourceSets.java6.output
 }
 
 // Add Common access transformers
@@ -55,6 +56,8 @@ shadowJar {
         // SpongeAPI and event generation
         include project(api.path)
         include dependency('org.spongepowered:event-gen-core')
+
+        include dependency('org.spongepowered:plugin-meta')
 
         // Include all other dependencies
         include dependency('org.slf4j:slf4j-api')
@@ -108,14 +111,15 @@ devJar {
 ext.shadedDevProject = common
 
 // Eclipse is too stupid to order the classpath correctly unfortunately...
-// Put Common last
+// Put SpongeAPI and SpongeCommon last
 eclipse {
     classpath {
         file {
             whenMerged { classpath ->
-                def lib = classpath.entries.find { it.path == '/SpongeCommon' }
-                def others = classpath.entries.findAll { it != lib }
-                classpath.entries = others + lib
+                def libs = classpath.entries.findAll { it.path.endsWith('SpongeCommon') || it.path.endsWith('SpongeAPI') }
+                def others = classpath.entries - libs
+                others.removeAll { it.path.contains('java6') }
+                classpath.entries = others + libs
             }
         }
     }

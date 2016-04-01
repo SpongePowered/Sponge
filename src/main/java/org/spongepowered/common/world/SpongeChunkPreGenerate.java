@@ -39,20 +39,23 @@ import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
+import java.util.ArrayDeque;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
 
-    private static final int TICK_INTERVAL = 10;
+    private static final int DEFAULT_TICK_INTERVAL = 10;
     private static final float DEFAULT_TICK_PERCENT = 0.15f;
     private final World world;
     private final Vector3d center;
     private final double diameter;
     @Nullable private Object plugin = null;
     @Nullable private Logger logger = null;
-    private int tickInterval = TICK_INTERVAL;
+    private int tickInterval = DEFAULT_TICK_INTERVAL;
     private int chunkCount = 0;
     private float tickPercent = DEFAULT_TICK_PERCENT;
 
@@ -70,7 +73,7 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
     }
 
     @Override
-    public WorldBorder.ChunkPreGenerate logger(Logger logger) {
+    public WorldBorder.ChunkPreGenerate logger(@Nullable Logger logger) {
         this.logger = logger;
         return this;
     }
@@ -100,13 +103,19 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         checkNotNull(this.plugin, "owner not set");
         checkArgument(this.chunkCount > 0 || this.tickPercent > 0, "Must use at least one of \"chunks per tick\" or \"tick percent limit\"");
         return Task.builder().name(toString())
-                .execute(new ChunkPreGenerator(this.world, this.center, this.diameter, this.chunkCount, this.tickPercent, this.logger))
-                .intervalTicks(this.tickInterval).submit(this.plugin);
+            .execute(new ChunkPreGenerator(this.world, this.center, this.diameter, this.chunkCount, this.tickPercent, this.logger))
+            .intervalTicks(this.tickInterval).submit(this.plugin);
     }
 
     @Override
     public WorldBorder.ChunkPreGenerate from(Task value) {
-        return null;
+        if (!(value instanceof SpongeChunkPreGenerate)) {
+            throw new IllegalArgumentException("Not a chunk pre-gen task");
+        }
+        final SpongeChunkPreGenerate other = (SpongeChunkPreGenerate) value;
+        // Bypass null check
+        this.plugin = other.plugin;
+        return logger(other.logger).tickInterval(other.tickInterval).chunksPerTick(other.chunkCount).tickPercentLimit(other.tickPercent);
     }
 
     @Override
@@ -119,25 +128,26 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         return this;
     }
 
-    @Override public String toString() {
+    @Override
+    public String toString() {
         return "SpongeChunkPreGen{" +
-                "center=" + this.center +
-                ", diameter=" + this.diameter +
-                ", plugin=" + this.plugin +
-                ", world=" + this.world +
-                ", tickInterval=" + this.tickInterval +
-                ", chunkCount=" + this.chunkCount +
-                ", tickPercent=" + this.tickPercent +
-                '}';
+            "center=" + this.center +
+            ", diameter=" + this.diameter +
+            ", plugin=" + this.plugin +
+            ", world=" + this.world +
+            ", tickInterval=" + this.tickInterval +
+            ", chunkCount=" + this.chunkCount +
+            ", tickPercent=" + this.tickPercent +
+            '}';
     }
 
     private static class ChunkPreGenerator implements Consumer<Task> {
 
         private static final Vector3i[] OFFSETS = {
-                Vector3i.UNIT_X,
-                Vector3i.UNIT_Z,
-                Vector3i.UNIT_X.negate(),
-                Vector3i.UNIT_Z.negate()
+            Vector3i.UNIT_X,
+            Vector3i.UNIT_Z,
+            Vector3i.UNIT_X.negate(),
+            Vector3i.UNIT_Z.negate()
         };
         private static final String TIME_FORMAT = "s's 'S'ms'";
         private final World world;
@@ -146,6 +156,8 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         private final float tickPercent;
         private final long tickTimeLimit;
         @Nullable private final Logger logger;
+        private final Queue<Chunk> unloadQueue = new ArrayDeque<>();
+        private final int unloadQueueThreshold;
         private Vector3i currentPosition;
         private int currentLayerIndex;
         private int currentLayerSize;
@@ -153,14 +165,21 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         private int totalCount;
         private long totalTime;
 
-        public ChunkPreGenerator(World world, Vector3d center, double diameter, int chunkCount, float tickPercent, @Nullable Logger logger) {
+        ChunkPreGenerator(World world, Vector3d center, double diameter, int chunkCount, float tickPercent, @Nullable Logger logger) {
             this.world = world;
             this.chunkRadius = GenericMath.floor(diameter / 32);
             this.chunkCount = chunkCount;
             this.tickPercent = tickPercent;
             this.logger = logger;
             this.tickTimeLimit = Math.round(SpongeScheduler.getInstance().getPreferredTickInterval() * tickPercent);
-            this.currentPosition = SpongeChunkLayout.instance.toChunk(center.toInt()).get();
+            // Enough chunks to be for the last two layers to be full, so adjacent chunks always exist
+            this.unloadQueueThreshold = 4 * this.chunkRadius - 2;
+            final Optional<Vector3i> currentPosition = SpongeChunkLayout.instance.toChunk(center.toInt());
+            if (currentPosition.isPresent()) {
+                this.currentPosition = currentPosition.get();
+            } else {
+                throw new IllegalArgumentException("Center is not a valid chunk coordinate");
+            }
             this.currentLayerIndex = 0;
             this.currentLayerSize = 0;
             this.currentIndexInLayer = 0;
@@ -173,21 +192,27 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
             final long startTime = System.currentTimeMillis();
             int count = 0;
             do {
-                this.world.loadChunk(nextChunkPosition(), true).ifPresent(Chunk::unloadChunk);
+                this.world.loadChunk(nextChunkPosition(), true).ifPresent(this.unloadQueue::add);
+                if (this.unloadQueue.size() > this.unloadQueueThreshold) {
+                    this.unloadQueue.remove();
+                }
             } while (hasNextChunkPosition() && checkChunkCount(++count) && checkTickTime(System.currentTimeMillis() - startTime));
             if (this.logger != null) {
                 this.totalCount += count;
                 final long deltaTime = System.currentTimeMillis() - startTime;
                 this.totalTime += deltaTime;
-                this.logger.info("Generated {} chunks in {}, {}% complete", count,
-                        DurationFormatUtils.formatDuration(deltaTime, TIME_FORMAT, false),
-                        Math.round((float) this.totalCount / (this.chunkRadius * this.chunkRadius * 4) * 100));
+                this.logger.info("Generated {} chunks in {}, {}% complete. Currently {} chunks are kept loaded", count,
+                    DurationFormatUtils.formatDuration(deltaTime, TIME_FORMAT, false),
+                    GenericMath.floor(this.totalCount / Math.pow(this.chunkRadius * 2 + 1, 2) * 100),
+                    this.unloadQueue.size()
+                );
             }
             if (!hasNextChunkPosition()) {
                 if (this.logger != null) {
                     this.logger.info("Done! Generated a total of {} chunks in {}", this.totalCount,
-                            DurationFormatUtils.formatDuration(this.totalTime, TIME_FORMAT, false));
+                        DurationFormatUtils.formatDuration(this.totalTime, TIME_FORMAT, false));
                 }
+                this.unloadQueue.clear();
                 task.cancel();
             }
         }

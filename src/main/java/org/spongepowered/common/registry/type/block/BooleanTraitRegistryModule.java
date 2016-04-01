@@ -77,7 +77,7 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
         this.booleanTraitMap.put(propertyId, property);
     }
 
-    private BooleanTraitRegistryModule() { }
+    BooleanTraitRegistryModule() { }
 
     @Override
     public Map<String, BooleanTrait> provideCatalogMap() {
@@ -89,6 +89,6 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
     }
 
     private static final class Holder {
-        private final static BooleanTraitRegistryModule INSTANCE = new BooleanTraitRegistryModule();
+        final static BooleanTraitRegistryModule INSTANCE = new BooleanTraitRegistryModule();
     }
 }

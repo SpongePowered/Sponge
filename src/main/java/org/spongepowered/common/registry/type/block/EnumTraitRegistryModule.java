@@ -76,7 +76,7 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
         this.enumTraitMap.put(propertyId, property);
     }
 
-    private EnumTraitRegistryModule() { }
+    EnumTraitRegistryModule() { }
 
     @Override
     public Map<String, EnumTrait<?>> provideCatalogMap() {
@@ -88,6 +88,6 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
     }
 
     private static final class Holder {
-        private final static EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();
+        final static EnumTraitRegistryModule INSTANCE = new EnumTraitRegistryModule();
     }
 }

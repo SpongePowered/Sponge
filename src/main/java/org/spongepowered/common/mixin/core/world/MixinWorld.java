@@ -415,6 +415,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }
 
+        // TODO - replace this with an actual check
+        /*
         if (entity instanceof EntityHanging) {
             if (((EntityHanging) entity).facingDirection == null) {
                 // TODO Some sort of detection of a valid direction?
@@ -424,7 +426,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             if (!((EntityHanging) entity).onValidSurface()) {
                 return Optional.empty();
             }
-        }
+        }*/
 
         // Last chance to fix null fields
         if (entity instanceof EntityPotion) {

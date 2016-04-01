@@ -65,10 +65,10 @@ public class SpongeInternalListeners {
         }
     }
 
-    private SpongeInternalListeners() {}
+    SpongeInternalListeners() {}
 
     private static final class Holder {
-        private static final SpongeInternalListeners INSTANCE = new SpongeInternalListeners();
+        static final SpongeInternalListeners INSTANCE = new SpongeInternalListeners();
     }
 
 }

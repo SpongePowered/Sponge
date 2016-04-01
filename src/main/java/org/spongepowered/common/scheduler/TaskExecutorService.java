@@ -144,7 +144,7 @@ class TaskExecutorService extends AbstractExecutorService implements SpongeExecu
         private final ScheduledTask task;
         private final SchedulerBase scheduler;
 
-        private SpongeTaskFuture(FutureTask<V> runnable, ScheduledTask task, SchedulerBase scheduler) {
+        SpongeTaskFuture(FutureTask<V> runnable, ScheduledTask task, SchedulerBase scheduler) {
             this.runnable = runnable;
             this.task = task;
             this.scheduler = scheduler;

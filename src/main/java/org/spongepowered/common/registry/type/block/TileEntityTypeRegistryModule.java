@@ -115,9 +115,9 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
         return id == null ? name : id;
     }
 
-    private TileEntityTypeRegistryModule() { }
+    TileEntityTypeRegistryModule() { }
 
     private static final class Holder {
-        private static final TileEntityTypeRegistryModule INSTANCE = new TileEntityTypeRegistryModule();
+        static final TileEntityTypeRegistryModule INSTANCE = new TileEntityTypeRegistryModule();
     }
 }

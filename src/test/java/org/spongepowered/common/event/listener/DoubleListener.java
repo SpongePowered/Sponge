@@ -22,15 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.event.listener;
 
-import net.minecraft.tileentity.TileEntityComparator;
-import org.spongepowered.api.block.tileentity.Comparator;
-import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.event.filter.cause.First;
+import org.spongepowered.api.item.inventory.ItemStack;
 
-@NonnullByDefault
-@Mixin(TileEntityComparator.class)
-public abstract class MixinTileEntityComparator extends MixinTileEntity implements Comparator {
+public class DoubleListener {
+
+    @Listener
+    public void onEvent(ChangeBlockEvent.Break e, @First Player p, @First ItemStack stack) {
+        e.getClass();
+    }
 
 }

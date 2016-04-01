@@ -22,55 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.block.tiles;
+package org.spongepowered.common.mixin.core.tileentity;
 
-import static org.spongepowered.api.data.DataQuery.of;
-
-import net.minecraft.command.ICommandSender;
-import net.minecraft.command.server.CommandBlockLogic;
-import net.minecraft.tileentity.TileEntityCommandBlock;
-import org.spongepowered.api.block.tileentity.CommandBlock;
+import com.google.common.collect.Lists;
+import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.service.permission.PermissionService;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinCommandSource;
+import org.spongepowered.common.interfaces.IMixinSubject;
 
 import java.util.List;
 
 @NonnullByDefault
-@Mixin(TileEntityCommandBlock.class)
-public abstract class MixinTileEntityCommandBlock extends MixinTileEntity implements CommandBlock, IMixinCommandSource {
+@Mixin(TileEntitySign.class)
+public abstract class MixinTileEntitySign extends MixinTileEntity implements Sign, IMixinSubject {
 
-    @Shadow public abstract CommandBlockLogic getCommandBlockLogic();
+    @Shadow @Final public IChatComponent[] signText;
+
+    @Override
+    public DataContainer toContainer() {
+        DataContainer container = super.toContainer();
+        List<String> lines = Lists.newArrayList();
+        for (IChatComponent line : this.signText) {
+            lines.add(IChatComponent.Serializer.componentToJson(line));
+        }
+        container.set(Keys.SIGN_LINES.getQuery(), lines);
+        return container;
+    }
+
+    @Override
+    public String getSubjectCollectionIdentifier() {
+        return PermissionService.SUBJECTS_COMMAND_BLOCK;
+    }
+
+    @Override
+    public Tristate permDefault(String permission) {
+        return Tristate.TRUE;
+    }
 
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getCommandData());
-    }
-
-    @Override
-    public ICommandSender asICommandSender() {
-        return getCommandBlockLogic();
-    }
-
-    @Override
-    public void execute() {
-        getCommandBlockLogic().trigger(this.worldObj);
-    }
-
-    @Override
-    @SuppressWarnings("deprecated")
-    public DataContainer toContainer() {
-        DataContainer container = super.toContainer();
-        container.set(of("StoredCommand"), this.getCommandBlockLogic().commandStored);
-        container.set(of("SuccessCount"), this.getCommandBlockLogic().successCount);
-        container.set(of("CustomName"), this.getCommandBlockLogic().getName());
-        container.set(of("DoesTrackOutput"), this.getCommandBlockLogic().shouldTrackOutput());
-        if (this.getCommandBlockLogic().shouldTrackOutput()) {
-        }
-        return container;
+        manipulators.add(getSignData());
     }
 }

@@ -24,25 +24,38 @@
  */
 package org.spongepowered.common.registry.type.text;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.util.EnumChatFormatting;
-import org.spongepowered.api.registry.RegistryModule;
+import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.text.format.SpongeTextStyle;
 
-public final class TextStyleRegistryModule implements RegistryModule {
+import java.util.Collection;
+import java.util.Optional;
+
+public final class TextStyleRegistryModule implements CatalogRegistryModule<TextStyle.Base> {
 
     @RegisterCatalog(TextStyles.class)
-    public static final ImmutableMap<String, TextStyle> textStyleMappings = ImmutableMap.<String, TextStyle>builder()
+    public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
         .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
         .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
         .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
         .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
         .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
         .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
-        .put("none", TextStyles.NONE)
         .build();
 
+    @Override
+    public Optional<TextStyle.Base> getById(String id) {
+        return Optional.ofNullable(textStyleMappings.get(Preconditions.checkNotNull(id)));
+    }
+
+    @Override
+    public Collection<TextStyle.Base> getAll() {
+        return ImmutableList.copyOf(textStyleMappings.values());
+    }
 }

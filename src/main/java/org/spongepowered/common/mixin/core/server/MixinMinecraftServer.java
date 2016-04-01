@@ -89,6 +89,7 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -158,7 +159,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
-    private boolean preparingChunks = false;
     private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
@@ -218,7 +218,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
         if (getConfigurationManager() == null || getConfigurationManager().getPlayerList() == null) {
             return ImmutableList.of();
@@ -449,9 +449,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
-        this.preparingChunks = true;
         this.initialWorldChunkLoad();
-        this.preparingChunks = false;
     }
 
     /**
@@ -592,6 +590,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     protected void prepareSpawnArea(WorldServer world) {
+        ((IMixinWorld) world).getCauseTracker().setCapturingTerrainGen(true);
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
         logger.info("Preparing start region for level {} ({})", world.provider.getDimensionId(), ((World) world).getName());
@@ -613,6 +612,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         this.clearCurrentTask();
+        ((IMixinWorld) world).getCauseTracker().setCapturingTerrainGen(false);
     }
 
     @Override
@@ -1014,6 +1014,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
+    @SuppressWarnings("rawtypes")
     @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
     public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
             List<String> list, String astring[], String s) {
@@ -1030,10 +1031,5 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
-    }
-
-    @Override
-    public boolean isPreparingChunks() {
-        return this.preparingChunks;
     }
 }

@@ -26,10 +26,8 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
@@ -84,7 +82,6 @@ import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -103,7 +100,6 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
@@ -132,7 +128,6 @@ public final class CauseTracker {
     @Nullable private TileEntity currentTickTileEntity;
     @Nullable private Cause pluginCause;
     private List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
-    private Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> capturedSpongePopulators = Maps.newHashMap();
     private List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
@@ -273,10 +268,6 @@ public final class CauseTracker {
         return this.capturedSpongeBlockSnapshots;
     }
 
-    public Map<PopulatorType, LinkedHashMap<Vector3i, Transaction<BlockSnapshot>>> getCapturedPopulators() {
-        return this.capturedSpongePopulators;
-    }
-
     public List<Transaction<BlockSnapshot>> getInvalidTransactions() {
         return this.invalidTransactions;
     }
@@ -360,8 +351,12 @@ public final class CauseTracker {
         } else {
             List<NamedCause> namedCauses = new ArrayList<>();
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
+                    if (!(entry.getValue() instanceof SpawnCause)) {
+                        namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                    } else {
+                        namedCauses.add(NamedCause.source(entry.getValue()));
+                    }
                 } else {
                     namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
                 }
@@ -396,17 +391,16 @@ public final class CauseTracker {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void handlePostTickCaptures(Cause cause) {
         if (this.getMinecraftWorld().isRemote || this.restoringBlocks || this.spawningDeathDrops || cause == null) {
             return;
         } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
-                   && this.capturedSpongePopulators.size() == 0 && StaticMixinHelper.packetPlayer == null) {
+                   && StaticMixinHelper.packetPlayer == null) {
             return; // nothing was captured, return
         }
 
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet packetIn = StaticMixinHelper.processingPacket;
+        Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
         // Attempt to find a Player cause if we do not have one
         if (!cause.first(User.class).isPresent() && !(this.capturedSpongeBlockSnapshots.size() > 0
@@ -579,26 +573,18 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            List<NamedCause> destructCauses = new ArrayList<>();
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    destructCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                } else {
-                    destructCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
             }
-            cause = Cause.of(destructCauses);
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
-            List<NamedCause> droppedCauses = new ArrayList<>();
+            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    droppedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                } else {
-                    droppedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
             }
-            cause = Cause.of(droppedCauses);
+            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         }
 
@@ -658,7 +644,7 @@ public final class CauseTracker {
 
     public void handleBlockCaptures(Cause cause) {
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet packetIn = StaticMixinHelper.processingPacket;
+        Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
         ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions = null;
         ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions = null;
@@ -872,7 +858,7 @@ public final class CauseTracker {
                 // Update any tile entity data for this block
                 net.minecraft.tileentity.TileEntity tileentity = this.getMinecraftWorld().getTileEntity(pos);
                 if (tileentity != null) {
-                    Packet pkt = tileentity.getDescriptionPacket();
+                    Packet<?> pkt = tileentity.getDescriptionPacket();
                     if (pkt != null) {
                         StaticMixinHelper.packetPlayer.playerNetServerHandler.sendPacket(pkt);
                     }
@@ -930,7 +916,11 @@ public final class CauseTracker {
         List<NamedCause> namedCauses = new ArrayList<>();
         for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
             if (entry.getKey().equals(NamedCause.SOURCE)) {
-                namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                if (!(entry.getValue() instanceof SpawnCause)) {
+                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                } else {
+                    namedCauses.add(NamedCause.source(entry.getValue()));
+                }
             } else {
                 namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
             }
@@ -1189,22 +1179,7 @@ public final class CauseTracker {
                         newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag));
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
                 if (shouldChainCause(cause)) {
-                    Cause currentCause = cause;
-                    List<NamedCause> causes = new ArrayList<>();
-                    causes.add(NamedCause.source(this.getCurrentTickBlock().get()));
-                    List<String> namesUsed = new ArrayList<>();
-                    int iteration = 1;
-                    for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
-                        String name = entry.getKey().equalsIgnoreCase("Source")
-                                      ? "AdditionalSource" : entry.getKey().equalsIgnoreCase("AdditionalSource")
-                                                             ? "PreviousSource" : entry.getKey();
-                        if (namesUsed.contains(name)) {
-                            name += iteration++;
-                        }
-                        namesUsed.add(name);
-                        causes.add(NamedCause.of(name, entry.getValue()));
-                    }
-                    cause = Cause.of(causes);
+                    cause = cause.merge(Cause.of(NamedCause.source(this.currentTickBlock)));
                 }
             }
 
@@ -1213,7 +1188,7 @@ public final class CauseTracker {
 
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (this.getCapturedEntities().size() > 0 && this.pluginCause == null) {
+            if (this.getCapturedSpongeBlockSnapshots().size() > 0 && this.pluginCause == null) {
                 this.handlePostTickCaptures(cause);
             }
 

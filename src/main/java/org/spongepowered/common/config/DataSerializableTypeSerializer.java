@@ -32,12 +32,7 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
-import org.spongepowered.api.data.DataManager;
-import org.spongepowered.common.SpongeImpl;
-
-import java.util.Optional;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
@@ -45,21 +40,12 @@ import java.util.Optional;
  */
 public class DataSerializableTypeSerializer implements TypeSerializer<DataSerializable> {
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
-
-        DataManager serviceOpt = Sponge.getDataManager();
-        Optional<DataBuilder<?>> builderOpt = (Optional) serviceOpt.getBuilder(type.getRawType().asSubclass(DataSerializable.class));
-
-        if (!builderOpt.isPresent()) {
-            throw new ObjectMappingException("No data builder is registered for " + type);
-        }
-        Optional<? extends DataSerializable> built = builderOpt.get().build(ConfigurateTranslator.instance().translateFrom(value));
-        if (!built.isPresent()) {
-            throw new ObjectMappingException("Unable to build instance of " + type);
-        }
-        return built.get();
+        Class<?> clazz = type.getRawType();
+        return Sponge.getDataManager().deserialize(clazz.asSubclass(DataSerializable.class),
+                ConfigurateTranslator.instance().translateFrom(value))
+                .orElseThrow(() -> new ObjectMappingException("Could not deserialize DataSerializable of type: " + clazz.getName()));
     }
 
     @Override
