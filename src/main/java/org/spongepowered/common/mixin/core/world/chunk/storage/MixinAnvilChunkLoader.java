@@ -52,11 +52,21 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Map;
 
 @Mixin(AnvilChunkLoader.class)
 public class MixinAnvilChunkLoader {
+
+    @Redirect(method = "readWorldEntityPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+    private static boolean onSpawn(World world, Entity entity) {
+        if (StaticMixinHelper.anvilChunkLoaderSpawnCause != null) {
+            System.out.println("Spawning with spawn cause: " + StaticMixinHelper.anvilChunkLoaderSpawnCause);
+            return ((org.spongepowered.api.world.World) world).spawnEntity((org.spongepowered.api.entity.Entity) entity, StaticMixinHelper.anvilChunkLoaderSpawnCause);
+        }
+        return world.spawnEntityInWorld(entity);
+    }
 
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";

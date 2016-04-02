@@ -81,4 +81,7 @@ public class StaticMixinHelper {
     public static boolean gettingSpawnList;
     public static boolean structureSpawning;
     public static boolean dispenserDispensing;
+
+    // Used for providing a spawn cause to entities spawned through AnvilChunkLoader#readWorldEntityPos
+    public static Cause anvilChunkLoaderSpawnCause;
 }
