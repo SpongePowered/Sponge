@@ -57,7 +57,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-@Mixin(value = Chunk.class, priority = 1111)
+@Mixin(value = net.minecraft.world.chunk.Chunk.class, priority = 1111)
 public abstract class MixinChunk_Tracker implements Chunk, IMixinChunk {
 
     private static final int NUM_XZ_BITS = 4;

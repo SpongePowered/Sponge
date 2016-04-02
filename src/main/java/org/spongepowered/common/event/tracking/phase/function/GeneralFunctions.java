@@ -100,9 +100,7 @@ public class GeneralFunctions {
                     return new Transaction<>(originalSnapshot, newSnapshot);
                 })
                 .forEach(transaction -> { // Assign the transactions as necessary
-                    final BlockSnapshot replacement = transaction.getDefault();
-                    final SpongeBlockSnapshot spongeReplacement = (SpongeBlockSnapshot) replacement;
-                    final BlockChange blockChange = spongeReplacement.blockChange;
+                    final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
                     transactionBuilders[blockChange.ordinal()].add(transaction);
                     transactionBuilders[GeneralFunctions.MULTI_CHANGE_INDEX].add(transaction);
                 });
@@ -111,7 +109,7 @@ public class GeneralFunctions {
             transactionArrays[i] = transactionBuilders[i].build();
         }
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[4];
-        final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class));
+        final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).get());
         final org.spongepowered.api.world.World world = causeTracker.getWorld();
         for (BlockChange blockChange : BlockChange.values()) {
             if (blockChange == BlockChange.DECAY) { // Decay takes place after.
@@ -128,7 +126,9 @@ public class GeneralFunctions {
         if (blockEvents.size() > 1) {
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                blockChange.suggestNamed(builder, mainEvent);
+                if (mainEvent != null) {
+                    blockChange.suggestNamed(builder, mainEvent);
+                }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[GeneralFunctions.MULTI_CHANGE_INDEX];
             final boolean cancelled = EventConsumer
@@ -176,7 +176,7 @@ public class GeneralFunctions {
 
                 // TODO - Any additional changes to the world should take place
                 // and get processed in the proceeding UNWINDING state.
-                TrackingUtil.dispatchPostBlockChanges(causeTracker, blockEvent.getTransactions(), blockChange, builder, context);
+                TrackingUtil.performBlockNotifications(causeTracker, blockEvent.getTransactions(), blockChange, builder, context);
             }
         }
     }

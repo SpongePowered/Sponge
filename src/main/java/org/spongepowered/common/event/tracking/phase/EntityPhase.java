@@ -25,24 +25,12 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.ExperienceOrb;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public final class EntityPhase extends TrackingPhase {
 

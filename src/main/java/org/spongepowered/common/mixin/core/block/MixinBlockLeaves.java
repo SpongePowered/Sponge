@@ -67,10 +67,12 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IBlockState blockState = worldIn.getBlockState(pos);
+        final IBlockState actualState = blockState.getBlock().getActualState(blockState, worldIn, pos);
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
                     .addCaptures()
-                    .add(NamedCause.source(state))
                     .complete());
         }
         boolean result = worldIn.setBlockState(pos, state, flags);
@@ -85,10 +87,12 @@ public abstract class MixinBlockLeaves extends MixinBlock {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IBlockState blockState = worldIn.getBlockState(pos);
+        final IBlockState actualState = blockState.getBlock().getActualState(blockState, worldIn, pos);
         if (isBlockAlready) {
             causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
                     .addCaptures()
-                    .add(NamedCause.source(worldIn.getBlockState(pos)))
                     .complete());
         }
         boolean result = worldIn.setBlockToAir(pos);

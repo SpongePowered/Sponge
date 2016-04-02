@@ -115,13 +115,15 @@ public final class CauseTracker {
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
             printer.add("  %s : %s", "Entering Phase", phase);
             printer.add("  %s : %s", "Entering State", state);
-            printer.add("%s : %s", "Current phases", this.stack.currentStates());
+            printer.add("%s :", "Current phases");
+            printer.table(" %s");
+            this.stack.currentStates().forEach(printer::tr);
             printer.add("  %s :", "Printing stack trace");
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
         IPhaseState currentState = this.stack.peekState();
-        if (!currentState.canSwitchTo(state) || (state != GeneralPhase.Post.UNWINDING || currentState == GeneralPhase.Post.UNWINDING)) {
+        if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Switching Phase").centre().hr();
@@ -130,7 +132,9 @@ public final class CauseTracker {
             printer.add("  %s : %s", "Current State", currentState);
             printer.add("  %s : %s", "Entering incompatible Phase", phase);
             printer.add("  %s : %s", "Entering incompatible State", state);
-            printer.add("%s : %s", "Current phases", this.stack.currentStates());
+            printer.add("%s :", "Current phases");
+            printer.table(" %s:");
+            this.stack.currentStates().forEach(printer::tr);
             printer.add("  %s :", "Printing stack trace");
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
@@ -323,7 +327,6 @@ public final class CauseTracker {
         final Block newBlock = newState.getBlock();
         // Sponge Start - Up to this point, we've copied exactly what Vanilla minecraft does.
         final IBlockState currentState = chunk.getBlockState(pos);
-        final Block currentBlock = currentState.getBlock();
 
         if (currentState == newState) {
             // Some micro optimization in case someone is trying to set the new state to the same as current
@@ -335,7 +338,7 @@ public final class CauseTracker {
         final IPhaseState phaseState = phaseData.getState();
         final TrackingPhase phase = phaseState.getPhase();
         if (phase.requiresBlockCapturing(phaseState)) {
-            phase.captureBlockChange(this, currentState, newState, newBlock, pos, flags, phaseData.getContext(), phaseState);
+            TrackingUtil.identifyBlockChange(this, currentState, newState, pos, flags, phaseData.getContext(), phaseState);
             return true; // Default, this means we've captured the block. Keeping with the semantics
             // of the original method where true means it successfully changed.
         } else {

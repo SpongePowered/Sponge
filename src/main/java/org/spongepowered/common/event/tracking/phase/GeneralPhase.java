@@ -40,17 +40,18 @@ import javax.annotation.Nullable;
 public final class GeneralPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
-        COMMAND,
-        COMPLETE;
-
-        public boolean isBusy() {
-            return this != COMPLETE;
-        }
-
-        @Override
-        public boolean canSwitchTo(IPhaseState state) {
-            return !isBusy() || state instanceof BlockPhase.State;
-        }
+        COMMAND {
+            @Override
+            public boolean canSwitchTo(IPhaseState state) {
+                return state instanceof BlockPhase.State;
+            }
+        },
+        COMPLETE {
+            @Override
+            public boolean canSwitchTo(IPhaseState state) {
+                return true;
+            }
+        };
 
         @Override
         public GeneralPhase getPhase() {
@@ -144,6 +145,11 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean alreadyCapturingTileTicks(IPhaseState state) {
         return state == Post.UNWINDING;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+        return currentState == Post.UNWINDING;
     }
 
     @Override

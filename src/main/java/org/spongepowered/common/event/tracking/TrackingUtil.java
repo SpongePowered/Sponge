@@ -34,6 +34,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
@@ -41,6 +42,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
@@ -348,11 +350,12 @@ public final class TrackingUtil {
     }
 
 
-    public static void dispatchPostBlockChanges(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type,
+    public static void performBlockNotifications(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type,
             Cause.Builder builder, PhaseContext phaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
-        SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(causeTracker.getMinecraftWorld(), transactions);
+        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
+        SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -365,26 +368,22 @@ public final class TrackingUtil {
             SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
             SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
             final Cause currentCause = builder.build();
-            SpongeHooks.logBlockAction(currentCause, causeTracker.getMinecraftWorld(), type, transaction);
+            SpongeHooks.logBlockAction(currentCause, minecraftWorld, type, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
             BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             // Containers get placed automatically
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
-                final BlockSnapshot snapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(newState,
-                    newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag);
-//                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.POST_NOTIFICATION_EVENT, PhaseContext.start()
-//                    .add(NamedCause.source(snapshot))
-//                    .addCaptures());
-                newState.getBlock().onBlockAdded(causeTracker.getMinecraftWorld(), pos, newState);
+                final IBlockState actualState = newState.getBlock().getActualState(newState, proxyBlockAccess, pos);
+                final BlockSnapshot snapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(newState, actualState, pos, updateFlag);
+                newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
                 if (shouldChainCause(causeTracker, currentCause)) {
                     final Cause.Builder newBuilder = Cause.source(snapshot);
                     for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
                         newBuilder.suggestNamed(entry.getKey(), entry.getValue());
                     }
                 }
-//                causeTracker.completePhase();
             }
 
             proxyBlockAccess.proceed();
@@ -394,5 +393,32 @@ public final class TrackingUtil {
     }
 
     private TrackingUtil() {
+    }
+
+    static void identifyBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+        final IBlockState actualState = currentState.getBlock().getActualState(currentState,  causeTracker.getMinecraftWorld(), pos);
+        final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
+        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
+        final Block newBlock = newState.getBlock();
+
+        if (phaseState == BlockPhase.State.BLOCK_DECAY) {
+            if (newBlock == Blocks.air) {
+                ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.DECAY;
+                capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+            }
+        } else if (newBlock == Blocks.air) {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.BREAK;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+        } else if (newBlock != currentState.getBlock()) {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.PLACE;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+        } else {
+            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.MODIFY;
+            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
+        }
+        final Chunk chunk = causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+
     }
 }

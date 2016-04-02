@@ -50,6 +50,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -66,6 +67,7 @@ import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -78,6 +80,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 
@@ -137,7 +140,7 @@ public interface PacketFunction {
                 final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
                 final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
                 final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
-                final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
+                final Cause cause;
                 final Container openContainer = player.openContainer;
                 final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
                 final CreativeInventoryEvent event;
@@ -149,10 +152,12 @@ public interface PacketFunction {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
+                    cause = Cause.source(EntitySpawnCause.builder().entity(EntityUtil.fromNative(player)).type(InternalSpawnTypes.DROPPED_ITEM).build()).build();
                     event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, capturedEntityItems,
                             entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) openContainer, (World) player.worldObj,
                             capturedTransactions);
                 } else {
+                    cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
                     event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer), capturedTransactions);
                 }
@@ -174,6 +179,15 @@ public interface PacketFunction {
                         // Custom cursor
                         if (event.getCursorTransaction().getCustom().isPresent()) {
                             PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getFinal());
+                        }
+                        if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
+                            ((CreativeInventoryEvent.Drop) creativeInventoryEvent).getEntities()
+                                    .forEach(entity ->{
+                                        if (entity != null) {
+                                            TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), player.worldObj);
+                                            ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
+                                        }
+                                    });
                         }
                     })
                     .process();
@@ -247,9 +261,7 @@ public interface PacketFunction {
 //                final List<Entity> entities = spawnEntityEvent.getEntities();
 //            }
 //        });
-        context.getCapturedBlockSupplier().get().ifPresent(snapshots -> {
-            GeneralFunctions.processBlockCaptures(snapshots, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context);
-        });
+
 
     });
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {

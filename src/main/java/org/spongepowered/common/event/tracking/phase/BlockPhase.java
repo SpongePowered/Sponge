@@ -24,18 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.BlockFunction;
-import org.spongepowered.common.world.BlockChange;
 
 public final class BlockPhase extends TrackingPhase {
 
@@ -64,19 +58,6 @@ public final class BlockPhase extends TrackingPhase {
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
         return currentState != State.RESTORING_BLOCKS;
-    }
-
-    @Override
-    public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
-        // Only capture final state of decay, ignore the rest
-        if (phaseState == State.BLOCK_DECAY && newBlock == Blocks.air) {
-            final IBlockState actualState = currentState.getBlock().getActualState(currentState, causeTracker.getMinecraftWorld(), pos);
-            BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.DECAY;
-            phaseContext.getCapturedBlocks().get().add(originalBlockSnapshot);
-        } else {
-            super.captureBlockChange(causeTracker, currentState, newState, newBlock, pos, flags, phaseContext, phaseState);
-        }
     }
 
     @Override

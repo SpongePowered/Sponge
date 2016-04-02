@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -34,8 +35,11 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -44,6 +48,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.world.BlockChange;
 
@@ -125,6 +130,25 @@ public final class WorldPhase extends TrackingPhase {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
 
+                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                    // TODO the entity spawn causes are not likely valid, need to investigate further.
+                    final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                            .block(tickingTile.getLocation().createSnapshot())
+                                            .type(InternalSpawnTypes.PLACEMENT)
+                                            .build())
+                                    .build();
+                    final ImmutableList<EntitySnapshot>
+                            snapshots =
+                            entities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                            .nonCancelled(event -> {
+                                event.getEntities().forEach(entity -> {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                });
+                            })
+                            .process();
+                });
             }
         },
         BLOCK() {
@@ -134,6 +158,21 @@ public final class WorldPhase extends TrackingPhase {
                         .orElseThrow(PhaseUtil.createIllegalStateSupplier("Not ticking on a Block!", phaseContext));
                 phaseContext.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                });
+                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                    // TODO the entity spawn causes are not likely valid, need to investigate further.
+                    final Cause cause = Cause.source(BlockSpawnCause.builder().block(tickingBlock).type(InternalSpawnTypes.PLACEMENT).build()).build();
+                    final ImmutableList<EntitySnapshot>
+                            snapshots =
+                            entities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                            .nonCancelled(event -> {
+                                event.getEntities().forEach(entity -> {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                });
+                            })
+                            .process();
                 });
 
             }
@@ -145,6 +184,20 @@ public final class WorldPhase extends TrackingPhase {
                         .orElseThrow(PhaseUtil.createIllegalStateSupplier("Not ticking on a Block!", phaseContext));
                 phaseContext.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                });
+                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                    final Cause cause = Cause.source(BlockSpawnCause.builder().block(tickingBlock).type(InternalSpawnTypes.PLACEMENT).build()).build();
+                    final ImmutableList<EntitySnapshot>
+                            snapshots =
+                            entities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                            .nonCancelled(event -> {
+                                event.getEntities().forEach(entity -> {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                });
+                            })
+                            .process();
                 });
 
             }

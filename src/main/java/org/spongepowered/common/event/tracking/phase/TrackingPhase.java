@@ -25,23 +25,16 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.google.common.base.Objects;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItem;
-import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -169,24 +162,11 @@ public abstract class TrackingPhase {
         return true;
     }
 
-    // Actual capture methods
-
-    public void captureBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, Block newBlock, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
-        final IBlockState actualState = currentState.getBlock().getActualState(currentState,  causeTracker.getMinecraftWorld(), pos);
-        final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
-        if (newBlock == Blocks.air) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.BREAK;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        } else if (newBlock != currentState.getBlock()) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.PLACE;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        } else {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.MODIFY;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        }
-
+    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+        return false;
     }
+
+    // Actual capture methods
 
     /**
      * This is Step 3 of entity spawning. It is used for the sole purpose of capturing an entity spawn
@@ -225,5 +205,6 @@ public abstract class TrackingPhase {
         return Objects.toStringHelper(this)
                 .toString();
     }
+
 
 }

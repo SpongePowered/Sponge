@@ -32,6 +32,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.asm.util.PrettyPrinter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -153,6 +154,14 @@ public class PhaseContext {
             this.cause = Cause.of(this.contextObjects);
         }
         return this.cause;
+    }
+
+    public PrettyPrinter populatePrinter(PrettyPrinter printer) {
+        printer.table(" %s : %s%n");
+        for (NamedCause cause : this.contextObjects) {
+            printer.tr(cause.getName(), cause.getCauseObject());
+        }
+        return printer;
     }
 
     PhaseContext() {

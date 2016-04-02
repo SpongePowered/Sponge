@@ -65,6 +65,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -387,7 +388,10 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
-                context.add(NamedCause.of(TrackingUtil.ITEM_USED, ItemStackUtil.cloneDefensive(placeBlock.getStack())));
+                final ItemStack itemstack = ItemStackUtil.cloneDefensive(placeBlock.getStack());
+                if (itemstack != null) {
+                    context.add(NamedCause.of(TrackingUtil.ITEM_USED, itemstack));
+                }
                 context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
                 context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
             }

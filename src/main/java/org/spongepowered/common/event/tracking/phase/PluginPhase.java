@@ -28,7 +28,6 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
 

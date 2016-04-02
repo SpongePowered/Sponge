@@ -26,9 +26,8 @@ package org.spongepowered.common.interfaces.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.CauseTracker;
 
 import javax.annotation.Nullable;
@@ -49,6 +48,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation);
 
-    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
+    SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
 }

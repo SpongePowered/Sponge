@@ -63,6 +63,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.EventConsumer;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
@@ -184,19 +186,28 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     private void preDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
         if (worldIn instanceof IMixinWorldServer) {
             final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
-            mixinWorld.getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
-                .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
-                .addCaptures()
-                .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_FORTUNE, fortune))
-                .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_POSITION, pos))
-                .complete());
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final IPhaseState currentState = causeTracker.getStack().peekState();
+            if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
+                causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
+                        .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
+                        .addCaptures()
+                        .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_FORTUNE, fortune))
+                        .add(NamedCause.of(TrackingUtil.BLOCK_BREAK_POSITION, pos))
+                        .complete());
+            }
         }
     }
 
     @Inject(method = "dropBlockAsItem", at = @At("RETURN"))
     private void postDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
         if (worldIn instanceof IMixinWorldServer) {
-            ((IMixinWorldServer) worldIn).getCauseTracker().completePhase();
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            final IPhaseState currentState = causeTracker.getStack().peekState();
+            if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
+                causeTracker.completePhase();
+            }
         }
     }
 
