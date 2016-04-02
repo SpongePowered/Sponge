@@ -25,20 +25,28 @@
 package org.spongepowered.common.mixin.core.event.cause.entity.damage;
 
 import com.google.common.base.Objects;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.EntityDamageSourceIndirect;
+import net.minecraft.world.Explosion;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
+import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(value = net.minecraft.util.DamageSource.class, priority = 990)
 public abstract class MixinDamageSource implements DamageSource {
@@ -63,6 +71,44 @@ public abstract class MixinDamageSource implements DamageSource {
             DamageSourceToTypeProvider.getInstance().addCustom(damageTypeIn);
         }
         this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
+    }
+
+    @Inject(method = "setExplosionSource", at = @At("HEAD"), cancellable = true)
+    private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
+        if (explosionIn != null && explosionIn.exploder != null && explosionIn.worldObj != null) {
+            if (explosionIn.getExplosivePlacedBy() == null) {
+                // check creator
+                Entity spongeEntity = (Entity) explosionIn.exploder;
+                Optional<UUID> creatorUuid = spongeEntity.getCreator();
+                if (creatorUuid.isPresent()) {
+                    EntityPlayer player = explosionIn.worldObj.getPlayerEntityByUUID(creatorUuid.get());
+                    User user = null;
+                    if (player != null) {
+                        user = (User) player;
+                    } else {
+                        Optional<User> creator =
+                                SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(creatorUuid.get());
+                        if (creator.isPresent()) {
+                            user = (User) creator.get();
+                        }
+                    }
+                    if (user != null) {
+                        Optional<EntityType> entityType = EntityTypeRegistryModule.getInstance().getEntity(((org.spongepowered.api.entity.Entity) explosionIn.exploder).getClass());
+                        String explosionType = "";
+                        if (entityType.isPresent()) {
+                            explosionType = entityType.get().getId();
+                        } else {
+                            explosionType = explosionIn.exploder.getClass().getSimpleName().toLowerCase().replace("entity", "").replace(":", ".");
+                        }
+                        EntityDamageSourceIndirect damageSource =
+                                new EntityDamageSourceIndirect("explosion." + explosionType,
+                                        explosionIn.exploder, user instanceof Entity ? (net.minecraft.entity.Entity) user : null);
+                        damageSource.setDifficultyScaled().setExplosion();
+                        cir.setReturnValue(damageSource);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -103,8 +149,8 @@ public abstract class MixinDamageSource implements DamageSource {
     @Override
     public String toString() {
         return Objects.toStringHelper("DamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.apiDamageType.getId())
-            .toString();
+                .add("Name", this.damageType)
+                .add("Type", this.apiDamageType.getId())
+                .toString();
     }
 }
