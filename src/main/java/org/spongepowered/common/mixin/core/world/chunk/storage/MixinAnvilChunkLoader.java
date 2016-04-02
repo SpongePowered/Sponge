@@ -62,7 +62,6 @@ public class MixinAnvilChunkLoader {
     @Redirect(method = "readWorldEntityPos", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
     private static boolean onSpawn(World world, Entity entity) {
         if (StaticMixinHelper.anvilChunkLoaderSpawnCause != null) {
-            System.out.println("Spawning with spawn cause: " + StaticMixinHelper.anvilChunkLoaderSpawnCause);
             return ((org.spongepowered.api.world.World) world).spawnEntity((org.spongepowered.api.entity.Entity) entity, StaticMixinHelper.anvilChunkLoaderSpawnCause);
         }
         return world.spawnEntityInWorld(entity);
