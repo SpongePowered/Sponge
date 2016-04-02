@@ -28,8 +28,6 @@ import com.google.common.base.Objects;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +48,12 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
-        this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        if (!(this.indirectEntity instanceof User)) {
+            this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (this.indirectEntity == null && this.owner.isPresent() && this.owner.get() instanceof Entity) {
+                this.indirectEntity = (Entity) this.owner.get();
+            }
+        }
     }
 
     @Override
@@ -65,7 +68,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
             .add("Type", this.getType().getId())
             .add("Source", this.getSource())
             .add("IndirectSource", this.getIndirectSource());
-        if (this.owner.isPresent()) {
+        if (this.owner != null && this.owner.isPresent()) {
             helper.add("SourceOwner", this.owner.get());
         }
         return helper.toString();
