@@ -128,9 +128,6 @@ public final class NbtDataUtil {
     public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
-    public static final String LEVEL_NAME = "LevelName";
-    public static final String WORLD_UUID_MOST = "uuid_most";
-    public static final String WORLD_UUID_LEAST = "uuid_least";
     public static final String CAN_GRIEF = "CanGrief";
 
     // Compatibility tags for Forge
@@ -150,6 +147,29 @@ public final class NbtDataUtil {
     public static final String ENTITY_TYPE_ID = "id";
     public static final String MINECART_TYPE = "Type";
     public static final String ENTITY_POSITION = "Pos";
+
+    public static final class Deprecated {
+
+        public static final class Entity {
+            public static final String UUID_LEAST_1_8 = "uuid_least";
+            public static final String UUID_MOST_1_8 = "uuid_most";
+
+            private Entity() {
+            }
+        }
+
+        public static final class World {
+
+            public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
+            public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
+
+            private World() {
+            }
+        }
+
+        private Deprecated() {
+        }
+    }
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 

@@ -912,22 +912,21 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public void trackEntityUniqueId(String nbtKey, UUID uuid) {
-        if (!getSpongeData().hasKey(nbtKey)) {
+        final NBTTagCompound spongeData = getSpongeData();
+        if (!spongeData.hasKey(nbtKey)) {
             if (uuid == null) {
                 return;
             }
 
             NBTTagCompound sourceNbt = new NBTTagCompound();
-            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
-            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
-            getSpongeData().setTag(nbtKey, sourceNbt);
+            sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
+            spongeData.setTag(nbtKey, sourceNbt);
         } else {
+            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
             if (uuid == null) {
-                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_LEAST);
-                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_MOST);
+                compoundTag.removeTag(NbtDataUtil.UUID);
             } else {
-                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
-                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
+                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
             }
         }
     }

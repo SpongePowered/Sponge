@@ -33,6 +33,7 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
@@ -74,6 +75,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.data.fixer.PlayerRespawnData;
+import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
+import org.spongepowered.common.data.fixer.world.LevelSpongeId;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
@@ -292,6 +296,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
      */
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
+        final DataFixer dataFixer = this.getDataFixer();
+        dataFixer.registerFix(FixTypes.LEVEL, new LevelSpongeId());
+        dataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
+        dataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
         StaticMixinHelper.convertingMapFormat = true;
         this.convertMapIfNeeded(overworldFolder);
         StaticMixinHelper.convertingMapFormat = false;

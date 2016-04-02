@@ -39,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
@@ -66,6 +67,7 @@ import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.mixin.core.server.MixinMinecraftServer;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -739,9 +741,11 @@ public class DimensionManager {
                 final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
                 final String worldFolderName = worldPath.getFileName().toString();
 
-                NBTTagCompound compound;
+                final NBTTagCompound compound;
                 try {
-                    compound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
+                    final NBTTagCompound tempCompound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
+                    final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+                    compound = server.getDataFixer().process(FixTypes.LEVEL, tempCompound);
                 } catch (IOException e) {
                     SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. Report to Sponge ASAP.", worldFolderName, e);
                     continue;

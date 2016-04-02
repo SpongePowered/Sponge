@@ -73,6 +73,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.JsonTranslator;
@@ -668,28 +669,26 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeRootLevelNbt = nbt;
         if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
             this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-            if (this.spongeNbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE)) {
-                this.playerUniqueIdNbt = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, 10);
-            } else {
-                this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-            }
         }
     }
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        // TODO Integrity checks
         this.uuid = nbt.getUniqueId(NbtDataUtil.UUID);
         this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
-        DimensionTypeRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
-                .forEach(type -> this.dimensionType = type);
+        final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
+        this.dimensionType = DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
+                .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId));
         this.trackedUniqueIdCount = 0;
-        for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
-            NBTTagCompound valueNbt = this.playerUniqueIdNbt.getCompoundTagAt(i);
-            UUID uuid = new UUID(valueNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), valueNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            this.playerUniqueIdMap.put(this.trackedUniqueIdCount, uuid);
-            this.trackedUniqueIdCount++;
+        if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
+            for (int i = 0; i < playerIdList.tagCount(); i++) {
+                final NBTTagCompound playerId = playerIdList.getCompoundTagAt(i);
+                final UUID playerUuid = playerId.getUniqueId(NbtDataUtil.UUID);
+                this.playerUniqueIdMap.put(this.trackedUniqueIdCount++, playerUuid);
+            }
+
         }
     }
 
@@ -700,12 +699,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
 
         final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
+        final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
         while (iterator.hasNext()) {
-            UUID uuidToAdd = iterator.next();
-            NBTTagCompound valueNbt = new NBTTagCompound();
-            valueNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, uuidToAdd.getMostSignificantBits());
-            valueNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, uuidToAdd.getLeastSignificantBits());
-            this.playerUniqueIdNbt.appendTag(valueNbt);
+            final NBTTagCompound compound = new NBTTagCompound();
+            compound.setUniqueId(NbtDataUtil.UUID, iterator.next());
+            playerIdList.appendTag(compound);
             iterator.remove();
         }
     }
