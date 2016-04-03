@@ -26,14 +26,13 @@ package org.spongepowered.common.data.processor.data.entity;
 
 import static org.spongepowered.common.data.util.DataConstants.Catalog.DEFAULT_HAND;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.entity.EntityLiving;
-import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDominantHandData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DominantHandData;
 import org.spongepowered.api.data.type.HandType;
+import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
@@ -52,7 +51,8 @@ public class DominantHandDataProcessor extends AbstractEntitySingleDataProcessor
 
     @Override
     protected boolean set(EntityLiving dataHolder, HandType value) {
-        dataHolder.setActiveHand(Preconditions.checkNotNull((EnumHand) (Object) value));
+        // What happens with custom EnumHandSide?
+        dataHolder.setLeftHanded(value.equals(HandTypes.LEFT));
         return true;
     }
 
