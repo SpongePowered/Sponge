@@ -212,7 +212,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
         tileentitysign.markDirty();
-        worldserver.getPlayerChunkManager().markBlockForUpdate(blockpos);
+        worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
     }
 
     /**

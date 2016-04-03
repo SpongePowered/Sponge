@@ -78,7 +78,7 @@ public abstract class MixinTextComponentBase implements IMixinChatComponent {
         StringBuilder builder = new StringBuilder();
 
         for (ITextComponent component : withChildren()) {
-            builder.append(component.getUnformattedTextForChat());
+            builder.append(component.getUnformattedComponentText());
         }
 
         return builder.toString();
@@ -88,7 +88,7 @@ public abstract class MixinTextComponentBase implements IMixinChatComponent {
     public String getLegacyFormatting() {
         StringBuilder builder = new StringBuilder(14);
 
-        Style style = getChatStyle();
+        Style style = getStyle();
         apply(builder, COLOR_CHAR, defaultIfNull(style.getColor(), RESET));
         apply(builder, COLOR_CHAR, BOLD, style.getBold());
         apply(builder, COLOR_CHAR, ITALIC, style.getItalic());
@@ -107,7 +107,7 @@ public abstract class MixinTextComponentBase implements IMixinChatComponent {
         Style previous = null;
 
         for (ITextComponent component : withChildren()) {
-            Style newStyle = component.getChatStyle();
+            Style newStyle = component.getStyle();
             ResolvedChatStyle style = resolve(current, previous, newStyle);
             previous = newStyle;
 
@@ -139,7 +139,7 @@ public abstract class MixinTextComponentBase implements IMixinChatComponent {
             }
 
             current = style;
-            builder.append(component.getUnformattedTextForChat());
+            builder.append(component.getUnformattedComponentText());
         }
 
         return builder.toString();
@@ -192,11 +192,11 @@ public abstract class MixinTextComponentBase implements IMixinChatComponent {
 
             builder.style(new TextStyle(this.style.bold, this.style.italic, this.style.underlined, this.style.strikethrough, this.style.obfuscated));
 
-            if (this.style.chatClickEvent != null) {
-                builder.onClick(((IMixinClickEvent) this.style.chatClickEvent).getHandle());
+            if (this.style.clickEvent != null) {
+                builder.onClick(((IMixinClickEvent) this.style.clickEvent).getHandle());
             }
-            if (this.style.chatHoverEvent != null) {
-                builder.onHover(((IMixinHoverEvent) this.style.chatHoverEvent).getHandle());
+            if (this.style.hoverEvent != null) {
+                builder.onHover(((IMixinHoverEvent) this.style.hoverEvent).getHandle());
             }
             if (this.style.insertion != null) {
                 builder.onShiftClick(TextActions.insertText(this.style.insertion));

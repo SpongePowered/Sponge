@@ -407,7 +407,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     public SPacketSpawnPlayer createSpawnPacket() {
         SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
         packet.entityId = this.getEntityId();
-        packet.playerId = this.fakeProfile.getId();
+        packet.uniqueId = this.fakeProfile.getId();
         packet.x = this.posX;
         packet.y = this.posY;
         packet.z = this.posZ;

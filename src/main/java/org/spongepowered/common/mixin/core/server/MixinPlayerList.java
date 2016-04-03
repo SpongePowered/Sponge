@@ -321,7 +321,7 @@ public abstract class MixinPlayerList {
             chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
-        chatcomponenttranslation.getChatStyle().setColor(TextFormatting.YELLOW);
+        chatcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
 
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             handler.sendPacket(new SPacketEntityEffect(playerIn.getEntityId(), potioneffect));
@@ -417,9 +417,9 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         // ### PHASE 2 ### Remove player from current dimension
-        playerIn.getServerForPlayer().getEntityTracker().removePlayerFromTrackers(playerIn);
-        playerIn.getServerForPlayer().getEntityTracker().untrackEntity(playerIn);
-        playerIn.getServerForPlayer().getPlayerChunkManager().removePlayer(playerIn);
+        playerIn.getServerWorld().getEntityTracker().removePlayerFromTrackers(playerIn);
+        playerIn.getServerWorld().getEntityTracker().untrackEntity(playerIn);
+        playerIn.getServerWorld().getPlayerChunkMap().removePlayer(playerIn);
         this.playerEntityList.remove(playerIn);
         this.mcServer.worldServerForDimension(playerIn.dimension).removePlayerEntityDangerously(playerIn);
 
@@ -477,7 +477,7 @@ public abstract class MixinPlayerList {
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
         this.func_187243_f(playerIn);
-        targetWorld.getPlayerChunkManager().addPlayer(playerIn);
+        targetWorld.getPlayerChunkMap().addPlayer(playerIn);
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
         this.uuidToPlayerMap.put(playerIn.getUniqueID(), playerIn);

@@ -701,7 +701,7 @@ public abstract class MixinEntity implements IMixinEntity {
         final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
         if (entity instanceof EntityPlayer) {
             fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerChunkManager().removePlayer((EntityPlayerMP) entity);
+            fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
             mcServer.getPlayerList().getPlayerList().remove(entity);
         } else {
             fromWorld.getEntityTracker().untrackEntity(entity);
@@ -743,7 +743,7 @@ public abstract class MixinEntity implements IMixinEntity {
                 entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
             mcServer.getPlayerList().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.getPlayerChunkManager().addPlayer(entityplayermp1);
+            toWorld.getPlayerChunkMap().addPlayer(entityplayermp1);
             toWorld.spawnEntityInWorld(entityplayermp1);
             mcServer.getPlayerList().getPlayerList().add(entityplayermp1);
             entityplayermp1.interactionManager.setWorld(toWorld);

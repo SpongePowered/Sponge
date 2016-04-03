@@ -103,9 +103,9 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         String s = world.getWorldInfo().getGeneratorOptions();
         ChunkProviderSettings settings;
         if (s != null) {
-            settings = ChunkProviderSettings.Factory.jsonToFactory(s).func_177864_b();
+            settings = ChunkProviderSettings.Factory.jsonToFactory(s).build();
         } else {
-            settings = ChunkProviderSettings.Factory.jsonToFactory("").func_177864_b();
+            settings = ChunkProviderSettings.Factory.jsonToFactory("").build();
         }
 
         Ore dirt = Ore.builder()
