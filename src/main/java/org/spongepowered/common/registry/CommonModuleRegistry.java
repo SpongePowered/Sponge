@@ -120,7 +120,6 @@ import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
 import org.spongepowered.common.event.damage.*;
-import org.spongepowered.common.event.*;
 import org.spongepowered.common.event.entity.teleport.SpongeEntityTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCauseBuilder;
 import org.spongepowered.common.event.entity.teleport.SpongeTeleportCauseBuilder;
@@ -139,6 +138,7 @@ import org.spongepowered.common.registry.type.block.*;
 import org.spongepowered.common.registry.type.boss.BossBarColorRegistryModule;
 import org.spongepowered.common.registry.type.boss.BossBarOverlayRegistryModule;
 import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
+import org.spongepowered.common.registry.type.data.HandSideRegistryModule;
 import org.spongepowered.common.registry.type.data.HandTypeRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
@@ -382,6 +382,7 @@ public final class CommonModuleRegistry {
             .registerModule(BossBarOverlay.class, new BossBarOverlayRegistryModule())
             .registerModule(PortalAgentType.class, PortalAgentRegistryModule.getInstance())
             .registerModule(HandType.class, HandTypeRegistryModule.getInstance())
+            .registerModule(HandSide.class, HandSideRegistryModule.getInstance())
             ;
     }
 

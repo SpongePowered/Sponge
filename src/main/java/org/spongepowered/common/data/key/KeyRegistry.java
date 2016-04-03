@@ -54,6 +54,7 @@ import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.GoldenApple;
+import org.spongepowered.api.data.type.HandSide;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -318,6 +319,7 @@ public class KeyRegistry {
         keyMap.put("armor_stand_marker", makeSingleKey(Boolean.class, Value.class, of("IsMarker")));
         keyMap.put("armor_stand_is_small", makeSingleKey(Boolean.class, Value.class, of("IsSmall")));
         keyMap.put("invulnerability_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("HurtTime")));
+        keyMap.put("dominant_hand", makeSingleKey(HandSide.class, Value.class, of("DominantHand")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

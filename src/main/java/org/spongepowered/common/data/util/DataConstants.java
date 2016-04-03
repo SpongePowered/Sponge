@@ -46,6 +46,8 @@ import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.DyeColors;
+import org.spongepowered.api.data.type.HandSide;
+import org.spongepowered.api.data.type.HandSides;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -154,6 +156,7 @@ public final class DataConstants {
         public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
+        public static final HandSide DEFAULT_HAND = HandSides.RIGHT;
     }
 
     public static final class Entity {}
