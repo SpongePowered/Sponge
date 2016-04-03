@@ -739,6 +739,9 @@ public class DataRegistrar {
         DataUtil.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
                 ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
 
+        DataUtil.registerDualProcessor(DominantHandData.class, SpongeDominantHandData.class, ImmutableDominantHandData.class, ImmutableSpongeDominantHandData.class,
+                new DominantHandDataProcessor());
+
         DataUtil.registerDataProcessorAndImpl(EndGatewayData.class, SpongeEndGatewayData.class,
             ImmutableEndGatewayData.class, ImmutableSpongeEndGatewayData.class, new EndGatewayDataProcessor());
 
@@ -912,6 +915,7 @@ public class DataRegistrar {
         // Entities
         propertyRegistry.register(EyeLocationProperty.class, new EyeLocationPropertyStore());
         propertyRegistry.register(EyeHeightProperty.class, new EyeHeightPropertyStore());
+        propertyRegistry.register(DominantHandProperty.class, new DominantHandPropertyStore());
     }
 
 }
