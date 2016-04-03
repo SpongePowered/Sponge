@@ -46,9 +46,9 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -117,17 +117,13 @@ public class PacketUtil {
                 packetIn.processPacket(netHandler);
             } else {
                 PhaseContext context = PhaseContext.start()
-                        .add(NamedCause.of(TrackingUtil.PACKET_PLAYER, packetPlayer))
+                        .add(NamedCause.source(packetPlayer))
+                        .add(NamedCause.of(InternalNamedCauses.Packet.PACKET_PLAYER, packetPlayer))
                         .addCaptures()
-                        .add(NamedCause.of(TrackingUtil.CAPTURED_PACKET, packetIn))
-                        .add(NamedCause.of(TrackingUtil.CURSOR, cursor))
-                        .add(NamedCause.of(TrackingUtil.IGNORING_CREATIVE, ignoreCreative));
-                if (packetPlayer.openContainer != null) {
-                    context.add(NamedCause.of(TrackingUtil.OPEN_CONTAINER, packetPlayer.openContainer));
-                }
-                if (itemUsed != null) {
-                    context.add(NamedCause.of(TrackingUtil.ITEM_USED, itemUsed));
-                }
+                        .add(NamedCause.of(InternalNamedCauses.Packet.CAPTURED_PACKET, packetIn))
+                        .add(NamedCause.of(InternalNamedCauses.Packet.CURSOR, cursor))
+                        .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
+
                 final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
                 TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                 context.complete();

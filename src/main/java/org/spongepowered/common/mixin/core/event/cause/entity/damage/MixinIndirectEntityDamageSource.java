@@ -37,6 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Optional;
@@ -51,6 +52,12 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
         this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        if (!(this.indirectEntity instanceof User)) {
+            this.owner = EntityUtil.toMixin(super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (this.indirectEntity == null && this.owner.isPresent() && this.owner.get() instanceof Entity) {
+                this.indirectEntity = (Entity) this.owner.get();
+            }
+        }
     }
 
     @Override
@@ -65,7 +72,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
             .add("Type", this.getType().getId())
             .add("Source", this.getSource())
             .add("IndirectSource", this.getIndirectSource());
-        if (this.owner.isPresent()) {
+        if (this.owner != null && this.owner.isPresent()) {
             helper.add("SourceOwner", this.owner.get());
         }
         return helper.toString();

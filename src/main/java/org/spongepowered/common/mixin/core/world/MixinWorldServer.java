@@ -66,6 +66,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
@@ -86,6 +87,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.EventConsumer;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -115,6 +118,8 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -259,39 +264,36 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return;
         }
 
-        if (context.firstNamed(TrackingUtil.PACKET_PLAYER, User.class).isPresent()) {
+        if (context.firstNamed(NamedCause.SOURCE, User.class).isPresent()) {
             // Add player to block event position
-            if (isBlockLoaded(pos)) {
-                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-                Optional<User> owner = spongeChunk.getBlockOwner(pos);
-                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                userTracking(blockIn, pos, notifier, owner, spongeChunk);
-            }
+            markBlockEventUserNotification(pos, blockIn, pos);
         } else {
-            BlockPos sourcePos = null;
-            Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-            Optional<TileEntity> currentTickingTileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
-            if (currentTickingBlock.isPresent()) {
-                sourcePos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-            } else if (currentTickingTileEntity.isPresent()) {
-                sourcePos = ((net.minecraft.tileentity.TileEntity) currentTickingTileEntity.get()).getPos();
-            }
-            if (sourcePos != null && isBlockLoaded(sourcePos)) {
-                IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
-                Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
-                Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
-                userTracking(blockIn, pos, notifier, owner, spongeChunk);
-            }
+            Stream.<Supplier<Optional<BlockPos>>>of(
+                    () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(ticking -> VecHelper.toBlockPos(ticking.getPosition())),
+                    () -> context.firstNamed(NamedCause.SOURCE, net.minecraft.tileentity.TileEntity.class).map(net.minecraft.tileentity.TileEntity::getPos))
+                    // We use suppliers because we can lazy evaluate: i.e. if there's a ticking block, we won't query for a ticking tile entity
+                    .map(Supplier::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .ifPresent(sourcePos -> {
+                        markBlockEventUserNotification(pos, blockIn, sourcePos);
+                    });
         }
     }
 
-    private void userTracking(Block block, BlockPos pos, Optional<User> notifier, Optional<User> owner, IMixinChunk spongeChunk) {
-        if (notifier.isPresent()) {
-            spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-            this.trackedBlockEvents.put(pos, notifier.get());
-        } else if (owner.isPresent()) {
-            spongeChunk.addTrackedBlockPosition(block, pos, owner.get(), PlayerTracker.Type.NOTIFIER);
-            this.trackedBlockEvents.put(pos, owner.get());
+    public void markBlockEventUserNotification(BlockPos pos, Block blockIn, BlockPos sourcePos) {
+        if (isBlockLoaded(sourcePos)) {
+            IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
+            Stream.<Supplier<Optional<User>>>of(() -> spongeChunk.getBlockOwner(sourcePos), () -> spongeChunk.getBlockNotifier(pos))
+                    .map(Supplier::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .ifPresent(tracked -> {
+                        this.trackedBlockEvents.put(pos, tracked);
+                        spongeChunk.addTrackedBlockPosition(blockIn, pos, tracked, PlayerTracker.Type.NOTIFIER);
+                    });
         }
     }
 
@@ -424,7 +426,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         final CauseTracker causeTracker = this.getCauseTracker();
         checkBlockBounds(x, y, z);
         final PhaseContext context = PhaseContext.start()
-                .add(NamedCause.of(TrackingUtil.PLUGIN_CAUSE, cause))
+                .add(NamedCause.of(InternalNamedCauses.General.PLUGIN_CAUSE, cause))
                 .addCaptures()
                 .add(NamedCause.source(cause.root()));
         for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
@@ -535,24 +537,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         directions.remove(skipSide);
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote) {
-            for (Object obj : directions) {
-                EnumFacing facing = (EnumFacing) obj;
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-            return;
-        }
 
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions);
-        if (event.isCancelled()) {
-            return;
-        }
+        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions))
+                .nonCancelled(event -> {
+                    for (EnumFacing facing : EnumFacing.values()) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (event.getNeighbors().keySet().contains(direction)) {
+                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                        }
+                    }
+                })
+                .process();
 
-        for (EnumFacing facing : EnumFacing.values()) {
-            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-        }
     }
 
     /**
@@ -567,20 +563,17 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        for (EnumFacing facing : EnumFacing.values()) {
-            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-        }
 
-        NotifyNeighborBlockEvent event = SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, java.util.EnumSet.allOf(EnumFacing.class));
-        if (event.isCancelled()) {
-            return;
-        }
-
-        for (EnumFacing facing : EnumFacing.values()) {
-            if (event.getNeighbors().keySet().contains(DirectionFacingProvider.getInstance().getKey(facing).get())) {
-                causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-            }
-        }
+        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class)))
+                .nonCancelled(event -> {
+                    for (EnumFacing facing : EnumFacing.values()) {
+                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+                        if (event.getNeighbors().keySet().contains(direction)) {
+                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+                        }
+                    }
+                })
+                .process();
     }
 
     @SuppressWarnings("Duplicates")
@@ -626,16 +619,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     // IMixinWorld method
     @Override
-    public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags) {
+    public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState oldState, IBlockState newState, int flags) {
         if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated())) {
             this.markBlockForUpdate(pos);
         }
 
         if (!this.isRemote && (flags & 1) != 0) {
-            this.notifyNeighborsRespectDebug(pos, old.getBlock());
+            this.notifyNeighborsRespectDebug(pos, oldState.getBlock());
 
-            if (new_.getBlock().hasComparatorInputOverride()) {
-                this.updateComparatorOutputLevel(pos, new_.getBlock());
+            if (newState.getBlock().hasComparatorInputOverride()) {
+                this.updateComparatorOutputLevel(pos, newState.getBlock());
             }
         }
     }

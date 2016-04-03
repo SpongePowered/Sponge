@@ -37,7 +37,7 @@ public final class BlockPhase extends TrackingPhase {
         BLOCK_DECAY,
         RESTORING_BLOCKS,
         DISPENSE,
-        BLOCK_DROP_ITEMS;
+        BLOCK_DROP_ITEMS, BLOCK_ADDED;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -70,6 +70,7 @@ public final class BlockPhase extends TrackingPhase {
         if (state == State.BLOCK_DECAY) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
@@ -79,6 +80,7 @@ public final class BlockPhase extends TrackingPhase {
         } else if (state == State.DISPENSE) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         }
 
     }

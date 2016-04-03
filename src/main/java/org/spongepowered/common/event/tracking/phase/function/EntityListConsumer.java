@@ -22,47 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.plugin;
+package org.spongepowered.common.event.tracking.phase.function;
 
-import org.spongepowered.asm.lib.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
-import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
-import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.common.event.tracking.CauseTracker;
 
 import java.util.List;
-import java.util.Set;
 
-public class ChunkFixPlugin implements IMixinConfigPlugin {
+public interface EntityListConsumer<E extends Entity> {
 
-    @Override
-    public void onLoad(String mixinPackage) {
-    }
+    EntityListConsumer<Entity> FORCE_SPAWN = (list, causeTracker) -> list.forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity));
 
-    @Override
-    public String getRefMapperConfig() {
-        return null;
-    }
-
-    @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeImpl.getGlobalConfig().getConfig().getModules().applyGameFixes();
-    }
-
-    @Override
-    public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
-    public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
-
-    @Override
-    public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-    }
+    void apply(List<? extends E> list, CauseTracker causeTracker);
 
 }

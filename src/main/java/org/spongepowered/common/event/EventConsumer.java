@@ -37,43 +37,47 @@ public final class EventConsumer<E extends Event> {
         return new EventConsumer<>(event);
     }
 
-    @Nullable private Consumer<E> cancelledConsumer;
-    @Nullable private Consumer<E> nonCancelledConsumer;
-    @Nullable private Consumer<E> postConsumer;
+    public static <E extends Event, T extends E> EventConsumer<E> event(Class<E> superClass, T event) {
+        return new EventConsumer<>(event);
+    }
+
+    @Nullable private Consumer<? super E> cancelledConsumer;
+    @Nullable private Consumer<? super E> nonCancelledConsumer;
+    @Nullable private Consumer<? super E> postConsumer;
     private final E event;
 
     private EventConsumer(E event) {
         this.event = event;
     }
 
-    public EventConsumer<E> cancelled(Consumer<E> consumer) {
+    public EventConsumer<E> cancelled(Consumer<? super E> consumer) {
         this.cancelledConsumer = consumer;
         return this;
     }
 
-    public EventConsumer<E> nonCancelled(Consumer<E> consumer) {
+    public EventConsumer<E> nonCancelled(Consumer<? super E> consumer) {
         this.nonCancelledConsumer = consumer;
         return this;
     }
 
-    public EventConsumer<E> post(Consumer<E> consumer) {
+    public EventConsumer<E> post(Consumer<? super E> consumer) {
         this.postConsumer = consumer;
         return this;
     }
 
 
     @Nullable
-    public Consumer<E> getCancelledConsumer() {
+    public Consumer<? super E> getCancelledConsumer() {
         return this.cancelledConsumer;
     }
 
     @Nullable
-    public Consumer<E> getNonCancelledConsumer() {
+    public Consumer<? super E> getNonCancelledConsumer() {
         return this.nonCancelledConsumer;
     }
 
     @Nullable
-    public Consumer<E> getPostConsumer() {
+    public Consumer<? super E> getPostConsumer() {
         return this.postConsumer;
     }
 

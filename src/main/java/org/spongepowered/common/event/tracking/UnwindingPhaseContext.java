@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking;
 
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -36,14 +37,14 @@ final class UnwindingPhaseContext extends PhaseContext {
     }
 
     UnwindingPhaseContext(IPhaseState unwindingState, PhaseContext unwindingContext) {
-        add(NamedCause.of(TrackingUtil.UNWINDING_CONTEXT, unwindingContext));
-        add(NamedCause.of(TrackingUtil.UNWINDING_STATE, unwindingState));
+        add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, unwindingContext));
+        add(NamedCause.of(InternalNamedCauses.Tracker.UNWINDING_STATE, unwindingState));
     }
 
 
     @Override
     public <T> Optional<T> first(Class<T> tClass) {
-        return Stream.of(super.first(tClass), super.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get().first(tClass))
+        return Stream.of(super.first(tClass), super.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class).get().first(tClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
@@ -51,7 +52,7 @@ final class UnwindingPhaseContext extends PhaseContext {
 
     @Override
     public <T> Optional<T> firstNamed(String name, Class<T> tClass) {
-        return Stream.of(super.firstNamed(name, tClass), super.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get().firstNamed(name, tClass))
+        return Stream.of(super.firstNamed(name, tClass), super.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class).get().firstNamed(name, tClass))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();

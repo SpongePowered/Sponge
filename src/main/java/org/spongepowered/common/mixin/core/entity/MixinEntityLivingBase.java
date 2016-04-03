@@ -55,12 +55,13 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
@@ -317,7 +318,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
                             .add(NamedCause.source(this))
-                            .add(NamedCause.of(TrackingUtil.DAMAGE_SOURCE, source))
+                            .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
+                            .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner))
                             .addCaptures()
                             .complete());
                     this.nmsEntityLiving.onDeath(source);

@@ -62,7 +62,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -94,7 +93,7 @@ public class SpongeCommonEventFactory {
             CauseTracker causeTracker = spongeWorld.getCauseTracker();
             PhaseContext context = causeTracker.getStack().peekContext();
 
-            final Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(TrackingUtil.CURRENT_TICK_BLOCK, BlockSnapshot.class);
+            final Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
             final Optional<TileEntity> currentTickingTileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
             final Optional<Entity> currentTickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
             if (currentTickingBlock.isPresent()) {
@@ -123,7 +122,7 @@ public class SpongeCommonEventFactory {
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData currentPhase = causeTracker.getStack().peek();
-        Optional<User> playerNotifier = currentPhase.getContext().firstNamed(TrackingUtil.PACKET_PLAYER, User.class);
+        Optional<User> playerNotifier = currentPhase.getContext().firstNamed(NamedCause.SOURCE, User.class);
         BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
         Map<Direction, BlockState> neighbors = new HashMap<>();
 

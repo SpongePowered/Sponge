@@ -27,17 +27,27 @@ package org.spongepowered.common.event.tracking.phase;
 import com.google.common.base.Objects;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
+import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -114,7 +124,41 @@ public abstract class TrackingPhase {
      *     extra captures that took place during the state's unwinding
      */
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
+        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks().get();
+        final List<Entity> contextEntities = postContext.getCapturedEntities().get();
+        final List<Entity> contextItems = postContext.getCapturedItems().get();
+        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions().get();
+        while (!contextBlocks.isEmpty() && !contextEntities.isEmpty() && !contextItems.isEmpty()) {
+            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
+            contextBlocks.clear();
+            final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
+            contextEntities.clear();
+            final ArrayList<Entity> items = new ArrayList<>(contextItems);
+            contextItems.clear();
+            invalidTransactions.clear(); // We don't care about invalid transactions from the previous context.
 
+            // Now process the currently captured things.
+            GeneralFunctions.processPostBlockCaptures(blockSnapshots, causeTracker, unwindingState, unwindingContext);
+
+            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
+
+            unwindingState.getPhase().processPostItemSpawns(causeTracker, unwindingState, items);
+        }
+
+    }
+
+    private void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
+        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), items, snapshots, causeTracker.getWorld()))
+                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                .process();
+    }
+
+    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
+        final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), entities, snapshots, causeTracker.getWorld()))
+                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                .process();
     }
 
     // Default methods that are basic qualifiers, leaving up to the phase and state to decide

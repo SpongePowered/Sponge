@@ -26,8 +26,10 @@ package org.spongepowered.common.interfaces.world;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 
 import javax.annotation.Nullable;
@@ -43,6 +45,10 @@ public interface IMixinWorldServer extends IMixinWorld {
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
     boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
+
+    default boolean forceSpawnEntity(Entity entity) {
+        return forceSpawnEntity(EntityUtil.fromNative(entity));
+    }
 
     void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
 

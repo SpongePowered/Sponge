@@ -4,10 +4,11 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.TrackingPlugin",
     "mixins": [
-    ],
-    "server": [
         "entity.MixinEntity_Tracker",
         "world.MixinChunk_Tracker"
+    ],
+    "server": [
+
     ],
     "injectors": {
         "defaultRequire": 1

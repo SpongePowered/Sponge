@@ -109,8 +109,6 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.gen.WorldGenerator;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -124,8 +122,8 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.EventConsumer;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -133,8 +131,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
-import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -147,7 +143,6 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -873,7 +868,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             final PhaseContext context = ((IMixinWorldServer) this).getCauseTracker().getStack().peek().getContext();
             final Optional<net.minecraft.entity.Entity>
                     targeted =
-                    context.firstNamed(TrackingUtil.TARGETED_ENTITY, net.minecraft.entity.Entity.class);
+                    context.firstNamed(InternalNamedCauses.Packet.TARGETED_ENTITY, net.minecraft.entity.Entity.class);
             if (entityIn.isDead && targeted.isPresent() && !(entityIn instanceof EntityLivingBase)) {
                 MessageChannel originalChannel = MessageChannel.TO_NONE;
 

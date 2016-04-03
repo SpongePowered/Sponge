@@ -77,7 +77,7 @@ public final class BlockFunction {
         Entities DROP_ITEMS_RANDOM = (blockSnapshot, causeTracker, phaseContext, entities) -> {
             final Cause cause = Cause.source(BlockSpawnCause.builder()
                         .block(blockSnapshot)
-                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                        .type(InternalSpawnTypes.BLOCK_SPAWNING)
                         .build())
                     .build();
             final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());

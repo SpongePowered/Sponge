@@ -27,11 +27,13 @@ package org.spongepowered.common.mixin.chunkfix;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 @Mixin(value = ChunkProviderServer.class, priority = 1111)
 public abstract class MixinChunkProviderServer {
@@ -44,7 +46,8 @@ public abstract class MixinChunkProviderServer {
     @Overwrite
     public Chunk provideChunk(int x, int z) {
         Chunk chunk = this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
-        return chunk == null ? (!this.worldObj.isFindingSpawnPoint() ? this.dummyChunk : this.loadChunk(x, z)) : chunk;
+        final boolean isDummyChunkEnabled = ((IMixinWorld) this.worldObj).getWorldConfig().getConfig().getGameFixes().isDummyChunkLoadingEnabled();
+        return chunk == null ? (!this.worldObj.isFindingSpawnPoint() && isDummyChunkEnabled ? this.dummyChunk : this.loadChunk(x, z)) : chunk;
     }
 
 }

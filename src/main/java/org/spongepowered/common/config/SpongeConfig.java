@@ -64,7 +64,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         DIMENSION(DimensionConfig.class),
         WORLD(WorldConfig.class);
 
-        private final Class<? extends ConfigBase> type;
+        final Class<? extends ConfigBase> type;
 
         Type(Class<? extends ConfigBase> type) {
             this.type = type;
@@ -122,6 +122,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String BLOCK_TRACKING = "block-tracking";
     public static final String BLOCK_TRACKING_BLACKLIST = "block-blacklist";
     public static final String BLOCK_TRACKING_ENABLED = "enabled";
+
+    // Game fixes
+    public static final String DUMMY_CHUNK_RETURN_IF_NOT_LOADED = "load-dummy-chunk-if-chunk-unavailable";
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
@@ -349,6 +352,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private WorldCategory world = new WorldCategory();
         @Setting
         private TimingsCategory timings = new TimingsCategory();
+        @Setting
+        private GameFixesCategory gameFixesCategory = new GameFixesCategory();
 
         public BlockTrackingCategory getBlockTracking() {
             return this.blockTracking;
@@ -380,6 +385,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public TimingsCategory getTimings() {
             return this.timings;
+        }
+
+        public GameFixesCategory getGameFixes() {
+            return this.gameFixesCategory;
         }
 
     }
@@ -780,6 +789,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("tracking")
         private boolean tracking = true;
 
+        @Setting("game-fixes")
+        private boolean gameFixes = false;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -819,6 +831,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public void setTracking(boolean tracking) {
             this.tracking = tracking;
         }
+
+        public boolean applyGameFixes() {
+            return this.gameFixes;
+        }
+
+        public void setGameFixes(boolean gameFixes) {
+            this.gameFixes = gameFixes;
+        }
     }
 
     @ConfigSerializable
@@ -841,6 +861,18 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public List<String> getBlockBlacklist() {
             return this.blockBlacklist;
         }
+    }
+
+    @ConfigSerializable
+    public static class GameFixesCategory extends Category {
+
+        @Setting(value = DUMMY_CHUNK_RETURN_IF_NOT_LOADED, comment = "If enabled, world calls to retrieve a Chunk that hasn't been loaded from file or generated will return a dummy chunk")
+        private boolean dummyChunk = false;
+
+        public boolean isDummyChunkLoadingEnabled() {
+            return this.dummyChunk;
+        }
+
     }
 
     @ConfigSerializable

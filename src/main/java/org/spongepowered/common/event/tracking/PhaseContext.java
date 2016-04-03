@@ -33,6 +33,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -57,7 +58,7 @@ import javax.annotation.Nullable;
 public class PhaseContext {
 
     private boolean isCompleted = false;
-    private final LinkedHashSet<NamedCause> contextObjects = new LinkedHashSet<>();
+    private final ArrayList<NamedCause> contextObjects = new ArrayList<>(10);
     @Nullable private Cause cause = null;
 
     public static PhaseContext start() {
@@ -70,11 +71,17 @@ public class PhaseContext {
         return this;
     }
 
+    public PhaseContext add(Optional<NamedCause> namedCause) {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        namedCause.ifPresent(this.contextObjects::add);
+        return this;
+    }
+
     public PhaseContext addCaptures() {
-        add(NamedCause.of(TrackingUtil.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
-        add(NamedCause.of(TrackingUtil.CAPTURED_ITEMS, new CapturedItemsSupplier()));
-        add(NamedCause.of(TrackingUtil.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        add(NamedCause.of(TrackingUtil.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
+        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        add(NamedCause.of(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
         return this;
     }
 
@@ -109,43 +116,43 @@ public class PhaseContext {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedEntities() {
-        return firstNamed(TrackingUtil.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Entity>> getCapturedEntitySupplier() {
-        return firstNamed(TrackingUtil.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Optional<List<Entity>> getCapturedItems() {
-        return firstNamed(TrackingUtil.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Entity>> getCapturedItemsSupplier() {
-        return firstNamed(TrackingUtil.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
     }
 
 
     @SuppressWarnings("unchecked")
     public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
-        return firstNamed(TrackingUtil.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<Transaction<BlockSnapshot>>> getInvalidTransactionSupplier() {
-        return firstNamed(TrackingUtil.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
+        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<List<BlockSnapshot>> getCapturedBlocks() {
-        return firstNamed(TrackingUtil.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
     }
 
     @SuppressWarnings("unchecked")
     public Optional<CapturedSupplier<BlockSnapshot>> getCapturedBlockSupplier() {
-        return this.firstNamed(TrackingUtil.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
     }
 
     public Cause toCause() {
@@ -234,6 +241,23 @@ public class PhaseContext {
         @Nullable
         public final <U> U map(Function<List<T>, ? extends U> function) {
             return this.captured == null ? null : function.apply(this.captured);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.captured);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            final CapturedSupplier other = (CapturedSupplier) obj;
+            return Objects.equals(this.captured, other.captured);
         }
     }
 

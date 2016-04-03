@@ -41,12 +41,10 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ServerConfigurationManager;
@@ -70,7 +68,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -90,12 +87,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.network.PacketUtil;
@@ -117,6 +119,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private static final String PLAYER_IS_CHANGING_QUANTITY_FIELD = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z";
     private static final String UPDATE_SIGN = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;";
     private static final String HANDLE_CUSTOM_PAYLOAD = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V";
+    private static final String PLAYER_ATTACK_TARGET_ENTITY = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V";
     @Shadow @Final private static Logger logger;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
@@ -433,6 +436,17 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         }
     }
 
+    @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
+    private void onPlayerUpdate(EntityPlayerMP playerEntity) {
+        final CauseTracker causeTracker = ((IMixinEntityPlayerMP) playerEntity).getMixinWorld().getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.PLAYER, PhaseContext.start()
+                .add(NamedCause.source(playerEntity))
+                .addCaptures()
+                .complete());
+        playerEntity.onUpdateEntity();
+        causeTracker.completePhase();
+    }
+
     @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", target = CONTAINER_SLOT_CLICK))
     private ItemStack onBeforeSlotClick(Container container, int slotId, int usedButton, int clickMode, EntityPlayer player) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
@@ -459,7 +473,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
-    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = PLAYER_ATTACK_TARGET_ENTITY))
     public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
         if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
             return; // PVP is disabled, ignore

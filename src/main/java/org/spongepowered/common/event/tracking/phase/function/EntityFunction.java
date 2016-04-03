@@ -32,9 +32,9 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.common.event.EventConsumer;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.List;
@@ -45,29 +45,29 @@ public class EntityFunction {
     public interface Drops {
 
 
+        /**
+         * Specifically during the dropitems on death for an entity.
+         */
         Drops DEATH_DROPS = (targetEntity, causeTracker, context, items) -> {
-            final DamageSource damageSource = context.firstNamed(TrackingUtil.DAMAGE_SOURCE, DamageSource.class).get();
+            final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
             final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.DROPPED_ITEM)
                         .build())
-                    .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
+                    .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                     .build();
-            final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                    .process();
+            destructItemsWithCause(items, cause, causeTracker);
         };
+        /**
+         * Any extra things that occur during onDeathUpdate.
+         */
         Drops DEATH_UPDATES = (targetEntity, causeTracker, context, items) -> {
             final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.DROPPED_ITEM)
                         .build())
                     .build();
-            final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                    .process();
+            destructItemsWithCause(items, cause, causeTracker);
         };
 
         void process(Entity targetEntity, CauseTracker causeTracker, PhaseContext context, List<Entity> items);
@@ -76,66 +76,77 @@ public class EntityFunction {
 
     public interface Entities {
 
+        /**
+         * Specifically during the dropitems on death for an entity.
+         */
         Entities DEATH_DROPS = (targetEntity, causeTracker, context, entities) -> {
-            final DamageSource damageSource = context.firstNamed(TrackingUtil.DAMAGE_SOURCE, DamageSource.class).get();
+            final DamageSource damageSource = context.firstNamed(InternalNamedCauses.General.DAMAGE_SOURCE, DamageSource.class).get();
             final List<Entity> experience = entities.stream().filter(entity -> entity instanceof ExperienceOrb).collect(Collectors.toList());
             if (!experience.isEmpty()) {
-                final List<EntitySnapshot> snapshots = experience.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.EXPERIENCE)
                         .build())
-                        .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
+                        .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                         .build();
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, experience, snapshots, causeTracker.getWorld()))
-                        .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                        .process();
+                processEntitiesWithCause(experience, cause, causeTracker);
+
             }
 
             final List<Entity> other = entities.stream().filter(entity -> !(entity instanceof ExperienceOrb)).collect(Collectors.toList());
             if (!other.isEmpty()) {
-                final List<EntitySnapshot> snapshots = other.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.ENTITY_DEATH)
                         .build())
-                        .named(TrackingUtil.DAMAGE_SOURCE, damageSource)
+                        .named(InternalNamedCauses.General.DAMAGE_SOURCE, damageSource)
                         .build();
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, other, snapshots, causeTracker.getWorld()))
-                        .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                        .process();
+                processEntitiesWithCause(other, cause, causeTracker);
+
             }
         };
+        /**
+         * Any extra things that occur during onDeathUpdate.
+         */
         Entities DEATH_UPDATES = (targetEntity, causeTracker, context, entities) -> {
             final List<Entity> experience = entities.stream().filter(entity -> entity instanceof ExperienceOrb).collect(Collectors.toList());
             if (!experience.isEmpty()) {
-                final List<EntitySnapshot> snapshots = experience.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.EXPERIENCE)
                         .build())
                         .build();
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, experience, snapshots, causeTracker.getWorld()))
-                        .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                        .process();
+                processEntitiesWithCause(experience, cause, causeTracker);
+
             }
 
             final List<Entity> other = entities.stream().filter(entity -> !(entity instanceof ExperienceOrb)).collect(Collectors.toList());
             if (!other.isEmpty()) {
-                final List<EntitySnapshot> snapshots = other.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(targetEntity)
                         .type(InternalSpawnTypes.ENTITY_DEATH)
                         .build())
                         .build();
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, other, snapshots, causeTracker.getWorld()))
-                        .nonCancelled(spawnEvent -> spawnEvent.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
-                        .process();
+                processEntitiesWithCause(other, cause, causeTracker);
             }
         };
 
         void process(Entity targetEntity, CauseTracker causeTracker, PhaseContext context, List<Entity> entities);
 
+    }
+
+    static void destructItemsWithCause(List<Entity> items, Cause cause, CauseTracker causeTracker) {
+        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
+                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                .process();
+    }
+
+    static void processEntitiesWithCause(List<Entity> entityList, Cause cause, CauseTracker causeTracker) {
+        final List<EntitySnapshot> snapshots = entityList.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entityList, snapshots, causeTracker.getWorld()))
+                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                .process();
     }
 
 }

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C00PacketKeepAlive;
@@ -57,9 +58,12 @@ import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -69,13 +73,17 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.PacketFunction;
+import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -148,7 +156,7 @@ public final class PacketPhase extends TrackingPhase {
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                context.add(NamedCause.of(TrackingUtil.DESTRUCT_ITEM_DROPS, false));
+                context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
             }
 
             @Override
@@ -265,7 +273,7 @@ public final class PacketPhase extends TrackingPhase {
         SWITCH_HOTBAR_SCROLL() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                context.add(NamedCause.of(TrackingUtil.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem));
             }
 
             @Override
@@ -358,28 +366,56 @@ public final class PacketPhase extends TrackingPhase {
         MOVEMENT,
         INTERACTION() {
             @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                if (stack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                }
+            }
+
+            @Override
             public boolean canSwitchTo(IPhaseState state) {
                 return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
             }
         },
         IGNORED,
-        INTERACT_ENTITY,
-        ATTACK_ENTITY() {
+        INTERACT_ENTITY {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
-                context.add(NamedCause.of(TrackingUtil.TARGETED_ENTITY, entity));
-                context.add(NamedCause.of(TrackingUtil.TRACKED_ENTITY_ID, entity.getEntityId()));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                if (stack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                }
             }
         },
-        INTERACT_AT_ENTITY,
+        ATTACK_ENTITY() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                if (stack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                }
+            }
+        },
+        INTERACT_AT_ENTITY {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                if (stack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                }
+            }
+        },
         CHAT() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
                 if (chatMessage.getMessage().contains("kill")) {
-                    context.add(NamedCause.of(TrackingUtil.DESTRUCT_ITEM_DROPS, true));
+                    context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
                 }
             }
         },
@@ -390,15 +426,42 @@ public final class PacketPhase extends TrackingPhase {
                 final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
                 final ItemStack itemstack = ItemStackUtil.cloneDefensive(placeBlock.getStack());
                 if (itemstack != null) {
-                    context.add(NamedCause.of(TrackingUtil.ITEM_USED, itemstack));
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
                 }
-                context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
-                context.add(NamedCause.of(TrackingUtil.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
+            }
+
+            @Override
+            public void handleBlockChangeWithUser(@Nullable BlockChange blockChange, WorldServer minecraftWorld, Transaction<BlockSnapshot> transaction, PhaseContext context) {
+                Player player = context.first(Player.class).get();
+                BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
+                spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.OWNER);
+                spongeChunk.addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player, PlayerTracker.Type.NOTIFIER);
+            }
+
+            @Override
+            public void markPostNotificationChange(BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
+                final Player player = context.first(Player.class).get();
+                final BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                final IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
+                spongeChunk.addTrackedBlockPosition(((Block) transaction.getFinal().getState().getType()), pos, player, PlayerTracker.Type.NOTIFIER);
+
             }
         },
         OPEN_INVENTORY,
         REQUEST_RESPAWN,
-        USE_ITEM,
+        USE_ITEM {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
+                final ItemStack itemstack = ItemStackUtil.cloneDefensive(placeBlock.getStack());
+                if (itemstack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
+                }
+            }
+        },
         INVALID_PLACE,
         CLIENT_SETTINGS,
         RIDING_JUMP,
@@ -408,7 +471,12 @@ public final class PacketPhase extends TrackingPhase {
         START_SPRINTING,
         STOP_SPRINTING,
         STOP_SLEEPING,
-        CLOSE_WINDOW,
+        CLOSE_WINDOW {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context.add(NamedCause.of(InternalNamedCauses.Packet.OPEN_CONTAINER, playerMP.openContainer));
+            }
+        },
         UPDATE_SIGN,
         HANDLED_EXTERNALLY,
         RESOURCE_PACK;
@@ -436,7 +504,7 @@ public final class PacketPhase extends TrackingPhase {
         if (packetStateFunction != null) {
             return packetStateFunction.apply(packet);
         }
-        return General.UNKNOWN;
+        return PacketPhase.General.UNKNOWN;
     }
 
     public PhaseContext populateContext(Packet<?> packet, EntityPlayerMP entityPlayerMP, IPhaseState state, PhaseContext context) {
@@ -449,8 +517,8 @@ public final class PacketPhase extends TrackingPhase {
     @SuppressWarnings("unchecked")
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState phaseState, PhaseContext phaseContext) {
-        final Packet<?> packetIn = phaseContext.firstNamed(TrackingUtil.CAPTURED_PACKET, Packet.class).get();
-        final EntityPlayerMP player = phaseContext.firstNamed(TrackingUtil.PACKET_PLAYER, EntityPlayerMP.class).get();
+        final Packet<?> packetIn = phaseContext.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, Packet.class).get();
+        final EntityPlayerMP player = phaseContext.firstNamed(NamedCause.SOURCE, EntityPlayerMP.class).get();
         final Class<? extends Packet<?>> packetInClass = (Class<? extends Packet<?>>) packetIn.getClass();
         final PacketFunction unwindFunction = this.packetUnwindMap.get(packetInClass);
         checkArgument(phaseState instanceof IPacketState, "PhaseState passed in is not an instance of IPacketState! Got %s", phaseState);
@@ -471,30 +539,30 @@ public final class PacketPhase extends TrackingPhase {
 
     PacketPhase(TrackingPhase parent) {
         super(parent);
-        this.packetTranslationMap.put(C00PacketKeepAlive.class, packet -> General.IGNORED);
-        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C00PacketKeepAlive.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(C02PacketUseEntity.class, packet -> {
             final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
             final C02PacketUseEntity.Action action = useEntityPacket.getAction();
             if (action == C02PacketUseEntity.Action.INTERACT) {
-                return General.INTERACT_ENTITY;
+                return PacketPhase.General.INTERACT_ENTITY;
             } else if (action == C02PacketUseEntity.Action.ATTACK) {
-                return General.ATTACK_ENTITY;
+                return PacketPhase.General.ATTACK_ENTITY;
             } else if (action == C02PacketUseEntity.Action.INTERACT_AT) {
-                return General.INTERACT_AT_ENTITY;
+                return PacketPhase.General.INTERACT_AT_ENTITY;
             } else {
-                return General.UNKNOWN;
+                return PacketPhase.General.UNKNOWN;
             }
         });
-        this.packetTranslationMap.put(C03PacketPlayer.class, packet -> General.MOVEMENT);
-        this.packetTranslationMap.put(C03PacketPlayer.C04PacketPlayerPosition.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C03PacketPlayer.C05PacketPlayerLook.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C03PacketPlayer.C06PacketPlayerPosLook.class, packet -> General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C03PacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
+        this.packetTranslationMap.put(C03PacketPlayer.C04PacketPlayerPosition.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C03PacketPlayer.C05PacketPlayerLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C03PacketPlayer.C06PacketPlayerPosLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(C07PacketPlayerDigging.class, packet -> {
             final C07PacketPlayerDigging playerDigging = (C07PacketPlayerDigging) packet;
             final C07PacketPlayerDigging.Action action = playerDigging.getStatus();
             final IPacketState state = INTERACTION_ACTION_MAPPINGS.get(action);
-            return state == null ? General.UNKNOWN : state;
+            return state == null ? PacketPhase.General.UNKNOWN : state;
         });
         this.packetTranslationMap.put(C08PacketPlayerBlockPlacement.class, packet -> {
             final C08PacketPlayerBlockPlacement blockPlace = (C08PacketPlayerBlockPlacement) packet;
@@ -502,44 +570,44 @@ public final class PacketPhase extends TrackingPhase {
             final EnumFacing front = EnumFacing.getFront(blockPlace.getPlacedBlockDirection());
             final MinecraftServer server = MinecraftServer.getServer();
             if (blockPlace.getPlacedBlockDirection() == 255 && blockPlace.getStack() != null) {
-                return General.USE_ITEM;
+                return PacketPhase.General.USE_ITEM;
             } else if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
-                return General.ACTIVATE_BLOCK_OR_USE_ITEM;
+                return PacketPhase.General.ACTIVATE_BLOCK_OR_USE_ITEM;
             } else {
-                return General.INVALID_PLACE;
+                return PacketPhase.General.INVALID_PLACE;
             }
         });
         this.packetTranslationMap.put(C09PacketHeldItemChange.class, packet -> Inventory.SWITCH_HOTBAR_SCROLL);
-        this.packetTranslationMap.put(C0APacketAnimation.class, packet -> General.ANIMATION);
+        this.packetTranslationMap.put(C0APacketAnimation.class, packet -> PacketPhase.General.ANIMATION);
         this.packetTranslationMap.put(C0BPacketEntityAction.class, packet -> {
             final C0BPacketEntityAction playerAction = (C0BPacketEntityAction) packet;
             final C0BPacketEntityAction.Action action = playerAction.getAction();
             return PLAYER_ACTION_MAPPINGS.get(action);
         });
-        this.packetTranslationMap.put(C0CPacketInput.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C0DPacketCloseWindow.class, packet -> General.CLOSE_WINDOW);
+        this.packetTranslationMap.put(C0CPacketInput.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C0DPacketCloseWindow.class, packet -> PacketPhase.General.CLOSE_WINDOW);
         this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> Inventory.fromWindowPacket((C0EPacketClickWindow) packet));
-        this.packetTranslationMap.put(C0FPacketConfirmTransaction.class, packet -> General.UNKNOWN);
-        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> General.CREATIVE_INVENTORY);
+        this.packetTranslationMap.put(C0FPacketConfirmTransaction.class, packet -> PacketPhase.General.UNKNOWN);
+        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
         this.packetTranslationMap.put(C11PacketEnchantItem.class, packet -> Inventory.ENCHANT_ITEM);
-        this.packetTranslationMap.put(C12PacketUpdateSign.class, packet -> General.UPDATE_SIGN);
-        this.packetTranslationMap.put(C13PacketPlayerAbilities.class, packet -> General.IGNORED);
-        this.packetTranslationMap.put(C14PacketTabComplete.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C15PacketClientSettings.class, packet -> General.CLIENT_SETTINGS);
+        this.packetTranslationMap.put(C12PacketUpdateSign.class, packet -> PacketPhase.General.UPDATE_SIGN);
+        this.packetTranslationMap.put(C13PacketPlayerAbilities.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(C14PacketTabComplete.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C15PacketClientSettings.class, packet -> PacketPhase.General.CLIENT_SETTINGS);
         this.packetTranslationMap.put(C16PacketClientStatus.class, packet -> {
             final C16PacketClientStatus clientStatus = (C16PacketClientStatus) packet;
             final C16PacketClientStatus.EnumState status = clientStatus.getStatus();
             if ( status == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT) {
                 return Inventory.OPEN_INVENTORY;
             } else if ( status == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
-                return General.REQUEST_RESPAWN;
+                return PacketPhase.General.REQUEST_RESPAWN;
             } else {
-                return General.IGNORED;
+                return PacketPhase.General.IGNORED;
             }
         });
-        this.packetTranslationMap.put(C17PacketCustomPayload.class, packet -> General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C18PacketSpectate.class, packet -> General.IGNORED);
-        this.packetTranslationMap.put(C19PacketResourcePackStatus.class, packet -> General.RESOURCE_PACK);
+        this.packetTranslationMap.put(C17PacketCustomPayload.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(C18PacketSpectate.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(C19PacketResourcePackStatus.class, packet -> PacketPhase.General.RESOURCE_PACK);
 
         this.packetUnwindMap.put(C00PacketKeepAlive.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(C01PacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
@@ -572,25 +640,25 @@ public final class PacketPhase extends TrackingPhase {
 
     public static final ImmutableMap<C0BPacketEntityAction.Action, IPacketState> PLAYER_ACTION_MAPPINGS = ImmutableMap.<C0BPacketEntityAction.Action, IPacketState>builder()
             .put(C0BPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
-            .put(C0BPacketEntityAction.Action.RIDING_JUMP, General.RIDING_JUMP)
-            .put(C0BPacketEntityAction.Action.START_SNEAKING, General.START_SNEAKING)
-            .put(C0BPacketEntityAction.Action.STOP_SNEAKING, General.STOP_SNEAKING)
-            .put(C0BPacketEntityAction.Action.START_SPRINTING, General.START_SPRINTING)
-            .put(C0BPacketEntityAction.Action.STOP_SPRINTING, General.STOP_SPRINTING)
-            .put(C0BPacketEntityAction.Action.STOP_SLEEPING, General.STOP_SLEEPING)
+            .put(C0BPacketEntityAction.Action.RIDING_JUMP, PacketPhase.General.RIDING_JUMP)
+            .put(C0BPacketEntityAction.Action.START_SNEAKING, PacketPhase.General.START_SNEAKING)
+            .put(C0BPacketEntityAction.Action.STOP_SNEAKING, PacketPhase.General.STOP_SNEAKING)
+            .put(C0BPacketEntityAction.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
+            .put(C0BPacketEntityAction.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)
+            .put(C0BPacketEntityAction.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
             .build();
 
     public static final ImmutableMap<C07PacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<C07PacketPlayerDigging.Action, IPacketState>builder()
             .put(C07PacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
             .put(C07PacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_INVENTORY)
-            .put(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, PacketPhase.General.INTERACTION)
             .build();
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return false;
+        return currentState instanceof General;
     }
 
 }

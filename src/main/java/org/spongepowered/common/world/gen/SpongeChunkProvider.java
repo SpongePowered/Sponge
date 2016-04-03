@@ -62,8 +62,8 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
@@ -254,7 +254,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         final CauseTracker causeTracker = world.getCauseTracker();
         final Object source = causeTracker.getStack().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
 
-        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(TrackingUtil.CHUNK_PROVIDER, chunkProvider));
+        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, chunkProvider));
 
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -294,7 +294,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
-                    .add(NamedCause.of(TrackingUtil.CAPTURED_POPULATOR, populator.getType()))
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
                     .addCaptures()
                     .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {

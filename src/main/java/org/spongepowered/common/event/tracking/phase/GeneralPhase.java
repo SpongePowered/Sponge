@@ -29,11 +29,11 @@ import static com.google.common.base.Preconditions.checkState;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import javax.annotation.Nullable;
 
@@ -101,8 +101,8 @@ public final class GeneralPhase extends TrackingPhase {
             checkState(sender != null, "Cannot complete a command when there was no command sender!");
             // todo properly unwind the captured block changes and entity spawns.
         } else if (state == Post.UNWINDING) {
-            final IPhaseState unwindingState = phaseContext.firstNamed(TrackingUtil.UNWINDING_STATE, IPhaseState.class).get();
-            final PhaseContext unwindingContext = phaseContext.firstNamed(TrackingUtil.UNWINDING_CONTEXT, PhaseContext.class).get();
+            final IPhaseState unwindingState = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_STATE, IPhaseState.class).get();
+            final PhaseContext unwindingContext = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class).get();
             unwindingState.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
         }
     }

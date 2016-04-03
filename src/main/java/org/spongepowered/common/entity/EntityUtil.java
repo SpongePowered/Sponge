@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
@@ -39,6 +40,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -174,7 +176,6 @@ public final class EntityUtil {
                 });
     }
 
-    @Nullable
     public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
         if (!(tickingEntity instanceof Entity)) {
             throw new IllegalArgumentException("Not a native Entity for this implementation!");
@@ -184,5 +185,33 @@ public final class EntityUtil {
 
     public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
         return (org.spongepowered.api.entity.Entity) entity;
+    }
+
+    public static Living fromNativeToLiving(Entity entity) {
+        if (!(entity instanceof Living)) {
+            throw new IllegalArgumentException("Entity is incompatible with SpongeAPI Living interface: " + entity);
+        }
+        return (Living) entity;
+    }
+
+    public static EntityLivingBase toNative(Living entity) {
+        if (!(entity instanceof EntityLivingBase)) {
+            throw new IllegalArgumentException("Living entity is not compatible with this implementation: " + entity);
+        }
+        return (EntityLivingBase) entity;
+    }
+
+    public static IMixinEntity toMixin(Entity entity) {
+        if (!(entity instanceof IMixinEntity)) {
+            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
+        }
+        return (IMixinEntity) entity;
+    }
+
+    public static IMixinEntity toMixin(org.spongepowered.api.entity.Entity entity) {
+        if (!(entity instanceof IMixinEntity)) {
+            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
+        }
+        return (IMixinEntity) entity;
     }
 }
