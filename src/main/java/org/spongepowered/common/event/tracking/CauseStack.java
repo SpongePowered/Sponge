@@ -35,6 +35,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
@@ -93,6 +94,10 @@ public final class CauseStack {
 
     public CauseStack push(IPhaseState state, PhaseContext context) {
         return push(new PhaseData(context, state));
+    }
+
+    public void forEach(Consumer<PhaseData> consumer) {
+        this.states.forEach(consumer::accept);
     }
 
     public boolean isEmpty() {

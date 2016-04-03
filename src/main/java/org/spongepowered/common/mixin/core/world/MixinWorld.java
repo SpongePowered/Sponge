@@ -78,6 +78,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.EnderPearl;
@@ -95,6 +96,7 @@ import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
@@ -121,6 +123,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -222,6 +225,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType);
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
     @Shadow public abstract void markBlockForUpdate(BlockPos pos);
+    @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
 
     // @formatter:on
 
@@ -651,11 +655,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void triggerExplosion(Explosion explosion) {
         checkNotNull(explosion, "explosion");
-        checkNotNull(explosion.getOrigin(), "origin");
-
-        newExplosion((net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), explosion
-                        .getOrigin().getX(), explosion.getOrigin().getY(), explosion.getOrigin().getZ(), explosion.getRadius(), explosion.canCauseFire(),
-                explosion.shouldBreakBlocks());
+        final Vector3d origin = explosion.getOrigin();
+        checkNotNull(origin, "origin");
+        newExplosion(EntityUtil.toNative(explosion.getSourceExplosive().orElse(null)), origin.getX(), origin.getY(), origin.getZ(),
+                explosion.getRadius(), explosion.canCauseFire(), explosion.shouldBreakBlocks());
     }
 
     @Override
@@ -722,40 +725,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        Optional<User> user = spongeChunk.getBlockOwner(pos);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        Optional<User> user = spongeChunk.getBlockNotifier(pos);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockCreator(pos, uuid);
     }
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockNotifier(pos, uuid);
     }
 
 

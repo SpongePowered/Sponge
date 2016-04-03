@@ -34,6 +34,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
@@ -53,6 +54,7 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -65,6 +67,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -97,6 +100,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -109,9 +113,11 @@ import org.spongepowered.common.world.gen.SpongeChunkProvider;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
@@ -119,6 +125,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -367,7 +374,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public ScheduledBlockUpdate addScheduledUpdate(int x, int y, int z, int priority, int ticks) {
         BlockPos pos = new BlockPos(x, y, z);
-        ((WorldServer) (Object) this).scheduleBlockUpdate(pos, getBlockState(pos).getBlock(), ticks, priority);
+        this.scheduleBlockUpdate(pos, getBlockState(pos).getBlock(), ticks, priority);
         ScheduledBlockUpdate sbu = (ScheduledBlockUpdate) this.tmpScheduledObj;
         this.tmpScheduledObj = null;
         return sbu;
@@ -442,6 +449,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!containsBlock(x, y, z)) {
             throw new PositionOutOfBoundsException(new Vector3i(x, y, z), BLOCK_MIN, BLOCK_MAX);
         }
+    }
+
+    @Override
+    public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
+        checkArgument(cause != null, "Cause cannot be null!");
+        checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
+        List<Entity> entitiesToSpawn = new ArrayList<>();
+        entities.forEach(entitiesToSpawn::add);
+        final List<EntitySnapshot> snapshots = entitiesToSpawn.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+        return !EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, snapshots, this))
+                .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), this.getCauseTracker()))
+                .process()
+                .isCancelled();
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------
@@ -685,6 +705,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             EntityPlayer entityplayer = (EntityPlayer) entity;
             this.playerEntities.add(entityplayer);
             this.updateAllPlayersSleepingFlag();
+        }
+
+        if (entity instanceof EntityLightningBolt) {
+            this.addWeatherEffect(entity);
+            return true;
         }
 
         this.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(entity);

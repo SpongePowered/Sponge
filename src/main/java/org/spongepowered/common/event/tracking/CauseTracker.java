@@ -39,6 +39,7 @@ import net.minecraft.util.ReportedException;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
+import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -48,6 +49,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -68,8 +70,14 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 /**
  * A helper object that is hard attached to a {@link World} that acts as a
@@ -79,6 +87,16 @@ import java.util.stream.Stream;
 public final class CauseTracker {
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
+
+    public static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
+        printer.add("  - Phase: %s", data.getState());
+        printer.add("    Context:");
+        data.getContext().forEach(namedCause -> {
+            printer.add("    - Name: %s", namedCause.getName());
+            printer.addWrapped(80, "      Object: %s", namedCause.getCauseObject());
+        });
+    };
+
     private final WorldServer targetWorld;
 
     private final CauseStack stack = new CauseStack(DEFAULT_QUEUE_SIZE);
@@ -106,19 +124,15 @@ public final class CauseTracker {
             printer.add("  %s : %s", "Entering Phase", phase);
             printer.add("  %s : %s", "Entering State", state);
             printer.add("%s :", "Current phases");
-            printer.table(" %s");
-            this.stack.currentStates().forEach(printer::tr);
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("  %s :", "Printing stack trace");
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
         IPhaseState currentState = this.stack.peekState();
-        if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
+        if (true) { //!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
-            if (state == WorldPhase.Tick.PLAYER) {
-                System.err.printf("derp%n");
-            }
-            PrettyPrinter printer = new PrettyPrinter(60);
+            PrettyPrinter printer = new PrettyPrinter(80);
             printer.add("Switching Phase").centre().hr();
             printer.add("Phase incompatibility detected! Attempting to switch to an invalid phase!");
             printer.add("  %s : %s", "Current Phase", currentState.getPhase());
@@ -126,8 +140,7 @@ public final class CauseTracker {
             printer.add("  %s : %s", "Entering incompatible Phase", phase);
             printer.add("  %s : %s", "Entering incompatible State", state);
             printer.add("%s :", "Current phases");
-            printer.table(" %s:");
-            this.stack.currentStates().forEach(printer::tr);
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("  %s :", "Printing stack trace");
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
@@ -135,6 +148,8 @@ public final class CauseTracker {
 
         this.stack.push(state, phaseContext);
     }
+
+
 
     public void completePhase() {
         final PhaseData tuple = this.stack.peek();
@@ -146,7 +161,8 @@ public final class CauseTracker {
             printer.add("Completing Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
             printer.addWrapped(60, "%s : %s", "Completing phase", state);
-            printer.addWrapped(60, "%s : %s", "Phases remaining", this.stack.currentStates());
+            printer.add(" Phases Remaining:");
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("Stacktrace:");
             printer.add(new Exception("Stack trace"));
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
@@ -170,7 +186,8 @@ public final class CauseTracker {
                 printer.add("Exception Exiting Phase").centre().hr();
                 printer.add("Something happened when trying to unwind the phase %s", state);
                 printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
-                printer.addWrapped(60, "   %s : %s", "Phases remaining", this.stack.currentStates());
+                printer.addWrapped(60, "   %s :", "Phases remaining");
+                this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
                 printer.add("Stacktrace:");
                 printer.add(e);
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
@@ -183,7 +200,8 @@ public final class CauseTracker {
             printer.add("Exception Post Dispatching Phase").centre().hr();
             printer.add("Something happened when trying to post dispatch state %s", state);
             printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
-            printer.addWrapped(60, "   %s : %s", "Phases remaining", this.stack.currentStates());
+            printer.addWrapped(60, "   %s :", "Phases remaining");
+            this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("Stacktrace:");
             printer.add(e);
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
@@ -233,7 +251,7 @@ public final class CauseTracker {
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
      */
-    public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, final BlockPos sourcePos) {
+    public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
 
         final PhaseData phaseContextTuple = this.getStack().peek(); // Sponge
@@ -249,41 +267,35 @@ public final class CauseTracker {
                 }
             } else {
                 final PhaseContext context = this.stack.peekContext();
-                final Object source;
-                final BlockPos predictedPos;
 
-                final Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-                final Optional<TileEntity> currentTickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
-                final Optional<Entity> currentTickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class);
-                final Optional<Player> currentTickingPlayer = context.firstNamed(NamedCause.SOURCE, Player.class);
-                if (currentTickingBlock.isPresent()) {
-                    source = currentTickingBlock.get();
-                    predictedPos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                } else if (currentTickingTile.isPresent()) {
-                    source = currentTickingTile.get();
-                    predictedPos = ((net.minecraft.tileentity.TileEntity) currentTickingTile.get()).getPos();
-                } else if (currentTickingEntity.isPresent()) { // Falling Blocks
-                    source = null;
-                    IMixinEntity spongeEntity = EntityUtil.toMixin(currentTickingEntity.get());
-                    predictedPos = EntityUtil.toNative(currentTickingEntity.get()).getPosition();
-                    final IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-
-                    Stream.<Supplier<Optional<User>>>of(
-                        () -> spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER),
-                        () -> spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR))
+                final Pair<Object, BlockPos> pair = Stream.<Supplier<Optional<Pair<Object, BlockPos>>>>of(
+                        () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                                .map(block -> Pair.of(block, VecHelper.toBlockPos(block.getPosition()))),
+                        () -> context.firstNamed(NamedCause.SOURCE, net.minecraft.tileentity.TileEntity.class)
+                                .map(tile -> Pair.of(tile, tile.getPos())),
+                        () -> context.firstNamed(NamedCause.SOURCE, Entity.class).map(entity -> {
+                            final IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
+                            final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
+                            Stream.<Supplier<Optional<User>>>of(
+                                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER),
+                                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR))
+                                    .map(Supplier::get)
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+                                    .findFirst()
+                                    .ifPresent(tracked -> spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, tracked, PlayerTracker.Type.NOTIFIER));
+                            return Pair.of(null, EntityUtil.toNative(entity).getPosition());
+                        }),
+                        () -> context.firstNamed(NamedCause.SOURCE, Player.class)
+                                .map(player -> Pair.of(player, EntityUtil.toNative(player).getPosition()))
+                        )
                         .map(Supplier::get)
                         .filter(Optional::isPresent)
                         .map(Optional::get)
                         .findFirst()
-                        .ifPresent(tracked -> spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, tracked, PlayerTracker.Type.NOTIFIER));
-                } else if (currentTickingPlayer.isPresent()) {
-                    source = currentTickingPlayer.get();
-                    predictedPos = ((net.minecraft.entity.Entity) currentTickingPlayer.get()).getPosition();
-
-                } else {
-                    source = null;
-                    predictedPos = sourcePos;
-                }
+                        .orElse(Pair.of(null, sourcePos));
+                final Object source = pair.getKey();
+                final BlockPos predictedPos = pair.getValue();
 
                 if (source != null) {
                     SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, predictedPos, iblockstate.getBlock(), notifyPos,
@@ -445,7 +457,6 @@ public final class CauseTracker {
         final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(entity);
         final WorldServer minecraftWorld = this.getMinecraftWorld();
         final PhaseData phaseData = this.getStack().peek();
-        final IPhaseState phaseState = phaseData.getState();
         // Sponge End - continue with vanilla mechanics
 
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
@@ -463,13 +474,7 @@ public final class CauseTracker {
 
             // Sponge Start - throw an event
             EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), ImmutableList.of(entity.createSnapshot()), getWorld()))
-                .nonCancelled(event -> {
-                    // Sponge end
-                    minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);
-                    minecraftWorld.loadedEntityList.add(minecraftEntity);
-                    // Sponge start
-                    getMixinWorld().onSpongeEntityAdded(minecraftEntity); // Sponge - Cannot add onEntityAdded to the access transformer because forge makes it public
-                })
+                .nonCancelled(event -> getMixinWorld().forceSpawnEntity(entity))
                 .process();
                 // Sponge end
 

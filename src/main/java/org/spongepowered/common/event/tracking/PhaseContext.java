@@ -163,6 +163,10 @@ public class PhaseContext {
         return this.cause;
     }
 
+    public void forEach(Consumer<NamedCause> consumer) {
+        this.contextObjects.forEach(consumer::accept);
+    }
+
     public PrettyPrinter populatePrinter(PrettyPrinter printer) {
         printer.table(" %s : %s%n");
         for (NamedCause cause : this.contextObjects) {

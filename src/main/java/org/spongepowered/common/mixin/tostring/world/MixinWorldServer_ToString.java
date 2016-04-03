@@ -22,39 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.tostring.world;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.tracking.CauseTracker;
+import com.google.common.base.Objects;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.core.world.MixinWorld;
 
-import javax.annotation.Nullable;
+@Mixin(WorldServer.class)
+public abstract class MixinWorldServer_ToString extends MixinWorld {
 
-public interface IMixinWorldServer extends IMixinWorld {
-
-    void updateWorldGenerator();
-
-    CauseTracker getCauseTracker();
-
-    void updateRotation(Entity entityIn);
-
-    void markAndNotifyNeighbors(BlockPos pos, @Nullable Chunk chunk, IBlockState oldState, IBlockState newState, int flags);
-
-    boolean forceSpawnEntity(org.spongepowered.api.entity.Entity entity);
-
-    default boolean forceSpawnEntity(Entity entity) {
-        return forceSpawnEntity(EntityUtil.fromNative(entity));
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("LevelName", this.worldInfo.getWorldName())
+                .add("DimensionId:", this.provider.getDimensionId())
+                .add("DimensionType", this.worldInfo.getTerrainType().getWorldTypeName())
+                .toString();
     }
-
-    void onSpongeEntityAdded(Entity entity);
-
-    void addEntityRotationUpdate(Entity entity, Vector3d rotation);
-
-    SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
-
 }

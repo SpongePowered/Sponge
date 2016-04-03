@@ -28,7 +28,9 @@ import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.util.ChatComponentTranslation;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,6 +47,8 @@ import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
+import java.util.Collection;
+
 @Mixin(CommandHandler.class)
 public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
@@ -52,15 +56,15 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
-        if (sender.getEntityWorld() != null) {
-            IMixinWorldServer world = (IMixinWorldServer) sender.getEntityWorld();
-            final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
+        Sponge.getServer().getWorlds().forEach(world -> {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+            mixinWorld.getCauseTracker().switchToPhase(TrackingPhases.GENERAL, GeneralPhase.State.COMMAND, PhaseContext.start()
                     .add(NamedCause.source(sender))
                     .add(NamedCause.of(InternalNamedCauses.General.COMMAND, command))
                     .addCaptures()
                     .complete());
-        }
+        });
+
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
         }
@@ -68,11 +72,16 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "RETURN"))
     public void onExecuteCommandReturn(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
-        if (sender.getEntityWorld() != null) {
-            IMixinWorldServer world = (IMixinWorldServer) sender.getEntityWorld();
-            final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.completePhase();
-        }
+        Sponge.getServer().getWorlds().forEach(world -> {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
+            try {
+                mixinWorld.getCauseTracker().completePhase();
+            } catch (Exception e) {
+                // Basically, we don't do anything because the worlds that were created during the
+                // command being executed. However, we still will process any additional captures that took place
+                // during the command's phase.
+            }
+        });
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
         }
