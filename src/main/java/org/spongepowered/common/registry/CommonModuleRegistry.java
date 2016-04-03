@@ -310,6 +310,7 @@ public final class CommonModuleRegistry {
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
+            .registerModule(HandType.class, new HandTypeRegistryModule())
             ;
     }
 

@@ -54,6 +54,7 @@ import org.spongepowered.api.data.type.DoublePlantType;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.Fish;
 import org.spongepowered.api.data.type.GoldenApple;
+import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.Hinge;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
@@ -307,6 +308,7 @@ public class KeyRegistry {
         keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
         keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
         keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
+        keyMap.put("dominant_hand", makeSingleKey(HandType.class, Value.class, of("DominantHand")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
