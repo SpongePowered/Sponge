@@ -33,6 +33,10 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.AgentData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.Goal;
 import org.spongepowered.api.entity.ai.GoalType;
@@ -56,6 +60,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAIBase;
 import org.spongepowered.common.interfaces.ai.IMixinEntityAITasks;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -63,6 +69,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -76,42 +83,11 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
     @Shadow @Nullable private EntityLivingBase attackTarget;
+
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
-
-    public boolean isAiEnabled() {
-        return !isAIDisabled();
-    }
-
-    public void setAiEnabled(boolean aiEnabled) {
-        setNoAI(!aiEnabled);
-    }
-
-    public boolean isLeashed() {
-        return getLeashedToEntity() != null;
-    }
-
-    public void setLeashed(boolean leashed) {
-        throw new UnsupportedOperationException(); // TODO
-    }
-
-    public Optional<Entity> getLeashHolder() {
-        return Optional.ofNullable((Entity) getLeashedToEntity());
-    }
-
-    public void setLeashHolder(@Nullable Entity entity) {
-        setLeashedToEntity((net.minecraft.entity.Entity) entity, true);
-    }
-
-    public boolean getCanPickupItems() {
-        return this.canPickUpLoot;
-    }
-
-    public void setCanPickupItems(boolean canPickupItems) {
-        this.canPickUpLoot = canPickupItems;
-    }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -238,4 +214,24 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     private boolean onCanGrief(GameRules gameRules, String rule) {
         return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
     }
+
+    // Data delegated methods
+
+
+    @Override
+    public AgentData getAgentData() {
+        return new SpongeAgentData(!this.isAIDisabled());
+    }
+
+    @Override
+    public Value<Boolean> aiEnabled() {
+        return new SpongeValue<>(Keys.AI_ENABLED, true, !this.isAIDisabled());
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getAgentData());
+    }
+
 }

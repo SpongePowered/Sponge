@@ -30,11 +30,10 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-@NonnullByDefault
 @Mixin(EntityTameable.class)
 public abstract class MixinEntityTameable extends MixinEntityAnimal {
 
-    @Shadow(prefix = "shadow$")
-    public abstract boolean shadow$isTamed();
+    @Shadow public abstract boolean shadow$isTamed();
+    @Shadow public abstract boolean shadow$isSitting();
 
 }

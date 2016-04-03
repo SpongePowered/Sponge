@@ -25,11 +25,39 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityPainting;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.ArtData;
+import org.spongepowered.api.data.type.Art;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.hanging.Painting;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeArtData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.mixin.core.entity.MixinEntityHanging;
+
+import java.util.List;
 
 @Mixin(EntityPainting.class)
 public abstract class MixinEntityPainting extends MixinEntityHanging implements Painting {
 
+    @Shadow public EntityPainting.EnumArt art;
+
+    @Override
+    public ArtData getArtData() {
+        return new SpongeArtData((Art) (Object) this.art);
+    }
+
+    @Override
+    public Value<Art> art() {
+        return new SpongeValue<>(Keys.ART, DataConstants.Catalog.DEFAULT_ART, (Art) (Object) this.art);
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getArtData());
+    }
 }

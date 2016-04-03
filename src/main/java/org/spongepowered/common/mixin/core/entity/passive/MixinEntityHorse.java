@@ -25,14 +25,28 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityHorse;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
+import org.spongepowered.api.data.type.HorseColor;
+import org.spongepowered.api.data.type.HorseStyle;
 import org.spongepowered.api.data.type.HorseVariant;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHorseData;
+import org.spongepowered.common.data.processor.common.HorseUtils;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.List;
 
 @Mixin(EntityHorse.class)
 public abstract class MixinEntityHorse extends MixinEntityAnimal implements Horse {
+
+    @Shadow public abstract int getHorseType();
 
     @Override
     public Translation getTranslation() {
@@ -41,4 +55,31 @@ public abstract class MixinEntityHorse extends MixinEntityAnimal implements Hors
         return horseVariant.getTranslation();
     }
 
+    @Override
+    public HorseData getHorseData() {
+        return new SpongeHorseData(HorseUtils.getHorseColor((EntityHorse) (Object) this),
+                HorseUtils.getHorseStyle((EntityHorse) (Object) this),
+                HorseUtils.getHorseVariant(this.getHorseType()));
+    }
+
+    @Override
+    public Value<HorseVariant> variant() {
+        return new SpongeValue<>(Keys.HORSE_VARIANT, DataConstants.Horse.DEFAULT_VARIANT);
+    }
+
+    @Override
+    public Value<HorseStyle> style() {
+        return new SpongeValue<>(Keys.HORSE_STYLE, DataConstants.Horse.DEFAULT_STYLE, HorseUtils.getHorseStyle((EntityHorse) (Object) this));
+    }
+
+    @Override
+    public Value<HorseColor> color() {
+        return new SpongeValue<>(Keys.HORSE_COLOR, DataConstants.Horse.DEFAULT_COLOR, HorseUtils.getHorseColor((EntityHorse) (Object) this));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getHorseData());
+    }
 }

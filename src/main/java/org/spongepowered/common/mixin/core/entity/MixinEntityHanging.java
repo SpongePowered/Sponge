@@ -28,12 +28,22 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.hanging.Hanging;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
+import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+
+import java.util.List;
 
 @Mixin(EntityHanging.class)
 public abstract class MixinEntityHanging extends MixinEntity implements Hanging {
@@ -68,4 +78,21 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging 
         }
     }
 
+    // Data delegated methods
+
+    @Override
+    public DirectionalData getDirectionalData() {
+        return new SpongeDirectionalData(DirectionResolver.getFor(this.facingDirection));
+    }
+
+    @Override
+    public Value<Direction> direction() {
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, DirectionResolver.getFor(this.facingDirection));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getDirectionalData());
+    }
 }

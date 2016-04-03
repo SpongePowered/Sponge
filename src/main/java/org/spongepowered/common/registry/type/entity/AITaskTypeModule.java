@@ -116,9 +116,9 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         return newType;
     }
 
-    private AITaskTypeModule() {}
+    AITaskTypeModule() {}
 
     private static final class Holder {
-        private static final AITaskTypeModule INSTANCE = new AITaskTypeModule();
+        static final AITaskTypeModule INSTANCE = new AITaskTypeModule();
     }
 }

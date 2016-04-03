@@ -1009,6 +1009,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.motionX = checkNotNull(velocity).getX();
         this.motionY = velocity.getY();
         this.motionZ = velocity.getZ();
+        this.velocityChanged = true;
     }
 
     @Override

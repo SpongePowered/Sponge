@@ -29,25 +29,16 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.world.Explosion;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.api.service.user.UserStorageService;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
-import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -68,27 +59,6 @@ public abstract class MixinDamageSource implements DamageSource {
 
     private DamageType apiDamageType;
 
-    @Inject(method = "setExplosionSource", at = @At("HEAD"), cancellable = true)
-    private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
-        if (explosionIn != null && explosionIn.exploder != null && explosionIn.worldObj != null) {
-            if (explosionIn.getExplosivePlacedBy() == null) {
-                // check creator
-                Entity spongeEntity = EntityUtil.fromNative(explosionIn.exploder);
-                Optional<UUID> creatorUuid = spongeEntity.getCreator();
-                if (creatorUuid.isPresent()) {
-                    EntityPlayer player = explosionIn.worldObj.getPlayerEntityByUUID(creatorUuid.get());
-                    User user = null;
-                    if (player != null) {
-                        final EntityDamageSourceIndirect damageSource = new EntityDamageSourceIndirect("explosion.player", explosionIn.exploder, player);
-                        damageSource.setDifficultyScaled().setExplosion();
-                        cir.setReturnValue(damageSource);
-                    }
-                }
-            }
-        }
-    }
-
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(String damageTypeIn, CallbackInfo ci) {
         final Optional<DamageType> damageType = DamageSourceToTypeProvider.getInstance().get(damageTypeIn);
@@ -96,6 +66,27 @@ public abstract class MixinDamageSource implements DamageSource {
             DamageSourceToTypeProvider.getInstance().addCustom(damageTypeIn);
         }
         this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
+    }
+
+    @Inject(method = "setExplosionSource", at = @At("HEAD"), cancellable = true)
+    private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
+        if (explosionIn != null && explosionIn.exploder != null && explosionIn.worldObj != null) {
+            if (explosionIn.getExplosivePlacedBy() == null) {
+                // check creator
+                Entity spongeEntity = (Entity) explosionIn.exploder;
+                Optional<UUID> creatorUuid = spongeEntity.getCreator();
+                if (creatorUuid.isPresent()) {
+                    EntityPlayer player = explosionIn.worldObj.getPlayerEntityByUUID(creatorUuid.get());
+                    if (player != null) {
+                        EntityDamageSourceIndirect damageSource =
+                                new EntityDamageSourceIndirect("explosion.player",
+                                        explosionIn.exploder, player);
+                        damageSource.setDifficultyScaled().setExplosion();
+                        cir.setReturnValue(damageSource);
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -136,8 +127,8 @@ public abstract class MixinDamageSource implements DamageSource {
     @Override
     public String toString() {
         return Objects.toStringHelper("DamageSource")
-            .add("Name", this.damageType)
-            .add("Type", this.apiDamageType.getId())
-            .toString();
+                .add("Name", this.damageType)
+                .add("Type", this.apiDamageType.getId())
+                .toString();
     }
 }

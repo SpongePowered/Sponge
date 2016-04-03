@@ -63,11 +63,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     private ItemStack currentItemStack;
 
     @Intrinsic
-    public boolean soft$isAngry() {
-        return this.shadow$isAngry();
-    }
-
-    @Intrinsic
     public void soft$setAngry(boolean angry) {
         this.shadow$setAngry(angry);
     }

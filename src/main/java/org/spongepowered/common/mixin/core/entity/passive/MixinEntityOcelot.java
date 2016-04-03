@@ -27,8 +27,12 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
+import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.living.animal.Ocelot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -36,6 +40,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -43,6 +48,11 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeOcelotData;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeSittingData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.SpongeEntityConstants;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.List;
@@ -52,6 +62,8 @@ import java.util.Random;
 public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
 
     private ItemStack currentItemStack;
+
+    @Shadow public abstract int getTameSkin();
 
     @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
@@ -81,10 +93,23 @@ public abstract class MixinEntityOcelot extends MixinEntityTameable implements O
         return 1;
     }
 
+    // Data delegated methods
+
+
+    @Override
+    public OcelotData getOcelotData() {
+        return new SpongeOcelotData(SpongeEntityConstants.OCELOT_IDMAP.get(this.getTameSkin()));
+    }
+
+    @Override
+    public Value<OcelotType> variant() {
+        return new SpongeValue<>(Keys.OCELOT_TYPE, DataConstants.Ocelot.DEFAULT_TYPE, SpongeEntityConstants.OCELOT_IDMAP.get(this.getTameSkin()));
+    }
+
     @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(SittingData.class).get());
+        manipulators.add(new SpongeSittingData(this.shadow$isSitting()));
         manipulators.add(getOcelotData());
     }
 

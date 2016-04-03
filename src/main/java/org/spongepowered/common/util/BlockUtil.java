@@ -41,6 +41,9 @@ public class BlockUtil {
 
     private static final class BlockStateComparator implements Comparator<BlockState> {
 
+        BlockStateComparator() {
+        }
+
         @Override
         public int compare(BlockState spongeA, BlockState spongeB) {
             IBlockState a = (IBlockState) spongeA;

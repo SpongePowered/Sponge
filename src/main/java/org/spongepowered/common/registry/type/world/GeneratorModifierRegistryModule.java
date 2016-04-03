@@ -146,10 +146,10 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         return modifiers;
     }
 
-    private GeneratorModifierRegistryModule() {}
+    GeneratorModifierRegistryModule() {}
 
     private static final class Holder {
 
-        private static final GeneratorModifierRegistryModule INSTANCE = new GeneratorModifierRegistryModule();
+        static final GeneratorModifierRegistryModule INSTANCE = new GeneratorModifierRegistryModule();
     }
 }

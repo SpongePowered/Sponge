@@ -41,6 +41,7 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;

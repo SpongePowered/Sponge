@@ -62,13 +62,12 @@ public final class SpongePlayerDataHandler {
     private boolean hasInitialized = false;
     private Path playerDir;
 
-    private final Map<UUID, SpongePlayerData> playerDataMap = new ConcurrentHashMap<>();
+    private Map<UUID, SpongePlayerData> playerDataMap;
 
     public static void init() {
         SpongePlayerDataHandler handlerInstance = Holder.INSTANCE;
-        if (handlerInstance.hasInitialized) {
-            return;
-        }
+        handlerInstance.playerDataMap = new ConcurrentHashMap<>();
+
         @Nullable File root = DimensionManager.getCurrentSaveRootDirectory();
         if (root == null) {
             return;
@@ -196,7 +195,7 @@ public final class SpongePlayerDataHandler {
         return Optional.ofNullable(data == null ? null : Instant.ofEpochMilli(data.lastJoined));
     }
 
-    private SpongePlayerDataHandler() { }
+    SpongePlayerDataHandler() { }
 
     private static final class Holder {
         static final SpongePlayerDataHandler INSTANCE = new SpongePlayerDataHandler();

@@ -86,10 +86,10 @@ public final class FluidTypeRegistryModule implements SpongeAdditionalCatalogReg
         }
     }
 
-    private FluidTypeRegistryModule() {
+    FluidTypeRegistryModule() {
     }
 
     private static final class Holder {
-        private static final FluidTypeRegistryModule INSTANCE = new FluidTypeRegistryModule();
+        static final FluidTypeRegistryModule INSTANCE = new FluidTypeRegistryModule();
     }
 }

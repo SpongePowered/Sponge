@@ -50,7 +50,7 @@ public class SpongeArgumentType<T> extends SpongeArgumentHolder<ArgumentType<T>>
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Function<String, T> getConverter(final Class<T> type, String converterKey) {
+    static <T> Function<String, T> getConverter(final Class<T> type, String converterKey) {
         if (!converters.containsKey(converterKey)) {
             try {
                 final Method valueOf = type.getMethod("valueOf", String.class);

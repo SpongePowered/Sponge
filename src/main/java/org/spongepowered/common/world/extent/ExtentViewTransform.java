@@ -553,7 +553,7 @@ public class ExtentViewTransform implements DefaultedExtent {
         private final DiscreteTransform3 transform;
         private final boolean valid;
 
-        private DiscreteTransform3to2(DiscreteTransform3 transform) {
+        DiscreteTransform3to2(DiscreteTransform3 transform) {
             this.transform = transform;
 
             /*
@@ -577,12 +577,12 @@ public class ExtentViewTransform implements DefaultedExtent {
             this.valid = xSign == zSign && xSign != ySign;
         }
 
-        private int transformX(int x, int y) {
+        int transformX(int x, int y) {
             Preconditions.checkState(this.valid, "Cannot access biomes when rotated around an axis that isn't y");
             return this.transform.transformX(x, 0, y);
         }
 
-        private int transformZ(int x, int y) {
+        int transformZ(int x, int y) {
             Preconditions.checkState(this.valid, "Cannot access biomes when rotated around an axis that isn't y");
             return this.transform.transformZ(x, 0, y);
         }

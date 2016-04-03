@@ -47,6 +47,6 @@ public class TimingsFactoryModule implements FactoryRegistry<TimingsFactory, Tim
     }
 
     private static final class Holder {
-        private static final SpongeTimingsFactory INSTANCE = new SpongeTimingsFactory();
+        static final SpongeTimingsFactory INSTANCE = new SpongeTimingsFactory();
     }
 }

@@ -42,7 +42,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
 
     private final Map<String, DamageType> damageSourceToTypeMappings = new HashMap<>();
 
-    private DamageSourceToTypeProvider() {
+    DamageSourceToTypeProvider() {
 
         this.damageSourceToTypeMappings.put("anvil", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
@@ -83,6 +83,6 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
     }
 
     private static final class Holder {
-        private static final DamageSourceToTypeProvider INSTANCE = new DamageSourceToTypeProvider();
+        static final DamageSourceToTypeProvider INSTANCE = new DamageSourceToTypeProvider();
     }
 }

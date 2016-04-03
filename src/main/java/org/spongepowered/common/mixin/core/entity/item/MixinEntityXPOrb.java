@@ -25,13 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityXPOrb;
+import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.ExpOrbData;
+import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.ExperienceOrb;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeExpOrbData;
+import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntityXPOrb;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
@@ -53,8 +57,23 @@ public abstract class MixinEntityXPOrb extends MixinEntity implements Experience
     }
 
     @Override
+    public Value<Integer> experience() {
+        return SpongeValueFactory.boundedBuilder(Keys.CONTAINED_EXPERIENCE)
+                .minimum(0)
+                .maximum(Integer.MAX_VALUE)
+                .actualValue(this.xpValue)
+                .defaultValue(0)
+                .build();
+    }
+
+    @Override
+    public ExpOrbData experienceHeld() {
+        return new SpongeExpOrbData(this.xpValue);
+    }
+
+    @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
-        manipulators.add(get(ExpOrbData.class).get());
+        manipulators.add(experienceHeld());
     }
 }

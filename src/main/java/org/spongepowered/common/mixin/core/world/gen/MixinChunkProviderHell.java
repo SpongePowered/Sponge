@@ -53,6 +53,7 @@ import java.util.Random;
 @Mixin(ChunkProviderHell.class)
 public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
+    @Shadow @Final private net.minecraft.world.World worldObj;
     @Shadow @Final private boolean field_177466_i;
     @Shadow @Final public Random hellRNG;
     @Shadow @Final private MapGenNetherBridge genNetherBridge;
@@ -71,6 +72,8 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
         if (this.field_177466_i) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
             generator.getPopulators().add((Populator) this.genNetherBridge);
+            // TODO: Remove once structures are properly implemented
+            this.genNetherBridge.worldObj = this.worldObj;
         }
     }
 
