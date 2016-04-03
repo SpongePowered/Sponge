@@ -54,56 +54,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public Rotations rightArmRotation;
     @Shadow public Rotations leftLegRotation;
     @Shadow public Rotations rightLegRotation;
-
-    @Shadow public abstract boolean getShowArms();
-    @Shadow public abstract boolean hasNoBasePlate();
-    @Shadow public abstract boolean hasNoGravity();
-    @Shadow protected abstract void setNoBasePlate(boolean p_175426_1_);
-    @Shadow protected abstract void setNoGravity(boolean p_175425_1_);
     @Shadow public abstract Rotations shadow$getHeadRotation();
     @Shadow public abstract Rotations getBodyRotation();
-
-    @Override
-    public boolean isSmall() {
-        return (this.dataWatcher.getWatchableObjectByte(10) & 1) != 0;
-    }
-
-    @Override
-    public void setSmall(boolean small) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(10);
-        this.dataWatcher.updateObject(10, (byte) (small ? (b0 | 1) : (b0 & -2)));
-    }
-
-    @Override
-    public boolean doesShowArms() {
-        return this.getShowArms();
-    }
-
-    @Override
-    public void setShowArms(boolean showArms) {
-        byte b0 = this.dataWatcher.getWatchableObjectByte(10);
-        this.dataWatcher.updateObject(10, (byte) (showArms ? (b0 | 4) : (b0 & -5)));
-    }
-
-    @Override
-    public boolean hasBasePlate() {
-        return !this.hasNoBasePlate();
-    }
-
-    @Override
-    public void setHasBasePlate(boolean baseplate) {
-        this.setNoBasePlate(!baseplate);
-    }
-
-    @Override
-    public boolean hasGravity() {
-        return !this.hasNoGravity();
-    }
-
-    @Override
-    public void setGravity(boolean gravity) {
-        this.setNoGravity(!gravity);
-    }
 
     @Override
     public BodyPartRotationalData getBodyPartRotationalData() {
@@ -126,4 +78,5 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getBodyPartRotationalData());
     }
+
 }
