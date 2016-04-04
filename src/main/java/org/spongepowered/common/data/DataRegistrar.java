@@ -356,6 +356,9 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
                 ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
 
+        dataManager.registerDualProcessor(GlowingData.class, SpongeGlowingData.class, ImmutableGlowingData.class, ImmutableSpongeGlowingData.class,
+                new GlowingDataProcessor());
+
         // Item Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,

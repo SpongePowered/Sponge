@@ -307,6 +307,7 @@ public class KeyRegistry {
         keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
         keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
         keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
+        keyMap.put("glowing", makeSingleKey(Boolean.class, Value.class, of("Glowing")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
