@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.Item;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -54,6 +55,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.IntHashMap;
+import net.minecraft.util.Vec3;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -96,6 +98,7 @@ import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -475,6 +478,18 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
         SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
         ci.cancel();
+    }
+
+    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;interactAt(Lnet/minecraft/entity/player/EntityPlayer;Lnet/minecraft/util/Vec3;)Z"))
+    public boolean onEntityInteractAt(net.minecraft.entity.Entity entityIn, EntityPlayer playerIn, Vec3 hitVec) {
+        InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
+                Cause.of(NamedCause.source(playerIn)), Optional.of(VecHelper.toVector(hitVec)), (org.spongepowered.api.entity.Entity) entityIn);
+            SpongeImpl.postEvent(event);
+            if (!event.isCancelled()) {
+                return entityIn.interactAt(playerIn, hitVec);
+            }
+
+            return false;
     }
 
     @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
