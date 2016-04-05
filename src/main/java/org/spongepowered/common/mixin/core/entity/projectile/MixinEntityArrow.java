@@ -224,17 +224,15 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
                 // Sponge start
                 if (!this.worldObj.isRemote) {
                     if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), movingobjectposition)) {
+                        // deflect and drop to ground
+                        this.motionX *= -0.10000000149011612D;
+                        this.motionY *= -0.10000000149011612D;
+                        this.motionZ *= -0.10000000149011612D;
+                        this.rotationYaw += 180.0F;
+                        this.mcEntity.prevRotationYaw += 180.0F;
+                        this.ticksInAir = 0;
                         return;
                     }
-
-                    // deflect and drop to ground
-                    this.motionX *= -0.10000000149011612D;
-                    this.motionY *= -0.10000000149011612D;
-                    this.motionZ *= -0.10000000149011612D;
-                    this.rotationYaw += 180.0F;
-                    this.mcEntity.prevRotationYaw += 180.0F;
-                    this.ticksInAir = 0;
-                    return;
                 }
                 // Sponge end
 
