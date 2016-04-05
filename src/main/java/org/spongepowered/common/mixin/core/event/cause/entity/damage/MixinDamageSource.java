@@ -68,7 +68,7 @@ public abstract class MixinDamageSource implements DamageSource {
         this.apiDamageType = damageType.orElse(DamageTypes.CUSTOM);
     }
 
-    @Inject(method = "setExplosionSource", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "causeExplosionDamage(Lnet/minecraft/world/Explosion;)Lnet/minecraft/util/DamageSource;", at = @At("HEAD"), cancellable = true)
     private static void onSetExplosionSource(Explosion explosionIn, CallbackInfoReturnable<net.minecraft.util.DamageSource> cir) {
         if (explosionIn != null && explosionIn.exploder != null && explosionIn.worldObj != null) {
             if (explosionIn.getExplosivePlacedBy() == null) {

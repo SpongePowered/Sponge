@@ -435,7 +435,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
     }

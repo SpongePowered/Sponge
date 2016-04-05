@@ -183,11 +183,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fireResistance;
     @Shadow public int fire;
     @Shadow public int dimension;
-    @Shadow public net.minecraft.entity.Entity riddenByEntity;
-    @Shadow public net.minecraft.entity.Entity ridingEntity;
     @Shadow protected Random rand;
     @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
     @Shadow public abstract boolean getFlag(int flag);
