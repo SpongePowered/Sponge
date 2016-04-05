@@ -24,15 +24,26 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
+import net.minecraft.util.MovingObjectPosition;
+import net.minecraft.util.Vec3;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.projectile.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
@@ -41,6 +52,8 @@ import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
+
+    private Entity mcEntity = (Entity)(Object) this;
 
     @Shadow public double damage;
     @Shadow public Entity shootingEntity;
@@ -87,4 +100,28 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
         super.writeToNbt(compound);
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
     }
+
+    @ModifyVariable(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/MovingObjectPosition;<init>(Lnet/minecraft/entity/Entity;)V", shift = At.Shift.BY, by = 2))
+    private MovingObjectPosition onAfterMoving(MovingObjectPosition movingObjectPosition) {
+        if (this.worldObj.isRemote) {
+            return movingObjectPosition;
+        }
+
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), movingObjectPosition)) {
+            movingObjectPosition = null;
+        }
+        return movingObjectPosition;
+     }
+
+    @Inject(method = "onUpdate", at = @At(value = "INVOKE", args="log=true",target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
+    public void onBlockHit(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3 vec, Vec3 vec1, MovingObjectPosition movingObjectPosition, Entity entity, List<Entity> list, double d0, BlockPos pos1, IBlockState state1, float f5) {
+        if (this.worldObj.isRemote) {
+            return;
+        }
+
+        if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), movingObjectPosition)) {
+            ci.cancel();
+        }
+    }
+
 }

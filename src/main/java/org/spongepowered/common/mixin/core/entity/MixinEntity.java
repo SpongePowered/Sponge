@@ -54,7 +54,6 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -72,9 +71,7 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
@@ -109,10 +106,10 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.mixin.core.item.MixinItemStack;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
@@ -120,7 +117,6 @@ import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
@@ -726,7 +722,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     // for sponge internal use only
-    @SuppressWarnings("unchecked")
     public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim, boolean forced) {
         MinecraftServer mcServer = MinecraftServer.getServer();
         final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
@@ -1051,25 +1046,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return;
         }
 
-        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        } else {
-            IMixinEntity spongeEntity = (IMixinEntity) entity;
-            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (user.isPresent()) {
-                cause = cause.with(NamedCause.owner(user.get()));
-            }
-        }
-
-        // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
-        SpongeImpl.postEvent(event);
-
-        if (!event.isCancelled()) {
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, entity);
         }
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
@@ -1079,49 +1058,21 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return;
         }
 
-        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        } else {
-            IMixinEntity spongeEntity = (IMixinEntity) entity;
-            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (user.isPresent()) {
-                cause = cause.with(NamedCause.owner(user.get()));
-            }
-        }
-
-        // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), Direction.NONE);
-        SpongeImpl.postEvent(event);
-
-        if (!event.isCancelled()) {
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
         }
-
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
-        if (block == Blocks.air) {
-            return;
-        } else if (world.isRemote) {
+        if (world.isRemote) {
             block.onFallenUpon(world, pos, entity, fallDistance);
             return;
         }
 
-        if (entity instanceof EntityPlayer) {
-            StaticMixinHelper.collidePlayer = (EntityPlayerMP) entity;
-        }
-
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity)), (BlockState) world.getBlockState(pos), new Location<World>((World) world, VecHelper.toVector(pos)), Direction.UP);
-        SpongeImpl.postEvent(event);
-
-        if (!event.isCancelled()) {
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
         }
-
-        StaticMixinHelper.collidePlayer = null;
     }
 
     @Override
