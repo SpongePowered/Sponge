@@ -57,7 +57,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
@@ -81,6 +80,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
@@ -117,6 +117,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -267,6 +268,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.playerNetServerHandler.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+    }
+
+    @Override
+    public void sendBookView(BookView bookView) {
+        BookFaker.fakeBookView(bookView, this);
     }
 
     @Override
@@ -571,6 +577,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public Value<GameMode> gameMode() {
         return new SpongeValue<>(Keys.GAME_MODE, DataConstants.Catalog.DEFAULT_GAMEMODE,
                 (GameMode) (Object) this.interactionManager.getGameType());
+    }
+
+    @Override
+    @Nullable
+    public Text getDisplayNameText() {
+        return Text.of(getName());
+    }
+
+    @Override
+    public void setDisplayName(@Nullable Text displayName) {
+        // Do nothing
     }
 
     @Override

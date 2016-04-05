@@ -52,7 +52,9 @@ import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.serializer.BookViewDataBuilder;
 import org.spongepowered.api.text.serializer.TextConfigSerializer;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Location;
@@ -90,7 +92,6 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
-import org.spongepowered.common.data.processor.dual.entity.CustomNameVisibleDualProcessor;
 import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
@@ -153,6 +154,7 @@ public class DataRegistrar {
 
         // Text stuff
         dataManager.registerBuilder(Text.class, new TextConfigSerializer());
+        dataManager.registerBuilder(BookView.class, new BookViewDataBuilder());
 
         // Util stuff
         dataManager.registerBuilder(VariableAmount.BaseAndAddition.class, new BaseAndAdditionBuilder());
@@ -605,7 +607,7 @@ public class DataRegistrar {
 
 
         dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
-                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleDualProcessor());
+                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
 
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
