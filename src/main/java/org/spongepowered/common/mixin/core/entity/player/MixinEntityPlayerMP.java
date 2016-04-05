@@ -579,6 +579,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    @Nullable
+    public Text getDisplayNameText() {
+        return Text.of(getName());
+    }
+
+    @Override
+    public void setDisplayName(@Nullable Text displayName) {
+        // Do nothing
+    }
+
+    @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
