@@ -204,9 +204,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract void doBlockCollisions();
 
 
     // @formatter:on
+
+    @Shadow(prefix = "shadow$")
+    public void shadow$onUpdate() {
+    }
 
     @Override
     public boolean isInConstructPhase() {
