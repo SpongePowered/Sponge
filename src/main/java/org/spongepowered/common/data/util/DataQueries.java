@@ -40,6 +40,7 @@ public final class DataQueries {
     public static final DataQuery X_POS = of("x");
     public static final DataQuery Y_POS = of("y");
     public static final DataQuery Z_POS = of("z");
+    public static final DataQuery W_POS = of("w");
 
     // Banners
     public static final DataQuery BASE = of("Base");
@@ -155,6 +156,16 @@ public final class DataQueries {
     // SpongePlayerData
     public static final DataQuery PLAYER_DATA_JOIN = of("FirstJoin");
     public static final DataQuery PLAYER_DATA_LAST = of("LastPlayed");
+
+    // Java API Queries for DataSerializers
+    public static final DataQuery LOCAL_TIME_HOUR = of("LocalTimeHour");
+    public static final DataQuery LOCAL_TIME_MINUTE = of("LocalTimeMinute");
+    public static final DataQuery LOCAL_TIME_SECOND = of("LocalTimeSecond");
+    public static final DataQuery LOCAL_TIME_NANO = of("LocalTimeNano");
+    public static final DataQuery LOCAL_DATE_YEAR = of("LocalDateYear");
+    public static final DataQuery LOCAL_DATE_MONTH = of("LocalDateMonth");
+    public static final DataQuery LOCAL_DATE_DAY = of("LocalDateDay");
+    public static final DataQuery ZONE_TIME_ID = of("ZoneDateTimeId");
 
     private DataQueries() {
     }
