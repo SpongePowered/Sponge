@@ -41,8 +41,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 
-import java.util.Optional;
-
 @Mixin(EntityAIMate.class)
 public abstract class MixinEntityAIMate {
 
@@ -55,7 +53,7 @@ public abstract class MixinEntityAIMate {
     @Inject(method = "spawnBaby()V", at = @At(value = "INVOKE_ASSIGN", target = METHOD_INVOKE_ASSIGN, shift = At.Shift.AFTER), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callBreedEvent(CallbackInfo ci, EntityAgeable entityageable) {
         final BreedEntityEvent.Breed event = SpongeEventFactory.createBreedEntityEventBreed(Cause.of(NamedCause.source(this.theAnimal)),
-            Optional.<Vector3d>empty(), (Ageable)entityageable, (Ageable)this.targetMate);
+            Vector3d.ZERO, (Ageable)entityageable, (Ageable)this.targetMate);
         SpongeImpl.postEvent(event);
         if(event.isCancelled()) {
             ci.cancel();

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -44,7 +45,6 @@ import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
-import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
@@ -508,19 +508,28 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 //    this.playerEntity.interactWith(entity);
                 // } else
                 if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
-                    InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
-                            Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector3d(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);
-                        SpongeImpl.postEvent(event);
-                        if (!event.isCancelled()) {
+                    InteractEntityEvent.Secondary event;
+                    if (packetIn.getHand() == EnumHand.MAIN_HAND) {
+                        event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), VecHelper.toVector3d(packetIn.getHitVec()), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    } else {
+                        event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), VecHelper.toVector3d(packetIn.getHitVec()), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    }
 
-                            EnumHand hand = packetIn.getHand();
-                            ItemStack itemstack = this.playerEntity.getHeldItem(hand);
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
 
-                            // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
-                            if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
-                                this.playerEntity.interact(entity, itemstack, hand);
-                            }
+                        EnumHand hand = packetIn.getHand();
+                        ItemStack itemstack = this.playerEntity.getHeldItem(hand);
+
+                        // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
+                        if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
+                            this.playerEntity.interact(entity, itemstack, hand);
                         }
+                    }
                 } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
                     if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
                         this.kickPlayerFromServer("Attempting to attack an invalid entity");
@@ -532,8 +541,16 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                         return; // PVP is disabled, ignore
                     }
 
-                    InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
-                        Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entity);
+                    InteractEntityEvent.Primary event;
+                    if (packetIn.getHand() == EnumHand.MAIN_HAND) {
+                        event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), Vector3d.ZERO, (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    } else {
+                        event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), Vector3d.ZERO, (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    }
                     SpongeImpl.postEvent(event);
                     if (!event.isCancelled()) {
                         this.playerEntity.attackTargetEntityWithCurrentItem(entity);
