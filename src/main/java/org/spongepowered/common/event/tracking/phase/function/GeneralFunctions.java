@@ -29,7 +29,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.util.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -39,6 +38,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
@@ -73,7 +73,8 @@ public class GeneralFunctions {
 
     public static final int EVENT_COUNT = 5;
 
-    public static void processUserBreakage(@Nullable BlockChange change, World minecraftWorld, Transaction<BlockSnapshot> transaction, @Nullable Entity tickingEntity) {
+    public static void processUserBreakage(@Nullable BlockChange change, net.minecraft.world.World minecraftWorld,
+            Transaction<BlockSnapshot> transaction, @Nullable Entity tickingEntity) {
         if (change == BlockChange.BREAK) {
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
             EntityUtil.findHangingEntities(minecraftWorld, blockPos).stream()
@@ -108,7 +109,7 @@ public class GeneralFunctions {
         }
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[4];
         final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).get());
-        final org.spongepowered.api.world.World world = causeTracker.getWorld();
+        final World world = causeTracker.getWorld();
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
         if (processMultiEvents(transactionArrays, blockEvents, mainEvents, builder, world)) {
             return;
@@ -152,7 +153,7 @@ public class GeneralFunctions {
     }
 
     public static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
-            ChangeBlockEvent[] mainEvents, Cause.Builder builder, org.spongepowered.api.world.World world) {
+            ChangeBlockEvent[] mainEvents, Cause.Builder builder, World world) {
         for (BlockChange blockChange : BlockChange.values()) {
             if (blockChange == BlockChange.DECAY) { // Decay takes place after.
                 continue;
@@ -241,7 +242,7 @@ public class GeneralFunctions {
         }
         final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[4];
         final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).get());
-        final org.spongepowered.api.world.World world = causeTracker.getWorld();
+        final World world = causeTracker.getWorld();
         iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
         if (processMultiEvents(transactionArrays, blockEvents, mainEvents, builder, world)) {
             return;
@@ -284,7 +285,7 @@ public class GeneralFunctions {
     }
 
     private static boolean processMultiEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
-            ChangeBlockEvent[] mainEvents, Cause.Builder builder, org.spongepowered.api.world.World world) {
+            ChangeBlockEvent[] mainEvents, Cause.Builder builder, World world) {
         if (blockEvents.size() > 1) {
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];

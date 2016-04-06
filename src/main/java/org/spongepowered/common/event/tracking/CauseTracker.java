@@ -130,7 +130,7 @@ public final class CauseTracker {
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         }
         IPhaseState currentState = this.stack.peekState();
-        if (true) { //!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
+        if (!currentState.canSwitchTo(state) && (state != GeneralPhase.Post.UNWINDING && currentState == GeneralPhase.Post.UNWINDING)) {
             // This is to detect incompatible phase switches.
             PrettyPrinter printer = new PrettyPrinter(80);
             printer.add("Switching Phase").centre().hr();
@@ -148,8 +148,6 @@ public final class CauseTracker {
 
         this.stack.push(state, phaseContext);
     }
-
-
 
     public void completePhase() {
         final PhaseData tuple = this.stack.peek();
