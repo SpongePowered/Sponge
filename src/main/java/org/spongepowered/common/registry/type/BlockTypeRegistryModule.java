@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
@@ -34,6 +34,8 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -43,13 +45,16 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -132,6 +137,13 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
                 BooleanTraitRegistryModule.getInstance().registerBlock(propertyId, block, (BooleanTrait) property);
             }
         }
+    }
+
+    @Override
+    public void registerDefaults() {
+        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(StaticMixinHelper.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.air.getDefaultState()).build();
+        RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
+        this.blockTypeMappings.put("none", BlockTypes.AIR);
     }
 
     BlockTypeRegistryModule() { }

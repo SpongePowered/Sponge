@@ -40,6 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class StaticMixinHelper {
 
@@ -69,6 +70,7 @@ public class StaticMixinHelper {
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
     public static boolean destructItemDrop = false;
+    public static UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
     // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
@@ -80,4 +82,9 @@ public class StaticMixinHelper {
     public static boolean gettingSpawnList;
     public static boolean structureSpawning;
     public static boolean dispenserDispensing;
+
+    // For animation packet
+    public static int lastAnimationPacketTick = 0;
+    public static int lastDigPacketTick = 0;
+    public static EntityPlayerMP lastAnimationPlayer = null;
 }
