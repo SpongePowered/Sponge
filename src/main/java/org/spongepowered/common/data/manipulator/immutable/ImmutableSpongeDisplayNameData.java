@@ -38,12 +38,15 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<Text, ImmutableDisplayNameData, DisplayNameData> implements ImmutableDisplayNameData {
 
+    private final ImmutableSpongeValue<Text> nameValue;
+
     public ImmutableSpongeDisplayNameData() {
         this(Text.of());
     }
 
     public ImmutableSpongeDisplayNameData(Text value) {
         super(ImmutableDisplayNameData.class, value, Keys.DISPLAY_NAME);
+        this.nameValue = new ImmutableSpongeValue<>(this.usedKey, Text.of(), value);
     }
 
     @Override
@@ -58,7 +61,7 @@ public class ImmutableSpongeDisplayNameData extends AbstractImmutableSingleData<
 
     @Override
     public ImmutableValue<Text> displayName() {
-        return new ImmutableSpongeValue<>(this.usedKey, Text.of(), this.getValue());
+        return this.nameValue;
     }
 
     @Override
