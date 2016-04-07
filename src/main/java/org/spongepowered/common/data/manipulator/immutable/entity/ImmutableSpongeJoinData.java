@@ -54,7 +54,7 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
         registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
 
         registerFieldGetter(Keys.LAST_DATE_PLAYED, this.lastJoined::get);
-        registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastJoined);
+        registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastPlayed);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
     }
 
     @Override
-    public ImmutableValue<Instant> lastJoined() {
+    public ImmutableValue<Instant> lastPlayed() {
         return this.lastJoined;
     }
 
@@ -76,7 +76,7 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
     public int compareTo(ImmutableJoinData o) {
         return ComparisonChain.start()
                 .compare(o.firstPlayed().get(), this.firstJoined.get())
-                .compare(o.lastJoined().get(), this.lastJoined.get())
+                .compare(o.lastPlayed().get(), this.lastJoined.get())
                 .result();
     }
 
