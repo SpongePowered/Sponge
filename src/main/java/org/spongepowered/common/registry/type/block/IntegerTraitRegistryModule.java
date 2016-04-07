@@ -36,6 +36,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,12 +56,12 @@ public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalog
 
     @Override
     public void registerAdditionalCatalog(IntegerTrait extraCatalog) {
-        this.integerTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.integerTraitMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
     public Optional<IntegerTrait> getById(String id) {
-        return Optional.ofNullable(this.integerTraitMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.integerTraitMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -70,8 +71,8 @@ public final class IntegerTraitRegistryModule implements SpongeAdditionalCatalog
 
     public void registerBlock(String id, BlockType block, IntegerTrait property) {
         checkNotNull(id, "Id was null!");
-        this.integerTraitMap.put(id.toLowerCase(), property);
-        final String propertyId = block.getId().toLowerCase() + "_" + property.getName().toLowerCase();
+        this.integerTraitMap.put(id.toLowerCase(Locale.ENGLISH), property);
+        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.integerTraitMap.put(propertyId, property);
     }
 

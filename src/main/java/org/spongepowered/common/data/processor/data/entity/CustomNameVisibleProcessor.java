@@ -22,10 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.dual.entity;
+package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCustomNameVisibleData;
@@ -41,10 +40,10 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.Optional;
 
-public final class CustomNameVisibleDualProcessor extends
+public final class CustomNameVisibleProcessor extends
         AbstractSingleDataSingleTargetProcessor<Entity, Boolean, Value<Boolean>, CustomNameVisibleData, ImmutableCustomNameVisibleData> {
 
-    public CustomNameVisibleDualProcessor() {
+    public CustomNameVisibleProcessor() {
         super(Keys.CUSTOM_NAME_VISIBLE, Entity.class);
     }
 
@@ -81,11 +80,6 @@ public final class CustomNameVisibleDualProcessor extends
 
     @Override
     protected boolean supports(Entity container) {
-        return !(container instanceof Humanoid);
-    }
-
-    @Override
-    public boolean supports(DataHolder container) {
         return !(container instanceof Humanoid);
     }
 

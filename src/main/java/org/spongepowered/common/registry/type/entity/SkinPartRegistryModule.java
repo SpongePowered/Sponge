@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public final class SkinPartRegistryModule implements CatalogRegistryModule<SkinP
 
     @Override
     public Optional<SkinPart> getById(String id) {
-        return Optional.ofNullable(this.skinPartMap.get(checkNotNull(id, "id").toLowerCase()));
+        return Optional.ofNullable(this.skinPartMap.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

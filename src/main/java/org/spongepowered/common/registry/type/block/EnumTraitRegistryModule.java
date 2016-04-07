@@ -36,6 +36,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -55,12 +56,12 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
 
     @Override
     public void registerAdditionalCatalog(EnumTrait<?> extraCatalog) {
-        this.enumTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.enumTraitMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
     public Optional<EnumTrait<?>> getById(String id) {
-        return Optional.ofNullable(this.enumTraitMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.enumTraitMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -71,8 +72,8 @@ public final class EnumTraitRegistryModule implements SpongeAdditionalCatalogReg
     public void registerBlock(String id, BlockType block, EnumTrait<?> property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
-        this.enumTraitMap.put(id.toLowerCase(), property);
-        final String propertyId = block.getId().toLowerCase() + "_" + property.getName().toLowerCase();
+        this.enumTraitMap.put(id.toLowerCase(Locale.ENGLISH), property);
+        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.enumTraitMap.put(propertyId, property);
     }
 

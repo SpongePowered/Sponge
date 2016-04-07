@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import java.util.Locale;
+
 @Mixin(Item.ToolMaterial.class)
 public abstract class MixinItemToolMaterial implements ToolType {
 
@@ -48,7 +50,7 @@ public abstract class MixinItemToolMaterial implements ToolType {
         if (toString.equalsIgnoreCase("emerald")) {
             toString = "diamond";
         }
-        this.name = toString.toLowerCase();
+        this.name = toString.toLowerCase(Locale.ENGLISH);
         this.capitalizedName = StringUtils.capitalize(this.name);
     }
 

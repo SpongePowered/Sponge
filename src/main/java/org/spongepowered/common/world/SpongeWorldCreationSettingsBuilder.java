@@ -81,6 +81,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = settings.isEnabled();
         this.loadOnStartup = settings.loadOnStartup();
         this.keepSpawnLoaded = settings.doesKeepSpawnLoaded();
+        this.generateSpawnOnLoad = settings.doesGenerateSpawnOnLoad();
         this.pvpEnabled = settings.isPVPEnabled();
     }
 
@@ -96,6 +97,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.worldEnabled = properties.isEnabled();
         this.loadOnStartup = properties.loadOnStartup();
         this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
         this.pvpEnabled = properties.isPVPEnabled();
     }
 

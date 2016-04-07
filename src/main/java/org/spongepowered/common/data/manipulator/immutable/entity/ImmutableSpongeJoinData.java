@@ -38,52 +38,52 @@ import java.time.Instant;
 
 public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoinData, JoinData> implements ImmutableJoinData {
 
-    private final Instant firstJoined;
-    private final Instant lastJoined;
+    private final ImmutableSpongeValue<Instant> firstJoined;
+    private final ImmutableSpongeValue<Instant> lastJoined;
 
     public ImmutableSpongeJoinData(Instant firstJoined, Instant lastJoined) {
         super(ImmutableJoinData.class);
-        this.firstJoined = firstJoined;
-        this.lastJoined = lastJoined;
+        this.firstJoined = new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, firstJoined);
+        this.lastJoined = new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, lastJoined);
         registerGetters();
     }
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.FIRST_DATE_PLAYED, () -> this.firstJoined);
+        registerFieldGetter(Keys.FIRST_DATE_PLAYED, this.firstJoined::get);
         registerKeyValue(Keys.FIRST_DATE_PLAYED, this::firstPlayed);
 
-        registerFieldGetter(Keys.LAST_DATE_PLAYED, () -> this.lastJoined);
+        registerFieldGetter(Keys.LAST_DATE_PLAYED, this.lastJoined::get);
         registerKeyValue(Keys.LAST_DATE_PLAYED, this::lastJoined);
     }
 
     @Override
     public ImmutableValue<Instant> firstPlayed() {
-        return new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined);
+        return this.firstJoined;
     }
 
     @Override
     public ImmutableValue<Instant> lastJoined() {
-        return new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined);
+        return this.lastJoined;
     }
 
     @Override
     public JoinData asMutable() {
-        return new SpongeJoinData(this.firstJoined, this.lastJoined);
+        return new SpongeJoinData(this.firstJoined.get(), this.lastJoined.get());
     }
 
     @Override
     public int compareTo(ImmutableJoinData o) {
         return ComparisonChain.start()
-                .compare(o.firstPlayed().get(), this.firstJoined)
-                .compare(o.lastJoined().get(), this.lastJoined)
+                .compare(o.firstPlayed().get(), this.firstJoined.get())
+                .compare(o.lastJoined().get(), this.lastJoined.get())
                 .result();
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.FIRST_DATE_PLAYED.getQuery(), this.firstJoined.toEpochMilli())
-                .set(Keys.LAST_DATE_PLAYED.getQuery(), this.lastJoined.toEpochMilli());
+                .set(Keys.FIRST_DATE_PLAYED.getQuery(), this.firstJoined.get().toEpochMilli())
+                .set(Keys.LAST_DATE_PLAYED.getQuery(), this.lastJoined.get().toEpochMilli());
     }
 }

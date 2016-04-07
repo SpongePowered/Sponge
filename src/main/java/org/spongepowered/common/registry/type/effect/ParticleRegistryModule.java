@@ -41,6 +41,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     @Override
     public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -62,53 +63,53 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     @Override
     public void registerDefaults() {
-        this.addParticleType("explosion_normal", new SpongeParticleType(EnumParticleTypes.EXPLOSION_NORMAL, true));
-        this.addParticleType("explosion_large", new SpongeParticleType.Resizable(EnumParticleTypes.EXPLOSION_LARGE, 1f));
-        this.addParticleType("explosion_huge", new SpongeParticleType(EnumParticleTypes.EXPLOSION_HUGE, false));
-        this.addParticleType("fireworks_spark", new SpongeParticleType(EnumParticleTypes.FIREWORKS_SPARK, true));
-        this.addParticleType("water_bubble", new SpongeParticleType(EnumParticleTypes.WATER_BUBBLE, true));
-        this.addParticleType("water_splash", new SpongeParticleType(EnumParticleTypes.WATER_SPLASH, true));
-        this.addParticleType("water_wake", new SpongeParticleType(EnumParticleTypes.WATER_WAKE, true));
-        this.addParticleType("suspended", new SpongeParticleType(EnumParticleTypes.SUSPENDED, false));
-        this.addParticleType("suspended_depth", new SpongeParticleType(EnumParticleTypes.SUSPENDED_DEPTH, false));
-        this.addParticleType("crit", new SpongeParticleType(EnumParticleTypes.CRIT, true));
-        this.addParticleType("crit_magic", new SpongeParticleType(EnumParticleTypes.CRIT_MAGIC, true));
-        this.addParticleType("smoke_normal", new SpongeParticleType(EnumParticleTypes.SMOKE_NORMAL, true));
-        this.addParticleType("smoke_large", new SpongeParticleType(EnumParticleTypes.SMOKE_LARGE, true));
-        this.addParticleType("spell", new SpongeParticleType(EnumParticleTypes.SPELL, false));
-        this.addParticleType("spell_instant", new SpongeParticleType(EnumParticleTypes.SPELL_INSTANT, false));
-        this.addParticleType("spell_mob", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB, Color.BLACK));
-        this.addParticleType("spell_mob_ambient", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB_AMBIENT, Color.BLACK));
-        this.addParticleType("spell_witch", new SpongeParticleType(EnumParticleTypes.SPELL_WITCH, false));
-        this.addParticleType("drip_water", new SpongeParticleType(EnumParticleTypes.DRIP_WATER, false));
-        this.addParticleType("drip_lava", new SpongeParticleType(EnumParticleTypes.DRIP_LAVA, false));
-        this.addParticleType("villager_angry", new SpongeParticleType(EnumParticleTypes.VILLAGER_ANGRY, false));
-        this.addParticleType("villager_happy", new SpongeParticleType(EnumParticleTypes.VILLAGER_HAPPY, true));
-        this.addParticleType("town_aura", new SpongeParticleType(EnumParticleTypes.TOWN_AURA, true));
-        this.addParticleType("note", new SpongeParticleType.Note(EnumParticleTypes.NOTE, NotePitches.F_SHARP0));
-        this.addParticleType("portal", new SpongeParticleType(EnumParticleTypes.PORTAL, true));
-        this.addParticleType("enchantment_table", new SpongeParticleType(EnumParticleTypes.ENCHANTMENT_TABLE, true));
-        this.addParticleType("flame", new SpongeParticleType(EnumParticleTypes.FLAME, true));
-        this.addParticleType("lava", new SpongeParticleType(EnumParticleTypes.LAVA, false));
-        this.addParticleType("footstep", new SpongeParticleType(EnumParticleTypes.FOOTSTEP, false));
-        this.addParticleType("cloud", new SpongeParticleType(EnumParticleTypes.CLOUD, true));
-        this.addParticleType("redstone", new SpongeParticleType.Colorable(EnumParticleTypes.REDSTONE, Color.RED));
-        this.addParticleType("snowball", new SpongeParticleType(EnumParticleTypes.SNOWBALL, false));
-        this.addParticleType("snow_shovel", new SpongeParticleType(EnumParticleTypes.SNOW_SHOVEL, true));
-        this.addParticleType("slime", new SpongeParticleType(EnumParticleTypes.SLIME, false));
-        this.addParticleType("heart", new SpongeParticleType(EnumParticleTypes.HEART, false));
-        this.addParticleType("barrier", new SpongeParticleType(EnumParticleTypes.BARRIER, false));
+        this.addParticleType("explosion_normal", new SpongeParticleType(EnumParticleTypes.EXPLOSION_NORMAL, "explosion_normal", true));
+        this.addParticleType("explosion_large", new SpongeParticleType.Resizable(EnumParticleTypes.EXPLOSION_LARGE, "explosion_large", 1f));
+        this.addParticleType("explosion_huge", new SpongeParticleType(EnumParticleTypes.EXPLOSION_HUGE, "explosion_huge", false));
+        this.addParticleType("fireworks_spark", new SpongeParticleType(EnumParticleTypes.FIREWORKS_SPARK, "fireworks_spark", true));
+        this.addParticleType("water_bubble", new SpongeParticleType(EnumParticleTypes.WATER_BUBBLE, "water_bubble", true));
+        this.addParticleType("water_splash", new SpongeParticleType(EnumParticleTypes.WATER_SPLASH, "water_splash", true));
+        this.addParticleType("water_wake", new SpongeParticleType(EnumParticleTypes.WATER_WAKE, "water_wake", true));
+        this.addParticleType("suspended", new SpongeParticleType(EnumParticleTypes.SUSPENDED, "suspended", false));
+        this.addParticleType("suspended_depth", new SpongeParticleType(EnumParticleTypes.SUSPENDED_DEPTH, "suspended_depth", false));
+        this.addParticleType("crit", new SpongeParticleType(EnumParticleTypes.CRIT, "crit", true));
+        this.addParticleType("crit_magic", new SpongeParticleType(EnumParticleTypes.CRIT_MAGIC, "crit_magic", true));
+        this.addParticleType("smoke_normal", new SpongeParticleType(EnumParticleTypes.SMOKE_NORMAL, "smoke_normal", true));
+        this.addParticleType("smoke_large", new SpongeParticleType(EnumParticleTypes.SMOKE_LARGE, "smoke_large", true));
+        this.addParticleType("spell", new SpongeParticleType(EnumParticleTypes.SPELL, "spell", false));
+        this.addParticleType("spell_instant", new SpongeParticleType(EnumParticleTypes.SPELL_INSTANT, "spell_instant", false));
+        this.addParticleType("spell_mob", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB, "spell_mob", Color.BLACK));
+        this.addParticleType("spell_mob_ambient", new SpongeParticleType.Colorable(EnumParticleTypes.SPELL_MOB_AMBIENT, "spell_mob_ambient", Color.BLACK));
+        this.addParticleType("spell_witch", new SpongeParticleType(EnumParticleTypes.SPELL_WITCH, "spell_witch", false));
+        this.addParticleType("drip_water", new SpongeParticleType(EnumParticleTypes.DRIP_WATER, "drip_water", false));
+        this.addParticleType("drip_lava", new SpongeParticleType(EnumParticleTypes.DRIP_LAVA, "drip_lava", false));
+        this.addParticleType("villager_angry", new SpongeParticleType(EnumParticleTypes.VILLAGER_ANGRY, "villager_angry", false));
+        this.addParticleType("villager_happy", new SpongeParticleType(EnumParticleTypes.VILLAGER_HAPPY, "villager_happy", true));
+        this.addParticleType("town_aura", new SpongeParticleType(EnumParticleTypes.TOWN_AURA, "town_aura", true));
+        this.addParticleType("note", new SpongeParticleType.Note(EnumParticleTypes.NOTE, "note", NotePitches.F_SHARP0));
+        this.addParticleType("portal", new SpongeParticleType(EnumParticleTypes.PORTAL, "portal", true));
+        this.addParticleType("enchantment_table", new SpongeParticleType(EnumParticleTypes.ENCHANTMENT_TABLE, "enchantment_table", true));
+        this.addParticleType("flame", new SpongeParticleType(EnumParticleTypes.FLAME, "flame", true));
+        this.addParticleType("lava", new SpongeParticleType(EnumParticleTypes.LAVA, "lava", false));
+        this.addParticleType("footstep", new SpongeParticleType(EnumParticleTypes.FOOTSTEP, "footstep", false));
+        this.addParticleType("cloud", new SpongeParticleType(EnumParticleTypes.CLOUD, "cloud", true));
+        this.addParticleType("redstone", new SpongeParticleType.Colorable(EnumParticleTypes.REDSTONE, "redstone", Color.RED));
+        this.addParticleType("snowball", new SpongeParticleType(EnumParticleTypes.SNOWBALL, "snowball", false));
+        this.addParticleType("snow_shovel", new SpongeParticleType(EnumParticleTypes.SNOW_SHOVEL, "snow_shovel", true));
+        this.addParticleType("slime", new SpongeParticleType(EnumParticleTypes.SLIME, "slime", false));
+        this.addParticleType("heart", new SpongeParticleType(EnumParticleTypes.HEART, "heart", false));
+        this.addParticleType("barrier", new SpongeParticleType(EnumParticleTypes.BARRIER, "barrier", false));
         this.addParticleType("item_crack",
-                             new SpongeParticleType.Item(EnumParticleTypes.ITEM_CRACK, new net.minecraft.item.ItemStack(Blocks.stone), true));
+                             new SpongeParticleType.Item(EnumParticleTypes.ITEM_CRACK, "item_crack", new net.minecraft.item.ItemStack(Blocks.stone), true));
         this.addParticleType("block_crack",
-                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_CRACK, (BlockState) Blocks.stone.getDefaultState(), true));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_CRACK, "block_crack", (BlockState) Blocks.stone.getDefaultState(), true));
         this.addParticleType("block_dust",
-                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_DUST, (BlockState) Blocks.stone.getDefaultState(), true));
-        this.addParticleType("water_drop", new SpongeParticleType(EnumParticleTypes.WATER_DROP, false));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_DUST, "block_dust", (BlockState) Blocks.stone.getDefaultState(), true));
+        this.addParticleType("water_drop", new SpongeParticleType(EnumParticleTypes.WATER_DROP, "water_drop", false));
         // Is this particle available to be spawned? It's not registered on the
         // client though
-        this.addParticleType("item_take", new SpongeParticleType(EnumParticleTypes.ITEM_TAKE, false));
-        this.addParticleType("mob_appearance", new SpongeParticleType(EnumParticleTypes.MOB_APPEARANCE, false));
+        this.addParticleType("item_take", new SpongeParticleType(EnumParticleTypes.ITEM_TAKE, "item_take", false));
+        this.addParticleType("mob_appearance", new SpongeParticleType(EnumParticleTypes.MOB_APPEARANCE, "mob_appearance", false));
     }
 
     private void addParticleType(String mapping, SpongeParticleType particle) {
@@ -120,7 +121,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
     public void registerAdditional() {
         for (EnumParticleTypes particleTypes : EnumParticleTypes.values()) {
             if (!this.particleByName.containsKey(particleTypes.getParticleName())) {
-                addParticleType(particleTypes.getParticleName().toLowerCase(), new SpongeParticleType(particleTypes, false));
+                addParticleType(particleTypes.getParticleName().toLowerCase(Locale.ENGLISH), new SpongeParticleType(particleTypes, particleTypes.getParticleName().toLowerCase(Locale.ENGLISH), false));
             }
         }
 

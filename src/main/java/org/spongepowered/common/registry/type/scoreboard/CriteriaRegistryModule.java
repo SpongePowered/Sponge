@@ -35,6 +35,7 @@ import org.spongepowered.api.scoreboard.critieria.Criteria;
 import org.spongepowered.api.scoreboard.critieria.Criterion;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class CriteriaRegistryModule implements CatalogRegistryModule<Crite
 
     @Override
     public Optional<Criterion> getById(String id) {
-        return Optional.ofNullable(this.criteriaMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.criteriaMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

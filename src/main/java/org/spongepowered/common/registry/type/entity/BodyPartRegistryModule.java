@@ -35,6 +35,7 @@ import org.spongepowered.common.data.type.SpongeBodyPart;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class BodyPartRegistryModule implements CatalogRegistryModule<BodyPart> {
 
     @Override
     public Optional<BodyPart> getById(String id) {
-        return Optional.ofNullable(this.bodyPartMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.bodyPartMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

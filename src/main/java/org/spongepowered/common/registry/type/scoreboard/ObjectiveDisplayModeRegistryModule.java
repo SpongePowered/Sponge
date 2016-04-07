@@ -35,6 +35,7 @@ import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMo
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayModes;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public final class ObjectiveDisplayModeRegistryModule implements CatalogRegistry
 
     @Override
     public Optional<ObjectiveDisplayMode> getById(String id) {
-        return Optional.ofNullable(this.objectiveDisplayModeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.objectiveDisplayModeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -31,6 +31,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.common.registry.TypeProvider;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,6 +49,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
         this.damageSourceToTypeMappings.put("arrow", DamageTypes.ATTACK);
         this.damageSourceToTypeMappings.put("cactus", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("drown", DamageTypes.DROWN);
+        this.damageSourceToTypeMappings.put("explosion.player", DamageTypes.EXPLOSIVE);
         this.damageSourceToTypeMappings.put("fall", DamageTypes.FALL);
         this.damageSourceToTypeMappings.put("fallingblock", DamageTypes.CONTACT);
         this.damageSourceToTypeMappings.put("generic", DamageTypes.GENERIC);
@@ -69,7 +71,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
 
     @Override
     public Optional<DamageType> get(String key) {
-        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase()));
+        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

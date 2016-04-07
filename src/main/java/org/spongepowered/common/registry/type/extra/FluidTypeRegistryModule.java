@@ -38,6 +38,7 @@ import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -68,7 +69,7 @@ public final class FluidTypeRegistryModule implements SpongeAdditionalCatalogReg
 
     @Override
     public Optional<FluidType> getById(String id) {
-        return Optional.ofNullable(this.fluidTypeMap.get(checkNotNull(id, "FluidType id cannot be null!").toLowerCase()));
+        return Optional.ofNullable(this.fluidTypeMap.get(checkNotNull(id, "FluidType id cannot be null!").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -42,6 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.IMixinEnumChatVisibility;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.Locale;
 import java.util.Set;
 
 @Mixin(EntityPlayer.EnumChatVisibility.class)
@@ -56,7 +57,7 @@ public abstract class MixinEnumChatVisibility implements ChatVisibility, IMixinE
     public void construct(String name, int i, int i2, String s2, CallbackInfo ci) {
         this.visibleChatTypes = Sets.newHashSet();
 
-        this.id = ((Enum) (Object) this).name().toLowerCase();
+        this.id = ((Enum) (Object) this).name().toLowerCase(Locale.ENGLISH);
         this.translation = new SpongeTranslation(this.resourceKey);
     }
 

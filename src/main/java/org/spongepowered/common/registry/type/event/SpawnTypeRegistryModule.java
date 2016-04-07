@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,14 +46,14 @@ public class SpawnTypeRegistryModule implements AdditionalCatalogRegistryModule<
 
     @Override
     public void registerAdditionalCatalog(SpawnType extraCatalog) {
-        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getId().toLowerCase()),
+        checkArgument(!this.spawnTypeMap.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH)),
                 "SpawnType with the same id is already registered: {}", extraCatalog.getId());
-        this.spawnTypeMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.spawnTypeMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
     public Optional<SpawnType> getById(String id) {
-        return Optional.ofNullable(this.spawnTypeMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase()));
+        return Optional.ofNullable(this.spawnTypeMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

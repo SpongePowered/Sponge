@@ -28,22 +28,17 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.Rotations;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
 import org.spongepowered.api.data.type.BodyPart;
+import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
-import org.spongepowered.common.data.processor.multi.entity.ArmorStandBodyPartRotationalDataProcessor;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -107,18 +102,14 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Override
     public BodyPartRotationalData getBodyPartRotationalData() {
-        Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
-
-        values.put(Keys.HEAD_ROTATION, VecHelper.toVector(this.shadow$getHeadRotation()));
-        values.put(Keys.CHEST_ROTATION, VecHelper.toVector(this.getBodyRotation()));
-        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector(this.leftArmRotation));
-        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector(this.rightArmRotation));
-        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector(this.leftLegRotation));
-        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector(this.rightLegRotation));
-        Collection<BodyPart> bodyParts = Sponge.getRegistry().getAllOf(BodyPart.class);
-        Collection<Vector3d> rotations = Arrays.asList(values.values().toArray(new Vector3d[values.values().size()]));
-        values.put(Keys.BODY_ROTATIONS, ArmorStandBodyPartRotationalDataProcessor.zipCollections(bodyParts, rotations));
-        return new SpongeBodyPartRotationalData();
+        Map<BodyPart, Vector3d> rotations = Maps.newHashMapWithExpectedSize(6);
+        rotations.put(BodyParts.HEAD, VecHelper.toVector(this.shadow$getHeadRotation()));
+        rotations.put(BodyParts.CHEST, VecHelper.toVector(this.getBodyRotation()));
+        rotations.put(BodyParts.LEFT_ARM, VecHelper.toVector(this.leftArmRotation));
+        rotations.put(BodyParts.RIGHT_ARM, VecHelper.toVector(this.rightArmRotation));
+        rotations.put(BodyParts.LEFT_LEG, VecHelper.toVector(this.leftLegRotation));
+        rotations.put(BodyParts.RIGHT_LEG, VecHelper.toVector(this.rightLegRotation));
+        return new SpongeBodyPartRotationalData(rotations);
     }
 
     @Override

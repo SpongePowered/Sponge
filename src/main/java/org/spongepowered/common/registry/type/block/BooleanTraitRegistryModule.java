@@ -37,6 +37,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -56,12 +57,12 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
 
     @Override
     public void registerAdditionalCatalog(BooleanTrait extraCatalog) {
-        this.booleanTraitMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.booleanTraitMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
     public Optional<BooleanTrait> getById(String id) {
-        return Optional.ofNullable(this.booleanTraitMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.booleanTraitMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -72,8 +73,8 @@ public final class BooleanTraitRegistryModule implements SpongeAdditionalCatalog
     public void registerBlock(String id, BlockType block, BooleanTrait property) {
         checkNotNull(id, "Id was null!");
         checkNotNull(property, "Property was null!");
-        this.booleanTraitMap.put(id.toLowerCase() + "_" + property.getName().toLowerCase(), property);
-        final String propertyId = block.getId().toLowerCase() + "_" + property.getName().toLowerCase();
+        this.booleanTraitMap.put(id.toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH), property);
+        final String propertyId = block.getId().toLowerCase(Locale.ENGLISH) + "_" + property.getName().toLowerCase(Locale.ENGLISH);
         this.booleanTraitMap.put(propertyId, property);
     }
 

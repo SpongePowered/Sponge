@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.entity.player;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.util.RespawnLocation;
 

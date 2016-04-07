@@ -36,6 +36,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public final class DifficultyRegistryModule implements CatalogRegistryModule<Dif
 
     @Override
     public Optional<Difficulty> getById(String id) {
-        return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.difficultyMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

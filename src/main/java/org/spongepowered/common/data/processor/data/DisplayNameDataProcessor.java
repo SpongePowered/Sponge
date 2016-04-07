@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.processor.data;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -38,8 +40,10 @@ import org.spongepowered.api.data.manipulator.immutable.ImmutableDisplayNameData
 import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
@@ -55,7 +59,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("deprecation")
+// TODO Improve this processor
 public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, Value<Text>, DisplayNameData, ImmutableDisplayNameData> {
 
     public DisplayNameDataProcessor() {
@@ -123,6 +127,23 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
 
     @Override
     public DataTransactionResult set(DataHolder holder, DisplayNameData manipulator, MergeFunction function) {
+        if (holder instanceof IMixinEntity && !(holder instanceof Player)) {
+            final Optional<DisplayNameData> old = from(holder);
+            final DisplayNameData merged = checkNotNull(function).merge(old.orElse(null), manipulator);
+            final Text newValue = merged.displayName().get();
+            final ImmutableValue<Text> immutableValue = merged.displayName().asImmutable();
+            try {
+                ((IMixinEntity) holder).setDisplayName(newValue);
+                if (old.isPresent()) {
+                    return DataTransactionResult.successReplaceResult(old.get().displayName().asImmutable(), immutableValue);
+                } else {
+                    return DataTransactionResult.successResult(immutableValue);
+                }
+            } catch (Exception e) {
+                SpongeImpl.getLogger().debug("An exception occurred when setting data: ", e);
+                return DataTransactionResult.errorResult(immutableValue);
+            }
+        }
         return DataTransactionResult.failResult(manipulator.getValues());
     }
 

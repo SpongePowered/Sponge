@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.effect.sound.SpongeSound;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -302,7 +303,7 @@ public final class SoundRegistryModule implements CatalogRegistryModule<SoundTyp
 
     @Override
     public Optional<SoundType> getById(String id) {
-        return Optional.ofNullable(this.soundNames.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.soundNames.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -49,7 +49,6 @@ public class StaticMixinHelper {
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
     public static EntityPlayerMP packetPlayer = null;
-    public static EntityPlayerMP collidePlayer = null;
     public static User blockEventUser = null;
     @SuppressWarnings("rawtypes")
     public static Packet processingPacket = null;
