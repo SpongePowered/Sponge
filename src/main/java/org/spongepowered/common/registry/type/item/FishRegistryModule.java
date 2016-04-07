@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public final class FishRegistryModule implements CatalogRegistryModule<Fish> {
 
     @Override
     public Optional<Fish> getById(String id) {
-        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -57,7 +58,7 @@ public final class FishRegistryModule implements CatalogRegistryModule<Fish> {
     @Override
     public void registerDefaults() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            this.fishMap.put(fishType.name().toLowerCase(), (Fish) (Object) fishType);
+            this.fishMap.put(fishType.name().toLowerCase(Locale.ENGLISH), (Fish) (Object) fishType);
         }
     }
 
@@ -65,7 +66,7 @@ public final class FishRegistryModule implements CatalogRegistryModule<Fish> {
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
             if (!this.fishMap.containsValue((Fish) (Object) fishType)) {
-                this.fishMap.put(fishType.name().toLowerCase(), (Fish) (Object) fishType);
+                this.fishMap.put(fishType.name().toLowerCase(Locale.ENGLISH), (Fish) (Object) fishType);
             }
         }
     }

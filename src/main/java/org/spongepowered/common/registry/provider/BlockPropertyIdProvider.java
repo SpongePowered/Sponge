@@ -37,6 +37,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Locale;
 import java.util.Optional;
 
 public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, String> {
@@ -55,7 +56,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
 
     @Override
     public Optional<IProperty<?>> getKey(String value) {
-        return Optional.ofNullable(this.idPropertyMap.get(checkNotNull(value, "Id cannot be null!").toLowerCase()));
+        return Optional.ofNullable(this.idPropertyMap.get(checkNotNull(value, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
     }
 
     private boolean isRegistered(IProperty<?> property) {
@@ -100,7 +101,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
                         final String className = field.getDeclaringClass().getSimpleName().replace("Block", "").replace("block", "");
                         final String classNameId = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, className);
                         final String propertyClassName = isStatic ? classNameId : originalClass;
-                        final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase();
+                        final String combinedId = modId + ":" + propertyClassName + "_" + propertyName.toLowerCase(Locale.ENGLISH);
                         if (instance.idPropertyMap.containsKey(combinedId)) {
                             // in this case, we really do have to fall back on the full block id...
                             if (instance.idPropertyMap.containsKey(lastAttemptId)) {
@@ -131,8 +132,8 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
     private void register(IProperty<?> property, String id) {
         checkArgument(!this.propertyIdMap.containsKey(property), "Property is already registered! Property: " + property.getName()
                                                                  + " is registered as : " + this.propertyIdMap.get(property));
-        this.propertyIdMap.put(property, id.toLowerCase());
-        this.idPropertyMap.put(id.toLowerCase(), property);
+        this.propertyIdMap.put(property, id.toLowerCase(Locale.ENGLISH));
+        this.idPropertyMap.put(id.toLowerCase(Locale.ENGLISH), property);
     }
 
     BlockPropertyIdProvider() {

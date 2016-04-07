@@ -35,6 +35,7 @@ import org.spongepowered.api.text.selector.SelectorTypes;
 import org.spongepowered.common.text.selector.SpongeSelectorType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class SelectorTypeRegistryModule implements CatalogRegistryModule<S
 
     @Override
     public Optional<SelectorType> getById(String id) {
-        return Optional.ofNullable(this.selectorMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.selectorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

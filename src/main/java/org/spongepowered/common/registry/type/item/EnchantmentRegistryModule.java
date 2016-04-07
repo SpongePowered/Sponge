@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -49,7 +50,7 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.enchantmentMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.enchantmentMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -103,7 +104,7 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
             }
             if (!this.enchantmentMappings.containsValue((Enchantment) enchantment)) {
                 final String name = enchantment.getName().replace("enchantment.", "");
-                this.enchantmentMappings.put(name.toLowerCase(), (Enchantment) enchantment);
+                this.enchantmentMappings.put(name.toLowerCase(Locale.ENGLISH), (Enchantment) enchantment);
             }
         }
 

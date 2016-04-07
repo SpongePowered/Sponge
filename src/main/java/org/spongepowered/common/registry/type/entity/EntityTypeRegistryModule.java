@@ -57,6 +57,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -81,7 +82,7 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
         if (!checkNotNull(id).contains(":")) {
             id = "minecraft:" + id;
         }
-        return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase()));
+        return Optional.ofNullable(this.entityTypeMappings.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -185,10 +186,10 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
             if (fieldName.equals("UNKNOWN")) {
                 return SpongeEntityType.UNKNOWN;
             }
-            EntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase());
+            EntityType entityType = this.entityTypeMappings.get(fieldName.toLowerCase(Locale.ENGLISH));
             this.entityClassToTypeMappings.put(((SpongeEntityType) entityType).entityClass, entityType);
             // remove old mapping
-            this.entityTypeMappings.remove(fieldName.toLowerCase());
+            this.entityTypeMappings.remove(fieldName.toLowerCase(Locale.ENGLISH));
             // add new mapping with minecraft id
             this.entityTypeMappings.put(entityType.getId(), entityType);
             return entityType;

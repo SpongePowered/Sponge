@@ -230,7 +230,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         } else {
-            return registryModule.getById(id.toLowerCase());
+            return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
         }
     }
 

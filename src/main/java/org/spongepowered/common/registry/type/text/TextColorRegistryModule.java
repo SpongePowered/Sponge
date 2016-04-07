@@ -37,6 +37,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
 
     @Override
     public Optional<TextColor> getById(String id) {
-        return Optional.ofNullable(textColorMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(textColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -81,7 +82,7 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
 
     private static void addTextColor(EnumChatFormatting handle, Color color) {
         SpongeTextColor spongeColor = new SpongeTextColor(handle, color);
-        textColorMappings.put(handle.name().toLowerCase(), spongeColor);
+        textColorMappings.put(handle.name().toLowerCase(Locale.ENGLISH), spongeColor);
         enumChatColor.put(handle, spongeColor);
     }
 }

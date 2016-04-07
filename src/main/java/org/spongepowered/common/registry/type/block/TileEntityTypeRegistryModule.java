@@ -37,6 +37,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -76,7 +77,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
     @Override
     public void registerAdditionalCatalog(TileEntityType extraCatalog) {
         this.tileClassToTypeMappings.put((Class<? extends TileEntity>) extraCatalog.getTileEntityType(), extraCatalog);
-        this.tileEntityTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.tileEntityTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
@@ -91,7 +92,7 @@ public final class TileEntityTypeRegistryModule implements ExtraClassCatalogRegi
 
     @Override
     public Optional<TileEntityType> getById(String id) {
-        return Optional.ofNullable(this.tileEntityTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.tileEntityTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -30,6 +30,7 @@ import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -48,11 +49,11 @@ public class RegistryHelper {
     }
 
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase()));
+        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)));
     }
 
     public static boolean mapFieldsIgnoreWarning(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase()), true);
+        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase(Locale.ENGLISH)), true);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {

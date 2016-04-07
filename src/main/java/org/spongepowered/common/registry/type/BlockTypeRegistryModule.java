@@ -53,6 +53,7 @@ import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -86,7 +87,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -101,12 +102,12 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerAdditionalCatalog(BlockType extraCatalog) {
-        this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
         registerBlockTrait(extraCatalog.getId(), extraCatalog);
     }
 
     public void registerFromGameData(String id, BlockType blockType) {
-        this.blockTypeMappings.put(id.toLowerCase(), blockType);
+        this.blockTypeMappings.put(id.toLowerCase(Locale.ENGLISH), blockType);
         registerBlockTrait(id, blockType);
     }
 

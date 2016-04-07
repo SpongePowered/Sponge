@@ -35,6 +35,7 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitTyp
 
     @Override
     public Optional<RabbitType> getById(String id) {
-        return Optional.ofNullable(this.rabbitTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.rabbitTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -56,7 +57,7 @@ public class RabbitTypeRegistryModule implements CatalogRegistryModule<RabbitTyp
     @Override
     public void registerDefaults() {
         this.rabbitTypeMap.putAll(SpongeEntityConstants.RABBIT_TYPES);
-        
+
     }
 
 }

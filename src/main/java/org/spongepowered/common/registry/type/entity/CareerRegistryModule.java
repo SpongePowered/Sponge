@@ -39,6 +39,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -61,13 +62,13 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
 
     @Override
     public void registerAdditionalCatalog(Career extraCatalog) {
-        if (this.forgeSpongeMapping.containsKey(extraCatalog.getId().toLowerCase())) {
+        if (this.forgeSpongeMapping.containsKey(extraCatalog.getId().toLowerCase(Locale.ENGLISH))) {
             // Basically, forge has alternate names for a minor few vanilla
             // careers and this avoids having duplicate "careers" registered.
             return;
         }
         if (!this.careerMap.containsKey(extraCatalog.getId())) {
-            this.careerMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+            this.careerMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
         }
         ProfessionRegistryModule.getInstance().registerCareerForProfession(extraCatalog);
     }
@@ -77,7 +78,7 @@ public class CareerRegistryModule implements SpongeAdditionalCatalogRegistryModu
         if (!id.contains(":")) {
             id = "minecraft:" + id;
         }
-        return Optional.ofNullable(this.careerMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.careerMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

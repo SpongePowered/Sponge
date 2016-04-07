@@ -41,6 +41,7 @@ import org.spongepowered.api.util.Color;
 import org.spongepowered.common.effect.particle.SpongeParticleType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
 
     @Override
     public Optional<ParticleType> getById(String id) {
-        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.particleByName.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -120,7 +121,7 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
     public void registerAdditional() {
         for (EnumParticleTypes particleTypes : EnumParticleTypes.values()) {
             if (!this.particleByName.containsKey(particleTypes.getParticleName())) {
-                addParticleType(particleTypes.getParticleName().toLowerCase(), new SpongeParticleType(particleTypes, particleTypes.getParticleName().toLowerCase(), false));
+                addParticleType(particleTypes.getParticleName().toLowerCase(Locale.ENGLISH), new SpongeParticleType(particleTypes, particleTypes.getParticleName().toLowerCase(Locale.ENGLISH), false));
             }
         }
 
