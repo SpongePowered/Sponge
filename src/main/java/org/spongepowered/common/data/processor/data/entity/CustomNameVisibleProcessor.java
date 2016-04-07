@@ -25,7 +25,6 @@
 package org.spongepowered.common.data.processor.data.entity;
 
 import net.minecraft.entity.Entity;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableCustomNameVisibleData;
@@ -81,11 +80,6 @@ public final class CustomNameVisibleProcessor extends
 
     @Override
     protected boolean supports(Entity container) {
-        return !(container instanceof Humanoid);
-    }
-
-    @Override
-    public boolean supports(DataHolder container) {
         return !(container instanceof Humanoid);
     }
 
