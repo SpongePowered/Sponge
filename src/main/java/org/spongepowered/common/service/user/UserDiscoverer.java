@@ -40,6 +40,7 @@ import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.util.SpongeHooks;
@@ -214,7 +215,7 @@ class UserDiscoverer {
                 return Optional.empty();
             }
         } catch (InterruptedException | ExecutionException e) {
-        	SpongeHooks.logWarning("Error while getting profile for {}. {}", uuid, e);
+            SpongeImpl.getLogger().warn("Error while getting profile for {}", uuid, e);
             return Optional.empty();
         }
     }

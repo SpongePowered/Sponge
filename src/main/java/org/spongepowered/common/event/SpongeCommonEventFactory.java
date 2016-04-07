@@ -29,6 +29,29 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.passive.EntityAnimal;
+import net.minecraft.entity.passive.EntityTameable;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.init.Items;
+import net.minecraft.inventory.ContainerPlayer;
+import net.minecraft.inventory.Slot;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C09PacketHeldItemChange;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
+import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
+import net.minecraft.network.play.client.C16PacketClientStatus;
+import net.minecraft.network.play.server.S09PacketHeldItemChange;
+import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
@@ -165,7 +188,22 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static boolean handleImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
+    public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {
+        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
+        if (!(entity instanceof EntityPlayer)) {
+            IMixinEntity spongeEntity = (IMixinEntity) entity;
+            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (user.isPresent()) {
+                cause = cause.with(NamedCause.owner(user.get()));
+            }
+        }
+
+        // TODO: Add target side support
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), direction);
+        return SpongeImpl.postEvent(event);
+    }
+
+    public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             MovingObjectPosition movingObjectPosition) {
         MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
         Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();

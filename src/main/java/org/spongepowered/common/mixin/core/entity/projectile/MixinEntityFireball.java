@@ -93,7 +93,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleImpactEvent(projectile, this.projectileSource, movingObjectPosition)) {
+        if (!SpongeCommonEventFactory.handleCollideImpactEvent(projectile, this.projectileSource, movingObjectPosition)) {
             this.onImpact(movingObjectPosition);
         }
     }

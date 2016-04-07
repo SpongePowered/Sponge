@@ -92,7 +92,6 @@ import org.spongepowered.common.data.processor.data.entity.*;
 import org.spongepowered.common.data.processor.data.extra.FluidItemDataProcessor;
 import org.spongepowered.common.data.processor.data.item.*;
 import org.spongepowered.common.data.processor.data.tileentity.*;
-import org.spongepowered.common.data.processor.dual.entity.CustomNameVisibleDualProcessor;
 import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
@@ -614,7 +613,7 @@ public class DataRegistrar {
 
 
         dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
-                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleDualProcessor());
+                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
 
         final HideDataProcessor hideDataProcessor = new HideDataProcessor();
         dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,

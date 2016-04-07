@@ -30,8 +30,11 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.server.CommandBlockLogic;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -39,6 +42,9 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.client.C02PacketUseEntity;
+import net.minecraft.network.play.client.C02PacketUseEntity.Action;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
@@ -54,7 +60,6 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.IChatComponent;
-import net.minecraft.util.IntHashMap;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
@@ -79,6 +84,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -87,7 +93,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -97,11 +102,11 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.VecHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -120,13 +125,15 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private static final String UPDATE_SIGN = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;";
     private static final String HANDLE_CUSTOM_PAYLOAD = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V";
     private static final String PLAYER_ATTACK_TARGET_ENTITY = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V";
+    private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
+
     @Shadow @Final private static Logger logger;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
     @Shadow public EntityPlayerMP playerEntity;
-    @Shadow private IntHashMap field_147372_n;
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);
+    @Shadow public abstract void kickPlayerFromServer(String reason);
 
     private boolean justTeleported = false;
     @Nullable private Location<World> lastMoveLocation = null;
@@ -183,6 +190,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * @author kashike
      */
     private Packet<?> rewritePacket(final Packet<?> packetIn) {
+        // Update the tab list data
         if (packetIn instanceof S38PacketPlayerListItem) {
             // Update the tab list data
             ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((S38PacketPlayerListItem) packetIn);
@@ -473,17 +481,76 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
-    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = PLAYER_ATTACK_TARGET_ENTITY))
-    public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
-        if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
-            return; // PVP is disabled, ignore
+    /**
+     * @author blood - April 5th, 2016
+     *
+     * Due to all the changes we now do for this packet, it is much easier
+     * to read it all with an overwrite. Information detailing on why each change
+     * was made can be found in comments below.
+     *
+     * @param packetIn The entity use packet
+     */
+    @Overwrite
+    public void processUseEntity(C02PacketUseEntity packetIn) {
+        // All packets received by server are handled first on the Netty Thread
+        if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+            if (packetIn.getAction() == Action.INTERACT) {
+                // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
+                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the
+                // INTERACT_AT packet contains the same data but also includes a hitVec.
+                return;
+            } else { // queue packet for main thread
+                PacketThreadUtil.checkThreadAndEnqueue(packetIn, this.netHandlerPlayServer, this.playerEntity.getServerForPlayer());
+                return;
+            }
         }
 
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
-            Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            player.attackTargetEntityWithCurrentItem(entityIn);
+        WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
+        Entity entity = packetIn.getEntityFromWorld(worldserver);
+        this.playerEntity.markPlayerActive();
+
+        if (entity != null) {
+            boolean flag = this.playerEntity.canEntityBeSeen(entity);
+            double d0 = 36.0D; // 6 blocks
+
+            if (!flag) {
+                d0 = 9.0D; // 1.5 blocks
+            }
+
+            if (this.playerEntity.getDistanceSqToEntity(entity) < d0) {
+                // Since we ignore any packet that has hitVec set to null, we can safely ignore this check
+                // if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT) {
+                //    this.playerEntity.interactWith(entity);
+                // } else
+                if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT_AT) {
+                    InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
+                            Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);
+                        SpongeImpl.postEvent(event);
+                        if (!event.isCancelled()) {
+                            // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
+                            if (!entity.interactAt(this.playerEntity, packetIn.getHitVec())) {
+                                this.playerEntity.interactWith(entity);
+                            }
+                        }
+                } else if (packetIn.getAction() == C02PacketUseEntity.Action.ATTACK) {
+                    if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
+                        this.kickPlayerFromServer("Attempting to attack an invalid entity");
+                        this.serverController.logWarning("Player " + this.playerEntity.getName() + " tried to attack an invalid entity");
+                        return;
+                    }
+
+                    if (entity instanceof Player && !((World) this.playerEntity.worldObj).getProperties().isPVPEnabled()) {
+                        return; // PVP is disabled, ignore
+                    }
+
+                    InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
+                        Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entity);
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+                        this.playerEntity.attackTargetEntityWithCurrentItem(entity);
+                    }
+                }
+            }
         }
     }
 
