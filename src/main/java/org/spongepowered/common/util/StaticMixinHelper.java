@@ -85,6 +85,7 @@ public class StaticMixinHelper {
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;
-    public static int lastDigPacketTick = 0;
+    public static int lastSecondaryPacketTick = 0;
+    public static int lastPrimaryPacketTick = 0;
     public static EntityPlayerMP lastAnimationPlayer = null;
 }

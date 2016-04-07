@@ -452,7 +452,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Inject(method = "processPlayerDigging", at = @At("HEAD"), cancellable = true)
     public void injectDig(C07PacketPlayerDigging packetIn, CallbackInfo ci) {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
-            StaticMixinHelper.lastDigPacketTick = MinecraftServer.getServer().getTickCounter();
+            StaticMixinHelper.lastPrimaryPacketTick = MinecraftServer.getServer().getTickCounter();
         }
     }
 
@@ -499,6 +499,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement) packetIn).getTimeStamp();
             }
 
+            StaticMixinHelper.lastSecondaryPacketTick = MinecraftServer.getServer().getTickCounter();
             PacketThreadUtil.checkThreadAndEnqueue(packetIn, this.netHandlerPlayServer, this.playerEntity.getServerForPlayer());
             return;
         }
@@ -519,7 +520,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             InteractBlockEvent.Secondary event =
                     SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(this.playerEntity)),
                             Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
-            if (SpongeImpl.postEvent(event) && event.getUseItemResult() != Tristate.TRUE) {
+            if (event.isCancelled() && event.getUseItemResult() != Tristate.TRUE) {
                 return;
             }
 
