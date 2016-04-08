@@ -263,7 +263,8 @@ public class SpongeCommonEventFactory {
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
-            if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
+            if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
                 Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
                 if (slot != null) {
                     SlotTransaction slotTransaction =
@@ -306,7 +307,8 @@ public class SpongeCommonEventFactory {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
-        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
+        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null && !slot.getHasStack()) {
                 SlotTransaction slotTransaction =
