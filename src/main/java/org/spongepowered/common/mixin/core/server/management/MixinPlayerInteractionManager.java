@@ -57,6 +57,7 @@ import net.minecraft.world.ILockableContainer;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -66,6 +67,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -84,6 +88,13 @@ public abstract class MixinPlayerInteractionManager {
 
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
+
+    @Inject(method = "processRightClick", at = @At("HEAD"))
+    public void onProcessrightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, CallbackInfoReturnable<EnumActionResult> cir) {
+        if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
+            cir.setReturnValue(EnumActionResult.FAIL);
+        }
+    }
 
     /**
      * Activate the clicked on block, otherwise use the held item.
