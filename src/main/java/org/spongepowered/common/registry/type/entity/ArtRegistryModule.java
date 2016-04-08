@@ -38,6 +38,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,7 +49,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
 
     @Override
     public Optional<Art> getById(String id) {
-        return Optional.ofNullable(this.artMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.artMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -59,7 +60,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     @Override
     public void registerDefaults() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
-            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
+            this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
         }
     }
 
@@ -68,7 +69,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
         registerDefaults();
         RegistryHelper.mapFields(Arts.class, field -> {
             String name = field.replace("_", "");
-            return this.artMappings.get(name.toLowerCase());
+            return this.artMappings.get(name.toLowerCase(Locale.ENGLISH));
         });
     }
 
@@ -76,7 +77,7 @@ public final class ArtRegistryModule implements CatalogRegistryModule<Art> {
     public void registerAdditionals() {
         for (EntityPainting.EnumArt art : EntityPainting.EnumArt.values()) {
             if (!this.artMappings.containsValue((Art) (Object) art)) {
-                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(), (Art) (Object) art);
+                this.artMappings.put(((Art) (Object) art).getId().toLowerCase(Locale.ENGLISH), (Art) (Object) art);
             }
         }
     }

@@ -31,6 +31,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.common.registry.TypeProvider;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -70,7 +71,7 @@ public class DamageSourceToTypeProvider implements TypeProvider<String, DamageTy
 
     @Override
     public Optional<DamageType> get(String key) {
-        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase()));
+        return Optional.ofNullable(this.damageSourceToTypeMappings.get(checkNotNull(key).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

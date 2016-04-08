@@ -40,6 +40,7 @@ import org.spongepowered.common.world.type.SpongeWorldTypeNether;
 import org.spongepowered.common.world.type.SpongeWorldTypeOverworld;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
 
     @Override
     public Optional<GeneratorType> getById(String id) {
-        return Optional.ofNullable(this.generatorTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.generatorTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -74,7 +75,7 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
     public void registerAdditional() {
         for (WorldType worldType : WorldType.worldTypes) {
             if (worldType != null && !this.generatorTypeMappings.values().contains(worldType)) {
-                this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(), (GeneratorType) worldType);
+                this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

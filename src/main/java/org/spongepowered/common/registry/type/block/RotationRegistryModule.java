@@ -34,6 +34,7 @@ import org.spongepowered.api.util.rotation.Rotations;
 import org.spongepowered.common.rotation.SpongeRotation;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class RotationRegistryModule implements CatalogRegistryModule<Rotation> {
@@ -52,7 +53,7 @@ public final class RotationRegistryModule implements CatalogRegistryModule<Rotat
 
     @Override
     public Optional<Rotation> getById(String id) {
-        return Optional.ofNullable(rotationMap.get(id.toLowerCase()));
+        return Optional.ofNullable(rotationMap.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

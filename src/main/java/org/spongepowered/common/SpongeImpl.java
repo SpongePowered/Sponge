@@ -78,7 +78,7 @@ public final class SpongeImpl {
     // TODO: Keep up to date
     public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8.9", 47);
 
-    private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME); // TODO: Should this use ECOSYSTEM_ID like plugin loggers?
+    private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
 
     @Nullable

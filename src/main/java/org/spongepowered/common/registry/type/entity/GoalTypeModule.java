@@ -40,6 +40,7 @@ import org.spongepowered.common.entity.ai.SpongeGoalType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -67,7 +68,7 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.goalTypes.get(id.toLowerCase()));
+        return Optional.ofNullable(this.goalTypes.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -85,7 +86,7 @@ public class GoalTypeModule implements AlternateCatalogRegistryModule<GoalType> 
         final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
-        final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;
+        final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ":" + id;
 
         @SuppressWarnings("unchecked")
         final SpongeGoalType newType = new SpongeGoalType(combinedId, name, (Class<Goal<?>>) (Class<?>) EntityAITasks.class);

@@ -57,6 +57,7 @@ import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
 
     @Override
     public Optional<PopulatorObject> getById(String id) {
-        return Optional.ofNullable(this.populatorObjectMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.populatorObjectMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

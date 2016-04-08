@@ -38,11 +38,13 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class BlockUtil {
 
     public static final Comparator<BlockState> BLOCK_STATE_COMPARATOR = new BlockStateComparator();
+    public static final UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
 
     public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
         setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);

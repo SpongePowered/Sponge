@@ -24,35 +24,22 @@
  */
 package org.spongepowered.common.registry;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.SpongeImpl;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
 
 public class RegistryHelper {
 
-    private static final Logger logger;
-
-    static {
-        Logger l;
-        try {
-            l = SpongeImpl.getLogger();
-        } catch (ExceptionInInitializerError | IllegalStateException e) {
-            l = LogManager.getLogger("Sponge"); // Running test suite
-        }
-        logger = l;
-    }
-
     public static boolean mapFields(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase()));
+        return mapFields(apiClass, fieldName -> mapping.get(fieldName.toLowerCase(Locale.ENGLISH)));
     }
 
     public static boolean mapFieldsIgnoreWarning(Class<?> apiClass, Map<String, ?> mapping) {
-        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase()), true);
+        return mapFields(apiClass, fieldname -> mapping.get(fieldname.toLowerCase(Locale.ENGLISH)), true);
     }
 
     public static boolean mapFields(Class<?> apiClass, Function<String, ?> mapFunction) {
@@ -65,13 +52,13 @@ public class RegistryHelper {
             try {
                 Object value = mapFunction.apply(f.getName());
                 if (value == null && !ignore) {
-                    logger.warn("Skipping {}.{}", f.getDeclaringClass().getName(), f.getName());
+                    SpongeImpl.getLogger().warn("Skipping {}.{}", f.getDeclaringClass().getName(), f.getName());
                     continue;
                 }
                 f.set(null, value);
             } catch (Exception e) {
                 if (!ignore) {
-                    logger.error("Error while mapping {}.{}", f.getDeclaringClass().getName(), f.getName(), e);
+                    SpongeImpl.getLogger().error("Error while mapping {}.{}", f.getDeclaringClass().getName(), f.getName(), e);
                 }
                 mappingSuccess = false;
             }
@@ -84,7 +71,7 @@ public class RegistryHelper {
             apiClass.getDeclaredField("factory").set(null, factory);
             return true;
         } catch (Exception e) {
-            logger.error("Error while setting factory on {}", apiClass, e);
+            SpongeImpl.getLogger().error("Error while setting factory on {}", apiClass, e);
             return false;
         }
     }
@@ -98,7 +85,7 @@ public class RegistryHelper {
             modifiers.setInt(field, field.getModifiers() & ~Modifier.FINAL);
             field.set(null, newValue);
         } catch (Exception e) {
-            logger.error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
+            SpongeImpl.getLogger().error("Error while setting field {}.{}", clazz.getName(), fieldName, e);
         }
     }
 }

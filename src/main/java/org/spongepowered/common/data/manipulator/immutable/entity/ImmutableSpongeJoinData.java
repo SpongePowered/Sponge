@@ -40,11 +40,13 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
 
     private final Instant firstJoined;
     private final Instant lastJoined;
+    private final ImmutableSpongeValue<Instant> firstJoinedValue;
+    private final ImmutableSpongeValue<Instant> lastJoinedValue;
 
     public ImmutableSpongeJoinData(Instant firstJoined, Instant lastJoined) {
         super(ImmutableJoinData.class);
-        this.firstJoined = firstJoined;
-        this.lastJoined = lastJoined;
+        this.firstJoinedValue = new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined = firstJoined);
+        this.lastJoinedValue = new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined = lastJoined);
         registerGetters();
     }
 
@@ -59,12 +61,12 @@ public class ImmutableSpongeJoinData extends AbstractImmutableData<ImmutableJoin
 
     @Override
     public ImmutableValue<Instant> firstPlayed() {
-        return new ImmutableSpongeValue<>(Keys.FIRST_DATE_PLAYED, Instant.EPOCH, this.firstJoined);
+        return this.firstJoinedValue;
     }
 
     @Override
     public ImmutableValue<Instant> lastJoined() {
-        return new ImmutableSpongeValue<>(Keys.LAST_DATE_PLAYED, Instant.EPOCH, this.lastJoined);
+        return this.lastJoinedValue;
     }
 
     @Override

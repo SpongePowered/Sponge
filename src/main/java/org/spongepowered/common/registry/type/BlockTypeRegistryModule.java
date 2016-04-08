@@ -25,8 +25,8 @@
 package org.spongepowered.common.registry.type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableSet;
@@ -34,6 +34,8 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.properties.IProperty;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -43,8 +45,11 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.block.BlockUtil;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
+import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
@@ -53,6 +58,7 @@ import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -86,7 +92,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -101,12 +107,12 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerAdditionalCatalog(BlockType extraCatalog) {
-        this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.blockTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
         registerBlockTrait(extraCatalog.getId(), extraCatalog);
     }
 
     public void registerFromGameData(String id, BlockType blockType) {
-        this.blockTypeMappings.put(id.toLowerCase(), blockType);
+        this.blockTypeMappings.put(id.toLowerCase(Locale.ENGLISH), blockType);
         registerBlockTrait(id, blockType);
     }
 
@@ -131,6 +137,13 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
                 BooleanTraitRegistryModule.getInstance().registerBlock(propertyId, block, (BooleanTrait) property);
             }
         }
+    }
+
+    @Override
+    public void registerDefaults() {
+        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(BlockUtil.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.air.getDefaultState()).build();
+        RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
+        this.blockTypeMappings.put("none", BlockTypes.AIR);
     }
 
     BlockTypeRegistryModule() { }

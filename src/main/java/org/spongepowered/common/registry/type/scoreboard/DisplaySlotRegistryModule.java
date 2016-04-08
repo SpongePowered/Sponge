@@ -40,6 +40,7 @@ import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.text.format.SpongeTextColor;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -59,7 +60,7 @@ public final class DisplaySlotRegistryModule implements CatalogRegistryModule<Di
 
     @Override
     public Optional<DisplaySlot> getById(String id) {
-        return Optional.ofNullable(this.displaySlotMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.displaySlotMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

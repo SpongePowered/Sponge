@@ -38,8 +38,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
     private EnumParticleTypes type;
     private boolean motion;
 
-    public SpongeParticleType(EnumParticleTypes type, boolean motion) {
-        super(type.name());
+    public SpongeParticleType(EnumParticleTypes type, String id, boolean motion) {
+        super(id);
         this.motion = motion;
         this.type = type;
     }
@@ -68,8 +68,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
 
         private Color color;
 
-        public Colorable(EnumParticleTypes type, Color color) {
-            super(type, false);
+        public Colorable(EnumParticleTypes type, String id, Color color) {
+            super(type, id, false);
             this.color = color;
         }
 
@@ -90,8 +90,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
 
         private float size;
 
-        public Resizable(EnumParticleTypes type, float size) {
-            super(type, false);
+        public Resizable(EnumParticleTypes type, String id, float size) {
+            super(type, id, false);
             this.size = size;
         }
 
@@ -112,8 +112,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
 
         private NotePitch note;
 
-        public Note(EnumParticleTypes type, NotePitch note) {
-            super(type, false);
+        public Note(EnumParticleTypes type, String id, NotePitch note) {
+            super(type, id, false);
             this.note = note;
         }
 
@@ -134,8 +134,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
 
         private ItemStack item;
 
-        public Item(EnumParticleTypes type, net.minecraft.item.ItemStack item, boolean motion) {
-            super(type, motion);
+        public Item(EnumParticleTypes type, String id, net.minecraft.item.ItemStack item, boolean motion) {
+            super(type, id, motion);
             this.item = (ItemStack) item;
         }
 
@@ -156,8 +156,8 @@ public class SpongeParticleType extends SpongeCatalogType implements ParticleTyp
 
         private BlockState block;
 
-        public Block(EnumParticleTypes type, BlockState block, boolean motion) {
-            super(type, motion);
+        public Block(EnumParticleTypes type, String id, BlockState block, boolean motion) {
+            super(type, id, motion);
             this.block = block;
         }
 

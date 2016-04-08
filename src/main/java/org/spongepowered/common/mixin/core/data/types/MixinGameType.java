@@ -34,6 +34,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.Locale;
+
 @Mixin(WorldSettings.GameType.class)
 @Implements(@Interface(iface = GameMode.class, prefix = "gamemode$"))
 public abstract class MixinGameType {
@@ -49,6 +51,6 @@ public abstract class MixinGameType {
     }
 
     public Translation getTranslation() {
-        return new SpongeTranslation("gameMode." + this.name.toLowerCase());
+        return new SpongeTranslation("gameMode." + this.name.toLowerCase(Locale.ENGLISH));
     }
 }

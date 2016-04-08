@@ -25,11 +25,9 @@
 package org.spongepowered.common.data.manipulator.immutable.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
@@ -39,19 +37,22 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.immutable.common.AbstractImmutableData;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
-import org.spongepowered.common.data.value.immutable.common.ImmutableSpongeEntityValue;
-
-import java.lang.ref.WeakReference;
 
 public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableVehicleData, VehicleData> implements ImmutableVehicleData {
 
     private final EntitySnapshot vehicle;
     private final EntitySnapshot baseVehicle;
 
+    private final ImmutableValue<EntitySnapshot> vehicleValue;
+    private final ImmutableValue<EntitySnapshot> baseVehicleValue;
+
     public ImmutableSpongeVehicleData(EntitySnapshot vehicle, EntitySnapshot baseVehicle) {
         super(ImmutableVehicleData.class);
-        this.vehicle = vehicle;
-        this.baseVehicle = baseVehicle;
+        this.vehicle = checkNotNull(vehicle, "vehicle");
+        this.baseVehicle = checkNotNull(baseVehicle, "baseVehicle");
+
+        this.vehicleValue = new ImmutableSpongeValue<>(Keys.VEHICLE, this.vehicle);
+        this.baseVehicleValue = new ImmutableSpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
         registerGetters();
     }
 
@@ -61,28 +62,24 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
 
     @Override
     public ImmutableValue<EntitySnapshot> vehicle() {
-        checkState(this.vehicle != null);
-        return new ImmutableSpongeValue<>(Keys.VEHICLE, this.vehicle);
+        return this.vehicleValue;
     }
 
     @Override
     public ImmutableValue<EntitySnapshot> baseVehicle() {
-        checkState(this.baseVehicle != null);
-        return new ImmutableSpongeValue<>(Keys.BASE_VEHICLE, this.baseVehicle);
+        return this.baseVehicleValue;
     }
 
     @Override
     public VehicleData asMutable() {
-        checkState(this.vehicle != null);
-        checkState(this.baseVehicle != null);
         return new SpongeVehicleData(this.vehicle, this.baseVehicle);
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.VEHICLE, this.vehicle)
-            .set(Keys.BASE_VEHICLE, this.baseVehicle);
+                .set(Keys.VEHICLE, this.vehicle)
+                .set(Keys.BASE_VEHICLE, this.baseVehicle);
     }
 
     @Override
@@ -94,13 +91,11 @@ public class ImmutableSpongeVehicleData extends AbstractImmutableData<ImmutableV
     }
 
     public EntitySnapshot getVehicle() {
-        checkState(this.vehicle != null);
-        return checkNotNull(this.vehicle);
+        return this.vehicle;
     }
 
     public EntitySnapshot getBaseVehicle() {
-        checkState(this.baseVehicle != null);
-        return checkNotNull(this.baseVehicle);
+        return this.baseVehicle;
     }
 
     @Override

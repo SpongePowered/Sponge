@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
 
     @Override
     public Optional<BannerPatternShape> getById(String id) {
-        return Optional.ofNullable(this.bannerPatternShapeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.bannerPatternShapeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -57,8 +58,8 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
     @Override
     public void registerDefaults() {
         for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
-            this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(), (BannerPatternShape) (Object) pattern);
-            this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(), (BannerPatternShape) (Object) pattern);
+            this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+            this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
         }
     }
 
@@ -66,8 +67,8 @@ public final class BannerPatternShapeRegistryModule implements CatalogRegistryMo
     public void registerAdditional() {
         for (TileEntityBanner.EnumBannerPattern pattern : TileEntityBanner.EnumBannerPattern.values()) {
             if (!this.bannerPatternShapeMappings.containsKey(pattern.name())) {
-                this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(), (BannerPatternShape) (Object) pattern);
-                this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(), (BannerPatternShape) (Object) pattern);
+                this.bannerPatternShapeMappings.put(pattern.name().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
+                this.bannerPatternShapeMappings.put(pattern.getPatternID().toLowerCase(Locale.ENGLISH), (BannerPatternShape) (Object) pattern);
             }
         }
     }

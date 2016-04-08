@@ -50,7 +50,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
 
     @Override
     protected boolean doesDataExist(ItemStack dataHolder) {
-        return true;
+        return dataHolder.hasTagCompound();
     }
 
     @Override

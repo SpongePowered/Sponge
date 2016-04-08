@@ -35,6 +35,7 @@ import org.spongepowered.common.entity.SpongeEntityConstants;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class SkeletonTypeRegistryModule implements CatalogRegistryModule<Skeleto
 
     @Override
     public Optional<SkeletonType> getById(String id) {
-        return Optional.ofNullable(this.skeletonTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.skeletonTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -173,6 +173,9 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(DisplayNameData.class, SpongeDisplayNameData.class,
                 ImmutableDisplayNameData.class, ImmutableSpongeDisplayNameData.class, new DisplayNameDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
+                ImmutableSpongeDyeableData.class, new DyeableDataProcessor());
+
         // Entity Processors
 
         dataManager.registerDualProcessor(FireworkEffectData.class, SpongeFireworkEffectData.class,
@@ -349,14 +352,17 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new PotionEntityPotionDataProcessor());
 
-        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class, ImmutableBodyPartRotationalData.class,
-                ImmutableSpongeBodyPartRotationalData.class, new ArmorStandBodyPartRotationalDataProcessor());
+        dataManager.registerDataProcessorAndImpl(BodyPartRotationalData.class, SpongeBodyPartRotationalData.class,
+                ImmutableBodyPartRotationalData.class, ImmutableSpongeBodyPartRotationalData.class, new ArmorStandBodyPartRotationalDataProcessor());
 
         dataManager.registerDualProcessor(GriefingData.class, SpongeGriefingData.class, ImmutableGriefingData.class,
                 ImmutableSpongeGriefingData.class, new GriefingDataProcessor());
 
         dataManager.registerDualProcessor(TargetedLocationData.class, SpongeTargetedLocationData.class,
                 ImmutableTargetedLocationData.class, ImmutableSpongeTargetedLocationData.class, new EntityTargetedLocationDataProcessor());
+
+        dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
+                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
 
         // Item Processors
 
@@ -437,6 +443,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(PotionEffectData.class, SpongePotionEffectData.class, ImmutablePotionEffectData.class,
                 ImmutableSpongePotionEffectData.class, new ItemPotionDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
+                new HideDataProcessor());
 
         // Block Processors
 
@@ -607,21 +616,8 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(DirectionalData.class, SpongeDirectionalData.class, ImmutableDirectionalData.class,
                 ImmutableSpongeDirectionalData.class, new SkullRotationDataProcessor());
 
-        final DyeableDataProcessor dyeableDataProcessor = new DyeableDataProcessor();
-        dataManager.registerDataProcessorAndImpl(DyeableData.class, SpongeDyeableData.class, ImmutableDyeableData.class,
-                ImmutableSpongeDyeableData.class, dyeableDataProcessor);
-
-
-        dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
-                ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
-
-        final HideDataProcessor hideDataProcessor = new HideDataProcessor();
-        dataManager.registerDataProcessorAndImpl(HideData.class, SpongeHideData.class, ImmutableHideData.class, ImmutableSpongeHideData.class,
-                hideDataProcessor);
-
-        final BeaconDataProcessor beaconDataProcessor = new BeaconDataProcessor();
-        dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class, ImmutableBeaconData.class, ImmutableSpongeBeaconData.class,
-                beaconDataProcessor);
+        dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
+                ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
 
         // Values
 

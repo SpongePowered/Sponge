@@ -34,15 +34,19 @@ import org.spongepowered.common.data.manipulator.mutable.extra.SpongeFluidItemDa
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshot;
 
-public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<FluidStackSnapshot, ImmutableFluidItemData, FluidItemData> implements ImmutableFluidItemData {
+public class ImmutableSpongeFluidItemData extends AbstractImmutableSingleData<FluidStackSnapshot, ImmutableFluidItemData, FluidItemData>
+        implements ImmutableFluidItemData {
+
+    private final ImmutableValue<FluidStackSnapshot> immutableValue;
 
     public ImmutableSpongeFluidItemData(FluidStackSnapshot value) {
         super(ImmutableFluidItemData.class, value, Keys.FLUID_ITEM_STACK);
+        this.immutableValue = new ImmutableSpongeValue<>(Keys.FLUID_ITEM_STACK, SpongeFluidStackSnapshot.DEFAULT, this.value);
     }
 
     @Override
     protected ImmutableValue<FluidStackSnapshot> getValueGetter() {
-        return new ImmutableSpongeValue<>(Keys.FLUID_ITEM_STACK, SpongeFluidStackSnapshot.DEFAULT, this.value);
+        return this.immutableValue;
     }
 
     @Override

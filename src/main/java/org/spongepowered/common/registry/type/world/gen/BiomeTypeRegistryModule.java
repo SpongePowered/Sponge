@@ -39,6 +39,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -51,7 +52,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
 
     @Override
     public Optional<BiomeType> getById(String id) {
-        return Optional.ofNullable(this.biomeTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.biomeTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -136,7 +137,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
         for (BiomeGenBase biome : biomeArray) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
-                this.biomeTypeMappings.put(biome.biomeName.toLowerCase(), (BiomeType) biome);
+                this.biomeTypeMappings.put(biome.biomeName.toLowerCase(Locale.ENGLISH), (BiomeType) biome);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

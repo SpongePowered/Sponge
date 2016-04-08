@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,15 +65,15 @@ public class ProfessionRegistryModule implements SpongeAdditionalCatalogRegistry
 
     @Override
     public void registerAdditionalCatalog(Profession extraCatalog) {
-        if (extraCatalog.getId().toLowerCase().equals("smith")) {
+        if (extraCatalog.getId().toLowerCase(Locale.ENGLISH).equals("smith")) {
             return;
         }
-        this.professionMap.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.professionMap.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override
     public Optional<Profession> getById(String id) {
-        return Optional.ofNullable(this.professionMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.professionMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

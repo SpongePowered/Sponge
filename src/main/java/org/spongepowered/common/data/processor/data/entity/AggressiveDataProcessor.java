@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableAggressiveData;
@@ -32,8 +31,9 @@ import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.util.OptBool;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
+import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
@@ -41,21 +41,21 @@ import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 import java.util.Optional;
 
 public class AggressiveDataProcessor
-        extends AbstractEntitySingleDataProcessor<EntityPigZombie, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
+        extends AbstractSingleDataSingleTargetProcessor<IMixinAggressive, Boolean, Value<Boolean>, AggressiveData, ImmutableAggressiveData> {
 
     public AggressiveDataProcessor() {
-        super(EntityPigZombie.class, Keys.ANGRY);
+        super(Keys.ANGRY, IMixinAggressive.class);
     }
 
     @Override
-    protected boolean set(EntityPigZombie entity, Boolean value) {
-        ((IMixinAggressive) entity).setAngry(value);
+    protected boolean set(IMixinAggressive entity, Boolean value) {
+        entity.setAngry(value);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityPigZombie entity) {
-        return Optional.of(entity.isAngry());
+    protected Optional<Boolean> getVal(IMixinAggressive entity) {
+        return OptBool.of(entity.isAngry());
     }
 
     @Override
