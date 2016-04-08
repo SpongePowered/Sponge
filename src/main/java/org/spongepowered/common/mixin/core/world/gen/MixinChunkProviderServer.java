@@ -25,28 +25,54 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.world.gen.SpongeChunkProvider;
 
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer {
 
+    private static final String CHUNK_PROVIDER_POPULATE = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V";
     @Shadow public WorldServer worldObj;
-    @Shadow public abstract Chunk provideChunk(int x, int z);
 
-    @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
+    /**
+     * @author blood, updated gabizou
+     *
+     * This redirect is *very* important. This enables the cause tracker to at least track that we're in
+     * a terrain generation phase. The finer grained events thrown (like populators) are thrown within
+     * {@link SpongeChunkProvider} itself. This is geared more towards modded servers where mods can
+     * break population logic and cause re-entrance to populating chunks.
+     *
+     * <p>Note that in 1.9, this logic must be moved to Chunk.</p>
+     *
+     * @param serverChunkGenerator
+     * @param chunkProvider
+     * @param x
+     * @param z
+     */
+    @Redirect(method = "populate", at = @At(value = "INVOKE", target = CHUNK_PROVIDER_POPULATE))
     public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        world.getCauseTracker().setProcessingCaptureCause(true);
-        world.getCauseTracker().setCapturingTerrainGen(true);
+        final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+        final NamedCause sourceCause = NamedCause.source(this);
+        final NamedCause chunkProviderCause = NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, chunkProvider);
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                .add(sourceCause)
+                .add(chunkProviderCause)
+                .addCaptures()
+                .complete());
         serverChunkGenerator.populate(chunkProvider, x, z);
-        world.getCauseTracker().setCapturingTerrainGen(false);
-        world.getCauseTracker().setProcessingCaptureCause(false);
+        causeTracker.completePhase();
     }
+
 }

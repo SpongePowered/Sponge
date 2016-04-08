@@ -80,7 +80,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
@@ -103,20 +102,20 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayDeque;
@@ -198,12 +197,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow(prefix = "shadow$")
-    protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract void playSound(String name, float volume, float pitch);
+    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
 
 
     // @formatter:on
@@ -351,7 +351,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         Entity spongeEntity = this;
-        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
+        net.minecraft.entity.Entity thisEntity = EntityUtil.toNative(spongeEntity);
 
         if (!forced) {
             // Validate
@@ -586,7 +586,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
-        ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.
+            ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        }
         if (((Entity) this) instanceof EntityPlayerMP) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
@@ -771,12 +773,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             entityplayermp1.setSneaking(false);
             mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
             toWorld.getPlayerManager().addPlayer(entityplayermp1);
+            // TODO need to direct this appropriately in cause tracking
             toWorld.spawnEntityInWorld(entityplayermp1);
             mcServer.getConfigurationManager().getPlayerList().add(entityplayermp1);
             entityplayermp1.theItemInWorldManager.setWorld(toWorld);
             entityplayermp1.addSelfToInternalCraftingInventory();
             entityplayermp1.setHealth(entityplayermp1.getHealth());
         } else {
+            // TODO need to direct this appropriately in cause tracking
             toWorld.spawnEntityInWorld(entity);
         }
 
@@ -953,25 +957,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
-        NBTTagCompound nbt = getSpongeData();
-        if (!nbt.hasKey(nbtKey)) {
-           return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
-            // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -998,22 +984,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
-       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-       if (user.isPresent()) {
-           return Optional.of(user.get().getUniqueId());
-       } else {
-           return Optional.empty();
-       }
+       return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -1172,23 +1148,25 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.displayName;
     }
 
+    private boolean skipSettingCustomNameTag = false;
+
     @Override
     public void setDisplayName(@Nullable Text displayName) {
         this.displayName = displayName;
 
-        StaticMixinHelper.setCustomNameTagSkip = true;
+        this.skipSettingCustomNameTag = true;
         if (this.displayName == null) {
             this.setCustomNameTag("");
         } else {
             this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
         }
 
-        StaticMixinHelper.setCustomNameTagSkip = false;
+        this.skipSettingCustomNameTag = false;
     }
 
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))
     public void onSetCustomNameTag(String name, CallbackInfo ci) {
-        if (!StaticMixinHelper.setCustomNameTagSkip) {
+        if (!this.skipSettingCustomNameTag) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
     }
@@ -1252,15 +1230,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
         this.custom = null;
         return stack;
-    }
-
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
 }

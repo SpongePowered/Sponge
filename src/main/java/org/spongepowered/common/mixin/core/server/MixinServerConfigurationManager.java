@@ -334,6 +334,7 @@ public abstract class MixinServerConfigurationManager {
 
             if (entity != null) {
                 entity.forceSpawn = true;
+                // TODO direct this appropriately
                 worldserver.spawnEntityInWorld(entity);
                 playerIn.mountEntity(entity);
                 entity.forceSpawn = false;
@@ -430,6 +431,7 @@ public abstract class MixinServerConfigurationManager {
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
         targetWorld.getPlayerManager().addPlayer(playerIn);
+        // TODO direct this appropriately
         targetWorld.spawnEntityInWorld(playerIn);
         this.playerEntityList.add(playerIn);
         playerIn.addSelfToInternalCraftingInventory();
@@ -534,6 +536,7 @@ public abstract class MixinServerConfigurationManager {
 
         // Spawn player into level
         WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        // TODO direct this appropriately
         level.spawnEntityInWorld(player);
         this.preparePlayer(player, null);
 

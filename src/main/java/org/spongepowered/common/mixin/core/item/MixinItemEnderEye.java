@@ -43,6 +43,7 @@ public class MixinItemEnderEye extends Item {
             target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
     private boolean onSpawnEntityInWorld(World world, Entity enderEye, ItemStack itemStack, World world2, EntityPlayer player) {
         ((EyeOfEnder) enderEye).setShooter((ProjectileSource) player);
+        // TODO direct this appropriately
         return world.spawnEntityInWorld(enderEye);
     }
 

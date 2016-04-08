@@ -77,10 +77,12 @@ import javax.annotation.Nullable;
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
+    private static final String GET_CLOSEST_PLAYER =
+            "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;";
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
-    @Shadow private EntityLivingBase attackTarget;
+    @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
@@ -154,7 +156,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         return Optional.empty();
     }
 
-    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
+    @Nullable
+    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = GET_CLOSEST_PLAYER))
     public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }

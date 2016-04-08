@@ -32,8 +32,10 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityXPOrb;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -84,7 +86,6 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.network.PlayerConnection;
@@ -108,12 +109,16 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -126,9 +131,17 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-@Mixin(NetHandlerPlayServer.class)
-public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
+import javax.annotation.Nullable;
 
+@Mixin(NetHandlerPlayServer.class)
+public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMixinNetHandlerPlayServer {
+
+    private static final String CONTAINER_SLOT_CLICK = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;";
+    private static final String PLAYER_UPDATE_CRAFTING_INVENTORY = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V";
+    private static final String PLAYER_IS_CHANGING_QUANTITY_FIELD = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z";
+    private static final String UPDATE_SIGN = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;";
+    private static final String HANDLE_CUSTOM_PAYLOAD = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V";
+    private static final String PLAYER_ATTACK_TARGET_ENTITY = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V";
     private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
 
     @Shadow @Final private static Logger logger;
@@ -140,13 +153,19 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     @Shadow public abstract void kickPlayerFromServer(String reason);
 
     private boolean justTeleported = false;
-    private Location<World> lastMoveLocation = null;
+    @Nullable private Location<World> lastMoveLocation = null;
 
     private final Map<String, ResourcePack> sentResourcePacks = new HashMap<>();
 
     private Long lastPacket;
     // Store the last block right-clicked
-    private Item lastItem;
+    @Nullable private Item lastItem;
+
+
+    @Override
+    public Map<String, ResourcePack> getSentResourcePacks() {
+        return this.sentResourcePacks;
+    }
 
     @Override
     public Player getPlayer() {
@@ -190,10 +209,10 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     private Packet<?> rewritePacket(final Packet<?> packetIn) {
         // Update the tab list data
         if (packetIn instanceof S38PacketPlayerListItem) {
+            // Update the tab list data
             ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((S38PacketPlayerListItem) packetIn);
-        }
-        // Store the resource pack for use when processing resource pack statuses
-        else if (packetIn instanceof IMixinPacketResourcePackSend) {
+        } else if (packetIn instanceof IMixinPacketResourcePackSend) {
+            // Store the resource pack for use when processing resource pack statuses
             IMixinPacketResourcePackSend packet = (IMixinPacketResourcePackSend) packetIn;
             this.sentResourcePacks.put(packet.setFakeHash(), packet.getResourcePack());
         }
@@ -212,7 +231,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @param tileentity Injected tilentity param
      * @param tileentitysign Injected tileentitysign param
      */
-    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C12PacketUpdateSign;getLines()[Lnet/minecraft/util/IChatComponent;"), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
+    @Inject(method = "processUpdateSign", at = @At(value = "INVOKE", target = UPDATE_SIGN), cancellable = true, locals = LocalCapture.CAPTURE_FAILSOFT)
     public void callSignChangeEvent(C12PacketUpdateSign packetIn, CallbackInfo ci, WorldServer worldserver, BlockPos blockpos, TileEntity tileentity, TileEntitySign tileentitysign) {
         ci.cancel();
         if (!PacketUtil.processSignPacket(packetIn, ci, tileentitysign, this.playerEntity)) {
@@ -254,8 +273,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @param packetIn method param
      */
     @Inject(method = "processVanilla250Packet", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
-            target = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;"
-                    + "Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V"), cancellable = true)
+            target = HANDLE_CUSTOM_PAYLOAD), cancellable = true)
     public void processCommandBlock(C17PacketCustomPayload packetIn, CallbackInfo ci) {
         if ("MC|AdvCdm".equals(packetIn.getChannelName())) {
             PacketBuffer packetbuffer;
@@ -339,7 +357,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     }
 
     @Inject(method = "processPlayer", at = @At(value = "FIELD", target = "net.minecraft.network.NetHandlerPlayServer.hasMoved:Z", ordinal = 2), cancellable = true)
-    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
+    public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci) {
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
             Vector3d fromrot = player.getRotation();
@@ -421,33 +439,6 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Inject(method = "handleResourcePackStatus", at = @At("HEAD"))
-    public void onResourcePackStatus(C19PacketResourcePackStatus packet, CallbackInfo ci) {
-        String hash = packet.hash;
-        ResourcePackStatusEvent.ResourcePackStatus status;
-        ResourcePack pack = this.sentResourcePacks.get(hash);
-        switch (packet.status) {
-            case ACCEPTED:
-                status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
-                break;
-            case DECLINED:
-                status = ResourcePackStatusEvent.ResourcePackStatus.DECLINED;
-                break;
-            case SUCCESSFULLY_LOADED:
-                status = ResourcePackStatusEvent.ResourcePackStatus.SUCCESSFULLY_LOADED;
-                break;
-            case FAILED_DOWNLOAD:
-                status = ResourcePackStatusEvent.ResourcePackStatus.FAILED;
-                break;
-            default:
-                throw new AssertionError();
-        }
-        if (status.wasSuccessful().isPresent()) {
-            this.sentResourcePacks.remove(hash);
-        }
-        SpongeImpl.postEvent(SpongeEventFactory.createResourcePackStatusEvent(Cause.of(NamedCause.source(SpongeImpl.getGame())), pack,
-            (Player)this.playerEntity, status));
-    }
 
     @Inject(method = "processPlayerDigging", at = @At("HEAD"), cancellable = true)
     public void injectDig(C07PacketPlayerDigging packetIn, CallbackInfo ci) {
@@ -460,7 +451,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     public void handleLeftBlockClick(ItemInWorldManager itemInWorldManager, BlockPos pos, EnumFacing side) {
         Location<World> location = new Location<>((World) this.playerEntity.worldObj, VecHelper.toVector(pos));
         InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(Cause.of(NamedCause.source(this.playerEntity)),
-                Optional.empty(), location.createSnapshot(), DirectionFacingProvider.getInstance().getKey(side).get());
+            Optional.empty(), location.createSnapshot(), DirectionFacingProvider.getInstance().getKey(side).get());
         if (SpongeImpl.postEvent(event)) {
             this.playerEntity.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.playerEntity.worldObj, pos));
             return;
@@ -471,11 +462,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
     /**
      * @author blood - April 6th, 2016
-     * 
+     *
      * Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
      * was made can be found in comments below.
-     * 
+     *
      * @param packetIn The block placement packet
      */
     @Overwrite
@@ -571,17 +562,29 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
-    public void onBeforeSlotClick(C0EPacketClickWindow packetIn, CallbackInfo ci) {
-        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
+    @Redirect(method = "processPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
+    private void onPlayerUpdate(EntityPlayerMP playerEntity) {
+        final CauseTracker causeTracker = ((IMixinEntityPlayerMP) playerEntity).getMixinWorld().getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.PLAYER, PhaseContext.start()
+                .add(NamedCause.source(playerEntity))
+                .addCaptures()
+                .complete());
+        playerEntity.onUpdateEntity();
+        causeTracker.completePhase();
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V", shift = At.Shift.AFTER))
+    @Redirect(method = "processClickWindow", at = @At(value = "INVOKE", target = CONTAINER_SLOT_CLICK))
+    private ItemStack onBeforeSlotClick(Container container, int slotId, int usedButton, int clickMode, EntityPlayer player) {
+        ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(true);
+        return container.slotClick(slotId, usedButton, clickMode, player);
+    }
+
+    @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = PLAYER_UPDATE_CRAFTING_INVENTORY, shift = At.Shift.AFTER))
     public void onAfterSecondUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z", shift = At.Shift.AFTER, ordinal = 1))
+    @Inject(method = "processClickWindow", at = @At(value = "FIELD", target = PLAYER_IS_CHANGING_QUANTITY_FIELD, shift = At.Shift.AFTER, ordinal = 1))
     public void onThirdUpdateCraftingInventory(C0EPacketClickWindow packetIn, CallbackInfo ci) {
         ((IMixinContainer) this.playerEntity.openContainer).setCaptureInventory(false);
     }
@@ -596,19 +599,13 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         ((IMixinContainer) this.playerEntity.inventoryContainer).setCaptureInventory(false);
     }
 
-    @Inject(method = "processHeldItemChange", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/play/client/C09PacketHeldItemChange;getSlotId()I", ordinal = 2), cancellable = true)
-    public void onGetSlotId(C09PacketHeldItemChange packetIn, CallbackInfo ci) {
-        SpongeCommonEventFactory.callChangeInventoryHeldEvent(this.playerEntity, packetIn);
-        ci.cancel();
-    }
-
     /**
      * @author blood - April 5th, 2016
-     * 
+     *
      * Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
      * was made can be found in comments below.
-     * 
+     *
      * @param packetIn The entity use packet
      */
     @Overwrite
@@ -617,7 +614,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
             if (packetIn.getAction() == Action.INTERACT) {
                 // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the 
+                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the
                 // INTERACT_AT packet contains the same data but also includes a hitVec.
                 return;
             } else { // queue packet for main thread
@@ -642,7 +639,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 // Since we ignore any packet that has hitVec set to null, we can safely ignore this check
                 // if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT) {
                 //    this.playerEntity.interactWith(entity);
-                // } else 
+                // } else
                 if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT_AT) {
                     InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
                             Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);

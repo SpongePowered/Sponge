@@ -27,7 +27,6 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import net.minecraft.block.BlockFalling;
@@ -63,10 +62,15 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
@@ -246,7 +250,12 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
-        Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
+        IMixinWorldServer world = (IMixinWorldServer) this.world;
+        final CauseTracker causeTracker = world.getCauseTracker();
+        final Object source = causeTracker.getStack().peek().getContext().firstNamed(NamedCause.SOURCE, Object.class).get();
+
+        final Cause populateCause = Cause.of(NamedCause.source(source), NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, chunkProvider));
+
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -284,7 +293,10 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
-            StaticMixinHelper.runningGenerator = populator.getType();
+            causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
+                    .addEntityCaptures()
+                    .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
             }
@@ -293,8 +305,8 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
             } else {
                 populator.populate(chunk, this.rand);
             }
+            causeTracker.completePhase();
         }
-        StaticMixinHelper.runningGenerator = null;
 
         // If we wrapped a custom chunk provider then we should call its
         // populate method so that its particular changes are used.
@@ -302,8 +314,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
             ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkProvider, chunkX, chunkZ);
         }
 
-        PopulateChunkEvent.Post event =
-                SpongeEventFactory.createPopulateChunkEventPost(populateCause, ImmutableList.copyOf(populators), chunk);
+        PopulateChunkEvent.Post event = SpongeEventFactory.createPopulateChunkEventPost(populateCause, populators, chunk);
         SpongeImpl.postEvent(event);
 
         BlockFalling.fallInstantly = false;

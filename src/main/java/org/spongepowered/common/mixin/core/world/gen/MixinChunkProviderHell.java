@@ -87,11 +87,4 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
         this.func_180516_b(x, z, chunkprimer);
     }
 
-    @Inject(method = "getPossibleCreatures", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/structure/MapGenNetherBridge;getSpawnList()Ljava/util/List;"))
-    private void onGetPossibleCreatures(CallbackInfoReturnable<List<BiomeGenBase.SpawnListEntry>> callbackInfoReturnable) {
-        if (StaticMixinHelper.gettingSpawnList) {
-            StaticMixinHelper.structureSpawning = true;
-        }
-    }
-
 }

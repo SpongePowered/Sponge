@@ -87,15 +87,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
@@ -593,7 +598,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     protected void prepareSpawnArea(WorldServer world) {
-        ((IMixinWorld) world).getCauseTracker().setCapturingTerrainGen(true);
+        final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+            .add(NamedCause.source(world))
+            .addCaptures()
+            .complete());
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
         logger.info("Preparing start region for level {} ({})", world.provider.getDimensionId(), ((World) world).getName());
@@ -615,7 +624,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         this.clearCurrentTask();
-        ((IMixinWorld) world).getCauseTracker().setCapturingTerrainGen(false);
+        causeTracker.completePhase();
     }
 
     @Override
@@ -779,7 +788,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         UUID uuid;
         if (properties.getUniqueId() == null || properties.getUniqueId().equals
-                (StaticMixinHelper.INVALID_WORLD_UUID)) {
+                (BlockUtil.INVALID_WORLD_UUID)) {
             // Check if Bukkit's uid.dat file is here and use it
             final Path uidPath = SpongeImpl.getGame().getSavesDirectory().resolve(properties.getWorldName()).resolve("uid.dat");
             if (!Files.exists(uidPath)) {

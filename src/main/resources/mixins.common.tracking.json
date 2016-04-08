@@ -1,0 +1,16 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.tracking",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.TrackingPlugin",
+    "mixins": [
+        "entity.MixinEntity_Tracker",
+        "world.MixinChunk_Tracker"
+    ],
+    "server": [
+
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

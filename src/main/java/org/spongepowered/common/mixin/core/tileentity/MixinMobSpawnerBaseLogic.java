@@ -45,7 +45,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
@@ -103,21 +106,6 @@ public abstract class MixinMobSpawnerBaseLogic {
         this.posX = 0;
         this.posY = 0;
         this.posZ = 0;
-    }
-
-    /**
-     * Redirects the entity spawn to ours since we know the cause already.
-     *
-     * @param world
-     * @param entity
-     * @return
-     */
-    @Redirect(method = "spawnNewEntity", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onEntitySpawn(World world, Entity entity) {
-        // TODO include the spawner data once implemented.
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
-        return ((org.spongepowered.api.world.World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity),
-                Cause.of(NamedCause.source(cause)));
     }
 
 }

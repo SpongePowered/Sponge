@@ -49,6 +49,7 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
@@ -63,10 +64,18 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeHealthData;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.data.value.mutable.SpongeOptionalValue;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.DamageObject;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.DamageObject;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -81,7 +90,6 @@ import javax.annotation.Nullable;
 @Mixin(value = EntityLivingBase.class, priority = 999)
 public abstract class MixinEntityLivingBase extends MixinEntity implements Living, IMixinEntityLivingBase {
 
-    private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
     private DamageSource lastDamageSource;
 
@@ -92,18 +100,20 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public boolean potionsNeedUpdate;
     @Shadow public CombatTracker _combatTracker;
     @Shadow public EntityLivingBase entityLivingToAttack;
+    @Shadow public float attackedAtYaw;
+    @Shadow public float limbSwingAmount;
     @Shadow protected BaseAttributeMap attributeMap;
     @Shadow protected ItemStack[] previousEquipment;
     @Shadow protected int entityAge;
     @Shadow protected int recentlyHit;
     @Shadow protected float lastDamage;
-    @Shadow protected EntityPlayer attackingPlayer;
+    @Shadow @Nullable protected EntityPlayer attackingPlayer;
     @Shadow protected abstract void damageArmor(float p_70675_1_);
     @Shadow protected abstract void setBeenAttacked();
     @Shadow protected abstract String getDeathSound();
     @Shadow protected abstract float getSoundVolume();
     @Shadow protected abstract float getSoundPitch();
-    @Shadow protected abstract String getHurtSound();
+    @Shadow @Nullable protected abstract String getHurtSound();
     @Shadow public abstract void setHealth(float health);
     @Shadow public abstract void addPotionEffect(net.minecraft.potion.PotionEffect potionEffect);
     @Shadow public abstract void removePotionEffect(int id);
@@ -119,8 +129,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow @Nullable public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
-    @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
+    @Shadow @Nullable public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+    @Shadow protected abstract void onDeathUpdate();
+    @Shadow public abstract void onDeath(DamageSource cause);
+    @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);
+    @Shadow public abstract void setRevengeTarget(EntityLivingBase livingBase);
+    @Shadow public abstract void setAbsorptionAmount(float amount);
+    @Shadow public abstract float getAbsorptionAmount();
+    @Shadow public abstract CombatTracker getCombatTracker();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -214,32 +231,33 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         if (source == null) {
             Thread.dumpStack();
         }
-        if (!hookModAttack(this.nmsEntityLiving, source, amount))
+        if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
-        if (this.nmsEntityLiving.isEntityInvulnerable(source)) {
+        if (this.isEntityInvulnerable(source)) {
             return false;
         } else if (this.worldObj.isRemote) {
             return false;
         } else {
             this.entityAge = 0;
 
-            if (this.nmsEntityLiving.getHealth() <= 0.0F) {
+            if (this.getHealth() <= 0.0F) {
                 return false;
-            } else if (source.isFireDamage() && this.nmsEntityLiving.isPotionActive(Potion.fireResistance)) {
+            } else if (source.isFireDamage() && this.isPotionActive(Potion.fireResistance)) {
                 return false;
             } else {
                 // Sponge - ignore as this is handled in our damageEntityHook
-                if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
-                    && this.nmsEntityLiving.getEquipmentInSlot(4) != null) {
-                    this.nmsEntityLiving.getEquipmentInSlot(4).damageItem((int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
-                                                                          this.nmsEntityLiving);
-                    amount *= 0.75F;
-                }
+//                if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
+//                    && this.getEquipmentInSlot(4) != null) {
+//                    this.getEquipmentInSlot(4).damageItem((int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
+//                            (EntityLivingBase) (Object) this);
+//                    amount *= 0.75F;
+//                }
+                // Sponge End
 
-                this.nmsEntityLiving.limbSwingAmount = 1.5F;
+                this.limbSwingAmount = 1.5F;
                 boolean flag = true;
 
-                if ((float) this.hurtResistantTime > (float) this.nmsEntityLiving.maxHurtResistantTime / 2.0F) {
+                if ((float) this.hurtResistantTime > (float) this.maxHurtResistantTime / 2.0F) {
                     if (amount <= this.lastDamage) {
                         return false;
                     }
@@ -258,27 +276,27 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                         return false;
                     }
                     this.lastDamage = amount;
-                    this.hurtResistantTime = this.nmsEntityLiving.maxHurtResistantTime;
+                    this.hurtResistantTime = this.maxHurtResistantTime;
                     // this.damageEntity(source, amount); // handled above
                     // Sponge end
-                    this.nmsEntityLiving.hurtTime = this.nmsEntityLiving.maxHurtTime = 10;
+                    this.hurtTime = this.maxHurtTime = 10;
                 }
 
-                this.nmsEntityLiving.attackedAtYaw = 0.0F;
+                this.attackedAtYaw = 0.0F;
                 net.minecraft.entity.Entity entity = source.getEntity();
 
                 if (entity != null) {
                     if (entity instanceof EntityLivingBase) {
-                        this.nmsEntityLiving.setRevengeTarget((EntityLivingBase) entity);
+                        this.setRevengeTarget((EntityLivingBase) entity);
                     }
 
                     if (entity instanceof EntityPlayer) {
                         this.recentlyHit = 100;
                         this.attackingPlayer = (EntityPlayer) entity;
                     } else if (entity instanceof net.minecraft.entity.passive.EntityTameable) {
-                        net.minecraft.entity.passive.EntityTameable entitywolf = (net.minecraft.entity.passive.EntityTameable) entity;
+                        net.minecraft.entity.passive.EntityTameable entityWolf = (net.minecraft.entity.passive.EntityTameable) entity;
 
-                        if (entitywolf.isTamed()) {
+                        if (entityWolf.isTamed()) {
                             this.recentlyHit = 100;
                             this.attackingPlayer = null;
                         }
@@ -286,7 +304,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 }
 
                 if (flag) {
-                    this.worldObj.setEntityState(this.nmsEntityLiving, (byte) 2);
+                    this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
 
                     if (source != DamageSource.drown) {
                         this.setBeenAttacked();
@@ -300,28 +318,44 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                             d1 = (Math.random() - Math.random()) * 0.01D;
                         }
 
-                        this.nmsEntityLiving.attackedAtYaw = (float) (Math.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
-                        this.nmsEntityLiving.knockBack(entity, amount, d1, d0);
+                        this.attackedAtYaw = (float) (Math.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
+                        this.knockBack(entity, amount, d1, d0);
                     } else {
-                        this.nmsEntityLiving.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
+                        this.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
                     }
                 }
 
                 String s;
 
-                if (this.nmsEntityLiving.getHealth() <= 0.0F) {
+                if (this.getHealth() <= 0.0F) {
                     s = this.getDeathSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(s, this.getSoundVolume(), this.getSoundPitch());
+                        this.playSound(s, this.getSoundVolume(), this.getSoundPitch());
                     }
 
-                    this.nmsEntityLiving.onDeath(source);
+                    // Sponge Start - notify the cause tracker
+                    final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
+                    final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntitySpecificDrops();
+                    if (tracksEntitySpecificDrops) {
+                        causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
+                                .add(NamedCause.source(this))
+                                .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
+                                .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
+                                .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(NamedCause::notifier).orElse(null))
+                                .addCaptures()
+                                .complete());
+                    }
+                    this.onDeath(source);
+                    if (tracksEntitySpecificDrops) {
+                        causeTracker.completePhase();
+                    }
+                    // Sponge End
                 } else {
                     s = this.getHurtSound();
 
                     if (flag && s != null) {
-                        this.nmsEntityLiving.playSound(s, this.getSoundVolume(), this.getSoundPitch());
+                        this.playSound(s, this.getSoundVolume(), this.getSoundPitch());
                     }
                 }
 
@@ -332,10 +366,10 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     @Override
     public boolean damageEntityHook(DamageSource damageSource, float damage) {
-        if (!this.nmsEntityLiving.isEntityInvulnerable(damageSource)) {
-            final boolean human = this.nmsEntityLiving instanceof EntityPlayer;
+        if (!this.isEntityInvulnerable(damageSource)) {
+            final boolean human = (Object) this instanceof EntityPlayer;
             // apply forge damage hook
-            damage = applyModDamage(this.nmsEntityLiving, damageSource, damage);
+            damage = applyModDamage((EntityLivingBase) (Object) this, damageSource, damage);
             float originalDamage = damage; // set after forge hook.
             if (damage <= 0) {
                 damage = 0;
@@ -343,17 +377,17 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
             List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> hardHatFunction =
-                DamageEventHandler.createHardHatModifier(this.nmsEntityLiving, damageSource);
+                DamageEventHandler.createHardHatModifier((EntityLivingBase) (Object) this, damageSource);
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> blockingFunction =
-                DamageEventHandler.createBlockingModifier(this.nmsEntityLiving, damageSource);
+                DamageEventHandler.createBlockingModifier((EntityLivingBase) (Object) this, damageSource);
             Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> armorFunction =
-                provideArmorModifiers(this.nmsEntityLiving, damageSource, damage);
+                provideArmorModifiers((EntityLivingBase) (Object) this, damageSource, damage);
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> resistanceFunction =
-                DamageEventHandler.createResistanceModifier(this.nmsEntityLiving, damageSource);
+                DamageEventHandler.createResistanceModifier((EntityLivingBase) (Object) this, damageSource);
             Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> armorEnchantments =
-                DamageEventHandler.createEnchantmentModifiers(this.nmsEntityLiving, damageSource);
+                DamageEventHandler.createEnchantmentModifiers((EntityLivingBase) (Object) this, damageSource);
             Optional<Tuple<DamageModifier, Function<? super Double, Double>>> absorptionFunction =
-                DamageEventHandler.createAbsorptionModifier(this.nmsEntityLiving, damageSource);
+                DamageEventHandler.createAbsorptionModifier((EntityLivingBase) (Object) this, damageSource);
 
             if (hardHatFunction.isPresent()) {
                 originalFunctions.add(hardHatFunction.get());
@@ -380,8 +414,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             }
             final Cause cause = DamageEventHandler.generateCauseFor(damageSource);
 
-            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(cause, originalFunctions,
-                         (Entity) this.nmsEntityLiving, originalDamage);
+            DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(cause, originalFunctions, this, originalDamage);
             Sponge.getEventManager().post(event);
             if (event.isCancelled()) {
                 return false;
@@ -390,15 +423,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             damage = (float) event.getFinalDamage();
 
             // Helmet
-            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.getEquipmentInSlot(4) != null) {
-                this.nmsEntityLiving.getEquipmentInSlot(4).damageItem(
-                    (int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), this.nmsEntityLiving);
+            if ((damageSource instanceof FallingBlockDamageSource) && this.getEquipmentInSlot(4) != null) {
+                this.getEquipmentInSlot(4).damageItem(
+                    (int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
             }
 
             // Armor
             if (!damageSource.isUnblockable()) {
                 for (Tuple<DamageModifier, Function<? super Double, Double>> modifier : event.getModifiers()) {
-                    applyArmorDamage(this.nmsEntityLiving, damageSource, event, modifier.getFirst());
+                    applyArmorDamage((EntityLivingBase) (Object) this, damageSource, event, modifier.getFirst());
                 }
             }
 
@@ -407,21 +440,21 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 absorptionModifier = event.getDamage(absorptionFunction.get().getFirst());
             }
 
-            this.nmsEntityLiving.setAbsorptionAmount(Math.max(this.nmsEntityLiving.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
+            this.setAbsorptionAmount(Math.max(this.getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
             if (damage != 0.0F) {
                 if (human) {
-                    ((EntityPlayer) this.nmsEntityLiving).addExhaustion(damageSource.getHungerDamage());
+                    ((EntityPlayer) (Object) this).addExhaustion(damageSource.getHungerDamage());
                 }
-                float f2 = this.nmsEntityLiving.getHealth();
+                float f2 = this.getHealth();
 
-                this.nmsEntityLiving.setHealth(f2 - damage);
-                this.nmsEntityLiving.getCombatTracker().trackDamage(damageSource, f2, damage);
+                this.setHealth(f2 - damage);
+                this.getCombatTracker().trackDamage(damageSource, f2, damage);
 
                 if (human) {
                     return true;
                 }
 
-                this.nmsEntityLiving.setAbsorptionAmount(this.nmsEntityLiving.getAbsorptionAmount() - damage);
+                this.setAbsorptionAmount(this.getAbsorptionAmount() - damage);
             }
             return true;
         }
@@ -443,7 +476,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     public void applyArmorDamage(EntityLivingBase entityLivingBase, DamageSource source, DamageEntityEvent entityEvent, DamageModifier modifier) {
         Optional<DamageObject> optional = modifier.getCause().first(DamageObject.class);
         if (optional.isPresent()) {
-            DamageEventHandler.acceptArmorModifier(this.nmsEntityLiving, source, modifier, entityEvent.getDamage(modifier));
+            DamageEventHandler.acceptArmorModifier((EntityLivingBase) (Object) this, source, modifier, entityEvent.getDamage(modifier));
         }
     }
 
@@ -481,8 +514,26 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     }
 
-    // Data delegated methods
+    @Redirect(method = "onEntityUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;onDeathUpdate()V"))
+    private void causeTrackDeathUpdate(EntityLivingBase entityLivingBase) {
+        if (!entityLivingBase.worldObj.isRemote) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) entityLivingBase.worldObj).getCauseTracker();
+            causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_UPDATE, PhaseContext.start()
+                    .addCaptures()
+                    .add(NamedCause.source(entityLivingBase))
+                    .complete());
+            ((IMixinEntityLivingBase) entityLivingBase).onSpongeDeathUpdate();
+            causeTracker.completePhase();
+        }
+    }
 
+
+    @Override
+    public void onSpongeDeathUpdate() {
+        this.onDeathUpdate();
+    }
+
+    // Data delegated methods
 
     @Override
     public HealthData getHealthData() {

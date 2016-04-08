@@ -42,9 +42,11 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -106,22 +108,27 @@ public final class SpongeImplHooks {
 
         while (iterator.hasNext()) {
             EnumFacing enumfacing = iterator.next();
-            BlockPos blockpos1 = pos.offset(enumfacing);
+            BlockPos neighborPosition = pos.offset(enumfacing);
 
-            if (world.isBlockLoaded(blockpos1)) {
-                IBlockState iblockstate = world.getBlockState(blockpos1);
+            if (world.isBlockLoaded(neighborPosition)) {
+                IBlockState iblockstate = world.getBlockState(neighborPosition);
 
                 if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
-                    iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                    iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                 } else if (iblockstate.getBlock().isNormalCube()) {
-                    blockpos1 = blockpos1.offset(enumfacing);
-                    iblockstate = world.getBlockState(blockpos1);
+                    neighborPosition = neighborPosition.offset(enumfacing);
+                    iblockstate = world.getBlockState(neighborPosition);
 
                     if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
-                        iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                        iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                     }
                 }
             }
         }
+    }
+
+    public static void addItemStackToListForSpawning(Collection<ItemStack> itemStacks, ItemStack itemStack) {
+        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
+        itemStacks.add(itemStack);
     }
 }

@@ -82,7 +82,7 @@ import org.spongepowered.common.entity.*;
 import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.*;
 import org.spongepowered.common.entity.player.tab.*;
-import org.spongepowered.common.event.*;
+import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.*;
 import org.spongepowered.common.item.*;
@@ -108,8 +108,9 @@ import org.spongepowered.common.scoreboard.builder.*;
 import org.spongepowered.common.world.*;
 import org.spongepowered.common.world.gen.builders.*;
 
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class CommonModuleRegistry {
 
