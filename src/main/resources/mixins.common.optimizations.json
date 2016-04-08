@@ -4,7 +4,9 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "mixins": [
-        "MixinSpongeImplHooks_Item_Pre_Merge"
+        "MixinEntity_Item_Pre_Merge",
+        "MixinSpongeImplHooks_Item_Pre_Merge",
+        "MixinInventoryHelper"
     ],
     "injectors": {
         "defaultRequire": 1

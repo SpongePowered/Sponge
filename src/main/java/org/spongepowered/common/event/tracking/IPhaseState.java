@@ -72,4 +72,8 @@ public interface IPhaseState {
     default boolean tracksBlockSpecificDrops() {
         return false;
     }
+
+    default boolean tracksEntitySpecificDrops() {
+        return false;
+    }
 }

@@ -130,7 +130,7 @@ public final class WorldPhase extends TrackingPhase {
                     .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
                 phaseContext.getCapturedEntitySupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Not capturing entity spawns!", phaseContext))
-                        .ifPresent(entities -> {
+                        .ifPresentAndNotEmpty(entities -> {
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                     .entity(tickingEntity)
                                     .type(InternalSpawnTypes.PASSIVE)
@@ -164,7 +164,7 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedItemsSupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Not capturing item stack spawns!", phaseContext))
-                        .ifPresent(entities -> {
+                        .ifPresentAndNotEmpty(entities -> {
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                     .entity(tickingEntity)
                                     .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -187,7 +187,7 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedBlockSupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Not capturing block changes!", phaseContext))
-                        .ifPresent(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                        .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
                 if (tickingEntity instanceof Player) {
                     return; // this is handled elsewhere
                 }
@@ -296,11 +296,11 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final TileEntity tickingTile = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
-                phaseContext.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
+                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
 
-                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                     // TODO the entity spawn causes are not likely valid, need to investigate further.
                     final Cause cause = Cause.source(BlockSpawnCause.builder()
                                             .block(tickingTile.getLocation().createSnapshot())
@@ -356,10 +356,10 @@ public final class WorldPhase extends TrackingPhase {
                 final World world = causeTracker.getWorld();
                 phaseContext.getCapturedBlockSupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block changes but couldn't!", phaseContext))
-                        .ifPresent(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                        .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
                 phaseContext.getCapturedEntitySupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity spawns couldn't!", phaseContext))
-                        .ifPresent(entities -> {
+                        .ifPresentAndNotEmpty(entities -> {
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
                                         .block(tickingBlock)
                                         .type(InternalSpawnTypes.PLACEMENT)
@@ -379,7 +379,7 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedItemsSupplier()
                         .orElseThrow(PhaseUtil.throwWithContext("Intended to capture items but couldn't!", phaseContext))
-                        .ifPresent(items -> {
+                        .ifPresentAndNotEmpty(items -> {
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
                                         .block(tickingBlock)
                                         .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -428,10 +428,10 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final BlockSnapshot tickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
-                phaseContext.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
+                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
-                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(BlockSpawnCause.builder().block(tickingBlock).type(InternalSpawnTypes.PLACEMENT).build()).build();
                     final ImmutableList<EntitySnapshot>
                             snapshots =
@@ -477,7 +477,7 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-                phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> {
+                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                             .entity(tickingEntity)
                             .type(InternalSpawnTypes.PASSIVE)
@@ -487,7 +487,7 @@ public final class WorldPhase extends TrackingPhase {
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
-                phaseContext.getCapturedItemsSupplier().get().ifPresent(entities -> {
+                phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                             .entity(tickingEntity)
                             .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -497,7 +497,7 @@ public final class WorldPhase extends TrackingPhase {
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
-                phaseContext.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
+                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
             }
@@ -597,7 +597,7 @@ public final class WorldPhase extends TrackingPhase {
                         .process();
             }
 
-            context.getCapturedBlockSupplier().get().ifPresent(blockSnapshots -> {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
                 GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, state, context);
             });
         }

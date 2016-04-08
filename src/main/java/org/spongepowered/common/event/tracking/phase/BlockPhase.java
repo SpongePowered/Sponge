@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase;
 
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -73,18 +72,18 @@ public final class BlockPhase extends TrackingPhase {
         if (state == State.BLOCK_DECAY) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
-            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
-            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+            phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+            phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
-            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
-            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+            phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+            phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.RESTORING_BLOCKS) {
             // do nothing for now.
         } else if (state == State.DISPENSE) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
-            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
-            phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
+            phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
+            phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         }
 
     }

@@ -382,6 +382,11 @@ public final class PacketPhase extends TrackingPhase {
             public boolean tracksBlockSpecificDrops() {
                 return true;
             }
+
+            @Override
+            public boolean tracksEntitySpecificDrops() {
+                return true;
+            }
         },
         IGNORED,
         INTERACT_ENTITY {
@@ -396,6 +401,11 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
             }
+
+            @Override
+            public boolean tracksEntitySpecificDrops() {
+                return true;
+            }
         },
         ATTACK_ENTITY() {
             @Override
@@ -404,6 +414,11 @@ public final class PacketPhase extends TrackingPhase {
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
+            }
+
+            @Override
+            public boolean tracksEntitySpecificDrops() {
+                return true;
             }
         },
         INTERACT_AT_ENTITY {
@@ -660,7 +675,7 @@ public final class PacketPhase extends TrackingPhase {
 
     public static final ImmutableMap<C07PacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<C07PacketPlayerDigging.Action, IPacketState>builder()
             .put(C07PacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
-            .put(C07PacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_INVENTORY)
+            .put(C07PacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM)
             .put(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
             .put(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)

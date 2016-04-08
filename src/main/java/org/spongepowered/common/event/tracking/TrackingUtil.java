@@ -165,6 +165,10 @@ public final class TrackingUtil {
         return false;
     }
 
+    public static void associateEntityCreator(PhaseContext context, Entity spongeEntity, World world) {
+        associateEntityCreator(context, EntityUtil.toNative(spongeEntity), world);
+    }
+
     public static void associateEntityCreator(PhaseContext context, net.minecraft.entity.Entity minecraftEntity, World minecraftWorld) {
         context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(tickingSnapshot -> {
             BlockPos sourcePos = VecHelper.toBlockPos(tickingSnapshot.getPosition());

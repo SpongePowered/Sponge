@@ -94,6 +94,8 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
+    @Shadow public abstract EntityItem dropOneItem(boolean dropAll);
+    @Shadow public abstract EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem);
 
     private boolean affectsSpawning = true;
     private Vector3d targetedLocation;

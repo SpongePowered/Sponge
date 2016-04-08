@@ -45,6 +45,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 
 import java.util.ArrayList;
@@ -222,5 +223,12 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
         }
         return (IMixinEntity) entity;
+    }
+
+    public static org.spongepowered.api.entity.Entity fromMixin(IMixinEntity mixinEntity) {
+        if (!(mixinEntity instanceof org.spongepowered.api.entity.Entity)) {
+            throw new IllegalArgumentException("Not a native SpongeAPI entity!");
+        }
+        return (org.spongepowered.api.entity.Entity) mixinEntity;
     }
 }

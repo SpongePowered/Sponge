@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -89,6 +90,7 @@ public class PhaseContext {
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, new EntityItemDropsSupplier()));
         return this;
     }
 
@@ -182,6 +184,19 @@ public class PhaseContext {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, (Class<CapturedMultiMapSupplier<BlockPos, ItemStack>>) (Class<?>) BlockItemDropsSupplier.class);
     }
 
+    public Optional<Multimap<UUID, ItemStack>> getCapturedEntityDrops() {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(CapturedMultiMapSupplier::get);
+    }
+
+    public Optional<Collection<ItemStack>> getCapturedEntityDrops(UUID position) {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(supplier -> supplier.get().get(position));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<CapturedMultiMapSupplier<UUID, ItemStack>> getCapturedEntityDropSupplier() {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, (Class<CapturedMultiMapSupplier<UUID, ItemStack>>) (Class<?>) EntityItemDropsSupplier.class);
+    }
+
     public Cause toCause() {
         checkState(this.isCompleted, "Cannot get a cuase for an incomplete PhaseContext!");
         if (this.cause == null) {
@@ -237,6 +252,9 @@ public class PhaseContext {
 
         @Nullable private Multimap<K, V> captured;
 
+        CapturedMultiMapSupplier() {
+        }
+
         @Override
         public Multimap<K, V> get() {
             if (this.captured == null) {
@@ -249,8 +267,8 @@ public class PhaseContext {
             return this.captured == null || this.captured.isEmpty();
         }
 
-        public final void ifPresent(Consumer<Multimap<? super K, ? super V>> consumer) {
-            if (this.captured != null) {
+        public final void ifPresentAndNotEmpty(Consumer<Multimap<K, V>> consumer) {
+            if (this.captured != null && !this.captured.isEmpty()) {
                 consumer.accept(this.captured);
             }
         }
@@ -289,6 +307,7 @@ public class PhaseContext {
         @Override
         public String toString() {
             return com.google.common.base.Objects.toStringHelper(this)
+                    .add("Captured", this.captured == null ? 0 : this.captured.size())
                     .toString();
         }
     }
@@ -298,6 +317,12 @@ public class PhaseContext {
         BlockItemDropsSupplier() {
         }
 
+    }
+
+    static class EntityItemDropsSupplier extends CapturedMultiMapSupplier<UUID, ItemStack> {
+
+        EntityItemDropsSupplier() {
+        }
     }
 
 
@@ -319,8 +344,8 @@ public class PhaseContext {
             return this.captured == null || this.captured.isEmpty();
         }
 
-        public final void ifPresent(Consumer<List<T>> consumer) {
-            if (this.captured != null) {
+        public final void ifPresentAndNotEmpty(Consumer<List<T>> consumer) {
+            if (this.captured != null && !this.captured.isEmpty()) {
                 consumer.accept(this.captured);
             }
         }
@@ -358,6 +383,7 @@ public class PhaseContext {
         @Override
         public String toString() {
             return com.google.common.base.Objects.toStringHelper(this)
+                    .add("Captured", this.captured == null ? 0 : this.captured.size())
                     .toString();
         }
     }

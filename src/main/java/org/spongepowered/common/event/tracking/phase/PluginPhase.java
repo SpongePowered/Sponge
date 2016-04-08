@@ -63,10 +63,10 @@ public final class PluginPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_WORKER) {
-            phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> {
+            phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> {
 
             });
-            phaseContext.getCapturedBlockSupplier().get().ifPresent(snapshots -> GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
+            phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(snapshots -> GeneralFunctions.processBlockCaptures(snapshots, causeTracker, state, phaseContext));
         }
     }
 }

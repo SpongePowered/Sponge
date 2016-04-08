@@ -102,6 +102,7 @@ import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
@@ -201,6 +202,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract void playSound(String name, float volume, float pitch);
+    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
 
 
     // @formatter:on
@@ -348,7 +351,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         Entity spongeEntity = this;
-        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
+        net.minecraft.entity.Entity thisEntity = EntityUtil.toNative(spongeEntity);
 
         if (!forced) {
             // Validate

@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.function;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -43,9 +42,7 @@ import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
-import net.minecraft.util.BlockPos;
 import net.minecraft.world.IInteractionObject;
-import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -55,7 +52,6 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
@@ -84,7 +80,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
-import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -95,14 +90,11 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
-import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 @FunctionalInterface
@@ -137,7 +129,7 @@ public interface PacketFunction {
                             }
                         })
                         .process();
-                context.getCapturedItemsSupplier().get().ifPresent(items -> {
+                context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> {
                     // For destruction, this should be empty, however, some times, it may not be?
                     final PrettyPrinter printer = new PrettyPrinter(60);
                     printer.add("Processing Attack Entity").centre().hr();
@@ -147,23 +139,38 @@ public interface PacketFunction {
                     printer.add(new Exception("Stack trace"));
                     printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
                 });
-                context.getCapturedBlockSupplier().get().ifPresent(blocks -> {
+                context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks -> {
                     GeneralFunctions.processBlockCaptures(blocks, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context);
                 });
+                context.getCapturedEntityDrops().ifPresent(map -> {
+                    if (map.isEmpty()) {
+                        return;
+                    }
+                    final PrettyPrinter printer = new PrettyPrinter(80);
+                    printer.add("Processing Attack Entity").centre().hr();
+                    printer.add("The item stacks captured are: ");
+                    map.asMap().entrySet().forEach(entry -> {
+                        printer.add("  - Entity with UUID: %s", entry.getKey());
+                        for (ItemStack stack : entry.getValue()) {
+                            printer.add("    - %s", stack);
+                        }
+                    });
+                    printer.trace(System.err);
+                });
+
 
             }
         } else if (state == PacketPhase.General.INTERACT_ENTITY) {
-            final List<BlockSnapshot> blockSnapshots = context.getCapturedBlocks().get();
-            if (!blockSnapshots.isEmpty()) {
-                final PrettyPrinter printer = new PrettyPrinter(80);
-                printer.add("Processing Interact Entity").centre().hr();
-                printer.add("The blocks captured are:");
-                for (BlockSnapshot blockSnapshot: blockSnapshots) {
-                    printer.add("  Block: %s", blockSnapshot);
-                }
-                printer.trace(System.err);
-            }
-            context.getCapturedEntities().ifPresent(entities -> {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks -> {
+                 final PrettyPrinter printer = new PrettyPrinter(80);
+                 printer.add("Processing Interact Entity").centre().hr();
+                 printer.add("The blocks captured are:");
+                 for (BlockSnapshot blockSnapshot : blocks) {
+                     printer.add("  Block: %s", blockSnapshot);
+                 }
+                 printer.trace(System.err);
+            });
+            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The entities captured are:");
@@ -172,7 +179,7 @@ public interface PacketFunction {
                 }
                 printer.trace(System.err);
             });
-            context.getCapturedItems().ifPresent(entities -> {
+            context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(entities -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact Entity").centre().hr();
                 printer.add("The items captured are:");
@@ -181,58 +188,77 @@ public interface PacketFunction {
                 }
                 printer.trace(System.err);
             });
+            context.getCapturedEntityDropSupplier().get().ifPresentAndNotEmpty(map -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact Entity").centre().hr();
+                printer.add("The item stacks captured are: ");
+
+                map.asMap().entrySet().forEach(entry -> {
+                    printer.add("  - Entity with UUID: %s", entry.getKey());
+                    for (ItemStack stack : entry.getValue()) {
+                        printer.add("    - %s", stack);
+                    }
+                });
+                printer.trace(System.err);
+            });
 
         } else if (state == PacketPhase.General.INTERACT_AT_ENTITY) {
-            // This doesn't throw the InteractEntityEvent, this is for post interacting with the entity.
-            final List<BlockSnapshot> blockSnapshots = context.getCapturedBlocks().get();
-            if (!blockSnapshots.isEmpty()) {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks -> {
                 final PrettyPrinter printer = new PrettyPrinter(80);
                 printer.add("Processing Interact At Entity").centre().hr();
                 printer.add("The blocks captured are:");
-                for (BlockSnapshot blockSnapshot: blockSnapshots) {
+                for (BlockSnapshot blockSnapshot : blocks) {
                     printer.add("  Block: %s", blockSnapshot);
                 }
                 printer.trace(System.err);
-            }
-            context.getCapturedEntities().ifPresent(entities -> {
-                if (!entities.isEmpty()) {
-                    final PrettyPrinter printer = new PrettyPrinter(80);
-                    printer.add("Processing Interact At Entity").centre().hr();
-                    printer.add("The entities captured are:");
-                    for (Entity capturedEntity : entities) {
-                        printer.add("  Entity: %s", capturedEntity);
-                    }
-                    printer.trace(System.err);
-                }
             });
-            context.getCapturedItems().ifPresent(entities -> {
-                if (!entities.isEmpty()) {
-                    final PrettyPrinter printer = new PrettyPrinter(80);
-                    printer.add("Processing Interact At Entity").centre().hr();
-                    printer.add("The items captured are:");
-                    for (Entity capturedEntity: entities) {
-                        printer.add("  Item: %s", capturedEntity);
-                    }
-                    printer.trace(System.err);
+            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact At Entity").centre().hr();
+                printer.add("The entities captured are:");
+                for (Entity capturedEntity: entities) {
+                    printer.add("  Entity: %s", capturedEntity);
                 }
+                printer.trace(System.err);
+            });
+            context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(entities -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact At Entity").centre().hr();
+                printer.add("The items captured are:");
+                for (Entity capturedEntity: entities) {
+                    printer.add("  Item: %s", capturedEntity);
+                }
+                printer.trace(System.err);
+            });
+            context.getCapturedEntityDropSupplier().get().ifPresentAndNotEmpty(map -> {
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interact At Entity").centre().hr();
+                printer.add("The item stacks captured are: ");
+
+                map.asMap().entrySet().forEach(entry -> {
+                    printer.add("  - Entity with UUID: %s", entry.getKey());
+                    for (ItemStack stack : entry.getValue()) {
+                        printer.add("    - %s", stack);
+                    }
+                });
+                printer.trace(System.err);
             });
         }
-        context.getCapturedBlockSupplier().get().ifPresent(snapshots -> {
-            GeneralFunctions.processBlockCaptures(snapshots, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context);
-        });
+        context.getCapturedBlockSupplier().get()
+                .ifPresentAndNotEmpty(snapshots ->
+                GeneralFunctions.processBlockCaptures(snapshots, ((IMixinWorldServer) player.worldObj).getCauseTracker(), state, context));
     };
 
     PacketFunction ACTION = (packet, state, player, context) -> {
         final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
         if (state == PacketPhase.Inventory.DROP_ITEM) {
-            context.getCapturedBlocks().ifPresent(blocks -> {
-                GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context);
-            });
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks ->
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
         } else if (state == PacketPhase.Inventory.DROP_INVENTORY) {
-            context.getCapturedBlocks().ifPresent(blocks -> {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks -> {
                 GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context);
             });
-            context.getCapturedItems().ifPresent(items -> {
+            context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> {
                 final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(EntityUtil.fromNative(player))
@@ -266,12 +292,26 @@ public interface PacketFunction {
                 EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
                         .nonCancelled(event ->
                                 event.getEntities().forEach(entity -> {
-                                    System.err.printf("[PacketFunction#@264] Spawning Entity: %s %n", entity);
                                     EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
                                 })
                         )
                         .process();
+            });
+            context.getCapturedEntityDrops().ifPresent(map -> {
+                if (map.isEmpty()) {
+                    return;
+                }
+                final PrettyPrinter printer = new PrettyPrinter(80);
+                printer.add("Processing Interaction").centre().hr();
+                printer.add("The item stacks captured are: ");
+                map.asMap().entrySet().forEach(entry -> {
+                    printer.add("  - Entity with UUID: %s", entry.getKey());
+                    for (ItemStack stack : entry.getValue()) {
+                        printer.add("    - %s", stack);
+                    }
+                });
+                printer.trace(System.err);
             });
 
         }
@@ -405,7 +445,7 @@ public interface PacketFunction {
         if (state == PacketPhase.General.USE_ITEM) { // No capturing to be done tbh.
             final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).get();
             final ItemStackSnapshot snapshot = itemStack.createSnapshot();
-            context.getCapturedEntitySupplier().get().ifPresent(entities -> {
+            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(EntityUtil.fromNative(player))
                         .type(InternalSpawnTypes.SPAWN_EGG)
@@ -417,13 +457,13 @@ public interface PacketFunction {
                     .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
                     .process();
             });
-            context.getCapturedBlockSupplier().get().ifPresent(originalBlocks -> {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
                 GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
             });
         } else if (state == PacketPhase.General.ACTIVATE_BLOCK_OR_USE_ITEM) {
             final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-            context.getCapturedEntitySupplier().get().ifPresent(entities -> {
+            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
                 final Cause cause = Cause.source(EntitySpawnCause.builder()
                         .entity(EntityUtil.fromNative(player))
                         .type(InternalSpawnTypes.SPAWN_EGG)
@@ -435,11 +475,11 @@ public interface PacketFunction {
                         .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
                         .process();
             });
-            context.getCapturedBlockSupplier().get().ifPresent(originalBlocks -> {
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
                 GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
             });
         }
-//        context.getCapturedEntitySupplier().get().ifPresent(capturedEntities -> {
+//        context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(capturedEntities -> {
 //            final Cause cause = Cause.source(EntitySpawnCause.builder().entity((Player) player).type(InternalSpawnTypes.SPAWN_EGG).build()).build();
 //            final SpawnEntityEvent spawnEntityEvent = state.createEntityEvent(cause, ((IMixinWorldServer) player.worldObj).getCauseTracker(), context);
 //            if (spawnEntityEvent != null && SpongeImpl.postEvent(spawnEntityEvent)) {

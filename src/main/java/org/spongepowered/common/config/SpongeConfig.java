@@ -895,8 +895,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
         private boolean preBlockItemDropMerge = true;
 
+        @Setting(value = "entity-drops-pre-merge", comment = "If enabled, entity drops are pre-processed to merge item stacks before spawning the related entities.")
+        private boolean preEntityItemDropMerge = true;
+
         public boolean doDropsPreMergeItemDrops() {
             return this.preBlockItemDropMerge;
+        }
+
+        public boolean doEntityDropsPreMerge() {
+            return this.preEntityItemDropMerge;
         }
     }
 

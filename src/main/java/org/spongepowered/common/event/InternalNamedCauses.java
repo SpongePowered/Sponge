@@ -65,6 +65,7 @@ public final class InternalNamedCauses {
         public static final String UNWINDING_STATE = "UnwindingState";
         public static final String UNWINDING_CONTEXT = "UnwindingContext";
         public static final String CAPTURED_BLOCK_DROPS = "CapturedBlockDropMap";
+        public static final String CAPTURED_ENTITY_DROPS = "CapturedEntityItemDropMap";
 
         private Tracker() {
 
