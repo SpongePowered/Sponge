@@ -35,6 +35,7 @@ import org.spongepowered.common.item.SpongeGoldenApple;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class GoldenAppleRegistryModule implements CatalogRegistryModule<Go
 
     @Override
     public Optional<GoldenApple> getById(String id) {
-        return Optional.ofNullable(this.goldenAppleMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.goldenAppleMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

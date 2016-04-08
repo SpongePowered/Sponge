@@ -32,6 +32,8 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeCatalogType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
+import java.util.Locale;
+
 public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
@@ -71,15 +73,15 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
     public boolean sendsVelocityUpdates;
 
     public SpongeEntityType(int id, String name, Class<? extends Entity> clazz, Translation translation) {
-        this(id, name.toLowerCase(), "minecraft", clazz, translation);
+        this(id, name.toLowerCase(Locale.ENGLISH), "minecraft", clazz, translation);
     }
 
     public SpongeEntityType(int id, String name, String modId, Class<? extends Entity> clazz, Translation translation) {
-        super(modId.toLowerCase() + ":" + name.toLowerCase(), check(translation));
+        super(modId.toLowerCase(Locale.ENGLISH) + ":" + name.toLowerCase(Locale.ENGLISH), check(translation));
         this.entityTypeId = id;
-        this.entityName = name.toLowerCase();
+        this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
-        this.modId = modId.toLowerCase();
+        this.modId = modId.toLowerCase(Locale.ENGLISH);
         String translationName = (String) EntityList.classToStringMapping.get(clazz);
         if (translationName == null) {
             translationName = "generic";

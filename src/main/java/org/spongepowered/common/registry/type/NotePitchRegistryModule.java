@@ -36,6 +36,7 @@ import org.spongepowered.common.registry.RegistryHelper;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public final class NotePitchRegistryModule implements CatalogRegistryModule<Note
 
     @Override
     public Optional<NotePitch> getById(String id) {
-        return Optional.ofNullable(this.notePitchMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.notePitchMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -58,7 +59,7 @@ public final class NotePitchRegistryModule implements CatalogRegistryModule<Note
     public void registerDefaults() {
         RegistryHelper.mapFields(NotePitches.class, input -> {
             NotePitch pitch = new SpongeNotePitch((byte) this.notePitchMap.size(), input);
-            this.notePitchMap.put(input.toLowerCase(), pitch);
+            this.notePitchMap.put(input.toLowerCase(Locale.ENGLISH), pitch);
             return pitch;
         });
     }

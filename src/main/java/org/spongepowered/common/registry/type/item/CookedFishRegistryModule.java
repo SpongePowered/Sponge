@@ -38,6 +38,7 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -57,7 +58,7 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
 
     @Override
     public Optional<CookedFish> getById(String id) {
-        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.fishMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -71,7 +72,7 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
             if (fishType.canCook()) {
                 CookedFish cooked = new SpongeCookedFish(fishType.name(),
                         new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
-                this.fishMap.put(cooked.getId().toLowerCase(), cooked);
+                this.fishMap.put(cooked.getId().toLowerCase(Locale.ENGLISH), cooked);
             }
         }
     }
@@ -79,10 +80,10 @@ public final class CookedFishRegistryModule implements AlternateCatalogRegistryM
     @AdditionalRegistration
     public void registerAdditional() {
         for (ItemFishFood.FishType fishType : ItemFishFood.FishType.values()) {
-            if (fishType.canCook() && !this.fishMap.containsKey(fishType.name().toLowerCase())) {
+            if (fishType.canCook() && !this.fishMap.containsKey(fishType.name().toLowerCase(Locale.ENGLISH))) {
                 CookedFish cooked = new SpongeCookedFish(fishType.name(),
                         new SpongeTranslation("item.fish." + fishType.getUnlocalizedName() + ".cooked.name"), fishType);
-                this.fishMap.put(cooked.getId().toLowerCase(), cooked);
+                this.fishMap.put(cooked.getId().toLowerCase(Locale.ENGLISH), cooked);
             }
         }
     }

@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.SpongeDamageType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class DamageTypeRegistryModule implements CatalogRegistryModule<DamageType> {
@@ -58,7 +59,7 @@ public final class DamageTypeRegistryModule implements CatalogRegistryModule<Dam
 
     @Override
     public Optional<DamageType> getById(String id) {
-        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.damageTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -35,6 +35,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public final class DisguisedBlockTypeRegistryModule implements CatalogRegistryMo
 
     @Override
     public Optional<DisguisedBlockType> getById(String id) {
-        return Optional.ofNullable(this.disguisedBlockTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.disguisedBlockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

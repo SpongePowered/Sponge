@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -50,7 +51,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
 
     @Override
     public Optional<DyeColor> getById(String id) {
-        return Optional.ofNullable(this.dyeColorMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.dyeColorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
 
@@ -62,7 +63,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     @Override
     public void registerDefaults() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
-            this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), (DyeColor) (Object) dyeColor);
+            this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
         }
     }
 
@@ -70,7 +71,7 @@ public final class DyeColorRegistryModule implements CatalogRegistryModule<DyeCo
     public void registerAdditional() {
         for (EnumDyeColor dyeColor : EnumDyeColor.values()) {
             if (!this.dyeColorMappings.containsValue((DyeColor) (Object) dyeColor)) {
-                this.dyeColorMappings.put(dyeColor.getName().toLowerCase(), (DyeColor) (Object) dyeColor);
+                this.dyeColorMappings.put(dyeColor.getName().toLowerCase(Locale.ENGLISH), (DyeColor) (Object) dyeColor);
             }
         }
     }

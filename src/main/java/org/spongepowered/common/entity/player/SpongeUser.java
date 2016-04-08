@@ -99,17 +99,24 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
                     compound.getInteger(NbtDataUtil.USER_SPAWN_Y),
                     compound.getInteger(NbtDataUtil.USER_SPAWN_Z));
             final UUID key = WorldPropertyRegistryModule.dimIdToUuid(0);
-            this.spawnLocations.put(key, RespawnLocation.builder().world(key).position(pos).build());
+            this.spawnLocations.put(key, RespawnLocation.builder()
+                    .world(key)
+                    .position(pos)
+                    .forceSpawn(compound.getBoolean(NbtDataUtil.USER_SPAWN_FORCED))
+                    .build());
         }
         NBTTagList spawnlist = compound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
         for (int i = 0; i < spawnlist.tagCount(); i++) {
             NBTTagCompound spawndata = (NBTTagCompound) spawnlist.getCompoundTagAt(i);
             UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
             if (uuid != null) {
-                this.spawnLocations.put(uuid, RespawnLocation.builder().world(uuid).position(
-                        new Vector3d(spawndata.getInteger(NbtDataUtil.USER_SPAWN_X),
+                this.spawnLocations.put(uuid, RespawnLocation.builder()
+                        .world(uuid)
+                        .position(new Vector3d(spawndata.getInteger(NbtDataUtil.USER_SPAWN_X),
                                 spawndata.getInteger(NbtDataUtil.USER_SPAWN_Y),
-                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Z))).build());
+                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Z)))
+                        .forceSpawn(spawndata.getBoolean(NbtDataUtil.USER_SPAWN_FORCED))
+                        .build());
             }
         }
         // TODO Read: inventory, any other data that should be
@@ -129,19 +136,20 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             if (dim == Integer.MIN_VALUE) {
                 continue;
             }
-            RespawnLocation respawn = entry.getValue();
+            Vector3d position = entry.getValue().getPosition();
+            boolean forced = entry.getValue().isForced();
             if (dim == 0) { // Overworld
-                compound.setDouble(NbtDataUtil.USER_SPAWN_X, respawn.getPosition().getX());
-                compound.setDouble(NbtDataUtil.USER_SPAWN_Y, respawn.getPosition().getY());
-                compound.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
-                compound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+                compound.setDouble(NbtDataUtil.USER_SPAWN_X, position.getX());
+                compound.setDouble(NbtDataUtil.USER_SPAWN_Y, position.getY());
+                compound.setDouble(NbtDataUtil.USER_SPAWN_Z, position.getZ());
+                compound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, forced);
             } else {
                 NBTTagCompound spawndata = new NBTTagCompound();
                 spawndata.setInteger(NbtDataUtil.USER_SPAWN_DIM, dim);
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_X, respawn.getPosition().getX());
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Y, respawn.getPosition().getY());
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
-                spawndata.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_X, position.getX());
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Y, position.getY());
+                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Z, position.getZ());
+                spawndata.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, forced);
                 spawnlist.appendTag(spawndata);
             }
         }

@@ -47,6 +47,7 @@ import org.spongepowered.common.entity.ai.SpongeAITaskType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -75,7 +76,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         if (!id.contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.aiTaskTypes.get(id.toLowerCase()));
+        return Optional.ofNullable(this.aiTaskTypes.get(id.toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -109,7 +110,7 @@ public class AITaskTypeModule implements AlternateCatalogRegistryModule<AITaskTy
         final Optional<PluginContainer> optPluginContainer = SpongeImpl.getGame().getPluginManager().fromInstance(plugin);
         Preconditions.checkArgument(optPluginContainer.isPresent());
         final PluginContainer pluginContainer = optPluginContainer.get();
-        final String combinedId = pluginContainer.getId().toLowerCase() + ":" + id;
+        final String combinedId = pluginContainer.getId().toLowerCase(Locale.ENGLISH) + ":" + id;
 
         final SpongeAITaskType newType = new SpongeAITaskType(combinedId, name, aiClass);
         this.aiTaskTypes.put(combinedId, newType);

@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
@@ -54,10 +55,12 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
@@ -67,6 +70,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.Dimension;
@@ -244,7 +248,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Text getMotd() {
         return SpongeTexts.fromLegacy(this.motd);
@@ -779,7 +782,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
         UUID uuid;
         if (properties.getUniqueId() == null || properties.getUniqueId().equals
-                (UUID.fromString("00000000-0000-0000-0000-000000000000"))) {
+                (StaticMixinHelper.INVALID_WORLD_UUID)) {
             // Check if Bukkit's uid.dat file is here and use it
             final Path uidPath = SpongeImpl.getGame().getSavesDirectory().resolve(properties.getWorldName()).resolve("uid.dat");
             if (!Files.exists(uidPath)) {
@@ -1008,7 +1011,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         WorldServer world = DimensionManager.getWorldFromDimId(0);
@@ -1044,5 +1046,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
+    }
+
+    @Inject(method = "tick", at = @At(value = "RETURN"))
+    public void onServerTick(CallbackInfo ci) {
+        int lastAnimTick = StaticMixinHelper.lastAnimationPacketTick;
+        int lastPrimaryTick = StaticMixinHelper.lastPrimaryPacketTick;
+        int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
+        EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
+        if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            if (Sponge.getEventManager().post(event)) {
+                return;
+            }
+        }
+        StaticMixinHelper.lastAnimationPacketTick = 0;
     }
 }

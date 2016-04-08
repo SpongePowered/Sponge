@@ -39,6 +39,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -79,7 +80,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
     }
 
     public void registerFromGameData(String id, ItemType itemType) {
-        this.itemTypeMappings.put(id.toLowerCase(), itemType);
+        this.itemTypeMappings.put(id.toLowerCase(Locale.ENGLISH), itemType);
     }
 
     @Override
@@ -89,7 +90,7 @@ public final class ItemTypeRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerAdditionalCatalog(ItemType extraCatalog) {
-        this.itemTypeMappings.put(extraCatalog.getId().toLowerCase(), extraCatalog);
+        this.itemTypeMappings.put(extraCatalog.getId().toLowerCase(Locale.ENGLISH), extraCatalog);
     }
 
     @Override

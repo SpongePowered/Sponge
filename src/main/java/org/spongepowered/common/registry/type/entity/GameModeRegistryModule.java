@@ -37,6 +37,7 @@ import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 
 public final class GameModeRegistryModule implements CatalogRegistryModule<GameMode> {
@@ -46,7 +47,7 @@ public final class GameModeRegistryModule implements CatalogRegistryModule<GameM
 
     @Override
     public Optional<GameMode> getById(String id) {
-        return Optional.of(this.gameModeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.of(this.gameModeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -67,7 +68,7 @@ public final class GameModeRegistryModule implements CatalogRegistryModule<GameM
     public void registerAdditional() {
         for (WorldSettings.GameType gameType : WorldSettings.GameType.values()) {
             if (!this.gameModeMappings.inverse().containsKey((GameMode) (Object) gameType)) {
-                this.gameModeMappings.put(gameType.getName().toLowerCase(), (GameMode) (Object) gameType);
+                this.gameModeMappings.put(gameType.getName().toLowerCase(Locale.ENGLISH), (GameMode) (Object) gameType);
             }
         }
     }

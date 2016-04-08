@@ -22,12 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity;
+package org.spongepowered.common.util;
 
-public interface IMixinAggressive {
+import com.google.common.collect.BiMap;
+import com.google.common.collect.ImmutableBiMap;
+import net.minecraft.util.EnumActionResult;
+import org.spongepowered.api.util.Tristate;
 
-    boolean isAngry();
+public class TristateUtil {
 
-    void setAngry(boolean angry);
+    private static final BiMap<EnumActionResult, Tristate> map = ImmutableBiMap.<EnumActionResult, Tristate>builder()
+            .put(EnumActionResult.FAIL, Tristate.FALSE)
+            .put(EnumActionResult.PASS, Tristate.UNDEFINED)
+            .put(EnumActionResult.SUCCESS, Tristate.TRUE)
+            .build();
+
+    public static Tristate fromActionResult(EnumActionResult result) {
+        return map.get(result);
+    }
+
+    public static EnumActionResult toActionResult(Tristate tristate) {
+        return map.inverse().get(tristate);
+    }
+
 
 }

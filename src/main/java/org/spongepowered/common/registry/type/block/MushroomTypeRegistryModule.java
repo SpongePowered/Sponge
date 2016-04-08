@@ -39,6 +39,7 @@ import org.spongepowered.api.world.gen.type.MushroomTypes;
 import org.spongepowered.common.world.gen.type.SpongeMushroomType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -52,7 +53,7 @@ public class MushroomTypeRegistryModule implements CatalogRegistryModule<Mushroo
 
     @Override
     public Optional<MushroomType> getById(String id) {
-        return Optional.ofNullable(this.mushroomTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.mushroomTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

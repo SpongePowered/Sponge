@@ -43,6 +43,7 @@ import org.spongepowered.api.text.chat.ChatVisibility;
 import org.spongepowered.common.interfaces.IMixinEnumChatVisibility;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -75,7 +76,7 @@ public final class ChatVisibilityRegistryModule implements CatalogRegistryModule
 
     @Override
     public Optional<ChatVisibility> getById(String id) {
-        return Optional.ofNullable(this.chatVisibilityMap.get(checkNotNull(id, "id").toLowerCase()));
+        return Optional.ofNullable(this.chatVisibilityMap.get(checkNotNull(id, "id").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -86,8 +87,8 @@ public final class ChatVisibilityRegistryModule implements CatalogRegistryModule
     @AdditionalRegistration
     public void customRegistration() {
         for (EntityPlayer.EnumChatVisibility visibility : EntityPlayer.EnumChatVisibility.values()) {
-            if (!this.chatVisibilityMap.containsKey(visibility.name().toLowerCase())) {
-                this.chatVisibilityMap.put(visibility.name().toLowerCase(), (ChatVisibility) (Object) visibility);
+            if (!this.chatVisibilityMap.containsKey(visibility.name().toLowerCase(Locale.ENGLISH))) {
+                this.chatVisibilityMap.put(visibility.name().toLowerCase(Locale.ENGLISH), (ChatVisibility) (Object) visibility);
             }
         }
     }

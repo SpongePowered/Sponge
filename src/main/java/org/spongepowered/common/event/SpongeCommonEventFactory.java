@@ -55,6 +55,7 @@ import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.IInteractionObject;
@@ -75,6 +76,7 @@ import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.CollideBlockEvent;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -92,6 +94,7 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -253,7 +256,8 @@ public class SpongeCommonEventFactory {
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
-            if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
+            if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+                    && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
                 Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
                 if (slot != null) {
                     SlotTransaction slotTransaction =
@@ -296,7 +300,8 @@ public class SpongeCommonEventFactory {
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(StaticMixinHelper.lastCursor, newCursor);
         ClickInventoryEvent clickEvent = null;
         // Handle empty slot clicks
-        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0) {
+        if (((IMixinContainer) player.openContainer).getCapturedTransactions().size() == 0 && packetIn.getSlotId() >= 0
+                && packetIn.getSlotId() < player.openContainer.inventorySlots.size()) {
             Slot slot = player.openContainer.getSlot(packetIn.getSlotId());
             if (slot != null && !slot.getHasStack()) {
                 SlotTransaction slotTransaction =
@@ -587,6 +592,21 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+        return callInteractBlockEventSecondary(cause, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, interactionPoint, targetBlock, targetSide, hand);
+    }
+
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Tristate originalUseBlockResult, Tristate useBlockResult, Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+        InteractBlockEvent.Secondary event;
+        if (hand == EnumHand.MAIN_HAND) {
+            event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
+        } else {
+            event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
+        }
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
     public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {
         Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
         if (!(entity instanceof EntityPlayer)) {
@@ -635,7 +655,6 @@ public class SpongeCommonEventFactory {
 
         return false;
     }
-
 
     public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
         if (entity instanceof Player) {

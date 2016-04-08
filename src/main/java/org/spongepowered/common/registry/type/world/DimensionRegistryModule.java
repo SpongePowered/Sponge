@@ -42,6 +42,7 @@ import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -66,7 +67,7 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
 
     @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
-        this.dimensionTypeMappings.put(dimType.getName().toLowerCase(), dimType);
+        this.dimensionTypeMappings.put(dimType.getName().toLowerCase(Locale.ENGLISH), dimType);
         this.providerIdMappings.put(((SpongeDimensionType) dimType).getDimensionTypeId(), dimType);
     }
 
@@ -77,13 +78,13 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
     public void unregisterProvider(int id) {
         DimensionType dimType = this.providerIdMappings.remove(id);
         if (dimType != null) {
-            this.dimensionTypeMappings.remove(dimType.getName().toLowerCase());
+            this.dimensionTypeMappings.remove(dimType.getName().toLowerCase(Locale.ENGLISH));
         }
     }
 
     @Override
     public Optional<DimensionType> getById(String id) {
-        return Optional.ofNullable(this.dimensionTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.dimensionTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -134,7 +135,7 @@ public final class DimensionRegistryModule implements SpongeAdditionalCatalogReg
         if (((IMixinWorldProvider) provider).getDimensionConfig() == null) {
             int providerId = DimensionManager.getProviderType(((IMixinWorldProvider) provider).getDimensionId());
             if (!isConfigRegistered(providerId)) {
-                String providerName = provider.getDimensionType().getName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+                String providerName = provider.getDimensionType().getName().toLowerCase(Locale.ENGLISH).replace(" ", "_").replace("[^A-Za-z0-9_]", "");
                 SpongeConfig<SpongeConfig.DimensionConfig> config = new SpongeConfig<>(SpongeConfig.Type.DIMENSION,
                         SpongeImpl.getSpongeConfigDir().resolve("worlds").resolve(providerName).resolve("dimension.conf"), SpongeImpl.ECOSYSTEM_ID);
                 registerConfig(providerId, config);

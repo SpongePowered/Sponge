@@ -28,12 +28,10 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.util.math.Rotations;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.key.Key;
-import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.BodyPartRotationalData;
 import org.spongepowered.api.data.type.BodyPart;
+import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -41,12 +39,9 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeBodyPartRotationalData;
-import org.spongepowered.common.data.processor.multi.entity.ArmorStandBodyPartRotationalDataProcessor;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -54,7 +49,7 @@ import java.util.Map;
 @Implements(@Interface(iface = ArmorStand.class, prefix = "armor$"))
 public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implements ArmorStand {
 
-    @Shadow public abstract boolean isSmall();
+    @Override @Shadow public abstract boolean isSmall();
     @Shadow public Rotations leftArmRotation;
     @Shadow public Rotations rightArmRotation;
     @Shadow public Rotations leftLegRotation;
@@ -65,8 +60,8 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
     @Shadow public abstract boolean hasNoGravity();
     @Shadow protected abstract void setNoBasePlate(boolean p_175426_1_);
     @Shadow protected abstract void setNoGravity(boolean p_175425_1_);
-    @Shadow public abstract void setSmall(boolean p_175420_1_);
-    @Shadow public abstract void setShowArms(boolean p_175413_1_);
+    @Override @Shadow public abstract void setSmall(boolean p_175420_1_);
+    @Override @Shadow public abstract void setShowArms(boolean p_175413_1_);
     @Shadow public abstract Rotations shadow$getHeadRotation();
     @Shadow public abstract Rotations getBodyRotation();
 
@@ -107,18 +102,14 @@ public abstract class MixinEntityArmorStand extends MixinEntityLivingBase implem
 
     @Override
     public BodyPartRotationalData getBodyPartRotationalData() {
-        Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
-
-        values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(this.shadow$getHeadRotation()));
-        values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(this.getBodyRotation()));
-        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(this.leftArmRotation));
-        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector3d(this.rightArmRotation));
-        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector3d(this.leftLegRotation));
-        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector3d(this.rightLegRotation));
-        Collection<BodyPart> bodyParts = Sponge.getRegistry().getAllOf(BodyPart.class);
-        Collection<Vector3d> rotations = Arrays.asList(values.values().toArray(new Vector3d[values.values().size()]));
-        values.put(Keys.BODY_ROTATIONS, ArmorStandBodyPartRotationalDataProcessor.zipCollections(bodyParts, rotations));
-        return new SpongeBodyPartRotationalData();
+        Map<BodyPart, Vector3d> rotations = Maps.newHashMapWithExpectedSize(6);
+        rotations.put(BodyParts.HEAD, VecHelper.toVector3d(this.shadow$getHeadRotation()));
+        rotations.put(BodyParts.CHEST, VecHelper.toVector3d(this.getBodyRotation()));
+        rotations.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(this.leftArmRotation));
+        rotations.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(this.rightArmRotation));
+        rotations.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(this.leftLegRotation));
+        rotations.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(this.rightLegRotation));
+        return new SpongeBodyPartRotationalData(rotations);
     }
 
     @Override

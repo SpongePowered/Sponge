@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -74,6 +75,7 @@ import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -573,18 +575,34 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                builder.suggestNamed(entry.getKey(), entry.getValue());
+            Cause.Builder builder = null;
+            if (cause.root() instanceof Entity) {
+                builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+            } else {
+                builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             }
-            cause = builder.build();
+
+            Cause spawnCause = builder.build();
+            if (cause.root() == StaticMixinHelper.packetPlayer) {
+                cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+            } else {
+                cause = spawnCause.merge(cause);
+            }
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                builder.suggestNamed(entry.getKey(), entry.getValue());
+            Cause.Builder builder = null;
+            if (cause.root() instanceof Entity) {
+                builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+            } else {
+                builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             }
-            cause = builder.build();
+
+            Cause spawnCause = builder.build();
+            if (cause.root() == StaticMixinHelper.packetPlayer) {
+                cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+            } else {
+                cause = spawnCause.merge(cause);
+            }
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         }
 
@@ -622,9 +640,7 @@ public final class CauseTracker {
                 iterator.remove();
             }
         } else {
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
-            }
+            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
             this.capturedEntityItems.clear();
         }
     }
@@ -792,7 +808,7 @@ public final class CauseTracker {
                     if (!transaction.isValid()) {
                         this.invalidTransactions.add(transaction);
                     } else {
-                        if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
+                        if (captureType == CaptureType.BREAK && !(transaction.getOriginal().getState().getType() instanceof BlockLiquid) && cause.first(User.class).isPresent()) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
                             for (EntityHanging hanging : SpongeHooks.findHangingEntities(this.getMinecraftWorld(), pos)) {
                                 if (hanging != null) {
@@ -864,9 +880,9 @@ public final class CauseTracker {
                     }
                 }
             }
-        } else if (captureType == CaptureType.PLACE) {
-            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
         }
+
+        sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
     }
 
     private void sendItemChangeToPlayer(EntityPlayerMP player) {
