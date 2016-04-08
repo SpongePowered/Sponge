@@ -59,11 +59,16 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
     }
 
     public static boolean isDyeable(Item item) {
-        return item.equals(Items.dye)
-                || Block.getBlockFromItem(item).equals(Blocks.wool)
-                || Block.getBlockFromItem(item).equals(Blocks.stained_glass)
-                || Block.getBlockFromItem(item).equals(Blocks.stained_glass_pane)
-                || Block.getBlockFromItem(item).equals(Blocks.stained_hardened_clay);
+        if (item.equals(Items.dye)) {
+            return true;
+        }
+
+        Block block = Block.getBlockFromItem(item);
+        return block != null
+            && (block.equals(Blocks.wool)
+                || block.equals(Blocks.stained_glass)
+                || block.equals(Blocks.stained_glass_pane)
+                || block.equals(Blocks.stained_hardened_clay));
     }
 
     @Override
