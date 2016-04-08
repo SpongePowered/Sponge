@@ -325,6 +325,7 @@
         "server.MixinNetHandlerHandshakeTCP",
         "server.MixinNetworkManager",
         "server.MixinServerCommandManager",
+        "server.management.MixinPlayerInteractionManager",
         "server.management.MixinPlayerProfileCache",
         "server.management.MixinPlayerProfileCacheEntry",
         "server.MixinPlayerList",

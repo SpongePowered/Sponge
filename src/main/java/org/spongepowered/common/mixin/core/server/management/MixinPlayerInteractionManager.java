@@ -68,6 +68,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.TristateUtil;
@@ -82,7 +83,7 @@ public abstract class MixinPlayerInteractionManager {
     @Shadow private WorldSettings.GameType gameType;
 
     @Shadow public abstract boolean isCreative();
-    @Shadow public abstract boolean tryUseItem(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack);
+    @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
 
     /**
      * Activate the clicked on block, otherwise use the held item.
@@ -113,7 +114,7 @@ public abstract class MixinPlayerInteractionManager {
         } else {
             // Sponge Start - fire event, and revert the client if cancelled
 
-            ItemStack oldStack = stack.copy();
+            ItemStack oldStack = ItemStack.copyItemStack(stack);
 
             BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
             InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
@@ -193,7 +194,7 @@ public abstract class MixinPlayerInteractionManager {
 
             // TODO - should this even be a thing? Do we really want to manually trigger right click air, when it didn't happen?
             if (stack != null && result != EnumActionResult.FAIL && !event.isCancelled() && event.getUseItemResult() != Tristate.FALSE) {
-                tryUseItem(player, worldIn, stack);
+                this.processRightClick(player, worldIn, stack, hand);
             }
 
             // if cancelled, force client itemstack update

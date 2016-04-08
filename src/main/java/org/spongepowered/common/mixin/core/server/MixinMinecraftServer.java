@@ -1055,7 +1055,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
         EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
         if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
             if (Sponge.getEventManager().post(event)) {
                 return;
             }
