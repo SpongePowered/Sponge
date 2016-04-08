@@ -67,6 +67,8 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 @Mixin(EntityPlayer.class)
@@ -76,6 +78,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -95,6 +98,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract boolean isSpectator();
 
     private boolean affectsSpawning = true;
+    private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
@@ -249,5 +253,15 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
     }
 
+    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))
+    public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
+        this.collidingEntityUuid = entity.getUniqueID();
+        entity.onCollideWithPlayer(player);
+        this.collidingEntityUuid = null;
+    }
 
+    @Override
+    public UUID getCollidingEntityUuid() {
+        return this.collidingEntityUuid;
+    }
 }

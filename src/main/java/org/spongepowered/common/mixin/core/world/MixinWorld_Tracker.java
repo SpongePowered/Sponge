@@ -31,6 +31,8 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
@@ -289,6 +291,13 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         causeTracker.setCurrentTickEntity(null);
         causeTracker.setProcessingCaptureCause(false);
+    }
+
+    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
+    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
+        if ((!(entityIn instanceof EntityLivingBase) || entityIn instanceof EntityArmorStand)) {
+            getCauseTracker().handleNonLivingEntityDestruct(entityIn);
+        }
     }
 
     /**

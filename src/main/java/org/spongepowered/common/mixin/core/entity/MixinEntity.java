@@ -34,8 +34,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -49,6 +51,7 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
@@ -112,6 +115,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -151,6 +155,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
+    protected DamageSource lastDamageSource;
+    private Cause destructCause;
+    private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -583,6 +590,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
@@ -1263,4 +1271,46 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
+    @Inject(method = "setDead", at = @At("HEAD"))
+    public void onSetDead(CallbackInfo ci) {
+        if (this.worldObj.isRemote || (this.mcEntity instanceof EntityLivingBase && !(this.mcEntity instanceof EntityArmorStand))) {
+            return;
+        }
+
+        EntityPlayer player = StaticMixinHelper.packetPlayer;
+        IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+        // Check if entity is killing self (ex. item despawning)
+        if (spongeWorld.getCauseTracker().hasTickingEntity()) {
+            Entity tickingEntity = ((IMixinWorld) this.worldObj).getCauseTracker().getCurrentTickEntity().get();
+            if (tickingEntity == this.mcEntity)  {
+                this.destructCause = Cause.of(NamedCause.source(tickingEntity));
+            }
+        // Check if a player is colliding with this entity (ex. item pickup)
+        } else if (player != null) {
+            if (((IMixinEntityPlayer) player).getCollidingEntityUuid().equals(this.mcEntity.getUniqueID())) {
+                this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
+            }
+        // Check for a possible DamageSource
+        } else {
+            this.lastDamageSource = SpongeHooks.getEntityDamageSource(this.mcEntity);
+            if (this.lastDamageSource != null) {
+                this.destructCause = Cause.of(NamedCause.source(this.lastDamageSource));
+            } else {
+                if (spongeWorld.getCauseTracker().hasTickingTileEntity()) {
+                    TileEntity te = (TileEntity) spongeWorld.getCauseTracker().getCurrentTickTileEntity().get();
+                    this.destructCause = Cause.of(NamedCause.source(te));
+                }
+            }
+        }
+    }
+
+    @Override
+    public DamageSource getLastDamageSource() {
+        return this.lastDamageSource;
+    }
+
+    @Override
+    public Cause getNonLivingDestructCause() {
+        return this.destructCause;
+    }
 }

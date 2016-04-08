@@ -62,7 +62,6 @@ public class StaticMixinHelper {
     public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
-    public static int lastDestroyedEntityId = -1;
     public static EntityLivingBase currentTargetEntity = null;
     public static Cause dropCause = null;
     public static PopulatorType runningGenerator = null;

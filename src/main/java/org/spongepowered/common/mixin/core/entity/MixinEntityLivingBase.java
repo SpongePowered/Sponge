@@ -83,7 +83,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
-    private DamageSource lastDamageSource;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -460,11 +459,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Overwrite
     public boolean canBeCollidedWith() {
         return !(this.isVanished() && this.ignoresCollision()) && !this.isDead;
-    }
-
-    @Override
-    public DamageSource getLastDamageSource() {
-        return this.lastDamageSource;
     }
 
     @Override

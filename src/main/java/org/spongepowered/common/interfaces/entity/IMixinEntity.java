@@ -27,8 +27,10 @@ package org.spongepowered.common.interfaces.entity;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -110,5 +112,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     Text getDisplayNameText();
 
     void setDisplayName(@Nullable Text displayName);
+
+    DamageSource getLastDamageSource();
+
+    Cause getNonLivingDestructCause();
 
 }
