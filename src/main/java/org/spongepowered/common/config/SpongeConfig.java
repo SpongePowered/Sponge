@@ -250,6 +250,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
 
+        @Setting(value = "optimizations")
+        private OptimizationCategory optimizations = new OptimizationCategory();
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
         }
@@ -279,6 +282,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public ExploitCategory getExploits() {
             return this.exploits;
+        }
+
+        public OptimizationCategory getOptimizations() {
+            return this.optimizations;
         }
 
         public Predicate<InetAddress> getIpSet(String name) {
@@ -622,6 +629,17 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     }
 
     @ConfigSerializable
+    public static class OptimizationCategory extends Category {
+
+        @Setting(value = "fast-blockstate-lookup")
+        private boolean blockStateLookup = true;
+
+        public boolean useBlockStateLookupPatch() {
+            return this.blockStateLookup;
+        }
+    }
+
+    @ConfigSerializable
     public static class LoggingCategory extends Category {
 
         @Setting(value = LOGGING_BLOCK_BREAK, comment = "Log when blocks are broken")
@@ -777,6 +795,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("exploits")
         private boolean enableExploitPatches = true;
 
+        @Setting("optimizations")
+        private boolean enableOptimizationPatches = true;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -807,6 +828,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setExploitPatches(boolean enableExploitPatches) {
             this.enableExploitPatches = enableExploitPatches;
+        }
+
+        public boolean useOptimizations() {
+            return this.enableOptimizationPatches;
         }
     }
 

@@ -1,0 +1,12 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.optimization",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
+    "mixins": [
+        "block.state.MixinStateImplementation"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}
