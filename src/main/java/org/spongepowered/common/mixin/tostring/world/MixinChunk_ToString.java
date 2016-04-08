@@ -41,8 +41,8 @@ public abstract class MixinChunk_ToString {
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .add("World:", this.worldObj)
-                .add("Position: ", this.xPosition + this.zPosition)
+                .add("World", this.worldObj)
+                .add("Position", this.xPosition + this.zPosition)
                 .toString();
     }
 }

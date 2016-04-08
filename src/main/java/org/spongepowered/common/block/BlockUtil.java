@@ -24,13 +24,25 @@
  */
 package org.spongepowered.common.block;
 
+import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.MapDifference;
+import com.google.common.collect.Maps;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.trait.BlockTrait;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class BlockUtil {
+
+    public static final Comparator<BlockState> BLOCK_STATE_COMPARATOR = new BlockStateComparator();
 
     public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
         setBlockState(world, new BlockPos(x, y, z), state, notifyNeighbors);
@@ -52,7 +64,7 @@ public final class BlockUtil {
         chunk.setBlockState(position, toBlockState(state));
     }
 
-    private static IBlockState toBlockState(BlockState state) {
+    public static IBlockState toBlockState(BlockState state) {
         if (state instanceof IBlockState) {
             return (IBlockState) state;
         } else {
@@ -63,5 +75,63 @@ public final class BlockUtil {
     }
 
     private BlockUtil() {
+    }
+
+    private static final class BlockStateComparator implements Comparator<BlockState> {
+
+        BlockStateComparator() {
+        }
+
+        @Override
+        public int compare(BlockState spongeA, BlockState spongeB) {
+            IBlockState a = (IBlockState) spongeA;
+            IBlockState b = (IBlockState) spongeB;
+            ComparisonChain chain = ComparisonChain.start();
+            // compare IDs
+            chain = chain.compare(a.getBlock().getUnlocalizedName(), b.getBlock().getUnlocalizedName());
+            // compare block traits
+            Map<BlockTrait<?>, ?> aTraits = spongeA.getTraitMap();
+            Map<BlockTrait<?>, ?> bTraits = spongeA.getTraitMap();
+            chain = chain.compare(aTraits.size(), bTraits.size());
+            if (chain.result() != 0) {
+                // avoid potentially expensive ops
+                return chain.result();
+            }
+            MapDifference<BlockTrait<?>, ?> diff = Maps.difference(aTraits, bTraits);
+            if (diff.areEqual()) {
+                // When the Maps are equal the end-result is 0, so chain.result
+                // is the same
+                return chain.result();
+            }
+            // Check the keys, see if they match
+            int onLeft = diff.entriesOnlyOnLeft().size();
+            int onRight = diff.entriesOnlyOnRight().size();
+            chain = chain.compare(onLeft, onRight);
+            if (chain.result() != 0) {
+                // avoid potentially expensive ops
+                return chain.result();
+            }
+            // Ok, keys match. Check values. Guaranteed difference here due to
+            // equality check above.
+            List<BlockTrait<?>> checkOrder = sortTraits(diff.entriesDiffering().keySet());
+            for (BlockTrait<?> trait : checkOrder) {
+                Comparable<?> aTraitValue = (Comparable<?>) aTraits.get(trait);
+                Comparable<?> bTraitValue = (Comparable<?>) bTraits.get(trait);
+                chain = chain.compare(aTraitValue, bTraitValue);
+                if (chain.result() != 0) {
+                    return chain.result();
+                }
+            }
+            // Impossible.
+            throw new IllegalStateException("Some object's equals() violates contract!");
+        }
+
+        /**
+         * Sorts {@code traits} by the trait IDs.
+         */
+        private List<BlockTrait<?>> sortTraits(Set<BlockTrait<?>> traits) {
+            return traits.stream().sorted((a, b) -> a.getId().compareTo(b.getId())).collect(Collectors.toList());
+        }
+
     }
 }

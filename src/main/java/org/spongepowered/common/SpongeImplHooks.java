@@ -42,9 +42,11 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -123,5 +125,10 @@ public final class SpongeImplHooks {
                 }
             }
         }
+    }
+
+    public static void addItemStackToListForSpawning(Collection<ItemStack> itemStacks, ItemStack itemStack) {
+        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
+        itemStacks.add(itemStack);
     }
 }

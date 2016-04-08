@@ -26,19 +26,27 @@ package org.spongepowered.common.event.tracking;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.InternalNamedCauses;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -65,23 +73,29 @@ public class PhaseContext {
         return new PhaseContext();
     }
 
-    public PhaseContext add(NamedCause namedCause) {
+    public PhaseContext add(@Nullable NamedCause namedCause) {
+        if (namedCause == null) {
+            return this;
+        }
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(namedCause);
         return this;
     }
 
-    public PhaseContext add(Optional<NamedCause> namedCause) {
+    public PhaseContext addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        namedCause.ifPresent(this.contextObjects::add);
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
         return this;
     }
 
-    public PhaseContext addCaptures() {
-        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
-        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
-        add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        add(NamedCause.of(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
+    public PhaseContext addEntityCaptures() {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
         return this;
     }
 
@@ -155,6 +169,19 @@ public class PhaseContext {
         return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
     }
 
+    public Optional<Multimap<BlockPos, ItemStack>> getCapturedBlockDrops() {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(CapturedMultiMapSupplier::get);
+    }
+
+    public Optional<Collection<ItemStack>> getCapturedBlockDrops(BlockPos position) {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(supplier -> supplier.get().get(position));
+    }
+
+    @SuppressWarnings("unchecked")
+    public Optional<CapturedMultiMapSupplier<BlockPos, ItemStack>> getBlockDropSupplier() {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, (Class<CapturedMultiMapSupplier<BlockPos, ItemStack>>) (Class<?>) BlockItemDropsSupplier.class);
+    }
+
     public Cause toCause() {
         checkState(this.isCompleted, "Cannot get a cuase for an incomplete PhaseContext!");
         if (this.cause == null) {
@@ -206,6 +233,74 @@ public class PhaseContext {
                 .toString();
     }
 
+    public static abstract class CapturedMultiMapSupplier<K, V> implements Supplier<Multimap<K, V>> {
+
+        @Nullable private Multimap<K, V> captured;
+
+        @Override
+        public Multimap<K, V> get() {
+            if (this.captured == null) {
+                this.captured = ArrayListMultimap.create();
+            }
+            return this.captured;
+        }
+
+        public final boolean isEmpty() {
+            return this.captured == null || this.captured.isEmpty();
+        }
+
+        public final void ifPresent(Consumer<Multimap<? super K, ? super V>> consumer) {
+            if (this.captured != null) {
+                consumer.accept(this.captured);
+            }
+        }
+
+        public final Multimap<K, V> orElse(Multimap<K, V> list) {
+            return this.captured == null ? list : this.captured;
+        }
+
+        public final Stream<V> stream(K key) {
+            // authors note: Multimap#get(K) returns an empty collection if there is no mapping.
+            return this.captured == null ? Stream.empty() : this.captured.get(key).stream();
+        }
+
+        @Nullable
+        public final <U> U map(K key, Function<Collection<V>, ? extends U> function) {
+            return this.captured == null ? null : function.apply(this.captured.get(key));
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(this.captured);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            final CapturedSupplier other = (CapturedSupplier) obj;
+            return Objects.equals(this.captured, other.captured);
+        }
+
+        @Override
+        public String toString() {
+            return com.google.common.base.Objects.toStringHelper(this)
+                    .toString();
+        }
+    }
+
+    static class BlockItemDropsSupplier extends CapturedMultiMapSupplier<BlockPos, ItemStack> {
+
+        BlockItemDropsSupplier() {
+        }
+
+    }
+
+
     public static abstract class CapturedSupplier<T> implements Supplier<List<T>> {
         @Nullable private List<T> captured;
 
@@ -242,11 +337,6 @@ public class PhaseContext {
             return this.captured == null ? Stream.empty() : this.captured.stream();
         }
 
-        @Nullable
-        public final <U> U map(Function<List<T>, ? extends U> function) {
-            return this.captured == null ? null : function.apply(this.captured);
-        }
-
         @Override
         public int hashCode() {
             return Objects.hashCode(this.captured);
@@ -262,6 +352,13 @@ public class PhaseContext {
             }
             final CapturedSupplier other = (CapturedSupplier) obj;
             return Objects.equals(this.captured, other.captured);
+        }
+
+
+        @Override
+        public String toString() {
+            return com.google.common.base.Objects.toStringHelper(this)
+                    .toString();
         }
     }
 

@@ -26,32 +26,11 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.item.EntityTNTPrimed;
-import net.minecraft.entity.item.EntityXPOrb;
-import net.minecraft.entity.passive.EntityAnimal;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityThrowable;
-import net.minecraft.init.Items;
-import net.minecraft.inventory.ContainerPlayer;
-import net.minecraft.inventory.Slot;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C16PacketClientStatus;
-import net.minecraft.network.play.server.S09PacketHeldItemChange;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
@@ -60,23 +39,15 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -89,7 +60,6 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
@@ -154,7 +124,7 @@ public class SpongeCommonEventFactory {
                 EnumFacing notifiedSide = (EnumFacing) obj;
                 BlockPos offset = pos.offset(notifiedSide);
                 Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<World>(world, VecHelper.toVector(offset));
+                Location<World> location = new Location<>(world, VecHelper.toVector(offset));
                 if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                     neighbors.put(direction, location.getBlock());
                 }
@@ -199,7 +169,8 @@ public class SpongeCommonEventFactory {
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), direction);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state,
+                new Location<>((World) world, VecHelper.toVector(pos)), direction);
         return SpongeImpl.postEvent(event);
     }
 
@@ -238,73 +209,6 @@ public class SpongeCommonEventFactory {
     }
 
 
-    public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
-        if (entity instanceof Player) {
-            return; // this is handled elsewhere
-        }
-        if (entity.lastTickPosX != entity.posX || entity.lastTickPosY != entity.posY || entity.lastTickPosZ != entity.posZ
-            || entity.rotationPitch != entity.prevRotationPitch || entity.rotationYaw != entity.prevRotationYaw) {
-            // yes we have a move event.
-            final double currentPosX = entity.posX;
-            final double currentPosY = entity.posY;
-            final double currentPosZ = entity.posZ;
-            final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
-            final double currentRotPitch = entity.rotationPitch;
-            final double currentRotYaw = entity.rotationYaw;
-            Vector3d currentRotationVector = new Vector3d(currentRotPitch, currentRotYaw, 0);
-            DisplaceEntityEvent.Move event;
-            Transform<World> previous = new Transform<>(((World) entity.worldObj),
-                    new Vector3d(entity.prevPosX, entity.prevPosY, entity.prevPosZ), new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw,
-                    0));
-            Location<World> currentLocation = new Location<>(((World) entity.worldObj), currentPosX, currentPosY, currentPosZ);
-            Transform<World> current = new Transform<>(currentLocation, currentRotationVector, ((Entity) entity).getScale());
-
-            if (entity instanceof Humanoid) {
-                event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(entity)), previous, current,
-                        (Humanoid) entity);
-            } else if (entity instanceof Living) {
-                event = SpongeEventFactory.createDisplaceEntityEventMoveTargetLiving(Cause.of(NamedCause.source(entity)), previous, current,
-                        (Living) entity);
-            } else {
-                event = SpongeEventFactory.createDisplaceEntityEventMove(Cause.of(NamedCause.source(entity)), previous, current,
-                        (Entity) entity);
-            }
-            SpongeImpl.postEvent(event);
-            if (event.isCancelled()) {
-                entity.posX = entity.lastTickPosX;
-                entity.posY = entity.lastTickPosY;
-                entity.posZ = entity.lastTickPosZ;
-                entity.rotationPitch = entity.prevRotationPitch;
-                entity.rotationYaw = entity.prevRotationYaw;
-            } else {
-                Transform<World> worldTransform = event.getToTransform();
-                Vector3d eventPosition = worldTransform.getPosition();
-                Vector3d eventRotation = worldTransform.getRotation();
-                if (!eventPosition.equals(currentPositionVector)) {
-                    entity.posX = eventPosition.getX();
-                    entity.posY = eventPosition.getY();
-                    entity.posZ = eventPosition.getZ();
-                }
-                if (!eventRotation.equals(currentRotationVector)) {
-                    entity.rotationPitch = (float) currentRotationVector.getX();
-                    entity.rotationYaw = (float) currentRotationVector.getY();
-                }
-                //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
-                /*
-                Some thoughts from gabizou: The interesting thing here is that while this is only called
-                in World.updateEntityWithOptionalForce, by default, it supposedly handles updating the rider entity
-                of the entity being handled here. The interesting issue is that since we are setting the transform,
-                the rider entity (and the rest of the rider entities) are being updated as well with the new position
-                and potentially world, which results in a dirty world usage (since the world transfer is handled by
-                us). Now, the thing is, the previous position is not updated either, and likewise, the current position
-                is being set by us as well. So, there's some issue I'm sure that is bound to happen with this
-                logic.
-                 */
-                //((Entity) entity).setTransform(event.getToTransform());
-            }
-        }
-    }
-
     public static void checkSpawnEvent(Entity entity, Cause cause) {
         checkArgument(cause.root() instanceof SpawnCause, "The cause does not have a SpawnCause! It has instead: {}", cause.root().toString());
         checkArgument(cause.containsNamed(NamedCause.SOURCE), "The cause does not have a \"Source\" named object!");
@@ -312,76 +216,4 @@ public class SpongeCommonEventFactory {
 
     }
 
-    public static Cause withExtra(Cause cause, String name, Object extra) {
-        return cause.with(NamedCause.of(name, extra));
-    }
-
-    public static Event throwItemDropEvent(Cause cause, List<Entity> entities, ImmutableList<EntitySnapshot> snapshots, World world) {
-        return SpongeEventFactory.createDropItemEventCustom(cause, entities, snapshots, world);
-    }
-
-    public static Event throwEntitySpawnCustom(Cause cause, List<Entity> entities, ImmutableList<EntitySnapshot> snapshots, World world) {
-        return SpongeEventFactory.createSpawnEntityEventCustom(cause, entities, snapshots, world);
-    }
-
-    public static Cause handleEntityCreatedByPlayerCause(Cause cause) {
-        final Object root = cause.root();
-        Cause newCause;
-        if (!(root instanceof SpawnCause)) {
-            SpawnCause spawnCause;
-            if (StaticMixinHelper.packetPlayer == null) {
-                spawnCause = SpawnCause.builder().type(InternalSpawnTypes.PLACEMENT).build();
-            } else {
-                spawnCause = EntitySpawnCause.builder()
-                        .entity((Entity) StaticMixinHelper.packetPlayer)
-                        .type(InternalSpawnTypes.PLACEMENT)
-                        .build();
-            }
-            List<NamedCause> causes = new ArrayList<>();
-            causes.add(NamedCause.source(spawnCause));
-            newCause = moveNewCausesUp(cause, causes);
-        } else {
-            newCause = cause;
-        }
-        return newCause;
-    }
-
-    public static Cause handleDropCause(Cause cause) {
-        final Object root = cause.root();
-        Cause newCause;
-        if (!(root instanceof SpawnCause)) {
-            SpawnCause spawnCause;
-            if (StaticMixinHelper.packetPlayer == null) {
-                spawnCause = SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build();
-            } else {
-                spawnCause = EntitySpawnCause.builder()
-                        .entity((Entity) StaticMixinHelper.packetPlayer)
-                        .type(InternalSpawnTypes.DROPPED_ITEM)
-                        .build();
-            }
-            List<NamedCause> causes = new ArrayList<>();
-            causes.add(NamedCause.source(spawnCause));
-            newCause = moveNewCausesUp(cause, causes);
-        } else {
-            newCause = cause;
-        }
-        return newCause;
-    }
-
-    private static Cause moveNewCausesUp(Cause currentCause, List<NamedCause> newCauses) {
-        int index = 0;
-        for (Map.Entry<String, Object> entry : currentCause.getNamedCauses().entrySet()) {
-            String entryName = entry.getKey();
-            if ("Source".equals(entryName)) {
-                newCauses.add(NamedCause.of("AdditionalSource", entry.getValue()));
-            } else if ("AdditionalSource".equals(entryName)) {
-                newCauses.add(NamedCause.of("PreviousSource", entry.getValue()));
-            } else if (entryName.startsWith("PreviousSource")) {
-                newCauses.add(NamedCause.of(entryName + index++, entry.getValue()));
-            } else {
-                newCauses.add(NamedCause.of(entryName, entry.getValue()));
-            }
-        }
-        return Cause.of(newCauses);
-    }
 }

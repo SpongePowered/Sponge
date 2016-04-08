@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimings;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -42,14 +43,12 @@ import net.minecraft.world.chunk.EmptyChunk;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
@@ -60,7 +59,6 @@ import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -71,12 +69,9 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 /**
@@ -100,6 +95,8 @@ public final class CauseTracker {
     private final WorldServer targetWorld;
 
     private final CauseStack stack = new CauseStack(DEFAULT_QUEUE_SIZE);
+
+    @Nullable private PhaseData currentProcessingState = null;
 
     public CauseTracker(WorldServer targetWorld) {
         if (((IMixinWorldServer) targetWorld).getCauseTracker() != null) {
@@ -150,11 +147,11 @@ public final class CauseTracker {
     }
 
     public void completePhase() {
-        final PhaseData tuple = this.stack.peek();
-        IPhaseState state = tuple.getState();
+        final PhaseData currentPhaseData = this.stack.peek();
+        IPhaseState state = currentPhaseData.getState();
         if (this.stack.size() > 6) {
             // This printing is to detect possibilities of a phase not being cleared properly
-            // and resulting in a "runaway" phase state accumilation.
+            // and resulting in a "runaway" phase state accumulation.
             PrettyPrinter printer = new PrettyPrinter(60);
             printer.add("Completing Phase").centre().hr();
             printer.add("Detecting a runaway phase! Potentially a problem where something isn't completing a phase!!!");
@@ -169,7 +166,7 @@ public final class CauseTracker {
         // If pop is called, the Deque will already throw an exception if there is no element
         // so it's an error properly handled.
         final TrackingPhase phase = state.getPhase();
-        final PhaseContext context = tuple.getContext();
+        final PhaseContext context = currentPhaseData.getContext();
         try {
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
                 // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
@@ -178,7 +175,11 @@ public final class CauseTracker {
                         .complete());
             }
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
+                this.currentProcessingState = currentPhaseData;
+                SpongeTimings.TRACKING_PHASE_UNWINDING.startTiming();
                 phase.unwind(this, state, context);
+                SpongeTimings.TRACKING_PHASE_UNWINDING.stopTiming();
+                this.currentProcessingState = null;
             } catch (Exception e) {
                 final PrettyPrinter printer = new PrettyPrinter(40);
                 printer.add("Exception Exiting Phase").centre().hr();
@@ -239,6 +240,10 @@ public final class CauseTracker {
         return this.stack;
     }
 
+    public PhaseData getCurrentProcessingPhase() {
+        return this.currentProcessingState == null ? CauseStack.EMPTY_DATA : this.currentProcessingState;
+    }
+
     // --------------------- DELEGATED WORLD METHODS -------------------------
 
     /**
@@ -268,9 +273,9 @@ public final class CauseTracker {
 
                 final Pair<Object, BlockPos> pair = Stream.<Supplier<Optional<Pair<Object, BlockPos>>>>of(
                         () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
-                                .map(block -> Pair.of(block, VecHelper.toBlockPos(block.getPosition()))),
+                                .map(block -> Pair.<Object, BlockPos>of(block, VecHelper.toBlockPos(block.getPosition()))),
                         () -> context.firstNamed(NamedCause.SOURCE, net.minecraft.tileentity.TileEntity.class)
-                                .map(tile -> Pair.of(tile, tile.getPos())),
+                                .map(tile -> Pair.<Object, BlockPos>of(tile, tile.getPos())),
                         () -> context.firstNamed(NamedCause.SOURCE, Entity.class).map(entity -> {
                             final IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
                             final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
@@ -285,7 +290,7 @@ public final class CauseTracker {
                             return Pair.of(null, EntityUtil.toNative(entity).getPosition());
                         }),
                         () -> context.firstNamed(NamedCause.SOURCE, Player.class)
-                                .map(player -> Pair.of(player, EntityUtil.toNative(player).getPosition()))
+                                .map(player -> Pair.<Object, BlockPos>of(player, EntityUtil.toNative(player).getPosition()))
                         )
                         .map(Supplier::get)
                         .filter(Optional::isPresent)

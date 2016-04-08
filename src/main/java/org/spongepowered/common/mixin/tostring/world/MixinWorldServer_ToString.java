@@ -36,7 +36,7 @@ public abstract class MixinWorldServer_ToString extends MixinWorld {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("LevelName", this.worldInfo.getWorldName())
-                .add("DimensionId:", this.provider.getDimensionId())
+                .add("DimensionId", this.provider.getDimensionId())
                 .add("DimensionType", this.worldInfo.getTerrainType().getWorldTypeName())
                 .toString();
     }

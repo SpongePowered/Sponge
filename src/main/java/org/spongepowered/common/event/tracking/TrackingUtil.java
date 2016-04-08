@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
@@ -40,15 +41,23 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
@@ -64,6 +73,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * A simple utility for aiding in tracking, either with resolving notifiers
@@ -79,7 +91,6 @@ public final class TrackingUtil {
                 .addCaptures()
                 .complete());
         entityIn.onUpdate();
-        SpongeCommonEventFactory.handleEntityMovement(entityIn);
         causeTracker.completePhase();
     }
 
@@ -158,10 +169,23 @@ public final class TrackingUtil {
         context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).ifPresent(tickingSnapshot -> {
             BlockPos sourcePos = VecHelper.toBlockPos(tickingSnapshot.getPosition());
             Block targetBlock = minecraftWorld.getBlockState(minecraftEntity.getPosition()).getBlock();
-            SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, tickingSnapshot, minecraftEntity, sourcePos, targetBlock, minecraftEntity.getPosition(), PlayerTracker.Type.NOTIFIER);
-
+            SpongeHooks.tryToTrackBlockAndEntity(minecraftWorld, tickingSnapshot, minecraftEntity, sourcePos, targetBlock,
+                    minecraftEntity.getPosition(), PlayerTracker.Type.NOTIFIER);
         });
         context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(tickingEntity -> {
+            Stream.<Supplier<Optional<UUID>>>of(
+                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                            .map(Identifiable::getUniqueId),
+                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                            .map(Identifiable::getUniqueId)
+                    )
+                    .map(Supplier::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .ifPresent(uuid ->
+                            EntityUtil.toMixin(minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
+                    );
             Optional<User> creator = ((IMixinEntity) tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
                 ((IMixinEntity) minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
@@ -226,4 +250,7 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
+    public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
+
+    }
 }

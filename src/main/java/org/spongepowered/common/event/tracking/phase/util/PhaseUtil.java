@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 
 public final class PhaseUtil {
 
-    public static Supplier<IllegalStateException> createIllegalStateSupplier(String s, PhaseContext phaseContext) {
+    public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext phaseContext) {
         return () -> new IllegalStateException(s + " Please analyze the current phase context: " + phaseContext);
     }
 

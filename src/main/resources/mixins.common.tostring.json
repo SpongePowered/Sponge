@@ -4,8 +4,7 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.ToStringPlugin",
     "mixins": [
-    ],
-    "server": [
+        "item.MixinItem_ToString",
         "world.MixinChunk_ToString",
         "world.MixinWorldServer_ToString"
     ],

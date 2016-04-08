@@ -48,7 +48,7 @@ import java.util.stream.Collectors;
 public final class CauseStack {
 
     public static final PhaseContext EMPTY = PhaseContext.start().add(NamedCause.of("EMPTY", "EMPTY")).complete();
-    public static final PhaseData EMPTY_TUPLE = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
+    public static final PhaseData EMPTY_DATA = new PhaseData(EMPTY, GeneralPhase.State.COMPLETE);
 
     private final Deque<PhaseData> states;
 
@@ -63,7 +63,7 @@ public final class CauseStack {
 
     public PhaseData peek() {
         final PhaseData phase = this.states.peek();
-        return phase == null ? CauseStack.EMPTY_TUPLE : phase;
+        return phase == null ? CauseStack.EMPTY_DATA : phase;
     }
 
     public IPhaseState peekState() {

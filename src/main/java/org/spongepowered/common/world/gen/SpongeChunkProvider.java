@@ -295,7 +295,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         for (Populator populator : populators) {
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                     .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
-                    .addCaptures()
+                    .addEntityCaptures()
                     .complete());
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;

@@ -42,6 +42,7 @@ import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -200,6 +201,13 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Living entity is not compatible with this implementation: " + entity);
         }
         return (EntityLivingBase) entity;
+    }
+
+    public static EntityPlayerMP toNative(Player player) {
+        if (!(player instanceof EntityPlayerMP)) {
+            throw new IllegalArgumentException("Player entity is not compatible with this implementation: " + player);
+        }
+        return (EntityPlayerMP) player;
     }
 
     public static IMixinEntity toMixin(Entity entity) {

@@ -330,7 +330,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
                             .add(NamedCause.source(this))
                             .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
-                            .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner))
+                            .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
                             .addCaptures()
                             .complete());
                     this.nmsEntityLiving.onDeath(source);

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -33,6 +34,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.GameRules;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -55,18 +58,23 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 import org.spongepowered.common.util.VecHelper;
@@ -226,6 +234,28 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         if (!worldIn.isRemote && ((IMixinWorldServer) worldIn).getCauseTracker().getStack().peekState() == BlockPhase.State.RESTORING_BLOCKS) {
             ci.cancel();
         }
+    }
+
+    @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
+    private static boolean redirectGameRulesToCaptureItemDrops(GameRules gameRules, String argument, net.minecraft.world.World worldIn, BlockPos pos, ItemStack stack) {
+        final boolean allowTileDrops = gameRules.getBoolean(argument);
+        if (allowTileDrops && worldIn instanceof IMixinWorldServer) {
+            final IMixinWorldServer mixin = (IMixinWorldServer) worldIn;
+            final PhaseData currentPhase = mixin.getCauseTracker().getStack().peek();
+            final IPhaseState currentState = currentPhase.getState();
+            if (currentState.tracksBlockSpecificDrops()) {
+                final PhaseContext context = currentPhase.getContext();
+                final IBlockState currentBlockState = worldIn.getBlockState(pos);
+                final IBlockState currentActualBlockState = currentBlockState.getBlock().getActualState(currentBlockState, worldIn, pos);
+                final BlockSnapshot blockSnapshot = mixin.createSpongeBlockSnapshot(currentBlockState, currentActualBlockState, pos, 3);
+                final Multimap<BlockPos, org.spongepowered.api.item.inventory.ItemStack> multimap =
+                        context.getBlockDropSupplier().get().get();
+                final Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks = multimap.get(pos);
+                SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(stack));
+                return false;
+            }
+        }
+        return allowTileDrops;
     }
 
 }

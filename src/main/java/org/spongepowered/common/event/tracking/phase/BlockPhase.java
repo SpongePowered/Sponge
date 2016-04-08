@@ -26,10 +26,12 @@ package org.spongepowered.common.event.tracking.phase;
 
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.BlockFunction;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 
 public final class BlockPhase extends TrackingPhase {
 
@@ -37,7 +39,8 @@ public final class BlockPhase extends TrackingPhase {
         BLOCK_DECAY,
         RESTORING_BLOCKS,
         DISPENSE,
-        BLOCK_DROP_ITEMS, BLOCK_ADDED;
+        BLOCK_DROP_ITEMS,
+        BLOCK_ADDED;
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
@@ -68,7 +71,8 @@ public final class BlockPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.BLOCK_DECAY) {
-            final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).get();
+            final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                    .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.BLOCK_DROP_ITEMS) {

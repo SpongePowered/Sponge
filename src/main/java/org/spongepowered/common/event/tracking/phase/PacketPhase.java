@@ -377,6 +377,11 @@ public final class PacketPhase extends TrackingPhase {
             public boolean canSwitchTo(IPhaseState state) {
                 return state == BlockPhase.State.BLOCK_DECAY || state == BlockPhase.State.BLOCK_DROP_ITEMS;
             }
+
+            @Override
+            public boolean tracksBlockSpecificDrops() {
+                return true;
+            }
         },
         IGNORED,
         INTERACT_ENTITY {
@@ -512,6 +517,11 @@ public final class PacketPhase extends TrackingPhase {
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
         return context;
+    }
+
+    @Override
+    public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
+        return currentState == General.INTERACTION;
     }
 
     @SuppressWarnings("unchecked")

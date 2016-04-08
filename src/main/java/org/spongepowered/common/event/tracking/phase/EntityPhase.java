@@ -49,13 +49,13 @@ public final class EntityPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.DEATH_DROPS_SPAWNING) {
-            final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).orElseThrow(PhaseUtil.createIllegalStateSupplier("Dying entity not found!", phaseContext));
+            final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> EntityFunction.Drops.DEATH_DROPS.process(dyingEntity, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> EntityFunction.Entities.DEATH_DROPS.process(dyingEntity, causeTracker, phaseContext, entities));
 
             // TODO Handle block changes
         } else if (state == State.DEATH_UPDATE) {
-            final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).orElseThrow(PhaseUtil.createIllegalStateSupplier("Dying entity not found!", phaseContext));
+            final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
             phaseContext.getCapturedItemsSupplier().get().ifPresent(items -> EntityFunction.Drops.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier().get().ifPresent(entities -> EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, entities));
 

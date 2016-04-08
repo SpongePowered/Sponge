@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.function;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
@@ -42,7 +43,9 @@ import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.util.BlockPos;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -52,6 +55,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
@@ -80,6 +84,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -90,11 +95,14 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 @FunctionalInterface
@@ -232,17 +240,38 @@ public interface PacketFunction {
                         .build())
                         .build();
                 EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
-                        .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                        .nonCancelled(event ->
+                                event.getEntities().forEach(entity -> {
+                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                })
+                        )
                         .process();
             });
 
         } else if (state == PacketPhase.General.INTERACTION) {
-            context.getCapturedBlocks().ifPresent(blocks -> {
-                GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context);
-            });
+            context.getCapturedBlocks().ifPresent(blocks ->
+                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
+            );
             context.getCapturedItems().ifPresent(items -> {
+                if (items.isEmpty()) {
+                    return;
+                }
                 final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-
+                final Cause cause = Cause.source(EntitySpawnCause.builder()
+                                .entity(EntityUtil.fromNative(player))
+                                .type(InternalSpawnTypes.DROPPED_ITEM)
+                                .build())
+                        .build();
+                EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
+                        .nonCancelled(event ->
+                                event.getEntities().forEach(entity -> {
+                                    System.err.printf("[PacketFunction#@264] Spawning Entity: %s %n", entity);
+                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                })
+                        )
+                        .process();
             });
 
         }

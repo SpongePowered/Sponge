@@ -189,7 +189,6 @@ public abstract class TrackingPhase {
         return false;
     }
 
-
     public boolean alreadyCapturingEntitySpawns(IPhaseState state) {
         return false;
     }
@@ -208,6 +207,10 @@ public abstract class TrackingPhase {
 
     public boolean alreadyCapturingItemSpawns(IPhaseState currentState) {
         return false;
+    }
+
+    public void associateAdditionalCauses(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+
     }
 
     // Actual capture methods

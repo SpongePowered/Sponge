@@ -79,6 +79,11 @@ public final class GeneralPhase extends TrackingPhase {
             return false;
         }
 
+        @Override
+        public boolean tracksBlockRestores() {
+            return true;
+        }
+
     }
 
     GeneralPhase(@Nullable TrackingPhase parent) {

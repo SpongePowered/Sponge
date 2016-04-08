@@ -64,6 +64,7 @@ public final class InternalNamedCauses {
         public static final String INVALID_TRANSACTIONS = "InvalidTransactions";
         public static final String UNWINDING_STATE = "UnwindingState";
         public static final String UNWINDING_CONTEXT = "UnwindingContext";
+        public static final String CAPTURED_BLOCK_DROPS = "CapturedBlockDropMap";
 
         private Tracker() {
 

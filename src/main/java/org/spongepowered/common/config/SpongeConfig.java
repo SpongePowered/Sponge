@@ -253,6 +253,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
 
+        @Setting(comment = "Configuration options for various game optimizations that may have possible side effects")
+        private OptimizationsCategory optimizations = new OptimizationsCategory();
+
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
         }
@@ -286,6 +289,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public Predicate<InetAddress> getIpSet(String name) {
             return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
+        }
+
+        public OptimizationsCategory getOptimizations() {
+            return this.optimizations;
         }
     }
 
@@ -792,6 +799,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("game-fixes")
         private boolean gameFixes = false;
 
+        @Setting("optimizations")
+        private boolean optimizations = true;
+
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
         }
@@ -839,6 +849,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public void setGameFixes(boolean gameFixes) {
             this.gameFixes = gameFixes;
         }
+
+        public boolean useOptimizations() {
+            return this.optimizations;
+        }
     }
 
     @ConfigSerializable
@@ -873,6 +887,17 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             return this.dummyChunk;
         }
 
+    }
+
+    @ConfigSerializable
+    public static class OptimizationsCategory extends Category {
+
+        @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
+        private boolean preBlockItemDropMerge = true;
+
+        public boolean doDropsPreMergeItemDrops() {
+            return this.preBlockItemDropMerge;
+        }
     }
 
     @ConfigSerializable

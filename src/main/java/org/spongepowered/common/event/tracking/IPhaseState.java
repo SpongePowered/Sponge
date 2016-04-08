@@ -64,4 +64,12 @@ public interface IPhaseState {
     default void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> snapshotTransaction) {
 
     }
+
+    default boolean tracksBlockRestores() {
+        return false;
+    }
+
+    default boolean tracksBlockSpecificDrops() {
+        return false;
+    }
 }
