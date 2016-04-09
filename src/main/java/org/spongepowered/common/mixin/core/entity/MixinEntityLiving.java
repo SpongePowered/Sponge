@@ -86,6 +86,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
+    @Shadow public abstract ItemStack getHeldItem();
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruct(CallbackInfo ci) {

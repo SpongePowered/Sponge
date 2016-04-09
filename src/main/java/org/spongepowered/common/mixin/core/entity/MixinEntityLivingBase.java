@@ -120,6 +120,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+    @Shadow public abstract void setSprinting(boolean sprinting);
+    @Shadow public abstract boolean isOnLadder();
 
     @Override
     public Vector3d getHeadRotation() {

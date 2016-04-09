@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.ItemStack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -193,4 +196,18 @@ public final class SpongeImpl {
         return SpongeImpl.class.getPackage();
     }
 
+    /**
+     * A simple method to check attacks for the forge event factory.
+     *
+     * @param entityPlayer
+     * @param targetEntity
+     * @return
+     */
+    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+        final ItemStack item = entityPlayer.getCurrentEquippedItem();
+        if (item != null) {
+            return true;
+        }
+        return true;
+    }
 }
