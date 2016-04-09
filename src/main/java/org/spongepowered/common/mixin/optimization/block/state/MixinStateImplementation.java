@@ -53,20 +53,20 @@ public abstract class MixinStateImplementation extends BlockStateBase {
      * <p>This is partially contributed code from Aikar in PaperSpigot.</p>
      *
      * @param property The property requested
-     * @param <T> The type of comparable
      * @return The value for the property
      */
+    @SuppressWarnings("unchecked")
+    @Override
     @Overwrite
     @Final
-    @Override
-    public <T extends Comparable<T>> T getValue(IProperty<T> property) {
+    public Comparable<?> getValue(IProperty property) {
         // Sponge Rewrite this to ignore validation steps
         final Comparable<?> value = this.properties.get(property);
         if (value == null) {
             // Still throws an exception if the property didn't have a mapping
             throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.block.getBlockState());
         }
-        return property.getValueClass().cast(value);
+        return (Comparable<?>) property.getValueClass().cast(value);
     }
 
     /**
@@ -86,14 +86,12 @@ public abstract class MixinStateImplementation extends BlockStateBase {
      *
      * @param property The property to use
      * @param value The value keyed to the property
-     * @param <T> The type of property
-     * @param <V> The type of value
      * @return The block state, if not already this block state
      */
+    @Override
     @Overwrite
     @Final
-    @Override
-    public <T extends Comparable<T>, V extends T> IBlockState withProperty(IProperty<T> property, V value) {
+    public IBlockState withProperty(IProperty property, Comparable value) {
         // Sponge - eliminate the hash lookups and validation lookups
         if (this.properties.get(property) == value) {
             return this;
