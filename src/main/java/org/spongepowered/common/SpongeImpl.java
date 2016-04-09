@@ -196,18 +196,4 @@ public final class SpongeImpl {
         return SpongeImpl.class.getPackage();
     }
 
-    /**
-     * A simple method to check attacks for the forge event factory.
-     *
-     * @param entityPlayer
-     * @param targetEntity
-     * @return
-     */
-    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
-        final ItemStack item = entityPlayer.getCurrentEquippedItem();
-        if (item != null) {
-            return true;
-        }
-        return true;
-    }
 }

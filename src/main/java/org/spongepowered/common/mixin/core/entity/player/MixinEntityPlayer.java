@@ -78,6 +78,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
@@ -309,7 +310,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Overwrite
     public void attackTargetEntityWithCurrentItem(net.minecraft.entity.Entity targetEntity) {
         // Sponge Start - Add SpongeImpl hook to override in forge as necessary
-        if (!SpongeImpl.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
+        if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
             return;
         }
         // Sponge End

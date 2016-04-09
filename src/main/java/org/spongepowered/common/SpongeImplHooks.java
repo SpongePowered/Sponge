@@ -28,7 +28,10 @@ package org.spongepowered.common;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
@@ -123,5 +126,20 @@ public final class SpongeImplHooks {
                 }
             }
         }
+    }
+
+    /**
+     * A simple method to check attacks for the forge event factory.
+     *
+     * @param entityPlayer
+     * @param targetEntity
+     * @return
+     */
+    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+        final ItemStack item = entityPlayer.getCurrentEquippedItem();
+        if (item != null) {
+            return true;
+        }
+        return true;
     }
 }
