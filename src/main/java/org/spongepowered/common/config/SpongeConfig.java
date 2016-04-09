@@ -634,8 +634,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = "fast-blockstate-lookup")
         private boolean blockStateLookup = true;
 
+        @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
+        private boolean ignoreUnloadedChunkLighting = true;
+
         public boolean useBlockStateLookupPatch() {
             return this.blockStateLookup;
+        }
+
+        public boolean useIgnoreUloadedChunkLightingPatch() {
+            return this.ignoreUnloadedChunkLighting;
         }
     }
 

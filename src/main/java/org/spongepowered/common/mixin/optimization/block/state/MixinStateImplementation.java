@@ -40,15 +40,15 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MixinStateImplementation extends BlockStateBase {
 
     @Shadow @Final private Block block;
-    @Shadow @Final private ImmutableMap<IProperty, Comparable> properties;
-    @Shadow private ImmutableTable<IProperty, Comparable, IBlockState> propertyValueTable;
+    @Shadow @Final private ImmutableMap<IProperty<?>, Comparable<?>> properties;
+    @Shadow private ImmutableTable<IProperty<?>, Comparable<?>, IBlockState> propertyValueTable;
 
     /**
      * @author gabizou - April 8th, 2016
      *
-     * Rewrites the getter to simply query the map, and throws an exception
-     * if the map had no pairing of key to a value. In laymans terms, this means
-     * the property doesn't apply for the block state.
+     * This is done to improve the performance of the method by removing an
+     * unnecessary hash lookup. The same logic can be computed with 1 hash
+     * lookup instead of 2.
      *
      * <p>This is partially contributed code from Aikar in PaperSpigot.</p>
      *
@@ -61,7 +61,7 @@ public abstract class MixinStateImplementation extends BlockStateBase {
     @Override
     public <T extends Comparable<T>> T getValue(IProperty<T> property) {
         // Sponge Rewrite this to ignore validation steps
-        final Comparable value = this.properties.get(property);
+        final Comparable<?> value = this.properties.get(property);
         if (value == null) {
             // Still throws an exception if the property didn't have a mapping
             throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.block.getBlockState());
@@ -72,11 +72,9 @@ public abstract class MixinStateImplementation extends BlockStateBase {
     /**
      * @author gabizou - April 8th, 2016
      *
-     * Rewrites the with property method to ignore the following:
-     * <ul>
-     *     <li>Key lookup</li>
-     *     <li>Properties allowed Values lookup</li>
-     * </ul>
+     * This is done to improve the performance of the method by removing an
+     * unnecessary hash lookup. The same logic can be computed with 1 hash
+     * lookup instead of 2.
      *
      * <p>Normally, all lookups are with proper properties anyways, the only corner
      * cases that they fail will result in null block states. Throwing exceptions

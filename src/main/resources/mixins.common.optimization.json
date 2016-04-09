@@ -4,7 +4,10 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "mixins": [
-        "block.state.MixinStateImplementation"
+        "block.state.MixinStateImplementation",
+        "world.MixinWorld_Lighting",
+        "world.MixinWorldServer_Lighting",
+        "world.gen.MixinChunkProviderServer_Lighting"
     ],
     "injectors": {
         "defaultRequire": 1

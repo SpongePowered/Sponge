@@ -34,6 +34,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class OptimizationPlugin implements IMixinConfigPlugin {
@@ -51,7 +52,7 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         final SpongeConfig.GlobalConfig globalConfig = SpongeImpl.getGlobalConfig().getConfig();
         if (globalConfig.getModules().useOptimizations()) {
-            return mixinEnabledMappings.get(mixinClassName).get();
+            return mixinEnabledMappings.get(mixinClassName).apply(globalConfig.getOptimizations());
         }
         return false;
     }
@@ -74,9 +75,15 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     }
 
     // So that any additional optimizations can be added in succession.
-    private static final Map<String, Supplier<Boolean>> mixinEnabledMappings = ImmutableMap.<String, Supplier<Boolean>>builder()
-        .put("org.spongepowered.common.mixin.optimization.block.state.MixinStateImplementation",
-            () -> SpongeImpl.getGlobalConfig().getConfig().getOptimizations().useBlockStateLookupPatch())
-        .build();
+    private static final Map<String, Function<SpongeConfig.OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<SpongeConfig.OptimizationCategory, Boolean >> builder()
+            .put("org.spongepowered.common.mixin.optimization.block.state.MixinStateImplementation",
+                    SpongeConfig.OptimizationCategory::useBlockStateLookupPatch)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_Lighting",
+                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting",
+                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Lighting",
+                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+            .build();
 
 }
