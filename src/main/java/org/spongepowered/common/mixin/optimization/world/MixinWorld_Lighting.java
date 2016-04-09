@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.optimization.world;
 
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public abstract class MixinWorld_Lighting {
 
     private static final String WORLD_GET_CHUNK =
-            "Lnet/minecraft/world/World;getChunkFromBlockCoords(Lnet/minecraft/util/BlockPos;)Lnet/minecraft/world/chunk/Chunk;";
+            "Lnet/minecraft/world/World;getChunkFromBlockCoords(Lnet/minecraft/util/math/BlockPos;)Lnet/minecraft/world/chunk/Chunk;";
 
     @Shadow protected IChunkProvider chunkProvider;
 
@@ -60,7 +60,7 @@ public abstract class MixinWorld_Lighting {
      * @param pos The position of the block
      * @param callbackInfo The callback info to return and cancel if necessary
      */
-    @Inject(method = "getLight(Lnet/minecraft/util/BlockPos;)I", at = @At(value = "INVOKE", target = WORLD_GET_CHUNK), cancellable = true)
+    @Inject(method = "getLight(Lnet/minecraft/util/math/BlockPos;)I", at = @At(value = "INVOKE", target = WORLD_GET_CHUNK), cancellable = true)
     private void checkChunkLoadedForLight(BlockPos pos, CallbackInfoReturnable<Integer> callbackInfo) {
         if (!this.isBlockLoaded(pos)) {
             callbackInfo.setReturnValue(0);
