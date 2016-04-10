@@ -68,7 +68,7 @@ public final class SpongePlayerDataHandler {
         if (!Sponge.isServerAvailable() || handlerInstance.hasInitialized) {
             return;
         }
-
+        handlerInstance.playerDataMap = new ConcurrentHashMap<>();
         final Path filePath = DimensionManager.getCurrentSavesDirectory().get().resolve("data").resolve
                 (SPONGE_DATA);
 
