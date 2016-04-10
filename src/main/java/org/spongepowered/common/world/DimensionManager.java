@@ -31,6 +31,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
@@ -52,6 +53,7 @@ import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -80,9 +82,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.BitSet;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -211,9 +215,11 @@ public class DimensionManager {
         newMap.put(-1, copy.remove(-1));
         newMap.put(1, copy.remove(1));
 
-        for (TIntObjectIterator<DimensionType> it = copy.iterator(); it.hasNext();) {
-            it.advance();
-            newMap.put(it.key(), it.value());
+        int[] ids = copy.keys();
+        Arrays.sort(ids);
+
+        for (int id: ids) {
+            newMap.put(id, copy.get(id));
         }
 
         return newMap;
@@ -688,6 +694,7 @@ public class DimensionManager {
         WorldServer worldServer = worldByDimensionId.get(0);
         sorted.remove(worldServer);
         sorted.add(0, worldServer);
+
         worldServer = worldByDimensionId.get(-1);
         if (worldServer != null) {
             sorted.remove(worldServer);
@@ -698,6 +705,12 @@ public class DimensionManager {
             sorted.remove(worldServer);
             sorted.add(2, worldServer);
         }
+
+        sorted.subList(3, sorted.size()).sort((world1, world2) -> ((IMixinWorld) world1).getDimensionId() - ((IMixinWorld) world2).getDimensionId());
+
+        //System.err.println("World order: ");
+        //sorted.stream().forEach(w -> System.err.println("World id: " + w.getWorldInfo().getWorldName() + " " + ((IMixinWorld) w).getDimensionId()));
+
         return sorted.toArray(new WorldServer[sorted.size()]);
     }
 
