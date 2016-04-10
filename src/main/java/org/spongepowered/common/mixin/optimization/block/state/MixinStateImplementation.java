@@ -35,6 +35,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(BlockState.StateImplementation.class)
 public abstract class MixinStateImplementation extends BlockStateBase {
@@ -88,19 +91,17 @@ public abstract class MixinStateImplementation extends BlockStateBase {
      * @param value The value keyed to the property
      * @return The block state, if not already this block state
      */
-    @Override
-    @Overwrite
-    @Final
-    public IBlockState withProperty(IProperty property, Comparable value) {
+    @Inject(method = "withProperty", at = @At("HEAD"), cancellable = true)
+    public void onWithProperty(IProperty property, Comparable value, CallbackInfoReturnable<IBlockState> cir) {
         // Sponge - eliminate the hash lookups and validation lookups
         if (this.properties.get(property) == value) {
-            return this;
+            cir.setReturnValue(this);
         } else {
             final IBlockState blockState = this.propertyValueTable.get(property, value);
             if (blockState == null) {
                 throw new IllegalArgumentException("No mapping found for the blockstate: " + Block.blockRegistry.getNameForObject(this.block) + " of property: " + property.getName() + " and value: " + value);
             }
-            return blockState;
+            cir.setReturnValue(blockState);
         }
     }
 
