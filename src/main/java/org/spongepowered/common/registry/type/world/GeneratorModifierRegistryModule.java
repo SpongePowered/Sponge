@@ -41,6 +41,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -64,7 +65,7 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public Optional<WorldGeneratorModifier> getById(String id) {
-        return Optional.ofNullable(this.modifierMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.modifierMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -88,7 +89,7 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         String id = modifier.getId();
         checkId(id, "World generator ID");
 
-        this.modifierMappings.put(id.toLowerCase(), modifier);
+        this.modifierMappings.put(id.toLowerCase(Locale.ENGLISH), modifier);
     }
 
     private void checkId(String id, String subject) {
@@ -119,7 +120,7 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         for (WorldGeneratorModifier modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
             String id = modifier.getId();
-            checkArgument(this.modifierMappings.containsKey(id.toLowerCase()), "unregistered modifier in collection");
+            checkArgument(this.modifierMappings.containsKey(id.toLowerCase(Locale.ENGLISH)), "unregistered modifier in collection");
             ids.add(id);
         }
         return ids.build();
@@ -136,7 +137,7 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
     public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
         List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
         for (String id : ids) {
-            WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase());
+            WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {

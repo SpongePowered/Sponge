@@ -37,6 +37,7 @@ import org.spongepowered.api.util.ban.BanTypes;
 import org.spongepowered.common.ban.SpongeBanType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Optional;
 
 public class BanTypeRegistryModule implements CatalogRegistryModule<BanType> {
@@ -46,7 +47,7 @@ public class BanTypeRegistryModule implements CatalogRegistryModule<BanType> {
 
     @Override
     public Optional<BanType> getById(String id) {
-        return Optional.of(this.banTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.of(this.banTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

@@ -167,7 +167,7 @@ public final class LegacyTexts {
     }
 
     public static TextComponentString parseComponent(TextComponentString component, char code) {
-        String text = component.getChatComponentText_TextValue();
+        String text = component.getText();
         int next = text.lastIndexOf(code, text.length() - 2);
 
         List<ITextComponent> parsed = null;
@@ -186,7 +186,7 @@ public final class LegacyTexts {
                         if (current != null) {
                             if (reset) {
                                 parsed.add(current);
-                                current.getChatStyle().setParentStyle(component.getChatStyle());
+                                current.getStyle().setParentStyle(component.getStyle());
                                 reset = false;
                                 current = new TextComponentString("");
                             } else {
@@ -203,7 +203,7 @@ public final class LegacyTexts {
                         current = new TextComponentString("");
                     }
 
-                    reset |= applyStyle(current.getChatStyle(), format);
+                    reset |= applyStyle(current.getStyle(), format);
                     pos = next;
                 }
 
@@ -212,7 +212,7 @@ public final class LegacyTexts {
 
             if (current != null) {
                 parsed.add(current);
-                current.getChatStyle().setParentStyle(component.getChatStyle());
+                current.getStyle().setParentStyle(component.getStyle());
             }
 
             Collections.reverse(parsed);
@@ -220,7 +220,7 @@ public final class LegacyTexts {
             if (component.getSiblings().isEmpty()) {
                 TextComponentString newComponent = new TextComponentString(text);
                 newComponent.getSiblings().addAll(parsed);
-                newComponent.setChatStyle(component.getChatStyle());
+                newComponent.setStyle(component.getStyle());
                 return newComponent;
             }
         } else if (component.getSiblings().isEmpty()) {
@@ -232,7 +232,7 @@ public final class LegacyTexts {
             newComponent.getSiblings().addAll(parsed);
         }
 
-        newComponent.setChatStyle(component.getChatStyle());
+        newComponent.setStyle(component.getStyle());
         for (ITextComponent child : (List<ITextComponent>) component.getSiblings()) {
             if (child instanceof TextComponentString) {
                 child = parseComponent((TextComponentString) child, code);

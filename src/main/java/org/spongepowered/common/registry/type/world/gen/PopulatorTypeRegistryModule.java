@@ -79,6 +79,7 @@ import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 import org.spongepowered.common.world.gen.SpongePopulatorType;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -104,7 +105,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
     @Override
     public Optional<PopulatorType> getById(String id) {
-        return Optional.ofNullable(this.populatorTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.populatorTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

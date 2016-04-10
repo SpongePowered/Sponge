@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
@@ -45,11 +46,14 @@ import net.minecraft.world.storage.ISaveHandler;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.source.ConsoleSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.command.TabCompleteEvent;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -57,6 +61,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.World;
@@ -214,7 +219,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Text getMotd() {
         return SpongeTexts.fromLegacy(this.motd);
@@ -490,7 +494,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         return DimensionManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
@@ -522,5 +525,20 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public String toString() {
         return getClass().getSimpleName();
+    }
+
+    @Inject(method = "tick", at = @At(value = "RETURN"))
+    public void onServerTick(CallbackInfo ci) {
+        int lastAnimTick = StaticMixinHelper.lastAnimationPacketTick;
+        int lastPrimaryTick = StaticMixinHelper.lastPrimaryPacketTick;
+        int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
+        EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
+        if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
+            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            if (Sponge.getEventManager().post(event)) {
+                return;
+            }
+        }
+        StaticMixinHelper.lastAnimationPacketTick = 0;
     }
 }

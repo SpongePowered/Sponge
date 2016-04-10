@@ -32,6 +32,7 @@ import org.spongepowered.api.registry.CatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
 
     @Override
     public Optional<BlockState> getById(String id) {
-        return Optional.ofNullable(this.blockStateMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase()));
+        return Optional.ofNullable(this.blockStateMap.get(checkNotNull(id, "Id cannot be null!").toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -55,8 +56,8 @@ public final class BlockStateRegistryModule implements CatalogRegistryModule<Blo
 
     void registerBlockState(BlockState blockState) {
         checkNotNull(blockState, "BlockState cannot be null!");
-        if (!this.blockStateMap.containsKey(blockState.getId().toLowerCase())) {
-            this.blockStateMap.put(blockState.getId().toLowerCase(), blockState);
+        if (!this.blockStateMap.containsKey(blockState.getId().toLowerCase(Locale.ENGLISH))) {
+            this.blockStateMap.put(blockState.getId().toLowerCase(Locale.ENGLISH), blockState);
         }
     }
 

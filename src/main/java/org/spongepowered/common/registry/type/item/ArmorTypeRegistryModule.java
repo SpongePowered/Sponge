@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class ArmorTypeRegistryModule implements CatalogRegistryModule<ArmorType>
 
     @Override
     public Optional<ArmorType> getById(String id) {
-        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -57,15 +58,15 @@ public class ArmorTypeRegistryModule implements CatalogRegistryModule<ArmorType>
     @Override
     public void registerDefaults() {
         for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
-            this.armorTypeMap.put(armorMaterial.name().toLowerCase(), (ArmorType) (Object) armorMaterial);
+            this.armorTypeMap.put(armorMaterial.name().toLowerCase(Locale.ENGLISH), (ArmorType) (Object) armorMaterial);
         }
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (ItemArmor.ArmorMaterial armorMaterial : ItemArmor.ArmorMaterial.values()) {
-            if (!this.armorTypeMap.containsKey(armorMaterial.name().toLowerCase())) {
-                this.armorTypeMap.put(armorMaterial.name().toLowerCase(), (ArmorType) (Object) armorMaterial);
+            if (!this.armorTypeMap.containsKey(armorMaterial.name().toLowerCase(Locale.ENGLISH))) {
+                this.armorTypeMap.put(armorMaterial.name().toLowerCase(Locale.ENGLISH), (ArmorType) (Object) armorMaterial);
             }
         }
     }

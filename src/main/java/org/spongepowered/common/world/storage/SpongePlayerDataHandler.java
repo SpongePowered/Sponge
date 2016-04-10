@@ -61,7 +61,7 @@ public final class SpongePlayerDataHandler {
     private boolean hasInitialized = false;
     private Path playerDir;
 
-    private final Map<UUID, SpongePlayerData> playerDataMap = new ConcurrentHashMap<>();
+    private Map<UUID, SpongePlayerData> playerDataMap;
 
     public static void init() {
         final SpongePlayerDataHandler handlerInstance = Holder.INSTANCE;

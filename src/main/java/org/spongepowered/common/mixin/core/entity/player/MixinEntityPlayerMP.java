@@ -30,6 +30,7 @@ import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Sets;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeMap;
@@ -40,6 +41,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.CPacketClientSettings;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
@@ -50,14 +52,15 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.DisplayNameData;
 import org.spongepowered.api.data.manipulator.mutable.entity.GameModeData;
 import org.spongepowered.api.data.manipulator.mutable.entity.JoinData;
 import org.spongepowered.api.data.type.SkinPart;
@@ -81,6 +84,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
@@ -117,6 +121,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
+import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -267,6 +272,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.playerNetServerHandler.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+    }
+
+    @Override
+    public void sendBookView(BookView bookView) {
+        BookFaker.fakeBookView(bookView, this);
     }
 
     @Override
@@ -574,9 +584,36 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
+    @Nullable
+    public Text getDisplayNameText() {
+        return Text.of(getName());
+    }
+
+    @Override
+    public void setDisplayName(@Nullable Text displayName) {
+        // Do nothing
+    }
+
+    @Override
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getJoinData());
         manipulators.add(getGameModeData());
     }
+
+    @Override
+    public void sendBlockChange(int x, int y, int z, BlockState state) {
+        checkNotNull(state, "state");
+        SPacketBlockChange packet = new SPacketBlockChange();
+        packet.blockPosition = new BlockPos(x, y, z);
+        packet.blockState = (IBlockState) state;
+        this.playerNetServerHandler.sendPacket(packet);
+    }
+
+    @Override
+    public void resetBlockChange(int x, int y, int z) {
+        SPacketBlockChange packet = new SPacketBlockChange(this.worldObj, new BlockPos(x, y, z));
+        this.playerNetServerHandler.sendPacket(packet);
+    }
+
 }

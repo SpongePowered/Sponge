@@ -13,7 +13,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 minecraft {
     version = '1.9'
-    mappings = 'snapshot_20160325'
+    mappings = 'snapshot_20160403'
 
     runDir = 'run'
     atSource sourceSets.main

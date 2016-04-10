@@ -47,8 +47,8 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.persistence.DataSerializer;
 import org.spongepowered.api.data.value.BaseValue;
-import org.spongepowered.api.data.DataManager;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
@@ -86,6 +86,8 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataManipulatorBuilder<?, ?>> immutableBuilderMap = new MapMaker()
         .concurrencyLevel(4)
         .makeMap();
+
+    private final Map<Class<?>, DataSerializer<?>> dataSerializerMap = new MapMaker().concurrencyLevel(4).makeMap();
 
     // Registrations
 
@@ -304,6 +306,25 @@ public final class SpongeDataManager implements DataManager {
     public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<DataManipulatorBuilder<T, I>>
     getImmutableManipulatorBuilder(Class<I> immutableManipulatorClass) {
         return Optional.ofNullable((DataManipulatorBuilder<T, I>) this.immutableBuilderMap.get(checkNotNull(immutableManipulatorClass)));
+    }
+
+    @Override
+    public <T> void registerSerializer(Class<T> objectClass, DataSerializer<T> serializer) {
+        checkState(allowRegistrations, "Registrations are no longer allowed");
+        checkNotNull(objectClass, "Target object class cannot be null!");
+        checkNotNull(serializer, "DataSerializer for : " + objectClass + " cannot be null!");
+        checkArgument(serializer.getToken().isAssignableFrom(objectClass), "DataSerializer is not compatible with the target object class: " + objectClass);
+        if (!this.dataSerializerMap.containsKey(checkNotNull(objectClass, "Target class cannot be null!"))) {
+            this.dataSerializerMap.put(objectClass, checkNotNull(serializer, "DataSerializer for " + objectClass + " cannot be null!"));
+        } else {
+            throw new IllegalStateException("Already registered the DataSerializer for " + objectClass.getCanonicalName());
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public <T> Optional<DataSerializer<T>> getSerializer(Class<T> objectclass) {
+        return Optional.ofNullable((DataSerializer<T>) this.dataSerializerMap.get(checkNotNull(objectclass, "Target class cannot be null!")));
     }
 
     public Optional<DataManipulatorBuilder<?, ?>> getWildManipulatorBuilder(Class<? extends DataManipulator<?, ?>> manipulatorClass) {

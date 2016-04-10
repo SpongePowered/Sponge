@@ -68,6 +68,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.CatalogTypeTypeSerializer;
 import org.spongepowered.common.data.DataRegistrar;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.network.status.SpongeFavicon;
@@ -141,6 +142,7 @@ public class SpongeGameRegistry implements GameRegistry {
         registerModulePhase();
         SpongeVillagerRegistry.registerVanillaTrades();
         DataRegistrar.setupSerialization(SpongeImpl.getGame());
+        DataSerializers.registerSerializers(SpongeImpl.getGame().getDataManager());
     }
 
 
@@ -228,7 +230,7 @@ public class SpongeGameRegistry implements GameRegistry {
         if (registryModule == null) {
             return Optional.empty();
         } else {
-            return registryModule.getById(id.toLowerCase());
+            return registryModule.getById(id.toLowerCase(Locale.ENGLISH));
         }
     }
 

@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public class ToolTypeRegistryModule implements CatalogRegistryModule<ToolType> {
 
     @Override
     public Optional<ToolType> getById(String id) {
-        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.armorTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -60,15 +61,15 @@ public class ToolTypeRegistryModule implements CatalogRegistryModule<ToolType> {
             if (toolMaterial == Item.ToolMaterial.DIAMOND) {
                 this.armorTypeMap.put("diamond", (ToolType) (Object) toolMaterial);
             }
-            this.armorTypeMap.put(toolMaterial.name().toLowerCase(), (ToolType) (Object) toolMaterial);
+            this.armorTypeMap.put(toolMaterial.name().toLowerCase(Locale.ENGLISH), (ToolType) (Object) toolMaterial);
         }
     }
 
     @AdditionalRegistration
     public void customRegistration() {
         for (Item.ToolMaterial toolMaterial : Item.ToolMaterial.values()) {
-            if (!this.armorTypeMap.containsKey(toolMaterial.name().toLowerCase())) {
-                this.armorTypeMap.put(toolMaterial.name().toLowerCase(), (ToolType) (Object) toolMaterial);
+            if (!this.armorTypeMap.containsKey(toolMaterial.name().toLowerCase(Locale.ENGLISH))) {
+                this.armorTypeMap.put(toolMaterial.name().toLowerCase(Locale.ENGLISH), (ToolType) (Object) toolMaterial);
             }
         }
     }

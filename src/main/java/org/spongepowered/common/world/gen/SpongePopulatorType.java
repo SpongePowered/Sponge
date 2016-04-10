@@ -28,18 +28,20 @@ import com.google.common.base.Objects;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.world.gen.PopulatorType;
 
+import java.util.Locale;
+
 public class SpongePopulatorType implements PopulatorType {
 
     public final String populatorName;
     public final String modId;
 
     public SpongePopulatorType(String name) {
-        this(name.toLowerCase(), "minecraft");
+        this(name.toLowerCase(Locale.ENGLISH), "minecraft");
     }
 
     public SpongePopulatorType(String name, String modId) {
-        this.populatorName = name.toLowerCase();
-        this.modId = modId.toLowerCase();
+        this.populatorName = name.toLowerCase(Locale.ENGLISH);
+        this.modId = modId.toLowerCase(Locale.ENGLISH);
     }
 
     @Override

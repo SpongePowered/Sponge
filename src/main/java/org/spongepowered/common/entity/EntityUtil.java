@@ -34,6 +34,7 @@ import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -97,4 +98,17 @@ public final class EntityUtil {
                                         + " when the expected contain: " + professions);
     }
 
+    public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
+        if (!(entity instanceof org.spongepowered.api.entity.Entity)) {
+            throw new IllegalArgumentException("Found a native entity that isn't implementing SpongeAPI Entity: " + entity);
+        }
+        return (org.spongepowered.api.entity.Entity) entity;
+    }
+
+    public static Entity toNative(org.spongepowered.api.entity.Entity entity) {
+        if (!(entity instanceof Entity)) {
+            throw new IllegalArgumentException("Incompatible SpongeAPI entity. It is not usable for this implementation: " + entity);
+        }
+        return (Entity) entity;
+    }
 }

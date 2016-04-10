@@ -64,7 +64,7 @@ public abstract class MixinText implements IMixinText {
     private ITextComponent initializeComponent() {
         if (this.component == null) {
             this.component = createComponent();
-            Style style = this.component.getChatStyle();
+            Style style = this.component.getStyle();
 
             if (this.format.getColor() != TextColors.NONE) {
                 style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
@@ -79,11 +79,11 @@ public abstract class MixinText implements IMixinText {
             }
 
             if (this.clickAction.isPresent()) {
-                style.setChatClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
+                style.setClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
             }
 
             if (this.hoverAction.isPresent()) {
-                style.setChatHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
+                style.setHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
             }
 
             if (this.shiftClickAction.isPresent()) {

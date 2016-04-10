@@ -35,6 +35,7 @@ import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.common.weather.SpongeWeather;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class WeatherRegistryModule implements CatalogRegistryModule<Weathe
 
     @Override
     public Optional<Weather> getById(String id) {
-        return Optional.ofNullable(this.weatherMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.weatherMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

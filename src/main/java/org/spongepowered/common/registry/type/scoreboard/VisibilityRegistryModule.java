@@ -35,6 +35,7 @@ import org.spongepowered.api.scoreboard.Visibilities;
 import org.spongepowered.api.scoreboard.Visibility;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class VisibilityRegistryModule implements CatalogRegistryModule<Vis
 
     @Override
     public Optional<Visibility> getById(String id) {
-        return Optional.ofNullable(visibilityMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(visibilityMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

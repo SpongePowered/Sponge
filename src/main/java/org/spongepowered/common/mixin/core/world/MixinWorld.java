@@ -50,6 +50,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -1009,4 +1010,30 @@ public abstract class MixinWorld implements World, IMixinWorld {
             callbackInfo.cancel();
         }
     }*/
+
+    @Override
+    public void sendBlockChange(int x, int y, int z, BlockState state) {
+        checkNotNull(state, "state");
+        SPacketBlockChange packet = new SPacketBlockChange();
+        packet.blockPosition = new BlockPos(x, y, z);
+        packet.blockState = (IBlockState) state;
+
+        for (EntityPlayer player : this.playerEntities) {
+            if (player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+            }
+        }
+    }
+
+    @Override
+    public void resetBlockChange(int x, int y, int z) {
+        SPacketBlockChange packet = new SPacketBlockChange((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+
+        for (EntityPlayer player : this.playerEntities) {
+            if (player instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+            }
+        }
+    }
+
 }

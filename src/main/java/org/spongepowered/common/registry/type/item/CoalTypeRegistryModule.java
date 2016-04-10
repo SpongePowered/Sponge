@@ -36,6 +36,7 @@ import org.spongepowered.common.item.SpongeCoalType;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +47,7 @@ public final class CoalTypeRegistryModule implements CatalogRegistryModule<CoalT
 
     @Override
     public Optional<CoalType> getById(String id) {
-        return Optional.ofNullable(this.coaltypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.coaltypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

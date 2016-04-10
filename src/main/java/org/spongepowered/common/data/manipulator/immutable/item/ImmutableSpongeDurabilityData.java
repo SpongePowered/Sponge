@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.item.ImmutableDurabilityData;
 import org.spongepowered.api.data.manipulator.mutable.item.DurabilityData;
@@ -41,19 +40,24 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 public class ImmutableSpongeDurabilityData extends AbstractImmutableData<ImmutableDurabilityData, DurabilityData> implements ImmutableDurabilityData {
 
-    private final ImmutableBoundedValue<Integer> durability;
-    private final ImmutableValue<Boolean> unbreakable;
+    private final Integer durability;
+    private final Boolean unbreakable;
+
+    private final ImmutableBoundedValue<Integer> durabilityValue;
+    private final ImmutableValue<Boolean> unbreakableValue;
 
     public ImmutableSpongeDurabilityData(int defaultDurability, int durability, boolean unbreakable) {
         super(ImmutableDurabilityData.class);
         checkArgument(durability >= 0);
-        this.durability = SpongeValueFactory.boundedBuilder(Keys.ITEM_DURABILITY)
+        this.durability = durability;
+        this.unbreakable = unbreakable;
+        this.durabilityValue = SpongeValueFactory.boundedBuilder(Keys.ITEM_DURABILITY)
                 .minimum(0)
                 .maximum(Integer.MAX_VALUE)
                 .defaultValue(defaultDurability)
                 .actualValue(durability)
                 .build().asImmutable();
-        this.unbreakable = ImmutableSpongeValue.cachedOf(Keys.UNBREAKABLE, false, unbreakable);
+        this.unbreakableValue = ImmutableSpongeValue.cachedOf(Keys.UNBREAKABLE, false, unbreakable);
         this.registerGetters();
     }
 
@@ -63,40 +67,40 @@ public class ImmutableSpongeDurabilityData extends AbstractImmutableData<Immutab
 
     @Override
     protected void registerGetters() {
-        registerFieldGetter(Keys.ITEM_DURABILITY, this.durability::get);
+        registerFieldGetter(Keys.ITEM_DURABILITY, () -> this.durability);
         registerKeyValue(Keys.ITEM_DURABILITY, this::durability);
 
-        registerFieldGetter(Keys.UNBREAKABLE, this.unbreakable::get);
+        registerFieldGetter(Keys.UNBREAKABLE, () -> this.unbreakable);
         registerKeyValue(Keys.UNBREAKABLE, this::unbreakable);
     }
 
     @Override
     public ImmutableBoundedValue<Integer> durability() {
-        return this.durability;
+        return this.durabilityValue;
     }
 
     @Override
     public ImmutableValue<Boolean> unbreakable() {
-        return this.unbreakable;
+        return this.unbreakableValue;
     }
 
     @Override
     public DurabilityData asMutable() {
-        return new SpongeDurabilityData(this.durability.getDefault(), this.durability.get(), this.unbreakable.get());
+        return new SpongeDurabilityData(this.durabilityValue.getDefault(), this.durability, this.unbreakable);
     }
 
     @Override
     public int compareTo(ImmutableDurabilityData o) {
         return ComparisonChain.start()
-                .compare(this.durability.get().intValue(), o.durability().get().intValue())
-                .compare(this.unbreakable.get(), o.unbreakable().get())
+                .compare(this.durability.intValue(), o.durability().get().intValue())
+                .compare(this.unbreakable, o.unbreakable().get())
                 .result();
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-                .set(Keys.ITEM_DURABILITY, this.durability.get())
-                .set(Keys.UNBREAKABLE, this.unbreakable.get());
+                .set(Keys.ITEM_DURABILITY, this.durability)
+                .set(Keys.UNBREAKABLE, this.unbreakable);
     }
 }

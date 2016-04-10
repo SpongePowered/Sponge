@@ -56,6 +56,7 @@ import org.spongepowered.common.world.gen.type.SpongeBiomeTreeType;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -66,7 +67,7 @@ public class BiomeTreeTypeRegistryModule implements CatalogRegistryModule<BiomeT
 
     @Override
     public Optional<BiomeTreeType> getById(String id) {
-        return Optional.ofNullable(this.biomeTreeTypeMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.biomeTreeTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

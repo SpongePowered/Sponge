@@ -43,13 +43,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
 
 import java.util.List;
 import java.util.Random;
 
 @Mixin(EntityWolf.class)
-@Implements(value = @Interface(iface = IMixinAggressive.class, prefix="soft$"))
+@Implements(value = @Interface(iface = IMixinAggressive.class, prefix = "aggr$"))
 public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf {
 
     @Shadow(prefix = "shadow$")
@@ -59,7 +60,12 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public abstract void shadow$setAngry(boolean angry);
 
     @Intrinsic
-    public void soft$setAngry(boolean angry) {
+    public boolean aggr$isAngry() {
+        return shadow$isAngry();
+    }
+
+    @Intrinsic
+    public void aggr$setAngry(boolean angry) {
         this.shadow$setAngry(angry);
     }
 
@@ -85,6 +91,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(get(SittingData.class).get());
-//        manipulators.add(get(AngerableData.class).get()); // Todo when someone adds the angerable data processor
+        manipulators.add(new SpongeAggressiveData(shadow$isAngry()));
     }
 }

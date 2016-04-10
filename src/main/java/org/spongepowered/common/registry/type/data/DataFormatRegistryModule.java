@@ -37,6 +37,7 @@ import org.spongepowered.common.data.persistence.NbtDataFormat;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -47,7 +48,7 @@ public class DataFormatRegistryModule implements AdditionalCatalogRegistryModule
 
     @Override
     public Optional<DataFormat> getById(String id) {
-        return Optional.ofNullable(this.dataFormatMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.dataFormatMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

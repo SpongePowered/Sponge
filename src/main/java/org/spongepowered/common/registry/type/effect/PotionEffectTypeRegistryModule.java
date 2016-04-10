@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -69,7 +70,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
         if (!checkNotNull(id).contains(":")) {
             id = "minecraft:" + id; // assume vanilla
         }
-        return Optional.ofNullable(this.potionEffectTypeMap.get(id.toLowerCase()));
+        return Optional.ofNullable(this.potionEffectTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
@@ -113,7 +114,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     }
 
     public void registerFromGameData(String id, PotionEffectType itemType) {
-        this.potionEffectTypeMap.put(id.toLowerCase(), itemType);
+        this.potionEffectTypeMap.put(id.toLowerCase(Locale.ENGLISH), itemType);
     }
 
     PotionEffectTypeRegistryModule() {

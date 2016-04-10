@@ -36,6 +36,7 @@ import org.spongepowered.api.registry.util.RegisterCatalog;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -502,7 +503,7 @@ public final class SoundRegistryModule implements AlternateCatalogRegistryModule
 
     @Override
     public Optional<SoundType> getById(String id) {
-        return Optional.ofNullable(this.soundMappings.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.soundMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

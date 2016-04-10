@@ -363,7 +363,7 @@ public abstract class MixinPlayerList {
             chatcomponenttranslation = new TextComponentTranslation("multiplayer.player.joined", playerIn.getDisplayName());
         }
 
-        chatcomponenttranslation.getChatStyle().setColor(TextFormatting.YELLOW);
+        chatcomponenttranslation.getStyle().setColor(TextFormatting.YELLOW);
 
         // Fire PlayerJoinEvent
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);

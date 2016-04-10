@@ -137,7 +137,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
             spawnCompound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
             spawnList.appendTag(spawnCompound);
-
         }
 
         if (!spawnList.hasNoTags()) {

@@ -51,8 +51,11 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -168,7 +171,9 @@ class UserDiscoverer {
         // want the player entity to be cached.
         IMixinEntityPlayerMP player = (IMixinEntityPlayerMP) confMgr.getPlayerByUUID(uniqueId);
         if (player != null) {
-            return player.getUserObject();
+            User user = player.getUserObject();
+            userCache.put(uniqueId, user);
+            return user;
         }
         return null;
     }
@@ -179,9 +184,10 @@ class UserDiscoverer {
         if (dataFile == null) {
             return null;
         }
-        GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(uniqueId);
-        if (profile != null) {
-            User user = create(profile);
+        Optional<org.spongepowered.api.profile.GameProfile> profile = getProfileFromServer(uniqueId);
+
+        if (profile.isPresent()) {
+            User user = create((GameProfile) profile.get());
             try {
                 ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
             } catch (IOException e) {
@@ -190,6 +196,22 @@ class UserDiscoverer {
             return user;
         } else {
             return null;
+        }
+    }
+
+    private static Optional<org.spongepowered.api.profile.GameProfile> getProfileFromServer(UUID uuid) {
+        CompletableFuture<org.spongepowered.api.profile.GameProfile> gameProfile = Sponge.getServer().getGameProfileManager().get(uuid);
+
+        try {
+            org.spongepowered.api.profile.GameProfile profile = gameProfile.get();
+            if (profile != null) {
+                return Optional.of(profile);
+            } else {
+                return Optional.empty();
+            }
+        } catch (InterruptedException | ExecutionException e) {
+            SpongeImpl.getLogger().warn("Error while getting profile for {}", uuid, e);
+            return Optional.empty();
         }
     }
 

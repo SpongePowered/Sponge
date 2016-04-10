@@ -30,6 +30,8 @@ import com.google.common.base.Objects;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
 import org.spongepowered.api.data.DataContainer;

@@ -26,6 +26,8 @@ package org.spongepowered.common.interfaces.entity;
 
 public interface IMixinAggressive {
 
+    boolean isAngry();
+
     void setAngry(boolean angry);
 
 }

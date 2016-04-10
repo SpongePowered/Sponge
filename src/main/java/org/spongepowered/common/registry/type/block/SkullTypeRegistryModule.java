@@ -35,6 +35,7 @@ import org.spongepowered.common.data.type.SpongeSkullType;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public final class SkullTypeRegistryModule implements CatalogRegistryModule<Skul
 
     @Override
     public Optional<SkullType> getById(String id) {
-        return Optional.ofNullable(this.skullTypeMap.get(checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.skullTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override

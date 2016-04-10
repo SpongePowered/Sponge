@@ -26,28 +26,43 @@ package org.spongepowered.common.mixin.core.network;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.network.PacketThreadUtil;
+import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClickWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
 import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketUpdateSign;
+import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import net.minecraft.tileentity.TileEntitySign;
+import net.minecraft.util.EnumActionResult;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
 import net.minecraft.util.IntHashMap;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -55,11 +70,13 @@ import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
 import org.spongepowered.api.data.value.mutable.ListValue;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.tileentity.ChangeSignEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -72,10 +89,13 @@ import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -90,7 +110,10 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.util.StaticMixinHelper;
+import org.spongepowered.common.util.VecHelper;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -101,13 +124,16 @@ import java.util.Set;
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
 
+    private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
+
     @Shadow @Final private static Logger logger;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
     @Shadow @Final private IntHashMap field_147372_n;
     @Shadow public EntityPlayerMP playerEntity;
 
-    @Shadow public abstract void sendPacket(final Packet packetIn);
+    @Shadow public abstract void sendPacket(final Packet<?> packetIn);
+    @Shadow public abstract void kickPlayerFromServer(String reason);
 
     private boolean justTeleported = false;
     private Location<World> lastMoveLocation = null;
@@ -144,7 +170,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @author kashike
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
-    public void onSendPacket(NetworkManager manager, Packet packet) {
+    public void onSendPacket(NetworkManager manager, Packet<?> packet) {
         manager.sendPacket(this.rewritePacket(packet));
     }
 
@@ -157,7 +183,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      *     packet if we did not perform any changes
      * @author kashike
      */
-    private Packet rewritePacket(final Packet packetIn) {
+    private Packet<?> rewritePacket(final Packet<?> packetIn) {
         // Update the tab list data
         if (packetIn instanceof SPacketPlayerListItem) {
             ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
@@ -212,7 +238,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             ((Sign) tileentitysign).offer(existingSignData.get());
         }
         tileentitysign.markDirty();
-        worldserver.getPlayerChunkManager().markBlockForUpdate(blockpos);
+        worldserver.getPlayerChunkMap().markBlockForUpdate(blockpos);
     }
 
     /**
@@ -420,39 +446,25 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
             (Player)this.playerEntity, status));
     }
 
-    @Inject(method = "sendPacket", at = @At("HEAD"))
-    public void onResourcePackSend(Packet packet, CallbackInfo ci) {
-        if (packet instanceof IMixinPacketResourcePackSend) {
-            IMixinPacketResourcePackSend p = (IMixinPacketResourcePackSend) packet;
-            this.sentResourcePacks.put(p.setFakeHash(), p.getResourcePack());
+    @Inject(method = "processPlayerDigging", at = @At("HEAD"), cancellable = true)
+    public void injectDig(CPacketPlayerDigging packetIn, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            StaticMixinHelper.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
         }
     }
 
-    // TODO 1.9 changes interaction. We need to evaluate the need for this anymore -- Zidane
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;onBlockClicked(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;)V"))
+    public void handleLeftBlockClick(PlayerInteractionManager interactionManager, BlockPos pos, EnumFacing side) {
+        Location<World> location = new Location<>((World) this.playerEntity.worldObj, VecHelper.toVector3d(pos));
+        InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(this.playerEntity)),
+                Optional.empty(), location.createSnapshot(), DirectionFacingProvider.getInstance().getKey(side).get());
+        if (SpongeImpl.postEvent(event)) {
+            this.playerEntity.playerNetServerHandler.sendPacket(new SPacketBlockChange(this.playerEntity.worldObj, pos));
+            return;
+        }
 
-//    @Inject(method = "processPlayerBlockPlacement", at = @At("HEAD"), cancellable = true)
-//    public void injectBlockPlacement(CPacketPlayerBlockPlacement packetIn, CallbackInfo ci) {
-//        // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-//        // aimed at a block. We shouldn't need to get the second packet if the data is handled
-//        // but we cannot know what the client will do, so we might still get it
-//        //
-//        // If the time between packets is small enough, and the 'signature' similar, we discard the
-//        // second one. This sadly has to remain until Mojang makes their packets saner. :(
-//        //  -- Grum
-//        if (!this.serverController.isCallingFromMinecraftThread()) {
-//            final ItemStack stack = playerEntity.func_184586_b(packetIn.func_187028_a());
-//
-//            if (packetIn.getPlacedBlockDirection() == 255) {
-//                if (packetIn.getStack() != null && packetIn.getStack().getItem() == this.lastItem && this.lastPacket != null && ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp() - this.lastPacket < 100) {
-//                    this.lastPacket = null;
-//                    ci.cancel();
-//                }
-//            } else {
-//                this.lastItem = packetIn.getStack() == null ? null : packetIn.getStack().getItem();
-//                this.lastPacket = ((IMixinC08PacketPlayerBlockPlacement)packetIn).getTimeStamp();
-//            }
-//        }
-//    }
+        interactionManager.onBlockClicked(pos, side);
+    }
 
     @Inject(method = "processClickWindow", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/Container;slotClick(IILnet/minecraft/inventory/ClickType;Lnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;", ordinal = 0))
     public void onBeforeSlotClick(CPacketClickWindow packetIn, CallbackInfo ci) {
@@ -485,17 +497,97 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         ci.cancel();
     }
 
-    @Redirect(method = "processUseEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V"))
-    public void onAttackTargetEntity(EntityPlayerMP player, net.minecraft.entity.Entity entityIn) {
-        if (entityIn instanceof Player && !((World) player.worldObj).getProperties().isPVPEnabled()) {
-            return; // PVP is disabled, ignore
+    /**
+     * @author blood - April 5th, 2016
+     *
+     * Due to all the changes we now do for this packet, it is much easier
+     * to read it all with an overwrite. Information detailing on why each change
+     * was made can be found in comments below.
+     *
+     * @param packetIn The entity use packet
+     */
+    @Overwrite
+    public void processUseEntity(CPacketUseEntity packetIn) {
+        // All packets received by server are handled first on the Netty Thread
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT) {
+                // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
+                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the
+                // INTERACT_AT packet contains the same data but also includes a hitVec.
+                return;
+            } else { // queue packet for main thread
+                PacketThreadUtil.checkThreadAndEnqueue(packetIn, this.netHandlerPlayServer, this.playerEntity.getServerWorld());
+                return;
+            }
         }
 
-        InteractEntityEvent.Primary event = SpongeEventFactory.createInteractEntityEventPrimary(
-            Cause.of(NamedCause.source(this.playerEntity)), Optional.empty(), (org.spongepowered.api.entity.Entity) entityIn);
-        SpongeImpl.postEvent(event);
-        if (!event.isCancelled()) {
-            player.attackTargetEntityWithCurrentItem(entityIn);
+        WorldServer worldserver = this.serverController.worldServerForDimension(this.playerEntity.dimension);
+        Entity entity = packetIn.getEntityFromWorld(worldserver);
+        this.playerEntity.markPlayerActive();
+
+        if (entity != null) {
+            boolean flag = this.playerEntity.canEntityBeSeen(entity);
+            double d0 = 36.0D; // 6 blocks
+
+            if (!flag) {
+                d0 = 9.0D; // 1.5 blocks
+            }
+
+            if (this.playerEntity.getDistanceSqToEntity(entity) < d0) {
+                // Since we ignore any packet that has hitVec set to null, we can safely ignore this check
+                // if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT) {
+                //    this.playerEntity.interactWith(entity);
+                // } else
+                if (packetIn.getAction() == CPacketUseEntity.Action.INTERACT_AT) {
+                    InteractEntityEvent.Secondary event;
+                    if (packetIn.getHand() == EnumHand.MAIN_HAND) {
+                        event = SpongeEventFactory.createInteractEntityEventSecondaryMainHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector3d(packetIn.getHitVec())), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    } else {
+                        event = SpongeEventFactory.createInteractEntityEventSecondaryOffHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector3d(packetIn.getHitVec())), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    }
+
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+
+                        EnumHand hand = packetIn.getHand();
+                        ItemStack itemstack = this.playerEntity.getHeldItem(hand);
+
+                        // If INTERACT_AT returns a false result, we assume this packet was meant for interactWith
+                        if (entity.applyPlayerInteraction(this.playerEntity, packetIn.getHitVec(), itemstack, hand) != EnumActionResult.SUCCESS) {
+                            this.playerEntity.interact(entity, itemstack, hand);
+                        }
+                    }
+                } else if (packetIn.getAction() == CPacketUseEntity.Action.ATTACK) {
+                    if (entity instanceof EntityItem || entity instanceof EntityXPOrb || entity instanceof EntityArrow || entity == this.playerEntity) {
+                        this.kickPlayerFromServer("Attempting to attack an invalid entity");
+                        this.serverController.logWarning("Player " + this.playerEntity.getName() + " tried to attack an invalid entity");
+                        return;
+                    }
+
+                    if (entity instanceof Player && !((World) this.playerEntity.worldObj).getProperties().isPVPEnabled()) {
+                        return; // PVP is disabled, ignore
+                    }
+
+                    InteractEntityEvent.Primary event;
+                    if (packetIn.getHand() == EnumHand.MAIN_HAND) {
+                        event = SpongeEventFactory.createInteractEntityEventPrimaryMainHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), packetIn.getHitVec() == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(packetIn.getHitVec())), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    } else {
+                        event = SpongeEventFactory.createInteractEntityEventPrimaryOffHand(
+                                Cause.of(NamedCause.source(this.playerEntity)), packetIn.getHitVec() == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(packetIn.getHitVec())), (org.spongepowered.api.
+                                        entity.Entity) entity);
+                    }
+                    SpongeImpl.postEvent(event);
+                    if (!event.isCancelled()) {
+                        this.playerEntity.attackTargetEntityWithCurrentItem(entity);
+                    }
+                }
+            }
         }
     }
 
@@ -507,4 +599,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return builder.append(SpongeTexts.toLegacy((ITextComponent) reason));
     }
 
+    @Inject(method = "handleAnimation", at = @At(value = "HEAD"))
+    public void onProcessAnimationHead(CPacketAnimation packetIn, CallbackInfo ci) {
+        if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
+            StaticMixinHelper.lastAnimationPacketTick = SpongeImpl.getServer().getTickCounter();
+            StaticMixinHelper.lastAnimationPlayer = this.playerEntity;
+        }
+    }
 }

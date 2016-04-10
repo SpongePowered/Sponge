@@ -27,6 +27,8 @@ package org.spongepowered.common.event;
 import com.google.common.base.Objects;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 
+import java.util.Locale;
+
 public class SpongeDamageType implements DamageType {
 
     private String id; // TODO: figure out how to handle mods
@@ -34,7 +36,7 @@ public class SpongeDamageType implements DamageType {
 
     public SpongeDamageType(String name) {
         this.name = name;
-        this.id = name.toLowerCase();
+        this.id = name.toLowerCase(Locale.ENGLISH);
     }
 
     @Override

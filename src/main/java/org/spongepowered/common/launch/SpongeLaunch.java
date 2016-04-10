@@ -72,7 +72,9 @@ public class SpongeLaunch {
                 .addConfiguration("mixins.common.core.json")
                 .addConfiguration("mixins.common.bungeecord.json")
                 .addConfiguration("mixins.common.exploit.json")
-                .addConfiguration("mixins.common.timings.json");
+                .addConfiguration("mixins.common.timings.json")
+                .addConfiguration("mixins.common.optimization.json")
+                ;
     }
 
     public static void setupSuperClassTransformer() {

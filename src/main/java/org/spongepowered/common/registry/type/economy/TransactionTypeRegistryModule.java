@@ -35,6 +35,7 @@ import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -45,7 +46,7 @@ public class TransactionTypeRegistryModule implements CatalogRegistryModule<Tran
 
     @Override
     public Optional<TransactionType> getById(String id) {
-        return Optional.ofNullable(this.transactionTypeMappings.get(Preconditions.checkNotNull(id).toLowerCase()));
+        return Optional.ofNullable(this.transactionTypeMappings.get(Preconditions.checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
