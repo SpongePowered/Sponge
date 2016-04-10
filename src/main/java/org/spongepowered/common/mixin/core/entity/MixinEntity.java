@@ -1289,7 +1289,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             }
         // Check if a player is colliding with this entity (ex. item pickup)
         } else if (player != null) {
-            if (((IMixinEntityPlayer) player).getCollidingEntityUuid().equals(this.mcEntity.getUniqueID())) {
+            if (this.mcEntity.getUniqueID().equals(((IMixinEntityPlayer) player).getCollidingEntityUuid())) {
                 this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
             }
         // Check for a possible DamageSource
