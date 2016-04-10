@@ -64,6 +64,7 @@ import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
@@ -401,6 +402,11 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Inject(method = "newExplosion", at = @At(value = "RETURN"))
     public void onExplosionReturn(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
         this.processingExplosion = false;
+    }
+
+    @Override
+    public WorldStorage getWorldStorage() {
+        return (WorldStorage) ((WorldServer) (Object) this).theChunkProviderServer;
     }
 
     /**************************** EFFECT ****************************************/
