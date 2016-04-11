@@ -147,7 +147,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow private int tickCounter;
     @Shadow private String motd;
     @Shadow public WorldServer[] worldServers;
-    @Shadow @Final private DataFixer field_184112_s;
+    @Shadow @Final private DataFixer dataFixer;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
     @Shadow public abstract void addChatMessage(ITextComponent message);
@@ -389,7 +389,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
-                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true, field_184112_s);
+                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true, dataFixer);
             WorldInfo worldInfo;
             WorldSettings worldSettings;
 
@@ -744,10 +744,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             savehandler =
                     new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                                         true, field_184112_s);
+                                         true, dataFixer);
 
         } else {
-            savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true, field_184112_s);
+            savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true, dataFixer);
         }
 
         WorldInfo worldInfo = savehandler.loadWorldInfo();
@@ -975,9 +975,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public AnvilSaveHandler getHandler(String worldName) {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             return new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                                        true, field_184112_s);
+                                        true, dataFixer);
         } else {
-            return new AnvilSaveHandler(new File(getFolderName()), worldName, true, field_184112_s);
+            return new AnvilSaveHandler(new File(getFolderName()), worldName, true, dataFixer);
         }
     }
 

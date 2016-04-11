@@ -44,15 +44,15 @@ import org.spongepowered.common.data.util.DataQueries;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class MixinPotionEffect implements PotionEffect {
 
-    @Shadow @Final private Potion field_188420_b;
+    @Shadow @Final private Potion potion;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean isAmbient;
-    @Shadow private boolean field_188421_h;
+    @Shadow private boolean showParticles;
 
     @Override
     public PotionEffectType getType() {
-        return (PotionEffectType) this.field_188420_b;
+        return (PotionEffectType) this.potion;
     }
 
     @Intrinsic
@@ -72,7 +72,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public boolean getShowParticles() {
-        return this.field_188421_h;
+        return this.showParticles;
     }
 
     @Override
@@ -84,10 +84,10 @@ public abstract class MixinPotionEffect implements PotionEffect {
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, this.field_188420_b.getName())
+                .set(DataQueries.POTION_TYPE, this.potion.getName())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)
-                .set(DataQueries.POTION_SHOWS_PARTICLES, this.field_188421_h);
+                .set(DataQueries.POTION_SHOWS_PARTICLES, this.showParticles);
     }
 }

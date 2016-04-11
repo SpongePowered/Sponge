@@ -143,9 +143,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
     @Shadow protected abstract void damageShield(float p_184590_1_);
-    @Shadow public abstract void func_184598_c(EnumHand hand);
+    @Shadow public abstract void setActiveHand(EnumHand hand);
     @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
-    @Shadow public abstract boolean func_184587_cr();
+    @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
     @Shadow public abstract void onDeath(DamageSource cause);
     @Shadow public abstract void knockBack(net.minecraft.entity.Entity entityIn, float p_70653_2_, double p_70653_3_, double p_70653_5_);

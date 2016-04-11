@@ -38,14 +38,14 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 @Mixin(MapGenBase.class)
 public abstract class MixinMapGenBase implements GenerationPopulator {
 
-    @Shadow public abstract void func_186125_a(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
+    @Shadow public abstract void generate(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
 
     @Override
     public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
         Preconditions.checkNotNull(world);
         int x = buffer.getBlockMin().getX() / 16;
         int z = buffer.getBlockMin().getZ() / 16;
-        func_186125_a((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
+        generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
     }
 
 }

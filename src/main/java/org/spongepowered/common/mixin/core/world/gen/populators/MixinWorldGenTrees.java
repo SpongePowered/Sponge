@@ -74,7 +74,7 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
             for (int k = x - b0; k <= x + b0 && flag; ++k) {
                 for (l = z - b0; l <= z + b0 && flag; ++l) {
                     if (j >= 0 && j < 256) {
-                        if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                        if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                             flag = false;
                         }
                     } else {
