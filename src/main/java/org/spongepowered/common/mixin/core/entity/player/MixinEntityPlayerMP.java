@@ -603,11 +603,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
         final int amount = dropAll ? currentItem.stackSize : 1;
         final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
+        // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
 
-        if (dropAll) {
-            return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
-        }
-
-        return null;
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
     }
 }

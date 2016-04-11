@@ -41,6 +41,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -139,9 +140,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
-    @Shadow protected abstract void func_184581_c(net.minecraft.util.DamageSource p_184581_1_);
-    @Shadow protected abstract boolean func_184583_d(DamageSource p_184583_1_);
-    @Shadow protected abstract void func_184590_k(float p_184590_1_);
+    @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
+    @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
+    @Shadow protected abstract void damageShield(float p_184590_1_);
     @Shadow public abstract void func_184598_c(EnumHand hand);
     @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
     @Shadow public abstract boolean func_184587_cr();
@@ -235,18 +236,22 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author bloodmc - November 22, 2015
+     * @author gabizou - Updated April 11th, 2016 - Update for 1.9 changes
      *
      * Purpose: Reroute damageEntity calls to our hook in order to prevent damage.
      */
     @Override
     @Overwrite
     public boolean attackEntityFrom(DamageSource source, float amount) {
+        // Sponge start - Add certain hooks for necessities
         this.lastDamageSource = source;
         if (source == null) {
             Thread.dumpStack();
         }
+        // Sponge - This hook is for forge use mainly
         if (!hookModAttack((EntityLivingBase) (Object) this, source, amount))
             return false;
+        // Sponge end
         if (this.isEntityInvulnerable(source)) {
             return false;
         } else if (this.worldObj.isRemote) {
@@ -259,7 +264,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             } else if (source.isFireDamage() && this.isPotionActive(MobEffects.fireResistance)) {
                 return false;
             } else {
-                // Sponge - ignore as this is handled in our damageEntityHook
+                // Spon - ignore as this is handled in our damageEntityHookge
 //                if (false && (source == DamageSource.anvil || source == DamageSource.fallingBlock)
 //                    && this.getEquipmentInSlot(4) != null) {
 //                    this.getEquipmentInSlot(4).damageItem((int) (amount * 4.0F + this.rand.nextFloat() * amount * 2.0F),
@@ -270,8 +275,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                 boolean flag = false;
 
-                if (amount > 0.0F && this.func_184583_d(source)) {
-                    this.func_184590_k(amount);
+                if (amount > 0.0F && this.canBlockDamageSource(source)) {
+                    this.damageShield(amount);
 
                     if (source.isProjectile()) {
                         amount = 0.0F;
@@ -340,8 +345,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 if (flag1) {
                     if (flag) {
                         this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 29);
-                    } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source)
-                            .getIsThornsDamage()) {
+                    } else if (source instanceof net.minecraft.util.EntityDamageSource && ((net.minecraft.util.EntityDamageSource) source).getIsThornsDamage()) {
                         this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 33);
                     } else {
                         this.worldObj.setEntityState((EntityLivingBase) (Object) this, (byte) 2);
@@ -359,8 +363,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                             d1 = (Math.random() - Math.random()) * 0.01D;
                         }
 
-                        this.attackedAtYaw = (float) (net.minecraft.util.math.MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
-                        this.knockBack(entity, amount, d1, d0);
+                        this.attackedAtYaw = (float) (MathHelper.atan2(d0, d1) * 180.0D / Math.PI - (double) this.rotationYaw);
+                        this.knockBack(entity, 0.4F, d1, d0);
                     } else {
                         this.attackedAtYaw = (float) ((int) (Math.random() * 2.0D) * 180);
                     }
@@ -391,7 +395,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     }
                     // Sponge End
                 } else if (flag1) {
-                    this.func_184581_c(source);
+                    this.playHurtSound(source);
                 }
 
                 return !flag || amount > 0.0F;
