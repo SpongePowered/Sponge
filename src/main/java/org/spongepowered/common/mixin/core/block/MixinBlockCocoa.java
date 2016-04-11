@@ -40,7 +40,7 @@ import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSponge
 import java.util.Optional;
 
 @Mixin(BlockCocoa.class)
-public abstract class MixinBlockCocoa extends MixinBlockDirectional {
+public abstract class MixinBlockCocoa extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {

@@ -42,6 +42,7 @@ import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.SaveHandler;
 import org.apache.logging.log4j.Level;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.SpongeImpl;
@@ -117,7 +118,7 @@ public class DimensionManager {
         // Grab provider name if available
         try {
             WorldProvider worldProvider = provider.newInstance();
-            worldType = worldProvider.getDimensionName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
+            worldType = worldProvider.getDimensionType().getName().toLowerCase().replace(" ", "_").replace("[^A-Za-z0-9_]", "");
         } catch (Exception e) {
             // ignore
         }
@@ -139,7 +140,7 @@ public class DimensionManager {
         try {
             if (dimensions.containsKey(dim)) {
                 WorldProvider provider = providers.get(getProviderType(dim)).newInstance();
-                ((IMixinWorldProvider) provider).setDimension(dim);
+                ((IMixinWorldProvider) provider).setDimensionId(dim);
                 return provider;
             } else {
                 throw new RuntimeException(String.format("No WorldProvider bound for dimension %d", dim));
@@ -232,11 +233,11 @@ public class DimensionManager {
         if (world != null) {
             worlds.put(id, world);
             weakWorldMap.put(world, world);
-            ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().put(id, new long[100]);
+            ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(id, new long[100]);
             SpongeImpl.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
             final WorldServer server = worlds.remove(id);
-            ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
+            ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().remove(id);
             SpongeImpl.getLogger().info("Unloading dimension {} ({})", id, server.getWorldInfo().getWorldName());
         }
 
@@ -259,7 +260,7 @@ public class DimensionManager {
             tmp.add(entry.getValue());
         }
 
-        MinecraftServer.getServer().worldServers = tmp.toArray(new WorldServer[tmp.size()]);
+        SpongeImpl.getServer().worldServers = tmp.toArray(new WorldServer[tmp.size()]);
     }
 
     public static WorldServer[] getWorlds() {
@@ -299,8 +300,8 @@ public class DimensionManager {
     public static File getCurrentSaveRootDirectory() {
         if (DimensionManager.getWorldFromDimId(0) != null) {
             return DimensionManager.getWorldFromDimId(0).getSaveHandler().getWorldDirectory();
-        } else if (MinecraftServer.getServer() != null) {
-            MinecraftServer srv = MinecraftServer.getServer();
+        } else if (Sponge.isServerAvailable()) {
+            MinecraftServer srv = SpongeImpl.getServer();
             SaveHandler saveHandler = (SaveHandler) srv.getActiveAnvilConverter().getSaveLoader(srv.getFolderName(), false);
             return saveHandler.getWorldDirectory();
         } else {
@@ -324,7 +325,7 @@ public class DimensionManager {
 
         WorldServer world =
                 (dim == 0 ? overworld : (WorldServer) (new WorldServerMulti(mcServer, savehandler, dim, overworld, mcServer.theProfiler).init()));
-        world.addWorldAccess(new WorldManager(mcServer, world));
+        world.addEventListener(new WorldManager(mcServer, world));
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((org.spongepowered.api.world.World) world));
         if (!mcServer.isSinglePlayer()) {
             world.getWorldInfo().setGameType(mcServer.getGameType());

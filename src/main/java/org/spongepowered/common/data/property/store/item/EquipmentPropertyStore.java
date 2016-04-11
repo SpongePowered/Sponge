@@ -38,17 +38,16 @@ public class EquipmentPropertyStore extends AbstractItemStackPropertyStore<Equip
     protected Optional<EquipmentProperty> getFor(ItemStack itemStack) {
         if (itemStack.getItem() instanceof ItemArmor) {
             final ItemArmor armor = (ItemArmor) itemStack.getItem();
-            final int slot = armor.armorType;
-            if (slot == 0) {
-                return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));
-            } else if (slot == 1) {
-                return Optional.of(new EquipmentProperty(EquipmentTypes.CHESTPLATE));
-            } else if (slot == 2) {
-                return Optional.of(new EquipmentProperty(EquipmentTypes.LEGGINGS));
-            } else if (slot == 3) {
-                return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
-            } else {
-                return Optional.of(new EquipmentProperty(EquipmentTypes.WORN));
+            switch (armor.armorType) {
+                 case FEET:{
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.HEADWEAR));
+                } case LEGS: {
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.CHESTPLATE));
+                } case CHEST: {
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.LEGGINGS));
+                } case HEAD: {
+                    return Optional.of(new EquipmentProperty(EquipmentTypes.BOOTS));
+                }
             }
 
         }

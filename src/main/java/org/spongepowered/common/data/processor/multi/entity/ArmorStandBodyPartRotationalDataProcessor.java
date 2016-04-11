@@ -126,12 +126,12 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
         Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
         
-        values.put(Keys.HEAD_ROTATION, VecHelper.toVector(dataHolder.getHeadRotation()));
-        values.put(Keys.CHEST_ROTATION, VecHelper.toVector(dataHolder.getBodyRotation()));
-        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector(dataHolder.leftArmRotation));
-        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector(dataHolder.rightArmRotation));
-        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector(dataHolder.leftLegRotation));
-        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector(dataHolder.rightLegRotation));
+        values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.getHeadRotation()));
+        values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.getBodyRotation()));
+        values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(dataHolder.leftArmRotation));
+        values.put(Keys.RIGHT_ARM_ROTATION, VecHelper.toVector3d(dataHolder.rightArmRotation));
+        values.put(Keys.LEFT_LEG_ROTATION, VecHelper.toVector3d(dataHolder.leftLegRotation));
+        values.put(Keys.RIGHT_LEG_ROTATION, VecHelper.toVector3d(dataHolder.rightLegRotation));
         Collection<BodyPart> bodyParts = Sponge.getRegistry().getAllOf(BodyPart.class);
         Collection<Vector3d> rotations = Arrays.asList(values.values().toArray(new Vector3d[values.values().size()]));
         values.put(Keys.BODY_ROTATIONS, zipCollections(bodyParts, rotations));

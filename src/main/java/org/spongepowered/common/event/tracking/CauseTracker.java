@@ -34,12 +34,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.EmptyChunk;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -265,9 +264,7 @@ public final class CauseTracker {
             final Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(NamedCause.SOURCE, User.class);
             if (packetUser.isPresent()) {
                 IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-                if (!(spongeChunk instanceof EmptyChunk)) {
-                    spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(), PlayerTracker.Type.NOTIFIER);
-                }
+                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(), PlayerTracker.Type.NOTIFIER);
             } else {
                 final PhaseContext context = this.stack.peekContext();
 
@@ -348,40 +345,36 @@ public final class CauseTracker {
         // Now we need to do some of our own logic to see if we need to capture.
         final PhaseData phaseData = this.getStack().peek();
         final IPhaseState phaseState = phaseData.getState();
-        final TrackingPhase phase = phaseState.getPhase();
-        if (phase.requiresBlockCapturing(phaseState)) {
-            return TrackingUtil.trackBlockChange(this, currentState, newState, pos, flags, phaseData.getContext(), phaseState); // Default, this means we've captured the block. Keeping with the semantics
+        if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
+            return TrackingUtil.trackBlockChange(this, chunk, currentState, newState, pos, flags, phaseData.getContext(), phaseState);
+            // Default, this means we've captured the block. Keeping with the semantics
             // of the original method where true means it successfully changed.
-        } else {
-            // Sponge End - continue with vanilla mechanics
-            final IBlockState iblockstate = chunk.setBlockState(pos, newState);
+        }
+        // Sponge End - continue with vanilla mechanics
+        final IBlockState iblockstate = chunk.setBlockState(pos, newState);
 
-            if (iblockstate == null) {
-                return false;
-            } else {
-                final Block currentblock = iblockstate.getBlock();
+        if (iblockstate == null) {
+            return false;
+        }
+        if (newState.getLightOpacity() != iblockstate.getLightOpacity() || newState.getLightValue() != iblockstate.getLightValue()) {
+            minecraftWorld.theProfiler.startSection("checkLight");
+            minecraftWorld.checkLight(pos);
+            minecraftWorld.theProfiler.endSection();
+        }
 
-                if (newBlock.getLightOpacity() != currentblock.getLightOpacity() || newBlock.getLightValue() != currentblock.getLightValue()) {
-                    minecraftWorld.theProfiler.startSection("checkLight");
-                    minecraftWorld.checkLight(pos);
-                    minecraftWorld.theProfiler.endSection();
-                }
+        if ((flags & 2) != 0 && (flags & 4) == 0 && chunk.isPopulated()) {
+            minecraftWorld.notifyBlockUpdate(pos, iblockstate, newState, flags);
+        }
 
-                if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
-                    minecraftWorld.markBlockForUpdate(pos);
-                }
+        if (!minecraftWorld.isRemote && (flags & 1) != 0) {
+            minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
 
-                if (!minecraftWorld.isRemote && (flags & 1) != 0) {
-                    minecraftWorld.notifyNeighborsRespectDebug(pos, iblockstate.getBlock());
-
-                    if (newBlock.hasComparatorInputOverride()) {
-                        minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
-                    }
-                }
-
-                return true;
+            if (newState.hasComparatorInputOverride()) {
+                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
             }
         }
+
+        return true;
     }
 
     /**

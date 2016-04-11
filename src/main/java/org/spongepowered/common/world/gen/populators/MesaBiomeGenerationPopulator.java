@@ -125,7 +125,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         boolean flag2 = false;
 
         for (int k1 = 255; k1 >= 0; --k1) {
-            if (((IBlockState) p_180622_3_.getBlock(l, k1, k)).getBlock().getMaterial() == Material.air && k1 < (int) d5) {
+            if (((IBlockState) p_180622_3_.getBlock(l, k1, k)).getMaterial() == Material.air && k1 < (int) d5) {
                 p_180622_3_.setBlock(l, k1, k, (BlockState) Blocks.stone.getDefaultState());
             }
 
@@ -134,7 +134,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
             } else {
                 IBlockState iblockstate1 = (IBlockState) p_180622_3_.getBlock(l, k1, k);
 
-                if (iblockstate1.getBlock().getMaterial() == Material.air) {
+                if (iblockstate1.getMaterial() == Material.air) {
                     j1 = -1;
                 } else if (iblockstate1.getBlock() == Blocks.stone) {
                     IBlockState iblockstate2;
@@ -150,7 +150,7 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
                             iblockstate3 = Blocks.stained_hardened_clay.getDefaultState();
                         }
 
-                        if (k1 < seaLevel && (iblockstate == null || iblockstate.getBlock().getMaterial() == Material.air)) {
+                        if (k1 < seaLevel && (iblockstate == null || iblockstate.getMaterial() == Material.air)) {
                             iblockstate = Blocks.water.getDefaultState();
                         }
 

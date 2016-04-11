@@ -28,8 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenSwamp;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
@@ -49,7 +49,7 @@ public abstract class MixinWorldGenSwamp extends MixinWorldGenAbstractTree imple
         net.minecraft.world.World worldIn = (net.minecraft.world.World) world;
         int i;
         BlockPos position = new BlockPos(x, y, z);
-        for (i = 5; worldIn.getBlockState(position.down()).getBlock().getMaterial() == Material.water; position = position.down());
+        for (i = 5; worldIn.getBlockState(position.down()).getMaterial() == Material.water; position = position.down());
 
         boolean flag = true;
 

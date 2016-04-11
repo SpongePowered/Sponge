@@ -29,8 +29,8 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
@@ -55,14 +55,14 @@ public class BookFaker {
 
         InventoryPlayer inventory = mcPlayer.inventory;
         int bookSlot = inventory.mainInventory.length + inventory.currentItem;
-        receiver.sendPacket(new S2FPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+        receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
         // Next we tell the client to open the Book GUI
-        receiver.sendPacket(new S3FPacketCustomPayload("MC|BOpen", new PacketBuffer(Unpooled.buffer())));
+        receiver.sendPacket(new SPacketCustomPayload("MC|BOpen", new PacketBuffer(Unpooled.buffer())));
 
         // Now we can remove the fake Book since it's contents will have already
         // been transferred to the GUI
-        receiver.sendPacket(new S2FPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+        receiver.sendPacket(new SPacketSetSlot(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
     }
 
 }

@@ -31,10 +31,10 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Objects;
 import com.google.common.collect.Maps;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.network.play.server.S47PacketPlayerListHeaderFooter;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.network.play.server.SPacketPlayerListHeaderFooter;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 
 public final class SpongeTabList implements TabList {
 
-    private static final IChatComponent EMPTY_COMPONENT = new ChatComponentText("");
+    private static final ITextComponent EMPTY_COMPONENT = new TextComponentString("");
     private final EntityPlayerMP player;
     @Nullable private Text header;
     @Nullable private Text footer;
@@ -108,7 +108,7 @@ public final class SpongeTabList implements TabList {
     }
 
     private void refreshClientHeaderFooter() {
-        S47PacketPlayerListHeaderFooter packet = new S47PacketPlayerListHeaderFooter();
+        SPacketPlayerListHeaderFooter packet = new SPacketPlayerListHeaderFooter();
         // MC-98180 - Sending null as header or footer will cause an exception on the client
         packet.header = this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header);
         packet.footer = this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer);
@@ -136,7 +136,7 @@ public final class SpongeTabList implements TabList {
         return this;
     }
 
-    private void addEntry(S38PacketPlayerListItem.AddPlayerData entry) {
+    private void addEntry(SPacketPlayerListItem.AddPlayerData entry) {
         if (!this.entries.containsKey(entry.getProfile().getId())) {
             this.addEntry(new SpongeTabListEntry(
                     this,
@@ -158,10 +158,10 @@ public final class SpongeTabList implements TabList {
         if (!this.entries.containsKey(uniqueId)) {
             this.entries.put(uniqueId, entry);
 
-            this.sendUpdate(entry, S38PacketPlayerListItem.Action.ADD_PLAYER);
-            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME));
-            this.sendUpdate(entry, S38PacketPlayerListItem.Action.UPDATE_LATENCY);
-            this.sendUpdate(entry, S38PacketPlayerListItem.Action.UPDATE_GAME_MODE);
+            this.sendUpdate(entry, SPacketPlayerListItem.Action.ADD_PLAYER);
+            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME));
+            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_LATENCY);
+            this.sendUpdate(entry, SPacketPlayerListItem.Action.UPDATE_GAME_MODE);
         }
     }
 
@@ -171,7 +171,7 @@ public final class SpongeTabList implements TabList {
 
         if (this.entries.containsKey(uniqueId)) {
             TabListEntry entry = this.entries.remove(uniqueId);
-            this.sendUpdate(entry, S38PacketPlayerListItem.Action.REMOVE_PLAYER);
+            this.sendUpdate(entry, SPacketPlayerListItem.Action.REMOVE_PLAYER);
             return Optional.of(entry);
         } else {
             return Optional.empty();
@@ -184,8 +184,8 @@ public final class SpongeTabList implements TabList {
      * @param entry The entry to update
      * @param action The update action to perform
      */
-    protected void sendUpdate(TabListEntry entry, S38PacketPlayerListItem.Action action) {
-        S38PacketPlayerListItem packet = new S38PacketPlayerListItem();
+    protected void sendUpdate(TabListEntry entry, SPacketPlayerListItem.Action action) {
+        SPacketPlayerListItem packet = new SPacketPlayerListItem();
         packet.action = action;
         ((IMixinSPacketPlayerListItem) packet).addEntry(entry);
         this.player.playerNetServerHandler.sendPacket(packet);
@@ -199,22 +199,22 @@ public final class SpongeTabList implements TabList {
      *
      * @param packet The packet to process
      */
-    public void updateEntriesOnSend(S38PacketPlayerListItem packet) {
-        for (S38PacketPlayerListItem.AddPlayerData data : packet.players) {
-            if (packet.action == S38PacketPlayerListItem.Action.ADD_PLAYER) {
+    public void updateEntriesOnSend(SPacketPlayerListItem packet) {
+        for (SPacketPlayerListItem.AddPlayerData data : packet.players) {
+            if (packet.action == SPacketPlayerListItem.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);
-            } else if (packet.action == S38PacketPlayerListItem.Action.REMOVE_PLAYER) {
+            } else if (packet.action == SPacketPlayerListItem.Action.REMOVE_PLAYER) {
                 this.removeEntry(data.getProfile().getId());
             } else {
                 this.getEntry(data.getProfile().getId()).ifPresent(entry -> {
-                    if (packet.action == S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME) {
+                    if (packet.action == SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setDisplayName(data.getDisplayName() == null ? null : SpongeTexts.toText(data.getDisplayName()));
-                    } else if (packet.action == S38PacketPlayerListItem.Action.UPDATE_LATENCY) {
+                    } else if (packet.action == SPacketPlayerListItem.Action.UPDATE_LATENCY) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setLatency(data.getPing());
-                    } else if (packet.action == S38PacketPlayerListItem.Action.UPDATE_GAME_MODE) {
+                    } else if (packet.action == SPacketPlayerListItem.Action.UPDATE_GAME_MODE) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setGameMode((GameMode) (Object) data.getGameMode());
                     } else {

@@ -127,12 +127,12 @@ public final class DataConstants {
     // Original (0) / Copy of original (1) / Copy of a copy (2) / Tattered (3)
     public static final int MAXIMUM_GENERATION = 3;
 
-    public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_HEAD_ROTATION);
-    public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_BODY_ROTATION);
-    public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
-    public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
-    public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
-    public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
+    public static final Vector3d DEFAULT_HEAD_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_HEAD_ROTATION);
+    public static final Vector3d DEFAULT_CHEST_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_BODY_ROTATION);
+    public static final Vector3d DEFAULT_LEFT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTARM_ROTATION);
+    public static final Vector3d DEFAULT_RIGHT_ARM_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTARM_ROTATION);
+    public static final Vector3d DEFAULT_LEFT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_LEFTLEG_ROTATION);
+    public static final Vector3d DEFAULT_RIGHT_LEG_ROTATION = VecHelper.toVector3d(EntityArmorStand.DEFAULT_RIGHTLEG_ROTATION);
 
     public static final class Catalog {
 

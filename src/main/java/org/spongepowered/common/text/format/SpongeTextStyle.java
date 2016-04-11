@@ -26,7 +26,7 @@ package org.spongepowered.common.text.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -35,9 +35,9 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 public class SpongeTextStyle extends TextStyle.Base {
 
-    private final EnumChatFormatting handle;
+    private final TextFormatting handle;
 
-    SpongeTextStyle(EnumChatFormatting handle, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable Boolean underline,
+    SpongeTextStyle(TextFormatting handle, @Nullable Boolean bold, @Nullable Boolean italic, @Nullable Boolean underline,
             @Nullable Boolean strikethrough, @Nullable Boolean obfuscated) {
         super(bold, italic, underline, strikethrough, obfuscated);
         this.handle = checkNotNull(handle, "handle");
@@ -53,22 +53,22 @@ public class SpongeTextStyle extends TextStyle.Base {
         return this.handle.name();
     }
 
-    public static SpongeTextStyle of(EnumChatFormatting handle) {
-        if (handle == EnumChatFormatting.RESET) {
+    public static SpongeTextStyle of(TextFormatting handle) {
+        if (handle == TextFormatting.RESET) {
             return new SpongeTextStyle(handle, false, false, false, false, false);
         }
 
         return new SpongeTextStyle(handle,
-                equalsOrNull(handle, EnumChatFormatting.BOLD),
-                equalsOrNull(handle, EnumChatFormatting.ITALIC),
-                equalsOrNull(handle, EnumChatFormatting.UNDERLINE),
-                equalsOrNull(handle, EnumChatFormatting.STRIKETHROUGH),
-                equalsOrNull(handle, EnumChatFormatting.OBFUSCATED)
+                equalsOrNull(handle, TextFormatting.BOLD),
+                equalsOrNull(handle, TextFormatting.ITALIC),
+                equalsOrNull(handle, TextFormatting.UNDERLINE),
+                equalsOrNull(handle, TextFormatting.STRIKETHROUGH),
+                equalsOrNull(handle, TextFormatting.OBFUSCATED)
         );
     }
 
     @Nullable
-    private static Boolean equalsOrNull(EnumChatFormatting handle, EnumChatFormatting check) {
+    private static Boolean equalsOrNull(TextFormatting handle, TextFormatting check) {
         return handle == check ? true : null;
     }
 

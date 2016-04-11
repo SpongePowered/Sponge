@@ -27,7 +27,7 @@ package org.spongepowered.common.interfaces.world;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;

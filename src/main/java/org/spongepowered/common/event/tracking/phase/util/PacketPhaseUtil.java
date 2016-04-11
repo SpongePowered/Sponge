@@ -28,7 +28,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
@@ -56,14 +56,14 @@ public final class PacketPhaseUtil {
                 nmsSlot.putStack(originalStack);
             }
 
-            player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
+            player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
         }
     }
 
     public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
-        player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(-1, -1, cursor));
+        player.playerNetServerHandler.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
     public static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
@@ -85,7 +85,7 @@ public final class PacketPhaseUtil {
                     nmsSlot.putStack(customStack);
                 }
 
-                player.playerNetServerHandler.sendPacket(new S2FPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
+                player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
             }
         }
     }

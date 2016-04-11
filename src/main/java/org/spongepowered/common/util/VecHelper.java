@@ -27,16 +27,16 @@ package org.spongepowered.common.util;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Rotations;
-import net.minecraft.util.Vec3;
-import net.minecraft.util.Vec3i;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Rotations;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.ChunkCoordIntPair;
 import org.spongepowered.api.world.Location;
 
 public final class VecHelper {
 
-    public static final Vec3 VEC3_ORIGIN = new Vec3(0, 0, 0);
+    public static final Vec3i VEC3_ORIGIN = new Vec3i(0, 0, 0);
 
     // === Flow Vector3d --> BlockPos ===
 
@@ -56,7 +56,7 @@ public final class VecHelper {
     }
     // === MC BlockPos --> Flow Vector3i ==
 
-    public static Vector3i toVector(BlockPos pos) {
+    public static Vector3i toVector3i(BlockPos pos) {
         return new Vector3i(pos.getX(), pos.getY(), pos.getZ());
     }
 
@@ -68,25 +68,31 @@ public final class VecHelper {
 
     // === Rotations --> Flow Vector ===
 
-    public static Vector3d toVector(Rotations rotation) {
+    public static Vector3d toVector3d(Rotations rotation) {
         return new Vector3d(rotation.getX(), rotation.getY(), rotation.getZ());
     }
 
     // === MC Vec3i --> Flow Vector3i ===
 
-    public static Vector3i toVector(Vec3i vector) {
+    public static Vector3i toVector3i(Vec3i vector) {
         return new Vector3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === Flow Vector3i --> MC Vec3i ===
 
-    public static Vec3i toVector(Vector3i vector) {
+    public static Vec3i toVec3i(Vector3i vector) {
         return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+    }
+
+    // === Flow Vector3d --> MC Vec3d ===
+
+    public static Vec3d toVec3d(Vector3d vector) {
+        return new Vec3d(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === MC ChunkCoordIntPair ---> Flow Vector3i ===
 
-    public static Vector3i toVector(ChunkCoordIntPair chunk) {
+    public static Vector3i toVec3i(ChunkCoordIntPair chunk) {
         return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
     }
 
@@ -98,14 +104,14 @@ public final class VecHelper {
 
     // === MC Vec3 --> flow Vector3d ==
 
-    public static Vector3d toVector(Vec3 vector) {
+    public static Vector3d toVector3d(Vec3d vector) {
         return new Vector3d(vector.xCoord, vector.yCoord, vector.zCoord);
     }
 
     // === Flow Vector3d --> MC Vec3 ==
 
-    public static Vec3 toVector(Vector3d vector) {
-        return new Vec3(vector.getX(), vector.getY(), vector.getZ());
+    public static Vec3i toVec3i(Vector3d vector) {
+        return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
     }
 
     // === Flow Vector --> Rotations ===

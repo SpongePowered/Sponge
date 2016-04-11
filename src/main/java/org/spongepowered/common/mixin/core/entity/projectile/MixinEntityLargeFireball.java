@@ -46,13 +46,13 @@ public abstract class MixinEntityLargeFireball extends MixinEntityFireball imple
 
     private float damage = 6.0f;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+    @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     protected float onAttackEntityFrom(float amount) {
         return this.damage;
     }
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+    @ModifyArg(method = "onImpact",
         at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
     protected Entity newExplosion(Entity entityIn) {
         return (Entity) (Object) this;

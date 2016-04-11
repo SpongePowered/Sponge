@@ -52,7 +52,7 @@ public class BeaconPrimaryEffectValueProcessor
     @Override
     protected boolean set(TileEntityBeacon container, Optional<PotionEffectType> value) {
         if (value.isPresent()) {
-            container.setField(1, ((Potion) value.get()).getId());
+            container.setField(1, Potion.getIdFromPotion((Potion) value.get()));
         } else {
             container.setField(1, 0);
         }
@@ -64,7 +64,7 @@ public class BeaconPrimaryEffectValueProcessor
     protected Optional<Optional<PotionEffectType>> getVal(TileEntityBeacon container) {
         int id = container.getField(1);
         if (id > 0) {
-            return Optional.of(Optional.of((PotionEffectType) Potion.potionTypes[id]));
+            return Optional.of(Optional.of((PotionEffectType) Potion.getPotionById(id)));
         }
         return Optional.of(Optional.empty());
     }

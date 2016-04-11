@@ -25,7 +25,6 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.google.common.collect.Lists;
-import net.minecraft.world.chunk.IChunkProvider;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -68,7 +67,7 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(IChunkProvider provider, Chunk chunk, Random rand, List<String> flags) {
+    public void populate(Chunk chunk, Random rand, List<String> flags) {
         if (!this.check.test(chunk)) {
             return;
         }

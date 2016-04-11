@@ -34,8 +34,6 @@ public interface IMixinWorldType {
 
     SpongeWorldGenerator createGeneratorFromString(World world, String settings);
 
-    int getMinimumSpawnHeight(net.minecraft.world.World world);
-
     int getSpawnFuzz();
 
 }

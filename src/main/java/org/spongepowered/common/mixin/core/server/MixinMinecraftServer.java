@@ -35,10 +35,12 @@ import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.IChatComponent;
-import net.minecraft.util.MathHelper;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldManager;
@@ -82,6 +84,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
@@ -141,14 +144,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow @Final public Profiler theProfiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
-    @Shadow private boolean worldIsBeingDeleted;
     @Shadow private int tickCounter;
     @Shadow private String motd;
-    @Shadow private ServerConfigurationManager serverConfigManager;
     @Shadow public WorldServer[] worldServers;
+    @Shadow @Final private DataFixer field_184112_s;
 
     @Shadow public abstract void setDifficultyForAllWorlds(EnumDifficulty difficulty);
-    @Shadow public abstract void addChatMessage(IChatComponent message);
+    @Shadow public abstract void addChatMessage(ITextComponent message);
     @Shadow public abstract void initiateShutdown();
     @Shadow public abstract boolean isServerInOnlineMode();
     @Shadow public abstract boolean isServerRunning();
@@ -156,7 +158,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow public abstract boolean isHardcore();
     @Shadow public abstract boolean isSinglePlayer();
     @Shadow public abstract String getFolderName();
-    @Shadow public abstract ServerConfigurationManager getConfigurationManager();
+    @Shadow public abstract PlayerList getPlayerList();
     @Shadow public abstract EnumDifficulty getDifficulty();
     @Shadow public abstract WorldSettings.GameType getGameType();
     @Shadow protected abstract void setUserMessage(String message);
@@ -213,12 +215,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public boolean hasWhitelist() {
-        return this.serverConfigManager.isWhiteListEnabled();
+        return this.getPlayerList().isWhiteListEnabled();
     }
 
     @Override
     public void setHasWhitelist(boolean enabled) {
-        this.serverConfigManager.setWhiteListEnabled(enabled);
+        this.getPlayerList().setWhiteListEnabled(enabled);
     }
 
     @Override
@@ -229,26 +231,26 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Player> getOnlinePlayers() {
-        if (getConfigurationManager() == null || getConfigurationManager().getPlayerList() == null) {
+        if (getPlayerList() == null || getPlayerList().getPlayerList() == null) {
             return ImmutableList.of();
         }
-        return ImmutableList.copyOf((List) getConfigurationManager().getPlayerList());
+        return ImmutableList.copyOf((List) getPlayerList().getPlayerList());
     }
 
     @Override
     public Optional<Player> getPlayer(UUID uniqueId) {
-        if (getConfigurationManager() == null) {
+        if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getConfigurationManager().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((Player) getPlayerList().getPlayerByUUID(uniqueId));
     }
 
     @Override
     public Optional<Player> getPlayer(String name) {
-        if (getConfigurationManager() == null) {
+        if (getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((Player) getConfigurationManager().getPlayerByUsername(name));
+        return Optional.ofNullable((Player) getPlayerList().getPlayerByUsername(name));
     }
 
     @Override
@@ -258,10 +260,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public int getMaxPlayers() {
-        if (getConfigurationManager() == null) {
+        if (getPlayerList() == null) {
             return 0;
         }
-        return getConfigurationManager().getMaxPlayers();
+        return getPlayerList().getMaxPlayers();
     }
 
     @Override
@@ -358,7 +360,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         for (int dim : idList) {
-            WorldProvider provider = WorldProvider.getProviderForDimension(dim);
+            WorldProvider provider = DimensionType.getById(dim).createDimension();
+            ((IMixinWorldProvider) provider).setDimensionId(dim);
             String worldFolder;
             if (dim == 0) {
                 worldFolder = overworldFolder;
@@ -386,7 +389,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             final AnvilSaveHandler worldsavehandler = new AnvilSaveHandler(dim == 0 ? SpongeImpl.getGame().getSavesDirectory().toFile() :
-                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true);
+                            SpongeImpl.getGame().getSavesDirectory().resolve(getFolderName()).toFile(), worldFolder, true, field_184112_s);
             WorldInfo worldInfo;
             WorldSettings worldSettings;
 
@@ -403,7 +406,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             if (worldInfo == null) {
                 worldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
-                worldSettings.setWorldName(generatorOptions); // setGeneratorOptions
+                worldSettings.setGeneratorOptions(generatorOptions); // setGeneratorOptions
                 ((IMixinWorldSettings) (Object) worldSettings).setActualWorldName(worldFolder);
 
                 if (this.enableBonusChest) {
@@ -443,9 +446,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
             final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
-
+            ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
             worldServer.initialize(worldSettings);
-            worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+            worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
             // This code changes from Mojang's to account for per-world API-set GameModes.
             if (!this.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(WorldSettings.GameType.NOT_SET)) {
@@ -455,7 +458,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         }
 
-        this.serverConfigManager.setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
+        this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldFromDimId(0)});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -605,7 +608,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             .complete());
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", world.provider.getDimensionId(), ((World) world).getName());
+        logger.info("Preparing start region for level {} ({})", ((IMixinWorldProvider) world.provider).getDimensionId(), ((World) world).getName());
         BlockPos blockpos = world.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -619,7 +622,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 ++i;
-                world.theChunkProviderServer.loadChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
+                world.getChunkProvider().provideChunk(blockpos.getX() + k >> 4, blockpos.getZ() + l >> 4);
             }
         }
 
@@ -702,9 +705,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
 
         worldServer.initialize(settings);
-        ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
+        ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
 
-        worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
+        worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
         SpongeImpl.postEvent(SpongeImplHooks.createLoadWorldEvent((World) worldServer));
         if (!isSinglePlayer()) {
             worldServer.getWorldInfo().setGameType(getGameType());
@@ -740,10 +743,10 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             savehandler =
                     new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                                         true);
+                                         true, field_184112_s);
 
         } else {
-            savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true);
+            savehandler = new AnvilSaveHandler(new File(getFolderName()), worldName, true, field_184112_s);
         }
 
         WorldInfo worldInfo = savehandler.loadWorldInfo();
@@ -776,7 +779,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         if (!DimensionManager.isDimensionRegistered(dim)) { // handle reloads properly
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
-        savehandler.saveWorldInfoWithPlayer(worldInfo, getConfigurationManager().getHostPlayerData());
+        savehandler.saveWorldInfoWithPlayer(worldInfo, getPlayerList().getHostPlayerData());
 
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldEvent(Cause.of(NamedCause.source(this)), settings,
             (WorldProperties) worldInfo));
@@ -817,7 +820,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public boolean unloadWorld(World world) {
         checkNotNull(world);
-        int dim = ((net.minecraft.world.World) world).provider.getDimensionId();
+        int dim = ((IMixinWorldProvider) ((net.minecraft.world.World) world).provider).getDimensionId();
         if (DimensionManager.getWorldFromDimId(dim) != null) {
             final WorldServer worldServer = (WorldServer) world;
             if (!worldServer.playerEntities.isEmpty()) {
@@ -971,9 +974,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     public AnvilSaveHandler getHandler(String worldName) {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.CLIENT) {
             return new AnvilSaveHandler(new File(SpongeImpl.getGame().getSavesDirectory() + File.separator + getFolderName()), worldName,
-                                        true);
+                                        true, field_184112_s);
         } else {
-            return new AnvilSaveHandler(new File(getFolderName()), worldName, true);
+            return new AnvilSaveHandler(new File(getFolderName()), worldName, true, field_184112_s);
         }
     }
 
@@ -1026,18 +1029,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return Optional.empty();
     }
 
-    @SuppressWarnings("rawtypes")
-    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, CallbackInfoReturnable<List> cir,
-            List<String> list, String astring[], String s) {
+    private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {
         TabCompleteEvent.Chat event = SpongeEventFactory.createTabCompleteEventChat(Cause.source(sender).build(),
-                ImmutableList.copyOf(list), list, input);
+                ImmutableList.copyOf(completions), completions, input);
         Sponge.getEventManager().post(event);
         if (event.isCancelled()) {
             cir.setReturnValue(new ArrayList<>());
         } else {
             cir.setReturnValue(event.getTabCompletions());
         }
+    }
+
+    @Surrogate
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
+            List<String> list, boolean flag, boolean flag1, List<String> list1) {
+        onTabCompleteChat(sender, input, cir, list);
+    }
+
+    @Inject(method = "getTabCompletions", at = @At(value = "RETURN", ordinal = 1), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
+    private void onTabCompleteChat(ICommandSender sender, String input, BlockPos pos, boolean p_184104_4_, CallbackInfoReturnable<List<String>> cir,
+            List<String> list, String[] a, String b, String[] c, int d, int e) {
+        onTabCompleteChat(sender, input, cir, list);
     }
 
     @Override
@@ -1052,7 +1064,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
         EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
         if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
-            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimary(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
+            InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
             if (Sponge.getEventManager().post(event)) {
                 return;
             }

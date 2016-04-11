@@ -66,7 +66,7 @@ public class StoredEnchantmentDataProcessor extends
         NBTTagList list = new NBTTagList();
         for (ItemEnchantment enchantment : value) {
             NBTTagCompound tag = new NBTTagCompound();
-            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()).effectId);
+            tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) enchantment.getEnchantment()));
             tag.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, (short) enchantment.getLevel());
             list.appendTag(tag);
         }
@@ -84,7 +84,7 @@ public class StoredEnchantmentDataProcessor extends
         for (int i = 0; i < tags.tagCount(); i++) {
             NBTTagCompound tag = tags.getCompoundTagAt(i);
             list.add(new ItemEnchantment(
-                    (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
+                    (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID)),
                     tag.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL)));
         }
         return Optional.of(list);

@@ -25,9 +25,9 @@
 package org.spongepowered.common.mixin.api.text;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.util.ChatComponentStyle;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentBase;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.ClickAction;
 import org.spongepowered.api.text.action.HoverAction;
@@ -54,17 +54,17 @@ public abstract class MixinText implements IMixinText {
     @Shadow @Final protected Optional<HoverAction<?>> hoverAction;
     @Shadow @Final protected Optional<ShiftClickAction<?>> shiftClickAction;
 
-    private IChatComponent component;
+    private ITextComponent component;
     private String json;
 
-    protected ChatComponentStyle createComponent() {
+    protected TextComponentBase createComponent() {
         throw new UnsupportedOperationException();
     }
 
-    private IChatComponent initializeComponent() {
+    private ITextComponent initializeComponent() {
         if (this.component == null) {
             this.component = createComponent();
-            ChatStyle style = this.component.getChatStyle();
+            Style style = this.component.getStyle();
 
             if (this.format.getColor() != TextColors.NONE) {
                 style.setColor(((SpongeTextColor) this.format.getColor()).getHandle());
@@ -79,11 +79,11 @@ public abstract class MixinText implements IMixinText {
             }
 
             if (this.clickAction.isPresent()) {
-                style.setChatClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
+                style.setClickEvent(SpongeClickAction.getHandle(this.clickAction.get()));
             }
 
             if (this.hoverAction.isPresent()) {
-                style.setChatHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
+                style.setHoverEvent(SpongeHoverAction.getHandle(this.hoverAction.get()));
             }
 
             if (this.shiftClickAction.isPresent()) {
@@ -98,12 +98,12 @@ public abstract class MixinText implements IMixinText {
         return this.component;
     }
 
-    private IChatComponent getHandle() {
+    private ITextComponent getHandle() {
         return initializeComponent();
     }
 
     @Override
-    public IChatComponent toComponent() {
+    public ITextComponent toComponent() {
         return getHandle().createCopy(); // Mutable instances are not nice :(
     }
 
@@ -115,7 +115,7 @@ public abstract class MixinText implements IMixinText {
     @Override
     public String toJson() {
         if (this.json == null) {
-            this.json = IChatComponent.Serializer.componentToJson(getHandle());
+            this.json = ITextComponent.Serializer.componentToJson(getHandle());
         }
 
         return this.json;

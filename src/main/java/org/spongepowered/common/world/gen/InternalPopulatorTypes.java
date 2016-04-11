@@ -30,6 +30,7 @@ public class InternalPopulatorTypes {
 
     public static PopulatorType ANIMAL;
     public static PopulatorType BONUS_CHEST;
+    public static PopulatorType END_SPIKE;
     public static PopulatorType ENDER_DRAGON;
     public static PopulatorType PLAINS_GRASS;
     public static PopulatorType SNOW;

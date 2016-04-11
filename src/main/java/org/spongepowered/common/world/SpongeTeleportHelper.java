@@ -27,6 +27,7 @@ package org.spongepowered.common.world;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.Location;
@@ -180,21 +181,21 @@ public class SpongeTeleportHelper implements TeleportHelper {
                 }
 
                 // We'll fall onto a block, need to make sure its safe
-                if (typeBelowPos != BlockTypes.AIR && !isSafeFloorMaterial(((Block) typeBelowPos).getMaterial())) {
+                if (typeBelowPos != BlockTypes.AIR && !isSafeFloorMaterial(((Block) typeBelowPos).getMaterial((IBlockState) typeBelowPos.getDefaultState()))) {
                     return false;
                 }
 
                 // We'll fall through an air block to another, need to make sure
                 // its safe
-                return isSafeFloorMaterial(((Block) typeBelowPos2).getMaterial());
+                return isSafeFloorMaterial(((Block) typeBelowPos2).getMaterial((IBlockState) typeBelowPos2.getDefaultState()));
             }
 
             // We have a non-air floor, need to ensure its safe
-            return isSafeFloorMaterial(((Block) block).getMaterial());
+            return isSafeFloorMaterial(((Block) block).getMaterial((IBlockState) block.getDefaultState()));
         }
 
         // We need to make sure the block at our torso or head is safe
-        return isSafeBodyMaterial(((Block) block).getMaterial());
+        return isSafeBodyMaterial(((Block) block).getMaterial((IBlockState) block.getDefaultState()));
     }
 
     private boolean isSafeFloorMaterial(Material material) {

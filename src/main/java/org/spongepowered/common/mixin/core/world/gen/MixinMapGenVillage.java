@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.gen;
 
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
 import org.spongepowered.api.world.Chunk;
@@ -47,7 +46,7 @@ import java.util.Random;
 public abstract class MixinMapGenVillage extends MapGenStructure implements IFlaggedPopulator {
 
     @Override
-    public void populate(IChunkProvider provider, Chunk chunk, Random rand, List<String> flags) {
+    public void populate(Chunk chunk, Random rand, List<String> flags) {
         World world = (World) chunk.getWorld();
         boolean flag = generateStructure(world, rand, new ChunkCoordIntPair(chunk.getPosition().getX(), chunk.getPosition().getZ()));
         if (flag) {

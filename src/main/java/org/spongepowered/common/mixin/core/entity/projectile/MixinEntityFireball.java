@@ -27,8 +27,7 @@ package org.spongepowered.common.mixin.core.entity.projectile;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.entity.projectile.explosive.fireball.Fireball;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +42,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 public abstract class MixinEntityFireball extends MixinEntity implements Fireball {
 
     @Shadow public EntityLivingBase shootingEntity;
-    @Shadow protected abstract void onImpact(MovingObjectPosition movingObjectPosition);
+    @Shadow protected abstract void onImpact(RayTraceResult movingObjectPosition);
 
     private ProjectileSource projectileSource = null;
 
@@ -71,7 +70,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
 
     @Override
     public void detonate() {
-        this.onImpact(new MovingObjectPosition(null));
+        this.onImpact(new RayTraceResult(null));
     }
 
     @Override
@@ -86,9 +85,9 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
         ProjectileSourceSerializer.writeSourceToNbt(compound, this.projectileSource, this.shootingEntity);
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/MovingObjectPosition;)V"))
-    public void onProjectileImpact(EntityFireball projectile, MovingObjectPosition movingObjectPosition) {
-        if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == MovingObjectType.MISS) {
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/projectile/EntityFireball;onImpact(Lnet/minecraft/util/math/RayTraceResult;)V"))
+    public void onProjectileImpact(EntityFireball projectile, RayTraceResult movingObjectPosition) {
+        if (this.worldObj.isRemote || movingObjectPosition.typeOfHit == RayTraceResult.Type.MISS) {
             this.onImpact(movingObjectPosition);
             return;
         }

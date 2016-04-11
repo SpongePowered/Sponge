@@ -26,8 +26,7 @@ package org.spongepowered.common.mixin.core.block;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.BlockFalling;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -44,13 +43,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 @Mixin(BlockFalling.class)
 public class MixinBlockFalling {
 
     private static final String WORLD_IS_AREA_LOADED =
-            "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/BlockPos;)Z";
+            "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z";
 
     @Redirect(method = "checkFallable", at = @At(value = "INVOKE", target = WORLD_IS_AREA_LOADED))
     private boolean onIsAreaLoadedCheck(World world, BlockPos pos, BlockPos to) {

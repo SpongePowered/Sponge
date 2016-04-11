@@ -34,11 +34,12 @@ import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -59,10 +60,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -73,9 +72,8 @@ import javax.annotation.Nullable;
 @Mixin(EntityPlayer.class)
 public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements IMixinEntityPlayer, ITargetedLocation {
 
-    private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String WORLD_PLAY_SOUND_AT =
-            "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
+            "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
 
     @Shadow public Container inventoryContainer;
@@ -106,7 +104,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     }
 
     @Inject(method = "getDisplayName", at = @At("RETURN"), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onGetDisplayName(CallbackInfoReturnable<IChatComponent> ci, ChatComponentText component) {
+    public void onGetDisplayName(CallbackInfoReturnable<ITextComponent> ci, TextComponentString component) {
         ci.setReturnValue(LegacyTexts.parseComponent(component, SpongeTexts.COLOR_CHAR));
     }
 
@@ -164,7 +162,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
             if (!this.worldObj.isRemote) {
                 SpongeImpl.postEvent(SpongeEventFactory.
                         createSleepingEventTick(Cause.of(NamedCause.source(this)),
-                                                this.getWorld().createSnapshot(VecHelper.toVector(this.playerLocation)), this));
+                                                this.getWorld().createSnapshot(VecHelper.toVector3i(this.playerLocation)), this));
             }
             return true;
         }
@@ -173,25 +171,13 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - January 4th, 2016
-     * This is necessary for invisibility checks so that invisible players don't actually send the particle stuffs.
-     */
-    @Redirect(method = "updateItemUse", at = @At(value = "INVOKE", target = WORLD_SPAWN_PARTICLE))
-    public void spawnItemParticle(World world, EnumParticleTypes particleTypes, double xCoord, double yCoord, double zCoord, double xOffset,
-            double yOffset, double zOffset, int ... p_175688_14_) {
-        if (!this.isVanished()) {
-            this.worldObj.spawnParticle(particleTypes, xCoord, yCoord, zCoord, xOffset, yOffset, zOffset, p_175688_14_);
-        }
-    }
-
-    /**
-     * @author gabizou - January 4th, 2016
      *
      * This prevents sounds from being sent to the server by players who are invisible.
      */
     @Redirect(method = "playSound", at = @At(value = "INVOKE", target = WORLD_PLAY_SOUND_AT))
-    public void playSound(World world, EntityPlayer player, String name, float volume, float pitch) {
+    public void playSound(World world, EntityPlayer player, double d1, double d2, double d3, SoundEvent sound, SoundCategory category, float volume, float pitch) {
         if (!this.isVanished()) {
-            world.playSoundToNearExcept(player, name, volume, pitch);
+            this.worldObj.playSound(player, d1, d2, d3, sound, category, volume, pitch);
         }
     }
 
@@ -232,24 +218,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         if (event.isCancelled()) {
             callbackInfoReturnable.setReturnValue(null);
         }
-    }
-
-    /**
-     * @author gabizou - January 30th, 2016
-     *
-     * Redirects the dropped item spawning to use our world spawning since we know the cause.
-     *
-     * @param world The world
-     * @param entity The entity item
-     * @return True if the events and such succeeded
-     */
-    @Redirect(method = "joinEntityItemWithWorld", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onDropItem(World world, net.minecraft.entity.Entity entity) {
-        SpawnCause spawnCause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((org.spongepowered.api.world.World) world).spawnEntity(EntityUtil.fromNative(entity), Cause.of(NamedCause.source(spawnCause)));
     }
 
 }

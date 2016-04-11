@@ -29,21 +29,14 @@ import net.minecraft.command.EntityNotFoundException;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.server.CommandScoreboard;
 import net.minecraft.entity.Entity;
-import net.minecraft.scoreboard.Scoreboard;
 import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.interfaces.command.IMixinCommandBase;
 
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -54,7 +47,7 @@ import java.util.UUID;
 public abstract class MixinCommandScoreboard extends CommandBase implements IMixinCommandBase {
 
     // The static method's owner is CommandScoreboard for some odd reason, despite it coming from CommandBase
-    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;getEntityName(Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
+    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;func_184891_e(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
 
     private static final String ITERATOR_NEXT = "Ljava/util/Iterator;next()Ljava/lang/Object;";
 
@@ -75,13 +68,13 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
     }
 
     @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameJoin(ICommandSender sender, String string) throws EntityNotFoundException {
-        return this.onGetEntityName(sender, string);
+    public String onGetEntityNameJoin(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        return this.onGetEntityName(server, sender, string);
     }
 
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 0))
-    public String onGetEntityNameLeaveFirst(ICommandSender sender, String string) throws EntityNotFoundException {
-        return this.onGetEntityName(sender, string);
+    public String onGetEntityNameLeaveFirst(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        return this.onGetEntityName(server, sender, string);
     }
 
     private void onGetUUID(Entity entity) {
@@ -90,22 +83,22 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
         }
     }
 
-    private String onGetEntityName(ICommandSender sender, String string) throws EntityNotFoundException {
+    private String onGetEntityName(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
         if (this.realName != null) {
             String newString = this.realName;
             this.realName = null;
             return newString;
         }
-        return CommandBase.getEntityName(sender, string);
+        return CommandBase.func_184891_e(server, sender, string);
     }
 
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
-    public String onGetEntityNameLeaveSecond(ICommandSender sender, String string) throws EntityNotFoundException {
-        String entityName = CommandBase.getEntityName(sender, string);
+    public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
+        String entityName = CommandBase.func_184891_e(server, sender, string);
         if (this.isExpandedSelector()) {
             try {
                 UUID uuid = UUID.fromString(entityName);
-                Entity entity = MinecraftServer.getServer().getEntityFromUuid(uuid);
+                Entity entity = sender.getServer().getEntityFromUuid(uuid);
                 if (entity != null && entity instanceof EntityHuman) {
                     return entity.getCustomNameTag();
                 }

@@ -46,7 +46,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 
-    private static final String RIDER_ENTITY_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;riddenByEntity:Lnet/minecraft/entity/Entity;";
+    private static final String IS_RIDDN = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z";
     private static final String MINECART_MOTION_X_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionX:D";
     private static final String MINECART_MOTION_Z_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionZ:D";
     protected double maxSpeed = 0.4D;
@@ -66,13 +66,12 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     }
 
     @Nullable
-    @Redirect(method = "applyDrag", at = @At(value = "FIELD", target = RIDER_ENTITY_FIELD, opcode = Opcodes.GETFIELD))
-    private Entity onGetRiderEntity(EntityMinecart self) {
-        Entity rider = self.riddenByEntity;
-        if (rider == null && !this.slowWhenEmpty) {
-            return EntityUtil.USELESS_ENTITY_FOR_MIXINS;
+    @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = IS_RIDDN, opcode = Opcodes.GETFIELD))
+    private boolean onIsRidden(EntityMinecart self) {
+        if (!this.isBeingRidden() && !this.slowWhenEmpty) {
+            return false;
         }
-        return rider;
+        return this.isBeingRidden();
     }
 
     @Override

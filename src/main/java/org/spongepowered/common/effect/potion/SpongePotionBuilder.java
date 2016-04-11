@@ -125,7 +125,7 @@ public class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> imple
     public PotionEffect build() throws IllegalStateException {
         checkState(this.potionType != null, "Potion type has not been set");
         checkState(this.duration > 0, "Duration has not been set");
-        return (PotionEffect) new net.minecraft.potion.PotionEffect(((Potion) this.potionType).id, this.duration,
+        return (PotionEffect) new net.minecraft.potion.PotionEffect((Potion) this.potionType, this.duration,
                 this.amplifier,
                 this.isAmbient,
                 this.showParticles);

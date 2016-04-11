@@ -24,17 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import net.minecraft.server.management.BanList;
-import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.UserList;
+import net.minecraft.server.management.UserListBans;
 import net.minecraft.server.management.UserListEntry;
+import net.minecraft.server.management.UserListIPBans;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.io.File;
@@ -45,7 +42,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
-@Mixin(BanList.class) // This is a bad MCP name, it's really IPBanList
+@Mixin(UserListIPBans.class) // This is a bad MCP name, it's really IPBanList
 public abstract class MixinIPBanList extends UserList {
 
     @Shadow public abstract String addressToString(SocketAddress address);

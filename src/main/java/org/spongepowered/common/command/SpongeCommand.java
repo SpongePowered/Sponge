@@ -83,6 +83,7 @@ public class SpongeCommand {
     static final Text INDENT_TEXT = Text.of(INDENT);
     static final Text NEWLINE_TEXT = Text.NEW_LINE;
     static final Text SEPARATOR_TEXT = Text.of(", ");
+    static final Text UNKNOWN = Text.of("UNKNOWN");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -135,6 +136,7 @@ public class SpongeCommand {
                 ++successes;
             }
             if (args.hasAny("dimension")) {
+                // TODO 1.9 - This isn't right but I can't fix until I fix dimension configs.
                 for (DimensionType dimension : args.<DimensionType>getAll("dimension")) {
                     WorldProvider provider = DimensionManager.getWorldFromDimId(((SpongeDimensionType) dimension).getDimensionTypeId()).provider;
                     src.sendMessage(Text.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)
@@ -235,9 +237,9 @@ public class SpongeCommand {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionId()), NEWLINE_TEXT,
-                                key("Loaded chunks: "), value(worldserver.theChunkProviderServer.getLoadedChunkCount()), NEWLINE_TEXT,
-                                key("Active chunks: "), value(worldserver.activeChunkSet.size()), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionType().getId()), NEWLINE_TEXT,
+                                key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
+                                key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
                                 key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
                                 key("Removed Entities:"), value(worldserver.unloadedEntityList.size()), NEWLINE_TEXT,
@@ -334,7 +336,8 @@ public class SpongeCommand {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
                     for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
-                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion().orElse("unknown")));
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), container.getVersion().isPresent
+                                () ? Text.of(container.getVersion().get()) : UNKNOWN);
                     }
 
                     src.sendMessage(builder.build());
@@ -415,7 +418,6 @@ public class SpongeCommand {
 
                             next.getVersion()
                                     .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
-
                             build.append(pluginBuilder.build());
                         }
                         src.sendMessage(build.build());

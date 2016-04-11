@@ -54,10 +54,10 @@ public final class SpongeStatusResponse {
             InetSocketAddress virtualHost) {
         ServerStatusResponse response = create(server);
         response.setProtocolVersionInfo(
-                new ServerStatusResponse.MinecraftProtocolVersionIdentifier(response.getProtocolVersionInfo().getName(), Byte.MAX_VALUE));
+                new ServerStatusResponse.Version(response.getProtocolVersionInfo().getName(), Byte.MAX_VALUE));
         response = call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
         if (response != null && response.getPlayerCountData() == null) {
-            response.setPlayerCountData(new ServerStatusResponse.PlayerCountData(-1, 0));
+            response.setPlayerCountData(new ServerStatusResponse.Players(-1, 0));
         }
         return response;
     }
@@ -87,9 +87,9 @@ public final class SpongeStatusResponse {
         return clone;
     }
 
-    private static ServerStatusResponse.PlayerCountData clone(ServerStatusResponse.PlayerCountData original) {
+    private static ServerStatusResponse.Players clone(ServerStatusResponse.Players original) {
         if (original != null) {
-            ServerStatusResponse.PlayerCountData clone = new ServerStatusResponse.PlayerCountData(original.getMaxPlayers(),
+            ServerStatusResponse.Players clone = new ServerStatusResponse.Players(original.getMaxPlayers(),
                     original.getOnlinePlayerCount());
             clone.setPlayers(original.getPlayers());
             return clone;
@@ -98,9 +98,9 @@ public final class SpongeStatusResponse {
         }
     }
 
-    private static ServerStatusResponse.MinecraftProtocolVersionIdentifier clone(ServerStatusResponse.MinecraftProtocolVersionIdentifier original) {
+    private static ServerStatusResponse.Version clone(ServerStatusResponse.Version original) {
         if (original != null) {
-            return new ServerStatusResponse.MinecraftProtocolVersionIdentifier(original.getName(), original.getProtocol());
+            return new ServerStatusResponse.Version(original.getName(), original.getProtocol());
         } else {
             return null;
         }

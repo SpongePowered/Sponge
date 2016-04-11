@@ -35,7 +35,6 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableAttachedData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableDirectionalData;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutablePoweredData;
-import org.spongepowered.api.data.manipulator.immutable.block.ImmutableSuspendedData;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
@@ -43,7 +42,6 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeAttachedData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongePoweredData;
-import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeSuspendedData;
 import org.spongepowered.common.data.util.DirectionChecker;
 import org.spongepowered.common.data.util.DirectionResolver;
 
@@ -54,21 +52,18 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsSuspendedFor(blockState), getIsAttachedFor(blockState),
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getIsAttachedFor(blockState),
                 getIsPoweredFor(blockState), getDirectionalData(blockState));
     }
 
     @Override
     public boolean supports(Class<? extends ImmutableDataManipulator<?, ?>> immutable) {
-        return ImmutableSuspendedData.class.isAssignableFrom(immutable) || ImmutableAttachedData.class.isAssignableFrom(immutable)
+        return ImmutableAttachedData.class.isAssignableFrom(immutable)
                 || ImmutablePoweredData.class.isAssignableFrom(immutable) || ImmutableDirectionalData.class.isAssignableFrom(immutable);
     }
 
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
-        if (manipulator instanceof ImmutableSuspendedData) {
-            return Optional.of((BlockState) blockState);
-        }
         if (manipulator instanceof ImmutableAttachedData) {
             return Optional.of((BlockState) blockState);
         }
@@ -98,11 +93,6 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
             return Optional.of((BlockState) blockState.withProperty(BlockTripWireHook.FACING, DirectionResolver.getFor(dir)));
         }
         return super.getStateWithValue(blockState, key, value);
-    }
-
-    private ImmutableSuspendedData getIsSuspendedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil
-                .getManipulator(ImmutableSpongeSuspendedData.class, (Boolean) blockState.getValue(BlockTripWireHook.SUSPENDED));
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.BlockRail;
 import net.minecraft.block.BlockRailBase;
 import net.minecraft.block.BlockRailDetector;
@@ -36,7 +37,6 @@ import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.manipulator.immutable.block.ImmutableRailDirectionData;
-import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
@@ -79,7 +79,8 @@ public abstract class MixinBlockRailBase extends MixinBlock {
                 }
                 return Optional.of((BlockState) blockState.withProperty(BlockRailDetector.SHAPE, railDirection));
             } else { // For mods that extend BlockRailBase
-                for (Map.Entry<IProperty, Comparable> entry : blockState.getProperties().entrySet()) {
+                for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
+                        ()) {
                     if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
                         if (entry.getKey().getAllowedValues().contains(railDirection)) {
                             return Optional.of((BlockState) blockState.withProperty(entry.getKey(), railDirection));
@@ -124,7 +125,8 @@ public abstract class MixinBlockRailBase extends MixinBlock {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
                     blockState.getValue(BlockRailDetector.SHAPE));
         } else { // For mods extending BlockRailBase
-            for (Map.Entry<IProperty, Comparable> entry : blockState.getProperties().entrySet()) {
+            for (Map.Entry<IProperty, Comparable> entry : (ImmutableSet<Map.Entry<IProperty, Comparable>>) (Object) blockState.getProperties().entrySet
+                    ()) {
                 if (entry.getValue() instanceof BlockRailBase.EnumRailDirection) {
                     return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,
                         entry.getValue());

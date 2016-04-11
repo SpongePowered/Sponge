@@ -27,7 +27,8 @@ package org.spongepowered.common.entity;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public final class EntityDummy extends Entity {
@@ -55,7 +56,7 @@ public final class EntityDummy extends Entity {
     }
 
     @Override
-    public void playSound(String name, float volume, float pitch) {
+    public void playSound(SoundEvent event, float volume, float pitch) {
     }
 
     @Override

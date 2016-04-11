@@ -44,7 +44,7 @@ public class ReplaceablePropertyStore extends AbstractBlockPropertyStore<Replace
 
     @Override
     protected Optional<ReplaceableProperty> getForBlock(Block block) {
-        return Optional.of(block.getMaterial().isReplaceable() ? TRUE : FALSE);
+        return Optional.of(block.getMaterial(null).isReplaceable() ? TRUE : FALSE);
     }
 
     @Override

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.network.play.server.S3BPacketScoreboardObjective;
-import net.minecraft.network.play.server.S3DPacketDisplayScoreboard;
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.network.play.server.SPacketDisplayObjective;
+import net.minecraft.network.play.server.SPacketScoreboardObjective;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.ScorePlayerTeam;
@@ -37,7 +37,6 @@ import org.spongepowered.api.scoreboard.critieria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -50,7 +49,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
-import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeObjective;
@@ -87,7 +85,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     // Add objective
 
     @Override
-    public ScoreObjective addScoreObjective(String name, IScoreObjectiveCriteria criteria) {
+    public ScoreObjective addScoreObjective(String name, IScoreCriteria criteria) {
         SpongeObjective objective = new SpongeObjective(name, (Criterion) criteria);
         this.scoreboard$addObjective(objective);
         return objective.getObjectiveFor(this);
@@ -102,7 +100,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         List<ScoreObjective> objectives = (List) this.scoreObjectiveCriterias.get(objective.getCriterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            this.scoreObjectiveCriterias.put((IScoreObjectiveCriteria) objective.getCriterion(), objectives);
+            this.scoreObjectiveCriterias.put((IScoreCriteria) objective.getCriterion(), objectives);
         }
 
         objectives.add(scoreObjective);
@@ -114,7 +112,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
 
     @Inject(method = "onScoreObjectiveAdded", at = @At("RETURN"))
     public void onOnScoreObjectiveAdded(ScoreObjective objective, CallbackInfo ci) {
-        this.sendToPlayers(new S3BPacketScoreboardObjective(objective, SpongeScoreboardConstants.OBJECTIVE_PACKET_ADD));
+        this.sendToPlayers(new SPacketScoreboardObjective(objective, SpongeScoreboardConstants.OBJECTIVE_PACKET_ADD));
     }
 
     // Get objective (display slot)
@@ -142,7 +140,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
         }
         int index = ((SpongeDisplaySlot) displaySlot).getIndex();
         this.objectiveDisplaySlots[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
-        this.sendToPlayers(new S3DPacketDisplayScoreboard(index, this.objectiveDisplaySlots[index]));
+        this.sendToPlayers(new SPacketDisplayObjective(index, this.objectiveDisplaySlots[index]));
     }
 
     // Get objective by criteria
@@ -185,7 +183,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
             }
         }
 
-        this.sendToPlayers(new S3BPacketScoreboardObjective(scoreObjective, SpongeScoreboardConstants.OBJECTIVE_PACKET_REMOVE));
+        this.sendToPlayers(new SPacketScoreboardObjective(scoreObjective, SpongeScoreboardConstants.OBJECTIVE_PACKET_REMOVE));
 
         List list = (List)this.scoreObjectiveCriterias.get(scoreObjective.getCriteria());
 
@@ -259,7 +257,7 @@ public abstract class MixinScoreboardLogic extends Scoreboard implements IMixinS
     // Scores
 
     @Override
-    public Score getValueFromObjective(String name, ScoreObjective objective) {
+    public Score getOrCreateScore(String name, ScoreObjective objective) {
         return ((SpongeScore) ((IMixinScoreObjective) objective).getSpongeObjective().getOrCreateScore(SpongeTexts.fromLegacy(name)))
                 .getScoreFor(objective);
     }

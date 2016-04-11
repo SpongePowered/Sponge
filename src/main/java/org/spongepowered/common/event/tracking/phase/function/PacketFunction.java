@@ -33,15 +33,16 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C15PacketClientSettings;
-import net.minecraft.network.play.client.C19PacketResourcePackStatus;
-import net.minecraft.network.play.server.S09PacketHeldItemChange;
-import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketClientSettings;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.network.play.client.CPacketResourcePackStatus;
+import net.minecraft.network.play.client.CPacketUseEntity;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketOpenWindow;
 import net.minecraft.world.IInteractionObject;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -104,7 +105,7 @@ public interface PacketFunction {
     PacketFunction HANDLED_EXTERNALLY = IGNORED;
 
     PacketFunction USE_ENTITY = (packet, state, player, context) -> {
-        final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
+        final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
         final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
         final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
 
@@ -276,10 +277,10 @@ public interface PacketFunction {
             });
 
         } else if (state == PacketPhase.General.INTERACTION) {
-            context.getCapturedBlocks().ifPresent(blocks ->
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks ->
                     GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
             );
-            context.getCapturedItems().ifPresent(items -> {
+            context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> {
                 if (items.isEmpty()) {
                     return;
                 }
@@ -318,36 +319,36 @@ public interface PacketFunction {
     };
 
     PacketFunction CREATIVE = (packet, state, player, context) -> {
-        if (state == PacketPhase.General.CREATIVE_INVENTORY) {
-            boolean ignoringCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).orElse(false);
-            if (!ignoringCreative) {
-                final C10PacketCreativeInventoryAction packetIn = ((C10PacketCreativeInventoryAction) packet);
-                final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).get();
-                final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
-                final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-                final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
-                final Cause cause;
-                final Container openContainer = player.openContainer;
-                final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
-                final CreativeInventoryEvent event;
-                if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
-                    Iterator<Entity> iterator = capturedEntityItems.iterator();
-                    ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-                    while (iterator.hasNext()) {
-                        Entity currentEntity = iterator.next();
-                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                        entitySnapshotBuilder.add(currentEntity.createSnapshot());
-                    }
-                    cause = Cause.source(EntitySpawnCause.builder().entity(EntityUtil.fromNative(player)).type(InternalSpawnTypes.DROPPED_ITEM).build()).build();
-                    event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, capturedEntityItems,
-                            entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) openContainer, (World) player.worldObj,
-                            capturedTransactions);
-                } else {
-                    cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
-                    event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer), capturedTransactions);
+        ((IMixinContainer) player.inventoryContainer).setCaptureInventory(false);
+        boolean ignoringCreative = context.firstNamed(InternalNamedCauses.Packet.IGNORING_CREATIVE, Boolean.class).orElse(false);
+        if (!ignoringCreative) {
+            final CPacketCreativeInventoryAction packetIn = ((CPacketCreativeInventoryAction) packet);
+            final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).get();
+            final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
+            final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
+            final Cause cause;
+            final Container openContainer = player.openContainer;
+            final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
+            final CreativeInventoryEvent event;
+            if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
+                Iterator<Entity> iterator = capturedEntityItems.iterator();
+                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
+                while (iterator.hasNext()) {
+                    Entity currentEntity = iterator.next();
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
-                EventConsumer.event(event)
+                cause = Cause.source(EntitySpawnCause.builder().entity(EntityUtil.fromNative(player)).type(InternalSpawnTypes.DROPPED_ITEM).build()).build();
+                event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, capturedEntityItems,
+                        entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) openContainer, (World) player.worldObj,
+                        capturedTransactions);
+            } else {
+                cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
+                PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, capturedTransactions);
+                event = SpongeEventFactory.createCreativeInventoryEventClick(cause, cursorTransaction, ContainerUtil.fromNative(openContainer), capturedTransactions);
+            }
+            EventConsumer.event(event)
                     .cancelled(creativeInventoryEvent -> {
                         if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
                             capturedEntityItems.clear();
@@ -377,13 +378,14 @@ public interface PacketFunction {
                         }
                     })
                     .process();
-                capturedTransactions.clear();
-            }
+            capturedTransactions.clear();
         }
+
     };
 
     PacketFunction INVENTORY = (packet, state, player, context) -> {
-        final C0EPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, C0EPacketClickWindow.class).get();
+        ((IMixinContainer) player.openContainer).setCaptureInventory(false);
+        final CPacketClickWindow packetIn = context.firstNamed(InternalNamedCauses.Packet.CAPTURED_PACKET, CPacketClickWindow.class).get();
         final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).get();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
@@ -439,58 +441,54 @@ public interface PacketFunction {
         }
     };
     PacketFunction USE_ITEM = ((packet, state, player, context) -> {
-        final C08PacketPlayerBlockPlacement placePacket = (C08PacketPlayerBlockPlacement) packet;
+        final CPacketPlayerBlockPlacement useItemPacket = (CPacketPlayerBlockPlacement) packet;
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
         final World spongeWorld = (World) mixinWorld;
-        if (state == PacketPhase.General.USE_ITEM) { // No capturing to be done tbh.
-            final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).get();
-            final ItemStackSnapshot snapshot = itemStack.createSnapshot();
-            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
-                final Cause cause = Cause.source(EntitySpawnCause.builder()
-                        .entity(EntityUtil.fromNative(player))
-                        .type(InternalSpawnTypes.SPAWN_EGG)
-                        .build())
-                        .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
-                        .build();
-                final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
+
+        final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
+        final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
+        context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
+            final Cause cause = Cause.source(EntitySpawnCause.builder()
+                    .entity(EntityUtil.fromNative(player))
+                    .type(InternalSpawnTypes.SPAWN_EGG)
+                    .build())
+                    .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
+                    .build();
+            final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
                     .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
                     .process();
-            });
-            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
-                GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
-            });
-        } else if (state == PacketPhase.General.ACTIVATE_BLOCK_OR_USE_ITEM) {
-            final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
-            final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
-            context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
-                final Cause cause = Cause.source(EntitySpawnCause.builder()
-                        .entity(EntityUtil.fromNative(player))
-                        .type(InternalSpawnTypes.SPAWN_EGG)
-                        .build())
-                        .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
-                        .build();
-                final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
-                        .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
-                        .process();
-            });
-            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
-                GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
-            });
-        }
-//        context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(capturedEntities -> {
-//            final Cause cause = Cause.source(EntitySpawnCause.builder().entity((Player) player).type(InternalSpawnTypes.SPAWN_EGG).build()).build();
-//            final SpawnEntityEvent spawnEntityEvent = state.createEntityEvent(cause, ((IMixinWorldServer) player.worldObj).getCauseTracker(), context);
-//            if (spawnEntityEvent != null && SpongeImpl.postEvent(spawnEntityEvent)) {
-//                final List<Entity> entities = spawnEntityEvent.getEntities();
-//            }
-//        });
-
+        });
+        context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
+            GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
+        });
 
     });
+    PacketFunction PLACE_BLOCK = (packet, state, player, context) -> {
+        final CPacketPlayerTryUseItem placePacket = (CPacketPlayerTryUseItem) packet;
+        final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
+        final World spongeWorld = (World) mixinWorld;
+        // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
+        final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).get();
+        final ItemStackSnapshot snapshot = itemStack.createSnapshot();
+        context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
+            final Cause cause = Cause.source(EntitySpawnCause.builder()
+                    .entity(EntityUtil.fromNative(player))
+                    .type(InternalSpawnTypes.SPAWN_EGG)
+                    .build())
+                    .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
+                    .build();
+            final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
+                    .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
+                    .process();
+        });
+        context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(originalBlocks -> {
+            GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context);
+        });
+    };
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
-        final C09PacketHeldItemChange itemChange = (C09PacketHeldItemChange) packet;
+        final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
         final int previousSlot = context.firstNamed(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class).get();
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
@@ -507,7 +505,7 @@ public interface PacketFunction {
         SlotTransaction targetTransaction = new SlotTransaction(new SlotAdapter(targetSlot), targetSnapshot, targetSnapshot);
         ImmutableList<SlotTransaction> transactions = new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
         EventConsumer.event(SpongeEventFactory.createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions))
-            .cancelled(event -> player.playerNetServerHandler.sendPacket(new S09PacketHeldItemChange(previousSlot)))
+            .cancelled(event -> player.playerNetServerHandler.sendPacket(new SPacketHeldItemChange(previousSlot)))
             .nonCancelled(event -> {
                 PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
                 inventory.currentItem = itemChange.getSlotId();
@@ -534,7 +532,7 @@ public interface PacketFunction {
                         guiId = "unknown";
                     }
                     slotInventory.openInventory(player);
-                    player.playerNetServerHandler.sendPacket(new S2DPacketOpenWindow(container.windowId, guiId, slotInventory
+                    player.playerNetServerHandler.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
                         .getDisplayName(), slotInventory.getSizeInventory()));
                     // resync data to client
                     player.sendContainerToPlayer(container);
@@ -551,7 +549,7 @@ public interface PacketFunction {
     PacketFunction ENCHANTMENT = ((packet, state, player, context) -> {
     });
     PacketFunction CLIENT_SETTINGS = ((packet, state, player, context) -> {
-        final C15PacketClientSettings settings = (C15PacketClientSettings) packet;
+        final CPacketClientSettings settings = (CPacketClientSettings) packet;
         PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(player)),
                 (ChatVisibility) (Object) settings.getChatVisibility(), SkinUtil.fromFlags(settings.getModelPartFlags()),
                 LanguageUtil.LOCALE_CACHE.getUnchecked(settings.getLang()), (Player) player, settings.isColorsEnabled(), settings.view);
@@ -576,11 +574,11 @@ public interface PacketFunction {
     PacketFunction RESOURCE_PACKET = ((packet, state, player, context) -> {
         final NetHandlerPlayServer playerNetServerHandler = player.playerNetServerHandler;
         final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) playerNetServerHandler;
-        final C19PacketResourcePackStatus resource = (C19PacketResourcePackStatus) packet;
+        final CPacketResourcePackStatus resource = (CPacketResourcePackStatus) packet;
         final String hash = resource.hash;
         final ResourcePackStatusEvent.ResourcePackStatus status;
         final ResourcePack pack = mixinHandler.getSentResourcePacks().get(hash);
-        switch (resource.status) {
+        switch (resource.action) {
             case ACCEPTED:
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;
                 break;

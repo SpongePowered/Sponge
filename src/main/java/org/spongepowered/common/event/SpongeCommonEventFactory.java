@@ -26,15 +26,16 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -118,7 +119,7 @@ public class SpongeCommonEventFactory {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
         final PhaseData currentPhase = causeTracker.getStack().peek();
         Optional<User> playerNotifier = currentPhase.getContext().firstNamed(NamedCause.SOURCE, User.class);
-        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
+        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector3i(pos));
         Map<Direction, BlockState> neighbors = new HashMap<>();
 
         if (notifiedSides != null) {
@@ -126,7 +127,7 @@ public class SpongeCommonEventFactory {
                 EnumFacing notifiedSide = (EnumFacing) obj;
                 BlockPos offset = pos.offset(notifiedSide);
                 Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<>(world, VecHelper.toVector(offset));
+                Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
                 if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
                     neighbors.put(direction, location.getBlock());
                 }
@@ -160,12 +161,17 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide) {
-        return callInteractBlockEventSecondary(cause, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, interactionPoint, targetBlock, targetSide);
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+        return callInteractBlockEventSecondary(cause, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, interactionPoint, targetBlock, targetSide, hand);
     }
 
-    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Tristate originalUseBlockResult, Tristate useBlockResult, Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide) {
-        InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
+    public static InteractBlockEvent.Secondary callInteractBlockEventSecondary(Cause cause, Tristate originalUseBlockResult, Tristate useBlockResult, Tristate originalUseItemResult, Tristate useItemResult, Optional<Vector3d> interactionPoint, BlockSnapshot targetBlock, Direction targetSide, EnumHand hand) {
+        InteractBlockEvent.Secondary event;
+        if (hand == EnumHand.MAIN_HAND) {
+            event = SpongeEventFactory.createInteractBlockEventSecondaryMainHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
+        } else {
+            event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
+        }
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -181,14 +187,13 @@ public class SpongeCommonEventFactory {
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state,
-                new Location<>((World) world, VecHelper.toVector(pos)), direction);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector3d(pos)), direction);
         return SpongeImpl.postEvent(event);
     }
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
-            MovingObjectPosition movingObjectPosition) {
-        MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
+            RayTraceResult movingObjectPosition) {
+        RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
         Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();
         IMixinEntity spongeEntity = (IMixinEntity) projectile;
         Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
@@ -196,10 +201,10 @@ public class SpongeCommonEventFactory {
             cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
         }
 
-        Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));
+        Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector3d(movingObjectPosition.hitVec));
 
-        if (movingObjectType == MovingObjectType.BLOCK) {
-            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector(movingObjectPosition.getBlockPos()));
+        if (movingObjectType == RayTraceResult.Type.BLOCK) {
+            BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
             Direction side = Direction.NONE;
             if (movingObjectPosition.sideHit != null) {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();

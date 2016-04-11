@@ -26,7 +26,7 @@ package org.spongepowered.common.network.message;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;

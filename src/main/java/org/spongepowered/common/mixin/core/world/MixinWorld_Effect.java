@@ -28,14 +28,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.server.management.PlayerList;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -54,6 +57,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 
 import java.util.List;
 import java.util.Random;
@@ -68,7 +72,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
     @Shadow @Final public WorldProvider provider;
     @Shadow protected WorldInfo worldInfo;
 
-    @Shadow public abstract void playSoundEffect(double x, double y, double z, String soundName, float volume, float pitch);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onEffectsConstructed(ISaveHandler handler, WorldInfo info, WorldProvider provider, Profiler profiler, boolean client, CallbackInfo callbackInfo) {
@@ -78,18 +82,18 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume) {
-        this.playSound(sound, position, volume, 1);
+    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
+        this.playSound(sound, category, position, volume, 1);
     }
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume, double pitch) {
-        this.playSound(sound, position, volume, pitch, 0);
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch) {
+        this.playSound(sound, category, position, volume, pitch, 0);
     }
 
     @Override
-    public void playSound(SoundType sound, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playSoundEffect(position.getX(), position.getY(), position.getZ(), sound.getId(), (float) Math.max(minVolume, volume), (float) pitch);
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
+        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
     }
 
     @Override
@@ -106,14 +110,14 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            ServerConfigurationManager manager = MinecraftServer.getServer().getConfigurationManager();
+            PlayerList playerList = ((net.minecraft.world.World) (Object) this).getMinecraftServer().getPlayerList();
 
             double x = position.getX();
             double y = position.getY();
             double z = position.getZ();
 
-            for (Packet<?> packet : packets) {
-                manager.sendToAllNear(x, y, z, radius, this.provider.getDimensionId(), packet);
+            for (Packet packet : packets) {
+                playerList.sendToAllNearExcept(null, x, y, z, radius, ((IMixinWorldProvider) this.provider).getDimensionId(), packet);
             }
         }
     }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.block.Block;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import org.spongepowered.asm.mixin.Mixin;

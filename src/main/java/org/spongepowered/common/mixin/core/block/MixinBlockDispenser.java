@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
@@ -41,6 +41,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDirectionalData;
@@ -61,7 +62,7 @@ import java.util.Random;
 public abstract class MixinBlockDispenser extends MixinBlock {
 
     private static final String DISPENSE_ITEM =
-            "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;)V";
+            "Lnet/minecraft/block/BlockDispenser;dispense(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;)V";
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {

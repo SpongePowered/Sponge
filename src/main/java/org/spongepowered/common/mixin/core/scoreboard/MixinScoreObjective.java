@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.scoreboard;
 
-import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -75,7 +73,7 @@ public abstract class MixinScoreObjective implements IMixinScoreObjective {
     }
 
     @Inject(method = "setRenderType", at = @At("HEAD"), cancellable = true)
-    public void onSetRenderType(IScoreObjectiveCriteria.EnumRenderType type, CallbackInfo ci) {
+    public void onSetRenderType(IScoreCriteria.EnumRenderType type, CallbackInfo ci) {
         if (this.theScoreboard != null && ((IMixinScoreboard) this.theScoreboard).isClient()) {
             return; // Let the normal logic take over.
         }

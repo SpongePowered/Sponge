@@ -26,14 +26,7 @@ package org.spongepowered.common.util;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.world.gen.PopulatorType;
 
-import java.util.Arrays;
-import java.util.UUID;
 
 public class StaticMixinHelper {
 

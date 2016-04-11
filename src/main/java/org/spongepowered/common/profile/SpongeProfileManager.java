@@ -26,7 +26,10 @@ package org.spongepowered.common.profile;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;

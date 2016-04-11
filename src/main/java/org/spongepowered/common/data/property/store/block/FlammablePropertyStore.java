@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.property.block.FlammableProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;

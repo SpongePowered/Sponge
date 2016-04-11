@@ -25,18 +25,16 @@
 package org.spongepowered.common.text.action;
 
 import net.minecraft.entity.EntityList;
-import net.minecraft.event.HoverEvent;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.stats.StatBase;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.event.HoverEvent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.HoverAction;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.text.SpongeTexts;
-
-import java.util.Locale;
 
 public class SpongeHoverAction {
 
@@ -59,11 +57,11 @@ public class SpongeHoverAction {
 
     public static HoverEvent getHandle(HoverAction<?> action) {
         HoverEvent.Action type = getType(action);
-        IChatComponent component;
+        ITextComponent component;
 
         switch (type) {
             case SHOW_ACHIEVEMENT:
-                component = new ChatComponentText(((StatBase) action.getResult()).statId);
+                component = new TextComponentString(((StatBase) action.getResult()).statId);
                 break;
             case SHOW_ENTITY: {
                 HoverAction.ShowEntity.Ref entity = ((HoverAction.ShowEntity) action).getResult();
@@ -72,18 +70,18 @@ public class SpongeHoverAction {
                 nbt.setString("id", entity.getUniqueId().toString());
 
                 if (entity.getType().isPresent()) {
-                    nbt.setString("type", EntityList.getStringFromID(((SpongeEntityType) entity.getType().get()).entityTypeId));
+                    nbt.setString("type", EntityList.getEntityStringFromClass(((SpongeEntityType) entity.getType().get()).entityClass));
                 }
 
                 nbt.setString("name", entity.getName());
-                component = new ChatComponentText(nbt.toString());
+                component = new TextComponentString(nbt.toString());
                 break;
             }
             case SHOW_ITEM: {
                 ItemStack item = (ItemStack) action.getResult();
                 NBTTagCompound nbt = new NBTTagCompound();
                 item.writeToNBT(nbt);
-                component = new ChatComponentText(nbt.toString());
+                component = new TextComponentString(nbt.toString());
                 break;
             }
             case SHOW_TEXT:

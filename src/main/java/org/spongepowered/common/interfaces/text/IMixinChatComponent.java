@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.interfaces.text;
 
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
 
 import java.util.Iterator;
 
-public interface IMixinChatComponent extends IChatComponent {
+public interface IMixinChatComponent extends ITextComponent {
 
-    Iterator<IChatComponent> childrenIterator();
+    Iterator<ITextComponent> childrenIterator();
 
-    Iterable<IChatComponent> withChildren();
+    Iterable<ITextComponent> withChildren();
 
     String toPlain();
 

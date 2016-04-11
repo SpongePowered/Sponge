@@ -31,33 +31,36 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.inventory.ClickType;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C00PacketKeepAlive;
-import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C02PacketUseEntity;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C09PacketHeldItemChange;
-import net.minecraft.network.play.client.C0APacketAnimation;
-import net.minecraft.network.play.client.C0BPacketEntityAction;
-import net.minecraft.network.play.client.C0CPacketInput;
-import net.minecraft.network.play.client.C0DPacketCloseWindow;
-import net.minecraft.network.play.client.C0EPacketClickWindow;
-import net.minecraft.network.play.client.C0FPacketConfirmTransaction;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C11PacketEnchantItem;
-import net.minecraft.network.play.client.C12PacketUpdateSign;
-import net.minecraft.network.play.client.C13PacketPlayerAbilities;
-import net.minecraft.network.play.client.C14PacketTabComplete;
-import net.minecraft.network.play.client.C15PacketClientSettings;
-import net.minecraft.network.play.client.C16PacketClientStatus;
-import net.minecraft.network.play.client.C17PacketCustomPayload;
-import net.minecraft.network.play.client.C18PacketSpectate;
-import net.minecraft.network.play.client.C19PacketResourcePackStatus;
+import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketChatMessage;
+import net.minecraft.network.play.client.CPacketClickWindow;
+import net.minecraft.network.play.client.CPacketClientSettings;
+import net.minecraft.network.play.client.CPacketClientStatus;
+import net.minecraft.network.play.client.CPacketCloseWindow;
+import net.minecraft.network.play.client.CPacketConfirmTransaction;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketCustomPayload;
+import net.minecraft.network.play.client.CPacketEnchantItem;
+import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.network.play.client.CPacketHeldItemChange;
+import net.minecraft.network.play.client.CPacketInput;
+import net.minecraft.network.play.client.CPacketKeepAlive;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketPlayerAbilities;
+import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.network.play.client.CPacketResourcePackStatus;
+import net.minecraft.network.play.client.CPacketSpectate;
+import net.minecraft.network.play.client.CPacketTabComplete;
+import net.minecraft.network.play.client.CPacketUpdateSign;
+import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -72,6 +75,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -80,6 +84,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.PacketFunction;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
@@ -117,13 +122,13 @@ public final class PacketPhase extends TrackingPhase {
     final static int CLICK_ANYWHERE         = CLICK_INSIDE_WINDOW | CLICK_OUTSIDE_WINDOW;
     
     // Modes flags
-    final static int MODE_CLICK             = 0x01 << 9 << 0;
-    final static int MODE_SHIFT_CLICK       = 0x01 << 9 << 1;
-    final static int MODE_HOTBAR            = 0x01 << 9 << 2;
-    final static int MODE_PICKBLOCK         = 0x01 << 9 << 3;
-    final static int MODE_DROP              = 0x01 << 9 << 4;
-    final static int MODE_DRAG              = 0x01 << 9 << 5;
-    final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << 6;
+    final static int MODE_CLICK             = 0x01 << 9 << ClickType.PICKUP.ordinal();
+    final static int MODE_SHIFT_CLICK       = 0x01 << 9 << ClickType.QUICK_MOVE.ordinal();
+    final static int MODE_HOTBAR            = 0x01 << 9 << ClickType.SWAP.ordinal();
+    final static int MODE_PICKBLOCK         = 0x01 << 9 << ClickType.CLONE.ordinal();
+    final static int MODE_DROP              = 0x01 << 9 << ClickType.THROW.ordinal();
+    final static int MODE_DRAG              = 0x01 << 9 << ClickType.QUICK_CRAFT.ordinal();
+    final static int MODE_DOUBLE_CLICK      = 0x01 << 9 << ClickType.PICKUP_ALL.ordinal();
     
     // Drag mode flags, bitmasked from button and only set if MODE_DRAG
     final static int DRAG_MODE_SPLIT_ITEMS  = 0x01 << 6 << 0;
@@ -156,6 +161,7 @@ public final class PacketPhase extends TrackingPhase {
         DROP_ITEM(MODE_CLICK | MODE_PICKBLOCK | BUTTON_PRIMARY | CLICK_OUTSIDE_WINDOW) {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                super.populateContext(playerMP, packet, context);
                 context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
             }
 
@@ -273,6 +279,7 @@ public final class PacketPhase extends TrackingPhase {
         SWITCH_HOTBAR_SCROLL() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                super.populateContext(playerMP, packet, context);
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, playerMP.inventory.currentItem));
             }
 
@@ -333,14 +340,21 @@ public final class PacketPhase extends TrackingPhase {
             return this.stateMask != MASK_NONE && ((packetState & this.stateMask & this.stateId) == (packetState & this.stateMask));
         }
 
+        @Override
+        public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+            if (playerMP.openContainer != null) {
+                ((IMixinContainer) playerMP.openContainer).setCaptureInventory(true);
+            }
+        }
+
         @Nullable
         public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                 List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
             return null;
         }
 
-        public static Inventory fromWindowPacket(C0EPacketClickWindow windowPacket) {
-            final int mode = 0x01 << 9 << windowPacket.getMode();
+        public static Inventory fromWindowPacket(CPacketClickWindow windowPacket) {
+            final int mode = 0x01 << 9 << windowPacket.getClickType().ordinal();
             final int packed = windowPacket.getUsedButton();
             final int unpacked = mode == MODE_DRAG ? (0x01 << 6 << (packed >> 2 & 3)) | (0x01 << 3 << (packed & 3)) : (0x01 << (packed & 3));
             return Inventory.fromState(Inventory.clickType(windowPacket.getSlotId()) | mode | unpacked);
@@ -367,7 +381,7 @@ public final class PacketPhase extends TrackingPhase {
         INTERACTION() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
@@ -392,11 +406,11 @@ public final class PacketPhase extends TrackingPhase {
         INTERACT_ENTITY {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
+                final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
                 context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
                 context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
-                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
@@ -410,7 +424,7 @@ public final class PacketPhase extends TrackingPhase {
         ATTACK_ENTITY() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand());
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
@@ -424,7 +438,8 @@ public final class PacketPhase extends TrackingPhase {
         INTERACT_AT_ENTITY {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem());
+                final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
+                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
@@ -433,23 +448,30 @@ public final class PacketPhase extends TrackingPhase {
         CHAT() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                C01PacketChatMessage chatMessage = (C01PacketChatMessage) packet;
+                CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
                 if (chatMessage.getMessage().contains("kill")) {
                     context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
                 }
             }
         },
-        CREATIVE_INVENTORY,
-        ACTIVATE_BLOCK_OR_USE_ITEM() {
+        CREATIVE_INVENTORY {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
-                final ItemStack itemstack = ItemStackUtil.cloneDefensive(placeBlock.getStack());
+                ((IMixinContainer) playerMP.inventoryContainer).setCaptureInventory(true);
+            }
+        },
+        PLACE_BLOCK() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
+                final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
+                final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
+                final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
                 if (itemstack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
                 }
-                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPosition()));
-                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, EnumFacing.getFront(placeBlock.getPlacedBlockDirection())));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.func_187024_b()));
             }
 
             @Override
@@ -462,7 +484,7 @@ public final class PacketPhase extends TrackingPhase {
             }
 
             @Override
-            public void markPostNotificationChange(BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
+            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
                 final Player player = context.first(Player.class).get();
                 final BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                 final IMixinChunk spongeChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(pos);
@@ -475,16 +497,19 @@ public final class PacketPhase extends TrackingPhase {
         USE_ITEM {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
-                final C08PacketPlayerBlockPlacement placeBlock = (C08PacketPlayerBlockPlacement) packet;
-                final ItemStack itemstack = ItemStackUtil.cloneDefensive(placeBlock.getStack());
+                // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
+                final CPacketPlayerBlockPlacement placeBlock = (CPacketPlayerBlockPlacement) packet;
+                final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
+                final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
                 if (itemstack != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.HAND_USED, placeBlock.getHand()));
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
                 }
             }
         },
         INVALID_PLACE,
         CLIENT_SETTINGS,
-        RIDING_JUMP,
+        START_RIDING_JUMP,
         ANIMATION,
         START_SNEAKING,
         STOP_SNEAKING,
@@ -499,7 +524,9 @@ public final class PacketPhase extends TrackingPhase {
         },
         UPDATE_SIGN,
         HANDLED_EXTERNALLY,
-        RESOURCE_PACK;
+        RESOURCE_PACK,
+        STOP_RIDING_JUMP,
+        SWAP_HAND_ITEMS;
 
         @Override
         public PacketPhase getPhase() {
@@ -564,122 +591,127 @@ public final class PacketPhase extends TrackingPhase {
 
     PacketPhase(TrackingPhase parent) {
         super(parent);
-        this.packetTranslationMap.put(C00PacketKeepAlive.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(C01PacketChatMessage.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C02PacketUseEntity.class, packet -> {
-            final C02PacketUseEntity useEntityPacket = (C02PacketUseEntity) packet;
-            final C02PacketUseEntity.Action action = useEntityPacket.getAction();
-            if (action == C02PacketUseEntity.Action.INTERACT) {
+        this.packetTranslationMap.put(CPacketKeepAlive.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(CPacketChatMessage.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketUseEntity.class, packet -> {
+            final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
+            final CPacketUseEntity.Action action = useEntityPacket.getAction();
+            if (action == CPacketUseEntity.Action.INTERACT) {
                 return PacketPhase.General.INTERACT_ENTITY;
-            } else if (action == C02PacketUseEntity.Action.ATTACK) {
+            } else if (action == CPacketUseEntity.Action.ATTACK) {
                 return PacketPhase.General.ATTACK_ENTITY;
-            } else if (action == C02PacketUseEntity.Action.INTERACT_AT) {
+            } else if (action == CPacketUseEntity.Action.INTERACT_AT) {
                 return PacketPhase.General.INTERACT_AT_ENTITY;
             } else {
                 return PacketPhase.General.UNKNOWN;
             }
         });
-        this.packetTranslationMap.put(C03PacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
-        this.packetTranslationMap.put(C03PacketPlayer.C04PacketPlayerPosition.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C03PacketPlayer.C05PacketPlayerLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C03PacketPlayer.C06PacketPlayerPosLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C07PacketPlayerDigging.class, packet -> {
-            final C07PacketPlayerDigging playerDigging = (C07PacketPlayerDigging) packet;
-            final C07PacketPlayerDigging.Action action = playerDigging.getStatus();
+        this.packetTranslationMap.put(CPacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
+        this.packetTranslationMap.put(CPacketPlayer.C04PacketPlayerPosition.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.C05PacketPlayerLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.C06PacketPlayerPosLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
+            final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
+            final CPacketPlayerDigging.Action action = playerDigging.getAction();
             final IPacketState state = INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? PacketPhase.General.UNKNOWN : state;
         });
-        this.packetTranslationMap.put(C08PacketPlayerBlockPlacement.class, packet -> {
-            final C08PacketPlayerBlockPlacement blockPlace = (C08PacketPlayerBlockPlacement) packet;
-            final BlockPos blockPos = blockPlace.getPosition();
-            final EnumFacing front = EnumFacing.getFront(blockPlace.getPlacedBlockDirection());
-            final MinecraftServer server = MinecraftServer.getServer();
-            if (blockPlace.getPlacedBlockDirection() == 255 && blockPlace.getStack() != null) {
-                return PacketPhase.General.USE_ITEM;
-            } else if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
-                return PacketPhase.General.ACTIVATE_BLOCK_OR_USE_ITEM;
+        this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> {
+            // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
+            final CPacketPlayerTryUseItem blockPlace = (CPacketPlayerTryUseItem) packet;
+            final BlockPos blockPos = blockPlace.getPos();
+            final EnumFacing front = blockPlace.func_187024_b();
+            final MinecraftServer server = SpongeImpl.getServer();
+            if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
+                return PacketPhase.General.PLACE_BLOCK;
             } else {
                 return PacketPhase.General.INVALID_PLACE;
             }
         });
-        this.packetTranslationMap.put(C09PacketHeldItemChange.class, packet -> Inventory.SWITCH_HOTBAR_SCROLL);
-        this.packetTranslationMap.put(C0APacketAnimation.class, packet -> PacketPhase.General.ANIMATION);
-        this.packetTranslationMap.put(C0BPacketEntityAction.class, packet -> {
-            final C0BPacketEntityAction playerAction = (C0BPacketEntityAction) packet;
-            final C0BPacketEntityAction.Action action = playerAction.getAction();
+        this.packetTranslationMap.put(CPacketPlayerBlockPlacement.class, packet -> PacketPhase.General.USE_ITEM);
+        this.packetTranslationMap.put(CPacketHeldItemChange.class, packet -> PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL);
+        this.packetTranslationMap.put(CPacketAnimation.class, packet -> PacketPhase.General.ANIMATION);
+        this.packetTranslationMap.put(CPacketEntityAction.class, packet -> {
+            final CPacketEntityAction playerAction = (CPacketEntityAction) packet;
+            final CPacketEntityAction.Action action = playerAction.getAction();
             return PLAYER_ACTION_MAPPINGS.get(action);
         });
-        this.packetTranslationMap.put(C0CPacketInput.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C0DPacketCloseWindow.class, packet -> PacketPhase.General.CLOSE_WINDOW);
-        this.packetTranslationMap.put(C0EPacketClickWindow.class, packet -> Inventory.fromWindowPacket((C0EPacketClickWindow) packet));
-        this.packetTranslationMap.put(C0FPacketConfirmTransaction.class, packet -> PacketPhase.General.UNKNOWN);
-        this.packetTranslationMap.put(C10PacketCreativeInventoryAction.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
-        this.packetTranslationMap.put(C11PacketEnchantItem.class, packet -> Inventory.ENCHANT_ITEM);
-        this.packetTranslationMap.put(C12PacketUpdateSign.class, packet -> PacketPhase.General.UPDATE_SIGN);
-        this.packetTranslationMap.put(C13PacketPlayerAbilities.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(C14PacketTabComplete.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C15PacketClientSettings.class, packet -> PacketPhase.General.CLIENT_SETTINGS);
-        this.packetTranslationMap.put(C16PacketClientStatus.class, packet -> {
-            final C16PacketClientStatus clientStatus = (C16PacketClientStatus) packet;
-            final C16PacketClientStatus.EnumState status = clientStatus.getStatus();
-            if ( status == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT) {
+        this.packetTranslationMap.put(CPacketInput.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketCloseWindow.class, packet -> PacketPhase.General.CLOSE_WINDOW);
+        this.packetTranslationMap.put(CPacketClickWindow.class, packet -> Inventory.fromWindowPacket((CPacketClickWindow) packet));
+        this.packetTranslationMap.put(CPacketConfirmTransaction.class, packet -> PacketPhase.General.UNKNOWN);
+        this.packetTranslationMap.put(CPacketCreativeInventoryAction.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
+        this.packetTranslationMap.put(CPacketEnchantItem.class, packet -> Inventory.ENCHANT_ITEM);
+        this.packetTranslationMap.put(CPacketUpdateSign.class, packet -> PacketPhase.General.UPDATE_SIGN);
+        this.packetTranslationMap.put(CPacketPlayerAbilities.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(CPacketTabComplete.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketClientSettings.class, packet -> PacketPhase.General.CLIENT_SETTINGS);
+        this.packetTranslationMap.put(CPacketClientStatus.class, packet -> {
+            final CPacketClientStatus clientStatus = (CPacketClientStatus) packet;
+            final CPacketClientStatus.State status = clientStatus.getStatus();
+            if ( status == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT) {
                 return Inventory.OPEN_INVENTORY;
-            } else if ( status == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
+            } else if ( status == CPacketClientStatus.State.PERFORM_RESPAWN) {
                 return PacketPhase.General.REQUEST_RESPAWN;
             } else {
                 return PacketPhase.General.IGNORED;
             }
         });
-        this.packetTranslationMap.put(C17PacketCustomPayload.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(C18PacketSpectate.class, packet -> PacketPhase.General.IGNORED);
-        this.packetTranslationMap.put(C19PacketResourcePackStatus.class, packet -> PacketPhase.General.RESOURCE_PACK);
+        this.packetTranslationMap.put(CPacketCustomPayload.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketSpectate.class, packet -> PacketPhase.General.IGNORED);
+        this.packetTranslationMap.put(CPacketResourcePackStatus.class, packet -> PacketPhase.General.RESOURCE_PACK);
 
-        this.packetUnwindMap.put(C00PacketKeepAlive.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C01PacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C02PacketUseEntity.class, PacketFunction.USE_ENTITY);
-        this.packetUnwindMap.put(C03PacketPlayer.C04PacketPlayerPosition.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C03PacketPlayer.C05PacketPlayerLook.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C03PacketPlayer.C06PacketPlayerPosLook.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C07PacketPlayerDigging.class, PacketFunction.ACTION);
-        this.packetUnwindMap.put(C08PacketPlayerBlockPlacement.class, PacketFunction.USE_ITEM);
-        this.packetUnwindMap.put(C09PacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
-        this.packetUnwindMap.put(C0APacketAnimation.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C0BPacketEntityAction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C0CPacketInput.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C0DPacketCloseWindow.class, PacketFunction.CLOSE_WINDOW);
-        this.packetUnwindMap.put(C0EPacketClickWindow.class, PacketFunction.INVENTORY);
-        this.packetUnwindMap.put(C0FPacketConfirmTransaction.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C10PacketCreativeInventoryAction.class, PacketFunction.CREATIVE);
-        this.packetUnwindMap.put(C11PacketEnchantItem.class, PacketFunction.ENCHANTMENT);
-        this.packetUnwindMap.put(C12PacketUpdateSign.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C13PacketPlayerAbilities.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C14PacketTabComplete.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C15PacketClientSettings.class, PacketFunction.CLIENT_SETTINGS);
-        this.packetUnwindMap.put(C16PacketClientStatus.class, PacketFunction.CLIENT_STATUS);
-        this.packetUnwindMap.put(C17PacketCustomPayload.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(C18PacketSpectate.class, PacketFunction.IGNORED);
-        this.packetUnwindMap.put(C19PacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
+        this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
+        this.packetUnwindMap.put(CPacketPlayer.C04PacketPlayerPosition.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.C05PacketPlayerLook.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.C06PacketPlayerPosLook.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
+        // Note that CPacketPlayerBlockPlacement is swapped with CPacketPlayerTryUseItem
+        this.packetUnwindMap.put(CPacketPlayerBlockPlacement.class, PacketFunction.USE_ITEM);
+        // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
+        this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.PLACE_BLOCK);
+        this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
+        this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketEntityAction.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketInput.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketCloseWindow.class, PacketFunction.CLOSE_WINDOW);
+        this.packetUnwindMap.put(CPacketClickWindow.class, PacketFunction.INVENTORY);
+        this.packetUnwindMap.put(CPacketConfirmTransaction.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketCreativeInventoryAction.class, PacketFunction.CREATIVE);
+        this.packetUnwindMap.put(CPacketEnchantItem.class, PacketFunction.ENCHANTMENT);
+        this.packetUnwindMap.put(CPacketUpdateSign.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayerAbilities.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketTabComplete.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketClientSettings.class, PacketFunction.CLIENT_SETTINGS);
+        this.packetUnwindMap.put(CPacketClientStatus.class, PacketFunction.CLIENT_STATUS);
+        this.packetUnwindMap.put(CPacketCustomPayload.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketSpectate.class, PacketFunction.IGNORED);
+        this.packetUnwindMap.put(CPacketResourcePackStatus.class, PacketFunction.RESOURCE_PACKET);
 
     }
 
 
-    public static final ImmutableMap<C0BPacketEntityAction.Action, IPacketState> PLAYER_ACTION_MAPPINGS = ImmutableMap.<C0BPacketEntityAction.Action, IPacketState>builder()
-            .put(C0BPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
-            .put(C0BPacketEntityAction.Action.RIDING_JUMP, PacketPhase.General.RIDING_JUMP)
-            .put(C0BPacketEntityAction.Action.START_SNEAKING, PacketPhase.General.START_SNEAKING)
-            .put(C0BPacketEntityAction.Action.STOP_SNEAKING, PacketPhase.General.STOP_SNEAKING)
-            .put(C0BPacketEntityAction.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
-            .put(C0BPacketEntityAction.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)
-            .put(C0BPacketEntityAction.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
+    public static final ImmutableMap<CPacketEntityAction.Action, IPacketState> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPacketState>builder()
+            .put(CPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
+            .put(CPacketEntityAction.Action.START_RIDING_JUMP, PacketPhase.General.START_RIDING_JUMP)
+            .put(CPacketEntityAction.Action.STOP_RIDING_JUMP, PacketPhase.General.STOP_RIDING_JUMP)
+            .put(CPacketEntityAction.Action.START_SNEAKING, PacketPhase.General.START_SNEAKING)
+            .put(CPacketEntityAction.Action.STOP_SNEAKING, PacketPhase.General.STOP_SNEAKING)
+            .put(CPacketEntityAction.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
+            .put(CPacketEntityAction.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)
+            .put(CPacketEntityAction.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
             .build();
 
-    public static final ImmutableMap<C07PacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<C07PacketPlayerDigging.Action, IPacketState>builder()
-            .put(C07PacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
-            .put(C07PacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM)
-            .put(C07PacketPlayerDigging.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
-            .put(C07PacketPlayerDigging.Action.RELEASE_USE_ITEM, PacketPhase.General.INTERACTION)
+    public static final ImmutableMap<CPacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPacketState>builder()
+            .put(CPacketPlayerDigging.Action.DROP_ITEM, Inventory.DROP_ITEM)
+            .put(CPacketPlayerDigging.Action.DROP_ALL_ITEMS, Inventory.DROP_ITEM)
+            .put(CPacketPlayerDigging.Action.START_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(CPacketPlayerDigging.Action.ABORT_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(CPacketPlayerDigging.Action.STOP_DESTROY_BLOCK, PacketPhase.General.INTERACTION)
+            .put(CPacketPlayerDigging.Action.RELEASE_USE_ITEM, PacketPhase.General.INTERACTION)
+            .put(CPacketPlayerDigging.Action.SWAP_HELD_ITEMS, PacketPhase.General.SWAP_HAND_ITEMS)
             .build();
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {

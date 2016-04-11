@@ -45,7 +45,6 @@ import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 @NonnullByDefault
 public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
-    private final BiomeGenBase[] biomeById = BiomeGenBase.getBiomeGenArray();
     private final byte[] biomes;
 
     public ByteArrayImmutableBiomeBuffer(byte[] biomes, Vector2i start, Vector2i size) {
@@ -58,11 +57,10 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         this.biomes = biomes;
     }
 
-    @SuppressWarnings("ConstantConditions")
     @Override
     public BiomeType getBiome(int x, int z) {
         checkRange(x, z);
-        BiomeType biomeType = (BiomeType) this.biomeById[this.biomes[getIndex(x, z)] & 0xff];
+        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 

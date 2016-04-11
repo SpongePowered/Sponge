@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.data.builder.block.tileentity;
 
-import net.minecraft.command.server.CommandBlockLogic;
+import net.minecraft.tileentity.CommandBlockBaseLogic;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.block.tileentity.CommandBlock;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.text.SpongeTexts;
 
@@ -50,7 +49,7 @@ public class SpongeCommandBlockBuilder extends AbstractTileBuilder<CommandBlock>
                 ((TileEntity) commandBlock).invalidate();
                 return Optional.empty();
             }
-            CommandBlockLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
+            CommandBlockBaseLogic cmdBlockLogic = ((TileEntityCommandBlock) commandBlock).getCommandBlockLogic();
             cmdBlockLogic.setCommand(container.getString(DataQueries.STORED_COMMAND).get());
             cmdBlockLogic.successCount = container.getInt(DataQueries.SUCCESS_COUNT).get();
             cmdBlockLogic.setTrackOutput(container.getBoolean(DataQueries.DOES_TRACK_OUTPUT).get());

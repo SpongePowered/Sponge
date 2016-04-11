@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -55,7 +55,7 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String ENTITY_LIST_CREATE_ENTITY =
-            "Lnet/minecraft/entity/EntityList;createEntityByName(Ljava/lang/String;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
+            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoaderlspawnEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;)V";
 
     @Shadow private int spawnRange;
 

@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.ban;
 
 import com.google.gson.JsonObject;
-import net.minecraft.server.management.BanEntry;
-import net.minecraft.server.management.IPBanEntry;
+import net.minecraft.server.management.UserListEntryBan;
+import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
@@ -39,8 +39,8 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Date;
 
-@Mixin(IPBanEntry.class)
-public abstract class MixinIPBanEntry extends BanEntry implements Ban.Ip {
+@Mixin(UserListIPBansEntry.class)
+public abstract class MixinIPBanEntry extends UserListEntryBan implements Ban.Ip {
 
     public MixinIPBanEntry(Object valueIn, Date startDate, String banner, Date endDate, String banReason) {
         super(valueIn, startDate, banner, endDate, banReason);

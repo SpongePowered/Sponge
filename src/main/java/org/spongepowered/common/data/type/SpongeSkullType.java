@@ -53,6 +53,8 @@ public class SpongeSkullType extends SpongeCatalogType.Translatable implements S
             return new SpongeTranslation("item.skull.char.name");
         } else if (name.equalsIgnoreCase("CREEPER")) {
             return new SpongeTranslation("item.skull.creeper.name");
+        } else if (name.equalsIgnoreCase("ENDER_DRAGON")) {
+            return new SpongeTranslation("item.skull.dragon.name");
         } else {
             throw new IllegalArgumentException("Unsupported Skull Type \"" + name + "\"!");
         }

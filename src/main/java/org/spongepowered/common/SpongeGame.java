@@ -144,11 +144,6 @@ public abstract class SpongeGame implements Game {
     }
 
     @Override
-    public Server getServer() {
-        return (Server) MinecraftServer.getServer();
-    }
-
-    @Override
     public DataManager getDataManager() {
         return SpongeDataManager.getInstance();
     }

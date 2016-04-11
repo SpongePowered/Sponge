@@ -99,20 +99,6 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         saveSpongeDatData(worldInformation);
     }
 
-    @Inject(method = "saveWorldInfo", at = @At(value = "INVOKE", target = NBT_COMPOUND_SET, shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onSaveWorldInfoAfterTagSet(WorldInfo worldInformation, CallbackInfo ci, NBTTagCompound nbttagcompound,
-            NBTTagCompound nbttagcompound1) {
-        saveDimensionAndOtherData((SaveHandler) (Object) this, worldInformation, nbttagcompound1);
-    }
-
-    @Inject(method = "saveWorldInfo", at = @At("RETURN"))
-    public void onSaveWorldInfoEnd(WorldInfo worldInformation, CallbackInfo ci) {
-        if (!StaticMixinHelper.convertingMapFormat) {
-            saveSpongeDatData(worldInformation);
-        }
-    }
-
     @Override
     public void loadSpongeDatData(WorldInfo info) throws IOException {
         final File spongeFile = new File(this.worldDirectory, "level_sponge.dat");

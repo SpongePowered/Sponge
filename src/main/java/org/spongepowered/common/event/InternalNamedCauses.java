@@ -51,6 +51,7 @@ public final class InternalNamedCauses {
         public static final String PLACED_BLOCK_FACING = "BlockFacingPlacedAgainst";
         public static final String PREVIOUS_HIGHLIGHTED_SLOT = "PreviousSlot";
         public static final String IGNORING_CREATIVE = "IgnoringCreative";
+        public static final String HAND_USED = "HandUsed";
 
         private Packet() {}
     }

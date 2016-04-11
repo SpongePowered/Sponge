@@ -67,7 +67,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
             if (command.getCallable() instanceof MinecraftCommandWrapper) {
                 MinecraftCommandWrapper wrapper = (MinecraftCommandWrapper) command.getCallable();
                 this.data.setPermission(SubjectData.GLOBAL_CONTEXT, wrapper.getCommandPermission(),
-                        Tristate.fromBoolean(wrapper.command.canCommandSenderUseCommand(sender)));
+                        Tristate.fromBoolean(wrapper.command.checkPermission(sender.getServer(), sender)));
             }
         }
     }
@@ -135,7 +135,7 @@ public class WrapperCommandSource extends SpongeSubject implements CommandSource
 
         @Override
         public Location<World> getLocation() {
-            return new Location<>(getWorld(), VecHelper.toVector(this.sender.getPositionVector()));
+            return new Location<>(getWorld(), VecHelper.toVector3d(this.sender.getPositionVector()));
         }
 
         @Override

@@ -24,47 +24,56 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import com.google.common.collect.Iterables;
 import net.minecraft.entity.monster.EntityZombie;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVillagerZombieData;
 import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.entity.SpongeProfession;
+import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 
 import java.util.Optional;
 
 public class VillagerZombieProcessor
-        extends AbstractEntitySingleDataProcessor<EntityZombie, Boolean, Value<Boolean>, VillagerZombieData, ImmutableVillagerZombieData> {
+        extends AbstractEntitySingleDataProcessor<EntityZombie, Profession, Value<Profession>, VillagerZombieData, ImmutableVillagerZombieData> {
 
     public VillagerZombieProcessor() {
-        super(EntityZombie.class, Keys.IS_VILLAGER_ZOMBIE);
+        super(EntityZombie.class, Keys.VILLAGER_ZOMBIE_PROFESSION);
     }
 
     @Override
-    protected boolean set(EntityZombie entity, Boolean value) {
-        entity.setVillager(value);
+    protected boolean set(EntityZombie entity, Profession value) {
+        entity.setVillagerType(((SpongeProfession) value).type);
         return true;
     }
 
     @Override
-    protected Optional<Boolean> getVal(EntityZombie entity) {
-        return Optional.of(entity.isVillager());
+    protected Optional<Profession> getVal(EntityZombie entity) {
+        if (entity.isVillager()) {
+            return Optional.of(Iterables.get(ProfessionRegistryModule.getInstance().getAll(), entity.getVillagerType()));
+        }
+        return Optional.empty();
     }
 
     @Override
-    protected Value<Boolean> constructValue(Boolean actualValue) {
-        return new SpongeValue<>(Keys.IS_VILLAGER_ZOMBIE, false, actualValue);
+    protected Value<Profession> constructValue(Profession actualValue) {
+        return new SpongeValue<>(Keys.VILLAGER_ZOMBIE_PROFESSION, Professions.FARMER, actualValue);
     }
 
     @Override
-    protected ImmutableValue<Boolean> constructImmutableValue(Boolean value) {
-        return ImmutableSpongeValue.cachedOf(Keys.IS_VILLAGER_ZOMBIE, false, value);
+    protected ImmutableValue<Profession> constructImmutableValue(Profession value) {
+        return ImmutableSpongeValue.cachedOf(Keys.VILLAGER_ZOMBIE_PROFESSION, Professions.FARMER, value);
     }
 
     @Override
@@ -74,7 +83,14 @@ public class VillagerZombieProcessor
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
-        return DataTransactionResult.failNoData();
+        EntityZombie zombie = (EntityZombie) container;
+
+        Optional<Profession> oldValue = this.getVal(zombie);
+        if (!oldValue.isPresent()) {
+            return DataTransactionResult.successNoData();
+        }
+        ((EntityZombie) container).setToNotVillager();
+        return DataTransactionResult.successRemove(constructImmutableValue(oldValue.get()));
     }
 
 }

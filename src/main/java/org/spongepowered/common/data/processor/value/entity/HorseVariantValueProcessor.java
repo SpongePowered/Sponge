@@ -53,13 +53,13 @@ public class HorseVariantValueProcessor extends AbstractSpongeValueProcessor<Ent
 
     @Override
     protected boolean set(EntityHorse container, HorseVariant value) {
-        container.setHorseType(((SpongeHorseVariant) value).type);
+        container.setType(((SpongeHorseVariant) value).getType());
         return true;
     }
 
     @Override
     protected Optional<HorseVariant> getVal(EntityHorse container) {
-        return Optional.of(HorseUtils.getHorseVariant(container.getHorseType()));
+        return Optional.of(HorseUtils.getHorseVariant(container.getType()));
     }
 
     @Override

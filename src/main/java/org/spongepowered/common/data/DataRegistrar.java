@@ -429,9 +429,6 @@ public class DataRegistrar {
         dataManager.registerDualProcessor(BlockItemData.class, SpongeBlockItemData.class, ImmutableBlockItemData.class,
                 ImmutableSpongeBlockItemData.class, new BlockItemDataProcessor());
 
-        dataManager.registerDualProcessor(SplashPotionData.class, SpongeSplashPotionData.class, ImmutableSplashPotionData.class,
-                ImmutableSpongeSplashPotionData.class, new SplashPotionDataProcessor());
-
         dataManager.registerDualProcessor(GenerationData.class, SpongeGenerationData.class,
                 ImmutableGenerationData.class, ImmutableSpongeGenerationData.class, new GenerationDataProcessor());
 
@@ -547,9 +544,6 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(SnowedData.class, SpongeSnowedData.class, ImmutableSnowedData.class,
                 ImmutableSpongeSnowedData.class, new SnowedDataProcessor());
-
-        dataManager.registerDualProcessor(SuspendedData.class, SpongeSuspendedData.class, ImmutableSuspendedData.class,
-                ImmutableSpongeSuspendedData.class, new SuspendedDataProcessor());
 
         dataManager.registerDualProcessor(OccupiedData.class, SpongeOccupiedData.class, ImmutableOccupiedData.class,
                 ImmutableSpongeOccupiedData.class, new OccupiedDataProcessor());

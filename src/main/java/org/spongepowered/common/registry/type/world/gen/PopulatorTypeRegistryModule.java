@@ -29,19 +29,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.world.gen.GeneratorBushFeature;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenBlockBlob;
+import net.minecraft.world.gen.feature.WorldGenBush;
 import net.minecraft.world.gen.feature.WorldGenCactus;
 import net.minecraft.world.gen.feature.WorldGenClay;
 import net.minecraft.world.gen.feature.WorldGenDeadBush;
 import net.minecraft.world.gen.feature.WorldGenDesertWells;
 import net.minecraft.world.gen.feature.WorldGenDoublePlant;
 import net.minecraft.world.gen.feature.WorldGenDungeons;
+import net.minecraft.world.gen.feature.WorldGenEndIsland;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import net.minecraft.world.gen.feature.WorldGenFlowers;
-import net.minecraft.world.gen.feature.WorldGenForest;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;
 import net.minecraft.world.gen.feature.WorldGenGlowStone2;
 import net.minecraft.world.gen.feature.WorldGenHellLava;
@@ -117,11 +118,12 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorTypeMappings.put("big_mushroom", new SpongePopulatorType("big_mushroom"));
         this.populatorTypeMappings.put("block_blob", new SpongePopulatorType("block_blob"));
         this.populatorTypeMappings.put("cactus", new SpongePopulatorType("cactus"));
+        this.populatorTypeMappings.put("chorus_flower", new SpongePopulatorType("chorus_flower"));
         this.populatorTypeMappings.put("dead_bush", new SpongePopulatorType("dead_bush"));
         this.populatorTypeMappings.put("desert_well", new SpongePopulatorType("desert_well"));
         this.populatorTypeMappings.put("double_plant", new SpongePopulatorType("double_plant"));
         this.populatorTypeMappings.put("dungeon", new SpongePopulatorType("dungeon"));
-        this.populatorTypeMappings.put("ender_crystal_platform", new SpongePopulatorType("ender_crystal_platform"));
+        this.populatorTypeMappings.put("end_island", new SpongePopulatorType("end_island"));
         this.populatorTypeMappings.put("flower", new SpongePopulatorType("flower"));
         this.populatorTypeMappings.put("forest", new SpongePopulatorType("forest"));
         this.populatorTypeMappings.put("glowstone", new SpongePopulatorType("glowstone"));
@@ -144,6 +146,7 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         // internal
         this.populatorTypeMappings.put("animal", new SpongePopulatorType("animal"));
         this.populatorTypeMappings.put("bonus_chest", new SpongePopulatorType("bonus_chest"));
+        this.populatorTypeMappings.put("end_spike", new SpongePopulatorType("end_spike"));
         this.populatorTypeMappings.put("ender_dragon", new SpongePopulatorType("ender_dragon"));
         this.populatorTypeMappings.put("plains_grass", new SpongePopulatorType("plains_grass"));
         this.populatorTypeMappings.put("snow", new SpongePopulatorType("snow"));
@@ -152,17 +155,19 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
 
         this.populatorClassToTypeMappings.put(WorldGenBigMushroom.class, this.populatorTypeMappings.get("big_mushroom"));
         this.populatorClassToTypeMappings.put(WorldGenBigTree.class, this.populatorTypeMappings.get("forest"));
+        this.populatorClassToTypeMappings.put(WorldGenBirchTree.class, this.populatorTypeMappings.get("forest"));
         this.populatorClassToTypeMappings.put(WorldGenBlockBlob.class, this.populatorTypeMappings.get("block_blob"));
+        this.populatorClassToTypeMappings.put(WorldGenBush.class, this.populatorTypeMappings.get("mushroom"));
         this.populatorClassToTypeMappings.put(WorldGenCactus.class, this.populatorTypeMappings.get("cactus"));
         this.populatorClassToTypeMappings.put(WorldGenClay.class, this.populatorTypeMappings.get("sea_floor"));
         this.populatorClassToTypeMappings.put(WorldGenDeadBush.class, this.populatorTypeMappings.get("dead_bush"));
         this.populatorClassToTypeMappings.put(WorldGenDesertWells.class, this.populatorTypeMappings.get("desert_well"));
         this.populatorClassToTypeMappings.put(WorldGenDoublePlant.class, this.populatorTypeMappings.get("double_plant"));
         this.populatorClassToTypeMappings.put(WorldGenDungeons.class, this.populatorTypeMappings.get("dungeon"));
+        this.populatorClassToTypeMappings.put(WorldGenEndIsland.class, this.populatorTypeMappings.get("end_island"));
         this.populatorClassToTypeMappings.put(WorldGeneratorBonusChest.class, this.populatorTypeMappings.get("bonus_chest"));
         this.populatorClassToTypeMappings.put(WorldGenFire.class, this.populatorTypeMappings.get("generic_block"));
         this.populatorClassToTypeMappings.put(WorldGenFlowers.class, this.populatorTypeMappings.get("flower"));
-        this.populatorClassToTypeMappings.put(WorldGenForest.class, this.populatorTypeMappings.get("forest"));
         this.populatorClassToTypeMappings.put(WorldGenGlowStone1.class, this.populatorTypeMappings.get("glowstone"));
         this.populatorClassToTypeMappings.put(WorldGenGlowStone2.class, this.populatorTypeMappings.get("glowstone"));
         this.populatorClassToTypeMappings.put(WorldGenHellLava.class, this.populatorTypeMappings.get("generic_block"));
@@ -188,7 +193,6 @@ public final class PopulatorTypeRegistryModule implements AdditionalCatalogRegis
         this.populatorClassToTypeMappings.put(WorldGenTrees.class, this.populatorTypeMappings.get("forest"));
         this.populatorClassToTypeMappings.put(WorldGenVines.class, this.populatorTypeMappings.get("vine"));
         this.populatorClassToTypeMappings.put(WorldGenWaterlily.class, this.populatorTypeMappings.get("water_lily"));
-        this.populatorClassToTypeMappings.put(GeneratorBushFeature.class, this.populatorTypeMappings.get("mushroom"));
     }
 
     @Override

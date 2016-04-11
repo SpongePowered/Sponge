@@ -26,9 +26,9 @@ package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import net.minecraft.world.gen.GeneratorBushFeature;
+import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
@@ -53,11 +53,11 @@ import java.util.function.Function;
  */
 public class HellMushroomPopulator implements Populator, Mushroom {
 
-    private final GeneratorBushFeature feature;
+    private final WorldGenBush feature;
     private final Mushroom featureM;
 
     public HellMushroomPopulator() {
-        this.feature = new GeneratorBushFeature(null);
+        this.feature = new WorldGenBush(null);
         this.featureM = (Mushroom) this.feature;
     }
 
@@ -76,7 +76,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
         int z;
         int n = this.featureM.getMushroomsPerChunk().getFlooredAmount(random);
 
-        MushroomType type = MushroomTypes.BROWN;
+        MushroomType type;
         List<MushroomType> result;
         for (int i = 0; i < n; ++i) {
             x = random.nextInt(16) + 8;
@@ -84,7 +84,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
             y = random.nextInt(128);
             BlockPos height = chunkPos.add(x, y, z);
             if (this.featureM.getSupplierOverride().isPresent()) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(height));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
             } else {
                 result = this.featureM.getTypes().get(random);
