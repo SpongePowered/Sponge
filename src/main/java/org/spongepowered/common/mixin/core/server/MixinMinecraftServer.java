@@ -442,6 +442,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
                     this.theProfiler).init();
             ((IMixinWorldProvider) worldServer.provider).setDimensionId(dim);
+            DimensionManager.setWorld(dim, worldServer);
             worldServer.initialize(worldSettings);
             worldServer.addEventListener(new WorldManager((MinecraftServer) (Object) this, worldServer));
 
