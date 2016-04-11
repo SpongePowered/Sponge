@@ -28,30 +28,38 @@ import com.flowpowered.math.GenericMath;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderEnd;
+import net.minecraft.world.gen.structure.MapGenEndCity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
+import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.util.gen.ChunkBufferPrimer;
-import org.spongepowered.common.world.gen.populators.EnderDragonPopulator;
 
 import java.util.Random;
 
 @Mixin(ChunkProviderEnd.class)
 public abstract class MixinChunkProviderEnd implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow public Random endRNG;
+    @Shadow public Random rand;
 
     @Shadow
-    public abstract void func_180520_a(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);
+    public abstract void setBlocksInChunk(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);
+
+    @Shadow private @Final MapGenEndCity field_185972_n;
+    @Shadow private @Final boolean mapFeaturesEnabled;
 
     @Override
     public void addPopulators(WorldGenerator generator) {
-        generator.getPopulators().add(new EnderDragonPopulator());
+        if (this.mapFeaturesEnabled) {
+            generator.getPopulators().add((Populator) this.field_185972_n);
+            generator.getGenerationPopulators().add((GenerationPopulator) this.field_185972_n);
+        }
     }
 
     @Override
@@ -59,8 +67,8 @@ public abstract class MixinChunkProviderEnd implements IChunkProvider, Generatio
         int x = GenericMath.floor(buffer.getBlockMin().getX() / 16f);
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
-        this.endRNG.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-        this.func_180520_a(x, z, chunkprimer);
+        this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
+        this.setBlocksInChunk(x, z, chunkprimer);
     }
 
 }

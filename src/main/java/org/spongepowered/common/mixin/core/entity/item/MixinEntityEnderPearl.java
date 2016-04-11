@@ -38,7 +38,7 @@ public abstract class MixinEntityEnderPearl extends MixinEntityThrowable impleme
 
     public double damageAmount;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V", at =
+    @ModifyArg(method = "onImpact", at =
             @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z")
         )
     private float onAttackEntityFrom(float damage) {

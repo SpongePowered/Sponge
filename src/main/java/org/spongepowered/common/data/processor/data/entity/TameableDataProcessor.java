@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.entity.passive.EntityTameable;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -51,16 +50,7 @@ public class TameableDataProcessor
 
     @Override
     protected Optional<Optional<UUID>> getVal(EntityTameable tameable) {
-        UUID uuid = null;
-        String ownerId = tameable.getOwnerId();
-        if (ownerId != null) {
-            try {
-                uuid = UUIDTypeAdapter.fromString(ownerId);
-            } catch (RuntimeException ignored) {
-                // Don't care
-            }
-        }
-        return Optional.of(Optional.ofNullable(uuid));
+        return Optional.of(Optional.ofNullable(tameable.getOwnerId()));
     }
 
     @Override
@@ -79,11 +69,7 @@ public class TameableDataProcessor
 
     @Override
     protected boolean set(EntityTameable tameable, Optional<UUID> uuidOptional) {
-        String ownerId = "";
-        if (uuidOptional.isPresent()) {
-            ownerId = UUIDTypeAdapter.fromUUID(uuidOptional.get());
-        }
-        tameable.setOwnerId(ownerId);
+        tameable.setOwnerId(uuidOptional.orElse(null));
         return true;
     }
 

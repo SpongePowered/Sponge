@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenAbstractTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
 import org.spongepowered.api.world.World;
@@ -66,7 +66,7 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
                 for (k = x - b0; k <= x + b0 && flag; ++k) {
                     for (l = z - b0; l <= z + b0 && flag; ++l) {
                         if (j >= 0 && j < 256) {
-                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                                 flag = false;
                             }
                         } else {

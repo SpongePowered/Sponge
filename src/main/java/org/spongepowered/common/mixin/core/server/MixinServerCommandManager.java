@@ -30,7 +30,7 @@ import net.minecraft.command.CommandResultStats;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.command.ServerCommandManager;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;

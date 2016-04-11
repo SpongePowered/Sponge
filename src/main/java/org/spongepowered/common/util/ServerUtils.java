@@ -33,7 +33,9 @@ import net.minecraft.world.MinecraftException;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
@@ -77,6 +79,10 @@ public class ServerUtils {
         return SpongeScheduler.getInstance().submitAsyncTask(new DeleteWorldTask(worldProperties));
     }
 
+    public static boolean isCallingFromMainThread() {
+        return Sponge.isServerAvailable() && SpongeImpl.getServer().isCallingFromMinecraftThread();
+    }
+
     private static class CopyWorldTask implements Callable<Optional<WorldProperties>> {
 
         private final WorldInfo oldInfo;
@@ -118,7 +124,7 @@ public class ServerUtils {
             ((IMixinWorldInfo) info).setUUID(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             WorldPropertyRegistryModule.getInstance().registerWorldProperties((WorldProperties) info);
-            ((IMixinMinecraftServer) MinecraftServer.getServer()).getHandler(this.newName).saveWorldInfo(info);
+            ((IMixinMinecraftServer) Sponge.getServer()).getHandler(this.newName).saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
 

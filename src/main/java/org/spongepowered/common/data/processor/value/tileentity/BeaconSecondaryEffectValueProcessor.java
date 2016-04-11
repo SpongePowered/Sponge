@@ -55,7 +55,7 @@ public class BeaconSecondaryEffectValueProcessor
             return false;
         }
         if (value.isPresent()) {
-            container.setField(2, ((Potion) value.get()).getId());
+            container.setField(2, Potion.getIdFromPotion((Potion) value.get()));
         } else {
             container.setField(2, 0);
         }
@@ -70,7 +70,7 @@ public class BeaconSecondaryEffectValueProcessor
         }
         int id = container.getField(2);
         if (id > 0) {
-            return Optional.of(Optional.of((PotionEffectType) Potion.potionTypes[id]));
+            return Optional.of(Optional.of((PotionEffectType) Potion.getPotionById(id)));
         }
         return Optional.of(Optional.empty());
     }

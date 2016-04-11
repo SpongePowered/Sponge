@@ -24,14 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.UserListEntry;
+import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,7 +44,7 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
-@Mixin(BanEntry.class)
+@Mixin(UserListEntryBan.class)
 public abstract class MixinBanEntry extends UserListEntry implements Ban {
 
     public MixinBanEntry(Object p_i1146_1_) {

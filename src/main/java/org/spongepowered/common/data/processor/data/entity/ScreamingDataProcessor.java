@@ -53,7 +53,7 @@ public class ScreamingDataProcessor
 
     @Override
     protected boolean set(EntityEnderman entity, Boolean value) {
-        entity.setScreaming(value);
+        entity.getDataManager().set(EntityEnderman.SCREAMING, value);
         return true;
     }
 

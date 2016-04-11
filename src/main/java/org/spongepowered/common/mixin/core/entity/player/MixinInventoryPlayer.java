@@ -29,7 +29,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.S09PacketHeldItemChange;
+import net.minecraft.network.play.server.SPacketHeldItemChange;
 import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
@@ -54,7 +54,7 @@ import java.util.Optional;
 
 @Mixin(InventoryPlayer.class)
 public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, HumanInventory {
-    
+
     @Shadow public int currentItem;
     @Shadow public EntityPlayer player;
 
@@ -109,12 +109,12 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
     public SlotProvider<IInventory, ItemStack> getSlotProvider() {
         return this.slots;
     }
-    
+
     @Override
     public void setSelectedItem(int itemIndex, boolean notify) {
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof EntityPlayerMP) {
-            S09PacketHeldItemChange packet = new S09PacketHeldItemChange(itemIndex);
+            SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
             ((EntityPlayerMP)this.player).playerNetServerHandler.sendPacket(packet);
         }
         this.currentItem = itemIndex;

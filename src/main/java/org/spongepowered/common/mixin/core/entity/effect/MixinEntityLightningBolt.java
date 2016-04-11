@@ -29,8 +29,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
-import org.spongepowered.api.Game;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -42,7 +41,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.weather.Lightning;
-import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -86,20 +84,20 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
     public boolean onStrikeBlockInit(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         return onStrikeBlock(world, pos, blockState);
     }
 
     @Redirect(method = "onUpdate()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
+            target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;)Z"))
     public boolean onStrikeBlockUpdate(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         return onStrikeBlock(world, pos, blockState);
     }
 
     private boolean onStrikeBlock(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
         if (!this.effect) {
-            Vector3i pos3i = VecHelper.toVector(pos);
+            Vector3i pos3i = VecHelper.toVector3i(pos);
             Transaction<BlockSnapshot> transaction = new Transaction<BlockSnapshot>(new SpongeBlockSnapshotBuilder()
                     .blockState((BlockState) world.getBlockState(pos)).world(((World) world).getProperties()).position(pos3i).build(),
                     new SpongeBlockSnapshotBuilder().blockState((BlockState) blockState).world(((World) world).getProperties()).position(pos3i)

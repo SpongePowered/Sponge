@@ -32,8 +32,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.EntityType;
@@ -63,15 +64,14 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 public abstract class MixinCommandSummon extends CommandBase {
 
     private static final String LIGHTNINGBOLT_CLASS = "class=net/minecraft/entity/effect/EntityLightningBolt";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
-            "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
+            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
-    @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
-    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, ICommandSender sender, String[] args) {
+    @Redirect(method = "execute", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
+    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double d1, double d2, double d3, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
         if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.EnumMinecartType.byNetworkID(nbt.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
+                    EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID));
@@ -82,7 +82,7 @@ public abstract class MixinCommandSummon extends CommandBase {
         if (type == null) {
             return null;
         }
-        Vec3 vec3 = sender.getPositionVector();
+        Vec3d vec3 = sender.getPositionVector();
 
         double x = vec3.xCoord;
         double y = vec3.yCoord;
@@ -105,17 +105,16 @@ public abstract class MixinCommandSummon extends CommandBase {
         return event.isCancelled() ? null : EntityList.createEntityFromNBT(nbt, world);
     }
 
-    @Inject(method = "processCommand", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
+    @Inject(method = "execute", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onProcess(ICommandSender commandSender, String[] args, CallbackInfo callbackInfo, String unused, BlockPos position, Vec3 vector,
-            double x, double y, double z, World target) {
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) target, new Vector3d(x, y, z));
+    private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d, double x, double y, double z, World world) {
+        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
 
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(commandSender))),
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(sender))),
                 EntityTypes.LIGHTNING, transform);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            callbackInfo.cancel();
+            ci.cancel();
         }
     }
 

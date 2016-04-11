@@ -29,9 +29,9 @@ import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 
@@ -55,12 +55,12 @@ public class BaseVehicleValueProcessor extends AbstractSpongeValueProcessor<net.
 
     @Override
     protected boolean set(net.minecraft.entity.Entity container, EntitySnapshot value) {
-        return EntityUtil.setVehicle(container, (net.minecraft.entity.Entity) value.restore().orElse(null));
+        return ((Entity) container).setVehicle(value.restore().orElse(null)).isSuccessful();
     }
 
     @Override
     protected Optional<EntitySnapshot> getVal(net.minecraft.entity.Entity container) {
-        return Optional.ofNullable(EntityUtil.getBaseVehicle(container));
+        return Optional.ofNullable(container.getLowestRidingEntity() == null ? null : ((Entity) container.getLowestRidingEntity()).createSnapshot());
     }
 
     @Override

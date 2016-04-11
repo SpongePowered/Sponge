@@ -30,11 +30,12 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandHandler;
+import net.minecraft.command.EntitySelector;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.command.PlayerSelector;
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandPermissionException;
@@ -94,7 +95,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) MinecraftServer.getServer().getCommandManager();
+        CommandHandler handler = (CommandHandler) ((ICommandSender) source).getServer().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
@@ -107,7 +108,7 @@ public class MinecraftCommandWrapper implements CommandCallable {
         int affectedEntities = 1;
         if (usernameIndex > -1) {
             @SuppressWarnings("unchecked")
-            List<Entity> list = PlayerSelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
+            List<Entity> list = EntitySelector.matchEntities(mcSender, splitArgs[usernameIndex], Entity.class);
             String previousNameVal = splitArgs[usernameIndex];
             affectedEntities = list.size();
 
@@ -165,7 +166,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
 
     @Override
     public boolean testPermission(CommandSource source) {
-        return this.command.canCommandSenderUseCommand(WrapperICommandSender.of(source));
+        ICommandSender sender = WrapperICommandSender.of(source);
+        return this.command.checkPermission(sender.getServer(), sender);
     }
 
     @Override
@@ -213,7 +215,8 @@ public class MinecraftCommandWrapper implements CommandCallable {
             return ImmutableList.of();
         }
         @SuppressWarnings("unchecked")
-        List<String> suggestions = this.command.addTabCompletionOptions(WrapperICommandSender.of(source), arguments.split(" ", -1), ((IMixinServerCommandManager) MinecraftServer.getServer().getCommandManager()).getTabBlockPos());
+        List<String> suggestions = this.command.getTabCompletionOptions((MinecraftServer) Sponge.getServer(), WrapperICommandSender.of(source),
+                arguments.split(" ", -1), ((IMixinServerCommandManager) ((MinecraftServer) Sponge.getServer()).getCommandManager()).getTabBlockPos());
         if (suggestions == null) {
             return ImmutableList.of();
         }

@@ -27,7 +27,7 @@ package org.spongepowered.common.registry.type.text;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextStyle;
@@ -41,12 +41,12 @@ public final class TextStyleRegistryModule implements CatalogRegistryModule<Text
 
     @RegisterCatalog(TextStyles.class)
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
-        .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
-        .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
-        .put("underline", SpongeTextStyle.of(EnumChatFormatting.UNDERLINE))
-        .put("strikethrough", SpongeTextStyle.of(EnumChatFormatting.STRIKETHROUGH))
-        .put("obfuscated", SpongeTextStyle.of(EnumChatFormatting.OBFUSCATED))
-        .put("reset", SpongeTextStyle.of(EnumChatFormatting.RESET))
+        .put("bold", SpongeTextStyle.of(TextFormatting.BOLD))
+        .put("italic", SpongeTextStyle.of(TextFormatting.ITALIC))
+        .put("underline", SpongeTextStyle.of(TextFormatting.UNDERLINE))
+        .put("strikethrough", SpongeTextStyle.of(TextFormatting.STRIKETHROUGH))
+        .put("obfuscated", SpongeTextStyle.of(TextFormatting.OBFUSCATED))
+        .put("reset", SpongeTextStyle.of(TextFormatting.RESET))
         .build();
 
     @Override

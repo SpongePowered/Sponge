@@ -24,22 +24,24 @@
  */
 package org.spongepowered.common.event.damage;
 
-import net.minecraft.block.Block;
+import com.google.common.collect.Iterables;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.MobEffects;
+import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.potion.Potion;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EntityDamageSourceIndirect;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -63,6 +65,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -82,27 +85,13 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createHardHatModifier(EntityLivingBase entityLivingBase,
                                                                                                           DamageSource damageSource) {
-        if ((damageSource instanceof FallingBlockDamageSource) && entityLivingBase.getEquipmentInSlot(4) != null) {
+        if ((damageSource instanceof FallingBlockDamageSource) && entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD) != null) {
             DamageModifier modifier = DamageModifier.builder()
                 .cause(
-                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.getEquipmentInSlot(4)).createSnapshot())))
+                    Cause.of(NamedCause.of(DamageEntityEvent.HARD_HAT_ARMOR, ((ItemStack) entityLivingBase.getItemStackFromSlot(EntityEquipmentSlot.HEAD)).createSnapshot())))
                 .type(DamageModifierTypes.HARD_HAT)
                 .build();
             return Optional.of(new Tuple<>(modifier, HARD_HAT_FUNCTION));
-        }
-        return Optional.empty();
-    }
-
-    public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createBlockingModifier(EntityLivingBase entityLivingBase,
-                                                                                                           DamageSource damageSource) {
-        if (!damageSource.isUnblockable() && (entityLivingBase instanceof EntityPlayer && ((EntityPlayer) entityLivingBase).isBlocking())) {
-            DamageModifier modifier = DamageModifier.builder()
-                .cause(Cause.of(NamedCause
-                                    .of(DamageEntityEvent.BLOCKING,
-                                        ((ItemStack) ((EntityPlayer) entityLivingBase).getCurrentEquippedItem()).createSnapshot())))
-                .type(DamageModifierTypes.BLOCKING)
-                .build();
-            return Optional.of(new Tuple<>(modifier, BLOCKING_FUNCTION));
         }
         return Optional.empty();
     }
@@ -113,10 +102,10 @@ public class DamageEventHandler {
                                                                                                                DamageSource damageSource, double damage) {
         if (!damageSource.isDamageAbsolute()) {
             damage *= 25;
-            net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer
-                                                       ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.getInventory();
+            net.minecraft.item.ItemStack[] inventory = Iterables.toArray(entityLivingBase.getArmorInventoryList(), net.minecraft.item.ItemStack.class);
             List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
             List<DamageObject> damageObjects = new ArrayList<>();
+
             for (int index = 0; index < inventory.length; index++) {
                 net.minecraft.item.ItemStack itemStack = inventory[index];
                 if (itemStack == null) {
@@ -132,6 +121,7 @@ public class DamageEventHandler {
                     damageObjects.add(object);
                 }
             }
+
             boolean first = true;
             double ratio = 0;
 
@@ -192,7 +182,7 @@ public class DamageEventHandler {
      */
     public static void acceptArmorModifier(EntityLivingBase entity, DamageSource damageSource, DamageModifier modifier, double damage) {
         Optional<DamageObject> property = modifier.getCause().first(DamageObject.class);
-        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.getInventory();
+        final net.minecraft.item.ItemStack[] inventory = entity instanceof EntityPlayer ? ((EntityPlayer) entity).inventory.armorInventory : entity.armorArray;
         if (property.isPresent()) {
             damage = Math.abs(damage) * 25;
             net.minecraft.item.ItemStack stack = inventory[property.get().slot];
@@ -221,8 +211,8 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createResistanceModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(Potion.resistance) && damageSource != DamageSource.outOfWorld) {
-            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(Potion.resistance));
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.resistance) && damageSource != DamageSource.outOfWorld) {
+            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.resistance));
             return Optional.of(new Tuple<>(DamageModifier.builder()
                                                .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
                                                .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
@@ -235,8 +225,8 @@ public class DamageEventHandler {
     private static double previousEnchantmentModifier = 0;
 
     public static Optional<List<Tuple<DamageModifier, Function<? super Double, Double>>>> createEnchantmentModifiers(EntityLivingBase entityLivingBase, DamageSource damageSource) {
-        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.getInventory();
-        if (EnchantmentHelper.getEnchantmentModifierDamage(inventory, damageSource) == 0) {
+        net.minecraft.item.ItemStack[] inventory = entityLivingBase instanceof EntityPlayer ? ((EntityPlayer) entityLivingBase).inventory.armorInventory : entityLivingBase.armorArray;
+        if (EnchantmentHelper.getEnchantmentModifierDamage(Arrays.asList(inventory), damageSource) == 0) {
             return Optional.empty();
         }
         List<Tuple<DamageModifier, Function<? super Double, Double>>> modifiers = new ArrayList<>();
@@ -254,9 +244,9 @@ public class DamageEventHandler {
                 final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-                if (Enchantment.getEnchantmentById(enchantmentId) != null) {
+                if (Enchantment.getEnchantmentByID(enchantmentId) != null) {
                     // Ok, we have an enchantment!
-                    final Enchantment enchantment = Enchantment.getEnchantmentById(enchantmentId);
+                    final Enchantment enchantment = Enchantment.getEnchantmentByID(enchantmentId);
                     final int temp = enchantment.calcModifierDamage(level, damageSource);
                     if (temp != 0) {
                         ItemStackSnapshot snapshot = ((ItemStack) itemStack).createSnapshot();
@@ -331,7 +321,7 @@ public class DamageEventHandler {
     }
 
 
-    public static Location<World> findFirstMatchingBlock(Entity entity, AxisAlignedBB bb, Predicate<Block> predicate) {
+    public static Location<World> findFirstMatchingBlock(Entity entity, AxisAlignedBB bb, Predicate<IBlockState> predicate) {
         int i = MathHelper.floor_double(bb.minX);
         int j = MathHelper.floor_double(bb.maxX + 1.0D);
         int k = MathHelper.floor_double(bb.minY);
@@ -342,7 +332,7 @@ public class DamageEventHandler {
             for (int l1 = k; l1 < l; ++l1) {
                 for (int i2 = i1; i2 < j1; ++i2) {
                     BlockPos blockPos = new BlockPos(k1, l1, i2);
-                    if (predicate.test(entity.worldObj.getBlockState(blockPos).getBlock())) {
+                    if (predicate.test(entity.worldObj.getBlockState(blockPos))) {
                         return new Location<>((World) entity.worldObj, k1, l1, i2);
                     }
                 }

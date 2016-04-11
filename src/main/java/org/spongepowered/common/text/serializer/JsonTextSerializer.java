@@ -25,14 +25,12 @@
 package org.spongepowered.common.text.serializer;
 
 import com.google.gson.JsonParseException;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextParseException;
 import org.spongepowered.api.text.serializer.TextSerializer;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
 import org.spongepowered.common.interfaces.text.IMixinText;
-
-import java.util.Locale;
 
 /**
  * TextSerializer implementation for the json format.
@@ -47,7 +45,7 @@ public final class JsonTextSerializer implements TextSerializer {
     @Override
     public Text deserialize(String input) throws TextParseException {
         try {
-            return ((IMixinChatComponent) IChatComponent.Serializer.jsonToComponent(input)).toText();
+            return ((IMixinChatComponent) ITextComponent.Serializer.jsonToComponent(input)).toText();
         } catch (JsonParseException e) {
             throw new TextParseException("Failed to parse JSON", e);
         }

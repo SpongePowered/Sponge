@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.biome.BiomeGenSnow;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Forest;
@@ -57,9 +56,6 @@ public abstract class MixinBiomeGenSnow extends MixinBiomeGenBase {
         }
         super.buildPopulators(world, gensettings);
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 2, 0.1));

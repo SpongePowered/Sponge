@@ -37,16 +37,20 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
+import net.minecraft.profiler.Profiler;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderServer;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
@@ -101,13 +105,16 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
+import org.spongepowered.common.world.border.PlayerBorderListener;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
@@ -142,15 +149,20 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private final CauseTracker causeTracker = new CauseTracker((WorldServer) (Object) this);
     private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
-    private SpongeChunkProvider spongegen;
+    private SpongeChunkGenerator spongegen;
 
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
-
-    @Shadow public abstract void updateBlockTick(BlockPos p_175654_1_, Block p_175654_2_, int p_175654_3_, int p_175654_4_);
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstructed(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn,
+            CallbackInfo ci) {
+        ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), ((IMixinWorldProvider) (
+                (IMixinWorld) (Object) this).getWorldProvider()).getDimensionId()));
+    }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
     public void onCreateSpawnPosition(WorldSettings settings, CallbackInfo ci) {
@@ -177,10 +189,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkProvider) {
+        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkGenerator) {
             // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
             // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkProvider) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
+            if (WorldGenConstants.isValid((IChunkGenerator) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
                 ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
             }
         } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
@@ -201,7 +213,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
 
         ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
-        chunkProviderServer.serverChunkGenerator = this.spongegen;
+        chunkProviderServer.chunkGenerator = this.spongegen;
     }
 
 
@@ -215,7 +227,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return this.causeTracker;
     }
 
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = BLOCK_RANDOM_TICK))
+    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentTuple = causeTracker.getStack().peek();
@@ -228,11 +240,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.randomTickBlock(causeTracker, block, pos, state, rand);
     }
 
-    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/BlockPos;)Z"))
+    @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;isRainingAt(Lnet/minecraft/util/math/BlockPos;)Z"))
     private boolean onLightningCheck(WorldServer world, BlockPos blockPos) {
         if (world.isRainingAt(blockPos)) {
             Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) this,
-                    VecHelper.toVector(blockPos).toDouble());
+                    VecHelper.toVector3d(blockPos).toDouble());
             SpawnCause cause = WeatherSpawnCause.builder().weather(this.getWeather()).type(SpawnTypes.WEATHER).build();
             ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)),
                     EntityTypes.LIGHTNING, transform);
@@ -242,12 +254,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false;
     }
 
-    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target= BLOCK_UPDATE_TICK))
+    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
 
-    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = BLOCK_UPDATE_TICK))
+    @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentTuple = causeTracker.getStack().peek();
@@ -329,13 +341,13 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Nullable
     private NextTickListEntry tmpScheduledObj;
 
-    @Redirect(method = "updateBlockTick(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+    @Redirect(method = "updateBlockTick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onUpdateScheduledBlock(NextTickListEntry sbu, int priority) {
         this.onCreateScheduledBlockUpdate(sbu, priority);
     }
 
-    @Redirect(method = "scheduleBlockUpdate(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/Block;II)V",
+    @Redirect(method = "scheduleBlockUpdate",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final CauseTracker causeTracker = this.getCauseTracker();
@@ -645,7 +657,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         if (!this.isRemote && (flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, oldState.getBlock());
 
-            if (newState.getBlock().hasComparatorInputOverride()) {
+            if (newState.getBlock().hasComparatorInputOverride(newState)) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
             }
         }
@@ -719,7 +731,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();
-        Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) this, VecHelper.toVector(pos));
+        Location<org.spongepowered.api.world.World> location = new Location<>(this, VecHelper.toVector3i(pos));
         this.builder.blockState((BlockState) state)
                 .extendedState((BlockState) extended)
                 .worldId(location.getExtent().getUniqueId())

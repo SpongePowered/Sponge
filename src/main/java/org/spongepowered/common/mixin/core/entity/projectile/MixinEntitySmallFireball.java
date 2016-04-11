@@ -40,7 +40,7 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
 
     private float damage = 5.0f;
 
-    @ModifyArg(method = "onImpact(Lnet/minecraft/util/MovingObjectPosition;)V",
+    @ModifyArg(method = "onImpact",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
     protected float onAttackEntityFrom(float amount) {
         return this.damage;

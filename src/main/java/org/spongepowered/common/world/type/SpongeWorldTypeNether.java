@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.type;
 
+import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraft.world.biome.WorldChunkManagerHell;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.BiomeProviderSingle;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderHell;
 
 public class SpongeWorldTypeNether extends SpongeWorldType {
@@ -38,11 +38,11 @@ public class SpongeWorldTypeNether extends SpongeWorldType {
         setNotificationData();
     }
 
-    public WorldChunkManager getChunkManager(World world) {
-        return new WorldChunkManagerHell(BiomeGenBase.hell, 0f);
+    public BiomeProvider getChunkManager(World world) {
+        return new BiomeProviderSingle(Biomes.hell);
     }
 
-    public IChunkProvider getChunkGenerator(World world, String generatorOptions) {
+    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
         return new ChunkProviderHell(world, world.getWorldInfo().isMapFeaturesEnabled(), world.getSeed());
     }
 }

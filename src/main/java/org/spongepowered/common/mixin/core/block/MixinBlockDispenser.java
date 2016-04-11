@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.block;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.BlockDispenser;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;

@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.tracking.world;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockType;

@@ -62,7 +62,7 @@ public class LeftArmRotationValueProcessor extends AbstractSpongeValueProcessor<
 
     @Override
     protected Optional<Vector3d> getVal(EntityArmorStand container) {
-        return Optional.of(VecHelper.toVector(container.leftArmRotation));
+        return Optional.of(VecHelper.toVector3d(container.leftArmRotation));
     }
 
     @Override

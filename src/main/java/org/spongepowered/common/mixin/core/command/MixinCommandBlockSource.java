@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartChest;
 import net.minecraft.tileentity.TileEntityCommandBlock;
+import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
-import org.spongepowered.api.command.source.CommandBlockSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinSubject;
 
 @NonnullByDefault
-@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartCommandBlock.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
+@Mixin(value = {TileEntityCommandBlock.class, EntityMinecartChest.class}, targets = IMixinCommandSender.SIGN_CLICK_SENDER)
 public abstract class MixinCommandBlockSource implements IMixinCommandSource, CommandBlockSource, IMixinSubject {
 
     @Override

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.property.store.item;
 
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTool;
@@ -50,7 +51,7 @@ public class HarvestingPropertyStore extends AbstractItemStackPropertyStore<Harv
         } else {
             final Collection<BlockType> blockTypes = SpongeImpl.getRegistry().getAllOf(BlockType.class);
             final ImmutableSet.Builder<BlockType> builder = ImmutableSet.builder();
-            blockTypes.stream().filter(blockType -> item.canHarvestBlock((Block) blockType)).forEach(builder::add);
+            blockTypes.stream().filter(blockType -> item.canHarvestBlock((IBlockState) blockType.getDefaultState())).forEach(builder::add);
             final ImmutableSet<BlockType> blocks = builder.build();
             if (blocks.isEmpty()) {
                 return Optional.empty();

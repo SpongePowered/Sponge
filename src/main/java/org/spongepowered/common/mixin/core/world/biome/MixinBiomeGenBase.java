@@ -30,7 +30,6 @@ import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
@@ -60,6 +59,7 @@ import org.spongepowered.api.world.gen.populator.WaterLily;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.api.world.gen.type.MushroomType;
 import org.spongepowered.api.world.gen.type.MushroomTypes;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
@@ -71,11 +71,9 @@ import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 @Mixin(BiomeGenBase.class)
 public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
-    @Shadow public String biomeName;
-    @Shadow public float temperature;
-    @Shadow public float rainfall;
-    @Shadow public float minHeight;
-    @Shadow public float maxHeight;
+    @Shadow @Final public String biomeName;
+    @Shadow @Final public float temperature;
+    @Shadow @Final public float rainfall;
     @Shadow public IBlockState topBlock;
     @Shadow public IBlockState fillerBlock;
     @Shadow public BiomeDecorator theBiomeDecorator;
@@ -98,9 +96,6 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
 
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.topBlock, SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));
@@ -108,9 +103,9 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         String s = world.getWorldInfo().getGeneratorOptions();
         ChunkProviderSettings settings;
         if (s != null) {
-            settings = ChunkProviderSettings.Factory.jsonToFactory(s).func_177864_b();
+            settings = ChunkProviderSettings.Factory.jsonToFactory(s).build();
         } else {
-            settings = ChunkProviderSettings.Factory.jsonToFactory("").func_177864_b();
+            settings = ChunkProviderSettings.Factory.jsonToFactory("").build();
         }
 
         Ore dirt = Ore.builder()

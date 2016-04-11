@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world.biome;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenMesa;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
@@ -54,9 +53,6 @@ public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
         gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.field_150626_aH, this.field_150620_aI));
         super.buildPopulators(world, gensettings);
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         gensettings.getGroundCoverLayers().clear();
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();

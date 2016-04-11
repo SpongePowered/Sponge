@@ -28,13 +28,14 @@ import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.entity.Entity;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -62,11 +63,11 @@ public class ChunkSaveHelper {
             for (World spongeWorld : SpongeImpl.getGame().getServer().getWorlds()) {
                 WorldServer world = (WorldServer) spongeWorld;
                 writer.beginObject();
-                writer.name("name").value(((WorldServer) spongeWorld).getSaveHandler().getWorldDirectoryName());
-                writer.name("dimensionId").value(world.provider.getDimensionId());
+                writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
+                writer.name("dimensionId").value(((IMixinWorldProvider) world.provider).getDimensionId());
                 writer.name("players").value(world.playerEntities.size());
-                writer.name("loadedChunks").value(world.theChunkProviderServer.loadedChunks.size());
-                writer.name("activeChunks").value(world.activeChunkSet.size());
+                writer.name("loadedChunks").value(world.getChunkProvider().loadedChunks.size());
+                writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 
@@ -130,7 +131,7 @@ public class ChunkSaveHelper {
             writer.close();
             fileWriter.close();
         } catch (Throwable throwable) {
-            MinecraftServer.getServer().logSevere("Could not save chunk info report to " + file);
+            SpongeImpl.getLogger().error("Could not save chunk info report to " + file);
         }
     }
 

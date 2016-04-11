@@ -30,7 +30,7 @@ import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -62,11 +62,11 @@ public abstract class MixinEntityTrackerEntry {
         }
         final EntityHuman human = (EntityHuman) this.trackedEntity;
         // Adds the GameProfile to the client
-        thisCtx.sendPacket(human.createPlayerListPacket(S38PacketPlayerListItem.Action.ADD_PLAYER));
+        thisCtx.sendPacket(human.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
         // Actually spawn the human (a player)
         thisCtx.sendPacket(spawnPacket);
         // Remove from tab list
-        final S38PacketPlayerListItem removePacket = human.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER);
+        final SPacketPlayerListItem removePacket = human.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER);
         if (human.canRemoveFromListImmediately()) {
             thisCtx.sendPacket(removePacket);
         } else {

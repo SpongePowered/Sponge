@@ -32,6 +32,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.TileEntityBanner;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.tileentity.Banner;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
@@ -92,7 +93,7 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
     public void markDirtyAndUpdate() {
         this.markDirty();
         if (this.worldObj != null) {
-            this.worldObj.markBlockForUpdate(this.getPos());
+            ((WorldServer) this.worldObj).getPlayerChunkMap().markBlockForUpdate(this.getPos());
         }
     }
 

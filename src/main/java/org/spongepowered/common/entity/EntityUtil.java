@@ -31,27 +31,22 @@ import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.S10PacketSpawnPainting;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketSpawnPainting;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
-import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 public final class EntityUtil {
 
@@ -70,49 +65,13 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    public static boolean setPassenger(Entity vehicle, @Nullable Entity passenger) {
-        if (vehicle.riddenByEntity == null) { // no existing passenger
-            if (passenger == null) {
-                return true;
-            }
-            passenger.mountEntity(vehicle);
-        } else { // passenger already exists
-            vehicle.riddenByEntity.mountEntity(null); // eject current passenger
-
-            if (passenger != null) {
-                passenger.mountEntity(vehicle);
-            }
-        }
-        return true;
-    }
-
-    public static boolean setVehicle(Entity passenger, @Nullable Entity vehicle) {
-        if (!passenger.worldObj.isRemote) {
-            passenger.mountEntity(vehicle);
-            return true;
-        }
-        return false;
-    }
-
-    public static EntitySnapshot getBaseVehicle(Entity passenger) {
-        if (passenger.ridingEntity == null) {
-            return null;
-        }
-        Entity baseVehicle = passenger.ridingEntity;
-        while (baseVehicle.ridingEntity != null) {
-            baseVehicle = baseVehicle.ridingEntity;
-        }
-
-        return ((org.spongepowered.api.entity.Entity) baseVehicle).createSnapshot();
-    }
-
     @SuppressWarnings("unchecked")
     public static boolean refreshPainting(EntityPainting painting, EntityPainting.EnumArt art) {
         final EntityTracker paintingTracker = ((WorldServer) painting.worldObj).getEntityTracker();
         EntityTrackerEntry paintingEntry = paintingTracker.trackedEntityHashTable.lookup(painting.getEntityId());
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
         for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
-            S13PacketDestroyEntities packet = new S13PacketDestroyEntities(painting.getEntityId());
+            SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
             player.playerNetServerHandler.sendPacket(packet);
             playerMPs.add(player);
         }
@@ -122,7 +81,7 @@ public final class EntityUtil {
             SpongeImpl.getGame().getScheduler().createTaskBuilder()
                 .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
                 .execute(() -> {
-                    final S10PacketSpawnPainting packet = new S10PacketSpawnPainting(painting);
+                    final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
                     playerMP.playerNetServerHandler.sendPacket(packet);
                 })
                 .submit(SpongeImpl.getPlugin());

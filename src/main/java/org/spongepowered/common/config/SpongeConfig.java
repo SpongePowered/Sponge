@@ -253,8 +253,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
 
-        @Setting(comment = "Configuration options for various game optimizations that may have possible side effects")
-        private OptimizationsCategory optimizations = new OptimizationsCategory();
+        @Setting(value = "optimizations", comment = "Configuration options for various game optimizations that may have possible side effects")
+        private OptimizationCategory optimizations = new OptimizationCategory();
 
         public BungeeCordCategory getBungeeCord() {
             return this.bungeeCord;
@@ -287,13 +287,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             return this.exploits;
         }
 
+        public OptimizationCategory getOptimizations() {
+            return this.optimizations;
+        }
+
         public Predicate<InetAddress> getIpSet(String name) {
             return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
         }
 
-        public OptimizationsCategory getOptimizations() {
-            return this.optimizations;
-        }
     }
 
     public static class DimensionConfig extends ConfigBase {
@@ -638,6 +639,38 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     }
 
     @ConfigSerializable
+    public static class OptimizationCategory extends Category {
+
+        @Setting(value = "fast-blockstate-lookup")
+        private boolean blockStateLookup = true;
+
+        @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
+        private boolean ignoreUnloadedChunkLighting = true;
+
+        public boolean useBlockStateLookupPatch() {
+            return this.blockStateLookup;
+        }
+
+        @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
+        private boolean preBlockItemDropMerge = true;
+
+        @Setting(value = "entity-drops-pre-merge", comment = "If enabled, entity drops are pre-processed to merge item stacks before spawning the related entities.")
+        private boolean preEntityItemDropMerge = true;
+
+        public boolean useIgnoreUloadedChunkLightingPatch() {
+            return this.ignoreUnloadedChunkLighting;
+        }
+
+        public boolean doDropsPreMergeItemDrops() {
+            return this.preBlockItemDropMerge;
+        }
+
+        public boolean doEntityDropsPreMerge() {
+            return this.preEntityItemDropMerge;
+        }
+    }
+
+    @ConfigSerializable
     public static class LoggingCategory extends Category {
 
         @Setting(value = LOGGING_BLOCK_BREAK, comment = "Log when blocks are broken")
@@ -800,7 +833,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private boolean gameFixes = false;
 
         @Setting("optimizations")
-        private boolean optimizations = true;
+        private boolean enableOptimizationPatches = true;
 
         public boolean usePluginBungeeCord() {
             return this.pluginBungeeCord;
@@ -851,7 +884,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         }
 
         public boolean useOptimizations() {
-            return this.optimizations;
+            return this.enableOptimizationPatches;
         }
     }
 
@@ -887,24 +920,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             return this.dummyChunk;
         }
 
-    }
-
-    @ConfigSerializable
-    public static class OptimizationsCategory extends Category {
-
-        @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
-        private boolean preBlockItemDropMerge = true;
-
-        @Setting(value = "entity-drops-pre-merge", comment = "If enabled, entity drops are pre-processed to merge item stacks before spawning the related entities.")
-        private boolean preEntityItemDropMerge = true;
-
-        public boolean doDropsPreMergeItemDrops() {
-            return this.preBlockItemDropMerge;
-        }
-
-        public boolean doEntityDropsPreMerge() {
-            return this.preEntityItemDropMerge;
-        }
     }
 
     @ConfigSerializable

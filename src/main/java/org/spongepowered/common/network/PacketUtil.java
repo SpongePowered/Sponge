@@ -25,27 +25,19 @@
 package org.spongepowered.common.network;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.event.ClickEvent;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.C03PacketPlayer;
-import net.minecraft.network.play.client.C07PacketPlayerDigging;
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.C0APacketAnimation;
-import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
-import net.minecraft.network.play.client.C12PacketUpdateSign;
-import net.minecraft.network.play.client.C15PacketClientSettings;
-import net.minecraft.network.play.client.C16PacketClientStatus;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.network.play.client.CPacketAnimation;
+import net.minecraft.network.play.client.CPacketClientSettings;
+import net.minecraft.network.play.client.CPacketClientStatus;
+import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketPlayer;
+import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.tileentity.TileEntitySign;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -53,11 +45,10 @@ import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeHooks;
 
 public class PacketUtil {
 
-    public static long lastInventoryOpenPacketTimeStamp = 0;
+    private static long lastInventoryOpenPacketTimeStamp = 0;
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
@@ -73,9 +64,7 @@ public class PacketUtil {
             //
             // This is done in order to sync client inventory to server and would be fine if the C10 packet
             // included an Enum of some sort that defined what type of sync was happening.
-            if (packetPlayer.theItemInWorldManager.isCreative()
-                && (packetIn instanceof C16PacketClientStatus
-                    && ((C16PacketClientStatus) packetIn).getStatus() == C16PacketClientStatus.EnumState.OPEN_INVENTORY_ACHIEVEMENT)) {
+            if (packetPlayer.interactionManager.isCreative() && (packetIn instanceof CPacketClientStatus && ((CPacketClientStatus) packetIn).getStatus() == CPacketClientStatus.State.OPEN_INVENTORY_ACHIEVEMENT)) {
                 lastInventoryOpenPacketTimeStamp = System.currentTimeMillis();
             } else if (creativeCheck(packetIn, packetPlayer)) {
 
@@ -103,17 +92,9 @@ public class PacketUtil {
 
             //System.out.println("RECEIVED PACKET " + packetIn);
             final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getItemStack());
-
             final IMixinWorldServer world = (IMixinWorldServer) packetPlayer.worldObj;
-            final ItemStack itemUsed;
-            if ((packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
-                itemUsed = ItemStackUtil.cloneDefensiveNative(packetPlayer.getHeldItem());
-            } else {
-                itemUsed = null;
-            }
-
             final CauseTracker causeTracker = world.getCauseTracker();
-            if (packetIn instanceof C03PacketPlayer || packetIn instanceof C0APacketAnimation || packetIn instanceof C15PacketClientSettings) {
+            if (packetIn instanceof CPacketPlayer || packetIn instanceof CPacketAnimation || packetIn instanceof CPacketClientSettings) {
                 packetIn.processPacket(netHandler);
             } else {
                 PhaseContext context = PhaseContext.start()
@@ -137,17 +118,19 @@ public class PacketUtil {
     }
 
     private static boolean creativeCheck(Packet<?> packet, EntityPlayerMP playerMP) {
-        return packet instanceof C10PacketCreativeInventoryAction;
+        return packet instanceof CPacketCreativeInventoryAction;
     }
 
 
-    public static boolean processSignPacket(C12PacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
-        if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
+    public static boolean processSignPacket(CPacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
+        // TODO: Check if this is still actually necessary
+
+        /*if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
             return true;
         }
         // Sign command exploit fix
         for (int i = 0; i < packetIn.getLines().length; ++i) {
-            ChatStyle chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
+            TextStyl chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
 
             if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
                 ClickEvent clickevent = chatstyle.getChatClickEvent();
@@ -162,7 +145,7 @@ public class PacketUtil {
                 }
             }
             packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
-        }
+        }*/
         return true;
 
     }

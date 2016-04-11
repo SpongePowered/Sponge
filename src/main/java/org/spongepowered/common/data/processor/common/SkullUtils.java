@@ -72,7 +72,8 @@ public class SkullUtils {
     public static void setSkullType(TileEntitySkull tileEntitySkull, int skullType) {
         tileEntitySkull.setType(skullType);
         tileEntitySkull.markDirty();
-        tileEntitySkull.getWorld().markBlockForUpdate(tileEntitySkull.getPos());
+        tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
+                .getBlockState(tileEntitySkull.getPos()), 3);
     }
 
     public static SkullType getSkullType(ItemStack itemStack) {
@@ -83,12 +84,13 @@ public class SkullUtils {
         return Optional.ofNullable((GameProfile) entity.getPlayerProfile());
     }
 
-    public static boolean setProfile(TileEntitySkull skull, @Nullable GameProfile profile) {
-        if (getSkullType(skull).equals(SkullTypes.PLAYER)) {
+    public static boolean setProfile(TileEntitySkull tileEntitySkull, @Nullable GameProfile profile) {
+        if (getSkullType(tileEntitySkull).equals(SkullTypes.PLAYER)) {
             final GameProfile newProfile = SpongeRepresentedPlayerData.NULL_PROFILE.equals(profile) ? null : resolveProfileIfNecessary(profile);
-            skull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
-            skull.markDirty();
-            skull.getWorld().markBlockForUpdate(skull.getPos());
+            tileEntitySkull.setPlayerProfile((com.mojang.authlib.GameProfile) newProfile);
+            tileEntitySkull.markDirty();
+            tileEntitySkull.getWorld().notifyBlockUpdate(tileEntitySkull.getPos(), tileEntitySkull.getWorld().getBlockState(tileEntitySkull.getPos()), tileEntitySkull.getWorld()
+                    .getBlockState(tileEntitySkull.getPos()), 3);
             return true;
         } else {
             return false;

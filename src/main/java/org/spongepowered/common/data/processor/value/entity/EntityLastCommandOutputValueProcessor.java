@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -37,7 +37,8 @@ import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
 
-public class EntityLastCommandOutputValueProcessor extends AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Optional<Text>, OptionalValue<Text>> {
+public class EntityLastCommandOutputValueProcessor extends
+        AbstractSpongeValueProcessor<EntityMinecartCommandBlock, Optional<Text>, OptionalValue<Text>> {
 
     public EntityLastCommandOutputValueProcessor() {
         super(EntityMinecartCommandBlock.class, Keys.LAST_COMMAND_OUTPUT);

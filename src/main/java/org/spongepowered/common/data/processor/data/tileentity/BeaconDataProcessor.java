@@ -58,9 +58,9 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
     protected boolean set(TileEntityBeacon dataHolder, Map<Key<?>, Object> keyValues) {
         Potion primary = ((Optional<Potion>) keyValues.get(Keys.BEACON_PRIMARY_EFFECT)).orElse(null);
         Potion secondary = ((Optional<Potion>) keyValues.get(Keys.BEACON_SECONDARY_EFFECT)).orElse(null);
-        final int primaryId = primary == null ? 0 : primary.getId();
+        final int primaryId = primary == null ? 0 : Potion.getIdFromPotion(primary);
         dataHolder.setField(1, primaryId);
-        final int secondaryId = secondary == null ? 0 : secondary.getId();
+        final int secondaryId = secondary == null ? 0 : Potion.getIdFromPotion(secondary);
         dataHolder.setField(2, secondaryId);
 
         dataHolder.markDirty();
@@ -73,10 +73,10 @@ public class BeaconDataProcessor extends AbstractTileEntityDataProcessor<TileEnt
         int primaryID = dataHolder.getField(1);
         int secondaryID = dataHolder.getField(2);
         if (primaryID > 0) {
-            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.potionTypes[primaryID]));
+            builder.put(Keys.BEACON_PRIMARY_EFFECT, Optional.ofNullable(Potion.getPotionById(primaryID)));
         }
         if (secondaryID > 0 && dataHolder.getField(0) == 4) {
-            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.potionTypes[secondaryID]));
+            builder.put(Keys.BEACON_SECONDARY_EFFECT, Optional.ofNullable(Potion.getPotionById(secondaryID)));
         }
         return builder.build();
     }

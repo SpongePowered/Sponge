@@ -30,7 +30,8 @@ import com.google.gson.JsonParser;
 import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import net.minecraft.world.gen.FlatGeneratorInfo;
@@ -40,7 +41,6 @@ import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
-import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
@@ -131,24 +131,13 @@ public abstract class MixinWorldType implements GeneratorType, IMixinWorldType {
 
     @Override
     public SpongeWorldGenerator createGeneratorFromString(World world, String settings) {
-        final net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
-        final IChunkProvider chunkProvider = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
-        final WorldChunkManager chunkManager = mcWorld.provider.getWorldChunkManager();
+        net.minecraft.world.World mcWorld = (net.minecraft.world.World) world;
+
+        final IChunkGenerator chunkGenerator = ((IMixinWorldProvider) mcWorld.provider).createChunkGenerator(settings);
+        final BiomeProvider biomeProvider = mcWorld.provider.biomeProvider;
         return new SpongeWorldGenerator((net.minecraft.world.World) world,
-                (BiomeGenerator) chunkManager,
-                SpongeGenerationPopulator.of((WorldServer) world, chunkProvider));
-    }
-
-    @Override
-    public int getMinimumSpawnHeight(net.minecraft.world.World world) {
-        int spawnHeight = 64;
-
-        if (world.getWorldType() == WorldType.FLAT) {
-            spawnHeight = 4;
-        } else if (world.getWorldType() == GeneratorTypes.THE_END) {
-            spawnHeight = 50;
-        }
-        return spawnHeight;
+                (BiomeGenerator) biomeProvider,
+                SpongeGenerationPopulator.of((WorldServer) world, chunkGenerator));
     }
 
     @Override

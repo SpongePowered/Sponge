@@ -25,13 +25,14 @@
 package org.spongepowered.common.text.serializer;
 
 import com.google.common.collect.Lists;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatStyle;
-import net.minecraft.util.EnumChatFormatting;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.LiteralText;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
+import org.spongepowered.api.text.format.TextStyle;
 import org.spongepowered.api.text.format.TextStyles;
 import org.spongepowered.common.interfaces.text.IMixinText;
 import org.spongepowered.common.text.format.SpongeTextColor;
@@ -44,7 +45,7 @@ import javax.annotation.Nullable;
 
 public final class LegacyTexts {
 
-    private static final EnumChatFormatting[] formatting = EnumChatFormatting.values();
+    private static final TextFormatting[] formatting = TextFormatting.values();
     private static final String LOOKUP;
 
     private LegacyTexts() {
@@ -78,7 +79,7 @@ public final class LegacyTexts {
     }
 
     @Nullable
-    public static EnumChatFormatting getFormat(char format) {
+    public static TextFormatting getFormat(char format) {
         int pos = findFormat(format);
         return pos != -1 ? formatting[pos] : null;
     }
@@ -100,7 +101,7 @@ public final class LegacyTexts {
 
         int pos = input.length();
         do {
-            EnumChatFormatting format = getFormat(input.charAt(next + 1));
+            TextFormatting format = getFormat(input.charAt(next + 1));
             if (format != null) {
                 int from = next + 2;
                 if (from != pos) {
@@ -136,7 +137,7 @@ public final class LegacyTexts {
         return Text.builder(pos > 0 ? input.substring(0, pos) : "").append(parts).build();
     }
 
-    private static boolean applyStyle(Text.Builder builder, EnumChatFormatting formatting) {
+    private static boolean applyStyle(Text.Builder builder, TextFormatting formatting) {
         switch (formatting) {
             case BOLD:
                 builder.style(TextStyles.BOLD);
@@ -165,44 +166,44 @@ public final class LegacyTexts {
         return false;
     }
 
-    public static ChatComponentText parseComponent(ChatComponentText component, char code) {
-        String text = component.text;
+    public static TextComponentString parseComponent(TextComponentString component, char code) {
+        String text = component.getText();
         int next = text.lastIndexOf(code, text.length() - 2);
 
-        List<IChatComponent> parsed = null;
+        List<ITextComponent> parsed = null;
         if (next >= 0) {
             parsed = new ArrayList<>();
 
-            ChatComponentText current = null;
+            TextComponentString current = null;
             boolean reset = false;
 
             int pos = text.length();
             do {
-                EnumChatFormatting format = getFormat(text.charAt(next + 1));
+                TextFormatting format = getFormat(text.charAt(next + 1));
                 if (format != null) {
                     int from = next + 2;
                     if (from != pos) {
                         if (current != null) {
                             if (reset) {
                                 parsed.add(current);
-                                current.getChatStyle().setParentStyle(component.getChatStyle());
+                                current.getStyle().setParentStyle(component.getStyle());
                                 reset = false;
-                                current = new ChatComponentText("");
+                                current = new TextComponentString("");
                             } else {
-                                ChatComponentText old = current;
-                                current = new ChatComponentText("");
+                                TextComponentString old = current;
+                                current = new TextComponentString("");
                                 current.appendSibling(old);
                             }
                         } else {
-                            current = new ChatComponentText("");
+                            current = new TextComponentString("");
                         }
 
                         current.text = text.substring(from, pos);
                     } else if (current == null) {
-                        current = new ChatComponentText("");
+                        current = new TextComponentString("");
                     }
 
-                    reset |= applyStyle(current.getChatStyle(), format);
+                    reset |= applyStyle(current.getStyle(), format);
                     pos = next;
                 }
 
@@ -211,30 +212,30 @@ public final class LegacyTexts {
 
             if (current != null) {
                 parsed.add(current);
-                current.getChatStyle().setParentStyle(component.getChatStyle());
+                current.getStyle().setParentStyle(component.getStyle());
             }
 
             Collections.reverse(parsed);
             text = pos > 0 ? text.substring(0, pos) : "";
             if (component.getSiblings().isEmpty()) {
-                ChatComponentText newComponent = new ChatComponentText(text);
+                TextComponentString newComponent = new TextComponentString(text);
                 newComponent.getSiblings().addAll(parsed);
-                newComponent.setChatStyle(component.getChatStyle());
+                newComponent.setStyle(component.getStyle());
                 return newComponent;
             }
         } else if (component.getSiblings().isEmpty()) {
             return component;
         }
 
-        ChatComponentText newComponent = new ChatComponentText(text);
+        TextComponentString newComponent = new TextComponentString(text);
         if (parsed != null) {
             newComponent.getSiblings().addAll(parsed);
         }
 
-        newComponent.setChatStyle(component.getChatStyle());
-        for (IChatComponent child : (List<IChatComponent>) component.getSiblings()) {
-            if (child instanceof ChatComponentText) {
-                child = parseComponent((ChatComponentText) child, code);
+        newComponent.setStyle(component.getStyle());
+        for (ITextComponent child : (List<ITextComponent>) component.getSiblings()) {
+            if (child instanceof TextComponentString) {
+                child = parseComponent((TextComponentString) child, code);
             } else {
                 child = child.createCopy();
             }
@@ -244,7 +245,7 @@ public final class LegacyTexts {
         return newComponent;
     }
 
-    private static boolean applyStyle(ChatStyle style, EnumChatFormatting formatting) {
+    private static boolean applyStyle(Style style, TextFormatting formatting) {
         switch (formatting) {
             case BOLD:
                 style.bold = true;

@@ -31,6 +31,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -43,15 +44,15 @@ import org.spongepowered.common.data.util.DataQueries;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class MixinPotionEffect implements PotionEffect {
 
-    @Shadow public abstract int getPotionID();
+    @Shadow @Final private Potion field_188420_b;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean isAmbient;
-    @Shadow private boolean showParticles;
+    @Shadow private boolean field_188421_h;
 
     @Override
     public PotionEffectType getType() {
-        return (PotionEffectType) Potion.potionTypes[getPotionID()];
+        return (PotionEffectType) this.field_188420_b;
     }
 
     @Intrinsic
@@ -71,7 +72,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public boolean getShowParticles() {
-        return this.showParticles;
+        return this.field_188421_h;
     }
 
     @Override
@@ -83,10 +84,10 @@ public abstract class MixinPotionEffect implements PotionEffect {
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, Potion.potionTypes[getPotionID()].getName())
+                .set(DataQueries.POTION_TYPE, this.field_188420_b.getName())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)
-                .set(DataQueries.POTION_SHOWS_PARTICLES, this.showParticles);
+                .set(DataQueries.POTION_SHOWS_PARTICLES, this.field_188421_h);
     }
 }

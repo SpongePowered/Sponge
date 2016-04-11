@@ -32,8 +32,8 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
 import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -53,6 +53,9 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.World;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -86,16 +89,13 @@ import java.util.Random;
 
 @NonnullByDefault
 @Mixin(value = Block.class, priority = 999)
+@Implements(@Interface(iface = BlockType.class, prefix = "block$"))
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Shadow private boolean needsRandomTick;
 
-    @Shadow public abstract boolean isBlockNormalCube();
-    @Shadow public abstract boolean getEnableStats();
-    @Shadow public abstract int getLightValue();
     @Shadow public abstract String getUnlocalizedName();
-    @Shadow public abstract IBlockState getStateFromMeta(int meta);
-    @Shadow public abstract Material getMaterial();
+    @Shadow public abstract Material getMaterial(IBlockState state);
     @Shadow(prefix = "shadow$")
     public abstract IBlockState shadow$getDefaultState();
 
@@ -129,10 +129,9 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return new SpongeTranslation(getUnlocalizedName() + ".name");
     }
 
-    @Override
-    @Overwrite
-    public boolean getTickRandomly() {
-        return this.needsRandomTick;
+    @Intrinsic
+    public boolean block$getTickRandomly() {
+        return this.getTickRandomly();
     }
 
     @Override
@@ -142,7 +141,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
-        BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
+        BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector3i(pos));
         final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Cause.of(NamedCause.source(world)), blockSnapshot);
         SpongeImpl.postEvent(event);
         if(event.isCancelled()) {

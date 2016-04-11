@@ -62,7 +62,7 @@ public class ChestRotationValueProcessor extends AbstractSpongeValueProcessor<En
 
     @Override
     protected Optional<Vector3d> getVal(EntityArmorStand container) {
-        return Optional.of(VecHelper.toVector(container.getBodyRotation()));
+        return Optional.of(VecHelper.toVector3d(container.getBodyRotation()));
     }
 
     @Override

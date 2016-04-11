@@ -29,7 +29,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.block.tileentity.TileEntityType;
@@ -116,7 +116,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) this.worldObj, VecHelper.toVector(this.getPos()));
+        return new Location<>((World) this.worldObj, VecHelper.toVector3i(this.getPos()));
     }
 
     @Override

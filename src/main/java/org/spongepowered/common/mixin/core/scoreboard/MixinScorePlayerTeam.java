@@ -27,14 +27,13 @@ package org.spongepowered.common.mixin.core.scoreboard;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Scoreboard;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.format.TextColor;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -62,7 +61,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     @Shadow public String registeredName;
     @Shadow public Set<String> membershipSet;
     @Shadow public String teamNameSPT;
-    @Shadow public EnumChatFormatting chatFormat;
+    @Shadow public TextFormatting chatFormat;
     @Shadow public String namePrefixSPT;
     @Shadow public String colorSuffix;
     @Shadow public boolean allowFriendlyFire;
@@ -77,13 +76,13 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     private Text suffix;
     private TextColor color;
 
-    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;sendTeamUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
+    private static final String TEAM_UPDATE_SIGNATURE = "Lnet/minecraft/scoreboard/Scoreboard;broadcastTeamInfoUpdate(Lnet/minecraft/scoreboard/ScorePlayerTeam;)V";
 
     // Minecraft doesn't do a null check on theScoreboard, so we redirect
     // the call and do it ourselves.
     private void doTeamUpdate() {
         if (this.theScoreboard != null) {
-            this.theScoreboard.sendTeamUpdate((ScorePlayerTeam) (Object) this);
+            this.theScoreboard.broadcastTeamInfoUpdate((ScorePlayerTeam) (Object) this);
         }
     }
 
@@ -289,7 +288,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     }
 
     @Inject(method = "setChatFormat", at = @At("RETURN"))
-    private void onSetChatFormat(EnumChatFormatting format, CallbackInfo ci) {
+    private void onSetChatFormat(TextFormatting format, CallbackInfo ci) {
         this.color = TextColorRegistryModule.enumChatColor.get(format);
         // This isn't called by Vanilla, so we inject the call ourselves.
         this.doTeamUpdate();

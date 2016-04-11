@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.core.server;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,11 +47,11 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     @Shadow private boolean guiIsEnabled;
 
     public MixinDedicatedServer() {
-        super(null, null, null);
+        super(null, null, null, null, null, null, null);
     }
 
     public Optional<InetSocketAddress> getBoundAddress() {
-        return Optional.of(new InetSocketAddress(getServerHostname(), getPort()));
+        return Optional.of(new InetSocketAddress(getServerHostname(), getServerPort()));
     }
 
     /**

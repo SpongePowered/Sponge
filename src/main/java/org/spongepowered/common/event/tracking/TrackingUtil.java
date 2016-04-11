@@ -27,32 +27,24 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.entity.living.Humanoid;
-import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
-import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.util.Identifiable;
-import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
@@ -199,7 +191,8 @@ public final class TrackingUtil {
     }
 
 
-    static boolean trackBlockChange(CauseTracker causeTracker, IBlockState currentState, IBlockState newState, BlockPos pos, int flags, PhaseContext phaseContext, IPhaseState phaseState) {
+    static boolean trackBlockChange(CauseTracker causeTracker, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
+            PhaseContext phaseContext, IPhaseState phaseState) {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IBlockState actualState = currentState.getBlock().getActualState(currentState, minecraftWorld, pos);
         final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
@@ -221,29 +214,27 @@ public final class TrackingUtil {
             ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.MODIFY;
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         }
-        final Chunk chunk = minecraftWorld.getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         final IBlockState changedBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
         if (changedBlockState == null) {
             capturedSpongeBlockSnapshots.remove(originalBlockSnapshot);
             return false;
         }
-        final Block currentblock = changedBlockState.getBlock();
 
-        if (newBlock.getLightOpacity() != currentblock.getLightOpacity() || newBlock.getLightValue() != currentblock.getLightValue()) {
+        if (newState.getLightOpacity() != currentState.getLightOpacity() || newState.getLightValue() != currentState.getLightValue()) {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();
         }
 
         if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
-            minecraftWorld.markBlockForUpdate(pos);
+            minecraftWorld.notifyBlockUpdate(pos, changedBlockState, newState, flags);
         }
 
         if (!minecraftWorld.isRemote && (flags & 1) != 0) {
             minecraftWorld.notifyNeighborsRespectDebug(pos, changedBlockState.getBlock());
 
-            if (newBlock.hasComparatorInputOverride()) {
+            if (newBlock.hasComparatorInputOverride(newState)) {
                 minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
             }
         }

@@ -139,7 +139,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private int borderWarningDistance;
     @Shadow private int borderWarningTime;
     @Shadow private GameRules theGameRules;
-    @Shadow public abstract NBTTagCompound getNBTTagCompound();
+    // TODO 1.9 Clone is an AWFUL NAME for this, its really fillCompound which takes a playerNbtCompound to use or if null, uses the player one
+    // TODO 1.9 already in this info. It then populates a returned compound with the worldInfo's properties.
+    @Shadow public abstract NBTTagCompound cloneNBTCompound(NBTTagCompound nbt);
 
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
@@ -506,7 +508,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public DataContainer toContainer() {
-        return NbtTranslator.getInstance().translateFrom(getNBTTagCompound());
+        return NbtTranslator.getInstance().translateFrom(cloneNBTCompound(null));
     }
 
     @Override

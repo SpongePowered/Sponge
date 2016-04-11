@@ -26,8 +26,10 @@ package org.spongepowered.common.service.user;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Sets;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.service.user.UserStorageService;
@@ -50,6 +52,7 @@ public class SpongeUserStorageService implements UserStorageService {
     public Optional<User> get(String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
         checkArgument(lastKnownName.length() >= 3 && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
+        checkState(Sponge.isServerAvailable(), "Server is not available!");
         return Optional.ofNullable(UserDiscoverer.findByUsername(lastKnownName));
     }
 
@@ -81,11 +84,13 @@ public class SpongeUserStorageService implements UserStorageService {
 
     @Override
     public boolean delete(GameProfile profile) {
+        checkState(Sponge.isServerAvailable(), "Server is not available!");
         return UserDiscoverer.delete(checkNotNull(profile, "profile").getUniqueId());
     }
 
     @Override
     public boolean delete(User user) {
+        checkState(Sponge.isServerAvailable(), "Server is not available!");
         return UserDiscoverer.delete(checkNotNull(user, "user").getUniqueId());
     }
 

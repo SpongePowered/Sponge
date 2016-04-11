@@ -27,22 +27,20 @@ package org.spongepowered.common.data.manipulator.mutable.entity;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVillagerZombieData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VillagerZombieData;
-import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.data.type.Profession;
+import org.spongepowered.api.data.type.Professions;
 import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpongeVillagerZombieData;
-import org.spongepowered.common.data.manipulator.mutable.common.AbstractBooleanData;
+import org.spongepowered.common.data.manipulator.mutable.common.AbstractSingleCatalogData;
+import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 
-public class SpongeVillagerZombieData extends AbstractBooleanData<VillagerZombieData, ImmutableVillagerZombieData> implements VillagerZombieData {
-
-    public SpongeVillagerZombieData(boolean value) {
-        super(VillagerZombieData.class, value, Keys.IS_VILLAGER_ZOMBIE, ImmutableSpongeVillagerZombieData.class, false);
-    }
+@ImplementationRequiredForTest
+public class SpongeVillagerZombieData extends AbstractSingleCatalogData<Profession, VillagerZombieData, ImmutableVillagerZombieData> implements VillagerZombieData {
 
     public SpongeVillagerZombieData() {
-        this(false);
+        this(Professions.FARMER);
     }
 
-    @Override
-    public Value<Boolean> villagerZombie() {
-        return getValueGetter();
+    public SpongeVillagerZombieData(Profession value) {
+        super(VillagerZombieData.class, value, Keys.VILLAGER_ZOMBIE_PROFESSION, ImmutableSpongeVillagerZombieData.class);
     }
 }

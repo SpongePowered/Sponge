@@ -29,6 +29,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemEnderEye;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
@@ -41,7 +42,7 @@ public class MixinItemEnderEye extends Item {
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
-    private boolean onSpawnEntityInWorld(World world, Entity enderEye, ItemStack itemStack, World world2, EntityPlayer player) {
+    private boolean onSpawnEntityInWorld(World world, Entity enderEye, ItemStack itemStackIn, World worldIn, EntityPlayer player, EnumHand hand) {
         ((EyeOfEnder) enderEye).setShooter((ProjectileSource) player);
         // TODO direct this appropriately
         return world.spawnEntityInWorld(enderEye);

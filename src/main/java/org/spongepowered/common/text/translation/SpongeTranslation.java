@@ -27,7 +27,7 @@ package org.spongepowered.common.text.translation;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Objects;
-import net.minecraft.util.StatCollector;
+import net.minecraft.util.text.translation.I18n;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 
@@ -49,12 +49,12 @@ public class SpongeTranslation implements Translation {
 
     @Override
     public String get(Locale locale) {
-        return StatCollector.translateToLocal(this.id);
+        return I18n.translateToLocal(this.id);
     }
 
     @Override
     public String get(Locale locale, Object... args) {
-        return StatCollector.translateToLocalFormatted(this.id, args);
+        return I18n.translateToLocalFormatted(this.id, args);
     }
 
     @Override

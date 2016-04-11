@@ -28,8 +28,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,15 +42,15 @@ public abstract class MixinWorldGenerator {
     
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     public boolean isAir(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial() == Material.air;
+        return state.getBlock().getMaterial(state) == Material.air;
     }
 
     public boolean isLeaves(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial() == Material.leaves;
+        return state.getBlock().getMaterial(state) == Material.leaves;
     }
 
     public boolean isWood(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial() == Material.wood;
+        return state.getBlock().getMaterial(state) == Material.wood;
     }
     
     public boolean canSustainPlant(Block block, World worldIn, BlockPos pos, EnumFacing direction, Block plant) {

@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.minecraft.init.Blocks;
-import net.minecraft.world.gen.GeneratorBushFeature;
+import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
@@ -98,7 +98,7 @@ public class MushroomBuilder implements Mushroom.Builder {
 
     @Override
     public Mushroom build() throws IllegalStateException {
-        Mushroom populator = (Mushroom) new GeneratorBushFeature(Blocks.brown_mushroom);
+        Mushroom populator = (Mushroom) new WorldGenBush(Blocks.brown_mushroom);
         populator.getTypes().addAll(this.types);
         populator.setMushroomsPerChunk(this.count);
         populator.setSupplierOverride(this.override);

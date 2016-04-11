@@ -26,13 +26,12 @@ package org.spongepowered.common.mixin.core.status;
 
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.ServerStatusResponse;
-import net.minecraft.network.status.client.C00PacketServerQuery;
-import net.minecraft.network.status.server.S00PacketServerInfo;
+import net.minecraft.network.status.client.CPacketServerQuery;
+import net.minecraft.network.status.server.SPacketServerInfo;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerStatusServer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -47,11 +46,11 @@ public abstract class MixinNetHandlerStatusServer {
     @Shadow @Final private NetworkManager networkManager;
 
     @Inject(method = "processServerQuery", at = @At("HEAD"), cancellable = true)
-    public void processServerQuery(C00PacketServerQuery packetIn, CallbackInfo callbackInfo) {
+    public void processServerQuery(CPacketServerQuery packetIn, CallbackInfo callbackInfo) {
         // Clone the response
         ServerStatusResponse response = SpongeStatusResponse.post(this.server, new SpongeStatusClient(this.networkManager));
         if (response != null) {
-            this.networkManager.sendPacket(new S00PacketServerInfo(response));
+            this.networkManager.sendPacket(new SPacketServerInfo(response));
         } else {
             this.networkManager.closeChannel(null);
         }

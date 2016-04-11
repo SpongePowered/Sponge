@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.google.common.base.Objects;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenMelon;
 import org.spongepowered.api.util.weighted.VariableAmount;

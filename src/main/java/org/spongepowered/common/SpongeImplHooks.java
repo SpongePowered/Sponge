@@ -30,8 +30,8 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -82,12 +82,8 @@ public final class SpongeImplHooks {
         return block instanceof ITileEntityProvider;
     }
 
-    public static int getBlockLightValue(Block block, BlockPos pos, IBlockAccess world) {
-        return block.getLightValue();
-    }
-
-    public static int getBlockLightOpacity(Block block, IBlockAccess world, BlockPos pos) {
-        return block.getLightOpacity();
+    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return state.getLightOpacity();
     }
 
     public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
@@ -113,13 +109,13 @@ public final class SpongeImplHooks {
             if (world.isBlockLoaded(neighborPosition)) {
                 IBlockState iblockstate = world.getBlockState(neighborPosition);
 
-                if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
+                if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
                     iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
-                } else if (iblockstate.getBlock().isNormalCube()) {
+                } else if (iblockstate.getBlock().isNormalCube(iblockstate)) {
                     neighborPosition = neighborPosition.offset(enumfacing);
                     iblockstate = world.getBlockState(neighborPosition);
 
-                    if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
+                    if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
                         iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                     }
                 }

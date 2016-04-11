@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.text.format.TextColor;
@@ -45,7 +45,7 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
 
     @RegisterCatalog(TextColors.class)
     public static final Map<String, TextColor> textColorMappings = Maps.newHashMap();
-    public static final Map<EnumChatFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(EnumChatFormatting.class);
+    public static final Map<TextFormatting, SpongeTextColor> enumChatColor = Maps.newEnumMap(TextFormatting.class);
 
     @Override
     public Optional<TextColor> getById(String id) {
@@ -59,28 +59,28 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
 
     @Override
     public void registerDefaults() {
-        addTextColor(EnumChatFormatting.BLACK, Color.BLACK);
-        addTextColor(EnumChatFormatting.DARK_BLUE, Color.ofRgb(0x0000AA));
-        addTextColor(EnumChatFormatting.DARK_GREEN, Color.ofRgb(0x00AA00));
-        addTextColor(EnumChatFormatting.DARK_AQUA, Color.ofRgb(0x00AAAA));
-        addTextColor(EnumChatFormatting.DARK_RED, Color.ofRgb(0xAA0000));
-        addTextColor(EnumChatFormatting.DARK_PURPLE, Color.ofRgb(0xAA00AA));
-        addTextColor(EnumChatFormatting.GOLD, Color.ofRgb(0xFFAA00));
-        addTextColor(EnumChatFormatting.GRAY, Color.ofRgb(0xAAAAAA));
-        addTextColor(EnumChatFormatting.DARK_GRAY, Color.ofRgb(0x555555));
-        addTextColor(EnumChatFormatting.BLUE, Color.ofRgb(0x5555FF));
-        addTextColor(EnumChatFormatting.GREEN, Color.ofRgb(0x55FF55));
-        addTextColor(EnumChatFormatting.AQUA, Color.ofRgb(0x00FFFF));
-        addTextColor(EnumChatFormatting.RED, Color.ofRgb(0xFF5555));
-        addTextColor(EnumChatFormatting.LIGHT_PURPLE, Color.ofRgb(0xFF55FF));
-        addTextColor(EnumChatFormatting.YELLOW, Color.ofRgb(0xFFFF55));
-        addTextColor(EnumChatFormatting.WHITE, Color.WHITE);
-        addTextColor(EnumChatFormatting.RESET, Color.WHITE);
+        addTextColor(TextFormatting.BLACK, Color.BLACK);
+        addTextColor(TextFormatting.DARK_BLUE, Color.ofRgb(0x0000AA));
+        addTextColor(TextFormatting.DARK_GREEN, Color.ofRgb(0x00AA00));
+        addTextColor(TextFormatting.DARK_AQUA, Color.ofRgb(0x00AAAA));
+        addTextColor(TextFormatting.DARK_RED, Color.ofRgb(0xAA0000));
+        addTextColor(TextFormatting.DARK_PURPLE, Color.ofRgb(0xAA00AA));
+        addTextColor(TextFormatting.GOLD, Color.ofRgb(0xFFAA00));
+        addTextColor(TextFormatting.GRAY, Color.ofRgb(0xAAAAAA));
+        addTextColor(TextFormatting.DARK_GRAY, Color.ofRgb(0x555555));
+        addTextColor(TextFormatting.BLUE, Color.ofRgb(0x5555FF));
+        addTextColor(TextFormatting.GREEN, Color.ofRgb(0x55FF55));
+        addTextColor(TextFormatting.AQUA, Color.ofRgb(0x00FFFF));
+        addTextColor(TextFormatting.RED, Color.ofRgb(0xFF5555));
+        addTextColor(TextFormatting.LIGHT_PURPLE, Color.ofRgb(0xFF55FF));
+        addTextColor(TextFormatting.YELLOW, Color.ofRgb(0xFFFF55));
+        addTextColor(TextFormatting.WHITE, Color.WHITE);
+        addTextColor(TextFormatting.RESET, Color.WHITE);
 
         textColorMappings.put("none", TextColors.NONE);
     }
 
-    private static void addTextColor(EnumChatFormatting handle, Color color) {
+    private static void addTextColor(TextFormatting handle, Color color) {
         SpongeTextColor spongeColor = new SpongeTextColor(handle, color);
         textColorMappings.put(handle.name().toLowerCase(Locale.ENGLISH), spongeColor);
         enumChatColor.put(handle, spongeColor);

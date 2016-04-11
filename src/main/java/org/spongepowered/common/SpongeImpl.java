@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.common.config.SpongeConfig.Type.GLOBAL;
 
 import com.google.inject.Injector;
+import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +77,7 @@ public final class SpongeImpl {
     public static final Optional<String> IMPLEMENTATION_VERSION =  Optional.ofNullable(getPackage().getImplementationVersion());
 
     // TODO: Keep up to date
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.8.9", 47);
+    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion("1.9", 107);
 
     private static final Logger logger = LogManager.getLogger(ECOSYSTEM_NAME);
     private static final org.slf4j.Logger slf4jLogger = LoggerFactory.getLogger(ECOSYSTEM_NAME);
@@ -120,6 +121,10 @@ public final class SpongeImpl {
 
     public static SpongeGame getGame() {
         return (SpongeGame) getInstance().game;
+    }
+
+    public static MinecraftServer getServer() {
+        return (MinecraftServer) getGame().getServer();
     }
 
     public static SpongeGameRegistry getRegistry() {

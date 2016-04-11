@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracking.world;
 
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.WorldServer;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;

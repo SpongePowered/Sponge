@@ -49,7 +49,7 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
     protected Optional<MatterProperty> getForBlock(Block block) {
         if (block instanceof BlockLiquid) {
             return Optional.of(LIQUID);
-        } else if (block.getMaterial() == Material.air) {
+        } else if (block.getMaterial(null) == Material.air) {
             return Optional.of(GAS);
         } else {
             return Optional.of(SOLID);
