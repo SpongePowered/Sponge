@@ -37,34 +37,31 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.util.Tristate;
 
 import java.lang.reflect.Method;
 
 public class CancellationEventFilterDelegate implements FilterDelegate {
 
-    private final IsCancelled anno;
+    private final Tristate state;
 
-    public CancellationEventFilterDelegate(IsCancelled anno) {
-        this.anno = anno;
+    public CancellationEventFilterDelegate(Tristate state) {
+        this.state = state;
     }
 
     @Override
     public int write(String name, ClassWriter cw, MethodVisitor mv, Method method, int locals) {
         if (!Cancellable.class.isAssignableFrom(method.getParameters()[0].getType())) {
-            throw new IllegalStateException(
-                    "Attempted to filter a non-cancellable event type by its cancellation status");
+            throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
         }
-        if (this.anno.value() == Tristate.UNDEFINED) {
+        if (this.state == Tristate.UNDEFINED) {
             return locals;
         }
         mv.visitVarInsn(ALOAD, 1);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(Cancellable.class));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Cancellable.class), "isCancelled", "()Z",
-                true);
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Cancellable.class), "isCancelled", "()Z", true);
         Label success = new Label();
-        if (this.anno.value() == Tristate.TRUE) {
+        if (this.state == Tristate.TRUE) {
             mv.visitJumpInsn(IFNE, success);
         } else {
             mv.visitJumpInsn(IFEQ, success);
