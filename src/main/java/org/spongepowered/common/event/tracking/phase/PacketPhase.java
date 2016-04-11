@@ -469,6 +469,8 @@ public final class PacketPhase extends TrackingPhase {
                 final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
                 if (itemstack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, itemstack));
+                } else {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, ItemStackSnapshot.NONE.createStack()));
                 }
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.func_187024_b()));

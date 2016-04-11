@@ -32,6 +32,7 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.gen.InternalPopulatorTypes;
 
 import java.util.Random;
 
@@ -41,7 +42,7 @@ public class EndSpikePopulator implements Populator {
 
     @Override
     public PopulatorType getType() {
-        return null;
+        return InternalPopulatorTypes.END_SPIKE;
     }
 
     @Override

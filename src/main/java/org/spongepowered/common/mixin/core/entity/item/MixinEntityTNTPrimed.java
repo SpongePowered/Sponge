@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import net.minecraft.entity.EntityLivingBase;
@@ -42,15 +41,9 @@ import java.util.Optional;
 @Mixin(EntityTNTPrimed.class)
 public abstract class MixinEntityTNTPrimed extends MixinEntity implements PrimedTNT {
 
-    @Shadow private int fuse;
     @Shadow private EntityLivingBase tntPlacedBy;
     @Shadow public abstract void explode();
-
-
-    private void setFuse(int fuse) {
-        checkArgument(fuse >= 0);
-        this.fuse = fuse;
-    }
+    @Shadow public abstract void shadow$setFuse(int fuse);
 
     @Override
     public boolean validateRawData(DataContainer container) {
@@ -62,7 +55,7 @@ public abstract class MixinEntityTNTPrimed extends MixinEntity implements Primed
     public void setRawData(DataContainer container) throws InvalidDataException {
         super.setRawData(container);
         try {
-            setFuse(container.getInt(of("Fuse")).get());
+            shadow$setFuse(container.getInt(of("Fuse")).get());
         } catch (Exception e) {
             throw new InvalidDataException("Couldn't parse raw data", e);
         }

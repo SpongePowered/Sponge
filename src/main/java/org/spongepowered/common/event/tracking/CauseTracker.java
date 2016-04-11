@@ -82,12 +82,24 @@ public final class CauseTracker {
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
 
+    private static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> {
+        context.forEach(namedCause -> {
+            printer.add("        - Name: %s", namedCause.getName());
+            printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());
+        });
+    };
+
     public static final BiConsumer<PrettyPrinter, PhaseData> PHASE_PRINTER = (printer, data) -> {
         printer.add("  - Phase: %s", data.getState());
         printer.add("    Context:");
         data.getContext().forEach(namedCause -> {
             printer.add("    - Name: %s", namedCause.getName());
-            printer.addWrapped(80, "      Object: %s", namedCause.getCauseObject());
+            final Object causeObject = namedCause.getCauseObject();
+            if (causeObject instanceof PhaseContext) {
+                CONTEXT_PRINTER.accept(printer, (PhaseContext) causeObject);
+            } else {
+                printer.addWrapped(100, "      Object: %s", causeObject);
+            }
         });
     };
 
@@ -183,8 +195,9 @@ public final class CauseTracker {
                 final PrettyPrinter printer = new PrettyPrinter(40);
                 printer.add("Exception Exiting Phase").centre().hr();
                 printer.add("Something happened when trying to unwind the phase %s", state);
-                printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
-                printer.addWrapped(60, "   %s :", "Phases remaining");
+                printer.addWrapped(40, "%s :", "PhaseContext");
+                CONTEXT_PRINTER.accept(printer, context);
+                printer.addWrapped(60, "%s :", "Phases remaining");
                 this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
                 printer.add("Stacktrace:");
                 printer.add(e);
@@ -197,8 +210,9 @@ public final class CauseTracker {
             final PrettyPrinter printer = new PrettyPrinter(40);
             printer.add("Exception Post Dispatching Phase").centre().hr();
             printer.add("Something happened when trying to post dispatch state %s", state);
-            printer.addWrapped(40, "   %s : %s", "PhaseContext", context);
-            printer.addWrapped(60, "   %s :", "Phases remaining");
+            printer.addWrapped(40, "%s :", "PhaseContext");
+            CONTEXT_PRINTER.accept(printer, context);
+            printer.addWrapped(60, "%s :", "Phases remaining");
             this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
             printer.add("Stacktrace:");
             printer.add(e);

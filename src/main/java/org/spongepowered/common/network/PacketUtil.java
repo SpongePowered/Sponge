@@ -38,6 +38,7 @@ import net.minecraft.tileentity.TileEntitySign;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -125,27 +126,27 @@ public class PacketUtil {
     public static boolean processSignPacket(CPacketUpdateSign packetIn, CallbackInfo ci, TileEntitySign tileentitysign, EntityPlayerMP playerEntity) {
         // TODO: Check if this is still actually necessary
 
-        /*if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
-            return true;
-        }
-        // Sign command exploit fix
-        for (int i = 0; i < packetIn.getLines().length; ++i) {
-            TextStyl chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
-
-            if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
-                ClickEvent clickevent = chatstyle.getChatClickEvent();
-
-                if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
-                    if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(playerEntity.getGameProfile())) {
-                        SpongeHooks.logExploitSignCommandUpdates(playerEntity, tileentitysign, clickevent.getValue());
-                        playerEntity.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
-                        ci.cancel();
-                        return false;
-                    }
-                }
-            }
-            packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
-        }*/
+//        if (!SpongeImpl.getGlobalConfig().getConfig().getExploits().isPreventSignExploit()) {
+//            return true;
+//        }
+//        // Sign command exploit fix
+//        for (int i = 0; i < packetIn.getLines().length; ++i) {
+//            TextStyle chatstyle = packetIn.getLines()[i] == null ? null : packetIn.getLines()[i].getChatStyle();
+//
+//            if (chatstyle != null && chatstyle.getChatClickEvent() != null) {
+//                ClickEvent clickevent = chatstyle.getChatClickEvent();
+//
+//                if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
+//                    if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(playerEntity.getGameProfile())) {
+//                        SpongeHooks.logExploitSignCommandUpdates(playerEntity, tileentitysign, clickevent.getValue());
+//                        playerEntity.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
+//                        ci.cancel();
+//                        return false;
+//                    }
+//                }
+//            }
+//            packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
+//        }
         return true;
 
     }

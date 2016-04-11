@@ -81,6 +81,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.util.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -277,8 +278,12 @@ public interface PacketFunction {
             });
 
         } else if (state == PacketPhase.General.INTERACTION) {
-            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks ->
-                    GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
+            System.err.printf("You remind me of the babe... %n");
+            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blocks -> {
+                System.err.printf("What babe? %n");
+                GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context);
+
+                    }
             );
             context.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(items -> {
                 if (items.isEmpty()) {
@@ -469,7 +474,8 @@ public interface PacketFunction {
         final IMixinWorldServer mixinWorld = (IMixinWorldServer) player.worldObj;
         final World spongeWorld = (World) mixinWorld;
         // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-        final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).get();
+        final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
         final ItemStackSnapshot snapshot = itemStack.createSnapshot();
         context.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
             final Cause cause = Cause.source(EntitySpawnCause.builder()
@@ -489,7 +495,8 @@ public interface PacketFunction {
     };
     PacketFunction HELD_ITEM_CHANGE = ((packet, state, player, context) -> {
         final CPacketHeldItemChange itemChange = (CPacketHeldItemChange) packet;
-        final int previousSlot = context.firstNamed(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class).get();
+        final int previousSlot = context.firstNamed(InternalNamedCauses.Packet.PREVIOUS_HIGHLIGHTED_SLOT, Integer.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected a previous highlighted slot, got nothing.", context));
         final Container inventoryContainer = player.inventoryContainer;
         final InventoryPlayer inventory = player.inventory;
         final Slot sourceSlot = inventoryContainer.getSlot(previousSlot + inventory.mainInventory.length);
@@ -514,8 +521,10 @@ public interface PacketFunction {
             .process();
     });
     PacketFunction CLOSE_WINDOW = ((packet, state, player, context) -> {
-        final Container container = context.firstNamed(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class).get();
-        ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).get();
+        final Container container = context.firstNamed(InternalNamedCauses.Packet.OPEN_CONTAINER, Container.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected the open container object, but had nothing!", context));
+        ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
         ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
         Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final Cause cause = Cause.source(player).build();
@@ -557,7 +566,8 @@ public interface PacketFunction {
     });
     PacketFunction CLIENT_STATUS = ((packet, state, player, context) -> {
         if (state == PacketPhase.Inventory.OPEN_INVENTORY) {
-            final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class).get();
+            final ItemStackSnapshot lastCursor = context.firstNamed(InternalNamedCauses.Packet.CURSOR, ItemStackSnapshot.class)
+                    .orElseThrow(PhaseUtil.throwWithContext("Expected a cursor item stack, but had nothing!", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
             EventConsumer.event(SpongeEventFactory.createInteractInventoryEventOpen(Cause.source(player).build(), cursorTransaction, ContainerUtil.fromNative(player.openContainer)))

@@ -24,7 +24,7 @@ public class MixinInventoryHelper {
 
     private static final String
             DROP_INVENTORY_ITEMS_BLOCK_POS =
-            "dropInventoryItems(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/inventory/IInventory;)V";
+            "dropInventoryItems(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/inventory/IInventory;)V";
     private static final String
             DROP_INVENTORY_ITEMS_X_Y_Z =
             "Lnet/minecraft/inventory/InventoryHelper;dropInventoryItems(Lnet/minecraft/world/World;DDDLnet/minecraft/inventory/IInventory;)V";

@@ -196,7 +196,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private Packet<?> rewritePacket(final Packet<?> packetIn) {
         // Update the tab list data
         if (packetIn instanceof SPacketPlayerListItem) {
-            ((SpongeTabList) ((Player) this).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
+            ((SpongeTabList) ((Player) this.playerEntity).getTabList()).updateEntriesOnSend((SPacketPlayerListItem) packetIn);
         }
         // Store the resource pack for use when processing resource pack statuses
         else if (packetIn instanceof IMixinPacketResourcePackSend) {

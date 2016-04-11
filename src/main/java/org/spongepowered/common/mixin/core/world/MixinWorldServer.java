@@ -299,7 +299,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-    public void markBlockEventUserNotification(BlockPos pos, Block blockIn, BlockPos sourcePos) {
+    private void markBlockEventUserNotification(BlockPos pos, Block blockIn, BlockPos sourcePos) {
         if (isBlockLoaded(sourcePos)) {
             IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
             Stream.<Supplier<Optional<User>>>of(() -> spongeChunk.getBlockOwner(sourcePos), () -> spongeChunk.getBlockNotifier(pos))
@@ -512,35 +512,35 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
     }
 
-
-    /**
-     * @author gabizou - March 12th, 2016
-     *
-     * Technically an overwrite to properly track on *server* worlds.
-     */
-    @Override
-    public void forceBlockUpdateTick(Block blockType, BlockPos pos, Random random) {
-        this.scheduledUpdatesAreImmediate = true;
-        // Sponge start - Cause tracking
-        final PhaseData peek = this.causeTracker.getStack().peek();
-        if (this.isRemote || peek.getState().getPhase().ignoresBlockUpdateTick(peek)) {
-            blockType.updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
-            return;
-        }
-        TrackingUtil.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
-        // Sponge end
-        this.scheduledUpdatesAreImmediate = false;
-    }
-
-    /**
-     * @author gabizou - March 12th, 2016
-     *
-     * Technically an overwrite to properly track on *server* worlds.
-     */
-    @Override
-    public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplHooks.updateComparatorOutputLevel((net.minecraft.world.World) (Object) this, pos, blockIn);
-    }
+//
+//    /**
+//     * @author gabizou - March 12th, 2016
+//     *
+//     * Technically an overwrite to properly track on *server* worlds.
+//     */
+//    @Override
+//    public void forceBlockUpdateTick(Block blockType, BlockPos pos, Random random) {
+//        this.scheduledUpdatesAreImmediate = true;
+//        // Sponge start - Cause tracking
+//        final PhaseData peek = this.causeTracker.getStack().peek();
+//        if (this.isRemote || peek.getState().getPhase().ignoresBlockUpdateTick(peek)) {
+//            blockType.updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
+//            return;
+//        }
+//        TrackingUtil.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
+//        // Sponge end
+//        this.scheduledUpdatesAreImmediate = false;
+//    }
+//
+//    /**
+//     * @author gabizou - March 12th, 2016
+//     *
+//     * Technically an overwrite to properly track on *server* worlds.
+//     */
+//    @Override
+//    public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
+//        SpongeImplHooks.updateComparatorOutputLevel((net.minecraft.world.World) (Object) this, pos, blockIn);
+//    }
 
     /**
      * @author gabizou - March 12th, 2016
@@ -551,60 +551,60 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public void notifyBlockOfStateChange(BlockPos pos, Block blockIn) {
         this.getCauseTracker().notifyBlockOfStateChange(pos, blockIn, null);
     }
-
-    /**
-     * @author gabizou - March 12th, 2016
-     *
-     * Technically an overwrite to properly track on *server* worlds.
-     */
-    @Override
-    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (!isValid(pos)) {
-            return;
-        }
-
-        EnumSet<EnumFacing> directions = EnumSet.allOf(EnumFacing.class);
-        directions.remove(skipSide);
-
-        final CauseTracker causeTracker = this.getCauseTracker();
-
-        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions))
-                .nonCancelled(event -> {
-                    for (EnumFacing facing : EnumFacing.values()) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (event.getNeighbors().keySet().contains(direction)) {
-                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-                        }
-                    }
-                })
-                .process();
-
-    }
-
-    /**
-     * @author gabizou - March 12th, 2016
-     *
-     * Technically an overwrite to properly track on *server* worlds.
-     */
-    @Override
-    public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
-        if (!isValid(pos)) {
-            return;
-        }
-
-        final CauseTracker causeTracker = this.getCauseTracker();
-
-        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class)))
-                .nonCancelled(event -> {
-                    for (EnumFacing facing : EnumFacing.values()) {
-                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
-                        if (event.getNeighbors().keySet().contains(direction)) {
-                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
-                        }
-                    }
-                })
-                .process();
-    }
+//
+//    /**
+//     * @author gabizou - March 12th, 2016
+//     *
+//     * Technically an overwrite to properly track on *server* worlds.
+//     */
+//    @Override
+//    public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
+//        if (!isValid(pos)) {
+//            return;
+//        }
+//
+//        EnumSet<EnumFacing> directions = EnumSet.allOf(EnumFacing.class);
+//        directions.remove(skipSide);
+//
+//        final CauseTracker causeTracker = this.getCauseTracker();
+//
+//        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, directions))
+//                .nonCancelled(event -> {
+//                    for (EnumFacing facing : EnumFacing.values()) {
+//                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+//                        if (event.getNeighbors().keySet().contains(direction)) {
+//                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+//                        }
+//                    }
+//                })
+//                .process();
+//
+//    }
+//
+//    /**
+//     * @author gabizou - March 12th, 2016
+//     *
+//     * Technically an overwrite to properly track on *server* worlds.
+//     */
+//    @Override
+//    public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
+//        if (!isValid(pos)) {
+//            return;
+//        }
+//
+//        final CauseTracker causeTracker = this.getCauseTracker();
+//
+//        EventConsumer.event(SpongeCommonEventFactory.callNotifyNeighborEvent(this, pos, EnumSet.allOf(EnumFacing.class)))
+//                .nonCancelled(event -> {
+//                    for (EnumFacing facing : EnumFacing.values()) {
+//                        final Direction direction = DirectionFacingProvider.getInstance().getKey(facing).get();
+//                        if (event.getNeighbors().keySet().contains(direction)) {
+//                            causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
+//                        }
+//                    }
+//                })
+//                .process();
+//    }
 
     @SuppressWarnings("Duplicates")
     @Override

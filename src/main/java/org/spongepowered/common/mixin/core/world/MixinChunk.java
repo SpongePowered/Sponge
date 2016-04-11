@@ -486,7 +486,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         // if (block1 != block) // Sponge - Forge removes this change.
         {
             if (!this.worldObj.isRemote) {
-                // Sponge - Forge adds this change for block changes to only fire events when necessary Only fire block breaks when the block changes.
+                // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
                     currentBlock.breakBlock(this.worldObj, pos, currentState);
                 }
@@ -507,7 +507,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             }
         }
 
-        if (extendedblockstorage.get(xPos, yPos & 15, zPos) != newBlock) {
+        if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
             return null;
         }
         // Sponge Start - Slight modifiactions

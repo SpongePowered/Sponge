@@ -66,6 +66,7 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -199,8 +200,7 @@ public class GeneralFunctions {
         };
     }
 
-    private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type,
-            Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
+    private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();

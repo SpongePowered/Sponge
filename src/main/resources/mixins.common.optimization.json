@@ -7,7 +7,10 @@
         "block.state.MixinStateImplementation",
         "world.MixinWorld_Lighting",
         "world.MixinWorldServer_Lighting",
-        "world.gen.MixinChunkProviderServer_Lighting"
+        "world.gen.MixinChunkProviderServer_Lighting",
+        "MixinEntity_Item_Pre_Merge",
+        "MixinSpongeImplHooks_Item_Pre_Merge",
+        "MixinInventoryHelper"
     ],
     "injectors": {
         "defaultRequire": 1

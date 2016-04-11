@@ -50,6 +50,12 @@ public class MixinSpongeImplHooks_Item_Pre_Merge {
         if (addingMinecraftStack == null) {
             return;
         }
+
+        if (itemStacks.isEmpty()) {
+            itemStacks.add(itemStack);
+            return;
+        }
+
         for (ItemStack existing : itemStacks) {
             final net.minecraft.item.ItemStack existingMinecraftStack = ItemStackUtil.toNative(existing);
             if (existingMinecraftStack == null) {

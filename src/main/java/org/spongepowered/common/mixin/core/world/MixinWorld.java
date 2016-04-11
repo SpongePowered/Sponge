@@ -216,7 +216,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
-    @Shadow public abstract boolean isValid(BlockPos pos);
+    @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract void forceBlockUpdateTick(Block blockType, BlockPos pos, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);

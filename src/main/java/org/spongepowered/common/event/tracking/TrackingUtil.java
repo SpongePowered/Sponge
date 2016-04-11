@@ -53,6 +53,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
@@ -196,7 +197,8 @@ public final class TrackingUtil {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IBlockState actualState = currentState.getBlock().getActualState(currentState, minecraftWorld, pos);
         final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks().get();
+        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks()
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block changes, but there is no list available!", phaseContext));
         final Block newBlock = newState.getBlock();
 
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
