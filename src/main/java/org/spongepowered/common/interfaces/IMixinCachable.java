@@ -22,24 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
+package org.spongepowered.common.interfaces;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+public interface IMixinCachable {
 
-import java.util.UUID;
+    long getCacheKey();
 
-import javax.annotation.Nullable;
+    void setCacheKey(long key);
 
-public interface IMixinEntityPlayer extends IMixinEntity {
-
-    @Nullable BlockPos getBedLocation(int dim);
-
-    boolean isSpawnForced(int dim);
-
-    boolean affectsSpawning();
-
-    void setAffectsSpawning(boolean affectsSpawning);
-
-    UUID getCollidingEntityUuid();
 }

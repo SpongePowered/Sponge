@@ -24,21 +24,15 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayerMP;
 
 
 public class StaticMixinHelper {
 
-    public static EntityPlayerMP packetPlayer = null;
     public static boolean processingInternalForgeEvent = false;
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
-    public static IBlockState breakEventExtendedState = null;
     public static boolean convertingMapFormat = false;
 
-    // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
-    // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
-    public static boolean lastPlayerInteractCancelled = false;
 
     // For animation packet
     public static int lastAnimationPacketTick = 0;

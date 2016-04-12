@@ -55,6 +55,7 @@ public final class DamageTypeRegistryModule implements CatalogRegistryModule<Dam
         .put("projectile", new SpongeDamageType("projectile"))
         .put("suffocate", new SpongeDamageType("suffocate"))
         .put("void", new SpongeDamageType("void"))
+            .put("sweeping_attack", new SpongeDamageType("sweeping_attack"))
         .build();
 
     @Override

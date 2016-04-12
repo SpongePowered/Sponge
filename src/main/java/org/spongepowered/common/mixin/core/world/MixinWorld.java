@@ -88,9 +88,9 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -584,7 +584,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return (Difficulty) (Object) this.shadow$getDifficulty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private List<Player> getPlayers() {
         return (List) ((net.minecraft.world.World) (Object) this).getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue());
     }
@@ -865,27 +865,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
-            }
-        }
-    }
-
-
-    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
-    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (!this.isRemote) {
-            final PhaseContext context = ((IMixinWorldServer) this).getCauseTracker().getStack().peek().getContext();
-            final Optional<net.minecraft.entity.Entity>
-                    targeted =
-                    context.firstNamed(InternalNamedCauses.Packet.TARGETED_ENTITY, net.minecraft.entity.Entity.class);
-            if (entityIn.isDead && targeted.isPresent() && !(entityIn instanceof EntityLivingBase)) {
-                MessageChannel originalChannel = MessageChannel.TO_NONE;
-
-                DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(Cause.source(this).build(), originalChannel,
-                        Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entityIn, true);
-                SpongeImpl.getGame().getEventManager().post(event);
-                if (!event.isMessageCancelled()) {
-                    event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
-                }
             }
         }
     }

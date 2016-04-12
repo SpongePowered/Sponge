@@ -559,4 +559,5 @@ public class SpongeHooks {
     public static String getTextWithoutFormattingCodes(String text) {
         return text == null ? null : formattingCodePattern.matcher(text).replaceAll("");
     }
+
 }

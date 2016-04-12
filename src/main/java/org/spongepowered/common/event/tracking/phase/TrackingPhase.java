@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase;
 
 import com.google.common.base.Objects;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
@@ -47,6 +48,7 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -253,4 +255,7 @@ public abstract class TrackingPhase {
                 .toString();
     }
 
+    public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext context, net.minecraft.entity.Entity entity) {
+        return Optional.empty();
+    }
 }

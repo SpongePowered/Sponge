@@ -101,7 +101,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
-    private DamageSource lastDamageSource;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -144,7 +143,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
     @Shadow protected abstract void damageShield(float p_184590_1_);
     @Shadow public abstract void setActiveHand(EnumHand hand);
-    @Shadow public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow @Nullable public abstract ItemStack getHeldItem(EnumHand hand);
+    @Shadow public abstract void setHeldItem(EnumHand hand, @Nullable ItemStack stack);
+    @Shadow @Nullable public abstract ItemStack getHeldItemMainhand();
     @Shadow public abstract boolean isHandActive();
     @Shadow protected abstract void onDeathUpdate();
     @Shadow public abstract void onDeath(DamageSource cause);
@@ -153,6 +154,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract void setAbsorptionAmount(float amount);
     @Shadow public abstract float getAbsorptionAmount();
     @Shadow public abstract CombatTracker getCombatTracker();
+    @Shadow public abstract void setSprinting(boolean sprinting);
+    @Shadow public abstract boolean isOnLadder();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -538,11 +541,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Overwrite
     public boolean canBeCollidedWith() {
         return !(this.isVanished() && this.ignoresCollision()) && !this.isDead;
-    }
-
-    @Override
-    public DamageSource getLastDamageSource() {
-        return this.lastDamageSource;
     }
 
     @Override

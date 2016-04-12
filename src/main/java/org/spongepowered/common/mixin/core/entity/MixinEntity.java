@@ -33,8 +33,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -48,6 +50,7 @@ import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
@@ -119,6 +122,7 @@ import org.spongepowered.common.interfaces.entity.IMixinGriefer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -158,6 +162,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
+    protected DamageSource lastDamageSource;
+    private Cause destructCause;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -185,6 +191,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
+    @Shadow public float prevDistanceWalkedModified;
+    @Shadow public float distanceWalkedModified;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -213,6 +221,12 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void dismountRidingEntity();
     @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
     @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
+    @Shadow public abstract boolean isSprinting();
+    @Shadow public abstract boolean isInWater();
+    @Shadow public abstract boolean isRiding();
+    @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
 
 
     // @formatter:on
@@ -568,6 +582,7 @@ public abstract class MixinEntity implements IMixinEntity {
         return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");

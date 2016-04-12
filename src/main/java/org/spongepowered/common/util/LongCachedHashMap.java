@@ -22,24 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
+package org.spongepowered.common.util;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import net.minecraft.util.LongHashMap;
+import org.spongepowered.common.interfaces.IMixinCachable;
 
-import java.util.UUID;
+public class LongCachedHashMap<V extends IMixinCachable> extends LongHashMap<V> {
 
-import javax.annotation.Nullable;
+    private V lastRetrievedValue = null;
 
-public interface IMixinEntityPlayer extends IMixinEntity {
+    @Override
+    public V getValueByKey(long key) {
+        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.getCacheKey()) {
+            return this.lastRetrievedValue;
+        }
+        return this.lastRetrievedValue = super.getValueByKey(key);
+    }
 
-    @Nullable BlockPos getBedLocation(int dim);
 
-    boolean isSpawnForced(int dim);
-
-    boolean affectsSpawning();
-
-    void setAffectsSpawning(boolean affectsSpawning);
-
-    UUID getCollidingEntityUuid();
+    @Override
+    public V remove(long key) {
+        if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.getCacheKey()) {
+            this.lastRetrievedValue = null;
+        }
+        return super.remove(key);
+    }
 }

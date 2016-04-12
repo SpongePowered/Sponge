@@ -30,7 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import org.spongepowered.api.event.Listener;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 
 import java.lang.reflect.Method;
@@ -58,10 +57,6 @@ public class FilterFactory {
     }
 
     public Class<? extends EventFilter> createFilter(Method method) throws Exception {
-        if (method.getParameterCount() == 1 && method.getDeclaredAnnotations().length == 1
-                && method.getDeclaredAnnotations()[0].annotationType().equals(Listener.class)) {
-            return null;
-        }
         return this.cache.get(method);
     }
 

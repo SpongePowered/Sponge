@@ -62,6 +62,7 @@ public final class NbtDataUtil {
 
         public static final String PASSENGERS = "Passengers";
 
+        public static final String IS_FLYING = "flying";
     }
 
     // These are the various tag compound id's for getting to various places

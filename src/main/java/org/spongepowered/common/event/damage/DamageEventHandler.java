@@ -30,7 +30,13 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.init.MobEffects;
 import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.item.Item;
@@ -42,8 +48,11 @@ import net.minecraft.util.EntityDamageSourceIndirect;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
@@ -60,8 +69,13 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -70,6 +84,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public class DamageEventHandler {
 
@@ -384,5 +401,67 @@ public class DamageEventHandler {
         } else {
             return Cause.of(NamedCause.source(damageSource));
         }
+    }
+
+    public static List<Tuple<DamageModifier, Function<? super Double, Double>>> createAttackEnchamntmentFunction(@Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute) {
+        final List<Tuple<DamageModifier, Function<? super Double, Double>>> damageModifierFunctions = new ArrayList<>();
+        if (heldItem != null) {
+            Supplier<ItemStackSnapshot> supplier = new Supplier<ItemStackSnapshot>() {
+                private ItemStackSnapshot snapshot;
+                @Override
+                public ItemStackSnapshot get() {
+                    if (this.snapshot == null) {
+                        this.snapshot = ItemStackUtil.createSnapshot(heldItem);
+                    }
+                    return this.snapshot;
+                }
+            };
+            NBTTagList nbttaglist = heldItem.getEnchantmentTagList();
+
+            if (nbttaglist != null) {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+                    int j = nbttaglist.getCompoundTagAt(i).getShort("id");
+                    int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+
+                    final Enchantment enchantment = Enchantment.getEnchantmentByID(j);
+                    if (enchantment != null) {
+                        final DamageModifier enchantmentModifier = DamageModifier.builder()
+                                .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
+                                .cause(Cause.builder()
+                                        .named("Weapon", supplier.get())
+                                        .named("Enchantment", enchantment)
+                                        .build())
+                                .build();
+                        Function<? super Double, Double> enchantmentFunction = (damage) ->
+                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute);
+                        damageModifierFunctions.add(new Tuple<>(enchantmentModifier, enchantmentFunction));
+                    }
+                }
+            }
+        }
+
+        return damageModifierFunctions;
+    }
+
+    public static Tuple<DamageModifier, Function<? super Double, Double>> provideCriticalAttackTuple(EntityPlayer player) {
+        final DamageModifier modifier = DamageModifier.builder()
+                .cause(Cause.source(player).build())
+                .type(DamageModifierTypes.CRITICAL_HIT)
+                .build();
+        Function<? super Double, Double> function = (damage) -> damage * 1.5F;
+        return new Tuple<>(modifier, function);
+    }
+
+    public static DamageSource getEntityDamageSource(@Nullable Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        if (entity.worldObj instanceof IMixinWorldServer) {
+            IMixinWorldServer spongeWorld = (IMixinWorldServer) entity.worldObj;
+            final PhaseData peek = spongeWorld.getCauseTracker().getStack().peek();
+            return peek.getState().getPhase().createDestructionDamageSource(peek.getState(), peek.getContext(), entity).orElse(null);
+        }
+        return null;
     }
 }

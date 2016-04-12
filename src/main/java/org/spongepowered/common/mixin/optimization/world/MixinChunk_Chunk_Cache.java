@@ -22,24 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
+package org.spongepowered.common.mixin.optimization.world;
 
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinCachable;
 
-import java.util.UUID;
+@Mixin(Chunk.class)
+public class MixinChunk_Chunk_Cache implements IMixinCachable {
 
-import javax.annotation.Nullable;
+    @Shadow @Final public int xPosition;
+    @Shadow @Final public int zPosition;
 
-public interface IMixinEntityPlayer extends IMixinEntity {
+    private long cacheKey = ChunkCoordIntPair.chunkXZ2Int(this.xPosition, this.zPosition);
 
-    @Nullable BlockPos getBedLocation(int dim);
+    @Override
+    public long getCacheKey() {
+        return this.cacheKey;
+    }
 
-    boolean isSpawnForced(int dim);
-
-    boolean affectsSpawning();
-
-    void setAffectsSpawning(boolean affectsSpawning);
-
-    UUID getCollidingEntityUuid();
+    @Override
+    public void setCacheKey(long key) {
+        this.cacheKey = key;
+    }
 }

@@ -27,10 +27,12 @@ package org.spongepowered.common.mixin.core.entity.monster;
 import net.minecraft.entity.monster.EntityPigZombie;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.mutable.entity.AggressiveData;
 import org.spongepowered.api.data.manipulator.mutable.entity.AngerableData;
 import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.living.monster.ZombiePigman;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
@@ -42,14 +44,19 @@ import org.spongepowered.common.interfaces.entity.IMixinAnger;
 import java.util.List;
 
 @Mixin(EntityPigZombie.class)
-public abstract class MixinEntityPigZombie extends MixinEntityZombie implements ZombiePigman, IMixinAggressive, IMixinAnger {
+@Implements(@Interface(iface = IMixinAggressive.class, prefix = "aggressive$"))
+public abstract class MixinEntityPigZombie extends MixinEntityZombie implements ZombiePigman, IMixinAnger {
 
     @Shadow private int angerLevel;
 
     @Shadow public abstract boolean isAngry();
+    
+    @Intrinsic
+    public boolean aggressive$isAngry() {
+        return this.isAngry();
+    }
 
-    @Override
-    public void setAngry(boolean angry) {
+    public void aggressive$setAngry(boolean angry) {
         if (angry) {
             this.angerLevel = 400 + this.rand.nextInt(400);
         } else {

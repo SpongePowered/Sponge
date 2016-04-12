@@ -28,7 +28,10 @@ package org.spongepowered.common;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -42,7 +45,6 @@ import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEv
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
@@ -123,8 +125,23 @@ public final class SpongeImplHooks {
         }
     }
 
-    public static void addItemStackToListForSpawning(Collection<ItemStack> itemStacks, ItemStack itemStack) {
+    public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, org.spongepowered.api.item.inventory.ItemStack itemStack) {
         // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
         itemStacks.add(itemStack);
+    }
+
+    /**
+     * A simple method to check attacks for the forge event factory.
+     *
+     * @param entityPlayer
+     * @param targetEntity
+     * @return
+     */
+    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+        final ItemStack item = entityPlayer.getHeldItemMainhand();
+        if (item != null) {
+            return true;
+        }
+        return true;
     }
 }
