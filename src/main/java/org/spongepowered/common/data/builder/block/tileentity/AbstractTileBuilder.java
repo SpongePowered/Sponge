@@ -103,7 +103,7 @@ public abstract class AbstractTileBuilder<T extends org.spongepowered.api.block.
         if (type == null) {
             return Optional.empty(); // TODO throw exception maybe?
         }
-        // Now we should be ready to actually deserialize the TileEntity with the right block.
+        // Now we should be ready to actually translate the TileEntity with the right block.
 
         final int x = container.getInt(DataQueries.X_POS).get();
         final int y = container.getInt(DataQueries.Y_POS).get();

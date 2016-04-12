@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.DataQuery.of;
 
 import com.google.common.collect.Lists;
+import com.google.common.reflect.TypeToken;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagByteArray;
@@ -48,16 +49,19 @@ import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.data.translator.DataTranslator;
+import org.spongepowered.api.data.persistence.DataTranslator;
+import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
     private static final NbtTranslator instance = new NbtTranslator();
+    private static final TypeToken<NBTTagCompound> TOKEN = TypeToken.of(NBTTagCompound.class);
     public static final String BOOLEAN_IDENTIFER = "$Boolean";
 
     public static NbtTranslator getInstance() {
@@ -282,18 +286,40 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         }
     }
 
-    @Override
     public NBTTagCompound translateData(DataView container) {
         return NbtTranslator.containerToCompound(container);
     }
 
-    @Override
     public void translateContainerToData(NBTTagCompound node, DataView container) {
         NbtTranslator.containerToCompound(container, node);
     }
 
-    @Override
     public DataContainer translateFrom(NBTTagCompound node) {
         return NbtTranslator.getViewFromCompound(node);
+    }
+
+    @Override
+    public TypeToken<NBTTagCompound> getToken() {
+        return TOKEN;
+    }
+
+    @Override
+    public Optional<NBTTagCompound> translate(DataView view) throws InvalidDataException {
+        return Optional.of(containerToCompound(view));
+    }
+
+    @Override
+    public DataContainer translate(NBTTagCompound obj) throws InvalidDataException {
+        return getViewFromCompound(obj);
+    }
+
+    @Override
+    public String getId() {
+        return "sponge:nbt";
+    }
+
+    @Override
+    public String getName() {
+        return "NbtTagCompoundTranslator";
     }
 }

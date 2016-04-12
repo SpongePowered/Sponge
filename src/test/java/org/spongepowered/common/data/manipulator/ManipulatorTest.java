@@ -192,7 +192,7 @@ public class ManipulatorTest {
             if (this.builder != null) {
                 final Optional<DataManipulator<?, ?>> optional = (Optional<DataManipulator<?, ?>>) this.builder.build(container);
                 if (!optional.isPresent()) {
-                    throw new IllegalArgumentException("[Serialization]: A builder did not deserialize the data manipulator: "
+                    throw new IllegalArgumentException("[Serialization]: A builder did not translate the data manipulator: "
                         + this.dataName + "\n[Serialization]: Providing the DataContainer: " + container.toString());
                 } else {
                     final DataManipulator<?, ?> deserialized = this.builder.build(container).get();

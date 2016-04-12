@@ -30,9 +30,8 @@ import ninja.leaping.configurate.objectmapping.ObjectMapper;
 import ninja.leaping.configurate.objectmapping.ObjectMappingException;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializer;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataSerializable;
-import org.spongepowered.api.data.translator.ConfigurateTranslator;
+import org.spongepowered.api.data.persistence.DataTranslators;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be
@@ -43,14 +42,13 @@ public class DataSerializableTypeSerializer implements TypeSerializer<DataSerial
     @Override
     public DataSerializable deserialize(TypeToken<?> type, ConfigurationNode value) throws ObjectMappingException {
         Class<?> clazz = type.getRawType();
-        return Sponge.getDataManager().deserialize(clazz.asSubclass(DataSerializable.class),
-                ConfigurateTranslator.instance().translateFrom(value))
-                .orElseThrow(() -> new ObjectMappingException("Could not deserialize DataSerializable of type: " + clazz.getName()));
+        return Sponge.getDataManager()
+                .deserialize(clazz.asSubclass(DataSerializable.class), DataTranslators.CONFIGURATION_NODE.translate(value))
+                .orElseThrow(() -> new ObjectMappingException("Could not translate DataSerializable of type: " + clazz.getName()));
     }
 
     @Override
     public void serialize(TypeToken<?> type, DataSerializable obj, ConfigurationNode value) throws ObjectMappingException {
-        DataContainer container = obj.toContainer();
-        value.setValue(ConfigurateTranslator.instance().translateData(container));
+        value.setValue(DataTranslators.CONFIGURATION_NODE.translate(obj.toContainer()));
     }
 }

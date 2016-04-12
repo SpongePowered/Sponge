@@ -72,7 +72,7 @@ public interface IMixinTileEntity {
     void writeToNbt(NBTTagCompound compound);
 
     /**
-     * Due to the nature of how {@link TileEntity} instances serialize their
+     * Due to the nature of how {@link TileEntity} instances translate their
      * data with {@link TileEntity#toContainer()}, all {@link DataManipulator}s
      * are serialized under a {@link DataQuery} specified query from
      * {@link NbtDataUtil}. This is to help separate the real

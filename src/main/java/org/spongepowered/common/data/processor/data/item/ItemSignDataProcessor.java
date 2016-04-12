@@ -93,7 +93,7 @@ public class ItemSignDataProcessor extends AbstractItemSingleDataProcessor<List<
                 textLines.set(i, TextSerializers.JSON.deserialize(lines.get(i)));
             }
         } catch (Exception e) {
-            throw new InvalidDataException("Could not deserialize text json lines", e);
+            throw new InvalidDataException("Could not translate text json lines", e);
         }
         return Optional.of(signData.set(Keys.SIGN_LINES, textLines));
     }
