@@ -27,7 +27,7 @@ package org.spongepowered.common.world.schematic;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import org.spongepowered.api.block.BlockArchetype;
+import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.schematic.SchematicVolume;
@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implements SchematicVolume {
 
-    private final Map<Vector3i, BlockArchetype> tiles = Maps.newHashMap();
+    private final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
     private final List<EntityArchetype> entities = Lists.newArrayList();
 
     public CharArraySchematicVolume(Vector3i start, Vector3i size) {
@@ -53,12 +53,12 @@ public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implem
     }
 
     @Override
-    public Optional<BlockArchetype> getBlockArchetype(int x, int y, int z) {
+    public Optional<TileEntityArchetype> getBlockArchetype(int x, int y, int z) {
         return Optional.ofNullable(this.tiles.get(getBlockMin().add(x, y, z)));
     }
 
     @Override
-    public Map<Vector3i, BlockArchetype> getBlockArchetypes() {
+    public Map<Vector3i, TileEntityArchetype> getBlockArchetypes() {
         return this.tiles;
     }
 

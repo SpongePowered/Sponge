@@ -90,8 +90,8 @@ public final class DataQueries {
     // General DataQueries
     public static final DataQuery UNSAFE_NBT = of("UnsafeData");
     public static final DataQuery DATA_MANIPULATORS = of("Data");
-    public static final DataQuery DATA_CLASS = of("DataClass");
-    public static final DataQuery INTERNAL_DATA = of("ManipulatorData");
+    public static final DataQuery DATA_CLASS = of(NbtDataUtil.CUSTOM_DATA_CLASS);
+    public static final DataQuery INTERNAL_DATA = of(NbtDataUtil.CUSTOM_DATA);
 
     // World
     public static final DataQuery WORLD_CUSTOM_SETTINGS = DataQuery.of("customSettings");
@@ -166,7 +166,33 @@ public final class DataQueries {
     public static final DataQuery LOCAL_DATE_MONTH = of("LocalDateMonth");
     public static final DataQuery LOCAL_DATE_DAY = of("LocalDateDay");
     public static final DataQuery ZONE_TIME_ID = of("ZoneDateTimeId");
+    public static final DataQuery FORGE_DATA = of(NbtDataUtil.FORGE_DATA_TAG);
 
     private DataQueries() {
+    }
+
+    public static final class TileEntityArchetype {
+
+        public static final DataQuery TILE_TYPE = of("TileEntityType");
+        public static final DataQuery BLOCK_STATE = of("BlockState");
+        public static final DataQuery TILE_DATA = of("TileEntityData");
+
+        private TileEntityArchetype() {
+        }
+    }
+
+    public static final class Compatibility {
+
+        public static final class Forge {
+            public static final DataQuery ROOT = of(NbtDataUtil.FORGE_DATA_TAG);
+        }
+
+    }
+
+    public static final class General {
+
+        public static final DataQuery SPONGE_ROOT = of(NbtDataUtil.SPONGE_DATA);
+
+        public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
     }
 }

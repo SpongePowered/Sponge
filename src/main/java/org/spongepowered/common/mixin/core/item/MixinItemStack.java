@@ -176,12 +176,12 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     }
 
     @Override
-    public boolean validateRawData(DataContainer container) {
+    public boolean validateRawData(DataView container) {
         return false;
     }
 
     @Override
-    public void setRawData(DataContainer container) throws InvalidDataException {
+    public void setRawData(DataView container) throws InvalidDataException {
 
     }
 

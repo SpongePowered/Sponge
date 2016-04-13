@@ -71,14 +71,14 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<BlockState> imp
     }
 
     @Override
-    public <V> BlockState.Builder add(Key<? extends BaseValue<V>> key, V value) {
+    public <V> SpongeBlockStateBuilder add(Key<? extends BaseValue<V>> key, V value) {
         checkNotNull(key, "key");
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         return this;
     }
 
     @Override
-    public BlockState.Builder from(BlockState holder) {
+    public SpongeBlockStateBuilder from(BlockState holder) {
         this.blockState = holder;
         return this;
     }

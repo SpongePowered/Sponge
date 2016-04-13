@@ -30,6 +30,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.Queries;
@@ -87,12 +88,12 @@ public class SpongeFluidStack implements FluidStack {
     }
 
     @Override
-    public boolean validateRawData(DataContainer container) {
+    public boolean validateRawData(DataView container) {
         return container.contains(Queries.CONTENT_VERSION, DataQueries.FLUID_TYPE, DataQueries.FLUID_VOLUME);
     }
 
     @Override
-    public void setRawData(DataContainer container) throws InvalidDataException {
+    public void setRawData(DataView container) throws InvalidDataException {
         try {
             final int contentVersion = container.getInt(Queries.CONTENT_VERSION).get();
             if (contentVersion != this.getContentVersion()) {

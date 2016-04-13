@@ -28,7 +28,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
@@ -53,6 +55,13 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.DataSerializableTypeSerializer;
 import org.spongepowered.common.data.builder.manipulator.SpongeDataManipulatorBuilder;
 import org.spongepowered.common.data.builder.manipulator.SpongeImmutableDataManipulatorBuilder;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
+import org.spongepowered.common.data.nbt.NbtDataType;
+import org.spongepowered.common.data.nbt.SpongeNbtProcessorDelegate;
+import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
+import org.spongepowered.common.data.nbt.validation.RawDataValidator;
+import org.spongepowered.common.data.nbt.validation.ValidationType;
+import org.spongepowered.common.data.nbt.value.NbtValueProcessor;
 import org.spongepowered.common.data.processor.common.AbstractSingleDataSingleTargetProcessor;
 import org.spongepowered.common.data.util.ComparatorUtil;
 import org.spongepowered.common.data.util.DataFunction;
@@ -62,6 +71,7 @@ import org.spongepowered.common.registry.type.data.DataTranslatorRegistryModule;
 
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -101,6 +111,10 @@ public final class SpongeDataManager implements DataManager {
             .concurrencyLevel(4)
             .makeMap();
 
+    private final Map<Class<? extends DataManipulator<?, ?>>, List<NbtDataProcessor<?, ?>>> nbtProcessorMap = new MapMaker()
+            .concurrencyLevel(4)
+            .makeMap();
+
 
     // Processor delegates
 
@@ -108,6 +122,8 @@ public final class SpongeDataManager implements DataManager {
     private final Map<Class<? extends DataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> dataProcessorDelegates =  new IdentityHashMap<>();
     private final Map<Class<? extends ImmutableDataManipulator<?, ?>>, DataProcessorDelegate<?, ?>> immutableDataProcessorDelegates =  new IdentityHashMap<>();
     private final Map<Class<? extends DataManipulator<?, ?>>, Class<? extends DataManipulator<?, ?>>> interfaceToImplDataManipulatorClasses = new IdentityHashMap<>();
+    private ImmutableTable<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> nbtProcessorTable = ImmutableTable.of();
+    private ImmutableTable<Key<?>, NbtDataType, NbtValueProcessor<?, ?>> nbtValueTable = ImmutableTable.of();
 
     // Content updaters
     private final Map<Class<? extends DataSerializable>, List<DataContentUpdater>> updatersMap = new IdentityHashMap<>();
@@ -270,6 +286,23 @@ public final class SpongeDataManager implements DataManager {
             registry.immutableDataProcessorDelegates.put(entry.getKey(), delegate);
         });
         registry.immutableProcessorMap.clear();
+
+        ImmutableTable.Builder<Class<? extends DataManipulator<?, ?>>, NbtDataType, NbtDataProcessor<?, ?>> builder = ImmutableTable.builder();
+        registry.nbtProcessorMap.entrySet().forEach(entry -> {
+            final HashMultimap<NbtDataType, NbtDataProcessor<?, ?>> processorMultimap = HashMultimap.create();
+            final List<NbtDataProcessor<?, ?>> value = entry.getValue();
+            for (NbtDataProcessor<?, ?> nbtDataProcessor : value) {
+                processorMultimap.put(nbtDataProcessor.getTargetType(), nbtDataProcessor);
+            }
+            for (Map.Entry<NbtDataType, Collection<NbtDataProcessor<?, ?>>> nbtDataTypeCollectionEntry : processorMultimap.asMap().entrySet()) {
+                ImmutableList.Builder<NbtDataProcessor<?, ?>> processorBuilder = ImmutableList.builder();
+                processorBuilder.addAll(nbtDataTypeCollectionEntry.getValue());
+                final NbtDataType dataType = nbtDataTypeCollectionEntry.getKey();
+                builder.put(entry.getKey(), dataType, new SpongeNbtProcessorDelegate(processorBuilder.build(), dataType));
+            }
+        });
+        registry.nbtProcessorMap.clear();
+        registry.nbtProcessorTable = builder.build();
 
     }
 
@@ -475,4 +508,34 @@ public final class SpongeDataManager implements DataManager {
         return Optional.ofNullable((ValueProcessor<E, ? extends BaseValue<E>>) this.valueDelegates.get(key));
     }
 
+    public RawDataValidator getValidators(ValidationType validationType) {
+
+        return new DelegateDataValidator(ImmutableList.of(), validationType);
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> Optional<NbtDataProcessor<T, I>> getNbtProcessor(NbtDataType dataType, Class<T> clazz) {
+        return Optional.ofNullable((NbtDataProcessor<T, I>) this.nbtProcessorTable.get(checkNotNull(clazz, "Manipulator class cannot be null!"), dataType));
+    }
+
+    @SuppressWarnings("unchecked")
+    public <E, V extends BaseValue<E>> Optional<NbtValueProcessor<E, V>> getNbtProcessor(NbtDataType dataType, Key<V> key) {
+        return Optional.ofNullable((NbtValueProcessor<E, V>) this.nbtValueTable.get(key, dataType));
+    }
+
+    public Optional<NbtDataProcessor> getRawNbtProcessor(NbtDataType dataType, Class<? extends DataManipulator> aClass) {
+        return Optional.ofNullable(this.nbtProcessorTable.get(checkNotNull(aClass, "Manipulator class cannot be null!"), dataType));
+    }
+
+    public Optional<NbtValueProcessor> getRawNbtProcessor(NbtDataType dataType, Key<?> key) {
+        return Optional.ofNullable(this.nbtValueTable.get(key, dataType));
+    }
+
+    public Collection<NbtDataProcessor<?, ?>> getNbtProcessors(NbtDataType type) {
+        return this.nbtProcessorTable.column(type).values();
+    }
+
+    public Collection<NbtValueProcessor<?, ?>> getNbtValueProcessors(NbtDataType type) {
+        return this.nbtValueTable.column(type).values();
+    }
 }

@@ -22,20 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
+package org.spongepowered.common.data.nbt.validation;
 
-import net.minecraft.nbt.NBTTagCompound;
-import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.api.CatalogType;
+import org.spongepowered.api.util.annotation.CatalogedBy;
 
-import java.util.Optional;
-
-public interface NbtDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
-
-    NbtDataType getTargetType();
-
-    Optional<M> readFromCompound(NBTTagCompound compound);
-
-    NBTTagCompound storeToCompound(NBTTagCompound compound, M manipulator);
+@CatalogedBy(Validations.class)
+public interface ValidationType extends CatalogType {
 
 }

@@ -53,6 +53,7 @@ import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public class DataUtil {
@@ -60,6 +61,7 @@ public class DataUtil {
     // TODO Bump this when needing to fix sponge added file data
     public static final int DATA_VERSION = 1;
     public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
+    private static final Supplier<InvalidDataException> INVALID_DATA_EXCEPTION_SUPPLIER = InvalidDataException::new;
 
     static {
         spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
@@ -211,4 +213,7 @@ public class DataUtil {
         return new Vector3d(x, y, z);
     }
 
+    public static Supplier<InvalidDataException> dataNotFound() {
+        return INVALID_DATA_EXCEPTION_SUPPLIER;
+    }
 }

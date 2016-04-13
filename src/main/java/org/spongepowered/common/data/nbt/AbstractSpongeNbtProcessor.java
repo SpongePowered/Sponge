@@ -24,11 +24,25 @@
  */
 package org.spongepowered.common.data.nbt;
 
-import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.common.data.nbt.data.NbtDataProcessor;
 
-public class NbtDataTypes {
+public abstract class AbstractSpongeNbtProcessor<T extends DataManipulator<T, I>, I extends ImmutableDataManipulator<I, T>> implements NbtDataProcessor<T, I> {
 
-    public static final NbtDataType ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "ENTITY");
-    public static final NbtDataType TILE_ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "TILE_ENTITY");
+    private final NbtDataType dataType;
 
+    protected AbstractSpongeNbtProcessor(NbtDataType dataType) {
+        this.dataType = dataType;
+    }
+
+    @Override
+    public int getPriority() {
+        return 100;
+    }
+
+    @Override
+    public final NbtDataType getTargetType() {
+        return this.dataType;
+    }
 }

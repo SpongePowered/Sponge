@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.entity.player;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
@@ -69,12 +69,12 @@ public abstract class MixinSpongeUser implements User, IMixinSubject {
     }
 
     @Override
-    public boolean validateRawData(DataContainer container) {
+    public boolean validateRawData(DataView container) {
         throw new UnsupportedOperationException(); // TODO Data API
     }
 
     @Override
-    public void setRawData(DataContainer container) throws InvalidDataException {
+    public void setRawData(DataView container) throws InvalidDataException {
         throw new UnsupportedOperationException(); // TODO Data API
     }
 

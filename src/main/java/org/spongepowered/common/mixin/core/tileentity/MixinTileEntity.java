@@ -151,7 +151,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public boolean validateRawData(DataContainer container) {
+    public boolean validateRawData(DataView container) {
         return container.contains(Queries.WORLD_ID)
             && container.contains(Queries.POSITION_X)
             && container.contains(Queries.POSITION_Y)
@@ -161,7 +161,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     }
 
     @Override
-    public void setRawData(DataContainer container) throws InvalidDataException {
+    public void setRawData(DataView container) throws InvalidDataException {
 
     }
 

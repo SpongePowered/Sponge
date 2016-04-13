@@ -22,13 +22,27 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
+package org.spongepowered.common.data.nbt.validation;
 
-import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
+import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataView;
 
-public class NbtDataTypes {
+public class SpongeEntityValidator implements RawDataValidator {
 
-    public static final NbtDataType ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "ENTITY");
-    public static final NbtDataType TILE_ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "TILE_ENTITY");
+    @Override
+    public ValidationType getValidationType() {
+        return Validations.ENTITY;
+    }
 
+    @Override
+    public boolean validate(NBTTagCompound view) {
+        // TODO implement this bit, the view needs various things, but it most definteily cannot
+        // contain
+        return true;
+    }
+
+    @Override
+    public boolean validate(DataView view) {
+        return false;
+    }
 }

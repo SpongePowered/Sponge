@@ -22,13 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.nbt;
+package org.spongepowered.common.data.nbt.data;
 
-import org.spongepowered.api.util.generator.dummy.DummyObjectProvider;
+import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
+import org.spongepowered.common.data.nbt.NbtDataType;
 
-public class NbtDataTypes {
+import java.util.Optional;
 
-    public static final NbtDataType ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "ENTITY");
-    public static final NbtDataType TILE_ENTITY = DummyObjectProvider.createFor(NbtDataType.class, "TILE_ENTITY");
+public interface NbtDataProcessor<M extends DataManipulator<M, I>, I extends ImmutableDataManipulator<I, M>> {
 
+    int getPriority();
+
+    NbtDataType getTargetType();
+
+    boolean isCompatible(NBTTagCompound compound);
+
+    Optional<M> readFrom(NBTTagCompound compound);
+
+    Optional<M> readFrom(DataView view);
+
+    Optional<NBTTagCompound> storeToCompound(NBTTagCompound compound, M manipulator);
+
+    Optional<DataView> storeToView(DataView view, M manipulator);
+
+    DataTransactionResult remove(NBTTagCompound data);
+
+    DataTransactionResult remove(DataView data);
 }
