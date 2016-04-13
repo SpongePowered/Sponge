@@ -25,8 +25,6 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.Block;
-import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.event.cause.Cause;
@@ -41,34 +39,47 @@ import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.schematic.GlobalPalette;
+import org.spongepowered.common.world.schematic.Palette;
 
 @NonnullByDefault
 public class CharArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
     @SuppressWarnings("ConstantConditions")
     private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+
+    private final Palette palette;
     private final char[] blocks;
 
     public CharArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
-        this(new char[size.getX() * size.getY() * size.getZ()], start, size);
+        this(GlobalPalette.instance, new char[size.getX() * size.getY() * size.getZ()], start, size);
     }
 
     public CharArrayMutableBlockBuffer(char[] blocks, Vector3i start, Vector3i size) {
+        this(GlobalPalette.instance, blocks, start, size);
+    }
+
+    public CharArrayMutableBlockBuffer(Palette palette, Vector3i start, Vector3i size) {
+        this(palette, new char[size.getX() * size.getY() * size.getZ()], start, size);
+    }
+
+    public CharArrayMutableBlockBuffer(Palette palette, char[] blocks, Vector3i start, Vector3i size) {
         super(start, size);
         this.blocks = blocks;
+        this.palette = palette;
     }
 
     @Override
     public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
         checkRange(x, y, z);
-        this.blocks[getIndex(x, y, z)] = (char) Block.BLOCK_STATE_IDS.get((IBlockState) block);
+        this.blocks[getIndex(x, y, z)] = (char) this.palette.getOrAssign(block);
         return true;
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        BlockState block = (BlockState) Block.BLOCK_STATE_IDS.getByValue(this.blocks[getIndex(x, y, z)]);
+        BlockState block = this.palette.get(this.blocks[getIndex(x, y, z)]).get();
         return block == null ? AIR : block;
     }
 
@@ -97,11 +108,11 @@ public class CharArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
     @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
-            case STANDARD:
-                return new CharArrayMutableBlockBuffer(this.blocks.clone(), this.start, this.size);
-            case THREAD_SAFE:
-            default:
-                throw new UnsupportedOperationException(type.name());
+        case STANDARD:
+            return new CharArrayMutableBlockBuffer(this.palette, this.blocks.clone(), this.start, this.size);
+        case THREAD_SAFE:
+        default:
+            throw new UnsupportedOperationException(type.name());
         }
     }
 
