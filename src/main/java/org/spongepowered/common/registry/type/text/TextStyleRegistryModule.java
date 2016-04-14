@@ -39,7 +39,7 @@ import java.util.Optional;
 
 public final class TextStyleRegistryModule implements CatalogRegistryModule<TextStyle.Base> {
 
-    @RegisterCatalog(TextStyles.class)
+    @RegisterCatalog(value = TextStyles.class, ignoredFields = "NONE")
     public static final ImmutableMap<String, TextStyle.Base> textStyleMappings = ImmutableMap.<String, TextStyle.Base>builder()
         .put("bold", SpongeTextStyle.of(EnumChatFormatting.BOLD))
         .put("italic", SpongeTextStyle.of(EnumChatFormatting.ITALIC))
