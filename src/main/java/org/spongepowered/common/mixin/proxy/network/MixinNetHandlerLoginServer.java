@@ -22,11 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network;
+package org.spongepowered.common.mixin.proxy.network;
 
 import com.google.common.base.Charsets;
+import com.google.common.base.Objects;
 import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.NetHandlerLoginServer;
@@ -51,22 +51,22 @@ public abstract class MixinNetHandlerLoginServer {
     @Inject(method = "processLoginStart", at = @At(value = "FIELD", target = "Lnet/minecraft/server/network/NetHandlerLoginServer;"
             + "loginGameProfile:Lcom/mojang/authlib/GameProfile;",
             opcode = Opcodes.PUTFIELD, ordinal = 0, shift = At.Shift.AFTER))
-    public void initUuid(CallbackInfo ci) {
+    public void createProfile(CallbackInfo ci) {
         if (!this.server.isServerInOnlineMode()) {
-            UUID uuid;
-            if (((IMixinNetworkManager) this.networkManager).getSpoofedUUID() != null) {
-                uuid = ((IMixinNetworkManager) this.networkManager).getSpoofedUUID();
+            GameProfile source;
+            if (((IMixinNetworkManager) this.networkManager).getProxyProfile() != null) {
+                source = ((IMixinNetworkManager) this.networkManager).getProxyProfile();
             } else {
-                uuid = UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8));
+                source = new GameProfile(UUID.nameUUIDFromBytes(("OfflinePlayer:" + this.loginGameProfile.getName()).getBytes(Charsets.UTF_8)), null);
             }
 
-            this.loginGameProfile = new GameProfile(uuid, this.loginGameProfile.getName());
-
-            if (((IMixinNetworkManager) this.networkManager).getSpoofedProfile() != null) {
-                for (Property property : ((IMixinNetworkManager) this.networkManager).getSpoofedProfile()) {
-                    this.loginGameProfile.getProperties().put(property.getName(), property);
-                }
-            }
+            this.loginGameProfile = this.copyProfile(source, this.loginGameProfile.getName());
         }
+    }
+
+    private GameProfile copyProfile(GameProfile source, String name) {
+        GameProfile result = new GameProfile(source.getId(), Objects.firstNonNull(source.getName(), name));
+        result.getProperties().putAll(source.getProperties());
+        return result;
     }
 }

@@ -22,54 +22,61 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.bungee.network;
+package org.spongepowered.common.mixin.proxy.network;
 
-import com.google.gson.Gson;
-import com.mojang.authlib.properties.Property;
-import com.mojang.util.UUIDTypeAdapter;
 import net.minecraft.network.EnumConnectionState;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.handshake.client.C00Handshake;
 import net.minecraft.network.login.server.S00PacketDisconnect;
 import net.minecraft.server.network.NetHandlerHandshakeTCP;
-import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.IChatComponent;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
+import org.spongepowered.common.interfaces.network.handshake.client.IMixinCHandshake;
+import org.spongepowered.common.proxy.HandshakeResponse;
+import org.spongepowered.common.proxy.ProxyManager;
+import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetSocketAddress;
 
 @Mixin(NetHandlerHandshakeTCP.class)
 public abstract class MixinNetHandlerHandshakeTCP {
 
-    private static final Gson gson = new Gson();
-
     @Shadow private NetworkManager networkManager;
 
     @Inject(method = "processHandshake", at = @At(value = "HEAD"), cancellable = true)
     public void onProcessHandshakeStart(C00Handshake packetIn, CallbackInfo ci) {
-        if (SpongeImpl.getGlobalConfig().getConfig().getBungeeCord().getIpForwarding() && packetIn.getRequestedState().equals(EnumConnectionState.LOGIN)) {
-            String[] split = packetIn.ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
-
-            if (split.length == 3 || split.length == 4) {
-                packetIn.ip = split[0];
-                ((IMixinNetworkManager) this.networkManager).setRemoteAddress(new InetSocketAddress(split[1],
-                        ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
-                ((IMixinNetworkManager) this.networkManager).setSpoofedUUID(UUIDTypeAdapter.fromString(split[2]));
-
-                if (split.length == 4) {
-                    ((IMixinNetworkManager) this.networkManager).setSpoofedProfile(gson.fromJson(split[3], Property[].class));
-                }
-            } else {
-                ChatComponentText chatcomponenttext =
-                        new ChatComponentText("If you wish to use IP forwarding, please enable it in your BungeeCord config as well!");
-                this.networkManager.sendPacket(new S00PacketDisconnect(chatcomponenttext));
-                this.networkManager.closeChannel(chatcomponenttext);
-            }
+        if (packetIn.getRequestedState() != EnumConnectionState.LOGIN) {
+            return;
         }
+
+        if (!ProxyManager.INSTANCE.forwardsClientDetails()) {
+            return;
+        }
+
+        HandshakeResponse response = new HandshakeResponse();
+        ProxyManager.INSTANCE.handshake(((IMixinCHandshake) packetIn).getHandshakeRequest(), response);
+
+        // Disconnect the client if we've failed handshaking
+        if (response.isFailed()) {
+            this.disconnect(response.getCancelMessage());
+            return;
+        }
+
+        packetIn.ip = response.getServerHostname();
+        ((IMixinNetworkManager) this.networkManager).setRemoteAddress(new InetSocketAddress(response.getClientHostname(),
+            ((InetSocketAddress) this.networkManager.getRemoteAddress()).getPort()));
+        ((IMixinNetworkManager) this.networkManager).setProxyProfile(response.getProfile());
+    }
+
+    private void disconnect(Text text) {
+        IChatComponent component = SpongeTexts.toComponent(text);
+        this.networkManager.sendPacket(new S00PacketDisconnect(component));
+        this.networkManager.closeChannel(component);
     }
 }

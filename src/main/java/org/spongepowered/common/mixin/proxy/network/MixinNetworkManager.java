@@ -22,29 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.mixin.proxy.network;
 
 import com.mojang.authlib.GameProfile;
-import org.spongepowered.api.MinecraftVersion;
+import io.netty.channel.SimpleChannelInboundHandler;
+import net.minecraft.network.NetworkManager;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.IMixinNetworkManager;
 
-import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
-public interface IMixinNetworkManager {
+@Mixin(NetworkManager.class)
+public abstract class MixinNetworkManager extends SimpleChannelInboundHandler implements IMixinNetworkManager {
 
-    InetSocketAddress getAddress();
+    @Shadow private SocketAddress socketAddress;
 
-    InetSocketAddress getVirtualHost();
+    private GameProfile proxyProfile;
 
-    void setVirtualHost(String host, int port);
+    @Override
+    public void setRemoteAddress(SocketAddress socketAddress) {
+        this.socketAddress = socketAddress;
+    }
 
-    MinecraftVersion getVersion();
+    @Override
+    public GameProfile getProxyProfile() {
+        return this.proxyProfile;
+    }
 
-    void setVersion(int version);
-
-    void setRemoteAddress(SocketAddress socketAddress);
-
-    GameProfile getProxyProfile();
-
-    void setProxyProfile(GameProfile profile);
+    @Override
+    public void setProxyProfile(GameProfile profile) {
+        this.proxyProfile = profile;
+    }
 }

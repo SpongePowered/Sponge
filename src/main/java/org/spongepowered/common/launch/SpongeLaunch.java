@@ -70,10 +70,10 @@ public class SpongeLaunch {
         return MixinEnvironment.getDefaultEnvironment()
                 .addConfiguration("mixins.common.api.json")
                 .addConfiguration("mixins.common.core.json")
-                .addConfiguration("mixins.common.bungeecord.json")
                 .addConfiguration("mixins.common.entityactivation.json")
                 .addConfiguration("mixins.common.entitycollisions.json")
                 .addConfiguration("mixins.common.exploit.json")
+                .addConfiguration("mixins.common.proxy.json")
                 .addConfiguration("mixins.common.timings.json")
                 .addConfiguration("mixins.common.optimization.json")
                 ;

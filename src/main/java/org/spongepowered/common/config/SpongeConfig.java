@@ -99,8 +99,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
     public static final String ENTITY_PAINTING_RESPAWN_DELAY = "entity-painting-respawn-delay";
 
-    // BUNGEECORD
-    public static final String BUNGEECORD_IP_FORWARDING = "ip-forwarding";
+    // PROXY
+    public static final String PROXY_FORWARD_CLIENT_DETAILS = "forward-client-details";
 
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
@@ -130,9 +130,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String BLOCK_TRACKING_ENABLED = "enabled";
 
     // MODULES
+    public static final String MODULES = "modules";
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
     public static final String MODULE_ENTITY_COLLISIONS = "entity-collisions";
-    public static final String MODULE_BUNGEECORD = "bungeecord";
+    public static final String MODULE_PROXY = "proxy";
 
     // WORLD
     public static final String WORLD_PVP_ENABLED = "pvp-enabled";
@@ -201,7 +202,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                     .setSerializers(
                             TypeSerializers.getDefaultSerializers().newChild().registerType(TypeToken.of(IpSet.class), new IpSet.IpSetSerializer()))
                     .setHeader(HEADER));
-            this.configBase = this.configMapper.populate(this.root.getNode(this.modId));
+            CommentedConfigurationNode node = this.root.getNode(this.modId);
+            this.configBase = this.configMapper.populate(node);
+            this.configBase.migrateConfig(node);
         } catch (Exception e) {
             SpongeImpl.getLogger().error("Failed to load configuration", e);
         }
@@ -245,14 +248,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private CommandsCategory commands = new CommandsCategory();
 
-        @Setting(value = "modules")
+        @Setting(value = MODULES)
         private ModuleCategory mixins = new ModuleCategory();
 
         @Setting("ip-sets")
         private Map<String, List<IpSet>> ipSets = new HashMap<>();
 
-        @Setting(value = MODULE_BUNGEECORD)
-        private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+        @Setting(value = MODULE_PROXY, comment = "Settings related to proxies")
+        private ProxyCategory proxy = new ProxyCategory();
 
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
@@ -260,8 +263,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = "optimizations")
         private OptimizationCategory optimizations = new OptimizationCategory();
 
-        public BungeeCordCategory getBungeeCord() {
-            return this.bungeeCord;
+        public ProxyCategory getProxy() {
+            return this.proxy;
         }
 
         public SqlCategory getSql() {
@@ -297,6 +300,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public Predicate<InetAddress> getIpSet(String name) {
             return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
+        }
+
+        @Override
+        protected void migrateConfig(CommentedConfigurationNode node) {
+            this.mixins.migrateConfig(node);
+            this.proxy.migrateConfig(node);
         }
     }
 
@@ -400,6 +409,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public TimingsCategory getTimings() {
             return this.timings;
+        }
+
+        protected void migrateConfig(CommentedConfigurationNode node) {
         }
 
     }
@@ -675,14 +687,25 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     }
 
     @ConfigSerializable
-    public static class BungeeCordCategory extends Category {
+    public static class ProxyCategory extends Category {
 
-        @Setting(value = BUNGEECORD_IP_FORWARDING,
-                comment = "If enabled, allows BungeeCord to forward IP address, UUID, and Game Profile to this server")
-        private boolean ipForwarding = false;
+        @Setting(value = PROXY_FORWARD_CLIENT_DETAILS,
+            comment = "If enabled, allows the proxy to forward client details (such as IP address, UUID, and"
+                + " profile properties) to this server. This is a default value, andcan be overridden by"
+                + " different proxy implementations.")
+        private boolean forwardClientDetails = false;
 
-        public boolean getIpForwarding() {
-            return this.ipForwarding;
+        public boolean isForwardClientDetails() {
+            return this.forwardClientDetails;
+        }
+
+        @Override
+        protected void migrateConfig(CommentedConfigurationNode node) {
+            CommentedConfigurationNode forwarding = node.getNode("bungeecord", "ip-forwarding");
+            if (!forwarding.isVirtual()) {
+                this.forwardClientDetails = node.getNode(MODULE_PROXY, PROXY_FORWARD_CLIENT_DETAILS).setValue(forwarding.getBoolean(false)).getBoolean();
+                node.removeChild("bungeecord");
+            }
         }
     }
 
@@ -909,8 +932,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class ModuleCategory extends Category {
 
-        @Setting(value = MODULE_BUNGEECORD)
-        private boolean pluginBungeeCord = false;
+        @Setting(value = MODULE_PROXY)
+        private boolean pluginProxy = false;
 
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private boolean pluginEntityActivation = true;
@@ -927,12 +950,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("optimizations")
         private boolean enableOptimizationPatches = true;
 
-        public boolean usePluginBungeeCord() {
-            return this.pluginBungeeCord;
+        public boolean usePluginProxy() {
+            return this.pluginProxy;
         }
 
-        public void setPluginBungeeCord(boolean state) {
-            this.pluginBungeeCord = state;
+        public void setPluginProxy(boolean state) {
+            this.pluginProxy = state;
         }
 
         public boolean usePluginEntityActivation() {
@@ -969,6 +992,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public boolean useOptimizations() {
             return this.enableOptimizationPatches;
+        }
+
+        @Override
+        protected void migrateConfig(CommentedConfigurationNode node) {
+            CommentedConfigurationNode bcModule = node.getNode(MODULES, "bungeecord");
+            if (!bcModule.isVirtual()) {
+                this.pluginProxy = node.getNode(MODULES, MODULE_PROXY).setValue(bcModule.getBoolean(false)).getBoolean();
+                bcModule.setValue(null);
+            }
         }
     }
 
@@ -1157,5 +1189,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     @ConfigSerializable
     private static class Category {
+
+        protected void migrateConfig(CommentedConfigurationNode node) {
+        }
     }
 }
