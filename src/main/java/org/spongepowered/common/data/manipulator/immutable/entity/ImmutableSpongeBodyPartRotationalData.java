@@ -49,8 +49,8 @@ import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import java.util.Map;
 import java.util.Optional;
 
-public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData<ImmutableBodyPartRotationalData, BodyPartRotationalData> 
-    implements ImmutableBodyPartRotationalData {
+public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData<ImmutableBodyPartRotationalData, BodyPartRotationalData>
+        implements ImmutableBodyPartRotationalData {
 
     private final Map<BodyPart, Vector3d> rotations;
     private final ImmutableMapValue<BodyPart, Vector3d> rotationsValue;
@@ -63,16 +63,22 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
 
     public ImmutableSpongeBodyPartRotationalData(Map<BodyPart, Vector3d> rotations) {
         super(ImmutableBodyPartRotationalData.class);
-        
+
         this.rotations = ImmutableMap.copyOf(checkNotNull(rotations, "rotations"));
         this.rotationsValue = new ImmutableSpongeMapValue<>(Keys.BODY_ROTATIONS, this.rotations);
-        this.headRotationValue = new ImmutableSpongeValue<>(Keys.HEAD_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.HEAD)).orElse(DataConstants.DEFAULT_HEAD_ROTATION));
-        this.chestRotationValue = new ImmutableSpongeValue<>(Keys.CHEST_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.CHEST)).orElse(DataConstants.DEFAULT_CHEST_ROTATION));
-        this.leftArmRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_ARM_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.LEFT_ARM)).orElse(DataConstants.DEFAULT_LEFT_ARM_ROTATION));
-        this.rightArmRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_ARM_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_ARM)).orElse(DataConstants.DEFAULT_RIGHT_ARM_ROTATION));
-        this.leftLegRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_LEG_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.LEFT_LEG)).orElse(DataConstants.DEFAULT_LEFT_LEG_ROTATION));
-        this.rightLegRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_LEG_ROTATION, Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_LEG)).orElse(DataConstants.DEFAULT_RIGHT_LEG_ROTATION));
-        
+        this.headRotationValue = new ImmutableSpongeValue<>(Keys.HEAD_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.HEAD)).orElse(DataConstants.DEFAULT_HEAD_ROTATION));
+        this.chestRotationValue = new ImmutableSpongeValue<>(Keys.CHEST_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.CHEST)).orElse(DataConstants.DEFAULT_CHEST_ROTATION));
+        this.leftArmRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_ARM_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_ARM)).orElse(DataConstants.DEFAULT_LEFT_ARM_ROTATION));
+        this.rightArmRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_ARM_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_ARM)).orElse(DataConstants.DEFAULT_RIGHT_ARM_ROTATION));
+        this.leftLegRotationValue = new ImmutableSpongeValue<>(Keys.LEFT_LEG_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.LEFT_LEG)).orElse(DataConstants.DEFAULT_LEFT_LEG_ROTATION));
+        this.rightLegRotationValue = new ImmutableSpongeValue<>(Keys.RIGHT_LEG_ROTATION,
+                Optional.ofNullable(this.rotations.get(BodyParts.RIGHT_LEG)).orElse(DataConstants.DEFAULT_RIGHT_LEG_ROTATION));
+
         registerGetters();
     }
 
@@ -84,7 +90,7 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
     @Override
     public int compareTo(ImmutableBodyPartRotationalData o) {
         int mapSizeComp = Integer.compare(this.rotations.size(), o.partRotation().size());
-        
+
         if (mapSizeComp != 0) {
             return mapSizeComp;
         }
@@ -104,7 +110,7 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
         Vector3d rightArmRotation = this.rotations.get(BodyParts.RIGHT_ARM);
         Vector3d leftLegRotation = this.rotations.get(BodyParts.LEFT_LEG);
         Vector3d rightLegRotation = this.rotations.get(BodyParts.RIGHT_LEG);
-        
+
         return super.toContainer()
                 .set(Keys.BODY_ROTATIONS, this.rotations)
                 .set(Keys.HEAD_ROTATION.getQuery().then(POSITION_X), headRotation.getX())
@@ -166,22 +172,22 @@ public class ImmutableSpongeBodyPartRotationalData extends AbstractImmutableData
     protected void registerGetters() {
         registerFieldGetter(Keys.BODY_ROTATIONS, () -> this.rotations);
         registerKeyValue(Keys.BODY_ROTATIONS, this::partRotation);
-        
+
         registerFieldGetter(Keys.HEAD_ROTATION, () -> this.rotations.get(BodyParts.HEAD));
         registerKeyValue(Keys.HEAD_ROTATION, this::headDirection);
-        
+
         registerFieldGetter(Keys.CHEST_ROTATION, () -> this.rotations.get(BodyParts.CHEST));
         registerKeyValue(Keys.CHEST_ROTATION, this::bodyRotation);
-        
+
         registerFieldGetter(Keys.LEFT_ARM_ROTATION, () -> this.rotations.get(BodyParts.LEFT_ARM));
         registerKeyValue(Keys.LEFT_ARM_ROTATION, this::leftArmDirection);
-        
+
         registerFieldGetter(Keys.RIGHT_ARM_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_ARM));
         registerKeyValue(Keys.RIGHT_ARM_ROTATION, this::rightArmDirection);
-        
+
         registerFieldGetter(Keys.LEFT_LEG_ROTATION, () -> this.rotations.get(BodyParts.LEFT_LEG));
         registerKeyValue(Keys.LEFT_LEG_ROTATION, this::leftLegDirection);
-        
+
         registerFieldGetter(Keys.RIGHT_LEG_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_LEG));
         registerKeyValue(Keys.RIGHT_LEG_ROTATION, this::rightLegDirection);
     }
