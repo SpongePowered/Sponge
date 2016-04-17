@@ -117,6 +117,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.entityReference = builder.entityReference;
     }
 
+    // internal use only
+    public WeakReference<Entity> getEntityReference() {
+        return this.entityReference;
+    }
+
     @Override
     public Optional<UUID> getUniqueId() {
         return Optional.ofNullable(this.entityUuid);

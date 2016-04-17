@@ -556,7 +556,11 @@ public final class CauseTracker {
         if (StaticMixinHelper.destructItemDrop) {
             Cause.Builder builder = null;
             if (cause.root() instanceof Entity) {
+                DamageSource damageSource = SpongeHooks.getEntityDamageSource((net.minecraft.entity.Entity) cause.root());
                 builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+                if (damageSource != null) {
+                    builder = builder.named(NamedCause.of("LastDamageSource", damageSource));
+                }
             } else {
                 builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             }
