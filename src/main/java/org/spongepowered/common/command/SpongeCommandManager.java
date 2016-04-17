@@ -25,6 +25,7 @@
 package org.spongepowered.common.command;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spongepowered.api.command.CommandMessageFormatting.error;
 import static org.spongepowered.api.util.SpongeApiTranslationHelper.t;
 
@@ -41,9 +42,13 @@ import org.spongepowered.api.command.CommandMapping;
 import org.spongepowered.api.command.CommandPermissionException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
+import org.spongepowered.api.command.CommandThrowableProcessor;
 import org.spongepowered.api.command.InvocationCommandException;
+import org.spongepowered.api.command.ModuleCommandMapping;
 import org.spongepowered.api.command.dispatcher.Disambiguator;
 import org.spongepowered.api.command.dispatcher.SimpleDispatcher;
+import org.spongepowered.api.command.AbstractCommandModule;
+import org.spongepowered.api.command.ImmutableModuleCommandMapping;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -62,6 +67,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.command.annotation.AnnotationCommandFactory;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -85,11 +91,15 @@ import javax.inject.Inject;
  * This service calls the appropriate events for a command.
  */
 public class SpongeCommandManager implements CommandManager {
+
+    private static final String NO_ASSOCIATED_CONTAINER = "The provided plugin object does not have an associated plugin container "
+            + "(in other words, is 'plugin' actually your plugin object?";
     private final Logger log;
     private final SimpleDispatcher dispatcher;
     private final Multimap<PluginContainer, CommandMapping> owners = HashMultimap.create();
     private final Map<CommandMapping, PluginContainer> reverseOwners = new ConcurrentHashMap<>();
     private final Object lock = new Object();
+    private final AnnotationCommandFactory annotationCommandFactory;
 
     /**
      * Construct a simple {@link CommandManager}.
@@ -110,6 +120,7 @@ public class SpongeCommandManager implements CommandManager {
     public SpongeCommandManager(Logger logger, Disambiguator disambiguator) {
         this.log = logger;
         this.dispatcher = new SimpleDispatcher(disambiguator);
+        this.annotationCommandFactory = new AnnotationCommandFactory(this.dispatcher, this.owners);
     }
 
     @Override
@@ -130,30 +141,13 @@ public class SpongeCommandManager implements CommandManager {
 
         Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
         if (!containerOptional.isPresent()) {
-            throw new IllegalArgumentException(
-                    "The provided plugin object does not have an associated plugin container "
-                            + "(in other words, is 'plugin' actually your plugin object?");
+            throw new IllegalArgumentException(NO_ASSOCIATED_CONTAINER);
         }
 
         PluginContainer container = containerOptional.get();
 
         synchronized (this.lock) {
-            // <namespace>:<alias> for all commands
-            List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
-            for (String alias : aliases) {
-                final Collection<CommandMapping> ownedCommands = this.owners.get(container);
-                for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
-                    if (ownedCommands.contains(mapping)) {
-                        boolean isWrapper = callable instanceof MinecraftCommandWrapper;
-                        if (!(isWrapper && ((MinecraftCommandWrapper) callable).suppressDuplicateAlias(alias))) {
-                            throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
-                        }
-                    }
-                }
-
-                aliasesWithPrefix.add(alias);
-                aliasesWithPrefix.add(container.getId() + ':' + alias);
-            }
+            List<String> aliasesWithPrefix = this.calculatePrefixesWithNamespace(container, callable, aliases);
 
             Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback);
 
@@ -164,6 +158,76 @@ public class SpongeCommandManager implements CommandManager {
 
             return mapping;
         }
+    }
+
+    @Override
+    public void install(Object plugin, AbstractCommandModule module) {
+        checkNotNull(plugin, "plugin");
+        checkNotNull(module, "module");
+        checkState(module.canBeInstalledOrConfigured(true), "The provided command module has already been installed.");
+
+        Optional<PluginContainer> containerOptional = Sponge.getGame().getPluginManager().fromInstance(plugin);
+        if (!containerOptional.isPresent()) {
+            throw new IllegalArgumentException(NO_ASSOCIATED_CONTAINER);
+        }
+
+        module.configure(containerOptional.get(), this);
+    }
+
+    @Override
+    public void register(AbstractCommandModule module, Object object) {
+        checkNotNull(module, "module");
+        checkState(module.canBeInstalledOrConfigured(false), "The provided command module has been fully configured and "
+                + "cannot be used to register commands.");
+        checkNotNull(object, "object");
+
+        synchronized (this.lock) {
+            this.annotationCommandFactory.register(module, object);
+        }
+    }
+
+    @Override
+    public Optional<CommandMapping> register(AbstractCommandModule module, CommandCallable callable, List<String> aliases,
+            Function<List<String>, List<String>> callback) {
+        checkNotNull(module, "module");
+        checkState(module.canBeInstalledOrConfigured(false), "The provided command module has been fully configured and "
+                + "cannot be used to register commands.");
+
+        PluginContainer container = module.getPlugin();
+
+        synchronized (this.lock) {
+            List<String> aliasesWithPrefix = this.calculatePrefixesWithNamespace(container, callable, aliases);
+
+            Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback,
+                    (cc, al) -> new ImmutableModuleCommandMapping(module, callable, aliases.get(0), aliases.subList(1, aliases.size())));
+
+            if (mapping.isPresent()) {
+                this.owners.put(container, mapping.get());
+            }
+
+            return mapping;
+        }
+    }
+
+    private List<String> calculatePrefixesWithNamespace(PluginContainer container, CommandCallable callable, List<String> aliases) {
+        // <namespace>:<alias> for all commands
+        List<String> aliasesWithPrefix = new ArrayList<>(aliases.size() * 3);
+        for (String alias : aliases) {
+            final Collection<CommandMapping> ownedCommands = this.owners.get(container);
+            for (CommandMapping mapping : this.dispatcher.getAll(alias)) {
+                if (ownedCommands.contains(mapping)) {
+                    boolean isWrapper = callable instanceof MinecraftCommandWrapper;
+                    if (!(isWrapper && ((MinecraftCommandWrapper) callable).suppressDuplicateAlias(alias))) {
+                        throw new IllegalArgumentException("A plugin may not register multiple commands for the same alias ('" + alias + "')!");
+                    }
+                }
+            }
+
+            aliasesWithPrefix.add(alias);
+            aliasesWithPrefix.add(container.getId() + ':' + alias);
+        }
+
+        return aliasesWithPrefix;
     }
 
     @Override
@@ -205,8 +269,7 @@ public class SpongeCommandManager implements CommandManager {
     public Set<CommandMapping> getOwnedBy(Object instance) {
         Optional<PluginContainer> container = Sponge.getGame().getPluginManager().fromInstance(instance);
         if (!container.isPresent()) {
-            throw new IllegalArgumentException("The provided plugin object does not have an associated plugin container "
-                            + "(in other words, is 'plugin' actually your plugin object?)");
+            throw new IllegalArgumentException(NO_ASSOCIATED_CONTAINER);
         }
 
         synchronized (this.lock) {
@@ -277,6 +340,19 @@ public class SpongeCommandManager implements CommandManager {
             commandLine = commandLine + ' ' + event.getArguments();
         }
 
+        final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
+        final Optional<CommandThrowableProcessor> throwableProcessor = mapping
+                .map((m -> m instanceof ModuleCommandMapping ? ((ModuleCommandMapping) m).getModule().getThrowableProcessor().orElse(null) : null));
+        if (throwableProcessor.isPresent()) {
+            try {
+                return this.dispatcher.process(source, commandLine);
+            } catch (Throwable t) {
+                if (throwableProcessor.get().processCommandThrowable(source, mapping.get(), t)) {
+                    return CommandResult.empty();
+                }
+            }
+        }
+
         try {
             try {
                 if (CauseTracker.ENABLED && SpongeImpl.getServer().isCallingFromMinecraftThread()) {
@@ -314,7 +390,6 @@ public class SpongeCommandManager implements CommandManager {
                 }
 
                 if (ex.shouldIncludeUsage()) {
-                    final Optional<CommandMapping> mapping = this.dispatcher.get(argSplit[0], source);
                     if (mapping.isPresent()) {
                         source.sendMessage(error(t("Usage: /%s %s", argSplit[0], mapping.get().getCallable().getUsage(source))));
                     }
@@ -410,4 +485,9 @@ public class SpongeCommandManager implements CommandManager {
             });
         }
     }
+
+    public SimpleDispatcher getDispatcher() {
+        return this.dispatcher;
+    }
+
 }
