@@ -554,22 +554,25 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            Cause.Builder builder = null;
-            if (cause.root() instanceof Entity) {
-                DamageSource damageSource = SpongeHooks.getEntityDamageSource((net.minecraft.entity.Entity) cause.root());
-                builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
-                if (damageSource != null) {
-                    builder = builder.named(NamedCause.of("LastDamageSource", damageSource));
+            if (!(cause.root() instanceof SpawnCause)) {
+                // determine spawn cause
+                Cause.Builder builder = null;
+                if (cause.root() instanceof Entity) {
+                    DamageSource damageSource = SpongeHooks.getEntityDamageSource((net.minecraft.entity.Entity) cause.root());
+                    builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+                    if (damageSource != null) {
+                        builder = builder.named(NamedCause.of("LastDamageSource", damageSource));
+                    }
+                } else {
+                    builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
                 }
-            } else {
-                builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            }
-
-            Cause spawnCause = builder.build();
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
-            } else {
-                cause = spawnCause.merge(cause);
+    
+                Cause spawnCause = builder.build();
+                if (cause.root() == StaticMixinHelper.packetPlayer) {
+                    cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+                } else {
+                    cause = spawnCause.merge(cause);
+                }
             }
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {

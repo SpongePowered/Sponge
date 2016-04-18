@@ -70,11 +70,6 @@ public class StaticMixinHelper {
     public static boolean convertingMapFormat = false;
     public static boolean destructItemDrop = false;
     public static UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
-
-    // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
-    // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
-    public static boolean lastPlayerInteractCancelled = false;
-
     public static boolean setCustomNameTagSkip = false;
 
     // For spawning
