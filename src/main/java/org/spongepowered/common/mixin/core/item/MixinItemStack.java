@@ -63,6 +63,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
@@ -88,7 +89,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract NBTTagCompound getSubCompound(String key, boolean create);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
-    @Shadow public abstract Item shadow$getItem();
+    @Shadow @Nullable public abstract Item shadow$getItem();
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
@@ -133,7 +134,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public ItemType getItem() {
-        return (ItemType) shadow$getItem();
+        final Item item = shadow$getItem();
+        return item == null ? (ItemType) ItemTypeRegistryModule.NONE_ITEM : (ItemType) item;
     }
 
     @Override
