@@ -43,7 +43,6 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
@@ -113,7 +112,6 @@ class UserDiscoverer {
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
         Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
 
@@ -196,7 +194,7 @@ class UserDiscoverer {
             try {
                 ((SpongeUser) user).readFromNbt(CompressedStreamTools.readCompressed(new FileInputStream(dataFile)));
             } catch (IOException e) {
-                SpongeHooks.logWarning("Corrupt user file {}. {}", dataFile, e);
+                SpongeImpl.getLogger().warn("Corrupt user file {}", dataFile, e);
             }
             return user;
         } else {
@@ -264,7 +262,7 @@ class UserDiscoverer {
             try {
                 return dataFile.delete();
             } catch (SecurityException e) {
-                SpongeHooks.logWarning("Unable to delete file {} due to a security error. {}", dataFile, e);
+                SpongeImpl.getLogger().warn("Unable to delete file {} due to a security error", dataFile, e);
                 return false;
             }
         }

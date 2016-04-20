@@ -96,7 +96,6 @@ import org.spongepowered.common.data.processor.multi.block.*;
 import org.spongepowered.common.data.processor.multi.entity.*;
 import org.spongepowered.common.data.processor.multi.item.*;
 import org.spongepowered.common.data.processor.multi.tileentity.*;
-import org.spongepowered.common.data.processor.value.*;
 import org.spongepowered.common.data.processor.value.block.*;
 import org.spongepowered.common.data.processor.value.entity.*;
 import org.spongepowered.common.data.processor.value.item.*;
