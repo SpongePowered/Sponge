@@ -35,8 +35,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityHanging;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -55,11 +53,11 @@ import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
+import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.WorldChunkManager;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -86,12 +84,9 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.DiscreteTransform3;
@@ -135,7 +130,6 @@ import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
@@ -196,6 +190,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
+
+    @Shadow public net.minecraft.world.World init() {
+        // Should never be overwritten because this is @Shadow'ed
+        throw new RuntimeException("Bad things have happened");
+    }
+
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
@@ -217,29 +217,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
 
     // @formatter:on
-
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
             CallbackInfo ci) {
+        if (info == null) {
+            SpongeImpl.getLogger().warn("World constructed without a WorldInfo! This will likely cause problems. Subsituting dummy info.",
+                    new RuntimeException("Stack trace:"));
+            this.worldInfo = new WorldInfo(new WorldSettings(0, WorldSettings.GameType.NOT_SET, false, false, WorldType.DEFAULT),
+                    "sponge$dummy_world");
+        }
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
-        }
-    }
-
-    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
-    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if (entityIn.isDead && entityIn.getEntityId() != StaticMixinHelper.lastDestroyedEntityId && !(entityIn instanceof EntityLivingBase)) {
-            MessageChannel originalChannel = MessageChannel.TO_NONE;
-
-            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
-                    Cause.of(NamedCause.source(this)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(),
-                    (Entity) entityIn, true
-            );
-            SpongeImpl.getGame().getEventManager().post(event);
-            if (!event.isMessageCancelled()) {
-                event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
-            }
         }
     }
 
@@ -669,7 +658,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return (Difficulty) (Object) this.shadow$getDifficulty();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private List<Player> getPlayers() {
         return (List) ((net.minecraft.world.World) (Object) this).getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue());
     }

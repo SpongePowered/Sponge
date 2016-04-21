@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.tileentity.ImmutableBannerData;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.BannerData;
@@ -50,10 +49,15 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     private final DyeColor base;
     private final List<PatternLayer> layers;
 
+    private final ImmutableValue<DyeColor> baseValue;
+    private final ImmutableSpongePatternListValue layersValue;
+
     public ImmutableSpongeBannerData(DyeColor base, List<PatternLayer> layers) {
         super(ImmutableBannerData.class);
         this.base = checkNotNull(base, "Null base!");
         this.layers = ImmutableList.copyOf(checkNotNull(layers, "Null pattern list!"));
+        this.baseValue = ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, this.base);
+        this.layersValue = new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, this.layers);
         registerGetters();
     }
 
@@ -76,12 +80,12 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
 
     @Override
     public ImmutableValue<DyeColor> baseColor() {
-        return ImmutableSpongeValue.cachedOf(Keys.BANNER_BASE_COLOR, DataConstants.Catalog.DEFAULT_BANNER_BASE, this.base);
+        return this.baseValue;
     }
 
     @Override
     public ImmutablePatternListValue patterns() {
-        return new ImmutableSpongePatternListValue(Keys.BANNER_PATTERNS, this.layers);
+        return this.layersValue;
     }
 
     @Override
@@ -92,15 +96,15 @@ public class ImmutableSpongeBannerData extends AbstractImmutableData<ImmutableBa
     @Override
     public int compareTo(ImmutableBannerData o) {
         return ComparisonChain.start()
-            .compare(o.baseColor().get().getId(), this.base.getId())
-            .compare(o.patterns().get().containsAll(this.layers), this.layers.containsAll(o.patterns().get()))
-            .result();
+                .compare(o.baseColor().get().getId(), this.base.getId())
+                .compare(o.patterns().get().containsAll(this.layers), this.layers.containsAll(o.patterns().get()))
+                .result();
     }
 
     @Override
     public DataContainer toContainer() {
         return super.toContainer()
-            .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())
-            .set(Keys.BANNER_PATTERNS, this.layers);
+                .set(Keys.BANNER_BASE_COLOR.getQuery(), this.base.getId())
+                .set(Keys.BANNER_PATTERNS, this.layers);
     }
 }

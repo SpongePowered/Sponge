@@ -30,7 +30,6 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.BlockPos;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -42,7 +41,6 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.weather.Lightning;
-import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.cause.Cause;
@@ -124,7 +122,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
-    public void onSetDead(CallbackInfo ci) {
+    public void onLivingTimeExpired(CallbackInfo ci) {
         if (this.isDead) {
             return;
         }

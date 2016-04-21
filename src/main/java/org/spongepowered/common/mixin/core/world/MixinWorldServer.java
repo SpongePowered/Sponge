@@ -105,6 +105,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Inject(method = "init", at = @At("HEAD"))
     public void beforeInit(CallbackInfoReturnable<World> cir) {
+        super.init(); // Call the super (vanilla doesn't do this)
         updateWorldGenerator();
     }
 

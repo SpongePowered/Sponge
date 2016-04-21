@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
@@ -36,6 +37,7 @@ import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.effect.EntityWeatherEffect;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.entity.item.EntityTNTPrimed;
@@ -47,7 +49,6 @@ import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C02PacketUseEntity;
 import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
@@ -58,6 +59,7 @@ import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.chunk.EmptyChunk;
@@ -74,6 +76,8 @@ import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
@@ -90,7 +94,6 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
-import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -467,28 +470,6 @@ public final class CauseTracker {
             }
         }
 
-        // Handle Player Entity destruct
-        if (player != null && packetIn instanceof C02PacketUseEntity) {
-            C02PacketUseEntity packet = (C02PacketUseEntity) packetIn;
-            if (packet.getAction() == C02PacketUseEntity.Action.ATTACK) {
-                net.minecraft.entity.Entity entity = packet.getEntityFromWorld(this.getMinecraftWorld());
-                if (entity != null && entity.isDead && !(entity instanceof EntityLivingBase)) {
-                    Player spongePlayer = (Player) player;
-                    MessageChannel originalChannel = spongePlayer.getMessageChannel();
-
-                    DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
-                            cause, originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(), (Entity) entity, true
-                    );
-                    SpongeImpl.getGame().getEventManager().post(event);
-                    if (!event.isMessageCancelled()) {
-                        event.getChannel().ifPresent(channel -> channel.send(entity, event.getMessage()));
-                    }
-
-                    StaticMixinHelper.lastDestroyedEntityId = entity.getEntityId();
-                }
-            }
-        }
-
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
             if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
@@ -553,7 +534,7 @@ public final class CauseTracker {
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
                 if (spongeEntity instanceof EntityLivingBase) {
-                    IMixinEntityLivingBase spongeLivingEntity = (IMixinEntityLivingBase) spongeEntity;
+                    IMixinEntity spongeLivingEntity = (IMixinEntity) spongeEntity;
                     DamageSource lastDamageSource = spongeLivingEntity.getLastDamageSource();
                     if (lastDamageSource != null && !cause.contains(lastDamageSource)) {
                         if (!cause.containsNamed("Attacker")) {
@@ -573,18 +554,41 @@ public final class CauseTracker {
         DropItemEvent event = null;
 
         if (StaticMixinHelper.destructItemDrop) {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                builder.suggestNamed(entry.getKey(), entry.getValue());
+            if (!(cause.root() instanceof SpawnCause)) {
+                // determine spawn cause
+                Cause.Builder builder = null;
+                if (cause.root() instanceof Entity) {
+                    DamageSource damageSource = SpongeHooks.getEntityDamageSource((net.minecraft.entity.Entity) cause.root());
+                    builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+                    if (damageSource != null) {
+                        builder = builder.named(NamedCause.of("LastDamageSource", damageSource));
+                    }
+                } else {
+                    builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
+                }
+    
+                Cause spawnCause = builder.build();
+                if (cause.root() == StaticMixinHelper.packetPlayer) {
+                    cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+                } else {
+                    cause = spawnCause.merge(cause);
+                }
             }
-            cause = builder.build();
             event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         } else {
-            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                builder.suggestNamed(entry.getKey(), entry.getValue());
+            Cause.Builder builder = null;
+            if (cause.root() instanceof Entity) {
+                builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
+            } else {
+                builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
             }
-            cause = builder.build();
+
+            Cause spawnCause = builder.build();
+            if (cause.root() == StaticMixinHelper.packetPlayer) {
+                cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+            } else {
+                cause = spawnCause.merge(cause);
+            }
             event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
         }
 
@@ -622,9 +626,7 @@ public final class CauseTracker {
                 iterator.remove();
             }
         } else {
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
-            }
+            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
             this.capturedEntityItems.clear();
         }
     }
@@ -792,7 +794,7 @@ public final class CauseTracker {
                     if (!transaction.isValid()) {
                         this.invalidTransactions.add(transaction);
                     } else {
-                        if (captureType == CaptureType.BREAK && cause.first(User.class).isPresent()) {
+                        if (captureType == CaptureType.BREAK && !(transaction.getOriginal().getState().getType() instanceof BlockLiquid) && cause.first(User.class).isPresent()) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
                             for (EntityHanging hanging : SpongeHooks.findHangingEntities(this.getMinecraftWorld(), pos)) {
                                 if (hanging != null) {
@@ -864,8 +866,43 @@ public final class CauseTracker {
                     }
                 }
             }
-        } else if (captureType == CaptureType.PLACE) {
-            sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+        }
+
+        sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
+    }
+
+    public void handleNonLivingEntityDestruct(net.minecraft.entity.Entity entityIn) {
+        if (entityIn.isDead && (!(entityIn instanceof EntityLivingBase) || entityIn instanceof EntityArmorStand)) {
+            MessageChannel originalChannel = MessageChannel.TO_NONE;
+
+            IMixinEntity spongeEntity = (IMixinEntity) entityIn;
+            Cause cause = spongeEntity.getNonLivingDestructCause();;
+            if (cause == null) {
+                cause = Cause.of(NamedCause.source(this));
+            }
+
+            if (cause.root() instanceof EntityDamageSource) {
+                EntityDamageSource entityDamageSource = (EntityDamageSource) cause.root();
+                if (entityDamageSource.getSourceOfDamage() instanceof Player) {
+                    originalChannel = ((Player) entityDamageSource.getSourceOfDamage()).getMessageChannel();
+                } else if (entityDamageSource instanceof IndirectEntityDamageSource) {
+                    IndirectEntityDamageSource indirectDamageSource = (IndirectEntityDamageSource) entityDamageSource;
+                    if (indirectDamageSource.getIndirectSource() instanceof Player) {
+                        originalChannel = ((Player) indirectDamageSource.getIndirectSource()).getMessageChannel();
+                    }
+                }
+            } else if (cause.root() instanceof Player) {
+                originalChannel = ((Player) cause.root()).getMessageChannel();
+            }
+
+            DestructEntityEvent event = SpongeEventFactory.createDestructEntityEvent(
+                    cause, originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(),
+                    (Entity) entityIn, true
+            );
+            SpongeImpl.getGame().getEventManager().post(event);
+            if (!event.isMessageCancelled()) {
+                event.getChannel().ifPresent(channel -> channel.send(entityIn, event.getMessage()));
+            }
         }
     }
 

@@ -31,6 +31,7 @@ import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -52,6 +53,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
@@ -60,6 +63,7 @@ import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.item.IMixinItem;
 import org.spongepowered.common.interfaces.item.IMixinItemStack;
 import org.spongepowered.common.item.inventory.SpongeItemStackSnapshot;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Collection;
@@ -85,7 +89,7 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Shadow public abstract NBTTagCompound getSubCompound(String key, boolean create);
     @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract net.minecraft.item.ItemStack shadow$copy();
-    @Shadow public abstract Item shadow$getItem();
+    @Shadow @Nullable public abstract Item shadow$getItem();
 
     @Inject(method = "writeToNBT", at = @At(value = "HEAD"))
     private void onWrite(NBTTagCompound incoming, CallbackInfoReturnable<NBTTagCompound> info) {
@@ -130,7 +134,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public ItemType getItem() {
-        return (ItemType) shadow$getItem();
+        final Item item = shadow$getItem();
+        return item == null ? (ItemType) ItemTypeRegistryModule.NONE_ITEM : (ItemType) item;
     }
 
     @Override
@@ -213,7 +218,18 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
-        ((IMixinItem) this.getItem()).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
+        final Item item = this.shadow$getItem();
+        if (item == null) {
+            final PrettyPrinter printer = new PrettyPrinter(60);
+            printer.add("Null Item found!").centre().hr();
+            printer.add("An ItemStack has a null ItemType! This is usually not supported as it will likely have issues elsewhere.");
+            printer.add("Please ask help for seeing if this is an issue with a mod and report it!");
+            printer.add("Printing a Stacktrace:");
+            printer.add(new Exception());
+            printer.log(SpongeImpl.getLogger(), Level.WARN);
+            return manipulators;
+        }
+        ((IMixinItem) item).getManipulatorsFor((net.minecraft.item.ItemStack) (Object) this, manipulators);
         if (hasManipulators()) {
             final List<DataManipulator<?, ?>> customManipulators = this.getCustomManipulators();
             manipulators.addAll(customManipulators);

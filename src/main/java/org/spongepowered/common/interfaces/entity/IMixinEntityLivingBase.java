@@ -45,8 +45,6 @@ public interface IMixinEntityLivingBase {
 
     int getRecentlyHit();
 
-    DamageSource getLastDamageSource();
-
     void setMaxAir(int max);
 
     void setLastDamage(double damage);

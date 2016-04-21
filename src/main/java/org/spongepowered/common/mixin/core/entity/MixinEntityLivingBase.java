@@ -83,7 +83,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
-    private DamageSource lastDamageSource;
 
     @Shadow public int maxHurtResistantTime;
     @Shadow public int hurtTime;
@@ -121,6 +120,8 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
     @Shadow public abstract ItemStack getEquipmentInSlot(int slotIn);
     @Shadow protected abstract void applyEntityAttributes();
+    @Shadow public abstract void setSprinting(boolean sprinting);
+    @Shadow public abstract boolean isOnLadder();
 
     @Override
     public Vector3d getHeadRotation() {
@@ -460,11 +461,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Overwrite
     public boolean canBeCollidedWith() {
         return !(this.isVanished() && this.ignoresCollision()) && !this.isDead;
-    }
-
-    @Override
-    public DamageSource getLastDamageSource() {
-        return this.lastDamageSource;
     }
 
     @Override

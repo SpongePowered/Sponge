@@ -68,4 +68,7 @@ public interface IMixinWorldInfo {
     void createWorldConfig();
 
     void setScoreboard(ServerScoreboard scoreboard);
+
+    boolean isValid();
+
 }

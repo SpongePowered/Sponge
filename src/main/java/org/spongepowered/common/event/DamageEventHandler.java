@@ -29,6 +29,7 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemArmor;
@@ -60,6 +61,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
@@ -67,6 +69,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 public class DamageEventHandler {
 
@@ -394,5 +399,54 @@ public class DamageEventHandler {
         } else {
             return Cause.of(NamedCause.source(damageSource));
         }
+    }
+
+    public static List<Tuple<DamageModifier, Function<? super Double, Double>>> createAttackEnchamntmentFunction(@Nullable net.minecraft.item.ItemStack heldItem, EnumCreatureAttribute creatureAttribute) {
+        final List<Tuple<DamageModifier, Function<? super Double, Double>>> damageModifierFunctions = new ArrayList<>();
+        if (heldItem != null) {
+            Supplier<ItemStackSnapshot> supplier = new Supplier<ItemStackSnapshot>() {
+                private ItemStackSnapshot snapshot;
+                @Override
+                public ItemStackSnapshot get() {
+                    if (this.snapshot == null) {
+                        this.snapshot = ItemStackUtil.createSnapshot(heldItem);
+                    }
+                    return this.snapshot;
+                }
+            };
+            NBTTagList nbttaglist = heldItem.getEnchantmentTagList();
+
+            if (nbttaglist != null) {
+                for (int i = 0; i < nbttaglist.tagCount(); ++i) {
+                    int j = nbttaglist.getCompoundTagAt(i).getShort("id");
+                    int enchantmentLevel = nbttaglist.getCompoundTagAt(i).getShort("lvl");
+
+                    final Enchantment enchantment = Enchantment.getEnchantmentById(j);
+                    if (enchantment != null) {
+                        final DamageModifier enchantmentModifier = DamageModifier.builder()
+                                .type(DamageModifierTypes.WEAPON_ENCHANTMENT)
+                                .cause(Cause.builder()
+                                        .named("Weapon", supplier.get())
+                                        .named("Enchantment", enchantment)
+                                        .build())
+                                .build();
+                        Function<? super Double, Double> enchantmentFunction = (damage) ->
+                                (double) enchantment.calcDamageByCreature(enchantmentLevel, creatureAttribute);
+                        damageModifierFunctions.add(new Tuple<>(enchantmentModifier, enchantmentFunction));
+                    }
+                }
+            }
+        }
+
+        return damageModifierFunctions;
+    }
+
+    public static Tuple<DamageModifier, Function<? super Double, Double>> provideCriticalAttackTuple(EntityPlayer player) {
+        final DamageModifier modifier = DamageModifier.builder()
+                .cause(Cause.source(player).build())
+                .type(DamageModifierTypes.CRITICAL_HIT)
+                .build();
+        Function<? super Double, Double> function = (damage) -> damage * 1.5F;
+        return new Tuple<>(modifier, function);
     }
 }

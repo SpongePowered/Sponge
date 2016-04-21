@@ -1,0 +1,17 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.optimization",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
+    "mixins": [
+        "block.state.MixinStateImplementation",
+        "world.MixinWorld_Lighting",
+        "world.MixinWorldServer_Lighting",
+        "world.MixinChunk_Chunk_Cache",
+        "world.gen.MixinChunkProviderServer_Lighting",
+        "world.gen.MixinChunkProviderServer_Chunk_Cache"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

@@ -22,4 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.mixin.optimization.world.gen;
+
+import net.minecraft.util.LongHashMap;
+import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.LongCachedHashMap;
+
+@Mixin(ChunkProviderServer.class)
+public class MixinChunkProviderServer_Chunk_Cache {
+
+    @Shadow private LongHashMap id2ChunkMap = new LongCachedHashMap();
+
+}

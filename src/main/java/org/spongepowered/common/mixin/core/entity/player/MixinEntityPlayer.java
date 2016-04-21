@@ -26,6 +26,12 @@ package org.spongepowered.common.mixin.core.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.EnumCreatureAttribute;
+import net.minecraft.entity.IEntityMultiPart;
+import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -33,12 +39,19 @@ import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.server.S12PacketEntityVelocity;
+import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.stats.AchievementList;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
 import net.minecraft.world.World;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
@@ -46,12 +59,17 @@ import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.damage.DamageModifier;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -60,12 +78,20 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
 import org.spongepowered.common.util.VecHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -76,6 +102,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
     @Shadow public Container openContainer;
@@ -93,8 +120,17 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void addExperience(int amount);
     @Shadow public abstract Scoreboard getWorldScoreboard();
     @Shadow public abstract boolean isSpectator();
+    @Shadow public abstract ItemStack getHeldItem();
+    @Shadow public abstract void onCriticalHit(net.minecraft.entity.Entity entityHit);
+    @Shadow public abstract void onEnchantmentCritical(net.minecraft.entity.Entity entityHit);
+    @Shadow public abstract void triggerAchievement(StatBase achievementIn);
+    @Shadow public abstract ItemStack getCurrentEquippedItem();
+    @Shadow public abstract void addExhaustion(float p_71020_1_);
+    @Shadow public abstract void addStat(StatBase stat, int amount);
+    @Shadow public abstract void destroyCurrentEquippedItem();
 
     private boolean affectsSpawning = true;
+    private UUID collidingEntityUuid = null;
     private Vector3d targetedLocation;
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;Lcom/mojang/authlib/GameProfile;)V", at = @At("RETURN"))
@@ -247,6 +283,181 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                 .type(SpawnTypes.DROPPED_ITEM)
                 .build();
         return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
+    }
+
+    @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))
+    public void onPlayerCollideEntity(net.minecraft.entity.Entity entity, EntityPlayer player) {
+        this.collidingEntityUuid = entity.getUniqueID();
+        entity.onCollideWithPlayer(player);
+        this.collidingEntityUuid = null;
+    }
+
+    @Override
+    public UUID getCollidingEntityUuid() {
+        return this.collidingEntityUuid;
+    }
+
+    /**
+     * @author gabizou - April 8th, 2016
+     *
+     * Rewrites the attackTargetEntityWithCurrentItem to throw an {@link AttackEntityEvent} prior
+     * to the ensuing {@link DamageEntityEvent}. This should cover all cases where players are
+     * attacking entities and those entities override {@link EntityLivingBase#attackEntityFrom(DamageSource, float)}
+     * and effectively bypass our damage event hooks.
+     *
+     * @param targetEntity The target entity
+     */
+    @Overwrite
+    public void attackTargetEntityWithCurrentItem(net.minecraft.entity.Entity targetEntity) {
+        // Sponge Start - Add SpongeImpl hook to override in forge as necessary
+        if (!SpongeImplHooks.checkAttackEntity((EntityPlayer) (Object) this, targetEntity)) {
+            return;
+        }
+        // Sponge End
+        if (targetEntity.canAttackWithItem()) {
+            if (!targetEntity.hitByEntity((EntityPlayer) (Object) this)) {
+                // Sponge Start - Prepare our event values
+                // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+                final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+                float baseDamage = (float) originalBaseDamage;
+                // Sponge End
+                int knockbackModifier = 0;
+                float enchantmentModifierAmount = 0.0F;
+
+                // Sponge Start - gather the attack modifiers
+                final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
+
+                final EnumCreatureAttribute creatureAttribute = targetEntity instanceof EntityLivingBase
+                                                                ? ((EntityLivingBase) targetEntity).getCreatureAttribute()
+                                                                : EnumCreatureAttribute.UNDEFINED;
+                final List<Tuple<DamageModifier, Function<? super Double, Double>>> enchantmentModifierFunctions =
+                        DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItem(), creatureAttribute);
+                // if (targetEntity instanceof EntityLivingBase) {
+                //     enchantmentModifierAmount = EnchantmentHelper.getModifierForCreature(this.getHeldItem(), creatureAttribute);
+                // } else {
+                //     enchantmentModifierAmount = EnchantmentHelper.getModifierForCreature(this.getHeldItem(), EnumCreatureAttribute.UNDEFINED);
+                // }
+                enchantmentModifierAmount = (float) enchantmentModifierFunctions.stream()
+                        .map(Tuple::getSecond)
+                        .mapToDouble(function -> function.apply(originalBaseDamage))
+                        .sum();
+                originalFunctions.addAll(enchantmentModifierFunctions);
+                // Sponge End
+
+                knockbackModifier = knockbackModifier + EnchantmentHelper.getKnockbackModifier((EntityPlayer) (Object) this);
+
+                if (this.isSprinting()) {
+                    ++knockbackModifier;
+                }
+
+                if (baseDamage > 0.0F || enchantmentModifierAmount > 0.0F) {
+                    boolean fallingCriticalHit = this.fallDistance > 0.0F && !this.onGround && !this.isOnLadder() && !this.isInWater() && !this.isPotionActive(
+                            Potion.blindness) && this.ridingEntity == null && targetEntity instanceof EntityLivingBase;
+
+                    if (fallingCriticalHit && baseDamage > 0.0F) {
+                        // Sponge - Add the function for critical attacking
+                        originalFunctions.add(DamageEventHandler.provideCriticalAttackTuple((EntityPlayer) (Object) this));
+                        // baseDamage *= 1.5F; Sponge - remove since it's handled in the event
+                    }
+
+                    // baseDamage = baseDamage + enchantmentModifierAmount; // Sponge - remove since it is delegated through the event.
+                    boolean targetLitOnFire = false;
+                    int fireAspectLevel = EnchantmentHelper.getFireAspectModifier((EntityPlayer) (Object) this);
+
+                    if (targetEntity instanceof EntityLivingBase && fireAspectLevel > 0 && !targetEntity.isBurning()) {
+                        targetLitOnFire = true;
+                        targetEntity.setFire(1);
+                    }
+
+                    double targetMotionX = targetEntity.motionX;
+                    double targetMotionY = targetEntity.motionY;
+                    double targetMotionZ = targetEntity.motionZ;
+
+                    // Sponge Start - Create the event and throw it
+                    final DamageSource damageSource = DamageSource.causePlayerDamage((EntityPlayer) (Object) this);
+                    final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(Cause.source(damageSource).build(), originalFunctions,
+                            EntityUtil.fromNative(targetEntity), knockbackModifier, originalBaseDamage);
+                    SpongeImpl.postEvent(event);
+                    if (event.isCancelled()) {
+                        if (targetLitOnFire) {
+                            targetEntity.extinguish();
+                        }
+                        return;
+                    }
+                    baseDamage = (float) event.getFinalOutputDamage();
+                    knockbackModifier = event.getKnockbackModifier();
+                    boolean attackSucceded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
+                    // Sponge End
+                    if (attackSucceded) {
+                        if (knockbackModifier > 0) {
+                            targetEntity.addVelocity((double) (-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * (float) knockbackModifier * 0.5F), 0.1D,
+                                    (double) (MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * (float) knockbackModifier * 0.5F));
+                            this.motionX *= 0.6D;
+                            this.motionZ *= 0.6D;
+                            this.setSprinting(false);
+                        }
+
+                        if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged) {
+                            ((EntityPlayerMP) targetEntity).playerNetServerHandler.sendPacket(new S12PacketEntityVelocity(targetEntity));
+                            targetEntity.velocityChanged = false;
+                            targetEntity.motionX = targetMotionX;
+                            targetEntity.motionY = targetMotionY;
+                            targetEntity.motionZ = targetMotionZ;
+                        }
+
+                        if (fallingCriticalHit) {
+                            this.onCriticalHit(targetEntity);
+                        }
+
+                        if (enchantmentModifierAmount > 0.0F) {
+                            this.onEnchantmentCritical(targetEntity);
+                        }
+
+                        if (baseDamage >= 18.0F) {
+                            this.triggerAchievement(AchievementList.overkill);
+                        }
+
+                        this.setLastAttacker(targetEntity);
+
+                        if (targetEntity instanceof EntityLivingBase) {
+                            EnchantmentHelper.applyThornEnchantments((EntityLivingBase) targetEntity, (EntityPlayer) (Object) this);
+                        }
+
+                        EnchantmentHelper.applyArthropodEnchantments((EntityPlayer) (Object) this, targetEntity);
+                        ItemStack itemstack = this.getCurrentEquippedItem();
+                        net.minecraft.entity.Entity entity = targetEntity;
+
+                        if (targetEntity instanceof EntityDragonPart) {
+                            IEntityMultiPart ientitymultipart = ((EntityDragonPart) targetEntity).entityDragonObj;
+
+                            if (ientitymultipart instanceof EntityLivingBase) {
+                                entity = (EntityLivingBase) ientitymultipart;
+                            }
+                        }
+
+                        if (itemstack != null && entity instanceof EntityLivingBase) {
+                            itemstack.hitEntity((EntityLivingBase) entity, (EntityPlayer) (Object) this);
+
+                            if (itemstack.stackSize <= 0) {
+                                this.destroyCurrentEquippedItem();
+                            }
+                        }
+
+                        if (targetEntity instanceof EntityLivingBase) {
+                            this.addStat(StatList.damageDealtStat, Math.round(baseDamage * 10.0F));
+
+                            if (fireAspectLevel > 0) {
+                                targetEntity.setFire(fireAspectLevel * 4);
+                            }
+                        }
+
+                        this.addExhaustion(0.3F);
+                    } else if (targetLitOnFire) {
+                        targetEntity.extinguish();
+                    }
+                }
+            }
+        }
     }
 
 

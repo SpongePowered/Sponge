@@ -33,12 +33,19 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.IMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.entity.projectile.EntityFireball;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
@@ -50,7 +57,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.common.SpongeImpl;
@@ -59,6 +68,7 @@ import org.spongepowered.common.config.SpongeConfig.DimensionConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -574,7 +584,6 @@ public class SpongeHooks {
         return causedBy;
     }
 
-    @SuppressWarnings("unchecked")
     public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
         List<EntityHanging> list = worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, new BlockPos(pos.getX(), pos.getY(), pos.getZ())).expand(1.1D, 1.1D, 1.1D), new Predicate<EntityHanging>() {
             @Override
@@ -643,5 +652,46 @@ public class SpongeHooks {
 
     public static String getTextWithoutFormattingCodes(String text) {
         return text == null ? null : formattingCodePattern.matcher(text).replaceAll("");
+    }
+
+    public static DamageSource getEntityDamageSource(Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+
+        IMixinWorld spongeWorld = (IMixinWorld) entity.worldObj;
+        if (spongeWorld.getCauseTracker().hasTickingEntity()) {
+            Entity lastAttacker = (Entity) spongeWorld.getCauseTracker().getCurrentTickEntity().get();
+            if (lastAttacker instanceof Player) {
+                EntityPlayerMP player = (EntityPlayerMP) lastAttacker;
+                return DamageSource.causePlayerDamage(player);
+            } else if (lastAttacker instanceof Projectile) {
+                Projectile projectile = (Projectile) lastAttacker;
+                net.minecraft.entity.Entity shooter = null;
+                if (projectile.getShooter() instanceof Entity) {
+                    shooter = (net.minecraft.entity.Entity) projectile.getShooter();
+                }
+
+                if (projectile instanceof EntityArrow) {
+                    return DamageSource.causeArrowDamage((EntityArrow) lastAttacker, shooter);
+                } else if (projectile instanceof EntityFireball) {
+                    return DamageSource.causeFireballDamage((EntityFireball) lastAttacker, shooter);
+                }
+            } else if ((lastAttacker instanceof EntityMob || lastAttacker instanceof IMob) && lastAttacker instanceof EntityLivingBase) {
+                return DamageSource.causeMobDamage((EntityLivingBase) lastAttacker);
+            } else {
+                String damageType = ((IMixinEntity) lastAttacker).getType() == null ? lastAttacker.getClass().getSimpleName() : ((IMixinEntity) lastAttacker).getType().getId();
+                return new EntityDamageSource(damageType, lastAttacker);
+            }
+        } else if (spongeWorld.getCauseTracker().hasTickingBlock()) {
+            BlockSnapshot blockSnapshot = spongeWorld.getCauseTracker().getCurrentTickBlock().get();
+            if (blockSnapshot.getLocation().isPresent()) {
+                return new MinecraftBlockDamageSource(blockSnapshot.getState().getType().getId(), blockSnapshot.getLocation().get());
+            }
+        } else if (StaticMixinHelper.packetPlayer != null) {
+            return DamageSource.causePlayerDamage(StaticMixinHelper.packetPlayer);
+        }
+
+        return null;
     }
 }

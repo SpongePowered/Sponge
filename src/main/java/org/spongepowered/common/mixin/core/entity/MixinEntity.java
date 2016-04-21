@@ -34,8 +34,10 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -49,6 +51,7 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
@@ -80,6 +83,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
@@ -111,6 +115,8 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
@@ -151,6 +157,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
+    protected DamageSource lastDamageSource;
+    private Cause destructCause;
+    private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -198,12 +207,14 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow(prefix = "shadow$")
-    protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract boolean isSprinting();
+    @Shadow public abstract boolean isInWater();
+    @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
 
     // @formatter:on
 
@@ -576,6 +587,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
@@ -963,7 +975,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 return Optional.of((User)player);
             }
             // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
+            return Optional.of(SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null)));
         }
     }
 
@@ -1034,6 +1046,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
+        if (block == Blocks.air) {
+            // ignore air blocks
+            return;
+        }
+
         if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, entity);
             return;
@@ -1046,6 +1063,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
+        if (block == Blocks.air) {
+            // ignore air blocks
+            return;
+        }
+
         if (world.isRemote) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
             return;
@@ -1058,6 +1080,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
+        if (block == Blocks.air) {
+            // ignore air blocks
+            return;
+        }
+
         if (world.isRemote) {
             block.onFallenUpon(world, pos, entity, fallDistance);
             return;
@@ -1241,4 +1268,46 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
+    @Inject(method = "setDead", at = @At("HEAD"))
+    public void onSetDead(CallbackInfo ci) {
+        if (this.worldObj.isRemote || (this.mcEntity instanceof EntityLivingBase && !(this.mcEntity instanceof EntityArmorStand))) {
+            return;
+        }
+
+        EntityPlayer player = StaticMixinHelper.packetPlayer;
+        IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+        // Check if entity is killing self (ex. item despawning)
+        if (spongeWorld.getCauseTracker().hasTickingEntity()) {
+            Entity tickingEntity = ((IMixinWorld) this.worldObj).getCauseTracker().getCurrentTickEntity().get();
+            if (tickingEntity == this.mcEntity)  {
+                this.destructCause = Cause.of(NamedCause.source(tickingEntity));
+            }
+        // Check if a player is colliding with this entity (ex. item pickup)
+        } else if (player != null) {
+            if (this.mcEntity.getUniqueID().equals(((IMixinEntityPlayer) player).getCollidingEntityUuid())) {
+                this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
+            }
+        // Check for a possible DamageSource
+        } else {
+            this.lastDamageSource = SpongeHooks.getEntityDamageSource(this.mcEntity);
+            if (this.lastDamageSource != null) {
+                this.destructCause = Cause.of(NamedCause.source(this.lastDamageSource));
+            } else {
+                if (spongeWorld.getCauseTracker().hasTickingTileEntity()) {
+                    TileEntity te = (TileEntity) spongeWorld.getCauseTracker().getCurrentTickTileEntity().get();
+                    this.destructCause = Cause.of(NamedCause.source(te));
+                }
+            }
+        }
+    }
+
+    @Override
+    public DamageSource getLastDamageSource() {
+        return this.lastDamageSource;
+    }
+
+    @Override
+    public Cause getNonLivingDestructCause() {
+        return this.destructCause;
+    }
 }

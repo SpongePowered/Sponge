@@ -342,6 +342,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
                 }
             }
         }
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position);
+        }
         return null;
     }
 

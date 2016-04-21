@@ -33,23 +33,20 @@ import com.flowpowered.math.vector.Vector3i;
 import org.apache.commons.lang3.time.DurationFormatUtils;
 import org.slf4j.Logger;
 import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.util.ArrayDeque;
 import java.util.Optional;
-import java.util.Queue;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
 public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
 
-    private static final int DEFAULT_TICK_INTERVAL = 10;
-    private static final float DEFAULT_TICK_PERCENT = 0.15f;
+    private static final int DEFAULT_TICK_INTERVAL = 4;
+    private static final float DEFAULT_TICK_PERCENT = 0.8f;
     private final World world;
     private final Vector3d center;
     private final double diameter;
@@ -144,10 +141,10 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
     private static class ChunkPreGenerator implements Consumer<Task> {
 
         private static final Vector3i[] OFFSETS = {
-            Vector3i.UNIT_X,
-            Vector3i.UNIT_Z,
-            Vector3i.UNIT_X.negate(),
-            Vector3i.UNIT_Z.negate()
+            Vector3i.UNIT_Z.negate().mul(2),
+            Vector3i.UNIT_X.mul(2),
+            Vector3i.UNIT_Z.mul(2),
+            Vector3i.UNIT_X.negate().mul(2)
         };
         private static final String TIME_FORMAT = "s's 'S'ms'";
         private final World world;
@@ -156,12 +153,11 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
         private final float tickPercent;
         private final long tickTimeLimit;
         @Nullable private final Logger logger;
-        private final Queue<Chunk> unloadQueue = new ArrayDeque<>();
-        private final int unloadQueueThreshold;
         private Vector3i currentPosition;
-        private int currentLayerIndex;
-        private int currentLayerSize;
-        private int currentIndexInLayer;
+        private int currentGenCount;
+        private int currentLayer;
+        private int currentIndex;
+        private int nextJump;
         private int totalCount;
         private long totalTime;
 
@@ -172,17 +168,16 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
             this.tickPercent = tickPercent;
             this.logger = logger;
             this.tickTimeLimit = Math.round(SpongeScheduler.getInstance().getPreferredTickInterval() * tickPercent);
-            // Enough chunks to be for the last two layers to be full, so adjacent chunks always exist
-            this.unloadQueueThreshold = 4 * this.chunkRadius - 2;
             final Optional<Vector3i> currentPosition = SpongeChunkLayout.instance.toChunk(center.toInt());
             if (currentPosition.isPresent()) {
                 this.currentPosition = currentPosition.get();
             } else {
                 throw new IllegalArgumentException("Center is not a valid chunk coordinate");
             }
-            this.currentLayerIndex = 0;
-            this.currentLayerSize = 0;
-            this.currentIndexInLayer = 0;
+            this.currentGenCount = 4;
+            this.currentLayer = 0;
+            this.currentIndex = 0;
+            this.nextJump = 0;
             this.totalCount = 0;
             this.totalTime = 0;
         }
@@ -192,19 +187,20 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
             final long startTime = System.currentTimeMillis();
             int count = 0;
             do {
-                this.world.loadChunk(nextChunkPosition(), true).ifPresent(this.unloadQueue::add);
-                if (this.unloadQueue.size() > this.unloadQueueThreshold) {
-                    this.unloadQueue.remove();
-                }
-            } while (hasNextChunkPosition() && checkChunkCount(++count) && checkTickTime(System.currentTimeMillis() - startTime));
+                count += this.currentGenCount;
+                final Vector3i position = nextChunkPosition();
+                this.world.loadChunk(position, true);
+                this.world.loadChunk(position.sub(Vector3i.UNIT_X), true);
+                this.world.loadChunk(position.sub(Vector3i.UNIT_Z), true);
+                this.world.loadChunk(position.sub(Vector3i.UNIT_X).sub(Vector3i.UNIT_Z), true);
+            } while (hasNextChunkPosition() && checkChunkCount(count) && checkTickTime(System.currentTimeMillis() - startTime));
             if (this.logger != null) {
                 this.totalCount += count;
                 final long deltaTime = System.currentTimeMillis() - startTime;
                 this.totalTime += deltaTime;
-                this.logger.info("Generated {} chunks in {}, {}% complete. Currently {} chunks are kept loaded", count,
+                this.logger.info("Generated {} chunks in {}, {}% complete", count,
                     DurationFormatUtils.formatDuration(deltaTime, TIME_FORMAT, false),
-                    GenericMath.floor(this.totalCount / Math.pow(this.chunkRadius * 2 + 1, 2) * 100),
-                    this.unloadQueue.size()
+                    GenericMath.floor(this.totalCount / Math.pow(this.chunkRadius * 2 + 1, 2) * 100)
                 );
             }
             if (!hasNextChunkPosition()) {
@@ -212,24 +208,33 @@ public class SpongeChunkPreGenerate implements WorldBorder.ChunkPreGenerate {
                     this.logger.info("Done! Generated a total of {} chunks in {}", this.totalCount,
                         DurationFormatUtils.formatDuration(this.totalTime, TIME_FORMAT, false));
                 }
-                this.unloadQueue.clear();
                 task.cancel();
             }
         }
 
         private boolean hasNextChunkPosition() {
-            return this.currentLayerIndex <= this.chunkRadius;
+            return this.currentLayer <= this.chunkRadius;
         }
 
         private Vector3i nextChunkPosition() {
             final Vector3i nextPosition = this.currentPosition;
-            if (++this.currentIndexInLayer >= this.currentLayerSize * 4) {
-                this.currentLayerIndex++;
-                this.currentLayerSize += 2;
-                this.currentIndexInLayer = 0;
-                this.currentPosition = this.currentPosition.sub(Vector3i.UNIT_Z).sub(Vector3i.UNIT_X);
+            final int currentLayerIndex;
+            if (this.currentIndex >= this.nextJump) {
+                // Reached end of layer, jump to the next so we can keep spiralling
+                this.currentPosition = this.currentPosition.sub(Vector3i.UNIT_X).sub(Vector3i.UNIT_Z);
+                this.currentLayer++;
+                // Each the jump increment increases by 4 at each new layer
+                this.nextJump += this.currentLayer * 4;
+                currentLayerIndex = 1;
+            } else {
+                // Get the current index since the last jump
+               currentLayerIndex = this.currentIndex - (this.nextJump - this.currentLayer * 4);
+                // Move to next position in layer, by following a square
+                this.currentPosition = this.currentPosition.add(OFFSETS[currentLayerIndex / this.currentLayer]);
             }
-            this.currentPosition = this.currentPosition.add(OFFSETS[this.currentIndexInLayer / this.currentLayerSize]);
+            // If we're at the corner it's 3, else 2 for an edge
+            this.currentGenCount = currentLayerIndex % this.currentLayer == 0 ? 3 : 2;
+            this.currentIndex++;
             return nextPosition;
         }
 

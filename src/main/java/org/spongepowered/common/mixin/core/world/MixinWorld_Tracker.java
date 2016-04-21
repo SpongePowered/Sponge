@@ -31,15 +31,15 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.world.IBlockAccess;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -59,6 +59,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.CauseTracker;
@@ -100,10 +101,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Shadow public abstract boolean checkLight(BlockPos pos);
 
 
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void onTrackerConstructed(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
-            CallbackInfo ci) {
-
+    @Inject(method = "init", at = @At("HEAD"))
+    protected void onWorldTrackerInit(CallbackInfoReturnable<net.minecraft.world.World> cir) {
         // Turn on capturing
         final CauseTracker causeTracker = this.getCauseTracker();
         causeTracker.setCaptureBlocks(true);
@@ -289,6 +288,13 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
         causeTracker.setCurrentTickEntity(null);
         causeTracker.setProcessingCaptureCause(false);
+    }
+
+    @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
+    public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
+        if ((!(entityIn instanceof EntityLivingBase) || entityIn instanceof EntityArmorStand)) {
+            getCauseTracker().handleNonLivingEntityDestruct(entityIn);
+        }
     }
 
     /**

@@ -50,7 +50,7 @@ public abstract class MixinEntityFireball extends MixinEntity implements Firebal
     @Override
     public ProjectileSource getShooter() {
         if (this.projectileSource == null || this.projectileSource != this.shootingEntity) {
-            if (this.shootingEntity != null) {
+            if (this.shootingEntity != null && this.shootingEntity instanceof ProjectileSource) {
                 this.projectileSource = (ProjectileSource) this.shootingEntity;
             } else {
                 this.projectileSource = ProjectileSource.UNKNOWN;

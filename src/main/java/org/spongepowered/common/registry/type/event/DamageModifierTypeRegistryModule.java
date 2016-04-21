@@ -68,5 +68,6 @@ public class DamageModifierTypeRegistryModule implements CatalogRegistryModule<D
         this.modifierTypeMap.put("magic", new SpongeDamageModifierType("Magic", "magic"));
         this.modifierTypeMap.put("difficulty", new SpongeDamageModifierType("Difficulty", "difficulty"));
         this.modifierTypeMap.put("absorption", new SpongeDamageModifierType("Absorption", "absorption"));
+        this.modifierTypeMap.put("critical_hit", new SpongeDamageModifierType("Critical Hit", "critical_hit"));
     }
 }

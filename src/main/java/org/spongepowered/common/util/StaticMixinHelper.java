@@ -40,6 +40,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.gen.PopulatorType;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 public class StaticMixinHelper {
 
@@ -61,7 +62,6 @@ public class StaticMixinHelper {
     public static ItemStackSnapshot lastCursor = null;
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
-    public static int lastDestroyedEntityId = -1;
     public static EntityLivingBase currentTargetEntity = null;
     public static Cause dropCause = null;
     public static PopulatorType runningGenerator = null;
@@ -69,15 +69,17 @@ public class StaticMixinHelper {
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
     public static boolean destructItemDrop = false;
-
-    // This is only set in SpongeForge, but it removes the problem of having both SpongeForge
-    // and SpongeCommon attempting to redirect ItemInWorldManager;activateBlockOrUseItem in NetHandlerPlayServer.
-    public static boolean lastPlayerInteractCancelled = false;
-
+    public static UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     public static boolean setCustomNameTagSkip = false;
 
     // For spawning
     public static boolean gettingSpawnList;
     public static boolean structureSpawning;
     public static boolean dispenserDispensing;
+
+    // For animation packet
+    public static int lastAnimationPacketTick = 0;
+    public static int lastSecondaryPacketTick = 0;
+    public static int lastPrimaryPacketTick = 0;
+    public static EntityPlayerMP lastAnimationPlayer = null;
 }
