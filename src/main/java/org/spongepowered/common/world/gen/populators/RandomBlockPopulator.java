@@ -26,8 +26,6 @@ package org.spongepowered.common.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.Chunk;
@@ -38,6 +36,7 @@ import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.RandomBlock;
 
 import java.util.Random;
+import java.util.function.Predicate;
 
 public class RandomBlockPopulator implements RandomBlock {
 
@@ -50,7 +49,7 @@ public class RandomBlockPopulator implements RandomBlock {
         this.count = checkNotNull(count);
         this.state = checkNotNull(block);
         this.height = checkNotNull(height);
-        this.check = Predicates.alwaysTrue();
+        this.check = (t) -> true;
     }
 
     public RandomBlockPopulator(BlockState block, VariableAmount count, VariableAmount height, Predicate<Location<World>> check) {
@@ -68,11 +67,11 @@ public class RandomBlockPopulator implements RandomBlock {
     @Override
     public void populate(Chunk chunk, Random random) {
         int n = this.count.getFlooredAmount(random);
-        Location<World> chunkMin =
-                new Location<World>(chunk.getWorld(), chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
+        Location<World> chunkMin = new Location<World>(chunk.getWorld(), chunk.getBlockMin().getX(), chunk.getBlockMin().getY(),
+                chunk.getBlockMin().getZ());
         for (int i = 0; i < n; i++) {
             Location<World> pos = chunkMin.add(random.nextInt(16) + 8, this.height.getFlooredAmount(random), random.nextInt(16) + 8);
-            if (this.check.apply(pos)) {
+            if (this.check.test(pos)) {
                 chunk.getWorld().setBlock(pos.getBlockPosition(), this.state);
             }
         }

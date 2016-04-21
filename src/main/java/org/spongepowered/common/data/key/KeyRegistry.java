@@ -104,7 +104,6 @@ import java.awt.Color;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 public class KeyRegistry {
@@ -307,6 +306,9 @@ public class KeyRegistry {
         keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
         keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
         keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
+        keyMap.put("fuse_duration", makeSingleKey(Integer.class, Value.class, of("FuseDuration")));
+        keyMap.put("ticks_remaining", makeSingleKey(Integer.class, Value.class, of("TicksRemaining")));
+        keyMap.put("explosion_radius", makeSingleKey(Integer.class, Value.class, of("ExplosionRadius")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

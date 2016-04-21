@@ -22,51 +22,57 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.passive.EntityWolf;
-import net.minecraft.item.EnumDyeColor;
+import static com.google.common.base.Preconditions.checkArgument;
+
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.api.data.type.DyeColors;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
+import org.spongepowered.api.entity.explosive.FusedExplosive;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
 
 import java.util.Optional;
 
-public class WolfDyeColorValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, DyeColor, Value<DyeColor>> {
+public class TicksRemainingValueProcessor extends AbstractSpongeValueProcessor<FusedExplosive, Integer, Value<Integer>> {
 
-    public WolfDyeColorValueProcessor() {
-        super(EntityWolf.class, Keys.DYE_COLOR);
+    public TicksRemainingValueProcessor() {
+        super(FusedExplosive.class, Keys.TICKS_REMAINING);
     }
 
     @Override
-    protected Value<DyeColor> constructValue(DyeColor actualValue) {
-        return SpongeValueFactory.getInstance().createValue(Keys.DYE_COLOR, actualValue, DyeColors.BLACK);
+    protected Value<Integer> constructValue(Integer actualValue) {
+        return new SpongeValue<>(Keys.TICKS_REMAINING, actualValue);
     }
 
     @Override
-    protected boolean set(EntityWolf container, DyeColor value) {
-        container.setCollarColor((EnumDyeColor) (Object) value);
-        return true;
+    protected boolean set(FusedExplosive container, Integer value) {
+        checkArgument(value >= 0, "ticks remaining cannot be less than zero");
+        if (container.isPrimed()) {
+            ((IMixinFusedExplosive) container).setFuseTicksRemaining(value);
+            return true;
+        }
+        return false;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntityWolf container) {
-        return Optional.of((DyeColor) (Object) container.getCollarColor());
+    protected Optional<Integer> getVal(FusedExplosive container) {
+        return Optional.of(((IMixinFusedExplosive) container).getFuseTicksRemaining());
     }
 
     @Override
-    protected ImmutableValue<DyeColor> constructImmutableValue(DyeColor value) {
-        return constructValue(value).asImmutable();
+    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
+        return new ImmutableSpongeValue<>(Keys.TICKS_REMAINING, value);
     }
 
     @Override
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         return DataTransactionResult.failNoData();
     }
+
 }

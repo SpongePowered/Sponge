@@ -119,10 +119,8 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -228,7 +226,6 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
 
-
     // @formatter:on
 
     @Override
@@ -312,12 +309,6 @@ public abstract class MixinEntity implements IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
-
-    }
-
-    @Override
-    public World getWorld() {
-        return (World) this.worldObj;
     }
 
     @Override

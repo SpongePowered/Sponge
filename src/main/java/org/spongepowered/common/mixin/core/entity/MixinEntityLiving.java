@@ -201,6 +201,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @return The current attack target, if not null
      */
     @Overwrite
+    @Nullable
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {
             if (((IMixinEntity) this.attackTarget).isVanished() && ((IMixinEntity) this.attackTarget).isUntargetable()) {

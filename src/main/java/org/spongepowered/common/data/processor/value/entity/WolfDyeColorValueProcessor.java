@@ -22,9 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.processor.value;
+package org.spongepowered.common.data.processor.value.entity;
 
-import net.minecraft.entity.passive.EntitySheep;
+import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.item.EnumDyeColor;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -38,10 +38,10 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 
 import java.util.Optional;
 
-public class SheepDyeColorValueProcessor extends AbstractSpongeValueProcessor<EntitySheep, DyeColor, Value<DyeColor>> {
+public class WolfDyeColorValueProcessor extends AbstractSpongeValueProcessor<EntityWolf, DyeColor, Value<DyeColor>> {
 
-    public SheepDyeColorValueProcessor() {
-        super(EntitySheep.class, Keys.DYE_COLOR);
+    public WolfDyeColorValueProcessor() {
+        super(EntityWolf.class, Keys.DYE_COLOR);
     }
 
     @Override
@@ -50,14 +50,14 @@ public class SheepDyeColorValueProcessor extends AbstractSpongeValueProcessor<En
     }
 
     @Override
-    protected boolean set(EntitySheep container, DyeColor value) {
-        container.setFleeceColor((EnumDyeColor) (Object) value);
+    protected boolean set(EntityWolf container, DyeColor value) {
+        container.setCollarColor((EnumDyeColor) (Object) value);
         return true;
     }
 
     @Override
-    protected Optional<DyeColor> getVal(EntitySheep container) {
-        return Optional.of((DyeColor) (Object) container.getFleeceColor());
+    protected Optional<DyeColor> getVal(EntityWolf container) {
+        return Optional.of((DyeColor) (Object) container.getCollarColor());
     }
 
     @Override

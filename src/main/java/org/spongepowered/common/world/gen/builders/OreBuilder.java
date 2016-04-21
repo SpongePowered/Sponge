@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenMinable;
@@ -35,6 +34,8 @@ import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Ore;
 import org.spongepowered.api.world.gen.populator.Ore.Builder;
 import org.spongepowered.common.world.gen.WorldGenConstants;
+
+import java.util.function.Predicate;
 
 public class OreBuilder implements Ore.Builder {
 

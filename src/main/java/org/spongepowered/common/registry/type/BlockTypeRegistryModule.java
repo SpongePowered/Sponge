@@ -89,7 +89,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
     @Override
     public Optional<BlockType> getById(String id) {
         checkNotNull(id);
-        if (!id.contains(":")) {
+        if (!id.contains(":") && !id.equals("none")) {
             id = "minecraft:" + id; // assume vanilla
         }
         return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
@@ -143,7 +143,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
     public void registerDefaults() {
         BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(BlockUtil.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.air.getDefaultState()).build();
         RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
-        this.blockTypeMappings.put("none", BlockTypes.AIR);
+        this.blockTypeMappings.put("none", (BlockType) Blocks.air);
     }
 
     BlockTypeRegistryModule() { }

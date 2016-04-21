@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.Sets;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.RegistrationPhase;
 import org.spongepowered.api.registry.RegistryModule;
@@ -41,6 +42,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Set;
 
 public final class RegistryModuleLoader {
 
@@ -62,7 +64,9 @@ public final class RegistryModuleLoader {
                     if (map.isEmpty()) {
                         return;
                     }
-                    RegistryHelper.mapFields(getCatalogClass(module), map);
+                    RegisterCatalog regAnnot = getRegisterCatalogAnnot(module);
+                    Set<String> ignored = regAnnot.ignoredFields().length == 0 ? null : Sets.newHashSet(regAnnot.ignoredFields());
+                    RegistryHelper.mapFields(regAnnot.value(), map, ignored);
                 }
             }
         } catch (Exception e) {
@@ -152,11 +156,11 @@ public final class RegistryModuleLoader {
         throw new IllegalStateException("Registry module does not have a catalog map! Registry: " + module.getClass().getCanonicalName());
     }
 
-    private static Class<?> getCatalogClass(RegistryModule module) {
+    private static RegisterCatalog getRegisterCatalogAnnot(RegistryModule module) {
         for (Field field : module.getClass().getDeclaredFields()) {
             RegisterCatalog annotation = field.getAnnotation(RegisterCatalog.class);
             if (annotation != null) {
-                return annotation.value();
+                return annotation;
             }
         }
         throw new IllegalArgumentException("The module does not have a registry to register! " + module.getClass().getCanonicalName());

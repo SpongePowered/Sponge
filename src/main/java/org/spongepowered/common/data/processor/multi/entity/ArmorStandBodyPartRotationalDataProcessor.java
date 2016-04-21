@@ -50,7 +50,8 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDataProcessor<EntityArmorStand, BodyPartRotationalData, ImmutableBodyPartRotationalData> {
+public class ArmorStandBodyPartRotationalDataProcessor
+        extends AbstractEntityDataProcessor<EntityArmorStand, BodyPartRotationalData, ImmutableBodyPartRotationalData> {
 
     public ArmorStandBodyPartRotationalDataProcessor() {
         super(EntityArmorStand.class);
@@ -64,12 +65,12 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     @Override
     public Optional<BodyPartRotationalData> fill(DataContainer container, BodyPartRotationalData data) {
         if (!container.contains(
-                Keys.BODY_ROTATIONS.getQuery(), 
-                Keys.HEAD_ROTATION.getQuery(), 
-                Keys.CHEST_ROTATION.getQuery(), 
-                Keys.LEFT_ARM_ROTATION.getQuery(), 
-                Keys.RIGHT_ARM_ROTATION.getQuery(), 
-                Keys.LEFT_LEG_ROTATION.getQuery(), 
+                Keys.BODY_ROTATIONS.getQuery(),
+                Keys.HEAD_ROTATION.getQuery(),
+                Keys.CHEST_ROTATION.getQuery(),
+                Keys.LEFT_ARM_ROTATION.getQuery(),
+                Keys.RIGHT_ARM_ROTATION.getQuery(),
+                Keys.LEFT_LEG_ROTATION.getQuery(),
                 Keys.RIGHT_LEG_ROTATION.getQuery())) {
             return Optional.empty();
         }
@@ -81,7 +82,7 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
         Vector3d rightArmRotation = DataUtil.getPosition3d(container, Keys.RIGHT_ARM_ROTATION.getQuery());
         Vector3d leftLegRotation = DataUtil.getPosition3d(container, Keys.LEFT_LEG_ROTATION.getQuery());
         Vector3d rightLegRotation = DataUtil.getPosition3d(container, Keys.RIGHT_LEG_ROTATION.getQuery());
-        
+
         data.set(Keys.BODY_ROTATIONS, bodyRotations);
         data.set(Keys.HEAD_ROTATION, headRotation);
         data.set(Keys.CHEST_ROTATION, chestRotation);
@@ -106,13 +107,19 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     protected boolean set(EntityArmorStand dataHolder, Map<Key<?>, Object> keyValues) {
         @SuppressWarnings("unchecked")
         Map<BodyPart, Vector3d> bodyRotations = (Map<BodyPart, Vector3d>) keyValues.get(Keys.BODY_ROTATIONS);
-        Vector3d headRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, DataConstants.DEFAULT_HEAD_ROTATION);
-        Vector3d chestRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.CHEST_ROTATION, bodyRotations, BodyParts.CHEST, DataConstants.DEFAULT_CHEST_ROTATION);
-        Vector3d leftArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_ARM_ROTATION, bodyRotations, BodyParts.LEFT_ARM, DataConstants.DEFAULT_LEFT_ARM_ROTATION);
-        Vector3d rightArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_ARM_ROTATION, bodyRotations, BodyParts.RIGHT_ARM, DataConstants.DEFAULT_RIGHT_ARM_ROTATION);
-        Vector3d leftLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_LEG_ROTATION, bodyRotations, BodyParts.LEFT_LEG, DataConstants.DEFAULT_LEFT_LEG_ROTATION);
-        Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG, DataConstants.DEFAULT_RIGHT_LEG_ROTATION);
-        
+        Vector3d headRotation =
+                getValueFromTwoMapsOrUseFallback(keyValues, Keys.HEAD_ROTATION, bodyRotations, BodyParts.HEAD, DataConstants.DEFAULT_HEAD_ROTATION);
+        Vector3d chestRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.CHEST_ROTATION, bodyRotations, BodyParts.CHEST,
+                DataConstants.DEFAULT_CHEST_ROTATION);
+        Vector3d leftArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_ARM_ROTATION, bodyRotations, BodyParts.LEFT_ARM,
+                DataConstants.DEFAULT_LEFT_ARM_ROTATION);
+        Vector3d rightArmRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_ARM_ROTATION, bodyRotations, BodyParts.RIGHT_ARM,
+                DataConstants.DEFAULT_RIGHT_ARM_ROTATION);
+        Vector3d leftLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.LEFT_LEG_ROTATION, bodyRotations, BodyParts.LEFT_LEG,
+                DataConstants.DEFAULT_LEFT_LEG_ROTATION);
+        Vector3d rightLegRotation = getValueFromTwoMapsOrUseFallback(keyValues, Keys.RIGHT_LEG_ROTATION, bodyRotations, BodyParts.RIGHT_LEG,
+                DataConstants.DEFAULT_RIGHT_LEG_ROTATION);
+
         dataHolder.setHeadRotation(VecHelper.toRotation(headRotation));
         dataHolder.setBodyRotation(VecHelper.toRotation(chestRotation));
         dataHolder.setLeftArmRotation(VecHelper.toRotation(leftArmRotation));
@@ -125,7 +132,6 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     @Override
     protected Map<Key<?>, ?> getValues(EntityArmorStand dataHolder) {
         Map<Key<?>, Object> values = Maps.newHashMapWithExpectedSize(6);
-        
         values.put(Keys.HEAD_ROTATION, VecHelper.toVector3d(dataHolder.getHeadRotation()));
         values.put(Keys.CHEST_ROTATION, VecHelper.toVector3d(dataHolder.getBodyRotation()));
         values.put(Keys.LEFT_ARM_ROTATION, VecHelper.toVector3d(dataHolder.leftArmRotation));
@@ -139,17 +145,19 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     }
 
     /**
-     * Creates a map whose keys and values are both provided by collections 
-     * that are passed to this method.
-     * 
-     * The collections that are passed must be of the same size, otherwise 
-     * the iterator on the smaller collection will throw a {@link NoSuchElementException} since it 
-     * would have finished iterating over its elements (as per {@link Iterator#next()}'s contract), whereas, 
+     * Creates a map whose keys and values are both provided by collections that
+     * are passed to this method.
+     *
+     * The collections that are passed must be of the same size, otherwise the
+     * iterator on the smaller collection will throw a
+     * {@link NoSuchElementException} since it would have finished iterating
+     * over its elements (as per {@link Iterator#next()}'s contract), whereas,
      * the iterator for the larger collection would still be iterating.
-     * 
+     *
      * @param keys The keys to be used in the new map
      * @param values The values to be used in the new map
-     * @return A new map containing keys and values created from the two collections
+     * @return A new map containing keys and values created from the two
+     *         collections
      */
     public static <K, V> Map<K, V> zipCollections(Collection<K> keys, Collection<V> values) {
         Map<K, V> map = Maps.newHashMapWithExpectedSize(Math.min(keys.size(), values.size()));
@@ -163,19 +171,20 @@ public class ArmorStandBodyPartRotationalDataProcessor extends AbstractEntityDat
     }
 
     /**
-     * This method tries to retrieve a value from {@code firstMap}.
-     * If that value is {@code null}, this method tries to retrieve
-     * a value from {@code fallbackMap}. If that value is {@code null}, 
-     * this method returns {@code fallbackValue}.
+     * This method tries to retrieve a value from {@code firstMap}. If that
+     * value is {@code null}, this method tries to retrieve a value from
+     * {@code fallbackMap}. If that value is {@code null}, this method returns
+     * {@code fallbackValue}.
+     *
      * @return A value using the algorithm above
      */
     @SuppressWarnings("unchecked")
-    private static <T> T getValueFromTwoMapsOrUseFallback(Map<?, ?> firstMap, Object keyForFirst, Map<?, ?> fallbackMap, Object keyForFallback, T fallbackValue) {
+    private static <T> T getValueFromTwoMapsOrUseFallback(Map<?, ?> firstMap, Object keyForFirst, Map<?, ?> fallbackMap, Object keyForFallback,
+            T fallbackValue) {
         return Optional
                 .ofNullable((T) firstMap.get(keyForFirst))
                 .orElse(Optional
                         .ofNullable((T) fallbackMap.get(keyForFallback))
-                        .orElse(fallbackValue)
-                );
+                        .orElse(fallbackValue));
     }
 }

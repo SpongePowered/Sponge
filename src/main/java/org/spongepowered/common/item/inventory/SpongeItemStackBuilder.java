@@ -35,6 +35,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Key;
@@ -50,7 +51,6 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 
 import java.util.HashSet;
@@ -62,13 +62,12 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 public class SpongeItemStackBuilder implements ItemStack.Builder {
-    private Set<DataManipulator<?, ?>> itemDataSet;
+    @Nullable private Set<DataManipulator<?, ?>> itemDataSet;
     private ItemType type;
     private int quantity;
     private int damageValue = 0;
-    private LinkedHashMap<Key<?>, Object> keyValues;
+    @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
     @Nullable private NBTTagCompound compound;
-    @Nullable private Set<BaseValue<?>> valueSet;
 
     public SpongeItemStackBuilder() {
         reset();
@@ -105,13 +104,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
 
     @Override
     public <V> ItemStack.Builder add(Key<? extends BaseValue<V>> key, V value) throws IllegalArgumentException {
-        checkNotNull(key, "key");
-        checkNotNull(this.type, "Cannot set item data without having set a type first!");
-        if (this.valueSet == null) {
-            this.valueSet = new HashSet<>();
-        }
-        valueSet.add(new ImmutableSpongeValue<>(key, value));
-        return this;
+        return keyValue(key, value);
     }
 
     @Override
@@ -178,6 +171,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         if (container.contains(DataQueries.DATA_MANIPULATORS)) {
             final List<DataView> views = container.getViewList(DataQueries.DATA_MANIPULATORS).get();
             final List<DataManipulator<?, ?>> manipulators = DataUtil.deserializeManipulatorList(views);
+            this.itemDataSet = new HashSet<>();
             manipulators.forEach(this.itemDataSet::add);
         }
         return this;
@@ -209,12 +203,12 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
     public ItemStack.Builder fromBlockSnapshot(BlockSnapshot blockSnapshot) {
         checkNotNull(blockSnapshot, "The snapshot was null!");
         reset();
-        final Optional<ItemType> itemType = blockSnapshot.getState().getType().getItem();
-        checkArgument(itemType.isPresent(), "ItemType not found for block type: " + blockSnapshot.getState().getType().getId());
-        itemType(itemType.get());
+        final BlockType blockType = blockSnapshot.getState().getType();
+        final Optional<ItemType> itemType = blockType.getItem();
+        itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockType.getId())));
         quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
-            final Block block = (Block) blockSnapshot.getState().getType();
+            final Block block = (Block) blockType;
             this.damageValue = block.damageDropped((IBlockState) blockSnapshot.getState());
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
@@ -243,6 +237,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         return this;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public ItemStack build() throws IllegalStateException {
         checkState(this.type != null, "Item type has not been set");
@@ -256,8 +251,8 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
             this.itemDataSet.forEach(stack::offer);
         }
 
-        if (this.valueSet != null) {
-            this.valueSet.forEach(stack::offer);
+        if (this.keyValues != null) {
+            this.keyValues.entrySet().forEach(entry -> stack.offer((Key) entry.getKey(), entry.getValue()));
         }
 
         return stack;

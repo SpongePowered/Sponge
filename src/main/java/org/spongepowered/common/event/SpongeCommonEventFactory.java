@@ -40,6 +40,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -52,6 +53,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
@@ -107,9 +109,9 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        ImmutableList<Entity> originalEntities = ImmutableList.copyOf((List<Entity>) (List<?>) entities);
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, originalEntities, (List<Entity>) (List<?>) entities,
-                (World) world);
+        List<Entity> spEntities = (List<Entity>) (List<?>) entities;
+        ImmutableList<EntitySnapshot> originalEntities = spEntities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, spEntities, originalEntities, (World) world);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -214,11 +216,12 @@ public class SpongeCommonEventFactory {
                     targetBlock.getLocation().get(), side);
             return SpongeImpl.postEvent(event);
         } else if (movingObjectPosition.entityHit != null) { // entity
-            ImmutableList.Builder<Entity> entityBuilder = new ImmutableList.Builder<>();
+            ImmutableList.Builder<EntitySnapshot> entityBuilder = new ImmutableList.Builder<>();
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause,
-                    entityBuilder.add((Entity) movingObjectPosition.entityHit).build(), entityList, impactPoint, (World) projectile.worldObj);
+            entityBuilder.add(((Entity) movingObjectPosition.entityHit).createSnapshot());
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityList, entityBuilder.build(), impactPoint,
+                    (World) projectile.worldObj);
             return SpongeImpl.postEvent(event);
         }
 
