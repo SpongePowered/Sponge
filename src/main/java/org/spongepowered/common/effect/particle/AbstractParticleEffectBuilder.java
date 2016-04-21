@@ -85,6 +85,11 @@ public abstract class AbstractParticleEffectBuilder<T extends ParticleEffect, P 
 
     @Override
     public B reset() {
+        this.type = null;
+        this.motion = Vector3d.ZERO;
+        this.offset = Vector3d.ZERO;
+        this.count = 1;
         return (B) this;
     }
+
 }
