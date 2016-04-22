@@ -51,7 +51,7 @@ public class FlowerForestSupplier implements Function<Location<Chunk>, PlantType
     @Override
     public PlantType apply(Location<Chunk> pos) {
         double noise =
-                MathHelper.clamp_double((1.0D + GRASS_COLOR_NOISE.func_151601_a((double) pos.getX() / 48.0D, (double) pos.getZ() / 48.0D)) / 2.0D,
+                MathHelper.clamp_double((1.0D + GRASS_COLOR_NOISE.func_151601_a(pos.getX() / 48.0D, pos.getZ() / 48.0D)) / 2.0D,
                         0.0D, 0.9999D);
         PlantType flower = options[(int) (noise * (double) options.length)];
         if (flower == PlantTypes.BLUE_ORCHID) {

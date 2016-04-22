@@ -73,10 +73,10 @@ public class MixinWorldGenPumpkin implements Pumpkin {
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: This is overwritten in order to use our custom patch size.
+     * @reason This is overwritten in order to use our custom patch size.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos p_180709_3_) {

@@ -39,7 +39,13 @@ public class JavaVersionCheckUtils {
 
     public static void ensureJava8() {
         String version = getCurrentVersion();
+        String runtimeVersion = System.getProperty("java.runtime.version");
+        boolean incompatible = false;
         if (version.compareTo(REQUIRED_VERSION) < 0) {
+            incompatible = true;
+        }
+        if (runtimeVersion.contains("8u"))
+        if (incompatible) {
             String error = String.format(ERROR_MESSAGE, version, REQUIRED_VERSION);
 
             if (!GraphicsEnvironment.isHeadless()) {
@@ -50,6 +56,6 @@ public class JavaVersionCheckUtils {
     }
 
     private static String getCurrentVersion() {
-        return System.getProperty("java.version");
+        return System.getProperty("java.runtime.version");
     }
 }

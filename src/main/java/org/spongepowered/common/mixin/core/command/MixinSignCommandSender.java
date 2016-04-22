@@ -41,7 +41,7 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
 
     @Shadow(aliases = {"this$0", "field_174796_b"})
     @Final
-    private TileEntitySign sign;
+    private TileEntitySign field_174796_b;
 
     @Override
     public ICommandSender asICommandSender() {
@@ -60,7 +60,7 @@ public abstract class MixinSignCommandSender implements ICommandSender, IMixinCo
 
     @Override
     public Sign getSign() {
-        return (Sign) this.sign;
+        return (Sign) this.field_174796_b;
     }
 
 }

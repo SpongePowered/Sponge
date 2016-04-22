@@ -81,9 +81,9 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     protected ImmutableTreeData getTreeData(IBlockState blockState) {
         BlockPlanks.EnumType type;
         if (blockState.getBlock() instanceof BlockOldLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockOldLeaf.VARIANT);
+            type = blockState.getValue(BlockOldLeaf.VARIANT);
         } else if (blockState.getBlock() instanceof BlockNewLeaf) {
-            type = (BlockPlanks.EnumType) blockState.getValue(BlockNewLeaf.VARIANT);
+            type = blockState.getValue(BlockNewLeaf.VARIANT);
         } else {
             type = BlockPlanks.EnumType.OAK;
         }
@@ -94,7 +94,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     }
 
     private ImmutableDecayableData getIsDecayableFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, (Boolean) blockState.getValue(BlockLeaves.DECAYABLE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.getValue(BlockLeaves.DECAYABLE));
     }
 
     @Override

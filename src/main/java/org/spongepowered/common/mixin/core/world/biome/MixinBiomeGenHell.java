@@ -79,16 +79,16 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
                 .build();
         gensettings.getPopulators().add(glowstone2);
 
-        ChanceTable<MushroomType> types = new ChanceTable<MushroomType>();
-        types.add(new WeightedObject<MushroomType>(MushroomTypes.BROWN, 1));
+        ChanceTable<MushroomType> types = new ChanceTable<>();
+        types.add(new WeightedObject<>(MushroomTypes.BROWN, 1));
         types.add(new EmptyObject<>(1));
         HellMushroomPopulator smallMushroom = new HellMushroomPopulator();
         smallMushroom.setMushroomsPerChunk(1);
         smallMushroom.getTypes().addAll(types);
         gensettings.getPopulators().add(smallMushroom);
 
-        ChanceTable<MushroomType> types2 = new ChanceTable<MushroomType>();
-        types.add(new WeightedObject<MushroomType>(MushroomTypes.RED, 1));
+        ChanceTable<MushroomType> types2 = new ChanceTable<>();
+        types.add(new WeightedObject<>(MushroomTypes.RED, 1));
         types.add(new EmptyObject<>(1));
         HellMushroomPopulator smallMushroom2 = new HellMushroomPopulator();
         smallMushroom2.setMushroomsPerChunk(1);
@@ -99,7 +99,7 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
                 .height(VariableAmount.baseWithRandomAddition(10, 108))
                 .ore(BlockTypes.QUARTZ_ORE.getDefaultState())
                 .perChunk(16)
-                .placementCondition((o) -> o != null && ((BlockState) o).getType() == BlockTypes.NETHERRACK)
+                .placementCondition((o) -> o != null && o.getType() == BlockTypes.NETHERRACK)
                 .size(14)
                 .build();
         gensettings.getPopulators().add(quartz);

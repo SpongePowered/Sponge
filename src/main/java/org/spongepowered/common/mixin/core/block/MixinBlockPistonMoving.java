@@ -93,6 +93,6 @@ public abstract class MixinBlockPistonMoving extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockPistonMoving.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockPistonMoving.FACING)));
     }
 }

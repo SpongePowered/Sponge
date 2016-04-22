@@ -77,7 +77,7 @@ public abstract class MixinBlockSnow extends MixinBlock {
     }
 
     private ImmutableLayeredData getLayerData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, (Integer) blockState.getValue(BlockSnow.LAYERS), 1, 8);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.getValue(BlockSnow.LAYERS), 1, 8);
     }
 
 }

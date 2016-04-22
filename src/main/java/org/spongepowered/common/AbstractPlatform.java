@@ -44,6 +44,8 @@ public abstract class AbstractPlatform implements Platform {
 
     protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
 
+        private static final long serialVersionUID = 7022397614988467398L;
+
         @Override
         public Object put(String key, Object value) {
             checkArgument(!this.containsKey(key), "Cannot set the value of the existing key %s", key);

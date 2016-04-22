@@ -40,7 +40,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     
     protected final Collection<InventoryProperty<?, ?>>[] properties;
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public DynamicLensCollectionImpl(int size) {
         this.lenses = new Lens[size];
         this.properties = new Collection[size];
@@ -55,7 +55,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     public void setProperty(int index, InventoryProperty<?, ?> property) {
         this.checkIndex(index);
         if (this.properties[index] == null) {
-            this.properties[index] = new ArrayList<InventoryProperty<?,?>>();
+            this.properties[index] = new ArrayList<>();
         } else {
             this.removeMatchingProperties(index, property);
         }
@@ -127,7 +127,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     public Collection<InventoryProperty<?, ?>> getProperties(int index) {
         this.checkIndex(index);
         if (this.properties[index] == null) {
-            return Collections.<InventoryProperty<?, ?>>emptyList();
+            return Collections.emptyList();
         }
         return Collections.unmodifiableCollection(this.properties[index]);
     }
@@ -136,7 +136,7 @@ public class DynamicLensCollectionImpl<TInventory, TStack> extends AbstractList<
     public Collection<InventoryProperty<?, ?>> getProperties(Lens<TInventory, TStack> child) {
         int index = this.indexOf(child);
         if (index < 0) {
-            return Collections.<InventoryProperty<?, ?>>emptyList();
+            return Collections.emptyList();
         }
         return this.getProperties(index);
     }

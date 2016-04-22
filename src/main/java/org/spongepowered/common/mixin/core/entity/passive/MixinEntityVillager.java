@@ -129,8 +129,7 @@ public abstract class MixinEntityVillager extends MixinEntityAgeable implements 
 
     /**
      * @author gabizou - January 13th, 2016
-     *
-     * This overwrites the current method using the multi-dimension array with
+     * @reason This overwrites the current method using the multi-dimension array with
      * our {@link VillagerRegistry} to handle career levels and registrations
      * for {@link TradeOfferGenerator}s. Note that this takes over entirely
      * whatever vanilla does, but this allows for maximum customization for

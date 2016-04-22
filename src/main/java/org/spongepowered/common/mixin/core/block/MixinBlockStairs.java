@@ -88,7 +88,7 @@ public abstract class MixinBlockStairs extends MixinBlock {
             final BlockStairs.EnumShape stairShapeType = (BlockStairs.EnumShape) value;
             return Optional.of((BlockState) blockState.withProperty(BlockStairs.SHAPE, stairShapeType));
         } else if (key.equals(Keys.PORTION_TYPE)) {
-            return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) (Object) value)));
+            return Optional.of((BlockState) blockState.withProperty(BlockStairs.HALF, convertType((BlockSlab.EnumBlockHalf) value)));
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = DirectionChecker.checkDirectionToHorizontal((Direction) value);
@@ -104,12 +104,12 @@ public abstract class MixinBlockStairs extends MixinBlock {
 
     private ImmutablePortionData getPortionTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePortionData.class,
-                convertType((EnumHalf) blockState.getValue(BlockStairs.HALF)));
+                convertType(blockState.getValue(BlockStairs.HALF)));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockStairs.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockStairs.FACING)));
     }
 
     private PortionType convertType(BlockStairs.EnumHalf type) {

@@ -79,7 +79,7 @@ public class EmptyInventoryImpl implements EmptyInventory, Observer<InventoryEve
         return Collections.<T>emptyList();
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings("ALL")
     @Override
     public EmptyInventory first() {
         return this;

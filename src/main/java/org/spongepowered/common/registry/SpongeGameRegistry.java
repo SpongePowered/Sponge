@@ -102,6 +102,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
+@SuppressWarnings("deprecation")
 @Singleton
 public class SpongeGameRegistry implements GameRegistry {
 
@@ -208,14 +209,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return Optional.of((CatalogRegistryModule<T>) this.catalogRegistryMap.get(catalogClass));
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public <TUnknown, T extends CatalogType> boolean isAdditionalRegistered(Class<TUnknown> clazz, Class<T> catalogType) {
-        CatalogRegistryModule<T> module = getRegistryModuleFor(catalogType).orElse(null);
-        checkArgument(module instanceof ExtraClassCatalogRegistryModule);
-        ExtraClassCatalogRegistryModule<T, ?> classModule = (ExtraClassCatalogRegistryModule<T, ?>) module;
-        return classModule.hasRegistrationFor((Class) clazz);
-    }
-
+    @SuppressWarnings("unchecked")
     public <TUnknown, T extends CatalogType> T getTranslated(Class<TUnknown> clazz, Class<T> catalogClazz) {
         CatalogRegistryModule<T> module = getRegistryModuleFor(catalogClazz).orElse(null);
         checkArgument(module instanceof ExtraClassCatalogRegistryModule);
@@ -333,10 +327,9 @@ public class SpongeGameRegistry implements GameRegistry {
         throw new UnsupportedOperationException(); // TODO
     }
 
-
     @Override
     public Optional<Translation> getTranslationById(String id) {
-        return Optional.<Translation>of(new SpongeTranslation(id));
+        return Optional.of(new SpongeTranslation(id));
     }
 
     @Override
@@ -389,6 +382,7 @@ public class SpongeGameRegistry implements GameRegistry {
         return SpongeVillagerRegistry.getInstance();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public TextSerializerFactory getTextSerializerFactory() {
         return SpongeTextSerializerFactory.INSTANCE;

@@ -72,6 +72,6 @@ public abstract class MixinBlockBed extends MixinBlockDirectional {
     }
 
     private ImmutableOccupiedData getIsOccupiedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, (Boolean) blockState.getValue(BlockBed.OCCUPIED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOccupiedData.class, blockState.getValue(BlockBed.OCCUPIED));
     }
 }

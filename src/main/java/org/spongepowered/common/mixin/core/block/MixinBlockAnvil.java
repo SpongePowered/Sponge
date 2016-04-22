@@ -48,7 +48,7 @@ public abstract class MixinBlockAnvil extends MixinBlock {
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getDirectionalData(blockState));
+        return ImmutableList.of(getDirectionalData(blockState));
     }
 
     @Override
@@ -76,6 +76,6 @@ public abstract class MixinBlockAnvil extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockAnvil.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockAnvil.FACING)));
     }
 }

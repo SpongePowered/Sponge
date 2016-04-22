@@ -77,7 +77,7 @@ public abstract class MixinBlockCake extends MixinBlock {
     }
 
     private ImmutableLayeredData getLayerData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, (Integer) blockState.getValue(BlockCake.BITES), 0, 6);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeLayeredData.class, blockState.getValue(BlockCake.BITES), 0, 6);
     }
 
 }

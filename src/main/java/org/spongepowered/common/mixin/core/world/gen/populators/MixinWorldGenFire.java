@@ -72,10 +72,10 @@ public class MixinWorldGenFire implements NetherFire {
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Overwritten to use our custom cluster size.
+     * @reason Overwritten to use our custom cluster size.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos pos) {

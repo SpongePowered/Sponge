@@ -29,7 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ComparisonChain;
 import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableVehicleData;
 import org.spongepowered.api.data.manipulator.mutable.entity.VehicleData;
@@ -40,9 +39,6 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractData;
 import org.spongepowered.common.data.util.ImplementationRequiredForTest;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.data.value.mutable.common.SpongeEntityValue;
-
-import java.lang.ref.WeakReference;
 
 import javax.annotation.Nullable;
 

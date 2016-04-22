@@ -62,6 +62,7 @@ public abstract class MixinBlockRailBase extends MixinBlock {
         return ImmutableRailDirectionData.class.isAssignableFrom(immutable);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableRailDirectionData) {
@@ -113,6 +114,7 @@ public abstract class MixinBlockRailBase extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
+    @SuppressWarnings("rawtypes")
     private ImmutableRailDirectionData getRailDirectionFor(IBlockState blockState) {
         if (blockState.getBlock() instanceof BlockRail) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,

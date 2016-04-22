@@ -107,7 +107,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         }
         NBTTagList spawnlist = compound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
         for (int i = 0; i < spawnlist.tagCount(); i++) {
-            NBTTagCompound spawndata = (NBTTagCompound) spawnlist.getCompoundTagAt(i);
+            NBTTagCompound spawndata = spawnlist.getCompoundTagAt(i);
             UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
             if (uuid != null) {
                 this.spawnLocations.put(uuid, RespawnLocation.builder()

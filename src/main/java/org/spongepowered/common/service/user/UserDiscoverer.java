@@ -139,16 +139,14 @@ class UserDiscoverer {
 
         // Add all whitelisted users
         UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
-        for (UserListWhitelistEntry entry : (Collection<UserListWhitelistEntry>) whiteList.getValues().values()) {
+        for (UserListWhitelistEntry entry : whiteList.getValues().values()) {
             profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
 
         // Add all banned users
         UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        for (BanEntry entry : banList.getValues().values()) {
-            if (entry instanceof UserListBansEntry) {
-                profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
-            }
+        for (UserListBansEntry entry : banList.getValues().values()) {
+            profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
         return profiles;
     }
@@ -221,9 +219,9 @@ class UserDiscoverer {
     private static User getFromWhitelist(UUID uniqueId) {
         GameProfile profile = null;
         UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
-        UserListWhitelistEntry whiteListData = (UserListWhitelistEntry) whiteList.getEntry(new GameProfile(uniqueId, ""));
+        UserListWhitelistEntry whiteListData = whiteList.getEntry(new GameProfile(uniqueId, ""));
         if (whiteListData != null) {
-            profile = (GameProfile) whiteListData.value;
+            profile = whiteListData.value;
         }
         if (profile != null) {
             return create(profile);
@@ -234,9 +232,9 @@ class UserDiscoverer {
     private static User getFromBanlist(UUID uniqueId) {
         GameProfile profile = null;
         UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        BanEntry banData = (BanEntry) banList.getEntry(new GameProfile(uniqueId, ""));
-        if (banData instanceof UserListBansEntry) {
-            profile = (GameProfile) banData.value;
+        UserListBansEntry banData = banList.getEntry(new GameProfile(uniqueId, ""));
+        if (banData != null) {
+            profile = banData.value;
         }
         if (profile != null) {
             return create(profile);

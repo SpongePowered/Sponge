@@ -81,10 +81,10 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Change the number of iterations and the height of the cluster
+     * @reason Change the number of iterations and the height of the cluster
      * depending on the respective variable amounts.
      */
     @Overwrite

@@ -297,7 +297,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
-                for (Packet packet : packets) {
+                for (Packet<?> packet : packets) {
                     this.playerNetServerHandler.sendPacket(packet);
                 }
             }
@@ -517,7 +517,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * assigns the {@link #pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
-    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
     private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
         return this.pendingGameType;
     }

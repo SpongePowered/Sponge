@@ -162,8 +162,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @SuppressWarnings("unchecked")
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        return new SpongeEntityType((Integer) EntityList.stringToIDMapping.get(mcName), spongeName,
-                (Class<? extends Entity>) EntityList.stringToClassMapping.get(mcName),
+        return new SpongeEntityType(EntityList.stringToIDMapping.get(mcName), spongeName,
+                EntityList.stringToClassMapping.get(mcName),
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
 

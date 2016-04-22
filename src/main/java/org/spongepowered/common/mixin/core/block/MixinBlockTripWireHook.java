@@ -102,19 +102,19 @@ public abstract class MixinBlockTripWireHook extends MixinBlock {
 
     private ImmutableSuspendedData getIsSuspendedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil
-                .getManipulator(ImmutableSpongeSuspendedData.class, (Boolean) blockState.getValue(BlockTripWireHook.SUSPENDED));
+                .getManipulator(ImmutableSpongeSuspendedData.class, blockState.getValue(BlockTripWireHook.SUSPENDED));
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, (Boolean) blockState.getValue(BlockTripWireHook.ATTACHED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getValue(BlockTripWireHook.ATTACHED));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockTripWireHook.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockTripWireHook.POWERED));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockTripWireHook.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockTripWireHook.FACING)));
     }
 }

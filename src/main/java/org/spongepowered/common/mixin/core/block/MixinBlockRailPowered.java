@@ -72,6 +72,6 @@ public abstract class MixinBlockRailPowered extends MixinBlockRailBase {
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockRailPowered.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRailPowered.POWERED));
     }
 }

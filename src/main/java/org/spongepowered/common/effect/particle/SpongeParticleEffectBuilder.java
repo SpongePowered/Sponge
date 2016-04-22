@@ -40,15 +40,17 @@ import org.spongepowered.api.effect.particle.ResizableParticle;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.Color;
 
-
-public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<ParticleEffect, ParticleType, ParticleEffect.Builder> implements ParticleEffect.Builder {
+public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<ParticleEffect, ParticleType, ParticleEffect.Builder>
+        implements ParticleEffect.Builder {
 
     @Override
     public SpongeParticleEffect build() throws IllegalStateException {
+        checkState(this.type != null, "ParticleType not set!");
         return new SpongeParticleEffect(this.type, this.motion, this.offset, this.count);
     }
 
-    public static class BuilderColorable extends AbstractParticleEffectBuilder<ColoredParticle, ParticleType.Colorable, ColoredParticle.Builder> implements ColoredParticle.Builder {
+    public static class BuilderColorable extends AbstractParticleEffectBuilder<ColoredParticle, ParticleType.Colorable, ColoredParticle.Builder>
+            implements ColoredParticle.Builder {
 
         private Color color;
 
@@ -59,9 +61,17 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
             return this;
         }
 
+        @Override
+        public BuilderColorable from(ColoredParticle value) {
+            super.from(value);
+            this.color = value.getColor();
+            return this;
+        }
 
         @Override
         public SpongeParticleEffect.Colored build() {
+            checkState(this.type != null, "ParticleType not set!");
+            checkState(this.color != null, "Particle color not set!");
             return new SpongeParticleEffect.Colored(this.type, this.motion, this.offset, this.color, this.count);
         }
 
@@ -69,15 +79,15 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
         public BuilderColorable reset() {
             super.reset();
             this.color = null;
-            return (BuilderColorable) super.reset();
+            return this;
         }
 
     }
 
-    public static class BuilderResizable extends AbstractParticleEffectBuilder<ResizableParticle, ParticleType.Resizable, ResizableParticle.Builder> implements ResizableParticle.Builder {
+    public static class BuilderResizable extends AbstractParticleEffectBuilder<ResizableParticle, ParticleType.Resizable, ResizableParticle.Builder>
+            implements ResizableParticle.Builder {
 
         private float size;
-
 
         @Override
         public BuilderResizable size(float size) {
@@ -87,50 +97,64 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
         }
 
         @Override
+        public BuilderResizable from(ResizableParticle value) {
+            super.from(value);
+            this.size = value.getSize();
+            return this;
+        }
+
+        @Override
         public SpongeParticleEffect.Resized build() {
+            checkState(this.type != null, "ParticleType not set!");
             return new SpongeParticleEffect.Resized(this.type, this.motion, this.offset, this.size, this.count);
         }
 
         @Override
         public BuilderResizable reset() {
+            super.reset();
             this.size = 0;
-            return (BuilderResizable) super.reset();
+            return this;
         }
 
     }
 
-    public static class BuilderNote extends AbstractParticleEffectBuilder<NoteParticle, ParticleType.Note, NoteParticle.Builder> implements NoteParticle.Builder {
+    public static class BuilderNote extends AbstractParticleEffectBuilder<NoteParticle, ParticleType.Note, NoteParticle.Builder>
+            implements NoteParticle.Builder {
 
         private NotePitch note;
 
         @Override
         public BuilderNote note(NotePitch note) {
-            checkNotNull(note, "The note has to scale between 0 and 24!");
+            checkNotNull(note, "The note pitch cannot be null!");
             this.note = note;
             return this;
         }
 
-
         @Override
-        public NoteParticle.Builder from(NoteParticle value) {
-            return super.from(value);
+        public BuilderNote from(NoteParticle value) {
+            super.from(value);
+            this.note = value.getNote();
+            return this;
         }
 
         @Override
         public SpongeParticleEffect.Note build() {
+            checkState(this.type != null, "ParticleType not set!");
+            checkState(this.note != null, "Note pitch not set!");
             return new SpongeParticleEffect.Note(this.type, this.motion, this.offset, this.note, this.count);
         }
 
-
         @Override
         public BuilderNote reset() {
+            super.reset();
             this.note = null;
-            return (BuilderNote) super.reset();
+            return this;
         }
 
     }
 
-    public static class BuilderMaterial extends AbstractParticleEffectBuilder<ItemParticle, ParticleType.Item, ItemParticle.Builder> implements ItemParticle.Builder {
+    public static class BuilderMaterial extends AbstractParticleEffectBuilder<ItemParticle, ParticleType.Item, ItemParticle.Builder>
+            implements ItemParticle.Builder {
 
         private ItemStackSnapshot item;
 
@@ -141,33 +165,51 @@ public class SpongeParticleEffectBuilder extends AbstractParticleEffectBuilder<P
             return this;
         }
 
+        @Override
+        public BuilderMaterial from(ItemParticle value) {
+            super.from(value);
+            this.item = value.getItem();
+            return this;
+        }
 
         @Override
         public SpongeParticleEffect.Materialized build() {
+            checkState(this.type != null, "ParticleType not set!");
+            checkState(this.item != null, "Item snapshot not set!");
             return new SpongeParticleEffect.Materialized(this.type, this.motion, this.offset, this.item, this.count);
         }
 
         @Override
         public BuilderMaterial reset() {
+            super.reset();
             this.item = null;
-            return (BuilderMaterial) super.reset();
+            return this;
         }
 
     }
 
-    public static class BuilderBlock extends AbstractParticleEffectBuilder<BlockParticle, ParticleType.Block, BlockParticle.Builder> implements BlockParticle.Builder {
+    public static class BuilderBlock extends AbstractParticleEffectBuilder<BlockParticle, ParticleType.Block, BlockParticle.Builder>
+            implements BlockParticle.Builder {
 
         private BlockState blockState;
 
         @Override
         public BuilderBlock block(BlockState blockState) {
-            this.blockState = checkNotNull(blockState);
+            this.blockState = checkNotNull(blockState, "BlockState cannot be null!");
+            return this;
+        }
+
+        @Override
+        public BuilderBlock from(BlockParticle value) {
+            super.from(value);
+            this.blockState = value.getBlockState();
             return this;
         }
 
         @Override
         public SpongeParticleEffect.Block build() {
-            checkState(this.blockState != null, "BlockState cannot be null!");
+            checkState(this.type != null, "ParticleType not set!");
+            checkState(this.blockState != null, "BlockState not set!");
             return new SpongeParticleEffect.Block(this.type, this.motion, this.offset, this.count, this.blockState);
         }
 

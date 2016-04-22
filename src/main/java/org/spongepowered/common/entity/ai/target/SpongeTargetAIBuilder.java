@@ -31,24 +31,28 @@ public abstract class SpongeTargetAIBuilder<A extends TargetAITask<A>, B extends
     protected boolean checkSight, onlyNearby;
     protected int searchDelay, interruptTargetUnseenTicks;
 
+    @SuppressWarnings("unchecked")
     @Override
     public B checkSight() {
         this.checkSight = true;
         return (B) this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public B onlyNearby() {
         this.onlyNearby = true;
         return (B) this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public B searchDelay(int delayTicks) {
         this.searchDelay = delayTicks;
         return (B) this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public B interruptTargetUnseenTicks(int unseenTicks) {
         this.interruptTargetUnseenTicks = unseenTicks;

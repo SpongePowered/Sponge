@@ -98,10 +98,10 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         return rand.nextInt(i);
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Completely changes the method to leverage the WeightedTable
+     * @reason Completely changes the method to leverage the WeightedTable
      * types. This method was almost completely rewritten.
      */
     @Overwrite

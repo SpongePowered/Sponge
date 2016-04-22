@@ -232,7 +232,7 @@ public final class LegacyTexts {
         }
 
         newComponent.setChatStyle(component.getChatStyle());
-        for (IChatComponent child : (List<IChatComponent>) component.getSiblings()) {
+        for (IChatComponent child : component.getSiblings()) {
             if (child instanceof ChatComponentText) {
                 child = parseComponent((ChatComponentText) child, code);
             } else {

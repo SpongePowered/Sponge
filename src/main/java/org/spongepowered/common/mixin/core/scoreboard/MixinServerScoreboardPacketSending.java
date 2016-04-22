@@ -74,13 +74,13 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     void sendScoreboard(EntityPlayerMP player) {
-        for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
+        for (ScorePlayerTeam team: this.getTeams()) {
             player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 0));
         }
 
-        for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
+        for (ScoreObjective objective: this.getScoreObjectives()) {
             player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 0));
-            for (Score score: (Collection<Score>) this.getSortedScores(objective)) {
+            for (Score score: this.getSortedScores(objective)) {
                 player.playerNetServerHandler.sendPacket(new S3CPacketUpdateScore(score));
             }
         }
@@ -103,80 +103,80 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
 
     @SuppressWarnings("unchecked")
     void removeTeams(EntityPlayerMP player) {
-        for (ScorePlayerTeam team: (Collection<ScorePlayerTeam>) this.getTeams()) {
+        for (ScorePlayerTeam team: this.getTeams()) {
             player.playerNetServerHandler.sendPacket(new S3EPacketTeams(team, 1));
         }
     }
 
     @SuppressWarnings("unchecked")
     void removeObjectives(EntityPlayerMP player) {
-        for (ScoreObjective objective: (Collection<ScoreObjective>) this.getScoreObjectives()) {
+        for (ScoreObjective objective: this.getScoreObjectives()) {
             player.playerNetServerHandler.sendPacket(new S3BPacketScoreboardObjective(objective, 1));
         }
     }
 
     @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onUpdateScoreValue(ServerConfigurationManager manager, Packet packet) {
+    public void onUpdateScoreValue(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS))
-    public boolean onUpdateScoreValue(Set set, Object object) {
+    @Redirect(method = "func_96536_a", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    public boolean onUpdateScoreValue(Set<ScoreObjective> set, Object object) {
         return true;
     }
 
     @Redirect(method = "func_96516_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveScore(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveScore(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "func_178820_a", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveScoreForObjective(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     //@Redirect(method = "setObjectiveInDisplaySlot", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    /*public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet packet) {
+    /*public void onSetObjectiveInDisplaySlot(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }*/
 
     @Redirect(method = "addPlayerToTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onAddPlayerToTeam(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "removePlayerFromTeam", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onRemovePlayerFromTeam(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onUpdateObjective(ServerConfigurationManager manager, Packet packet) {
+    public void onUpdateObjective(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SET_CONTAINS))
-    public boolean onUpdateObjective(Set set, Object object) {
+    @Redirect(method = "onObjectiveDisplayNameChanged", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    public boolean onUpdateObjective(Set<ScoreObjective> set, Object object) {
         return true;
     }
 
-    @Redirect(method = "onScoreObjectiveRemoved", at = @At(value = "INVOKE", target = SET_CONTAINS))
-    public boolean onSendDisplayPackets(Set set, Object object) {
+    @Redirect(method = "onScoreObjectiveRemoved", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    public boolean onSendDisplayPackets(Set<ScoreObjective> set, Object object) {
         return true;
     }
 
     @Redirect(method = "broadcastTeamCreated", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet packet) {
+    public void onBroadcastTeamCreated(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "sendTeamUpdate", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onSendTeamUpdate(ServerConfigurationManager manager, Packet packet) {
+    public void onSendTeamUpdate(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 
     @Redirect(method = "func_96513_c", at = @At(value = "INVOKE", target = SEND_PACKET_METHOD))
-    public void onRemoveTeam(ServerConfigurationManager manager, Packet packet) {
+    public void onRemoveTeam(ServerConfigurationManager manager, Packet<?> packet) {
         this.sendToPlayers(packet);
     }
 

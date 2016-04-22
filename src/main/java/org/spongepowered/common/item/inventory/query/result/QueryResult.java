@@ -49,7 +49,8 @@ public interface QueryResult<TInventory, TStack> extends Result<TInventory, TSta
         protected boolean isDelayedInit() {
             return true;
         }
-        
+
+        @SuppressWarnings("rawtypes")
         @Override
         protected void init(SlotProvider<TInventory, TStack> slots) {
             for (Lens<TInventory, TStack> result : this.resultSet) {

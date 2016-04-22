@@ -82,10 +82,10 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: overwritten to make use of populator parameters
+     * @reason overwritten to make use of populator parameters
      */
     @Override
     @Overwrite
