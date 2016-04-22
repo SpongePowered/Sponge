@@ -56,6 +56,13 @@ public abstract class MixinUserListBans extends UserList<com.mojang.authlib.Game
         return (UserListBansEntry) Sponge.getServiceManager().provideUnchecked(BanService.class).getBanFor((GameProfile) object).orElse(null);
     }
 
+    /**
+     * @author Aaron1011 - December 19th, 2015
+     * @reason Use Sponge's ban service that can be replaced by plugins to
+     * get the usernames of the users that are banned.
+     *
+     * @return The string array of banned user names
+     */
     @Overwrite
     @Override
     public String[] getKeys() {
@@ -83,6 +90,14 @@ public abstract class MixinUserListBans extends UserList<com.mojang.authlib.Game
         Sponge.getServiceManager().provideUnchecked(BanService.class).pardon((GameProfile) object);
     }
 
+    /**
+     * @author Aaron1011 - December 19th, 2015
+     * @reason Use Sponge's ban service that can be replaced by plugins to
+     * get the {@link GameProfile} of the potential username that is listed
+     * as being banned.
+     *
+     * @return The banned GameProfile
+     */
     @Overwrite
     public com.mojang.authlib.GameProfile getBannedProfile(String username) {
         for (Ban.Profile ban: Sponge.getServiceManager().provideUnchecked(BanService.class).getProfileBans()) {

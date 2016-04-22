@@ -140,7 +140,7 @@ class UserDiscoverer {
 
         // Add all whitelisted users
         UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
-        for (UserListWhitelistEntry entry : (Collection<UserListWhitelistEntry>) whiteList.getValues().values()) {
+        for (UserListWhitelistEntry entry : whiteList.getValues().values()) {
             profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
 
@@ -224,7 +224,7 @@ class UserDiscoverer {
         UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         UserListWhitelistEntry whiteListData = (UserListWhitelistEntry) whiteList.getEntry(new GameProfile(uniqueId, ""));
         if (whiteListData != null) {
-            profile = (GameProfile) whiteListData.value;
+            profile = whiteListData.value;
         }
         if (profile != null) {
             return create(profile);

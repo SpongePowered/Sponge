@@ -484,7 +484,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     /**
      * @author blood - April 5th, 2016
      *
-     * Due to all the changes we now do for this packet, it is much easier
+     * @reason Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
      * was made can be found in comments below.
      *

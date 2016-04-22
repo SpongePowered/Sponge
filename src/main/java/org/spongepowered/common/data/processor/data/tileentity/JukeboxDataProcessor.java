@@ -41,6 +41,7 @@ import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemDa
 import org.spongepowered.common.data.processor.common.AbstractTileEntitySingleDataProcessor;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.registry.type.ItemTypeRegistryModule;
 
 import java.util.Optional;
 
@@ -65,7 +66,7 @@ public class JukeboxDataProcessor extends
         }
         ((Jukebox) jukebox).insertRecord(stackSnapshot.createStack());
         block = jukebox.getWorld().getBlockState(jukebox.getPos());
-        return block.getBlock() instanceof BlockJukebox && (Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+        return block.getBlock() instanceof BlockJukebox && block.getValue(BlockJukebox.HAS_RECORD);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class JukeboxDataProcessor extends
     private boolean remove(BlockJukebox.TileEntityJukebox jukebox) {
         ((Jukebox) jukebox).ejectRecord();
         IBlockState block = jukebox.getWorld().getBlockState(jukebox.getPos());
-        return block.getBlock() instanceof BlockJukebox && !(Boolean) block.getValue(BlockJukebox.HAS_RECORD);
+        return block.getBlock() instanceof BlockJukebox && !block.getValue(BlockJukebox.HAS_RECORD);
     }
 
     @Override
@@ -105,12 +106,12 @@ public class JukeboxDataProcessor extends
 
     @Override
     protected Value<ItemStackSnapshot> constructValue(ItemStackSnapshot value) {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.NONE_SNAPSHOT, value);
     }
 
     @Override
     protected ImmutableValue<ItemStackSnapshot> constructImmutableValue(ItemStackSnapshot value) {
-        return new ImmutableSpongeValue<ItemStackSnapshot>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_ITEM, ItemTypeRegistryModule.NONE_SNAPSHOT, value);
     }
 
 }

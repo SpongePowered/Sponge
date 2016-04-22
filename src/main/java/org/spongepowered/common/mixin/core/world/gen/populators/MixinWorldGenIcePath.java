@@ -77,10 +77,10 @@ public abstract class MixinWorldGenIcePath implements IcePath {
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Overwritten to replace the path radius with one dependent on
+     * @reason Overwritten to replace the path radius with one dependent on
      * our variable amount.
      */
     @Overwrite

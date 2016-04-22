@@ -49,6 +49,7 @@ import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 public class PacketUtil {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     private static long lastInventoryOpenPacketTimeStamp = 0;
 
     @SuppressWarnings({"rawtypes", "unchecked"})

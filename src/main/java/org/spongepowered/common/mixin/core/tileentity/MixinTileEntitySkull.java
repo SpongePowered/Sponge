@@ -80,11 +80,11 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
     }
 
     /**
-     * Overwrite this method to overload to
+     * @author windy - March 13th, 2016
+     *
+     * @reason Overwrite this method to overload to
      * {@link #setPlayerProfile(GameProfile, boolean)}. This allows to
      * set the profile from {@link SkullUtils} without invoking another update.
-     *
-     * - windy 3/13/16
      *
      * @param mcProfile Minecraft GameProfile
      */
@@ -94,11 +94,10 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
     }
 
     /**
-     * Overwrite this method to delegate profile updating to the
+     * @author windy - March 13th, 2016
+     * @reason Overwrite this method to delegate profile updating to the
      * {@link GameProfileManager} so skull updating can be handled
      * asynchronously.
-     *
-     * - windy 3/13/16
      */
     @Overwrite
     private void updatePlayerProfile() {

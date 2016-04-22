@@ -35,13 +35,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 @Mixin(ServerStatusResponse.Players.class)
 public abstract class MixinServerStatusResponsePlayers implements ClientPingServerEvent.Response.Players {
 
     @Shadow private int onlinePlayerCount;
     @Shadow private int maxPlayers;
 
-    private List<GameProfile> profiles;
+    @Nullable private List<GameProfile> profiles;
 
     @Override
     public int getOnline() {
@@ -70,9 +72,16 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
             this.profiles = Lists.newArrayList();
         }
 
-        return (List) this.profiles; // This cast should be always save
+        return (List<org.spongepowered.api.profile.GameProfile>) (List<?>) this.profiles;
     }
 
+    /**
+     * @author minecrell - January 18th, 2015
+     * @reason Use our game profile objects in the collection
+     * instead of vanilla.
+     *
+     * @return The profiles
+     */
     @Overwrite
     public GameProfile[] getPlayers() {
         if (this.profiles == null) {
@@ -84,6 +93,12 @@ public abstract class MixinServerStatusResponsePlayers implements ClientPingServ
         return this.profiles.toArray(new GameProfile[this.profiles.size()]);
     }
 
+    /**
+     * @author minecrell - January 18th, 2015
+     * @reason Use our own field
+     *
+     * @param playersIn The players to set
+     */
     @Overwrite
     public void setPlayers(GameProfile[] playersIn) {
         if (this.profiles == null) {

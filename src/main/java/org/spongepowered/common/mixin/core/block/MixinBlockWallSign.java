@@ -46,7 +46,7 @@ import java.util.Optional;
 public abstract class MixinBlockWallSign extends MixinBlockSign {
 
     public ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final EnumFacing facing = (EnumFacing) blockState.getValue(BlockWallSign.FACING);
+        final EnumFacing facing = blockState.getValue(BlockWallSign.FACING);
         final Direction direction = DirectionResolver.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }

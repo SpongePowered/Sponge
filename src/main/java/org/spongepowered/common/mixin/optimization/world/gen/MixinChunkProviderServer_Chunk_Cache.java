@@ -30,6 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.LongCachedHashMap;
 
+@SuppressWarnings("rawtypes")
 @Mixin(ChunkProviderServer.class)
 public class MixinChunkProviderServer_Chunk_Cache {
 

@@ -81,6 +81,6 @@ public abstract class MixinBlockPortal extends MixinBlock {
 
     public ImmutableAxisData getAxisData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class,
-                DirectionChecker.convertAxisToSponge((EnumFacing.Axis) blockState.getValue(BlockPortal.AXIS)));
+                DirectionChecker.convertAxisToSponge(blockState.getValue(BlockPortal.AXIS)));
     }
 }

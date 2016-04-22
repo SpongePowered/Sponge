@@ -170,7 +170,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     private static DataContainer getViewFromCompound(NBTTagCompound compound) {
         checkNotNull(compound);
         DataContainer container = new MemoryDataContainer();
-        for (String key : (Set<String>) compound.getKeySet()) {
+        for (String key : compound.getKeySet()) {
             NBTBase base = compound.getTag(key);
             byte type = base.getId();
             setInternal(base, type, container, key); // gotta love recursion
@@ -227,7 +227,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             case NbtDataUtil.TAG_COMPOUND:
                 DataView internalView = view.createView(of('.', key));
                 NBTTagCompound compound = (NBTTagCompound) base;
-                for (String internalKey : (Set<String>) compound.getKeySet()) {
+                for (String internalKey : compound.getKeySet()) {
                     NBTBase internalBase = compound.getTag(internalKey);
                     byte internalType = internalBase.getId();
                     // Basically.... more recursion.

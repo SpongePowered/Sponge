@@ -64,11 +64,11 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     /**
      * @author bloodmc
-     *
-     * Purpose: As we do not create a new player object on respawn, we
+     * @reason As we do not create a new player object on respawn, we
      * need to update the client with changes if listener already
      * exists.
      */
+    @SuppressWarnings("unchecked")
     @Overwrite
     public void onCraftGuiOpened(ICrafting listener) {
         Container container = (Container) (Object) this;
@@ -87,8 +87,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
 
     /**
      * @author bloodmc
-     *
-     * Purpose: All player inventory changes that need to be synced to
+     * @reason All player inventory changes that need to be synced to
      * client flow through this method. Overwrite is used as no mod
      * should be touching this method.
      *

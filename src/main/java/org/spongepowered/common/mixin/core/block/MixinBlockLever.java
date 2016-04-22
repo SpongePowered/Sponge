@@ -67,12 +67,12 @@ public abstract class MixinBlockLever extends MixinBlock {
         }
         if (manipulator instanceof ImmutableDirectionalData) {
             final Direction dir = ((ImmutableDirectionalData) manipulator).direction().get();
-            final Axis axis = this.getAxisFromOrientation((BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING));
+            final Axis axis = this.getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
             return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
         }
         if (manipulator instanceof ImmutableAxisData) {
             final Axis axis = ((ImmutableAxisData) manipulator).axis().get();
-            final Direction dir = DirectionResolver.getFor((BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING));
+            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
             return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
         }
         return super.getStateWithData(blockState, manipulator);
@@ -85,28 +85,28 @@ public abstract class MixinBlockLever extends MixinBlock {
         }
         if (key.equals(Keys.DIRECTION)) {
             final Direction dir = (Direction) value;
-            final Axis axis = this.getAxisFromOrientation((BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING));
+            final Axis axis = this.getAxisFromOrientation(blockState.getValue(BlockLever.FACING));
             return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
         }
         if (key.equals(Keys.AXIS)) {
             final Axis axis = (Axis) value;
-            final Direction dir = DirectionResolver.getFor((BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING));
+            final Direction dir = DirectionResolver.getFor(blockState.getValue(BlockLever.FACING));
             return Optional.of((BlockState) blockState.withProperty(BlockLever.FACING, DirectionResolver.getAsOrientation(dir, axis)));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockLever.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockLever.POWERED));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final BlockLever.EnumOrientation intDir = (BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING);
+        final BlockLever.EnumOrientation intDir = blockState.getValue(BlockLever.FACING);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, DirectionResolver.getFor(intDir));
     }
 
     public ImmutableAxisData getAxisData(IBlockState blockState) {
-        final BlockLever.EnumOrientation orientation = (BlockLever.EnumOrientation) blockState.getValue(BlockLever.FACING);
+        final BlockLever.EnumOrientation orientation = blockState.getValue(BlockLever.FACING);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAxisData.class, this.getAxisFromOrientation(orientation));
     }
 

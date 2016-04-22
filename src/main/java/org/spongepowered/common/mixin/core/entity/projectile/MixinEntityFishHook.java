@@ -105,8 +105,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
 
     /**
      * @author Aaron1011 - February 6th, 2015
-     *
-     * Purpose: This needs to handle for both cases where a fish and/or an entity is being caught.
+     * @reason This needs to handle for both cases where a fish and/or an entity is being caught.
      * There's no real good way to do this with an injection.
      */
 

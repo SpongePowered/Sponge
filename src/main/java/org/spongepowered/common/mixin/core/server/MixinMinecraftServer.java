@@ -327,6 +327,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         ((MinecraftServer) (Object) this).getPlayerProfileCache().save();
     }
 
+    /**
+     * @author Zidane - June 15th, 2015
+     * @author blood - December 23rd, 2015
+     *
+     * @reason Add multiworld support
+     */
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
         StaticMixinHelper.convertingMapFormat = true;
@@ -562,6 +568,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
+    /**
+     * @author Zidane - June 15th, 2015
+     * @author blood - December 23rd, 2015
+     *
+     * @reason Add multiworld support
+     */
     @Overwrite
     protected void initialWorldChunkLoad() {
         final List<WorldServer> worldServers = new LinkedList<>(Arrays.asList(DimensionManager.getWorlds()));
@@ -981,6 +993,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
     }
 
+    /**
+     * @author Zidane - June 13th, 2015
+     *
+     * @reason Use our DimensionManager to get dimensions since
+     * we support multiple dimensions with the same dimension type.
+     *
+     * @param dim The dimension id
+     * @return The world server
+     */
     @Overwrite
     public WorldServer worldServerForDimension(int dim) {
         WorldServer ret = DimensionManager.getWorldFromDimId(dim);

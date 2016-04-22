@@ -66,6 +66,15 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
         }
     }
 
+    /**
+     * @author minecrell - January 18th, 2015
+     * @reason Implements our Ping Status Response API for throwing
+     * events and delegating to plugins.
+     *
+     * @param ctx The context
+     * @param msg The message
+     * @throws Exception For reasons unexplained
+     */
     @Override
     @Overwrite
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {

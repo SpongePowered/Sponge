@@ -46,7 +46,7 @@ import java.util.Optional;
 public abstract class MixinBlockBannerHanging extends MixinBlockBanner {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
-        final EnumFacing facing = (EnumFacing) blockState.getValue(BlockBannerHanging.FACING);
+        final EnumFacing facing = blockState.getValue(BlockBannerHanging.FACING);
         final Direction direction = DirectionResolver.getFor(facing);
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class, direction);
     }

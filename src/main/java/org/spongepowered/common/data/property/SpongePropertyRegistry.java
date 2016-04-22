@@ -58,7 +58,7 @@ public class SpongePropertyRegistry implements PropertyRegistry {
         return INSTANCE;
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void completeRegistration() {
         allowRegistrations = false;
         final SpongePropertyRegistry registry = getInstance();

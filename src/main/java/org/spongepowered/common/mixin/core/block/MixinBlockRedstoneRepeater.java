@@ -74,8 +74,7 @@ public abstract class MixinBlockRedstoneRepeater extends MixinBlock {
     }
 
     private ImmutableDelayableData getDelayableData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class,
-                (Integer) blockState.getValue(BlockRedstoneRepeater.DELAY));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDelayableData.class, blockState.getValue(BlockRedstoneRepeater.DELAY));
     }
 
 }

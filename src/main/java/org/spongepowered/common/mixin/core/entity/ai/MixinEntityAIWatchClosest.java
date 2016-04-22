@@ -42,7 +42,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("unchecked")
+@SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(EntityAIWatchClosest.class)
 public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements WatchClosestAITask {
 
@@ -54,10 +54,10 @@ public abstract class MixinEntityAIWatchClosest extends EntityAIBase implements 
 
     @Override
     public Class<? extends Entity> getWatchedClass() {
-        if (watchedType == null) {
-            watchedType = SpongeImpl.getRegistry().getTranslated(watchedClass, EntityType.class);
+        if (this.watchedType == null) {
+            this.watchedType = SpongeImpl.getRegistry().getTranslated(this.watchedClass, EntityType.class);
         }
-        return watchedClass;
+        return this.watchedClass;
     }
 
     @Override

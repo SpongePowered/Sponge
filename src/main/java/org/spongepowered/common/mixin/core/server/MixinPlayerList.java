@@ -386,6 +386,18 @@ public abstract class MixinPlayerList {
     // getPlayerRespawnLocation and recreatePlayerEntity
     private boolean tempIsBedSpawn = false;
 
+    /**
+     * @author Zidane - June 13th, 2015
+     * @author simon816 - June 24th, 2015
+     *
+     * @reason - Direct respawning players to use Sponge events
+     * and process appropriately.
+     *
+     * @param playerIn The player being respawned/created
+     * @param targetDimension The target dimension
+     * @param conqueredEnd Whether the end was conquered
+     * @return The new player
+     */
     @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {

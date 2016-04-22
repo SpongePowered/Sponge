@@ -412,6 +412,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
 
+    /**
+     * @author blood
+     * @reason cause tracking
+     *
+     * @param pos The position to set
+     * @param state The state to set
+     * @return The changed state
+     */
     @Nullable
     @Overwrite
     public IBlockState setBlockState(BlockPos pos, IBlockState state) {
@@ -655,7 +663,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
-        for (ClassInheritanceMultiMap entityClassMap : this.entityLists) {
+        for (ClassInheritanceMultiMap<Entity> entityClassMap : this.entityLists) {
             for (Object entity : entityClassMap) {
                 if (filter.test((org.spongepowered.api.entity.Entity) entity)) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);

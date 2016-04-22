@@ -102,7 +102,7 @@ public interface MixinIBlockState extends IBlockState, BlockState {
         return Optional.empty();
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     default Optional<BlockState> withTrait(BlockTrait<?> trait, Object value) {
         if (value instanceof String) {

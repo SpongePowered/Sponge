@@ -26,6 +26,8 @@ package org.spongepowered.common.item.inventory.util;
 
 public class NativeTradeOfferException extends NativeException {
 
+    private static final long serialVersionUID = 1203356201064756155L;
+
     public NativeTradeOfferException() {
     }
 

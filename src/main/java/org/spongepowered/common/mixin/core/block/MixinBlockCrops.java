@@ -82,7 +82,7 @@ public abstract class MixinBlockCrops extends MixinBlock {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(getAgeProperty()), 0, func_185526_g());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, func_185526_g());
     }
 
 }

@@ -35,9 +35,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Date;
 
 @Mixin(UserListBansEntry.class)
-public abstract class MixinUserBanEntry extends UserListEntryBan implements Ban.Profile {
+public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
-    public MixinUserBanEntry(Object valueIn, Date startDate, String banner, Date endDate, String banReason) {
+    public MixinUserBanEntry(com.mojang.authlib.GameProfile valueIn, Date startDate, String banner, Date endDate, String banReason) {
         super(valueIn, startDate, banner, endDate, banReason);
     }
 
@@ -46,6 +46,7 @@ public abstract class MixinUserBanEntry extends UserListEntryBan implements Ban.
         return BanTypes.PROFILE;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public GameProfile getProfile() {
         return (GameProfile) this.getValue();

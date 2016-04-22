@@ -42,17 +42,16 @@ import java.util.function.Function;
  *
  * Do not wrap the backing map with Collections.synchronizedMap.
  *
- * @param <K> Key
  * @param <V> Value
  */
 public class LoadingIntMap<V> extends TIntObjectHashMap<V> {
 
+    private static final long serialVersionUID = 4788110182547553543L;
     private final Function<Integer, V> loader;
 
     /**
      * Initializes an auto loading map using specified loader and backing map
      *
-     * @param backingMap
      * @param loader
      */
     public LoadingIntMap(Function<Integer, V> loader) {

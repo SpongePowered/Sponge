@@ -172,7 +172,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
      * @param localfile The local file
      * @return True if the file exists
      */
-    @Redirect(method = READ_PLAYER_DATA, at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z"))
+    @Redirect(method = READ_PLAYER_DATA, at = @At(value = "INVOKE", target = "Ljava/io/File;isFile()Z", remap = false))
     private boolean grabfile(File localfile) {
         final boolean isFile = localfile.isFile();
         this.file = isFile ? localfile.toPath() : null;

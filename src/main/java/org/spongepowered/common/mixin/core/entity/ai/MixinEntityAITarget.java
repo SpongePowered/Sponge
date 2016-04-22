@@ -40,9 +40,10 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
 
     @Override
     public boolean shouldCheckSight() {
-        return shouldCheckSight;
+        return this.shouldCheckSight;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public A setCheckSight(boolean checkSight) {
         this.shouldCheckSight = checkSight;
@@ -51,9 +52,10 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
 
     @Override
     public boolean onlyNearby() {
-        return nearbyOnly;
+        return this.nearbyOnly;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public A setOnlyNearby(boolean nearby) {
         this.nearbyOnly = nearby;
@@ -62,9 +64,10 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
 
     @Override
     public int getSearchStatus() {
-        return targetSearchStatus;
+        return this.targetSearchStatus;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public A setSearchStatus(int status) {
         this.targetSearchStatus = status;
@@ -73,9 +76,10 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
 
     @Override
     public int getSearchDelay() {
-        return targetSearchDelay;
+        return this.targetSearchDelay;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public A setSearchDelay(int delay) {
         this.targetSearchDelay = delay;
@@ -84,9 +88,10 @@ public abstract class MixinEntityAITarget<A extends TargetAITask<A>> extends Mix
 
     @Override
     public int getInterruptIfTargetUnseenTicks() {
-        return targetUnseenTicks;
+        return this.targetUnseenTicks;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public A setInterruptIfTargetUnseenTicks(int ticks) {
         this.targetUnseenTicks = ticks;

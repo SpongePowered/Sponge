@@ -118,7 +118,7 @@ public abstract class MixinBlockLeaves extends MixinBlock {
     }
 
     private ImmutableDecayableData getIsDecayableFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, (Boolean) blockState.getValue(BlockLeaves.DECAYABLE));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDecayableData.class, blockState.getValue(BlockLeaves.DECAYABLE));
     }
 
     @Override

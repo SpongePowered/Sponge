@@ -93,14 +93,14 @@ public abstract class MixinBlockFenceGate extends MixinBlock {
     }
 
     private ImmutableOpenData getIsOpenFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, (Boolean) blockState.getValue(BlockFenceGate.OPEN));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeOpenData.class, blockState.getValue(BlockFenceGate.OPEN));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockFenceGate.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockFenceGate.POWERED));
     }
 
     private ImmutableInWallData getInWallFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, (Boolean) blockState.getValue(BlockFenceGate.IN_WALL));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeInWallData.class, blockState.getValue(BlockFenceGate.IN_WALL));
     }
 }

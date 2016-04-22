@@ -50,6 +50,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
 
     private List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
 
+    @SuppressWarnings("rawtypes")
     @Override
     public DataTransactionResult offerCustom(DataManipulator<?, ?> manipulator, MergeFunction function) {
         @Nullable DataManipulator<?, ?> existingManipulator = null;
@@ -132,7 +133,7 @@ public abstract class MixinCustomDataHolder implements IMixinCustomDataHolder {
         return this.manipulators.stream().map(DataManipulator::copy).collect(Collectors.toList());
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public <E> DataTransactionResult offerCustom(Key<? extends BaseValue<E>> key, E value) {
         for (DataManipulator<?, ?> manipulator : this.manipulators) {

@@ -77,7 +77,7 @@ public abstract class MixinBlockNetherWart extends MixinBlock {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockNetherWart.AGE), 0, 3);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockNetherWart.AGE), 0, 3);
     }
 
 }

@@ -233,7 +233,7 @@ public final class LegacyTexts {
         }
 
         newComponent.setStyle(component.getStyle());
-        for (ITextComponent child : (List<ITextComponent>) component.getSiblings()) {
+        for (ITextComponent child : component.getSiblings()) {
             if (child instanceof TextComponentString) {
                 child = parseComponent((TextComponentString) child, code);
             } else {
