@@ -22,34 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.gui.window.BookWindow;
+import org.spongepowered.api.text.BookView;
+import org.spongepowered.common.util.BookFaker;
 
-import javax.annotation.Nullable;
+public class SpongeBookWindow extends AbstractSpongeWindow implements BookWindow {
 
-public interface IMixinEntityPlayerMP {
+    private static final BookView EMPTY_BOOK = BookView.builder().build();
 
-    void reset();
+    private BookView bookView;
 
-    default boolean usesCustomClient() {
-        return false;
+    @Override
+    protected boolean show() {
+        BookFaker.fakeBookView(getBookView(), (Player) this.player);
+        return true;
     }
 
-    User getUserObject();
+    @Override
+    public BookView getBookView() {
+        return this.bookView != null ? this.bookView : EMPTY_BOOK;
+    }
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+    @Override
+    public void setBookView(BookView view) {
+        this.bookView = view;
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public static class Builder extends SpongeWindowBuilder<BookWindow, BookWindow.Builder> implements BookWindow.Builder {
 
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void informGuiClosed();
-
-    int incrementWindowId();
+        @Override
+        public BookWindow build() {
+            return new SpongeBookWindow();
+        }
+    }
 
 }

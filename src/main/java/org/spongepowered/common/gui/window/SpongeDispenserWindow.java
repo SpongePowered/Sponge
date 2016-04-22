@@ -22,34 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntityDispenser;
+import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import org.spongepowered.api.gui.window.DispenserWindow;
 
-import javax.annotation.Nullable;
+public class SpongeDispenserWindow extends AbstractSpongeTileContainerWindow<TileEntityDispenser, Dispenser> implements DispenserWindow {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    public SpongeDispenserWindow() {
+        super(TileEntityDispenser.class);
     }
 
-    User getUserObject();
+    @Override
+    protected TileEntityDispenser createVirtualTile() {
+        return new TileEntityDispenser() {
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+            @Override
+            public boolean isUseableByPlayer(EntityPlayer player) {
+                return player == SpongeDispenserWindow.this.player;
+            }
+        };
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public static class Builder extends SpongeWindowBuilder<DispenserWindow, DispenserWindow.Builder> implements DispenserWindow.Builder {
 
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void informGuiClosed();
-
-    int incrementWindowId();
+        @Override
+        public DispenserWindow build() {
+            return new SpongeDispenserWindow();
+        }
+    }
 
 }

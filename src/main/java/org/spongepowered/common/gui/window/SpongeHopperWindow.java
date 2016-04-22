@@ -22,34 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntityHopper;
+import org.spongepowered.api.block.tileentity.carrier.Hopper;
+import org.spongepowered.api.gui.window.HopperWindow;
 
-import javax.annotation.Nullable;
+public class SpongeHopperWindow extends AbstractSpongeTileContainerWindow<TileEntityHopper, Hopper> implements HopperWindow {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    public SpongeHopperWindow() {
+        super(TileEntityHopper.class);
     }
 
-    User getUserObject();
+    @Override
+    protected TileEntityHopper createVirtualTile() {
+        return new TileEntityHopper() {
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+            @Override
+            public boolean isUseableByPlayer(EntityPlayer player) {
+                return player == SpongeHopperWindow.this.player;
+            }
+        };
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public static class Builder extends SpongeWindowBuilder<HopperWindow, HopperWindow.Builder> implements HopperWindow.Builder {
 
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void informGuiClosed();
-
-    int incrementWindowId();
+        @Override
+        public HopperWindow build() {
+            return new SpongeHopperWindow();
+        }
+    }
 
 }

@@ -22,34 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntityDropper;
+import org.spongepowered.api.block.tileentity.carrier.Dropper;
+import org.spongepowered.api.gui.window.DropperWindow;
 
-import javax.annotation.Nullable;
+public class SpongeDropperWindow extends AbstractSpongeTileContainerWindow<TileEntityDropper, Dropper> implements DropperWindow {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    public SpongeDropperWindow() {
+        super(TileEntityDropper.class);
     }
 
-    User getUserObject();
+    @Override
+    protected TileEntityDropper createVirtualTile() {
+        return new TileEntityDropper() {
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+            @Override
+            public boolean isUseableByPlayer(EntityPlayer player) {
+                return player == SpongeDropperWindow.this.player;
+            }
+        };
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public static class Builder extends SpongeWindowBuilder<DropperWindow, DropperWindow.Builder> implements DropperWindow.Builder {
 
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void informGuiClosed();
-
-    int incrementWindowId();
+        @Override
+        public DropperWindow build() {
+            return new SpongeDropperWindow();
+        }
+    }
 
 }
