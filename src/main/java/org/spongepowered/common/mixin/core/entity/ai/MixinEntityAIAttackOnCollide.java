@@ -32,13 +32,14 @@ import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(EntityAIAttackOnCollide.class)
 public abstract class MixinEntityAIAttackOnCollide implements AttackLivingAITask {
-    @Shadow Class classTarget;
+    @SuppressWarnings("rawtypes") @Shadow Class classTarget;
     @Shadow double speedTowardsTarget;
     @Shadow boolean longMemory;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Class<? extends Living> getTargetClass() {
-        return (Class<? extends Living>) classTarget;
+        return (Class<? extends Living>) this.classTarget;
     }
 
     @Override
@@ -49,7 +50,7 @@ public abstract class MixinEntityAIAttackOnCollide implements AttackLivingAITask
 
     @Override
     public double getSpeed() {
-        return speedTowardsTarget;
+        return this.speedTowardsTarget;
     }
 
     @Override
@@ -60,7 +61,7 @@ public abstract class MixinEntityAIAttackOnCollide implements AttackLivingAITask
 
     @Override
     public boolean hasLongMemory() {
-        return longMemory;
+        return this.longMemory;
     }
 
     @Override

@@ -292,7 +292,7 @@ public class SpongeCommandManager implements CommandManager {
             Text.Builder excBuilder;
             if (thr instanceof TextMessageException) {
                 Text text = ((TextMessageException) thr).getText();
-                excBuilder = text == null ? Text.builder("null") : text.builder();
+                excBuilder = text == null ? Text.builder("null") : Text.builder();
             } else {
                 excBuilder = Text.builder(String.valueOf(thr.getMessage()));
             }

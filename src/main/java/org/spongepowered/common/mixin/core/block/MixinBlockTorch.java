@@ -84,11 +84,11 @@ public abstract class MixinBlockTorch extends MixinBlock {
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class,
-                (EnumFacing) blockState.getValue(BlockTorch.FACING) != EnumFacing.UP);
+                blockState.getValue(BlockTorch.FACING) != EnumFacing.UP);
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockTorch.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockTorch.FACING)));
     }
 }

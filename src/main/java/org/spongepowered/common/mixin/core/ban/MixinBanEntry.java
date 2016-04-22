@@ -30,8 +30,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
-import org.spongepowered.api.util.TextMessageException;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -46,10 +44,11 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
 
+@SuppressWarnings("rawtypes")
 @Mixin(BanEntry.class)
-public abstract class MixinBanEntry extends UserListEntry implements Ban {
+public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
 
-    public MixinBanEntry(Object p_i1146_1_) {
+    public MixinBanEntry(T p_i1146_1_) {
         super(p_i1146_1_);
     }
 
@@ -78,7 +77,7 @@ public abstract class MixinBanEntry extends UserListEntry implements Ban {
         if (this.bannedBy.equals("Server")) { // There could be a user called Server, but of course Mojang doesn't care...
             this.commandSource = Optional.of(SpongeImpl.getGame().getServer().getConsole());
         } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
-            this.commandSource = Optional.of((CommandSource) user.get());
+            this.commandSource = Optional.of(user.get());
         }
     }
 

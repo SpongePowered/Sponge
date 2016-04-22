@@ -55,9 +55,8 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     }
 
     /**
-     * @author Zidane
-     *
-     * Purpose: At the time of writing, this turns off the default Minecraft Server GUI that exists in non-headless environment.
+     * @author Zidane - April 20th, 2015
+     * @reason At the time of writing, this turns off the default Minecraft Server GUI that exists in non-headless environment.
      * Reasoning: The GUI console can easily consume a sizable chunk of each CPU core (20% or more is common) on the computer being ran on and has
      * been proven to cause quite a bit of latency issues.
      */
@@ -73,9 +72,9 @@ public abstract class MixinDedicatedServer extends MinecraftServer {
     }
 
     /**
-     * @author zml
+     * @author zml - March 9th, 2016
      *
-     * Purpose: Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
+     * @reason Change spawn protection to take advantage of Sponge permissions. Rather than affecting only the default world like vanilla, this
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Override

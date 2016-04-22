@@ -143,7 +143,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      * @param base
      * @return
      */
-    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/List;add(Ljava/lang/Object;)Z"))
+    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(List<EntityAITasks.EntityAITaskEntry> list, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {
@@ -185,6 +185,12 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         this.taskEntries.clear();
     }
 
+    /**
+     * @author Zidane - November 30th, 2015
+     * @reason Integrate Sponge events into the AI task removal.
+     *
+     * @param aiBase
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public void removeTask(EntityAIBase aiBase) {
@@ -194,11 +200,14 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             final EntityAITasks.EntityAITaskEntry entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
             final EntityAIBase otherAiBase = entityaitaskentry.action;
 
+            // Sponge Start - check equals, not instance equality
+            // if (entityaibase == task) {
             if (otherAiBase.equals(aiBase)) {
                 final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
                     (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
+                    // Sponge End
                     if (this.executingTaskEntries.contains(entityaitaskentry)) {
                         otherAiBase.resetTask();
                         this.executingTaskEntries.remove(entityaitaskentry);
@@ -211,12 +220,12 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     /**
-     * @author Zidane
-     * Reason: Use SpongeAPI's method check instead of exposing mutex bits
+     * @author Zidane - February 22, 2016
+     * @reason Use SpongeAPI's method check instead of exposing mutex bits
      *
-     * @param taskEntry1
-     * @param taskEntry2
-     * @return
+     * @param taskEntry1 The task entry to check compatibility
+     * @param taskEntry2 The second entry to check compatibility
+     * @return Whehter the two tasks are compatible or "can run at the same time"
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite

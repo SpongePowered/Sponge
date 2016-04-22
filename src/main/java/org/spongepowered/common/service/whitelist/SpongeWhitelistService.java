@@ -45,7 +45,7 @@ public class SpongeWhitelistService implements WhitelistService {
     public Collection<GameProfile> getWhitelistedProfiles() {
         List<GameProfile> profiles = new ArrayList<>();
 
-        for (UserListWhitelistEntry entry: ((Collection<UserListWhitelistEntry>) MinecraftServer.getServer().getConfigurationManager().whiteListedPlayers.getValues().values())) {
+        for (UserListWhitelistEntry entry: MinecraftServer.getServer().getConfigurationManager().whiteListedPlayers.getValues().values()) {
             profiles.add((GameProfile) entry.getValue());
         }
 

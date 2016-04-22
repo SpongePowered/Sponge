@@ -70,7 +70,8 @@ public abstract class MixinItemInWorldManager {
     @Shadow public abstract boolean tryUseItem(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack);
 
     /**
-     * Activate the clicked on block, otherwise use the held item.
+     * @author blood - April 8th, 2016
+     * @reason Activate the clicked on block, otherwise use the held item.
      */
     @Overwrite
     public boolean activateBlockOrUseItem(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, BlockPos pos, EnumFacing side, float offsetX,
@@ -134,7 +135,7 @@ public abstract class MixinItemInWorldManager {
                     IBlockState iblockstate = worldIn.getBlockState(pos);
                     result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, side, offsetX, offsetY, offsetZ);
                 } else {
-                    thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(theWorld, pos));
+                    this.thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.theWorld, pos));
                     result = event.getUseItemResult() != Tristate.TRUE;
                 }
             }

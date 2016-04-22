@@ -299,8 +299,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - April 8th, 2016
-     *
-     * Rewrites the attackTargetEntityWithCurrentItem to throw an {@link AttackEntityEvent} prior
+     * @reason Rewrites the attackTargetEntityWithCurrentItem to throw an {@link AttackEntityEvent} prior
      * to the ensuing {@link DamageEntityEvent}. This should cover all cases where players are
      * attacking entities and those entities override {@link EntityLivingBase#attackEntityFrom(DamageSource, float)}
      * and effectively bypass our damage event hooks.

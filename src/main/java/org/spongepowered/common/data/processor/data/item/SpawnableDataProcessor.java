@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.processor.data.item;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
@@ -50,10 +51,11 @@ public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<Enti
         super(input -> input.getItem().equals(Items.spawn_egg), Keys.SPAWNABLE_ENTITY_TYPE);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final String name = (String) EntityList.classToStringMapping.get(value.getEntityClass());
-        final int id = (int) EntityList.stringToIDMapping.get(name);
+        final String name = EntityList.classToStringMapping.get((Class<? extends Entity>) value.getEntityClass());
+        final int id = EntityList.stringToIDMapping.get(name);
         if (EntityList.entityEggs.containsKey(id)) {
             itemStack.setItemDamage(id);
             return true;

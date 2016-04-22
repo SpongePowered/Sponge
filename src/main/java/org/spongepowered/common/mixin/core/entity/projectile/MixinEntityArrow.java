@@ -107,7 +107,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
      */
     @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 3, shift = At.Shift.AFTER),
             locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true, require = 0)
-    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3 vecA, Vec3 vecB, MovingObjectPosition hitResult, Entity entity, List aabbs, double d0) {
+    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3 vecA, Vec3 vecB, MovingObjectPosition hitResult, Entity entity, List<Entity> aabbs, double d0) {
         this.arrowImpact(ci, hitResult);
     }
 

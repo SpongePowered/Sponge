@@ -115,6 +115,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return new SpongeTranslation(getUnlocalizedName() + ".name");
     }
 
+    /**
+     * @author - unknown - Before April 2015
+     * @reason Use our API defined value for whether this block
+     * is to be ticked randomly.
+     *
+     * @return True if this block is to be ticked randomly
+     */
     @Override
     @Overwrite
     public boolean getTickRandomly() {

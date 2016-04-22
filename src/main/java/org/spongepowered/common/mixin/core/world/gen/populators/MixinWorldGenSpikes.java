@@ -80,9 +80,9 @@ public class MixinWorldGenSpikes implements EnderCrystalPlatform {
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015 TODO I believe this can be done
-     * purely with injections as no code needs to be removed. Or possible
+    /**
+     * @author Deamon - December 12th, 2015 TODO I believe this can be done
+     * @reason purely with injections as no code needs to be removed. Or possible
      * redirects
      */
     @Overwrite

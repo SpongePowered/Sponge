@@ -34,6 +34,8 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 
 import java.util.Locale;
 
+import javax.annotation.Nullable;
+
 public class SpongeEntityType extends SpongeCatalogType.Translatable implements EntityType {
 
     public static final EntityType UNKNOWN = new EntityType() {
@@ -82,14 +84,14 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
-        String translationName = (String) EntityList.classToStringMapping.get(clazz);
+        String translationName = EntityList.classToStringMapping.get(clazz);
         if (translationName == null) {
             translationName = "generic";
         }
         this.translation = new SpongeTranslation("entity." + translationName + ".name");
     }
 
-    private static Translation check(Translation translation) {
+    private static Translation check(@Nullable Translation translation) {
         if (translation == null) {
             return UNKNOWN.getTranslation();
         } else {

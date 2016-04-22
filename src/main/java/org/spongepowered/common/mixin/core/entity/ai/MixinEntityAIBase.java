@@ -41,6 +41,8 @@ import org.spongepowered.common.registry.type.entity.AITaskTypeModule;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityAIBase.class)
 @Implements(value = @Interface(iface = AITask.class, prefix = "task$"))
 public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
@@ -52,20 +54,20 @@ public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
     public void assignAITaskType(CallbackInfo ci) {
         final Optional<AITaskType> optAiTaskType = AITaskTypeModule.getInstance().getByAIClass(getClass());
         if (optAiTaskType.isPresent()) {
-            type = optAiTaskType.get();
+            this.type = optAiTaskType.get();
         }
     }
 
     public AITaskType task$getType() {
-        return type;
+        return this.type;
     }
 
     public Optional<Goal<?>> task$getGoal() {
-        return owner;
+        return this.owner;
     }
 
     public boolean task$canRunConcurrentWith(AITask<?> other) {
-        return (mutexBits & ((EntityAIBase) other).getMutexBits()) == 0;
+        return (this.mutexBits & ((EntityAIBase) other).getMutexBits()) == 0;
     }
 
     public boolean task$canBeInterrupted() {
@@ -83,14 +85,14 @@ public abstract class MixinEntityAIBase implements IMixinEntityAIBase {
     }
 
     @Override
-    public void setGoal(Goal owner) {
+    public void setGoal(@Nullable Goal<?> owner) {
         this.owner = Optional.ofNullable(owner);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper(this)
-                .addValue(type)
+                .addValue(this.type)
                 .addValue(task$getGoal())
                 .toString();
     }

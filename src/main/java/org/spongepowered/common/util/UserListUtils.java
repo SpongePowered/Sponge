@@ -31,7 +31,7 @@ import java.io.IOException;
 
 public class UserListUtils {
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void addEntry(UserList list, UserListEntry entry) {
         list.getValues().put(list.getObjectKey(entry.getValue()), entry);
 
@@ -43,6 +43,7 @@ public class UserListUtils {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static void removeEntry(UserList list, Object object) {
         list.getValues().remove(list.getObjectKey(object));
 

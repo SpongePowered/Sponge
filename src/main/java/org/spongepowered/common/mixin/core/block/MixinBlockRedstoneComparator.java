@@ -91,7 +91,6 @@ public abstract class MixinBlockRedstoneComparator extends MixinBlockDirectional
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class,
-                (Boolean) blockState.getValue(BlockRedstoneComparator.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockRedstoneComparator.POWERED));
     }
 }

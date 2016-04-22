@@ -54,6 +54,11 @@ public class SpongeTransactionType implements TransactionType {
     }
 
     @Override
+    public int hashCode() {
+        return java.util.Objects.hash(this.id);
+    }
+
+    @Override
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("id", this.getId())

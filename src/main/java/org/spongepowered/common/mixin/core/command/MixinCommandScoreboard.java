@@ -60,14 +60,14 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
 
     private String realName;
 
-    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "joinTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0, remap = false))
     public Object onGetUUIDJoin(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);
         return entity;
     }
 
-    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0))
+    @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = ITERATOR_NEXT, ordinal = 0, remap = false))
     private Object onGetUUIDLeave(Iterator<Entity> iterator) {
         Entity entity = iterator.next();
         this.onGetUUID(entity);

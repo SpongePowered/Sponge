@@ -100,6 +100,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk implements Chunk, IMixinChunk {
@@ -140,7 +142,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
 
-    @Shadow public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
+    @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
     @Shadow protected abstract void relightBlock(int x, int y, int z);
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
@@ -421,6 +423,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.populateCause;
     }
 
+    /**
+     * @author blood
+     * @reason cause tracking
+     *
+     * @param pos The position to set
+     * @param state The state to set
+     * @return The changed state
+     */
     @Overwrite
     public IBlockState setBlockState(BlockPos pos, IBlockState state) {
         IBlockState iblockstate1 = this.getBlockState(pos);
@@ -785,7 +795,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.spawnEntity(entity, cause);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities() {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
@@ -798,7 +808,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
-        for (ClassInheritanceMultiMap entityClassMap : this.entityLists) {
+        for (ClassInheritanceMultiMap<Entity> entityClassMap : this.entityLists) {
             for (Object entity : entityClassMap) {
                 if (filter.test((org.spongepowered.api.entity.Entity) entity)) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);

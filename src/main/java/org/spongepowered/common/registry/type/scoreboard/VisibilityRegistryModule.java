@@ -56,9 +56,9 @@ public final class VisibilityRegistryModule implements CatalogRegistryModule<Vis
 
     @Override
     public void registerDefaults() {
-        this.visibilityMappings.put("all", (Visibility) (Object) Team.EnumVisible.ALWAYS);
-        this.visibilityMappings.put("own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
-        this.visibilityMappings.put("other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
-        this.visibilityMappings.put("none", (Visibility) (Object) Team.EnumVisible.NEVER);
+        visibilityMappings.put("all", (Visibility) (Object) Team.EnumVisible.ALWAYS);
+        visibilityMappings.put("own_team", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OTHER_TEAMS);
+        visibilityMappings.put("other_teams", (Visibility) (Object) Team.EnumVisible.HIDE_FOR_OWN_TEAM);
+        visibilityMappings.put("none", (Visibility) (Object) Team.EnumVisible.NEVER);
     }
 }

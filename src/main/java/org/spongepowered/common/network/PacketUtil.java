@@ -50,6 +50,7 @@ import org.spongepowered.common.util.StaticMixinHelper;
 
 public class PacketUtil {
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
@@ -113,7 +114,7 @@ public class PacketUtil {
         }
     }
 
-    private static boolean creativeCheck(Packet packet) {
+    private static boolean creativeCheck(Packet<?> packet) {
         return packet instanceof C10PacketCreativeInventoryAction;
     }
 

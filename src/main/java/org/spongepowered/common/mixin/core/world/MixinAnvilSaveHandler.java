@@ -43,6 +43,13 @@ public abstract class MixinAnvilSaveHandler extends SaveHandler {
         super(savesDirectory, directoryName, playersDirectoryIn);
     }
 
+    /**
+     * @author blood - April 5th, 2015
+     * @reason Use individual chunkloaders for multi-dimensions
+     *
+     * @param provider The world provider
+     * @return The chunkloader
+     */
     @Override
     @Overwrite
     public IChunkLoader getChunkLoader(WorldProvider provider) {

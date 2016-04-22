@@ -84,7 +84,8 @@ public final class SpongeAvoidEntityAIBuilder implements AvoidEntityAITask.Build
     public AvoidEntityAITask build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidEntityAITask) new EntityAIAvoidEntity((EntityCreature) owner, Entity.class, GuavaJavaUtils.asGuavaPredicate(this.targetSelector),
+        return (AvoidEntityAITask) new EntityAIAvoidEntity<>((EntityCreature) owner, net.minecraft.entity.EntityCreature.class,
+                GuavaJavaUtils.asGuavaPredicate((Predicate<net.minecraft.entity.Entity>) (Predicate<?>) this.targetSelector),
                 this.searchDistance, this.closeRangeSpeed, this.farRangeSpeed);
     }
 }

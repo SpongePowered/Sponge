@@ -76,7 +76,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 this.potionEffectTypeMap.put(potion.getName().toLowerCase(Locale.ENGLISH), potionEffectType);
             }
         }
-        ((Map<ResourceLocation, Potion>) Potion.field_180150_I).entrySet().stream()
+        Potion.field_180150_I.entrySet().stream()
             .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH)))
             .forEach(entry -> {
                 this.potionList.add((PotionEffectType) entry.getValue());
@@ -96,7 +96,7 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
                 }
             }
         }
-        ((Map<ResourceLocation, Potion>) Potion.field_180150_I).entrySet().stream()
+        Potion.field_180150_I.entrySet().stream()
             .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH)))
             .forEach(entry -> {
                 this.potionList.add((PotionEffectType) entry.getValue());

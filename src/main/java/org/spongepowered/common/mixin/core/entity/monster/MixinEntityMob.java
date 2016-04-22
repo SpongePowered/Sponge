@@ -53,8 +53,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
     /**
      * @author gabizou - April 8th, 2016
-     *
-     * Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
+     * @reason Rewrite this to throw an {@link AttackEntityEvent}
+     * and process correctly.
      *
      * @param targetEntity The entity to attack
      * @return True if the attack was successful

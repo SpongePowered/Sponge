@@ -64,15 +64,27 @@ public abstract class MixinDataHolder implements DataHolder {
     @SuppressWarnings("unchecked")
     @Override
     public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
-        try (Timing timing = SpongeTimings.dataGetManipulator.startTiming()) {
-            final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
-            if (optional.isPresent()) {
-                return (Optional<T>) optional.get().from(this);
-            } else if (this instanceof IMixinCustomDataHolder) {
-                return ((IMixinCustomDataHolder) this).getCustom(containerClass);
-            }
-            return Optional.empty();
+        if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+            SpongeTimings.dataGetManipulator.startTiming();
         }
+        final Optional<DataProcessor<?, ?>> optional = SpongeDataManager.getInstance().getWildProcessor(containerClass);
+        if (optional.isPresent()) {
+            final Optional<?> from = optional.get().from(this);
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                SpongeTimings.dataGetManipulator.stopTiming();
+            }
+            return (Optional<T>) from;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            final Optional<T> custom = ((IMixinCustomDataHolder) this).getCustom(containerClass);
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                SpongeTimings.dataGetManipulator.stopTiming();
+            }
+            return custom;
+        }
+        if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+            SpongeTimings.dataGetManipulator.stopTiming();
+        }
+        return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
@@ -185,23 +197,21 @@ public abstract class MixinDataHolder implements DataHolder {
         if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
             SpongeTimings.dataOfferManipulator.startTiming();
         }
-        try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
-            final Optional<DataProcessor> optional = SpongeDataManager.getInstance().getWildDataProcessor(valueContainer.getClass());
-            if (optional.isPresent()) {
-                final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
-                if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
-                    SpongeTimings.dataOfferManipulator.stopTiming();
-                }
-                return result;
-            } else if (this instanceof IMixinCustomDataHolder) {
-                final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
-                if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
-                    SpongeTimings.dataOfferManipulator.stopTiming();
-                }
-                return result;
+        final Optional<DataProcessor> optional = SpongeDataManager.getInstance().getWildDataProcessor(valueContainer.getClass());
+        if (optional.isPresent()) {
+            final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                SpongeTimings.dataOfferManipulator.stopTiming();
             }
-            return DataTransactionResult.failResult(valueContainer.getValues());
+            return result;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
+            if (MinecraftServer.getServer().isCallingFromMinecraftThread()) {
+                SpongeTimings.dataOfferManipulator.stopTiming();
+            }
+            return result;
         }
+        return DataTransactionResult.failResult(valueContainer.getValues());
     }
 
     @Override

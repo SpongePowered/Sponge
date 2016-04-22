@@ -75,7 +75,7 @@ public class ChunkSaveHelper {
                 TObjectIntHashMap<Entity> entityCollisionCounts = new TObjectIntHashMap<>();
                 Set<BlockPos> collidingCoords = new HashSet<>();
                 for (int i = 0; i < world.loadedEntityList.size(); i++) {
-                    Entity entity = (Entity) world.loadedEntityList.get(i);
+                    Entity entity = world.loadedEntityList.get(i);
                     ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair((int) entity.posX >> 4, (int) entity.posZ >> 4);
                     chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
@@ -96,7 +96,7 @@ public class ChunkSaveHelper {
                 TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<>();
                 writer.name("tiles").beginArray();
                 for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
-                    TileEntity tile = (TileEntity) world.loadedTileEntityList.get(i);
+                    TileEntity tile = world.loadedTileEntityList.get(i);
                     if (logAll) {
                         writer.beginObject();
                         writer.name("type").value(tile.getClass().toString());

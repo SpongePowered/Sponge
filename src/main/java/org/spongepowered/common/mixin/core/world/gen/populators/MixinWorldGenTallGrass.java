@@ -63,7 +63,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     @Shadow private IBlockState tallGrassState;
 
     private WeightedTable<ShrubType> types;
-    private Function<Location<Chunk>, ShrubType> override = null;
+    @Nullable private Function<Location<Chunk>, ShrubType> override = null;
     private VariableAmount count;
 
     @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN") )

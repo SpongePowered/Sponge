@@ -58,6 +58,7 @@ public abstract class MixinGameProfile {
         return Optional.ofNullable(this.getName());
     }
 
+    @SuppressWarnings("unchecked")
     public Multimap<String, ProfileProperty> profile$getPropertyMap() {
         return (Multimap<String, ProfileProperty>) (Object) this.getProperties();
     }

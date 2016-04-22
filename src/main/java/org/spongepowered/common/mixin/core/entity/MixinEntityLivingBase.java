@@ -195,8 +195,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author bloodmc - November 21, 2015
-     *
-     * Purpose: This shouldn't be used internally but a mod may still call it so we simply reroute to our hook.
+     * @reason This shouldn't be used internally but a mod may still call it so we simply reroute to our hook.
      */
     @Overwrite
     protected void damageEntity(DamageSource damageSource, float damage) {
@@ -205,8 +204,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author bloodmc - November 22, 2015
-     *
-     * Purpose: Reroute damageEntity calls to our hook in order to prevent damage.
+     * @reason Reroute damageEntity calls to our hook in order to prevent damage.
      */
     @Override
     @Overwrite
@@ -455,8 +453,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     /**
      * @author gabizou - January 4th, 2016
-     *
-     * This allows invisiblity to ignore entity collisions.
+     * @reason This allows invisiblity to ignore entity collisions.
      */
     @Overwrite
     public boolean canBeCollidedWith() {

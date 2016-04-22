@@ -116,7 +116,8 @@ public class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public void registerContextCalculator(ContextCalculator calculator) {
+    public void registerContextCalculator(ContextCalculator<Subject> calculator) {
+
     }
 
     @Override

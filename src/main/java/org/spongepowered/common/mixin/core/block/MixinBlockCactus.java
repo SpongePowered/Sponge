@@ -50,12 +50,14 @@ import org.spongepowered.common.event.MinecraftBlockDamageSource;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 @Mixin(BlockCactus.class)
 public abstract class MixinBlockCactus extends MixinBlock {
 
     private static final String CACTUS_DAMAGE_FIELD = "Lnet/minecraft/util/DamageSource;cactus:Lnet/minecraft/util/DamageSource;";
 
-    private DamageSource originalCactus;
+    @Nullable private DamageSource originalCactus;
 
     @Inject(method = "onEntityCollidedWithBlock", at = @At(value = "FIELD", target = CACTUS_DAMAGE_FIELD, opcode = Opcodes.GETSTATIC))
     public void preSetOnFire(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Entity entityIn, CallbackInfo callbackInfo) {
@@ -106,7 +108,7 @@ public abstract class MixinBlockCactus extends MixinBlock {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockCactus.AGE), 0, 15);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCactus.AGE), 0, 15);
     }
 
 }

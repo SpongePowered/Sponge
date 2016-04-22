@@ -83,8 +83,8 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
     @SuppressWarnings("unchecked")
     @Override
     public int compareTo(MinecartBlockData o) {
-        Map oTraits = o.block().get().getTraitMap();
-        Map traits = this.block.getTraitMap();
+        Map<?, ?> oTraits = o.block().get().getTraitMap();
+        Map<?, ?> traits = this.block.getTraitMap();
         return ComparisonChain.start()
                 .compare(oTraits.entrySet().containsAll(traits.entrySet()), traits.entrySet().containsAll(oTraits.entrySet()))
                 .compare((Integer) this.offset, o.offset().get())

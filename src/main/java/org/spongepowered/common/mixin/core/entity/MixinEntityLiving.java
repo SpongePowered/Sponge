@@ -80,11 +80,11 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
-    @Shadow private EntityLivingBase attackTarget;
+    @Shadow @Nullable private EntityLivingBase attackTarget;
 
     @Shadow public abstract boolean isAIDisabled();
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
-    @Shadow public abstract net.minecraft.entity.Entity getLeashedToEntity();
+    @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
     @Shadow public abstract ItemStack getHeldItem();
 
@@ -121,7 +121,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
         if (!playerIn.worldObj.isRemote) {
-            Entity leashedEntity = (Entity)(Object) this;
+            Entity leashedEntity = this;
             final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), leashedEntity);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
@@ -134,9 +134,8 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     public void callUnleashEvent(boolean sendPacket, boolean dropLead, CallbackInfo ci) {
         net.minecraft.entity.Entity entity = getLeashedToEntity();
         if (!this.worldObj.isRemote) {
-            Entity leashedEntity = (Entity)(Object) this;
-            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", leashedEntity))
-                : Cause.of(NamedCause.source(entity)), leashedEntity);
+            UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(entity == null ? Cause.of(NamedCause.of("Self", this))
+                : Cause.of(NamedCause.source(entity)), this);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
                 ci.cancel();
@@ -146,15 +145,16 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Goal<? extends Agent>> getGoal(GoalType type) {
+    public <T extends Agent> Optional<Goal<T>> getGoal(GoalType type) {
         if (GoalTypes.NORMAL.equals(type)) {
-            return Optional.ofNullable((Goal) this.tasks);
+            return Optional.of((Goal<T>) this.tasks);
         } else if (GoalTypes.TARGET.equals(type)) {
-            return Optional.ofNullable((Goal) this.targetTasks);
+            return Optional.of((Goal<T>) this.targetTasks);
         }
         return Optional.empty();
     }
 
+    @Nullable
     @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
     public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
@@ -183,7 +183,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
      * @param entitylivingbaseIn The entity living base coming in
      */
     @Inject(method = "setAttackTarget", at = @At("HEAD"), cancellable = true)
-    public void onSetAttackTarget(EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
+    public void onSetAttackTarget(@Nullable EntityLivingBase entitylivingbaseIn, CallbackInfo ci) {
         if (entitylivingbaseIn != null && ((IMixinEntity) entitylivingbaseIn).isVanished()
             && ((IMixinEntity) entitylivingbaseIn).isUntargetable()) {
             this.attackTarget = null;
@@ -193,11 +193,12 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - January 4th, 2016
-     *
-     * This will still check if the current attack target is invisible and is untargetable.
+     * @reason This will still check if the current attack target
+     * is invisible and is untargetable.
      *
      * @return The current attack target, if not null
      */
+    @Nullable
     @Overwrite
     public EntityLivingBase getAttackTarget() {
         if (this.attackTarget != null) {

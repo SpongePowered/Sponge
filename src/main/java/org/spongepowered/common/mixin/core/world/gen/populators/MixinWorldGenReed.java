@@ -71,10 +71,10 @@ public class MixinWorldGenReed implements Reed {
         generate(world, random, position);
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: This is overwritten to use our custom attempt counts and reed
+     * @reason This is overwritten to use our custom attempt counts and reed
      * heights.
      */
     @Overwrite

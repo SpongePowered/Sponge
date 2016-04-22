@@ -534,8 +534,7 @@ public final class CauseTracker {
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
                 if (spongeEntity instanceof EntityLivingBase) {
-                    IMixinEntity spongeLivingEntity = (IMixinEntity) spongeEntity;
-                    DamageSource lastDamageSource = spongeLivingEntity.getLastDamageSource();
+                    DamageSource lastDamageSource = spongeEntity.getLastDamageSource();
                     if (lastDamageSource != null && !cause.contains(lastDamageSource)) {
                         if (!cause.containsNamed("Attacker")) {
                             cause = cause.with(NamedCause.of("Attacker", lastDamageSource));

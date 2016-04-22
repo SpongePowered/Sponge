@@ -80,7 +80,7 @@ public abstract class MixinBlockCocoa extends MixinBlockDirectional {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockCocoa.AGE), 0, 2);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockCocoa.AGE), 0, 2);
     }
 
 }

@@ -81,10 +81,10 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: This overwrite is to replace the usages of Block with BlockState as well
+     * @reason This overwrite is to replace the usages of Block with BlockState as well
      * as to modify the radii calculations to use our VariableAmount.
      */
     @Overwrite

@@ -111,8 +111,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     /**
      * @author bloodmc
-     *
-     * Purpose: Rewritten to support capturing blocks
+     * @reason Rewritten to support capturing blocks
      */
     @Overwrite
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
@@ -300,7 +299,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     /**
      * @author bloodmc
      *
-     * Purpose: Redirects vanilla method to our method which includes a cause.
+     * @reason Redirects vanilla method to our method which includes a cause.
      */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
@@ -315,7 +314,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Rewritten to pass the source block position.
+     * @reason Rewritten to pass the source block position.
      */
     @Overwrite
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
@@ -348,7 +347,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Rewritten to pass the source block position.
+     * @reason Rewritten to pass the source block position.
      */
     @SuppressWarnings("rawtypes")
     @Overwrite
@@ -384,7 +383,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Redirect's vanilla method to ours that includes source block
+     * @reason Redirect's vanilla method to ours that includes source block
      * position.
      */
     @Overwrite
@@ -395,7 +394,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     /**
      * @author bloodmc - November 15th, 2015
      *
-     * Purpose: Used to track comparators when they update levels.
+     * @reason Used to track comparators when they update levels.
      */
     @Overwrite
     public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {

@@ -105,10 +105,10 @@ public abstract class MixinWorldGenDungeons implements Dungeon, IWorldGenDungeon
         }
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Overwritten to leverage the data manipulator while creating the
+     * @reason Overwritten to leverage the data manipulator while creating the
      * tile entity and the weighted table while filling chests.
      * 
      * TODO can possibly be changed to a pair of injections
