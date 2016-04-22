@@ -54,6 +54,8 @@ import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.HorseVariants;
 import org.spongepowered.api.data.type.OcelotType;
 import org.spongepowered.api.data.type.OcelotTypes;
+import org.spongepowered.api.data.type.PickupRule;
+import org.spongepowered.api.data.type.PickupRules;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RabbitTypes;
 import org.spongepowered.api.data.type.SkeletonType;
@@ -154,6 +156,7 @@ public final class DataConstants {
         public static final BlockState DEFAULT_FALLING_BLOCK_BLOCKSTATE = BlockTypes.SAND.getDefaultState();
         public static final BlockState DEFAULT_BLOCK_STATE = BlockTypes.STONE.getDefaultState();
         public static final Art DEFAULT_ART = Arts.KEBAB;
+        public static final PickupRule DEFAULT_PICKUP_RULE = PickupRules.ALLOWED;
     }
 
     public static final class Entity {}

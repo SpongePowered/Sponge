@@ -134,6 +134,7 @@
         "data.types.MixinBlockStoneSlabNewEnumType",
         "data.types.MixinBlockTallGrassEnumType",
         "data.types.MixinBlockWallEnumType",
+        "data.types.MixinEntityArrowPickupStatus",
         "data.types.MixinEnumBannerPattern",
         "data.types.MixinEnumChatVisibility",
         "data.types.MixinEnumDifficulty",
