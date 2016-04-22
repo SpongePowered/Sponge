@@ -22,21 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.gui.window;
 
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.api.gui.window.PlayerInventoryWindow;
+import org.spongepowered.api.item.inventory.Container;
 
-@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
-public class MixinPacketThreadUtil {
+import java.util.Optional;
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
-        PacketUtil.onProcessPacket(packetIn, netHandler);
+public class SpongePlayerInventoryWindow extends AbstractSpongeWindow implements PlayerInventoryWindow {
+
+    @Override
+    public Optional<Container> getContainer() {
+        return Optional.of((Container) this.player.inventoryContainer);
+    }
+
+    @Override
+    protected boolean show() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    public static class Builder extends SpongeWindowBuilder<PlayerInventoryWindow, PlayerInventoryWindow.Builder>
+            implements PlayerInventoryWindow.Builder {
+
+        @Override
+        public PlayerInventoryWindow build() {
+            return new SpongePlayerInventoryWindow();
+        }
     }
 
 }

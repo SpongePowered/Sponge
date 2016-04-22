@@ -22,21 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.gui.window;
 
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.PacketUtil;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntityDropper;
+import org.spongepowered.api.block.tileentity.carrier.Dropper;
+import org.spongepowered.api.gui.window.DropperWindow;
 
-@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
-public class MixinPacketThreadUtil {
+public class SpongeDropperWindow extends AbstractSpongeTileContainerWindow<TileEntityDropper, Dropper> implements DropperWindow {
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
-        PacketUtil.onProcessPacket(packetIn, netHandler);
+    public SpongeDropperWindow() {
+        super(TileEntityDropper.class);
+    }
+
+    @Override
+    protected TileEntityDropper createVirtualTile() {
+        return new TileEntityDropper() {
+
+            @Override
+            public boolean isUseableByPlayer(EntityPlayer player) {
+                return player == SpongeDropperWindow.this.player;
+            }
+        };
+    }
+
+    public static class Builder extends SpongeWindowBuilder<DropperWindow, DropperWindow.Builder> implements DropperWindow.Builder {
+
+        @Override
+        public DropperWindow build() {
+            return new SpongeDropperWindow();
+        }
     }
 
 }

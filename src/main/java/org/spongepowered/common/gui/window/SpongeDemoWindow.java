@@ -22,21 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.gui.window;
 
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.PacketUtil;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import org.spongepowered.api.gui.window.DemoWindow;
 
-@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
-public class MixinPacketThreadUtil {
+public class SpongeDemoWindow extends AbstractSpongeWindow implements DemoWindow {
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
-        PacketUtil.onProcessPacket(packetIn, netHandler);
+    @Override
+    protected boolean show() {
+        this.player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(5, 0));
+        return true;
+    }
+
+    public static class Builder extends SpongeWindowBuilder<DemoWindow, DemoWindow.Builder> implements DemoWindow.Builder {
+
+        @Override
+        public DemoWindow build() {
+            return new SpongeDemoWindow();
+        }
     }
 
 }

@@ -29,13 +29,19 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.client.CPacketAnimation;
 import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.client.CPacketClientStatus;
+import net.minecraft.network.play.client.CPacketClientStatus.State;
+import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
+import net.minecraft.network.play.client.CPacketEntityAction;
+import net.minecraft.network.play.client.CPacketEntityAction.Action;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
+import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.data.type.HandType;
@@ -46,6 +52,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.AnimateHandEvent;
+import org.spongepowered.api.gui.window.Window;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -54,21 +61,23 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.gui.window.AbstractSpongeWindow;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
 import java.lang.ref.WeakReference;
+import java.util.Optional;
 
 public class PacketUtil {
 
     private static final PhaseContext EMPTY_INVALID = PhaseContext.start().complete();
     private static long lastInventoryOpenPacketTimeStamp = 0;
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
+    @SuppressWarnings("unchecked")
+    public static <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             EntityPlayerMP packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
 
@@ -77,6 +86,11 @@ public class PacketUtil {
                 return;
             }
             boolean ignoreCreative = false;
+
+            if (interceptPacket((Packet<INetHandlerPlayServer>) packetIn, (NetHandlerPlayServer) netHandler,
+                    ((NetHandlerPlayServer) netHandler).playerEntity)) {
+                return; // Cancel normal processing
+            }
 
             // This is another horrible hack required since the client sends a C10 packet for every slot
             // containing an itemstack after a C16 packet in the following scenarios :
@@ -138,6 +152,52 @@ public class PacketUtil {
         return packetIn instanceof CPacketCreativeInventoryAction;
     }
 
+    private static boolean interceptPacket(Packet<INetHandlerPlayServer> packet, NetHandlerPlayServer netHandler, EntityPlayerMP player) {
+        boolean ret = false;
+
+        // Fix invisibility respawn exploit
+        // Disabled until it can be tested further
+        /*
+         * if (packet instanceof C16PacketClientStatus) { C16PacketClientStatus
+         * statusPacket = (C16PacketClientStatus) packet; if
+         * (statusPacket.getStatus() ==
+         * C16PacketClientStatus.EnumState.PERFORM_RESPAWN) { if
+         * (!player.isDead) { SpongeHooks.logExploitRespawnInvisibility(player);
+         * netHandler.kickPlayerFromServer(
+         * "You have been kicked for attempting to perform an invisibility respawn exploit."
+         * ); resetStaticData(); ret = true; } } }
+         */
+
+        ret = ret || handleGuiClose(packet, player);
+        return ret;
+    }
+
+    private static boolean handleGuiClose(Packet<INetHandlerPlayServer> packet, EntityPlayerMP player) {
+        boolean hasClosedGui = false;
+        if (packet instanceof CPacketUpdateSign) {
+            hasClosedGui = true;
+        } else if (packet instanceof CPacketEntityAction) {
+            if (((CPacketEntityAction) packet).getAction() == Action.STOP_SLEEPING && player.playerLocation == null) {
+                hasClosedGui = true;
+            }
+        } else if (packet instanceof CPacketClientStatus) {
+            if (((CPacketClientStatus) packet).getStatus() == State.PERFORM_RESPAWN) {
+                hasClosedGui = true;
+            }
+        } else if (packet instanceof CPacketCloseWindow) {
+            // Note: The window ID is not used (assumed to be correct)
+            hasClosedGui = true;
+        }
+        if (hasClosedGui) {
+            Optional<Window> openGui = ((Player) player).getActiveWindow();
+            if (openGui.isPresent() && openGui.get() instanceof AbstractSpongeWindow) {
+                ((AbstractSpongeWindow) openGui.get()).onClientClose(packet);
+                return true; // Packet intercepted and handled
+            }
+        }
+        return false;
+    }
+
     private static boolean firePreEvents(Packet<?> packetIn, EntityPlayerMP playerMP) {
         if (packetIn instanceof CPacketAnimation) {
             CPacketAnimation packet = (CPacketAnimation) packetIn;
@@ -166,10 +226,10 @@ public class PacketUtil {
                     double d1 = playerMP.posY - ((double)pos.getY() + 0.5D) + 1.5D;
                     double d2 = playerMP.posZ - ((double)pos.getZ() + 0.5D);
                     double d3 = d0 * d0 + d1 * d1 + d2 * d2;
-        
+
                     double dist = SpongeImplHooks.getBlockReachDistance(playerMP)+ 1;
                     dist *= dist;
-        
+
                     if (d3 > dist) {
                         return true;
                     } else if (pos.getY() >= SpongeImpl.getServer().getBuildLimit()) {

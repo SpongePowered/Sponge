@@ -147,6 +147,7 @@ import org.spongepowered.common.event.spawn.SpongeSpawnCauseBuilder;
 import org.spongepowered.common.event.spawn.SpongeWeatherSpawnCauseBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
+import org.spongepowered.common.gui.window.SpongeWindowBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
@@ -316,6 +317,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
         ;
+        SpongeWindowBuilder.registerBuilders(registry);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

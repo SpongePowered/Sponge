@@ -22,21 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.gui.window;
 
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.PacketUtil;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.gui.window.BookWindow;
+import org.spongepowered.api.text.BookView;
+import org.spongepowered.common.util.BookFaker;
 
-@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
-public class MixinPacketThreadUtil {
+public class SpongeBookWindow extends AbstractSpongeWindow implements BookWindow {
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
-        PacketUtil.onProcessPacket(packetIn, netHandler);
+    private static final BookView EMPTY_BOOK = BookView.builder().build();
+
+    private BookView bookView;
+
+    @Override
+    protected boolean show() {
+        BookFaker.fakeBookView(getBookView(), (Player) this.player);
+        return true;
+    }
+
+    @Override
+    public BookView getBookView() {
+        return this.bookView != null ? this.bookView : EMPTY_BOOK;
+    }
+
+    @Override
+    public void setBookView(BookView view) {
+        this.bookView = view;
+    }
+
+    public static class Builder extends SpongeWindowBuilder<BookWindow, BookWindow.Builder> implements BookWindow.Builder {
+
+        @Override
+        public BookWindow build() {
+            return new SpongeBookWindow();
+        }
     }
 
 }

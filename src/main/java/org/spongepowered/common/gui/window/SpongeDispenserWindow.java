@@ -22,21 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.util;
+package org.spongepowered.common.gui.window;
 
-import net.minecraft.network.INetHandler;
-import net.minecraft.network.Packet;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.network.PacketUtil;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.tileentity.TileEntityDispenser;
+import org.spongepowered.api.block.tileentity.carrier.Dispenser;
+import org.spongepowered.api.gui.window.DispenserWindow;
 
-@Mixin(targets = "net/minecraft/network/PacketThreadUtil$1")
-public class MixinPacketThreadUtil {
+public class SpongeDispenserWindow extends AbstractSpongeTileContainerWindow<TileEntityDispenser, Dispenser> implements DispenserWindow {
 
-    @Redirect(method = "run()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/Packet;processPacket(Lnet/minecraft/network/INetHandler;)V") )
-    public <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
-        PacketUtil.onProcessPacket(packetIn, netHandler);
+    public SpongeDispenserWindow() {
+        super(TileEntityDispenser.class);
+    }
+
+    @Override
+    protected TileEntityDispenser createVirtualTile() {
+        return new TileEntityDispenser() {
+
+            @Override
+            public boolean isUseableByPlayer(EntityPlayer player) {
+                return player == SpongeDispenserWindow.this.player;
+            }
+        };
+    }
+
+    public static class Builder extends SpongeWindowBuilder<DispenserWindow, DispenserWindow.Builder> implements DispenserWindow.Builder {
+
+        @Override
+        public DispenserWindow build() {
+            return new SpongeDispenserWindow();
+        }
     }
 
 }

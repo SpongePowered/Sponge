@@ -38,6 +38,7 @@ import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcess
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -58,7 +59,8 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.getItem() == Items.WRITTEN_BOOK) {
-            NbtDataUtil.getOrCreateCompound(container).setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
+            NBTTagCompound mainCompound = ItemStackUtil.getTagCompound(container);
+            mainCompound.setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
         } else {
             container.setStackDisplayName(legacy);
         }
