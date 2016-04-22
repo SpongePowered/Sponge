@@ -356,6 +356,7 @@ public final class CommonModuleRegistry {
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
             .registerModule(WorldCreationSettings.class, WorldCreationSettingsRegistryModule.getInstance())
+            .registerModule(PickupRule.class, new PickupRuleRegistryModule())
             ;
     }
 
