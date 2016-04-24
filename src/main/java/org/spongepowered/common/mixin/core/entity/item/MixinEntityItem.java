@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
@@ -37,6 +38,8 @@ import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
+import org.spongepowered.common.data.util.DataConstants;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -47,26 +50,111 @@ import java.util.List;
 @Mixin(EntityItem.class)
 public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
 
+    private static final int MAGIC_PREVIOUS = -1;
     @Shadow private int delayBeforeCanPickup;
     @Shadow private int age;
-
     @Shadow public abstract ItemStack getEntityItem();
+    private int previousPickupDelay = MAGIC_PREVIOUS;
+    private boolean infinitePickupDelay;
+    private int previousDespawnDelay = MAGIC_PREVIOUS;
+    private boolean infiniteDespawnDelay;
 
     public float dropChance = 1.0f;
 
     @Override
+    public boolean infinitePickupDelay() {
+        return this.infinitePickupDelay;
+    }
+
+    @Override
     public int getPickupDelay() {
-        return this.delayBeforeCanPickup;
+        return this.infinitePickupDelay ? this.previousPickupDelay : this.delayBeforeCanPickup;
+    }
+
+    @Override
+    public void setPickupDelay(int delay, boolean infinite) {
+        this.delayBeforeCanPickup = delay;
+        boolean previous = this.infinitePickupDelay;
+        this.infinitePickupDelay = infinite;
+        if (infinite && !previous) {
+            this.previousPickupDelay = this.delayBeforeCanPickup;
+            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (!infinite) {
+            this.previousPickupDelay = MAGIC_PREVIOUS;
+        }
+    }
+
+    @Override
+    public boolean infiniteDespawnDelay() {
+        return this.infiniteDespawnDelay;
     }
 
     @Override
     public int getDespawnDelay() {
-        return this.age;
+        return this.infiniteDespawnDelay ? this.previousDespawnDelay : this.age;
     }
 
     @Override
-    public void setDespawnDelay(int delay) {
+    public void setDespawnDelay(int delay, boolean infinite) {
         this.age = delay;
+        boolean previous = this.infiniteDespawnDelay;
+        this.infiniteDespawnDelay = infinite;
+        if (infinite && !previous) {
+            this.previousDespawnDelay = this.age;
+            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (!infinite) {
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        }
+    }
+
+    @Override
+    public void readFromNbt(NBTTagCompound compound) {
+        super.readFromNbt(compound);
+
+        this.infinitePickupDelay = compound.getBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY);
+        if (compound.hasKey(NbtDataUtil.PREVIOUS_PICKUP_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousPickupDelay = compound.getInteger(NbtDataUtil.PREVIOUS_PICKUP_DELAY);
+        } else {
+            this.previousPickupDelay = MAGIC_PREVIOUS;
+        }
+        this.infiniteDespawnDelay = compound.getBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY);
+        if (compound.hasKey(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, NbtDataUtil.TAG_ANY_NUMERIC)) {
+            this.previousDespawnDelay = compound.getInteger(NbtDataUtil.PREVIOUS_DESPAWN_DELAY);
+        } else {
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        }
+
+        if (this.infinitePickupDelay) {
+            if (this.previousPickupDelay != this.delayBeforeCanPickup) {
+                this.previousPickupDelay = this.delayBeforeCanPickup;
+            }
+
+            this.delayBeforeCanPickup = DataConstants.Entity.Item.MAGIC_NO_PICKUP;
+        } else if (this.delayBeforeCanPickup == DataConstants.Entity.Item.MAGIC_NO_PICKUP && this.previousPickupDelay != MAGIC_PREVIOUS) {
+            this.delayBeforeCanPickup = this.previousPickupDelay;
+            this.previousPickupDelay = MAGIC_PREVIOUS;
+        }
+
+        if (this.infiniteDespawnDelay) {
+            if (this.previousDespawnDelay != this.age) {
+                this.previousDespawnDelay = this.age;
+            }
+
+            this.age = DataConstants.Entity.Item.MAGIC_NO_DESPAWN;
+        } else if (this.age == DataConstants.Entity.Item.MAGIC_NO_DESPAWN && this.previousDespawnDelay != MAGIC_PREVIOUS) {
+            this.age = this.previousDespawnDelay;
+            this.previousDespawnDelay = MAGIC_PREVIOUS;
+        }
+    }
+
+    @Override
+    public void writeToNbt(NBTTagCompound compound) {
+        super.writeToNbt(compound);
+
+        compound.setBoolean(NbtDataUtil.INFINITE_PICKUP_DELAY, this.infinitePickupDelay);
+        compound.setShort(NbtDataUtil.PREVIOUS_PICKUP_DELAY, (short) this.previousPickupDelay);
+        compound.setBoolean(NbtDataUtil.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
+        compound.setShort(NbtDataUtil.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
 
     @Override

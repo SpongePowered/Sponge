@@ -26,9 +26,15 @@ package org.spongepowered.common.interfaces.entity.item;
 
 public interface IMixinEntityItem {
 
+    boolean infinitePickupDelay();
+
     int getPickupDelay();
+
+    void setPickupDelay(int delay, boolean infinite);
+
+    boolean infiniteDespawnDelay();
 
     int getDespawnDelay();
 
-    void setDespawnDelay(int delay);
+    void setDespawnDelay(int delay, boolean infinite);
 }

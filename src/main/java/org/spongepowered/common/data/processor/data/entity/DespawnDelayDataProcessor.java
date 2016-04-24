@@ -24,54 +24,50 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
+import static org.spongepowered.common.data.util.DataUtil.getData;
+
+import com.google.common.collect.ImmutableMap;
 import net.minecraft.entity.item.EntityItem;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.entity.ImmutableDespawnDelayData;
 import org.spongepowered.api.data.manipulator.mutable.entity.DespawnDelayData;
-import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeDespawnDelayData;
-import org.spongepowered.common.data.processor.common.AbstractEntitySingleDataProcessor;
-import org.spongepowered.common.data.util.DataConstants;
-import org.spongepowered.common.data.value.SpongeValueFactory;
-import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
 import org.spongepowered.common.interfaces.entity.item.IMixinEntityItem;
 
+import java.util.Map;
 import java.util.Optional;
 
-public final class DespawnDelayDataProcessor extends AbstractEntitySingleDataProcessor<EntityItem, Integer, MutableBoundedValue<Integer>,
-        DespawnDelayData, ImmutableDespawnDelayData> {
+public final class DespawnDelayDataProcessor extends AbstractEntityDataProcessor<EntityItem, DespawnDelayData, ImmutableDespawnDelayData> {
 
     public DespawnDelayDataProcessor() {
-        super(EntityItem.class, Keys.DESPAWN_DELAY);
+        super(EntityItem.class);
     }
 
     @Override
-    protected MutableBoundedValue<Integer> constructValue(Integer actualValue) {
-        return SpongeValueFactory.boundedBuilder(this.key)
-                .actualValue(actualValue)
-                .minimum(DataConstants.Entity.Item.MIN_DESPAWN_DELAY)
-                .maximum(DataConstants.Entity.Item.MAX_DESPAWN_DELAY)
-                .defaultValue(DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY)
-                .build();
-    }
-
-    @Override
-    protected boolean set(EntityItem entity, Integer value) {
-        ((IMixinEntityItem) entity).setDespawnDelay(value);
+    protected boolean doesDataExist(EntityItem container) {
         return true;
     }
 
     @Override
-    protected Optional<Integer> getVal(EntityItem entity) {
-        return Optional.of(((IMixinEntityItem) entity).getDespawnDelay());
+    protected boolean set(EntityItem container, Map<Key<?>, Object> keyValues) {
+        ((IMixinEntityItem) container).setDespawnDelay(
+                (Integer) keyValues.get(Keys.DESPAWN_DELAY),
+                (Boolean) keyValues.get(Keys.INFINITE_DESPAWN_DELAY)
+        );
+        return true;
     }
 
     @Override
-    protected ImmutableValue<Integer> constructImmutableValue(Integer value) {
-        return new ImmutableSpongeValue<>(this.key, DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY, value);
+    protected Map<Key<?>, ?> getValues(EntityItem container) {
+        return ImmutableMap.<Key<?>, Object> builder()
+                .put(Keys.DESPAWN_DELAY, ((IMixinEntityItem) container).getDespawnDelay())
+                .put(Keys.INFINITE_DESPAWN_DELAY, ((IMixinEntityItem) container).infiniteDespawnDelay())
+                .build();
     }
 
     @Override
@@ -80,7 +76,14 @@ public final class DespawnDelayDataProcessor extends AbstractEntitySingleDataPro
     }
 
     @Override
-    public DataTransactionResult removeFrom(ValueContainer<?> container) {
+    public Optional<DespawnDelayData> fill(DataContainer container, DespawnDelayData data) {
+        data.set(Keys.DESPAWN_DELAY, getData(container, Keys.DESPAWN_DELAY));
+        data.set(Keys.INFINITE_DESPAWN_DELAY, getData(container, Keys.INFINITE_DESPAWN_DELAY));
+        return Optional.of(data);
+    }
+
+    @Override
+    public DataTransactionResult remove(DataHolder container) {
         return DataTransactionResult.failNoData();
     }
 

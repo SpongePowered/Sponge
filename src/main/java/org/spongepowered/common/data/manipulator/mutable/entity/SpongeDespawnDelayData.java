@@ -33,6 +33,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayData, ImmutableDespawnDelayData> implements DespawnDelayData {
 
@@ -52,6 +53,11 @@ public final class SpongeDespawnDelayData extends AbstractIntData<DespawnDelayDa
                 .maximum(DataConstants.Entity.Item.MAX_DESPAWN_DELAY)
                 .defaultValue(DataConstants.Entity.Item.DEFAULT_DESPAWN_DELAY)
                 .build();
+    }
+
+    @Override
+    public Value<Boolean> infinite() {
+        return new SpongeValue<>(Keys.INFINITE_DESPAWN_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_DESPAWN);
     }
 
     @Override

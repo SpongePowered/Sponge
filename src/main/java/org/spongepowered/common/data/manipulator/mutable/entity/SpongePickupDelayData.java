@@ -33,6 +33,7 @@ import org.spongepowered.common.data.manipulator.immutable.entity.ImmutableSpong
 import org.spongepowered.common.data.manipulator.mutable.common.AbstractIntData;
 import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.value.SpongeValueFactory;
+import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData, ImmutablePickupDelayData> implements PickupDelayData {
 
@@ -52,6 +53,11 @@ public final class SpongePickupDelayData extends AbstractIntData<PickupDelayData
                 .maximum(DataConstants.Entity.Item.MAX_PICKUP_DELAY)
                 .defaultValue(DataConstants.Entity.Item.DEFAULT_PICKUP_DELAY)
                 .build();
+    }
+
+    @Override
+    public Value<Boolean> infinite() {
+        return new SpongeValue<>(Keys.INFINITE_PICKUP_DELAY, false, this.getValue() == DataConstants.Entity.Item.MAGIC_NO_PICKUP);
     }
 
     @Override

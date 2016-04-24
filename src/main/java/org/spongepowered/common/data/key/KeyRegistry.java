@@ -306,8 +306,10 @@ public class KeyRegistry {
         keyMap.put("beacon_primary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconPrimaryEffect")));
         keyMap.put("beacon_secondary_effect", makeOptionalKey(PotionEffectType.class, of("BeaconSecondaryEffect")));
         keyMap.put("targeted_location", makeSingleKey(Vector3d.class, Value.class, of("TargetedVector3d")));
-        keyMap.put("pickup_delay", makeSingleKey(Boolean.class, Value.class, of("PickupDelay")));
-        keyMap.put("despawn_delay", makeSingleKey(Boolean.class, Value.class, of("DespawnDelay")));
+        keyMap.put("pickup_delay", makeSingleKey(Integer.class, Value.class, of("PickupDelay")));
+        keyMap.put("infinite_pickup_delay", makeSingleKey(Boolean.class, Value.class, of("InfinitePickupDelay")));
+        keyMap.put("despawn_delay", makeSingleKey(Integer.class, Value.class, of("DespawnDelay")));
+        keyMap.put("infinite_despawn_delay", makeSingleKey(Boolean.class, Value.class, of("InfiniteDespawnDelay")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
