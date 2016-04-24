@@ -27,6 +27,7 @@ package org.spongepowered.common.data.processor.value.entity;
 import static org.spongepowered.common.data.util.ComparatorUtil.doubleComparator;
 
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.util.DamageSource;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.ValueContainer;
@@ -110,6 +111,9 @@ public class HealthValueProcessor extends AbstractSpongeValueProcessor<EntityLiv
                 ((EntityLivingBase) container).setHealth(value.floatValue());
             } catch (Exception e) {
                 return DataTransactionResult.errorResult(newHealthValue);
+            }
+            if (value.floatValue() <= 0.0F) {
+                ((EntityLivingBase) container).onDeath(DamageSource.generic);
             }
             return builder.success(newHealthValue).replace(oldHealthValue).result(DataTransactionResult.Type.SUCCESS).build();
         }
