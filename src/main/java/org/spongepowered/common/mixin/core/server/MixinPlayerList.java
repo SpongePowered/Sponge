@@ -93,9 +93,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
@@ -442,17 +440,17 @@ public abstract class MixinPlayerList {
         final WorldServer toWorldServer = (WorldServer) toTransform.getExtent();
         if (fromTransform.getExtent().equals(toTransform.getExtent())) {
 
-            toWorldServer.getChunkProvider().provideChunk((int) toTransform.getLocation().getX() >> 4, (int) toTransform.getLocation().getZ() >> 4);
-
             entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorldServer) toWorldServer).getDimensionId(), toWorldServer.getDifficulty(),
                     toWorldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
         }
 
         ((Player) entityPlayerMP).setTransform(toTransform);
 
-        if (!toWorldServer.getEntityTracker().trackedEntityHashTable.containsItem(entityPlayerMP.getEntityId())) {
-            toWorldServer.getEntityTracker().trackEntity(entityPlayerMP);
+        if (fromTransform.getExtent().equals(toTransform.getExtent())) {
+            toWorldServer.getChunkProvider().provideChunk((int) toTransform.getLocation().getX() >> 4, (int) toTransform.getLocation().getZ() >> 4);
         }
+
+        toWorldServer.spawnEntityInWorld(entityPlayerMP);
 
         // TODO Following still needed?
         // Reset the health.

@@ -30,20 +30,28 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -189,5 +197,101 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a native SpongeAPI entity!");
         }
         return (org.spongepowered.api.entity.Entity) mixinEntity;
+    }
+
+    public static boolean changeWorld(Entity entity, Location<org.spongepowered.api.world.World> toLocation) {
+        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final WorldServer fromWorld = (WorldServer) entity.getEntityWorld();
+        final WorldServer toWorld = (WorldServer) toLocation.getExtent();
+
+        // First remove us from where we come from
+        if (entity instanceof EntityPlayer) {
+            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
+            fromWorld.getPlayerChunkMap().removePlayer((EntityPlayerMP) entity);
+            fromWorld.playerEntities.remove(entity);
+            fromWorld.updateAllPlayersSleepingFlag();
+        } else {
+            fromWorld.getEntityTracker().untrackEntity(entity);
+        }
+
+        if (entity.isBeingRidden())
+        {
+            entity.removePassengers();
+        }
+
+        if (entity.isRiding())
+        {
+            entity.dismountRidingEntity();
+        }
+
+        final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
+        fromMixinWorld.onSpongeEntityRemoved(entity);
+
+        int i = entity.chunkCoordX;
+        int j = entity.chunkCoordZ;
+
+        if (entity.addedToChunk && fromWorld.isChunkLoaded(i, j, true))
+        {
+            fromWorld.getChunkFromChunkCoords(i, j).removeEntity(entity);
+        }
+
+        if (!(entity instanceof EntityPlayerMP)) {
+            fromWorld.loadedEntityList.remove(entity);
+        }
+
+        // At this point, we've removed the entity from the previous world. Lets now put them in the new world.
+        final IMixinWorldServer toMixinWorld = (IMixinWorldServer) toWorld;
+        entity.dimension = toMixinWorld.getDimensionId();
+        entity.setWorld(toWorld);
+
+        if (entity instanceof EntityPlayer) {
+            EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
+
+            // Support vanilla clients going into custom dimensions
+            final net.minecraft.world.DimensionType fromClientDimensionType = DimensionManager.getClientDimensionType(fromWorld.provider
+                    .getDimensionType());
+            final net.minecraft.world.DimensionType toClientDimensionType = DimensionManager.getClientDimensionType(toWorld.provider.getDimensionType
+                    ());
+            if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
+                DimensionManager.sendDimensionRegistration(entityPlayerMP, toClientDimensionType);
+            } else {
+                final int currentDim =  fromMixinWorld.getDimensionId();
+                final int targetDim = toMixinWorld.getDimensionId();
+                final int fromClientDimensionTypeId = fromClientDimensionType.getId();
+                final int toClientDimensionTypeId = toClientDimensionType.getId();
+                // Force vanilla client to refresh their chunk cache if same dimension
+                if (currentDim != targetDim && fromClientDimensionTypeId == toClientDimensionTypeId) {
+                    entityPlayerMP.playerNetServerHandler.sendPacket(
+                            new SPacketRespawn(toClientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(), toWorld.getWorldInfo().
+                                    getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+                }
+            }
+
+            toWorld.getChunkProvider().provideChunk((int) toLocation.getX() >> 4, (int) toLocation.getZ() >> 4);
+
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
+                    getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
+            entityPlayerMP.setLocationAndAngles(toLocation.getX(), toLocation.getY(), toLocation.getZ(), entityPlayerMP.rotationYaw, entityPlayerMP
+                    .rotationPitch);
+            while (!toWorld.getCollisionBoxes(entityPlayerMP, entityPlayerMP.getEntityBoundingBox()).isEmpty() && entityPlayerMP.posY < 256.0D)
+            {
+                entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
+            }
+            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+                    entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
+            entityPlayerMP.setSneaking(false);
+            server.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);
+            entityPlayerMP.interactionManager.setWorld(toWorld);
+            entityPlayerMP.addSelfToInternalCraftingInventory();
+            toWorld.getPlayerChunkMap().addPlayer(entityPlayerMP);
+        } else {
+            entity.setPositionAndRotation(toLocation.getX(), toLocation.getY(), toLocation.getZ(), 0, 0);
+        }
+
+        toWorld.spawnEntityInWorld(entity);
+
+        fromWorld.resetUpdateEntityTick();
+        toWorld.resetUpdateEntityTick();
+        return true;
     }
 }
