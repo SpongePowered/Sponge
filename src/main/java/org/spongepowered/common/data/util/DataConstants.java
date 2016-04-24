@@ -156,7 +156,21 @@ public final class DataConstants {
         public static final Art DEFAULT_ART = Arts.KEBAB;
     }
 
-    public static final class Entity {}
+    public static final class Entity {
+
+        public static final class Item {
+
+            public static final int MIN_PICKUP_DELAY = Short.MIN_VALUE;
+            public static final int MAX_PICKUP_DELAY = Short.MAX_VALUE;
+            public static final int DEFAULT_PICKUP_DELAY = 0;
+            public static final int MIN_DESPAWN_DELAY = Short.MIN_VALUE;
+            public static final int MAX_DESPAWN_DELAY = Short.MAX_VALUE;
+            public static final int DEFAULT_DESPAWN_DELAY = 0;
+
+            private Item() {
+            }
+        }
+    }
 
 
     public static final class Horse {
