@@ -33,16 +33,16 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(IScoreCriteria.EnumRenderType.class)
 public abstract class MixinScoreboardObjectiveDisplayType implements ObjectiveDisplayMode {
 
-    @Shadow @Final public String field_178798_d;
+    @Shadow @Final public String renderType;
 
     @Override
     public String getId() {
-        return this.field_178798_d;
+        return this.renderType;
     }
 
     @Override
     public String getName() {
-        return this.field_178798_d;
+        return this.renderType;
     }
 
 }

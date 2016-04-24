@@ -34,10 +34,10 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 @Mixin(targets = IMixinCommandSender.COMMAND_BLOCK_SENDER)
 public abstract class MixinBlockCommandBlockSender implements IMixinCommandSender {
 
-    @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock commandBlock;
+    @Shadow(aliases = {"field_145767_a", "this$0"}) @Final private TileEntityCommandBlock field_145767_a;
 
     @Override
     public CommandSource asCommandSource() {
-        return (CommandSource) this.commandBlock;
+        return (CommandSource) this.field_145767_a;
     }
 }

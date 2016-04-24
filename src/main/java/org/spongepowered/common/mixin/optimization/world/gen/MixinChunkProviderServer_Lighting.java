@@ -28,6 +28,7 @@ import net.minecraft.util.LongHashMap;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IMIxinChunkProviderServer;
@@ -37,7 +38,7 @@ import javax.annotation.Nullable;
 @Mixin(ChunkProviderServer.class)
 public abstract class MixinChunkProviderServer_Lighting implements IMIxinChunkProviderServer {
 
-    @Shadow private LongHashMap<Chunk> id2ChunkMap;
+    @Shadow @Final private LongHashMap<Chunk> id2ChunkMap;
 
     @Nullable
     @Override

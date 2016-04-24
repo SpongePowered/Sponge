@@ -34,6 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.GuavaJavaUtils;
 
+@SuppressWarnings("rawtypes")
 @Mixin(EntityAINearestAttackableTarget.class)
 public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAITarget<FindNearestAttackableTargetAITask>
         implements FindNearestAttackableTargetAITask {
@@ -42,6 +43,7 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
     @Shadow private int targetChance;
     @Shadow protected Predicate targetEntitySelector;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Class<? extends Living> getTargetClass() {
         return this.targetClass;
@@ -70,9 +72,10 @@ public abstract class MixinEntityAINearestAttackableTarget extends MixinEntityAI
         return this;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public java.util.function.Predicate<Living> getFilter() {
-        return this.targetEntitySelector == null ? GuavaJavaUtils.asJavaPredicate(Predicates.alwaysTrue()) : GuavaJavaUtils.asJavaPredicate(this.targetEntitySelector);
+        return this.targetEntitySelector == null ? GuavaJavaUtils.asJavaPredicate(Predicates.alwaysTrue()) : GuavaJavaUtils.<Living>asJavaPredicate(this.targetEntitySelector);
     }
 
 }

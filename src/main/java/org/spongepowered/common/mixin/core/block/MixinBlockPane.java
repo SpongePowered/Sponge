@@ -75,10 +75,10 @@ public abstract class MixinBlockPane extends MixinBlock {
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = (Boolean) blockState.getValue(BlockPane.NORTH);
-        final Boolean east = (Boolean) blockState.getValue(BlockPane.EAST);
-        final Boolean west = (Boolean) blockState.getValue(BlockPane.WEST);
-        final Boolean south = (Boolean) blockState.getValue(BlockPane.SOUTH);
+        final Boolean north = blockState.getValue(BlockPane.NORTH);
+        final Boolean east = blockState.getValue(BlockPane.EAST);
+        final Boolean west = blockState.getValue(BlockPane.WEST);
+        final Boolean south = blockState.getValue(BlockPane.SOUTH);
         if (north) {
             directions.add(Direction.NORTH);
         }

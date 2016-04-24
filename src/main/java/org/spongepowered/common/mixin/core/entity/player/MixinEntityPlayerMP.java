@@ -34,13 +34,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.ai.attributes.AttributeMap;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.client.CPacketClientSettings;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketResourcePackSend;
@@ -50,7 +50,6 @@ import net.minecraft.scoreboard.IScoreCriteria;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -75,8 +74,8 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
-import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -118,13 +117,12 @@ import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.IMixinTeam;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
-import org.spongepowered.common.util.SkinUtil;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -184,21 +182,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "onDeath", at = @At(value = "RETURN"))
-    public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        // Special case for players as sometimes tick capturing won't capture deaths
-        if (world.getCauseTracker().getCapturedEntityItems().size() > 0) {
-            StaticMixinHelper.destructItemDrop = true;
-            world.getCauseTracker().handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)));
-            StaticMixinHelper.destructItemDrop = false;
-        } else if (!this.worldObj.getGameRules().getBoolean("keepInventory")) {
-            // This is normally performed in CauseTracker#handleDroppedItems. However, if a mod removes
-            // all drops, then the player's inventory is not cleared as usual - despite it still containing items.
-            // TODO gabizou: Possibly find a better solution with the CauseTracking refactor
-            this.inventory.clear();
-        }
+    @Override
+    public IMixinWorldServer getMixinWorld() {
+        return ((IMixinWorldServer) this.worldObj);
     }
 
     @Override
@@ -219,21 +205,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public User getUserObject() {
         return this.user;
-    }
-
-    // Post before the player values are updated
-    @Inject(method = "handleClientSettings", at = @At("HEAD"))
-    public void processClientSettingsEvent(CPacketClientSettings packet, CallbackInfo ci) {
-        PlayerChangeClientSettingsEvent event = SpongeEventFactory.createPlayerChangeClientSettingsEvent(Cause.of(NamedCause.source(this)),
-                (ChatVisibility) (Object) packet.getChatVisibility(), SkinUtil.fromFlags(packet.getModelPartFlags()),
-                LanguageUtil.LOCALE_CACHE.getUnchecked(packet.getLang()), this, packet.isColorsEnabled(), packet.view);
-        SpongeImpl.postEvent(event);
-    }
-
-    @Inject(method = "handleClientSettings", at = @At("RETURN"))
-    public void processClientSettings(CPacketClientSettings packet, CallbackInfo ci) {
-        this.skinParts = SkinUtil.fromFlags(packet.getModelPartFlags()); // Returned set is immutable
-        this.viewDistance = packet.view;
     }
 
     @Override
@@ -299,7 +270,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
-                for (Packet packet : packets) {
+                for (Packet<?> packet : packets) {
                     this.playerNetServerHandler.sendPacket(packet);
                 }
             }
@@ -519,7 +490,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
      * assigns the {@link #pendingGameType} returned by the event to the actual
      * local variable in the method.
      */
-    @ModifyVariable(method = "setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At("HEAD"), argsOnly = true)
+    @ModifyVariable(method = "Lnet/minecraft/entity/player/EntityPlayerMP;setGameType(Lnet/minecraft/world/WorldSettings$GameType;)V", at = @At(value = "HEAD", remap = false), argsOnly = true)
     private WorldSettings.GameType assignPendingGameType(WorldSettings.GameType gameType) {
         return this.pendingGameType;
     }
@@ -616,4 +587,24 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.playerNetServerHandler.sendPacket(packet);
     }
 
+    /**
+     * @author gabizou, April 7th, 2016
+     *
+     * Technically an overwrite of {@link EntityPlayer#dropOneItem(boolean)}
+     * @param dropAll
+     * @return
+     */
+    @Override
+    @Nullable
+    public EntityItem dropOneItem(boolean dropAll) {
+        final ItemStack currentItem = this.inventory.getCurrentItem();
+        if (currentItem == null) {
+            return null;
+        }
+        final int amount = dropAll ? currentItem.stackSize : 1;
+        final Cause cause = Cause.source(SpawnCause.builder().type(InternalSpawnTypes.DROPPED_ITEM).build()).named(NamedCause.OWNER, this).build();
+        // ASK MUMFREY HOW TO GET THE FRIGGING SLOT FOR THE EVENT?!
+
+        return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
+    }
 }

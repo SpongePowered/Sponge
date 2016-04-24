@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
 
-    private static final String RTR_CTOR_ENTITY = "net/minecraft/util/MovingObjectPosition.entityHit:Lnet/minecraft/entity/Entity;";
+    private static final String RTR_CTOR_ENTITY = "net/minecraft/util/math/RayTraceResult.entityHit:Lnet/minecraft/entity/Entity;";
     private EntityArrow mcEntity = (EntityArrow) (Object) this;
 
     @Shadow public Entity shootingEntity;
@@ -105,9 +105,9 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
     /**
      * This is the injection used in dev.
      */
-    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 3, shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true, require = 0)
-    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity, List aabbs, double d0) {
+    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 2, shift = At.Shift.AFTER),
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, require = 0)
+    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity) {
         this.arrowImpact(ci, hitResult);
     }
 

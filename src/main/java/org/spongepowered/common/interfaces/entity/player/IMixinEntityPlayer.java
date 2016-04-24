@@ -27,6 +27,8 @@ package org.spongepowered.common.interfaces.entity.player;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 public interface IMixinEntityPlayer extends IMixinEntity {
@@ -38,4 +40,6 @@ public interface IMixinEntityPlayer extends IMixinEntity {
     boolean affectsSpawning();
 
     void setAffectsSpawning(boolean affectsSpawning);
+
+    UUID getCollidingEntityUuid();
 }

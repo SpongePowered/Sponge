@@ -76,6 +76,6 @@ public abstract class MixinBlockEndPortalFrame extends MixinBlock {
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockEndPortalFrame.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockEndPortalFrame.FACING)));
     }
 }

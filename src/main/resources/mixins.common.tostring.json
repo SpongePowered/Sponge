@@ -1,0 +1,14 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.tostring",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.ToStringPlugin",
+    "mixins": [
+        "item.MixinItem_ToString",
+        "world.MixinChunk_ToString",
+        "world.MixinWorldServer_ToString"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

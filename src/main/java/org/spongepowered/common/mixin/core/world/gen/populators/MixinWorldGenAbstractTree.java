@@ -36,12 +36,12 @@ import java.util.Random;
 @Mixin(WorldGenAbstractTree.class)
 public abstract class MixinWorldGenAbstractTree extends MixinWorldGenerator {
 
-    @Shadow protected abstract boolean func_150523_a(Block p_150523_1_);
+    @Shadow protected abstract boolean canGrowInto(Block p_150523_1_);
     @Shadow public abstract void func_180711_a(World worldIn, Random p_180711_2_, BlockPos p_180711_3_);
 
     public boolean isReplaceable(World world, BlockPos pos) {
         net.minecraft.block.state.IBlockState state = world.getBlockState(pos);
-        return isAir(state, world, pos) || isLeaves(state, world, pos) || isWood(state, world, pos) || func_150523_a(state.getBlock());
+        return isAir(state, world, pos) || isLeaves(state, world, pos) || isWood(state, world, pos) || canGrowInto(state.getBlock());
     }
     
 }

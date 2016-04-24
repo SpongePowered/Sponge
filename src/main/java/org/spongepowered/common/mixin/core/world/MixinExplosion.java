@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.entity.explosive.Explosive;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,8 +74,8 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     }
 
     @Override
-    public World getWorld() {
-        return (World) this.worldObj;
+    public Location<World> getLocation() {
+        return new Location<>((World) this.worldObj, this.origin);
     }
 
     @Override
@@ -85,11 +86,6 @@ public abstract class MixinExplosion implements Explosion, IMixinExplosion {
     @Override
     public float getRadius() {
         return this.explosionSize;
-    }
-
-    @Override
-    public Vector3d getOrigin() {
-        return this.origin;
     }
 
     @Override

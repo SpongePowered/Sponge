@@ -189,14 +189,14 @@ public class SpongeObjective implements Objective {
         for (ScoreObjective objective: this.objectives.values()) {
             net.minecraft.scoreboard.Scoreboard scoreboard = objective.theScoreboard;
 
-            Map map = (Map) scoreboard.entitiesScoreObjectives.get(name);
+            Map<?, ?> map = scoreboard.entitiesScoreObjectives.get(name);
 
             if (map != null) {
                 net.minecraft.scoreboard.Score score = (net.minecraft.scoreboard.Score) map.remove(objective);
 
 
                 if (map.size() < 1) {
-                    Map map1 = (Map) scoreboard.entitiesScoreObjectives.remove(name);
+                    Map<?, ?> map1 = scoreboard.entitiesScoreObjectives.remove(name);
 
                     if (map1 != null) {
                         scoreboard.broadcastScoreUpdate(name);
@@ -225,7 +225,7 @@ public class SpongeObjective implements Objective {
         if (this.objectives.containsKey(scoreboard)) {
             return this.objectives.get(scoreboard);
         }
-        ScoreObjective objective = new ScoreObjective(scoreboard, name, (IScoreCriteria) this.criterion);
+        ScoreObjective objective = new ScoreObjective(scoreboard, this.name, (IScoreCriteria) this.criterion);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new objective is being created here, we want to avoid
@@ -249,7 +249,7 @@ public class SpongeObjective implements Objective {
     @SuppressWarnings("unchecked")
     @Override
     public Set<Scoreboard> getScoreboards() {
-        return (Set) new HashSet<>(this.objectives.keySet());
+        return (Set<Scoreboard>) (Set<?>) new HashSet<>(this.objectives.keySet());
     }
 
     public Collection<ScoreObjective> getObjectives() {

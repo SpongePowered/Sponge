@@ -58,6 +58,13 @@ public final class NbtDataUtil {
     private NbtDataUtil() {
     }
 
+    public static final class Minecraft {
+
+        public static final String PASSENGERS = "Passengers";
+
+        public static final String IS_FLYING = "flying";
+    }
+
     // These are the various tag compound id's for getting to various places
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     public static final String BLOCK_ENTITY_ID = "id";
@@ -369,4 +376,6 @@ public final class NbtDataUtil {
         }
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
+
+
 }

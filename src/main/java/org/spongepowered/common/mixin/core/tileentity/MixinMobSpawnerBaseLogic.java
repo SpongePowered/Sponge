@@ -27,9 +27,12 @@ package org.spongepowered.common.mixin.core.tileentity;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
+import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.nbt.NBTTagList;
 import net.minecraft.tileentity.MobSpawnerBaseLogic;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -45,14 +48,16 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
 @Mixin(MobSpawnerBaseLogic.class)
 public abstract class MixinMobSpawnerBaseLogic {
 
     private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
-    private static final String ENTITY_LIST_CREATE_ENTITY =
-            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoaderlspawnEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/world/World;)V";
+    private static final String
+            ANVIL_CHUNK_LOADER_READ_ENTITY =
+            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
     @Shadow private int spawnRange;
 
@@ -66,39 +71,77 @@ public abstract class MixinMobSpawnerBaseLogic {
 
     /**
      * @author gabizou - January 30th, 2016
+     * @author gabizou - Updated April 10th, 2016 - Update for 1.9 since it's passed to the AnvilChunkLoader
      *
      * Redirects to throw a ConstructEntityEvent.PRE
-     * @param entityName
      * @param world
      * @return
      */
-    /*
-    // TODO 1.9: Figure out how to update this
-    @Redirect(method = "updateSpawner", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_ENTITY))
-    private Entity onConstruct(String entityName, World world) {
-        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.stringToClassMapping.get(entityName));
+    @Redirect(method = "updateSpawner", at = @At(value = "INVOKE", target = ANVIL_CHUNK_LOADER_READ_ENTITY))
+    private Entity onConstruct(NBTTagCompound compound, World world, double x, double y, double z, boolean doesNotForceSpawn) {
+        return readEntityFromCompoundAtWorld(compound, world, x, y, z, doesNotForceSpawn);
+
+    }
+
+    /**
+     * @author gabizou - April 10th, 2016
+     *
+     * This is close to a verbatim copy of {@link AnvilChunkLoader#readWorldEntityPos(NBTTagCompound, World, double, double, double, boolean)}
+     * with the added bonus of throwing events before entities are constructed with appropriate causes.
+     *
+     * @param compound The compound of the entity to spawn with
+     * @param world The world to spawn at
+     * @param x The x position
+     * @param y The y position
+     * @param z The z position
+     * @param attemptToSpawn If false, the entity is not going to be spawned into the world yet
+     * @return The entity, if successfully created
+     */
+    private static Entity readEntityFromCompoundAtWorld(NBTTagCompound compound, World world, double x, double y, double z, boolean attemptToSpawn) {
+        final String entityTypeString = compound.getString(NbtDataUtil.ENTITY_TYPE_ID);
+        EntityType type = EntityTypeRegistryModule.getInstance().getForClass(EntityList.stringToClassMapping.get(entityTypeString));
         if (type == null) {
             return null;
         }
-        BlockPos blockPos = getSpawnerPosition();
-
-        this.posX = (double)blockPos.getX() + (this.getSpawnerWorld().rand.nextDouble() - this.getSpawnerWorld().rand.nextDouble())
-                                              * (double)this.spawnRange + 0.5D;
-        this.posY = (double)(blockPos.getY() + this.getSpawnerWorld().rand.nextInt(3) - 1);
-        this.posZ = (double)blockPos.getZ() + (this.getSpawnerWorld().rand.nextDouble() - this.getSpawnerWorld().rand.nextDouble())
-                                              * (double)this.spawnRange + 0.5D;
 
         SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(
-                ((org.spongepowered.api.world.World) getSpawnerWorld()), new Vector3d(this.posX, this.posY, this.posZ));
+                ((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
             return null;
         }
-        return EntityList.createEntityByName(entityName, world);
+        Entity entity;
+        try {
+            entity = EntityList.createEntityFromNBT(compound, world);
+        } catch (Exception e) {
+            return null;
+        }
 
-    }*/
+        if (entity == null) {
+            return null;
+        }
+
+        entity.setLocationAndAngles(x, y, z, entity.rotationYaw, entity.rotationPitch);
+
+        if (attemptToSpawn && !world.spawnEntityInWorld(entity)) {
+            return null;
+        }
+
+
+        if (compound.hasKey(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList passengerList = compound.getTagList(NbtDataUtil.Minecraft.PASSENGERS, NbtDataUtil.TAG_COMPOUND);
+
+            for (int i = 0; i < passengerList.tagCount(); i++) {
+                final Entity passenger = readEntityFromCompoundAtWorld(passengerList.getCompoundTagAt(i), world, x, y, z, attemptToSpawn);
+                if (passenger != null) {
+                    passenger.startRiding(entity, true);
+                }
+            }
+        }
+        return entity;
+    }
 
     @Inject(method = "updateSpawner", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/MobSpawnerBaseLogic;resetTimer()V"))
     private void onReset(CallbackInfo callbackInfo) {
@@ -106,22 +149,5 @@ public abstract class MixinMobSpawnerBaseLogic {
         this.posY = 0;
         this.posZ = 0;
     }
-
-    /**
-     * Redirects the entity spawn to ours since we know the cause already.
-     *
-     * @param world
-     * @param entity
-     * @return
-     */
-    // TODO 1.9: Re-add this
-    /*
-    @Redirect(method = "spawnNewEntity", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onEntitySpawn(World world, Entity entity) {
-        // TODO include the spawner data once implemented.
-        SpawnCause cause = SpawnCause.builder().type(SpawnTypes.MOB_SPAWNER).build(); // We can't use MobspawnerSpawnCause yet.
-        return ((org.spongepowered.api.world.World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity),
-                Cause.of(NamedCause.source(cause)));
-    }*/
 
 }

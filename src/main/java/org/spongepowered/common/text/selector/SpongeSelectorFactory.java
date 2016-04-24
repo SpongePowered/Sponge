@@ -118,11 +118,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    private static <T> Optional<T> recast(Optional<?> source) {
-        return (Optional<T>) source;
-    }
-
     private final Map<String, ArgumentHolder.Limit<ArgumentType<Integer>>> scoreToTypeMap =
             Maps.newLinkedHashMap();
     private final Map<String, ArgumentType<?>> argumentLookupMap = Maps
@@ -189,7 +184,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
 
     @Override
     public Optional<ArgumentType<?>> getArgumentType(String name) {
-        return recast(Optional.ofNullable(this.argumentLookupMap.get(name)));
+        return Optional.ofNullable(this.argumentLookupMap.get(name));
     }
 
     @Override
@@ -216,11 +211,6 @@ public class SpongeSelectorFactory implements SelectorFactory {
                                                                      type, converterKey));
         }
         return (SpongeArgumentType<T>) this.argumentLookupMap.get(key);
-    }
-
-    public SpongeArgumentType.Invertible<String> createInvertibleArgumentType(
-            String key) {
-        return createInvertibleArgumentType(key, String.class);
     }
 
     public <T> SpongeArgumentType.Invertible<T> createInvertibleArgumentType(
@@ -262,7 +252,7 @@ public class SpongeSelectorFactory implements SelectorFactory {
         Set<Argument<T>> set = Sets.newLinkedHashSet();
         if (type instanceof SpongeArgumentHolder.SpongeVector3) {
             Set<Function<V, T>> extractors =
-                    ((SpongeArgumentHolder.SpongeVector3<V, T>) (Object) type)
+                    ((SpongeArgumentHolder.SpongeVector3<V, T>) type)
                             .extractFunctions();
             Set<? extends ArgumentType<T>> types = type.getTypes();
             Iterator<Function<V, T>> extIter = extractors.iterator();

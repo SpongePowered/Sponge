@@ -122,7 +122,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     @Inject(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/effect/EntityLightningBolt;setDead()V"))
-    public void onSetDead(CallbackInfo ci) {
+    public void onLivingTimeExpired(CallbackInfo ci) {
         if (this.isDead) {
             return;
         }

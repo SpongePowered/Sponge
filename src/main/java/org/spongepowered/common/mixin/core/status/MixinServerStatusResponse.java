@@ -51,14 +51,14 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class MixinServerStatusResponse implements ClientPingServerEvent.Response {
 
-    @Shadow private ITextComponent serverMotd;
-    @Shadow private ServerStatusResponse.Players playerCount;
+    @Shadow @Nullable private ITextComponent serverMotd;
+    @Shadow @Nullable private ServerStatusResponse.Players playerCount;
     @Shadow private ServerStatusResponse.Version protocolVersion;
-    @Shadow private String favicon;
+    @Shadow @Nullable private String favicon;
 
-    private Text description;
-    private ServerStatusResponse.Players playerBackup;
-    private Favicon faviconHandle;
+    private Text description = Text.of();
+    @Nullable private ServerStatusResponse.Players playerBackup;
+    @Nullable private Favicon faviconHandle;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onInit(CallbackInfo ci) {
@@ -76,6 +76,12 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
         this.serverMotd = SpongeTexts.toComponent(description); // TODO: Hope we get sent the locale
     }
 
+    /**
+     * @author minecrell - January 18th, 2015
+     * @reason Use our Text API
+     *
+     * @param motd The message of the day to set
+     */
     @Overwrite
     public void setServerDescription(@Nullable ITextComponent motd) {
         if (motd != null) {
@@ -125,8 +131,14 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
         }
     }
 
+    /**
+     * @author minecrell - January 18th, 2015
+     * @reason Implements our Status API
+     *
+     * @param faviconBlob the blob of the favicon
+     */
     @Overwrite
-    public void setFavicon(String faviconBlob) {
+    public void setFavicon(@Nullable String faviconBlob) {
         if (faviconBlob == null) {
             this.favicon = null;
             this.faviconHandle = null;

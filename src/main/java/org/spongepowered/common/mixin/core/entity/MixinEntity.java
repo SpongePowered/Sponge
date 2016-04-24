@@ -34,8 +34,10 @@ import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
+import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
@@ -49,9 +51,11 @@ import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -82,7 +86,6 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
@@ -107,18 +110,20 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.util.ArrayList;
@@ -154,7 +159,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private DamageSource originalLava;
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
-    private boolean isRespawning = false;
+    protected DamageSource lastDamageSource;
+    private Cause destructCause;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -182,6 +188,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public int fire;
     @Shadow public int dimension;
     @Shadow protected Random rand;
+    @Shadow public float prevDistanceWalkedModified;
+    @Shadow public float distanceWalkedModified;
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -198,18 +206,24 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow public abstract void setFire(int seconds);
     @Shadow public abstract void writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
-    @Shadow(prefix = "shadow$")
-    protected abstract void shadow$setRotation(float yaw, float pitch);
+    @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
     @Shadow public abstract boolean isBeingRidden();
-    @Shadow public abstract SoundCategory func_184176_by();
-    @Shadow(prefix = "shadow$")
-    public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
+    @Shadow public abstract SoundCategory getSoundCategory();
+    @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
     @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
     @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
     @Shadow public abstract void dismountRidingEntity();
+    @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
+    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
+    @Shadow public abstract boolean isSprinting();
+    @Shadow public abstract boolean isInWater();
+    @Shadow public abstract boolean isRiding();
+    @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
 
     // @formatter:on
 
@@ -294,12 +308,6 @@ public abstract class MixinEntity implements IMixinEntity {
         if (this.fire > 0) {
             manipulators.add(get(IgniteableData.class).get());
         }
-
-    }
-
-    @Override
-    public World getWorld() {
-        return (World) this.worldObj;
     }
 
     @Override
@@ -381,7 +389,8 @@ public abstract class MixinEntity implements IMixinEntity {
             this$.dismountRidingEntity();
         }
 
-        ((IMixinWorld) fromWorld).onSpongeEntityRemoved(this$);
+        final IMixinWorldServer fromMixinWorld = (IMixinWorldServer) fromWorld;
+        fromMixinWorld.onSpongeEntityRemoved(this$);
 
         int i = this$.chunkCoordX;
         int j = this$.chunkCoordZ;
@@ -396,7 +405,8 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         // At this point, we've removed the entity from the previous world. Lets now put them in the new world.
-        this$.dimension = ((IMixinWorld) toWorld).getDimensionId();
+        final IMixinWorldServer toMixinWorld = (IMixinWorldServer) toWorld;
+        this$.dimension = toMixinWorld.getDimensionId();
         this$.setWorld(toWorld);
 
         if (this$ instanceof EntityPlayer) {
@@ -410,8 +420,8 @@ public abstract class MixinEntity implements IMixinEntity {
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
                 DimensionManager.sendDimensionRegistration(entityPlayerMP, toClientDimensionType);
             } else {
-                final int currentDim = ((IMixinWorld) fromWorld).getDimensionId();
-                final int targetDim = ((IMixinWorld) toWorld).getDimensionId();
+                final int currentDim =  fromMixinWorld.getDimensionId();
+                final int targetDim = toMixinWorld.getDimensionId();
                 final int fromClientDimensionTypeId = fromClientDimensionType.getId();
                 final int toClientDimensionTypeId = toClientDimensionType.getId();
                 // Force vanilla client to refresh their chunk cache if same dimension
@@ -463,7 +473,7 @@ public abstract class MixinEntity implements IMixinEntity {
         } else {
             if (((Entity) this) instanceof EntityPlayerMP) {
                 // Players use different logic, as they support real relative movement.
-                EnumSet relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
+                EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
                     relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
@@ -591,6 +601,7 @@ public abstract class MixinEntity implements IMixinEntity {
         return new Vector3d(this.rotationPitch, this.rotationYaw, 0);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "The rotation was null!");
@@ -602,7 +613,9 @@ public abstract class MixinEntity implements IMixinEntity {
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
-            ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+            if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.
+                ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+            }
 
             // Let the entity tracker do its job, this just updates the variables
             shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
@@ -715,7 +728,7 @@ public abstract class MixinEntity implements IMixinEntity {
             builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
         }
         if (entity != null) {
-            builder.from(entity.addPassenger((Entity) this));
+            builder.from(entity.addPassenger(this));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
     }
@@ -887,25 +900,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
-        NBTTagCompound nbt = getSpongeData();
-        if (!nbt.hasKey(nbtKey)) {
-           return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasUniqueId(NbtDataUtil.UUID)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
-            // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -931,22 +926,12 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
-       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-       if (user.isPresent()) {
-           return Optional.of(user.get().getUniqueId());
-       } else {
-           return Optional.empty();
-       }
+       return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -1105,33 +1090,25 @@ public abstract class MixinEntity implements IMixinEntity {
         return this.displayName;
     }
 
+    private boolean skipSettingCustomNameTag = false;
+
     @Override
     public void setDisplayName(@Nullable Text displayName) {
         this.displayName = displayName;
 
-        StaticMixinHelper.setCustomNameTagSkip = true;
+        this.skipSettingCustomNameTag = true;
         if (this.displayName == null) {
             this.setCustomNameTag("");
         } else {
             this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
         }
 
-        StaticMixinHelper.setCustomNameTagSkip = false;
-    }
-
-    @Override
-    public boolean isRespawning() {
-        return this.isRespawning;
-    }
-
-    @Override
-    public void setRespawning(boolean respawning) {
-        this.isRespawning = respawning;
+        this.skipSettingCustomNameTag = false;
     }
 
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))
     public void onSetCustomNameTag(String name, CallbackInfo ci) {
-        if (!StaticMixinHelper.setCustomNameTagSkip) {
+        if (!this.skipSettingCustomNameTag) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
     }
@@ -1195,15 +1172,6 @@ public abstract class MixinEntity implements IMixinEntity {
         ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
         this.custom = null;
         return stack;
-    }
-
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
 }

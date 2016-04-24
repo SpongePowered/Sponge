@@ -1,0 +1,12 @@
+{
+    "minVersion": "0.5.3",
+    "package": "org.spongepowered.common.mixin.gamefix",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.GameFixPlugin",
+    "mixins": [
+        "world.gen.MixinChunkProviderServer_Disable_Double_Chunk_Load"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

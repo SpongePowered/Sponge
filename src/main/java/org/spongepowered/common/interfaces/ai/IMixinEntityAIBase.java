@@ -29,11 +29,13 @@ import org.spongepowered.api.entity.ai.task.AITaskType;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 public interface IMixinEntityAIBase {
 
     void setType(AITaskType type);
 
     Optional<Goal<?>> getAIGoal();
 
-    void setGoal(Goal owner);
+    void setGoal(@Nullable Goal<?> owner);
 }

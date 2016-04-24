@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.interfaces.entity;
 
-public interface IMixinEntityFireworkRocket {
+import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive;
+
+public interface IMixinEntityFireworkRocket extends IMixinFusedExplosive {
 
     void setModifier(byte modifier);
 

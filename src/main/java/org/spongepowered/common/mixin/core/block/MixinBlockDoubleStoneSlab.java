@@ -64,11 +64,9 @@ public abstract class MixinBlockDoubleStoneSlab extends MixinBlockStoneSlab {
 
     private ImmutableSeamlessData getIsSeamlessFor(IBlockState blockState) {
         if (blockState.getBlock() instanceof BlockStoneSlab) {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class,
-                    (Boolean) blockState.getValue(BlockStoneSlab.SEAMLESS));
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.getValue(BlockStoneSlab.SEAMLESS));
         } else {
-            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class,
-                    (Boolean) blockState.getValue(BlockStoneSlabNew.SEAMLESS));
+            return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeSeamlessData.class, blockState.getValue(BlockStoneSlabNew.SEAMLESS));
         }
     }
 }

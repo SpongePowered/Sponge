@@ -123,6 +123,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String BLOCK_TRACKING_BLACKLIST = "block-blacklist";
     public static final String BLOCK_TRACKING_ENABLED = "enabled";
 
+    // Game fixes
+    public static final String DUMMY_CHUNK_RETURN_IF_NOT_LOADED = "load-dummy-chunk-if-chunk-unavailable";
+
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
     public static final String MODULE_BUNGEECORD = "bungeecord";
@@ -250,7 +253,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting
         private ExploitCategory exploits = new ExploitCategory();
 
-        @Setting(value = "optimizations")
+        @Setting(value = "optimizations", comment = "Configuration options for various game optimizations that may have possible side effects")
         private OptimizationCategory optimizations = new OptimizationCategory();
 
         public BungeeCordCategory getBungeeCord() {
@@ -291,6 +294,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public Predicate<InetAddress> getIpSet(String name) {
             return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
         }
+
     }
 
     public static class DimensionConfig extends ConfigBase {
@@ -356,6 +360,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private WorldCategory world = new WorldCategory();
         @Setting
         private TimingsCategory timings = new TimingsCategory();
+        @Setting
+        private GameFixesCategory gameFixesCategory = new GameFixesCategory();
 
         public BlockTrackingCategory getBlockTracking() {
             return this.blockTracking;
@@ -387,6 +393,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public TimingsCategory getTimings() {
             return this.timings;
+        }
+
+        public GameFixesCategory getGameFixes() {
+            return this.gameFixesCategory;
         }
 
     }
@@ -631,18 +641,39 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class OptimizationCategory extends Category {
 
-        @Setting(value = "fast-blockstate-lookup")
+        @Setting(value = "fast-blockstate-lookup", comment = "A simple patch to reduce a few sanity checks for the sake of speed when performing block state operations")
         private boolean blockStateLookup = true;
 
         @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
         private boolean ignoreUnloadedChunkLighting = true;
 
+        @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
+        private boolean useCachedChunkMap = true;
+
         public boolean useBlockStateLookupPatch() {
             return this.blockStateLookup;
         }
 
+        @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
+        private boolean preBlockItemDropMerge = true;
+
+        @Setting(value = "entity-drops-pre-merge", comment = "If enabled, entity drops are pre-processed to merge item stacks before spawning the related entities.")
+        private boolean preEntityItemDropMerge = true;
+
         public boolean useIgnoreUloadedChunkLightingPatch() {
             return this.ignoreUnloadedChunkLighting;
+        }
+
+        public boolean isUseCachedChunkMap() {
+            return this.useCachedChunkMap;
+        }
+
+        public boolean doDropsPreMergeItemDrops() {
+            return this.preBlockItemDropMerge;
+        }
+
+        public boolean doEntityDropsPreMerge() {
+            return this.preEntityItemDropMerge;
         }
     }
 
@@ -802,6 +833,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting("exploits")
         private boolean enableExploitPatches = true;
 
+        @Setting("tracking")
+        private boolean tracking = true;
+
+        @Setting("game-fixes")
+        private boolean gameFixes = false;
+
         @Setting("optimizations")
         private boolean enableOptimizationPatches = true;
 
@@ -837,6 +874,22 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.enableExploitPatches = enableExploitPatches;
         }
 
+        public boolean useTracking() {
+            return this.tracking;
+        }
+
+        public void setTracking(boolean tracking) {
+            this.tracking = tracking;
+        }
+
+        public boolean applyGameFixes() {
+            return this.gameFixes;
+        }
+
+        public void setGameFixes(boolean gameFixes) {
+            this.gameFixes = gameFixes;
+        }
+
         public boolean useOptimizations() {
             return this.enableOptimizationPatches;
         }
@@ -862,6 +915,18 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public List<String> getBlockBlacklist() {
             return this.blockBlacklist;
         }
+    }
+
+    @ConfigSerializable
+    public static class GameFixesCategory extends Category {
+
+        @Setting(value = DUMMY_CHUNK_RETURN_IF_NOT_LOADED, comment = "If enabled, world calls to retrieve a Chunk that hasn't been loaded from file or generated will return a dummy chunk")
+        private boolean dummyChunk = false;
+
+        public boolean isDummyChunkLoadingEnabled() {
+            return this.dummyChunk;
+        }
+
     }
 
     @ConfigSerializable

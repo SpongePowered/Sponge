@@ -45,6 +45,7 @@ import org.spongepowered.api.block.trait.EnumTrait;
 import org.spongepowered.api.block.trait.IntegerTrait;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.interfaces.block.IMixinBlockState;
 import org.spongepowered.common.interfaces.block.IMixinPropertyHolder;
@@ -54,7 +55,6 @@ import org.spongepowered.common.registry.provider.BlockPropertyIdProvider;
 import org.spongepowered.common.registry.type.block.BooleanTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.EnumTraitRegistryModule;
 import org.spongepowered.common.registry.type.block.IntegerTraitRegistryModule;
-import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -89,7 +89,7 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
     @Override
     public Optional<BlockType> getById(String id) {
         checkNotNull(id);
-        if (!id.contains(":")) {
+        if (!id.contains(":") && !id.equals("none")) {
             id = "minecraft:" + id; // assume vanilla
         }
         return Optional.ofNullable(this.blockTypeMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
@@ -141,9 +141,9 @@ public class BlockTypeRegistryModule implements SpongeAdditionalCatalogRegistryM
 
     @Override
     public void registerDefaults() {
-        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(StaticMixinHelper.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.air.getDefaultState()).build();
+        BlockSnapshot NONE_SNAPSHOT = new SpongeBlockSnapshotBuilder().worldId(BlockUtil.INVALID_WORLD_UUID).position(new Vector3i(0, 0, 0)).blockState((BlockState) Blocks.air.getDefaultState()).build();
         RegistryHelper.setFinalStatic(BlockSnapshot.class, "NONE", NONE_SNAPSHOT);
-        this.blockTypeMappings.put("none", BlockTypes.AIR);
+        this.blockTypeMappings.put("none", (BlockType) Blocks.air);
     }
 
     BlockTypeRegistryModule() { }

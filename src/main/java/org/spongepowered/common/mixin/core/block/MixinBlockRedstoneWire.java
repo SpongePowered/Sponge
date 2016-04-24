@@ -82,16 +82,15 @@ public abstract class MixinBlockRedstoneWire extends MixinBlock {
     }
 
     private ImmutableRedstonePoweredData getPowerFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class,
-                (Integer) blockState.getValue(BlockRedstoneWire.POWER));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRedstonePoweredData.class, blockState.getValue(BlockRedstoneWire.POWER));
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final IStringSerializable north = (IStringSerializable) blockState.getValue(BlockRedstoneWire.NORTH);
-        final IStringSerializable east = (IStringSerializable) blockState.getValue(BlockRedstoneWire.EAST);
-        final IStringSerializable west = (IStringSerializable) blockState.getValue(BlockRedstoneWire.WEST);
-        final IStringSerializable south = (IStringSerializable) blockState.getValue(BlockRedstoneWire.SOUTH);
+        final IStringSerializable north = blockState.getValue(BlockRedstoneWire.NORTH);
+        final IStringSerializable east = blockState.getValue(BlockRedstoneWire.EAST);
+        final IStringSerializable west = blockState.getValue(BlockRedstoneWire.WEST);
+        final IStringSerializable south = blockState.getValue(BlockRedstoneWire.SOUTH);
         if (!north.getName().matches("none")) {
             directions.add(Direction.NORTH);
         }

@@ -63,7 +63,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     private Function<Location<Chunk>, DoublePlantType> override = null;
     private VariableAmount count;
 
-    @Shadow private BlockDoublePlant.EnumPlantType field_150549_a;
+    @Shadow private BlockDoublePlant.EnumPlantType plantType;
 
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
@@ -98,10 +98,10 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         return rand.nextInt(i);
     }
 
-    /*
-     * Author: Deamon - December 12th, 2015
+    /**
+     * @author Deamon - December 12th, 2015
      * 
-     * Purpose: Completely changes the method to leverage the WeightedTable
+     * @reason Completely changes the method to leverage the WeightedTable
      * types. This method was almost completely rewritten.
      */
     @Overwrite
@@ -109,7 +109,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         boolean flag = false;
 
         if (this.types.isEmpty()) {
-            this.types.add(new WeightedObject<DoublePlantType>((DoublePlantType) (Object) this.field_150549_a, 1));
+            this.types.add(new WeightedObject<DoublePlantType>((DoublePlantType) (Object) this.plantType, 1));
         }
         DoublePlantType type = DoublePlantTypes.GRASS;
         List<DoublePlantType> result;

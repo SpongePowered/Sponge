@@ -42,13 +42,13 @@ import org.spongepowered.common.world.gen.populators.RoofedForestPopulator;
 @Mixin(BiomeGenForest.class)
 public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
 
-    @Shadow private BiomeGenForest.Type field_150632_aF;
+    @Shadow private BiomeGenForest.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
         int base = -3;
-        if (this.field_150632_aF == BiomeGenForest.Type.FLOWER) {
+        if (this.type == BiomeGenForest.Type.FLOWER) {
             base = -1;
         }
         DoublePlant plant = DoublePlant.builder()
@@ -60,13 +60,13 @@ public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
         gensettings.getPopulators().add(plant);
         super.buildPopulators(world, gensettings);
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        if (this.field_150632_aF == BiomeGenForest.Type.ROOFED) {
+        if (this.type == BiomeGenForest.Type.ROOFED) {
             RoofedForestPopulator forest = new RoofedForestPopulator();
             gensettings.getPopulators().add(0, forest);
         } else {
             Forest.Builder forest = Forest.builder();
             forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-            if (this.field_150632_aF == BiomeGenForest.Type.BIRCH) {
+            if (this.type == BiomeGenForest.Type.BIRCH) {
                 forest.type(BiomeTreeTypes.BIRCH.getPopulatorObject(), 1);
             } else {
                 forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 4);
@@ -74,7 +74,7 @@ public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
             }
             gensettings.getPopulators().add(0, forest.build());
         }
-        if (this.field_150632_aF == BiomeGenForest.Type.FLOWER) {
+        if (this.type == BiomeGenForest.Type.FLOWER) {
             gensettings.getPopulators().removeAll(gensettings.getPopulators(Flower.class));
             Flower flower = Flower.builder()
                     .perChunk(theBiomeDecorator.flowersPerChunk * 64)

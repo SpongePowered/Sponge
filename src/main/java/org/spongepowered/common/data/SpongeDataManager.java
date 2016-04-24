@@ -76,7 +76,6 @@ public final class SpongeDataManager implements DataManager {
     private static final SpongeDataManager instance = new SpongeDataManager();
     private final Map<Class<?>, DataBuilder<?>> builders = Maps.newHashMap();
     private final Map<Class<? extends ImmutableDataHolder<?>>, ImmutableDataBuilder<?, ?>> immutableDataBuilderMap = new MapMaker().concurrencyLevel(4).makeMap();
-    private boolean registrationComplete = false;
 
     // Builders
 
@@ -119,16 +118,10 @@ public final class SpongeDataManager implements DataManager {
 
     private SpongeDataManager() {}
 
-    public void completeRegistration() {
-        checkState(!this.registrationComplete);
-        this.registrationComplete = true;
-    }
-
     @Override
     public <T extends DataSerializable> void registerBuilder(Class<T> clazz, DataBuilder<T> builder) {
         checkNotNull(clazz);
         checkNotNull(builder);
-        checkState(!this.registrationComplete);
         if (!this.builders.containsKey(clazz)) {
             if (!(builder instanceof AbstractDataBuilder || builder instanceof SpongeDataManipulatorBuilder || builder instanceof SpongeImmutableDataManipulatorBuilder)) {
                 SpongeImpl.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
@@ -410,7 +403,7 @@ public final class SpongeDataManager implements DataManager {
      * @return The data processor
      */
     public Optional<DataProcessor<?, ?>> getWildProcessor(Class<? extends DataManipulator<?, ?>> mutableClass) {
-        return Optional.<DataProcessor<?, ?>>ofNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
+        return Optional.ofNullable(this.dataProcessorDelegates.get(checkNotNull(mutableClass)));
     }
 
     /**
@@ -419,9 +412,9 @@ public final class SpongeDataManager implements DataManager {
      * @param class1 The class of the {@link DataManipulator}
      * @return The raw typed data processor
      */
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"rawtypes", "SuspiciousMethodCalls"})
     public Optional<DataProcessor> getWildDataProcessor(Class<? extends DataManipulator> class1) {
-        return Optional.<DataProcessor>ofNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
+        return Optional.ofNullable(this.dataProcessorDelegates.get(checkNotNull(class1)));
     }
 
     /**
@@ -448,7 +441,7 @@ public final class SpongeDataManager implements DataManager {
      */
     @SuppressWarnings("rawtypes")
     public Optional<DataProcessor> getWildImmutableProcessor(Class<? extends ImmutableDataManipulator<?, ?>> immutableClass) {
-        return Optional.<DataProcessor>ofNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
+        return Optional.ofNullable(this.immutableDataProcessorDelegates.get(checkNotNull(immutableClass)));
     }
 
 
@@ -459,7 +452,7 @@ public final class SpongeDataManager implements DataManager {
         checkNotNull(key);
         List<ValueProcessor<?, ?>> processorList = this.valueProcessorMap.get(key);
         if (processorList == null) {
-            processorList = Collections.synchronizedList(Lists.<ValueProcessor<?, ?>>newArrayList());
+            processorList = Collections.synchronizedList(Lists.newArrayList());
             this.valueProcessorMap.put(key, processorList);
         }
         checkArgument(!processorList.contains(valueProcessor), "Duplicate ValueProcessor registration!");
@@ -472,7 +465,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     public Optional<ValueProcessor<?, ?>> getWildValueProcessor(Key<?> key) {
-        return Optional.<ValueProcessor<?, ?>>ofNullable(this.valueDelegates.get(key));
+        return Optional.ofNullable(this.valueDelegates.get(key));
     }
 
     @SuppressWarnings("unchecked")

@@ -97,6 +97,7 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.DimensionManager;
@@ -238,7 +239,7 @@ public abstract class MixinPlayerList {
         float pitch = (float) loginEvent.getToTransform().getPitch();
         float yaw = (float) loginEvent.getToTransform().getYaw();
 
-        playerIn.dimension = ((IMixinWorld) worldServer).getDimensionId();
+        playerIn.dimension = ((IMixinWorldServer) worldServer).getDimensionId();
         playerIn.setWorld(worldServer);
         playerIn.interactionManager.setWorld((WorldServer) playerIn.worldObj);
         // Sponge end
@@ -286,7 +287,7 @@ public abstract class MixinPlayerList {
 
         // Sponge start - add world name to message
         logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
-                + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorld) worldServer).getDimensionId()
+                + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) worldServer).getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         // Sponge end
 
@@ -384,6 +385,19 @@ public abstract class MixinPlayerList {
     // getPlayerRespawnLocation and recreatePlayerEntity
     private boolean tempIsBedSpawn = false;
 
+    /**
+     * @author Zidane - June 13th, 2015
+     * @author simon816 - June 24th, 2015
+     * @author Zidane - March 29th, 2016
+     *
+     * @reason - Direct respawning players to use Sponge events
+     * and process appropriately.
+     *
+     * @param entityPlayerMP The player being respawned/created
+     * @param targetDimension The target dimension
+     * @param conqueredEnd Whether the end was conquered
+     * @return The new player
+     */
     @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP entityPlayerMP, int targetDimension, boolean conqueredEnd) {
@@ -413,12 +427,10 @@ public abstract class MixinPlayerList {
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();
         entityPlayerMP.isDead = false;
 
-        ((IMixinEntity) entityPlayerMP).setRespawning(true);
         final RespawnPlayerEvent event = SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(entityPlayerMP)), fromTransform,
                 toTransform, (Player) entityPlayerMP, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        ((IMixinEntity) entityPlayerMP).setRespawning(false);
 
         toTransform = event.getToTransform();
 
@@ -432,7 +444,7 @@ public abstract class MixinPlayerList {
 
             toWorldServer.getChunkProvider().provideChunk((int) toTransform.getLocation().getX() >> 4, (int) toTransform.getLocation().getZ() >> 4);
 
-            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorld) toWorldServer).getDimensionId(), toWorldServer.getDifficulty(),
+            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorldServer) toWorldServer).getDimensionId(), toWorldServer.getDifficulty(),
                     toWorldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
         }
 
@@ -464,7 +476,7 @@ public abstract class MixinPlayerList {
         }
 
         final Dimension targetDimension = (Dimension) targetWorld.provider;
-        int targetDimensionId = ((IMixinWorld) targetWorld).getDimensionId();
+        int targetDimensionId = ((IMixinWorldServer) targetWorld).getDimensionId();
         // Cannot respawn in requested world, use the fallback dimension for
         // that world. (Usually overworld unless a mod says otherwise).
         if (!targetDimension.allowsPlayerRespawns()) {
@@ -541,6 +553,7 @@ public abstract class MixinPlayerList {
 
         // Spawn player into level
         WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
+        // TODO direct this appropriately
         level.spawnEntityInWorld(player);
         this.preparePlayer(player, null);
 

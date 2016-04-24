@@ -206,9 +206,9 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     public boolean team$removeMember(Text member) {
         String legacyName = SpongeTexts.toLegacy(member);
         if (this.theScoreboard != null) {
-            ScorePlayerTeam realTeam = theScoreboard.getPlayersTeam(legacyName);
+            ScorePlayerTeam realTeam = this.theScoreboard.getPlayersTeam(legacyName);
 
-            if ((Object) realTeam == this) {
+            if (realTeam == (ScorePlayerTeam) (Object) this) {
                 this.theScoreboard.removePlayerFromTeam(legacyName, realTeam);
                 return true;
             }
@@ -218,6 +218,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     public Optional<org.spongepowered.api.scoreboard.Scoreboard> team$getScoreboard() {
         return Optional.ofNullable((org.spongepowered.api.scoreboard.Scoreboard) this.theScoreboard);
     }
@@ -296,7 +297,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
 
     @SuppressWarnings("rawtypes")
     public MessageChannel getChannel() {
-        return MessageChannel.fixed(((Collection<String>) this.getMembershipCollection()).stream()
+        return MessageChannel.fixed(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
@@ -306,7 +307,7 @@ public abstract class MixinScorePlayerTeam extends net.minecraft.scoreboard.Team
     @SuppressWarnings("rawtypes")
     @Override
     public MessageChannel getTeamChannel(EntityPlayerMP player) {
-        return MessageChannel.fixed(((Collection<String>) this.getMembershipCollection()).stream()
+        return MessageChannel.fixed(this.getMembershipCollection().stream()
                 .map(name -> Sponge.getGame().getServer().getPlayer(name))
                 .filter(Optional::isPresent)
                 .map(Optional::get)

@@ -53,9 +53,9 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
     }
 
     /**
-     * @author gabizou - March 7th, 2016
+     * @author gabizou - March 4th, 2016
      *
-     * Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
+     * @reason Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
      * prevented any non-vanilla beacon defined potions from being applied
      * to a beacon. This method is used for both setfield and when reading from nbt.
      */

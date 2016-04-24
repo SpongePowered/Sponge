@@ -36,7 +36,7 @@ public abstract class MixinEntityAIAttackMelee implements AttackLivingAITask {
 
     @Override
     public double getSpeed() {
-        return speedTowardsTarget;
+        return this.speedTowardsTarget;
     }
 
     @Override
@@ -47,7 +47,7 @@ public abstract class MixinEntityAIAttackMelee implements AttackLivingAITask {
 
     @Override
     public boolean hasLongMemory() {
-        return longMemory;
+        return this.longMemory;
     }
 
     @Override

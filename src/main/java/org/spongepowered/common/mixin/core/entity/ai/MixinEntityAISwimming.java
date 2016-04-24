@@ -37,8 +37,8 @@ public abstract class MixinEntityAISwimming implements SwimmingAITask {
     float swimChance = 0.8f;
 
     /**
-     * Author: Zidane
-     * Purpose: By default, Vanilla's swim chance is always 0.8f. I expose this.
+     * @author Zidane
+     * @reason By default, Vanilla's swim chance is always 0.8f. I expose this.
      */
     @Overwrite
     public void updateTask() {

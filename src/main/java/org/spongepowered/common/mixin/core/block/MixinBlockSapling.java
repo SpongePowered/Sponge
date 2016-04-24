@@ -93,6 +93,6 @@ public abstract class MixinBlockSapling extends MixinBlock {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(BlockSapling.STAGE), 0, 1);
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(BlockSapling.STAGE), 0, 1);
     }
 }

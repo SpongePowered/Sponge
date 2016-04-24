@@ -28,12 +28,10 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ClassInheritanceMultiMap;
@@ -48,7 +46,6 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -59,9 +56,9 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -79,13 +76,18 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -95,6 +97,7 @@ import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWork
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -102,13 +105,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @NonnullByDefault
 @Mixin(net.minecraft.world.chunk.Chunk.class)
 public abstract class MixinChunk implements Chunk, IMixinChunk {
 
-    public Map<Integer, PlayerTracker> trackedIntBlockPositions = Maps.newHashMap();
-    public Map<Short, PlayerTracker> trackedShortBlockPositions = Maps.newHashMap();
-    private Cause populateCause;
     private org.spongepowered.api.world.World world;
     private UUID uuid;
 
@@ -142,7 +144,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
 
-    @Shadow public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
+    @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
     @Shadow protected abstract void relightBlock(int x, int y, int z);
     @Shadow public abstract int getLightFor(EnumSkyBlock p_177413_1_, BlockPos pos);
@@ -271,12 +273,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     public void setBlock(int x, int y, int z, BlockState block) {
         checkBlockBounds(x, y, z);
-        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
+        BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, x, y, z, block, false);
     }
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        SpongeHooks.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
+        BlockUtil.setBlockState((net.minecraft.world.chunk.Chunk) (Object) this, this.xPosition << 4 + (x & 15), y, this.zPosition << 4 + (z & 15),
                 block, notifyNeighbors);
     }
 
@@ -387,12 +389,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, entityIn, listToFill);
-        if (event == null) {
-            return;
-        } else if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             listToFill.clear();
-        } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
         }
     }
 
@@ -408,20 +406,21 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
 
         CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.worldObj, null, listToFill);
-        if (event == null) {
-            return;
-        } else if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             listToFill.clear();
-        } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
         }
     }
 
-    @Override
-    public Cause getCurrentPopulateCause() {
-        return this.populateCause;
-    }
 
+    /**
+     * @author blood
+     * @reason cause tracking
+     *
+     * @param pos The position to set
+     * @param state The state to set
+     * @return The changed state
+     */
+    @Nullable
     @Overwrite
     public IBlockState setBlockState(BlockPos pos, IBlockState state) {
         IBlockState iblockstate1 = this.getBlockState(pos);
@@ -433,338 +432,202 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return setBlockState(pos, state, iblockstate1, null);
     }
 
+    /**
+     * @author blood - November 2015
+     * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
+     *
+     *
+     * @param pos The position changing
+     * @param newState The new state
+     * @param currentState The current state - passed in from either chunk or world
+     * @param newBlockSnapshot The new snapshot. This can be null when calling {@link MixinChunk#setBlockState(BlockPos, IBlockState)} directly,
+     *      as there's no block snapshot to change.
+     * @return The changed block state if not null
+     */
     @Override
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot) {
+    @Nullable
+    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
+        int xPos = pos.getX() & 15;
+        int yPos = pos.getY();
+        int zPos = pos.getZ() & 15;
+        int combinedPos = zPos << 4 | xPos;
 
-        int i = pos.getX() & 15;
-        int j = pos.getY();
-        int k = pos.getZ() & 15;
-        int l = k << 4 | i;
-
-        if (j >= this.precipitationHeightMap[l] - 1) {
-            this.precipitationHeightMap[l] = -999;
+        if (yPos >= this.precipitationHeightMap[combinedPos] - 1) {
+            this.precipitationHeightMap[combinedPos] = -999;
         }
 
-        int i1 = this.heightMap[l];
-        // Sponge - remove blockstate check as we handle it in world.setBlockState
-        Block block = newState.getBlock();
-        Block block1 = currentState.getBlock();
-        ExtendedBlockStorage extendedblockstorage = this.storageArrays[j >> 4];
-        boolean flag = false;
+        int currentHeight = this.heightMap[combinedPos];
+
+        // Sponge Start - remove blockstate check as we handle it in world.setBlockState
+        // IBlockState iblockstate = this.getBlockState(pos);
+        //
+        // if (iblockstate == state) {
+        //    return null;
+        // } else {
+        Block newBlock = newState.getBlock();
+        Block currentBlock = currentState.getBlock();
+        // Sponge End
+
+        ExtendedBlockStorage extendedblockstorage = this.storageArrays[yPos >> 4];
+        // Sponge - make this final so we don't change it later
+        final boolean requiresNewLightCalculations;
+
+        // Sponge - Forge moves this from
+        int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.worldObj, pos);
 
         if (extendedblockstorage == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
-            if (block == Blocks.air) {
+            if (newBlock == Blocks.air) {
                 return null;
             }
 
-            extendedblockstorage = this.storageArrays[j >> 4] = new ExtendedBlockStorage(j >> 4 << 4, !this.worldObj.provider.getHasNoSky());
-            flag = j >= i1;
-        }
-
-        extendedblockstorage.set(i, j & 15, k, newState);
-
-        TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-
-        if (!this.worldObj.isRemote) {
-            if (block != block1) {
-                block1.breakBlock(this.worldObj, pos, currentState);
-            }
-
-            if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
-                this.worldObj.removeTileEntity(pos);
-            }
-        } else if (SpongeImplHooks.blockHasTileEntity(block1, currentState)) {
-            if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
-                this.worldObj.removeTileEntity(pos);
-            }
-        }
-
-        if (extendedblockstorage.get(i, j & 15, k).getBlock() != block) {
-            return null;
+            extendedblockstorage = this.storageArrays[yPos >> 4] = new ExtendedBlockStorage(yPos >> 4 << 4, !this.worldObj.provider.getHasNoSky());
+            requiresNewLightCalculations = yPos >= currentHeight;
+            // Sponge Start - properly initialize variable
         } else {
-            if (flag) {
-                this.generateSkylightMap();
-            } else {
-                int j1 = SpongeImplHooks.getBlockLightOpacity(block, newState, this.worldObj, pos);
-                int k1 = currentState.getLightOpacity();
+            requiresNewLightCalculations = false;
+        }
+        // Sponge end
 
-                if (j1 > 0) {
-                    if (j >= i1) {
-                        this.relightBlock(i, j + 1, k);
-                    }
-                } else if (j == i1 - 1) {
-                    this.relightBlock(i, j, k);
+        extendedblockstorage.set(xPos, yPos & 15, zPos, newState);
+
+        // Sponge Start
+        // if (block1 != block) // Sponge - Forge removes this change.
+        {
+            if (!this.worldObj.isRemote) {
+                // Sponge - Forge adds this change for block changes to only fire events when necessary
+                if (currentState.getBlock() != newState.getBlock()) {
+                    currentBlock.breakBlock(this.worldObj, pos, currentState);
                 }
-
-                if (j1 != k1 && (j1 < k1 || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
-                    this.propagateSkylightOcclusion(i, k);
+                // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
+                // still work by themselves in vanilla.
+                TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+                if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
+                    this.worldObj.removeTileEntity(pos);
+                }
+            // } else if (currentBlock instanceof ITileEntityProvider) { // Sponge - remove since forge has a special hook we need to add here
+            } else if (SpongeImplHooks.blockHasTileEntity(currentBlock, currentState)) {
+                TileEntity tileEntity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+                // Sponge - Add hook for refreshing, because again, forge hooks.
+                if (tileEntity != null && SpongeImplHooks.shouldRefresh(tileEntity, this.worldObj, pos, currentState, newState)) {
+                    // Sponge End
+                    this.worldObj.removeTileEntity(pos);
                 }
             }
+        }
 
-            // Sponge start - Invalid previous TileEntity (if exists)
-            if (te != null) {
-                te.updateContainingBlockInfo();
+        if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
+            return null;
+        }
+        // Sponge Start - Slight modifiactions
+        // } else { // Sponge - remove unecessary else
+        if (requiresNewLightCalculations) {
+            this.generateSkylightMap();
+        } else {
+
+            // int newBlockLightOpacity = state.getLightOpacity(); - Sponge Forge moves this all the way up before tile entities are removed.
+            // int postNewBlockLightOpacity = newState.getLightOpacity(this.worldObj, pos); - Sponge use the SpongeImplHooks for forge compatibility
+            int postNewBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.worldObj, pos);
+            // Sponge End
+
+            if (newBlockLightOpacity > 0) {
+                if (yPos >= currentHeight) {
+                    this.relightBlock(xPos, yPos + 1, zPos);
+                }
+            } else if (yPos == currentHeight - 1) {
+                this.relightBlock(xPos, yPos, zPos);
+            }
+
+            if (newBlockLightOpacity != postNewBlockLightOpacity && (newBlockLightOpacity < postNewBlockLightOpacity || this.getLightFor(EnumSkyBlock.SKY, pos) > 0 || this.getLightFor(EnumSkyBlock.BLOCK, pos) > 0)) {
+                this.propagateSkylightOcclusion(xPos, zPos);
+            }
+        }
+
+        if (!this.worldObj.isRemote && currentBlock != newBlock) {
+            // Sponge start - Ignore block activations during block placement captures unless it's
+            // a BlockContainer. Prevents blocks such as TNT from activating when
+            // cancelled.
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final PhaseData peek = causeTracker.getStack().peek();
+            final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
+            if (!requiresCapturing) {
+                // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
+                // If it is null, then directly call the onBlockAdded logic.
+                if (newBlockSnapshot == null) {
+                    newBlock.onBlockAdded(this.worldObj, pos, newState);
+                }
             }
             // Sponge end
-
-            if (!this.worldObj.isRemote && block1 != block) {
-                // Sponge start - Ignore block activations during block placement captures unless it's
-                // a BlockContainer. Prevents blocks such as TNT from activating when cancelled.
-                if (!((IMixinWorld) this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
-                    if (newBlockSnapshot == null) {
-                        block.onBlockAdded(this.worldObj, pos, newState);
-                    }
-                }
-                // Sponge end
-            }
-
-            if (SpongeImplHooks.blockHasTileEntity(block, newState)) {
-                te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
-
-                if (te == null) {
-                    te = SpongeImplHooks.createTileEntity(block, this.worldObj, newState);
-                    this.worldObj.setTileEntity(pos, te);
-                }
-
-                // Invalidate new TE (it'll get populated with correct data later)
-                if (te != null) {
-                    te.updateContainingBlockInfo();
-                }
-            }
-
-            this.isModified = true;
-            return currentState;
         }
+
+        // Sponge Start - Use SpongeImplHooks for forge compatibility
+        // if (block instanceof ITileEntityProvider) { // Sponge
+        if (SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
+            // Sponge End
+            TileEntity tileentity = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
+
+            if (tileentity == null) {
+                // Sponge Start - use SpongeImplHooks for forge compatibility
+                // tileentity = ((ITileEntityProvider)block).createNewTileEntity(this.worldObj, block.getMetaFromState(state)); // Sponge
+                tileentity = SpongeImplHooks.createTileEntity(newBlock, this.worldObj, newState);
+                // Sponge End
+                this.worldObj.setTileEntity(pos, tileentity);
+            }
+
+            if (tileentity != null) {
+                tileentity.updateContainingBlockInfo();
+            }
+        }
+
+        this.isModified = true;
+        return currentState;
     }
+
+    // These methods are enabled in MixinChunk_Tracker as a Mixin plugin
 
     @Override
     public void addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType) {
-        if (this.worldObj.isRemote || !SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().isEnabled()) {
-            return;
-        } else {
-            IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-            if (spongeWorld.getCauseTracker().isCapturingTerrainGen()) {
-                // Don't track chunk gen
-                return;
-            }
-        }
 
-        if (!SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType)block).getId())) {
-            SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, true);
-        } else {
-            SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, false);
-        }
-
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedShortBlockPositions.get(blockPos).ownerIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                } else {
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                }
-            } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedIntBlockPositions.get(blockPos).ownerIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                } else {
-                    this.trackedIntBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                }
-            } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
-            }
-        }
     }
 
     @Override
     public Map<Integer, PlayerTracker> getTrackedIntPlayerPositions() {
-        return this.trackedIntBlockPositions;
+        return Collections.emptyMap();
     }
 
     @Override
     public Map<Short, PlayerTracker> getTrackedShortPlayerPositions() {
-        return this.trackedShortBlockPositions;
+        return Collections.emptyMap();
     }
 
     @Override
     public Optional<User> getBlockOwner(BlockPos pos) {
-        if (this.trackedIntBlockPositions.get(blockPosToInt(pos)) != null) {
-            PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
-            if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
-            }
-        } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
-            PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.ownerIndex));
-            if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
-            }
-        }
-
         return Optional.empty();
     }
 
     @Override
     public Optional<User> getBlockNotifier(BlockPos pos) {
-        if (this.trackedIntBlockPositions.get(blockPosToInt(pos)) != null) {
-            PlayerTracker tracker = this.trackedIntBlockPositions.get(blockPosToInt(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
-            if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
-            }
-        } else if (this.trackedShortBlockPositions.get(blockPosToShort(pos)) != null) {
-            PlayerTracker tracker = this.trackedShortBlockPositions.get(blockPosToShort(pos));
-            Optional<UUID> uuid = (((IMixinWorldInfo) this.worldObj.getWorldInfo()).getUniqueIdForIndex(tracker.notifierIndex));
-            if (uuid.isPresent()) {
-                // get player if online
-                EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid.get());
-                if (player != null) {
-                    return Optional.of((User) player);
-                }
-                // player is not online, get user from storage if one exists
-                return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid.get());
-            }
-        }
-
         return Optional.empty();
     }
 
-    // Special setter used by API
     @Override
-    public void setBlockNotifier(BlockPos pos, UUID uuid) {
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
-            } else {
-                this.trackedShortBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
-                                PlayerTracker.Type.NOTIFIER));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).notifierIndex = uuid == null ? -1 :
-                        ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid);
-            } else {
-                this.trackedIntBlockPositions.put(blockPos,
-                        new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(uuid),
-                                PlayerTracker.Type.NOTIFIER));
-            }
-        }
+    public void setBlockNotifier(BlockPos pos, @Nullable UUID uuid) {
+
     }
 
-    // Special setter used by API
     @Override
-    public void setBlockCreator(BlockPos pos, UUID uuid) {
-        if (pos.getY() <= 255) {
-            short blockPos = blockPosToShort(pos);
-            if (this.trackedShortBlockPositions.get(blockPos) != null) {
-                this.trackedShortBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
-            } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
-            }
-        } else {
-            int blockPos = blockPosToInt(pos);
-            if (this.trackedIntBlockPositions.get(blockPos) != null) {
-                this.trackedIntBlockPositions.get(blockPos).ownerIndex = uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid);
-            } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(uuid == null ? -1 : ((IMixinWorldInfo) this.worldObj.getWorldInfo())
-                        .getIndexForUniqueId(uuid), PlayerTracker.Type.OWNER));
-            }
-        }
+    public void setBlockCreator(BlockPos pos, @Nullable UUID uuid) {
+
     }
 
     @Override
     public void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPositions) {
-        this.trackedIntBlockPositions = trackedPositions;
     }
 
     @Override
     public void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPositions) {
-        this.trackedShortBlockPositions = trackedPositions;
     }
 
-    /**
-    * Modifies bits in an integer.
-    *
-    * @param num Integer to modify
-    * @param data Bits of data to add
-    * @param which Index of nibble to start at
-    * @param bitsToReplace The number of bits to replace starting from nibble index
-    * @return The modified integer
-    */
-    public int setNibble(int num, int data, int which, int bitsToReplace) {
-        return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
-    }
-
-    /**
-     * Serialize this BlockPos into a short value
-     */
-    public short blockPosToShort(BlockPos pos) {
-        short serialized = (short) setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = (short) setNibble(serialized, pos.getY() & Y_SHORT_MASK, 1, NUM_SHORT_Y_BITS);
-        serialized = (short) setNibble(serialized, pos.getZ() & XZ_MASK, 3, NUM_XZ_BITS);
-        return serialized;
-    }
-
-    /**
-     * Create a BlockPos from a serialized chunk position
-     */
-    public BlockPos blockPosFromShort(short serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
-        int y = (serialized >> Y_SHIFT) & Y_SHORT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_SHORT_SHIFT) & XZ_MASK);
-        return new BlockPos(x, y, z);
-    }
-
-    /**
-     * Serialize this BlockPos into an int value
-     */
-    public int blockPosToInt(BlockPos pos) {
-        int serialized = setNibble(0, pos.getX() & XZ_MASK, 0, NUM_XZ_BITS);
-        serialized = setNibble(serialized, pos.getY() & Y_INT_MASK, 1, NUM_INT_Y_BITS);
-        serialized = setNibble(serialized, pos.getZ() & XZ_MASK, 7, NUM_XZ_BITS);
-        return serialized;
-    }
-
-    /**
-     * Create a BlockPos from a serialized chunk position
-     */
-    public BlockPos blockPosFromInt(int serialized) {
-        int x = this.xPosition * 16 + (serialized & XZ_MASK);
-        int y = (serialized >> Y_SHIFT) & Y_INT_MASK;
-        int z = this.zPosition * 16 + ((serialized >> Z_INT_SHIFT) & XZ_MASK);
-        return new BlockPos(x, y, z);
-    }
+    // Continuing the rest of the implementation
 
     @Override
     public Optional<org.spongepowered.api.entity.Entity> createEntity(EntityType type, Vector3d position) {
@@ -786,7 +649,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return this.world.spawnEntity(entity, cause);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities() {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
@@ -796,10 +659,11 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return entities;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public Collection<org.spongepowered.api.entity.Entity> getEntities(java.util.function.Predicate<org.spongepowered.api.entity.Entity> filter) {
         Set<org.spongepowered.api.entity.Entity> entities = Sets.newHashSet();
-        for (ClassInheritanceMultiMap entityClassMap : this.entityLists) {
+        for (ClassInheritanceMultiMap<Entity> entityClassMap : this.entityLists) {
             for (Object entity : entityClassMap) {
                 if (filter.test((org.spongepowered.api.entity.Entity) entity)) {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
@@ -890,12 +754,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Redirect(method = "populateChunk(Lnet/minecraft/world/chunk/IChunkGenerator;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkGenerator;populate(II)V"))
     public void onChunkPopulate(IChunkGenerator generator, int x, int z) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        world.getCauseTracker().setProcessingCaptureCause(true);
-        world.getCauseTracker().setCapturingTerrainGen(true);
-        generator.populate(x, z);
-        world.getCauseTracker().setCapturingTerrainGen(false);
-        world.getCauseTracker().setProcessingCaptureCause(false);
+        if (this.worldObj instanceof WorldServer) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
+            final NamedCause sourceCause = NamedCause.source(this);
+            final NamedCause chunkProviderCause = NamedCause.of(InternalNamedCauses.WorldGeneration.CHUNK_PROVIDER, generator);
+            causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                    .add(sourceCause)
+                    .add(chunkProviderCause)
+                    .addCaptures()
+                    .complete());
+            generator.populate(x, z);
+            causeTracker.completePhase();
+        }
     }
 
 }

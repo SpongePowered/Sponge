@@ -28,7 +28,10 @@ package org.spongepowered.common;
 import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.math.BlockPos;
@@ -45,6 +48,7 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Optional;
 
@@ -80,8 +84,8 @@ public final class SpongeImplHooks {
         return block instanceof ITileEntityProvider;
     }
 
-    public static int getBlockLightOpacity(Block block, IBlockState state, IBlockAccess world, BlockPos pos) {
-        return block.getLightOpacity(state);
+    public static int getBlockLightOpacity(IBlockState state, IBlockAccess world, BlockPos pos) {
+        return state.getLightOpacity();
     }
 
     public static boolean shouldRefresh(TileEntity tile, net.minecraft.world.World world, BlockPos pos, IBlockState oldState, IBlockState newState) {
@@ -102,22 +106,42 @@ public final class SpongeImplHooks {
 
         while (iterator.hasNext()) {
             EnumFacing enumfacing = iterator.next();
-            BlockPos blockpos1 = pos.offset(enumfacing);
+            BlockPos neighborPosition = pos.offset(enumfacing);
 
-            if (world.isBlockLoaded(blockpos1)) {
-                IBlockState iblockstate = world.getBlockState(blockpos1);
+            if (world.isBlockLoaded(neighborPosition)) {
+                IBlockState iblockstate = world.getBlockState(neighborPosition);
 
                 if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
-                    iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                    iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                 } else if (iblockstate.getBlock().isNormalCube(iblockstate)) {
-                    blockpos1 = blockpos1.offset(enumfacing);
-                    iblockstate = world.getBlockState(blockpos1);
+                    neighborPosition = neighborPosition.offset(enumfacing);
+                    iblockstate = world.getBlockState(neighborPosition);
 
                     if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
-                        iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
+                        iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                     }
                 }
             }
         }
+    }
+
+    public static void addItemStackToListForSpawning(Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks, org.spongepowered.api.item.inventory.ItemStack itemStack) {
+        // This is the hook that can be overwritten to handle merging the item stack into an already existing item stack
+        itemStacks.add(itemStack);
+    }
+
+    /**
+     * A simple method to check attacks for the forge event factory.
+     *
+     * @param entityPlayer
+     * @param targetEntity
+     * @return
+     */
+    public static boolean checkAttackEntity(EntityPlayer entityPlayer, Entity targetEntity) {
+        final ItemStack item = entityPlayer.getHeldItemMainhand();
+        if (item != null) {
+            return true;
+        }
+        return true;
     }
 }

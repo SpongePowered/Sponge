@@ -61,14 +61,18 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.event.CauseTracker;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
@@ -248,9 +252,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void populate(int chunkX, int chunkZ) {
-        IMixinWorld world = (IMixinWorld) this.world;
+        IMixinWorldServer world = (IMixinWorldServer) this.world;
         final CauseTracker causeTracker = world.getCauseTracker();
-        Cause populateCause = Cause.of(NamedCause.source(this));
+        final Cause populateCause = Cause.of(NamedCause.source(this));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -288,7 +292,14 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
-            StaticMixinHelper.runningGenerator = populator.getType();
+            final PopulatorType type = populator.getType();
+            if (type == null) {
+                System.err.printf("Found a populator with a null type: %s populator%n", populator);
+            }
+            causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                    .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
+                    .addEntityCaptures()
+                    .complete());
             if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
             }
@@ -297,8 +308,8 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             } else {
                 populator.populate(chunk, this.rand);
             }
+            causeTracker.completePhase();
         }
-        StaticMixinHelper.runningGenerator = null;
 
         // If we wrapped a custom chunk provider then we should call its
         // populate method so that its particular changes are used.
@@ -344,6 +355,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                     return ((MapGenStronghold) gen).getClosestStrongholdPos(worldIn, position);
                 }
             }
+        }
+        if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            return ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).getStrongholdGen(worldIn, structureName, position);
         }
         return null;
     }

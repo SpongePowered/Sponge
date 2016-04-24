@@ -32,7 +32,7 @@ import com.google.common.cache.LoadingCache;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.command.source.RemoteSource;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
@@ -79,8 +79,8 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
-            if (source instanceof LocatedSource) {
-                World currentExt = ((LocatedSource) source).getWorld();
+            if (source instanceof Locatable) {
+                World currentExt = ((Locatable) source).getWorld();
                 accumulator.add(currentExt.getContext());
                 accumulator.add((currentExt.getDimension().getContext()));
             }
@@ -100,8 +100,8 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
-            if (source instanceof LocatedSource && context.getType().equals(Context.WORLD_KEY)) {
-                LocatedSource located = (LocatedSource) source;
+            if (source instanceof Locatable && context.getType().equals(Context.WORLD_KEY)) {
+                Locatable located = (Locatable) source;
                 if (context.getType().equals(Context.WORLD_KEY)) {
                     return located.getWorld().getContext().equals(context);
                 } else if (context.getType().equals(Context.DIMENSION_KEY)) {

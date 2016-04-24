@@ -25,16 +25,22 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityHanging;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketSpawnPainting;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.type.Profession;
-import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
@@ -50,6 +56,11 @@ public final class EntityUtil {
      * USED FOR OTHER PURPOSES AT ALL.
      */
     public static final Entity USELESS_ENTITY_FOR_MIXINS = new EntityDummy(null);
+
+    public static final BlockPos HANGING_OFFSET_EAST = new BlockPos(1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_WEST = new BlockPos(-1, 1, 0);
+    public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
+    public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
 
     private EntityUtil() {
     }
@@ -98,17 +109,85 @@ public final class EntityUtil {
                                         + " when the expected contain: " + professions);
     }
 
-    public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
-        if (!(entity instanceof org.spongepowered.api.entity.Entity)) {
-            throw new IllegalArgumentException("Found a native entity that isn't implementing SpongeAPI Entity: " + entity);
+    public static List<EntityHanging> findHangingEntities(World worldIn, BlockPos pos) {
+        return worldIn.getEntitiesWithinAABB(EntityHanging.class, new AxisAlignedBB(pos, pos).expand(1.1D, 1.1D, 1.1D),
+                entityIn -> {
+                    if (entityIn == null) {
+                        return false;
+                    }
+
+                    BlockPos entityPos = entityIn.getPosition();
+                    // Hanging Neighbor Entity
+                    if (entityPos.equals(pos.add(0, 1, 0))) {
+                        return true;
+                    }
+
+                    // Check around source block
+                    EnumFacing entityFacing = entityIn.getHorizontalFacing();
+
+                    if (entityFacing == EnumFacing.NORTH) {
+                        return entityPos.equals(pos.add(HANGING_OFFSET_NORTH));
+                    } else if (entityFacing == EnumFacing.SOUTH) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_SOUTH));
+                    } else if (entityFacing == EnumFacing.WEST) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_WEST));
+                    } else if (entityFacing == EnumFacing.EAST) {
+                        return entityIn.getPosition().equals(pos.add(HANGING_OFFSET_EAST));
+                    }
+                    return false;
+                });
+    }
+
+    public static Entity toNative(org.spongepowered.api.entity.Entity tickingEntity) {
+        if (!(tickingEntity instanceof Entity)) {
+            throw new IllegalArgumentException("Not a native Entity for this implementation!");
         }
+        return (Entity) tickingEntity;
+    }
+
+    public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
         return (org.spongepowered.api.entity.Entity) entity;
     }
 
-    public static Entity toNative(org.spongepowered.api.entity.Entity entity) {
-        if (!(entity instanceof Entity)) {
-            throw new IllegalArgumentException("Incompatible SpongeAPI entity. It is not usable for this implementation: " + entity);
+    public static Living fromNativeToLiving(Entity entity) {
+        if (!(entity instanceof Living)) {
+            throw new IllegalArgumentException("Entity is incompatible with SpongeAPI Living interface: " + entity);
         }
-        return (Entity) entity;
+        return (Living) entity;
+    }
+
+    public static EntityLivingBase toNative(Living entity) {
+        if (!(entity instanceof EntityLivingBase)) {
+            throw new IllegalArgumentException("Living entity is not compatible with this implementation: " + entity);
+        }
+        return (EntityLivingBase) entity;
+    }
+
+    public static EntityPlayerMP toNative(Player player) {
+        if (!(player instanceof EntityPlayerMP)) {
+            throw new IllegalArgumentException("Player entity is not compatible with this implementation: " + player);
+        }
+        return (EntityPlayerMP) player;
+    }
+
+    public static IMixinEntity toMixin(Entity entity) {
+        if (!(entity instanceof IMixinEntity)) {
+            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
+        }
+        return (IMixinEntity) entity;
+    }
+
+    public static IMixinEntity toMixin(org.spongepowered.api.entity.Entity entity) {
+        if (!(entity instanceof IMixinEntity)) {
+            throw new IllegalArgumentException("Not a mixin Entity for this implementation!");
+        }
+        return (IMixinEntity) entity;
+    }
+
+    public static org.spongepowered.api.entity.Entity fromMixin(IMixinEntity mixinEntity) {
+        if (!(mixinEntity instanceof org.spongepowered.api.entity.Entity)) {
+            throw new IllegalArgumentException("Not a native SpongeAPI entity!");
+        }
+        return (org.spongepowered.api.entity.Entity) mixinEntity;
     }
 }

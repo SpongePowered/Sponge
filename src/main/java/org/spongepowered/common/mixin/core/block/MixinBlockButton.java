@@ -82,11 +82,11 @@ public abstract class MixinBlockButton extends MixinBlock {
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockButton.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockButton.POWERED));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockButton.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockButton.FACING)));
     }
 }

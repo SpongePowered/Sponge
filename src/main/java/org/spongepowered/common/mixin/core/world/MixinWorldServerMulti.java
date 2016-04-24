@@ -44,6 +44,14 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         super(server, saveHandlerIn, info, dimensionId, profilerIn);
     }
 
+    /**
+     * @author unknown
+     * @reason Uses our own save handler instead of delegating to
+     * the "parent" world since multi-world support changes the
+     * structure.
+     *
+     * @throws MinecraftException An exception
+     */
     @Override
     @Overwrite
     protected void saveLevel() throws MinecraftException {
@@ -54,6 +62,10 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         super.saveLevel();
     }
 
+    /**
+     * @author unknown
+     * @reason Simply re-delegates to the super class
+     */
     @Override
     @Overwrite
     public World init() {

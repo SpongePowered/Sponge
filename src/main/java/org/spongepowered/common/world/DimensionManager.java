@@ -68,6 +68,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.mixin.core.server.MixinMinecraftServer;
 import org.spongepowered.common.scheduler.SpongeScheduler;
@@ -114,6 +115,9 @@ public class DimensionManager {
     private static final BitSet dimensionBits = new BitSet(Long.SIZE << 4);
     private static final Map<World, World> weakWorldByWorld = new MapMaker().weakKeys().weakValues().concurrencyLevel(1).makeMap();
     private static final Queue<WorldServer> unloadQueue = new ArrayDeque<>();
+    private static final Comparator<WorldServer>
+            WORLD_SERVER_COMPARATOR =
+            (world1, world2) -> ((IMixinWorldServer) world1).getDimensionId() - ((IMixinWorldServer) world2).getDimensionId();
 
     static {
         registerDimensionType(0, DimensionType.OVERWORLD);
@@ -374,7 +378,7 @@ public class DimensionManager {
                 e.printStackTrace();
             }
             finally {
-                final int dimensionId = ((IMixinWorld) worldServer).getDimensionId();
+                final int dimensionId = ((IMixinWorldServer) worldServer).getDimensionId();
                 worldByDimensionId.remove(dimensionId);
                 ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
                 SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
@@ -706,7 +710,7 @@ public class DimensionManager {
             sorted.add(2, worldServer);
         }
 
-        sorted.subList(3, sorted.size()).sort((world1, world2) -> ((IMixinWorld) world1).getDimensionId() - ((IMixinWorld) world2).getDimensionId());
+        sorted.subList(3, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
 
         //System.err.println("World order: ");
         //sorted.stream().forEach(w -> System.err.println("World id: " + w.getWorldInfo().getWorldName() + " " + ((IMixinWorld) w).getDimensionId()));

@@ -44,7 +44,7 @@ import java.util.Optional;
 @Mixin(BlockCrops.class)
 public abstract class MixinBlockCrops extends MixinBlock {
 
-    @Shadow protected abstract PropertyInteger func_185524_e();
+    @Shadow protected abstract PropertyInteger getAgeProperty();
     @Shadow protected abstract int func_185526_g();
 
     @Override
@@ -64,7 +64,7 @@ public abstract class MixinBlockCrops extends MixinBlock {
             if (growth > func_185526_g()) {
                 growth = func_185526_g();
             }
-            return Optional.of((BlockState) blockState.withProperty(func_185524_e(), growth));
+            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
         return super.getStateWithData(blockState, manipulator);
     }
@@ -76,13 +76,13 @@ public abstract class MixinBlockCrops extends MixinBlock {
             if (growth > func_185526_g()) {
                 growth = func_185526_g();
             }
-            return Optional.of((BlockState) blockState.withProperty(func_185524_e(), growth));
+            return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, (Integer) blockState.getValue(func_185524_e()), 0, func_185526_g());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, func_185526_g());
     }
 
 }

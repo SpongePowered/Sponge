@@ -68,6 +68,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Nullable;
+
 /*
  * Notes
  *
@@ -91,10 +93,10 @@ public class EntityHuman extends EntityCreature implements TeamMember {
             });
 
     // A queue of packets waiting to send to players tracking this human
-    private final Map<UUID, List<Packet[]>> playerPacketMap = Maps.newHashMap();
+    private final Map<UUID, List<Packet<?>[]>> playerPacketMap = Maps.newHashMap();
 
     private GameProfile fakeProfile;
-    private UUID skinUuid;
+    @Nullable private UUID skinUuid;
     private boolean aiDisabled = false;
 
     public EntityHuman(World worldIn) {
@@ -206,7 +208,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    public void onDeath(DamageSource cause) {
+    public void onDeath(@Nullable DamageSource cause) {
         super.onDeath(cause);
         this.setSize(0.2F, 0.2F);
         this.setPosition(this.posX, this.posY, this.posZ);
@@ -319,7 +321,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return true;
     }
 
-    public void removeFromTabListDelayed(EntityPlayerMP player, SPacketPlayerListItem removePacket) {
+    public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, SPacketPlayerListItem removePacket) {
         int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
         Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
@@ -346,6 +348,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return true;
     }
 
+    @Nullable
     public UUID getSkinUuid() {
         return this.skinUuid;
     }
@@ -435,7 +438,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      *
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(Packet... packets) {
+    public void pushPackets(Packet<?>... packets) {
         this.pushPackets(null, packets); // null = all players
     }
 
@@ -446,12 +449,22 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      * @param player The player tracking this human
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(EntityPlayerMP player, Packet... packets) {
-        List<Packet[]> queue = this.playerPacketMap.get(player);
-        if (queue == null) {
-            this.playerPacketMap.put(player == null ? null : player.getUniqueID(), queue = new ArrayList<>());
+    public void pushPackets(@Nullable EntityPlayerMP player, Packet<?>... packets) {
+        if (player == null) {
+            List<Packet<?>[]> queue = this.playerPacketMap.get(null);
+            if (queue == null) {
+                queue = new ArrayList<>();
+                this.playerPacketMap.put(null, queue);
+            }
+            queue.add(packets);
+        } else {
+            List<Packet<?>[]> queue = this.playerPacketMap.get(player.getUniqueID());
+            if (queue == null) {
+                queue = new ArrayList<>();
+                this.playerPacketMap.put(player.getUniqueID(), queue);
+            }
+            queue.add(packets);
         }
-        queue.add(packets);
     }
 
     /**
@@ -460,8 +473,8 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public Packet[] popQueuedPackets(EntityPlayerMP player) {
-        List<Packet[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
+    public Packet<?>[] popQueuedPackets(@Nullable EntityPlayerMP player) {
+        List<Packet<?>[]> queue = this.playerPacketMap.get(player == null ? null : player.getUniqueID());
         return queue == null || queue.isEmpty() ? null : queue.remove(0);
     }
 }

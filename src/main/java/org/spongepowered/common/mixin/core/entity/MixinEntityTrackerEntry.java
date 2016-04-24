@@ -49,8 +49,7 @@ public abstract class MixinEntityTrackerEntry {
     @Shadow public Entity trackedEntity;
     @Shadow public Set<EntityPlayerMP> trackingPlayers;
 
-    @Shadow
-    public abstract void func_151261_b(Packet<?> packetIn);
+    @Shadow public abstract void sendToTrackingAndSelf(Packet<?> packetIn);
 
     @Redirect(method = "updatePlayerEntity", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V", ordinal = 0))
@@ -117,4 +116,5 @@ public abstract class MixinEntityTrackerEntry {
             callBackInfo.cancel();
         }
     }
+
 }

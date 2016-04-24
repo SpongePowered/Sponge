@@ -24,72 +24,84 @@
  */
 package org.spongepowered.common.mixin.core.entity.projectile;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityLargeFireball;
-import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.world.GameRules;
 import org.spongepowered.api.entity.projectile.explosive.fireball.LargeFireball;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
+import org.spongepowered.common.interfaces.entity.explosive.IMixinExplosive;
+
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityLargeFireball.class)
-public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball {
+public abstract class MixinEntityLargeFireball extends MixinEntityFireball implements LargeFireball, IMixinExplosive {
 
-    private static final String NEW_EXPLOSION_METHOD =
+    private static final String TARGET_NEW_EXPLOSION =
         "Lnet/minecraft/world/World;newExplosion(Lnet/minecraft/entity/Entity;DDDFZZ)Lnet/minecraft/world/Explosion;";
+    private static final int DEFAULT_EXPLOSION_RADIUS = 1;
+
     @Shadow public int explosionPower;
 
-    private float damage = 6.0f;
+    @Nullable private Cause detonationCause;
 
-    @ModifyArg(method = "onImpact",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z"))
-    protected float onAttackEntityFrom(float amount) {
-        return this.damage;
-    }
-
-    @ModifyArg(method = "onImpact",
-        at = @At(value = "INVOKE", target = NEW_EXPLOSION_METHOD))
-    protected Entity newExplosion(Entity entityIn) {
-        return (Entity) (Object) this;
-    }
-
-    public double getDamage() {
-        return this.damage;
-    }
-
-    public void setDamage(double damage) {
-        this.damage = (float) damage;
-    }
-
-    public int getExplosionPower() {
-        return this.explosionPower;
-    }
-
-    public void setExplosionPower(int explosionPower) {
-        this.explosionPower = explosionPower;
-    }
-
-    @Override
-    public void readFromNbt(NBTTagCompound compound) {
-        super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+    private Cause getDetonationCause() {
+        if (this.detonationCause != null) {
+            return this.detonationCause;
+        } else {
+            return Cause.of(NamedCause.of(NamedCause.THROWER, getShooter()));
         }
-    }
-
-    @Override
-    public void writeToNbt(NBTTagCompound compound) {
-        super.writeToNbt(compound);
-        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
     }
 
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))
     private boolean onCanGrief(GameRules gameRules, String rule) {
         return gameRules.getBoolean(rule) && ((IMixinGriefer) this).canGrief();
     }
+
+    // Explosive Impl
+
+    @Override
+    public Optional<Integer> getExplosionRadius() {
+        return Optional.of(this.explosionPower);
+    }
+
+    @Override
+    public void setExplosionRadius(Optional<Integer> radius) {
+        this.explosionPower = radius.orElse(DEFAULT_EXPLOSION_RADIUS);
+    }
+
+    @Override
+    public void detonate(Cause cause) {
+        this.detonationCause = checkNotNull(cause, "cause");
+        onExplode(this.worldObj, null, this.posX, this.posY, this.posZ, this.explosionPower, true, true);
+        setDead();
+    }
+
+    @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = TARGET_NEW_EXPLOSION))
+    protected net.minecraft.world.Explosion onExplode(net.minecraft.world.World worldObj, @Nullable Entity nil,
+                                                      double x, double y, double z, float strength, boolean flaming,
+                                                      boolean smoking) {
+        boolean griefer = ((IMixinGriefer) this).canGrief();
+        return detonate(getDetonationCause(), Explosion.builder()
+                .location(new Location<>((World) worldObj, new Vector3d(x, y, z)))
+                .sourceExplosive(this)
+                .radius(strength)
+                .canCauseFire(flaming && griefer)
+                .shouldPlaySmoke(smoking && griefer))
+                .orElse(null);
+    }
+
 }

@@ -83,17 +83,24 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.fixer.PlayerRespawnData;
 import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
 import org.spongepowered.common.data.fixer.world.LevelSpongeId;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.IOException;
@@ -144,6 +151,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private GameProfileManager profileManager;
     private MessageChannel broadcastChannel = MessageChannel.TO_ALL;
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<World> getWorld(String worldName) {
         return (Optional<World>) (Object) DimensionManager.getWorld(worldName);
@@ -294,9 +302,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     /**
+     * @author Zidane - June 15th, 2015
+     * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
+     *
      * Sponge re-writes this method because we take control of loading existing Sponge dimensions, migrate old worlds to our standard, and
      * configuration checks.
+     * @reason Add multiworld support
      */
     @Overwrite
     protected void loadAllWorlds(String overworldFolder, String worldName, long seed, WorldType type, String generatorOptions) {
@@ -323,7 +335,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     /**
      * @author Zidane - March 13th, 2016
-     * Sponge has a config option for determining if we'll generate spawn on server start. I enforce that here.
+     *
+     * @reason Sponge has a config option for determining if we'll
+     * generate spawn on server start. I enforce that here.
      */
     @Overwrite
     protected void initialWorldChunkLoad() {
@@ -341,10 +355,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             return;
         }
 
-        ((IMixinWorld) worldServer).getCauseTracker().setCapturingTerrainGen(false);
+        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.TERRAIN_GENERATION, PhaseContext.start()
+                .add(NamedCause.source(worldServer))
+                .addCaptures()
+                .complete());
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", ((IMixinWorld) worldServer).getDimensionId(), ((World) worldServer).getName());
+        logger.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
         BlockPos blockpos = worldServer.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 
@@ -363,7 +381,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
 
         this.clearCurrentTask();
-        ((IMixinWorld) worldServer).getCauseTracker().setCapturingTerrainGen(false);
+        causeTracker.completePhase();
     }
 
     @Override
@@ -391,6 +409,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return DimensionManager.unloadWorld((WorldServer) world);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Collection<World> getWorlds() {
         return (Collection<World>) (Object) Collections.unmodifiableCollection(DimensionManager.getWorlds());
@@ -535,9 +554,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         EntityPlayerMP player = StaticMixinHelper.lastAnimationPlayer;
         if (player != null && lastAnimTick != lastPrimaryTick && lastAnimTick != lastSecondaryTick && lastAnimTick != 0 && lastAnimTick - lastPrimaryTick > 3 && lastAnimTick - lastSecondaryTick > 3) {
             InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.owner(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE);
-            if (Sponge.getEventManager().post(event)) {
-                return;
-            }
+            Sponge.getEventManager().post(event);
         }
         StaticMixinHelper.lastAnimationPacketTick = 0;
     }

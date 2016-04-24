@@ -34,7 +34,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.world.World;
 import org.spongepowered.api.command.CommandSource;
-import org.spongepowered.api.command.source.LocatedSource;
+import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -73,24 +73,24 @@ public class WrapperICommandSender implements ICommandSender {
 
     @Override
     public BlockPos getPosition() {
-        if (this.source instanceof LocatedSource) {
-            return VecHelper.toBlockPos(((LocatedSource) this.source).getLocation());
+        if (this.source instanceof Locatable) {
+            return VecHelper.toBlockPos(((Locatable) this.source).getLocation());
         }
         return BlockPos.ORIGIN;
     }
 
     @Override
     public Vec3d getPositionVector() {
-        if (this.source instanceof LocatedSource) {
-            return VecHelper.toVec3d(((LocatedSource) this.source).getLocation().getPosition());
+        if (this.source instanceof Locatable) {
+            return VecHelper.toVec3d(((Locatable) this.source).getLocation().getPosition());
         }
         return new Vec3d(0, 0, 0);
     }
 
     @Override
     public World getEntityWorld() {
-        if (this.source instanceof LocatedSource) {
-            return (World) ((LocatedSource) this.source).getWorld();
+        if (this.source instanceof Locatable) {
+            return (World) ((Locatable) this.source).getWorld();
         }
         return null;
     }

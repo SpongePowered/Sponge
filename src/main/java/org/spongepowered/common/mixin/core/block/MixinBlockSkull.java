@@ -84,11 +84,11 @@ public abstract class MixinBlockSkull extends MixinBlock {
     }
 
     private ImmutableDropData getShouldDropFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !(Boolean) blockState.getValue(BlockSkull.NODROP));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDropData.class, !blockState.getValue(BlockSkull.NODROP));
     }
 
     private ImmutableDirectionalData getDirectionalData(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDirectionalData.class,
-                DirectionResolver.getFor((EnumFacing) blockState.getValue(BlockSkull.FACING)));
+                DirectionResolver.getFor(blockState.getValue(BlockSkull.FACING)));
     }
 }

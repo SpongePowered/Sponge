@@ -40,9 +40,9 @@ import java.net.UnknownHostException;
 import java.util.Date;
 
 @Mixin(UserListIPBansEntry.class)
-public abstract class MixinIPBanEntry extends UserListEntryBan implements Ban.Ip {
+public abstract class MixinIPBanEntry extends UserListEntryBan<String> implements Ban.Ip {
 
-    public MixinIPBanEntry(Object valueIn, Date startDate, String banner, Date endDate, String banReason) {
+    public MixinIPBanEntry(String valueIn, Date startDate, String banner, Date endDate, String banReason) {
         super(valueIn, startDate, banner, endDate, banReason);
     }
 
@@ -60,7 +60,7 @@ public abstract class MixinIPBanEntry extends UserListEntryBan implements Ban.Ip
 
     private void setAddress() {
         try {
-            this.address = InetAddress.getByName((String) this.value);
+            this.address = InetAddress.getByName(this.value);
         } catch (UnknownHostException e) {
             throw new IllegalStateException("Error parsing Ban IP address!", e);
         }

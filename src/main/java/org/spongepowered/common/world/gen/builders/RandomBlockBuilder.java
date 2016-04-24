@@ -26,7 +26,6 @@ package org.spongepowered.common.world.gen.builders;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.base.Predicate;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -36,6 +35,8 @@ import org.spongepowered.api.world.gen.populator.RandomBlock;
 import org.spongepowered.api.world.gen.populator.RandomBlock.Builder;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.RandomBlockPopulator;
+
+import java.util.function.Predicate;
 
 public class RandomBlockBuilder implements RandomBlock.Builder {
 

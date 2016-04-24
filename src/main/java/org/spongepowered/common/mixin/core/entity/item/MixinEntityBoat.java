@@ -40,7 +40,7 @@ import org.spongepowered.common.mixin.core.entity.MixinEntity;
 @Mixin(EntityBoat.class)
 public abstract class MixinEntityBoat extends MixinEntity implements Boat {
 
-    @Shadow private double speedMultiplier;
+//    @Shadow private double speedMultiplier;
 
     private double maxSpeed = 0.35D;
     private boolean moveOnLand = false;
@@ -52,49 +52,50 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     private double tempSpeedMultiplier;
     private double initialDisplacement;
 
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"))
-    public void implementLandBoats(CallbackInfo ci) {
-        if (this.onGround && this.moveOnLand) {
-            this.motionX /= 0.5;
-            this.motionY /= 0.5;
-            this.motionZ /= 0.5;
-        }
-    }
-
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 0))
-    public void beforeModifyMotion(CallbackInfo ci) {
-        this.initialDisplacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-    }
-
-    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 1))
-    public void beforeLimitSpeed(CallbackInfo ci) {
-        this.tempMotionX = this.motionX;
-        this.tempMotionZ = this.motionZ;
-        this.tempSpeedMultiplier = this.speedMultiplier;
-    }
-
-    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1))
-    public void afterLimitSpeed(CallbackInfo ci) {
-        this.motionX = this.tempMotionX;
-        this.motionZ = this.tempMotionZ;
-        this.speedMultiplier = this.tempSpeedMultiplier;
-        double displacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
-
-        if (displacement > this.maxSpeed) {
-            double ratio = this.maxSpeed / displacement;
-            this.motionX *= ratio;
-            this.motionZ *= ratio;
-            displacement = this.maxSpeed;
-        }
-
-        if ((displacement > this.initialDisplacement) && (this.speedMultiplier < this.maxSpeed)) {
-            this.speedMultiplier += (this.maxSpeed - this.speedMultiplier) / this.maxSpeed * 100.0;
-            this.speedMultiplier = Math.min(this.speedMultiplier, this.maxSpeed);
-        } else {
-            this.speedMultiplier -= (this.speedMultiplier - 0.07) / this.maxSpeed * 100.0;
-            this.speedMultiplier = Math.max(this.speedMultiplier, 0.07);
-        }
-    }
+    // All of these injections need to be rewritten.
+//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityBoat;moveEntity(DDD)V"))
+//    public void implementLandBoats(CallbackInfo ci) {
+//        if (this.onGround && this.moveOnLand) {
+//            this.motionX /= 0.5;
+//            this.motionY /= 0.5;
+//            this.motionZ /= 0.5;
+//        }
+//    }
+//
+//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 0))
+//    public void beforeModifyMotion(CallbackInfo ci) {
+//        this.initialDisplacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+//    }
+//
+//    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "java.lang.Math.sqrt(D)D", ordinal = 1))
+//    public void beforeLimitSpeed(CallbackInfo ci) {
+//        this.tempMotionX = this.motionX;
+//        this.tempMotionZ = this.motionZ;
+//        this.tempSpeedMultiplier = this.speedMultiplier;
+//    }
+//
+//    @Inject(method = "onUpdate()V", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/item/EntityBoat;onGround:Z", ordinal = 1))
+//    public void afterLimitSpeed(CallbackInfo ci) {
+//        this.motionX = this.tempMotionX;
+//        this.motionZ = this.tempMotionZ;
+//        this.speedMultiplier = this.tempSpeedMultiplier;
+//        double displacement = Math.sqrt(this.motionX * this.motionX + this.motionZ * this.motionZ);
+//
+//        if (displacement > this.maxSpeed) {
+//            double ratio = this.maxSpeed / displacement;
+//            this.motionX *= ratio;
+//            this.motionZ *= ratio;
+//            displacement = this.maxSpeed;
+//        }
+//
+//        if ((displacement > this.initialDisplacement) && (this.speedMultiplier < this.maxSpeed)) {
+//            this.speedMultiplier += (this.maxSpeed - this.speedMultiplier) / this.maxSpeed * 100.0;
+//            this.speedMultiplier = Math.min(this.speedMultiplier, this.maxSpeed);
+//        } else {
+//            this.speedMultiplier -= (this.speedMultiplier - 0.07) / this.maxSpeed * 100.0;
+//            this.speedMultiplier = Math.max(this.speedMultiplier, 0.07);
+//        }
+//    }
 
     // TODO: Re-enable this with support for multiple riding
     /*@Inject(method = "onUpdate()V",

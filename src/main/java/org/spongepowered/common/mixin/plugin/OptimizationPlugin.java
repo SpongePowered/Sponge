@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class OptimizationPlugin implements IMixinConfigPlugin {
 
@@ -76,14 +75,22 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<SpongeConfig.OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<SpongeConfig.OptimizationCategory, Boolean >> builder()
-            .put("org.spongepowered.common.mixin.optimization.block.state.MixinStateImplementation",
-                    SpongeConfig.OptimizationCategory::useBlockStateLookupPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_Lighting",
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting",
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Lighting",
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
+            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Chunk_Cache",
+                    SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
+                    SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
+                    SpongeConfig.OptimizationCategory::doDropsPreMergeItemDrops)
+            .put("org.spongepowered.common.mixin.optimization.MixinInventoryHelper",
+                    SpongeConfig.OptimizationCategory::doDropsPreMergeItemDrops)
+            .put("org.spongepowered.common.mixin.optimization.MixinEntity_Item_Pre_Merge",
+                    SpongeConfig.OptimizationCategory::doEntityDropsPreMerge)
             .build();
 
 }

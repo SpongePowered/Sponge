@@ -65,7 +65,7 @@ public abstract class MixinWorldGenTaiga1 extends MixinWorldGenAbstractTree impl
                 for (j1 = x - k2; j1 <= x + k2 && flag; ++j1) {
                     for (k1 = z - k2; k1 <= z + k2 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 256) {
-                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(j1, i1, k1)).getBlock())) {
+                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(j1, i1, k1)).getBlock())) {
                                 flag = false;
                             }
                         } else {

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.processor.data.entity;
 
-import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
@@ -57,8 +56,7 @@ public class RespawnLocationDataProcessor extends
         if (container instanceof ISpongeUser) {
             ImmutableMap<UUID, RespawnLocation> removed = ((ISpongeUser) container).removeAllBeds();
             if (!removed.isEmpty()) {
-                return DataTransactionResult
-                        .builder().result(DataTransactionResult.Type.SUCCESS).replace(constructImmutableValue(removed)).build();
+                return DataTransactionResult.successRemove(constructImmutableValue(removed));
             } else {
                 return DataTransactionResult.successNoData();
             }

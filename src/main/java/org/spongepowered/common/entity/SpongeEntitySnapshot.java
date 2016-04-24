@@ -85,6 +85,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
     @Nullable private final WeakReference<Entity> entityReference;
+    // TODO write optimization to lazy load and evaluate all of the manipulators for entities during events.
+    private boolean isDirty = true;
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;
@@ -115,6 +117,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         this.rotation = builder.rotation == null ? null : builder.rotation;
         this.scale = builder.scale == null ? null : builder.scale;
         this.entityReference = builder.entityReference;
+    }
+
+    // internal use only
+    public WeakReference<Entity> getEntityReference() {
+        return this.entityReference;
     }
 
     @Override
@@ -266,6 +273,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
         return transform(key, input -> value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<EntitySnapshot> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());

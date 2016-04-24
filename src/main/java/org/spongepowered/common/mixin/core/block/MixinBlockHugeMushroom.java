@@ -74,6 +74,6 @@ public abstract class MixinBlockHugeMushroom extends MixinBlock {
 
     private ImmutableBigMushroomData getBigMushroomTypeFor(IBlockState blockState) {
         return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeBigMushroomData.class,
-                (BigMushroomType) (Object) (BlockHugeMushroom.EnumType) blockState.getValue(BlockHugeMushroom.VARIANT));
+                (BigMushroomType) (Object) blockState.getValue(BlockHugeMushroom.VARIANT));
     }
 }

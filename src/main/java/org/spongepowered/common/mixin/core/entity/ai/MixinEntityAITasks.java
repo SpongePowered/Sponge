@@ -145,7 +145,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      * @param base
      * @return
      */
-    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z"))
+    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
     private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {
@@ -187,6 +187,12 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
         this.taskEntries.clear();
     }
 
+    /**
+     * @author Zidane - November 30th, 2015
+     * @reason Integrate Sponge events into the AI task removal.
+     *
+     * @param aiBase
+     */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite
     public void removeTask(EntityAIBase aiBase) {
@@ -218,12 +224,12 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     /**
-     * @author Zidane
-     * Reason: Use SpongeAPI's method check instead of exposing mutex bits
+     * @author Zidane - February 22, 2016
+     * @reason Use SpongeAPI's method check instead of exposing mutex bits
      *
-     * @param taskEntry1
-     * @param taskEntry2
-     * @return
+     * @param taskEntry1 The task entry to check compatibility
+     * @param taskEntry2 The second entry to check compatibility
+     * @return Whehter the two tasks are compatible or "can run at the same time"
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Overwrite

@@ -267,6 +267,18 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         return true;
     }
 
+    @Override
+    public ImmutableMap<UUID, RespawnLocation> removeAllBeds() {
+        Optional<Player> player = this.self.getPlayer();
+        if (player.isPresent()) {
+            return ((ISpongeUser) player.get()).removeAllBeds();
+        }
+        ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
+        this.spawnLocations.clear();
+        this.markDirty();
+        return locations;
+    }
+
     private void markDirty() {
         dirtyUsers.add(this);
     }
@@ -292,18 +304,6 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
         } catch (IOException e) {
             SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
-    }
-
-    @Override
-    public ImmutableMap<UUID, RespawnLocation> removeAllBeds() {
-        Optional<Player> player = this.self.getPlayer();
-        if (player.isPresent()) {
-            return ((ISpongeUser) player.get()).removeAllBeds();
-        }
-        ImmutableMap<UUID, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
-        this.spawnLocations.clear();
-        this.markDirty();
-        return locations;
     }
 
 }

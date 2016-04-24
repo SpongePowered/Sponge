@@ -51,7 +51,8 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 import java.util.Map;
 
 @ImplementationRequiredForTest
-public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationalData, ImmutableBodyPartRotationalData> implements BodyPartRotationalData {
+public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationalData, ImmutableBodyPartRotationalData>
+        implements BodyPartRotationalData {
 
     private Map<BodyPart, Vector3d> rotations;
 
@@ -63,8 +64,7 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
                 .put(BodyParts.RIGHT_ARM, DataConstants.DEFAULT_RIGHT_ARM_ROTATION)
                 .put(BodyParts.LEFT_LEG, DataConstants.DEFAULT_LEFT_LEG_ROTATION)
                 .put(BodyParts.RIGHT_LEG, DataConstants.DEFAULT_RIGHT_LEG_ROTATION)
-                .build()
-        );
+                .build());
     }
 
     public SpongeBodyPartRotationalData(Map<BodyPart, Vector3d> rotations) {
@@ -76,7 +76,7 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
     @Override
     public int compareTo(BodyPartRotationalData o) {
         int mapSizeComp = Integer.compare(this.rotations.size(), o.partRotation().size());
-        
+
         if (mapSizeComp != 0) {
             return mapSizeComp;
         }
@@ -96,7 +96,7 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
         Vector3d rightArmRotation = this.rotations.get(BodyParts.RIGHT_ARM);
         Vector3d leftLegRotation = this.rotations.get(BodyParts.LEFT_LEG);
         Vector3d rightLegRotation = this.rotations.get(BodyParts.RIGHT_LEG);
-        
+
         return super.toContainer()
                 .set(Keys.BODY_ROTATIONS, this.rotations)
                 .set(Keys.HEAD_ROTATION.getQuery().then(POSITION_X), headRotation.getX())
@@ -157,29 +157,29 @@ public class SpongeBodyPartRotationalData extends AbstractData<BodyPartRotationa
     @Override
     protected void registerGettersAndSetters() {
         registerFieldGetter(Keys.BODY_ROTATIONS, () -> this.rotations);
-        registerFieldSetter(Keys.BODY_ROTATIONS, rotations -> this.rotations = rotations);
+        registerFieldSetter(Keys.BODY_ROTATIONS, rotations -> this.rotations = Maps.newHashMap(rotations));
         registerKeyValue(Keys.BODY_ROTATIONS, this::partRotation);
-        
+
         registerFieldGetter(Keys.HEAD_ROTATION, () -> this.rotations.get(BodyParts.HEAD));
         registerFieldSetter(Keys.HEAD_ROTATION, value -> this.rotations.put(BodyParts.HEAD, value));
         registerKeyValue(Keys.HEAD_ROTATION, this::headDirection);
-        
+
         registerFieldGetter(Keys.CHEST_ROTATION, () -> this.rotations.get(BodyParts.CHEST));
         registerFieldSetter(Keys.CHEST_ROTATION, value -> this.rotations.put(BodyParts.CHEST, value));
         registerKeyValue(Keys.CHEST_ROTATION, this::bodyRotation);
-        
+
         registerFieldGetter(Keys.LEFT_ARM_ROTATION, () -> this.rotations.get(BodyParts.LEFT_ARM));
         registerFieldSetter(Keys.LEFT_ARM_ROTATION, value -> this.rotations.put(BodyParts.LEFT_ARM, value));
         registerKeyValue(Keys.LEFT_ARM_ROTATION, this::leftArmDirection);
-        
+
         registerFieldGetter(Keys.RIGHT_ARM_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_ARM));
         registerFieldSetter(Keys.RIGHT_ARM_ROTATION, value -> this.rotations.put(BodyParts.RIGHT_ARM, value));
         registerKeyValue(Keys.RIGHT_ARM_ROTATION, this::rightArmDirection);
-        
+
         registerFieldGetter(Keys.LEFT_LEG_ROTATION, () -> this.rotations.get(BodyParts.LEFT_LEG));
         registerFieldSetter(Keys.LEFT_LEG_ROTATION, value -> this.rotations.put(BodyParts.LEFT_LEG, value));
         registerKeyValue(Keys.LEFT_LEG_ROTATION, this::leftLegDirection);
-        
+
         registerFieldGetter(Keys.RIGHT_LEG_ROTATION, () -> this.rotations.get(BodyParts.RIGHT_LEG));
         registerFieldSetter(Keys.RIGHT_LEG_ROTATION, value -> this.rotations.put(BodyParts.RIGHT_LEG, value));
         registerKeyValue(Keys.RIGHT_LEG_ROTATION, this::rightLegDirection);

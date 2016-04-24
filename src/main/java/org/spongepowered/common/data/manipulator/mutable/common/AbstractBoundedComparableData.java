@@ -70,6 +70,7 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
         return (M) ReflectionUtil.createInstance(this.getClass(), this.getValue(), this.lowerBound, this.upperBound);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     protected MutableBoundedValue<T> getValueGetter() {
         return SpongeValueFactory.boundedBuilder(((Key<? extends BoundedValue<T>>) this.usedKey))
@@ -92,7 +93,10 @@ public abstract class AbstractBoundedComparableData<T extends Comparable<T>, M e
 
     @Override
     public int compareTo(M o) {
-        return this.comparator.compare(o.get(this.usedKey).get(), this.getValue());
+        return this.comparator.compare(o.get(this.usedKey)
+                .orElseThrow(() -> new IllegalArgumentException("Expected key does not have a value for Manipulator: " + o)),
+                this.getValue()
+        );
     }
 
     @Override

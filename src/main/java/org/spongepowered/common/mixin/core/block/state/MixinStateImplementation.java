@@ -100,7 +100,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         if (supports(key)) {
             final Cycleable value = (Cycleable) get((Key) key).get();
             final Cycleable next = value.cycleNext();
-            return with((Key<? extends BaseValue<Object>>) (Object) key, next).get();
+            return with((Key<? extends BaseValue<Object>>) (Key<?>) key, next).get();
         }
         throw new IllegalArgumentException("Used an invalid cyclable key! Check with supports in the future!");
     }
@@ -178,6 +178,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
         return ((IMixinBlock) this.block).getStateWithValue(this, key, value);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Optional<BlockState> with(BaseValue<?> value) {
         return with((Key<? extends BaseValue<Object>>) value.getKey(), value.get());

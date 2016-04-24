@@ -203,23 +203,24 @@ public abstract class MixinDataHolder implements DataHolder {
         if (callingFromMinecraftThread) {
             SpongeTimings.dataOfferManipulator.startTiming();
         }
-        try (Timing timing = SpongeTimings.dataOfferManipulator.startTiming()) {
-            final Optional<DataProcessor> optional = SpongeDataManager.getInstance().getWildDataProcessor(valueContainer.getClass());
-            if (optional.isPresent()) {
-                final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
-                if (callingFromMinecraftThread) {
-                    SpongeTimings.dataOfferManipulator.stopTiming();
-                }
-                return result;
-            } else if (this instanceof IMixinCustomDataHolder) {
-                final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
-                if (callingFromMinecraftThread) {
-                    SpongeTimings.dataOfferManipulator.stopTiming();
-                }
-                return result;
+        final Optional<DataProcessor> optional = SpongeDataManager.getInstance().getWildDataProcessor(valueContainer.getClass());
+        if (optional.isPresent()) {
+            final DataTransactionResult result = optional.get().set(this, valueContainer, checkNotNull(function));
+            if (callingFromMinecraftThread) {
+                SpongeTimings.dataOfferManipulator.stopTiming();
             }
-            return DataTransactionResult.failResult(valueContainer.getValues());
+            return result;
+        } else if (this instanceof IMixinCustomDataHolder) {
+            final DataTransactionResult result = ((IMixinCustomDataHolder) this).offerCustom(valueContainer, function);
+            if (callingFromMinecraftThread) {
+                SpongeTimings.dataOfferManipulator.stopTiming();
+            }
+            return result;
         }
+        if (callingFromMinecraftThread) {
+            SpongeTimings.dataOfferManipulator.stopTiming();
+        }
+        return DataTransactionResult.failResult(valueContainer.getValues());
     }
 
     @Override

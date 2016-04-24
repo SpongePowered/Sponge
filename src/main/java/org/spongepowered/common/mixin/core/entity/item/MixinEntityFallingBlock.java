@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.event.MinecraftFallingBlockDamageSource;
+import org.spongepowered.common.event.damage.MinecraftFallingBlockDamageSource;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 @Mixin(EntityFallingBlock.class)

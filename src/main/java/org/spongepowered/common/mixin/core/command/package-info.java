@@ -29,7 +29,7 @@
  * <dl>
  * <dt>{@link org.spongepowered.api.command.CommandSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandSource}
- * <dt>{@link org.spongepowered.api.command.source.LocatedSource}</dt>
+ * <dt>{@link org.spongepowered.api.world.Locatable}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinLocatedSource}
  * <dt>{@link org.spongepowered.api.command.source.CommandBlockSource}</dt>
  * <dd>{@link org.spongepowered.common.mixin.core.command.MixinCommandBlockSource}

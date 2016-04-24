@@ -105,23 +105,23 @@ public abstract class MixinBlockTripWire extends MixinBlock {
     }
 
     private ImmutableDisarmedData getIsDisarmedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, (Boolean) blockState.getValue(BlockTripWire.DISARMED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeDisarmedData.class, blockState.getValue(BlockTripWire.DISARMED));
     }
 
     private ImmutableAttachedData getIsAttachedFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, (Boolean) blockState.getValue(BlockTripWire.ATTACHED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeAttachedData.class, blockState.getValue(BlockTripWire.ATTACHED));
     }
 
     private ImmutablePoweredData getIsPoweredFor(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, (Boolean) blockState.getValue(BlockTripWire.POWERED));
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongePoweredData.class, blockState.getValue(BlockTripWire.POWERED));
     }
 
     private ImmutableConnectedDirectionData getConnectedDirectionData(IBlockState blockState) {
         final Set<Direction> directions = new HashSet<>();
-        final Boolean north = (Boolean) blockState.getValue(BlockTripWire.NORTH);
-        final Boolean east = (Boolean) blockState.getValue(BlockTripWire.EAST);
-        final Boolean west = (Boolean) blockState.getValue(BlockTripWire.WEST);
-        final Boolean south = (Boolean) blockState.getValue(BlockTripWire.SOUTH);
+        final Boolean north = blockState.getValue(BlockTripWire.NORTH);
+        final Boolean east = blockState.getValue(BlockTripWire.EAST);
+        final Boolean west = blockState.getValue(BlockTripWire.WEST);
+        final Boolean south = blockState.getValue(BlockTripWire.SOUTH);
         if (north) {
             directions.add(Direction.NORTH);
         }
