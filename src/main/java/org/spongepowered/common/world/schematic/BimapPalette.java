@@ -27,9 +27,8 @@ package org.spongepowered.common.world.schematic;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.common.util.Bitset;
 
-import java.util.Iterator;
+import java.util.BitSet;
 import java.util.Optional;
 
 public class BimapPalette implements Palette {
@@ -38,7 +37,7 @@ public class BimapPalette implements Palette {
 
     private final BiMap<Integer, BlockState> ids;
     private final BiMap<BlockState, Integer> idsr;
-    private final Bitset allocation = new Bitset(DEFAULT_ALLOCATION_SIZE);
+    private final BitSet allocation = new BitSet(DEFAULT_ALLOCATION_SIZE);
     private int maxId = 0;
 
     public BimapPalette() {
@@ -65,13 +64,7 @@ public class BimapPalette implements Palette {
     public int getOrAssign(BlockState state) {
         Integer id = this.idsr.get(state);
         if (id == null) {
-            Iterator<Integer> it = this.allocation.iterator();
-            int next;
-            if (it.hasNext()) {
-                next = this.allocation.iterator().next();
-            } else {
-                next = this.allocation.getLength();
-            }
+            int next = this.allocation.nextClearBit(0);
             this.allocation.set(next);
             this.ids.put(next, state);
             return next;
@@ -90,7 +83,7 @@ public class BimapPalette implements Palette {
         if (id == null) {
             return false;
         }
-        this.allocation.unset(id);
+        this.allocation.clear(id);
         this.ids.remove(id);
         return true;
     }

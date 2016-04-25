@@ -32,7 +32,7 @@ import org.spongepowered.api.data.Archetype;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.LocateableSnapshot;
+import org.spongepowered.api.data.LocatableSnapshot;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -43,8 +43,8 @@ import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.common.data.nbt.CustomDataNbtUtil;
 import org.spongepowered.common.data.nbt.NbtDataType;
-import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
+import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.property.SpongePropertyRegistry;
 
 import java.util.Collection;
@@ -52,7 +52,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public abstract class AbstractArchetype<C extends CatalogType, S extends LocateableSnapshot<S>> implements Archetype<S> {
+public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>> implements Archetype<S> {
 
     protected final C type;
     protected NBTTagCompound data;

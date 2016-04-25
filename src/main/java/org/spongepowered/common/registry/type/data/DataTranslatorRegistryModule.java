@@ -26,13 +26,11 @@ package org.spongepowered.common.registry.type.data;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -62,7 +60,6 @@ public class DataTranslatorRegistryModule implements SpongeAdditionalCatalogRegi
 
     @Override
     public void registerAdditionalCatalog(DataTranslator<?> extraCatalog) {
-        checkState(SpongeDataManager.allowsRegistrations(), "Not allowing additional registrations of DataTranslators at this time!");
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
         checkArgument(!this.dataFormatMappings.containsKey(extraCatalog.getId()), "Duplicate Id");

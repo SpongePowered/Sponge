@@ -29,8 +29,8 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.world.extent.ArchetypeVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.schematic.SchematicVolume;
 import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
@@ -39,7 +39,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implements SchematicVolume {
+public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implements ArchetypeVolume {
 
     private final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
     private final List<EntityArchetype> entities = Lists.newArrayList();
@@ -68,7 +68,7 @@ public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implem
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends SchematicVolume> getBlockWorker() {
+    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
