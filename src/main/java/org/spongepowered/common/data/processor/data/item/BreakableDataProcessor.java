@@ -58,12 +58,12 @@ public class BreakableDataProcessor
 
     @Override
     protected Optional<Set<BlockType>> getVal(ItemStack itemStack) {
-        return BreakablePlaceableUtils.get(itemStack, NbtDataUtil.ITEM_BREAKABLE_BLOCKS);
+        return BreakablePlaceableUtils.get(itemStack, NbtDataUtil.Item.CAN_DESTROY);
     }
 
     @Override
     protected boolean set(ItemStack itemStack, Set<BlockType> value) {
-        return BreakablePlaceableUtils.set(itemStack, NbtDataUtil.ITEM_BREAKABLE_BLOCKS, value);
+        return BreakablePlaceableUtils.set(itemStack, NbtDataUtil.Item.CAN_DESTROY, value);
     }
 
     @Override

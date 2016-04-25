@@ -256,8 +256,8 @@ public class DamageEventHandler {
                 continue;
             }
             for (int i = 0; i < enchantmentList.tagCount(); ++i) {
-                final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
-                final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
+                final short enchantmentId = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.Item.ENCHANTMENT_ID);
+                final short level = enchantmentList.getCompoundTagAt(i).getShort(NbtDataUtil.Item.ENCHANTMENT_LEVEL);
 
                 if (Enchantment.getEnchantmentById(enchantmentId) != null) {
                     // Ok, we have an enchantment!
@@ -360,7 +360,7 @@ public class DamageEventHandler {
     public static Cause generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
-            Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
             if (owner.isPresent()) {
                 return Cause.of(NamedCause.source(damageSource),
                                  NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
@@ -369,8 +369,8 @@ public class DamageEventHandler {
             }
         } else if (damageSource instanceof EntityDamageSource) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
-            Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+            Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
+            Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_NOTIFIER);
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
             if (notifier.isPresent()) {

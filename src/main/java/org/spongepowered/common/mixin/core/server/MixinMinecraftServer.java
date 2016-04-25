@@ -492,16 +492,16 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 continue;
             }
 
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeData = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+            if (compound.hasKey(NbtDataUtil.General.SPONGE_DATA)) {
+                final NBTTagCompound spongeData = compound.getCompoundTag(NbtDataUtil.General.SPONGE_DATA);
 
-                if (!spongeData.hasKey(NbtDataUtil.DIMENSION_ID)) {
+                if (!spongeData.hasKey(NbtDataUtil.World.DIMENSION_ID)) {
                     SpongeImpl.getLogger().error("World [{}] has no dimension id. This is a critical error and should be reported to Sponge ASAP.",
                             worldCandidateFile.getName());
                     continue;
                 }
 
-                final int dimensionId = spongeData.getInteger(NbtDataUtil.DIMENSION_ID);
+                final int dimensionId = spongeData.getInteger(NbtDataUtil.World.DIMENSION_ID);
 
                 // Nether and The End are handled above
                 if (dimensionId == -1 || dimensionId == 1) {
@@ -510,8 +510,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
                 String dimensionType = "overworld";
 
-                if (spongeData.hasKey(NbtDataUtil.DIMENSION_TYPE)) {
-                    dimensionType = spongeData.getString(NbtDataUtil.DIMENSION_TYPE);
+                if (spongeData.hasKey(NbtDataUtil.World.DIMENSION_TYPE)) {
+                    dimensionType = spongeData.getString(NbtDataUtil.World.DIMENSION_TYPE);
 
                     // Temporary fix for old data, remove in future build
                     if (dimensionType.equalsIgnoreCase("net.minecraft.world.WorldProviderSurface")) {
@@ -526,7 +526,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                             worldCandidateFile.getName(), dimensionId);
                 }
 
-                spongeData.setString(NbtDataUtil.DIMENSION_TYPE, dimensionType);
+                spongeData.setString(NbtDataUtil.World.DIMENSION_TYPE, dimensionType);
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(dimensionType, worldCandidateFile.getName());
 
                 if (activeConfig.getType().equals(SpongeConfig.Type.WORLD) || activeConfig.getType().equals(SpongeConfig.Type.DIMENSION)) {
@@ -547,7 +547,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 }
 
                 DimensionRegistryModule.getInstance().getAll().forEach(type -> {
-                    if (type.getId().equalsIgnoreCase(spongeData.getString(NbtDataUtil.DIMENSION_TYPE))) {
+                    if (type.getId().equalsIgnoreCase(spongeData.getString(NbtDataUtil.World.DIMENSION_TYPE))) {
                         DimensionRegistryModule.getInstance().registerWorldDimensionId(dimensionId, worldCandidateFile.getName());
                         if (!DimensionManager.isDimensionRegistered(dimensionId)) {
                             DimensionManager.registerDimension(dimensionId,

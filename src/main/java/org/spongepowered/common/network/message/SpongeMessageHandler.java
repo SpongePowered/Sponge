@@ -88,8 +88,8 @@ public final class SpongeMessageHandler {
             Entity entity = sender.worldObj.getEntityByID(message.entityId);
             if (entity != null) {
                 IMixinEntity spongeEntity = (IMixinEntity) entity;
-                owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
+                notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_NOTIFIER);
             }
         }
 

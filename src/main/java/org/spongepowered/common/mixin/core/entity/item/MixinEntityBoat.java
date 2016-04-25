@@ -161,26 +161,26 @@ public abstract class MixinEntityBoat extends MixinEntity implements Boat {
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.BOAT_MAX_SPEED)) {
-            this.maxSpeed = compound.getDouble(NbtDataUtil.BOAT_MAX_SPEED);
+        if (compound.hasKey(NbtDataUtil.Entity.Boat.MAX_SPEED)) {
+            this.maxSpeed = compound.getDouble(NbtDataUtil.Entity.Boat.MAX_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_MOVE_ON_LAND)) {
-            this.moveOnLand = compound.getBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND);
+        if (compound.hasKey(NbtDataUtil.Entity.Boat.MOVE_ON_LAND)) {
+            this.moveOnLand = compound.getBoolean(NbtDataUtil.Entity.Boat.MOVE_ON_LAND);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED)) {
-            this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED);
+        if (compound.hasKey(NbtDataUtil.Entity.Boat.OCCUPIED_DECELERATION_SPEED)) {
+            this.occupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.Entity.Boat.OCCUPIED_DECELERATION_SPEED);
         }
-        if (compound.hasKey(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED)) {
-            this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED);
+        if (compound.hasKey(NbtDataUtil.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED)) {
+            this.unoccupiedDecelerationSpeed = compound.getDouble(NbtDataUtil.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setDouble(NbtDataUtil.BOAT_MAX_SPEED, this.maxSpeed);
-        compound.setBoolean(NbtDataUtil.BOAT_MOVE_ON_LAND, this.moveOnLand);
-        compound.setDouble(NbtDataUtil.BOAT_OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
-        compound.setDouble(NbtDataUtil.BOAT_UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
+        compound.setDouble(NbtDataUtil.Entity.Boat.MAX_SPEED, this.maxSpeed);
+        compound.setBoolean(NbtDataUtil.Entity.Boat.MOVE_ON_LAND, this.moveOnLand);
+        compound.setDouble(NbtDataUtil.Entity.Boat.OCCUPIED_DECELERATION_SPEED, this.occupiedDecelerationSpeed);
+        compound.setDouble(NbtDataUtil.Entity.Boat.UNOCCUPIED_DECELERATION_SPEED, this.unoccupiedDecelerationSpeed);
     }
 }

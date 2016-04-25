@@ -56,19 +56,19 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        if (container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.getTagCompound().hasKey(NbtDataUtil.Item.HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+            int flag = container.getTagCompound().getInteger(NbtDataUtil.Item.HIDE_FLAGS);
             if (value) {
                 container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag | this.flag);
+                        .setInteger(NbtDataUtil.Item.HIDE_FLAGS, flag | this.flag);
             } else {
                 container.getTagCompound()
-                        .setInteger(NbtDataUtil.ITEM_HIDE_FLAGS,
+                        .setInteger(NbtDataUtil.Item.HIDE_FLAGS,
                                 flag & ~this.flag);
             }
         } else {
             if (value) {
-                container.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, this.flag);
+                container.getTagCompound().setInteger(NbtDataUtil.Item.HIDE_FLAGS, this.flag);
             }
         }
         return true;
@@ -76,8 +76,8 @@ public abstract class AbstractHideFlagsValueProcessor extends AbstractSpongeValu
 
     @Override
     protected Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-            int flag = container.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.Item.HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+            int flag = container.getTagCompound().getInteger(NbtDataUtil.Item.HIDE_FLAGS);
             if ((flag & this.flag) != 0) {
                 return Optional.of(true);
             } else {

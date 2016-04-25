@@ -101,7 +101,7 @@ public class ItemEnchantmentDataProcessor
             if (!old.isPresent()) {
                 return DataTransactionResult.successNoData();
             }
-            stack.getTagCompound().removeTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST);
+            stack.getTagCompound().removeTag(NbtDataUtil.Item.ENCHANTMENT_LIST);
             return DataTransactionResult.successRemove(constructImmutableValue(old.get()));
         }
         return DataTransactionResult.failNoData();

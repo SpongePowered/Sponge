@@ -58,12 +58,12 @@ public class PlaceableDataProcessor
 
     @Override
     protected Optional<Set<BlockType>> getVal(ItemStack itemStack) {
-        return BreakablePlaceableUtils.get(itemStack, NbtDataUtil.ITEM_PLACEABLE_BLOCKS);
+        return BreakablePlaceableUtils.get(itemStack, NbtDataUtil.Item.CAN_PLACE_ON);
     }
 
     @Override
     protected boolean set(ItemStack itemStack, Set<BlockType> value) {
-        return BreakablePlaceableUtils.set(itemStack, NbtDataUtil.ITEM_PLACEABLE_BLOCKS, value);
+        return BreakablePlaceableUtils.set(itemStack, NbtDataUtil.Item.CAN_PLACE_ON, value);
     }
 
     @Override

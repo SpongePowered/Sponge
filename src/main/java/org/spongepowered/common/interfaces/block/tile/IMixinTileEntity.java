@@ -50,10 +50,10 @@ public interface IMixinTileEntity {
      */
     default NBTTagCompound getSpongeData() {
         NBTTagCompound data = this.getTileData();
-        if (!data.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            data.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
+        if (!data.hasKey(NbtDataUtil.General.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            data.setTag(NbtDataUtil.General.SPONGE_DATA, new NBTTagCompound());
         }
-        return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        return data.getCompoundTag(NbtDataUtil.General.SPONGE_DATA);
     }
 
     /**

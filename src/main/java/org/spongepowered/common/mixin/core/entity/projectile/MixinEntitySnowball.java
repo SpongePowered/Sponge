@@ -47,8 +47,8 @@ public abstract class MixinEntitySnowball extends MixinEntityThrowable implement
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damageAmount = compound.getDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        if (compound.hasKey(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT)) {
+            this.damageAmount = compound.getDouble(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT);
             this.damageSet = true;
         }
     }
@@ -57,9 +57,9 @@ public abstract class MixinEntitySnowball extends MixinEntityThrowable implement
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.damageSet) {
-            compound.setDouble(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damageAmount);
+            compound.setDouble(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT, this.damageAmount);
         } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+            compound.removeTag(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT);
         }
     }
 

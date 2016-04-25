@@ -32,11 +32,9 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -71,8 +69,8 @@ public class MixinAnvilChunkLoader {
         if (chunk.getTrackedShortPlayerPositions().size() > 0 || chunk.getTrackedIntPlayerPositions().size() > 0) {
             NBTTagCompound trackedNbt = new NBTTagCompound();
             NBTTagList positions = new NBTTagList();
-            trackedNbt.setTag(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, positions);
-            compound.setTag(NbtDataUtil.SPONGE_DATA, trackedNbt);
+            trackedNbt.setTag(NbtDataUtil.Chunk.SPONGE_BLOCK_POS_TABLE, positions);
+            compound.setTag(NbtDataUtil.General.SPONGE_DATA, trackedNbt);
 
             for (Map.Entry<Short, PlayerTracker> mapEntry : chunk.getTrackedShortPlayerPositions().entrySet()) {
                 Short pos = mapEntry.getKey();
@@ -100,10 +98,10 @@ public class MixinAnvilChunkLoader {
 
     @Inject(method = "readChunkFromNBT", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NBTTagCompound;getIntArray(Ljava/lang/String;)[I", shift = At.Shift.BEFORE), locals = LocalCapture.CAPTURE_FAILHARD)
     public void onReadChunkFromNBT(World worldIn, NBTTagCompound compound, CallbackInfoReturnable<net.minecraft.world.chunk.Chunk> ci, int chunkX, int chunkZ, net.minecraft.world.chunk.Chunk chunkIn) {
-        if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
+        if (compound.hasKey(NbtDataUtil.General.SPONGE_DATA)) {
             Map<Integer, PlayerTracker> trackedIntPlayerPositions = Maps.newHashMap();
             Map<Short, PlayerTracker> trackedShortPlayerPositions = Maps.newHashMap();
-            NBTTagList positions = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA).getTagList(NbtDataUtil.SPONGE_BLOCK_POS_TABLE, 10);
+            NBTTagList positions = compound.getCompoundTag(NbtDataUtil.General.SPONGE_DATA).getTagList(NbtDataUtil.Chunk.SPONGE_BLOCK_POS_TABLE, 10);
             IMixinChunk chunk = (IMixinChunk) chunkIn;
             for (int i = 0; i < positions.tagCount(); i++) {
                 NBTTagCompound valueNbt = positions.getCompoundTagAt(i);
@@ -144,12 +142,12 @@ public class MixinAnvilChunkLoader {
     @Redirect(method = "readChunkFromNBT(Lnet/minecraft/world/World;Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/world/chunk/Chunk;",
             at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT), require = 0, expect = 0)
     private Entity onReadEntity(NBTTagCompound compound, World world) {
-        if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
-            compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.EnumMinecartType.byNetworkID(compound.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
-            compound.removeTag(NbtDataUtil.MINECART_TYPE);
+        if ("Minecart".equals(compound.getString(NbtDataUtil.Entity.ENTITY_TYPE_ID))) {
+            compound.setString(NbtDataUtil.Entity.ENTITY_TYPE_ID,
+                    EntityMinecart.EnumMinecartType.byNetworkID(compound.getInteger(NbtDataUtil.Entity.Minecart.MINECART_TYPE)).getName());
+            compound.removeTag(NbtDataUtil.Entity.Minecart.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(compound.getString(NbtDataUtil.Entity.ENTITY_TYPE_ID));
         if (entityClass == null) {
             return null;
         }
@@ -157,8 +155,8 @@ public class MixinAnvilChunkLoader {
         if (type == null) {
             return null;
         }
-        NBTTagList positionList = compound.getTagList(NbtDataUtil.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
-        NBTTagList rotationList = compound.getTagList(NbtDataUtil.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
+        NBTTagList positionList = compound.getTagList(NbtDataUtil.Entity.ENTITY_POSITION, NbtDataUtil.TAG_DOUBLE);
+        NBTTagList rotationList = compound.getTagList(NbtDataUtil.Entity.ENTITY_ROTATION, NbtDataUtil.TAG_FLOAT);
         Vector3d position = new Vector3d(positionList.getDoubleAt(0), positionList.getDoubleAt(1), positionList.getDoubleAt(2));
         Vector3d rotation = new Vector3d(rotationList.getFloatAt(0), rotationList.getFloatAt(1), 0);
         Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, position, rotation);

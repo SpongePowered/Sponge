@@ -248,7 +248,7 @@ public class SpongeCommonEventFactory {
             ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
             while (iterator.hasNext()) {
                 Entity currentEntity = iterator.next();
-                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
             final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
@@ -323,7 +323,7 @@ public class SpongeCommonEventFactory {
                     ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
-                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
@@ -351,7 +351,7 @@ public class SpongeCommonEventFactory {
                     ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                     while (iterator.hasNext()) {
                         Entity currentEntity = iterator.next();
-                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                        ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
                     final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
@@ -611,7 +611,7 @@ public class SpongeCommonEventFactory {
         Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
         if (!(entity instanceof EntityPlayer)) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
-            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
             if (user.isPresent()) {
                 cause = cause.with(NamedCause.owner(user.get()));
             }
@@ -627,7 +627,7 @@ public class SpongeCommonEventFactory {
         MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
         Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();
         IMixinEntity spongeEntity = (IMixinEntity) projectile;
-        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
         if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
             cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
         }
@@ -913,7 +913,7 @@ public class SpongeCommonEventFactory {
                 causeName = NamedCause.THROWER;
                 if (specialCause instanceof Player) {
                     Player player = (Player) specialCause;
-                    ((IMixinEntity) spawning).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                    ((IMixinEntity) spawning).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueId());
                 }
             }
         }
@@ -925,7 +925,7 @@ public class SpongeCommonEventFactory {
 
             if (specialCause instanceof Player) {
                 Player player = (Player) specialCause;
-                ((IMixinEntity) spawning).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                ((IMixinEntity) spawning).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueId());
             }
         }
         // Special case for Tameables

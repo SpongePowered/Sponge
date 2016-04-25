@@ -329,13 +329,13 @@ public final class CauseTracker {
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
                 User user = cause.first(User.class).get();
-                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
                     cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
             }
             entitySnapshotBuilder.add(currentEntity.createSnapshot());
@@ -440,7 +440,7 @@ public final class CauseTracker {
                         cause = cause.with(NamedCause.owner(tameable.getOwner()));
                     }
                 } else {
-                    Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                    Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
                     if (owner.isPresent() && !cause.contains(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.owner(owner.get()));
                     }
@@ -523,15 +523,15 @@ public final class CauseTracker {
             if (cause.first(User.class).isPresent()) {
                 // store user UUID with entity to track later
                 User user = cause.first(User.class).get();
-                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
+                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, user.getUniqueId());
             } else if (cause.first(Entity.class).isPresent()) {
                 IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
                 if (owner.isPresent()) {
                     if (!cause.containsNamed(NamedCause.OWNER)) {
                         cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
                     }
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
                 }
                 if (spongeEntity instanceof EntityLivingBase) {
                     DamageSource lastDamageSource = spongeEntity.getLastDamageSource();
@@ -994,9 +994,9 @@ public final class CauseTracker {
                             PlayerTracker.Type.NOTIFIER);
                 }
                 if (this.currentTickEntity != null) {
-                    Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                    Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
                     if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
+                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
                     }
                 }
                 if (entityIn instanceof EntityItem) {
@@ -1024,7 +1024,7 @@ public final class CauseTracker {
                         causeName = NamedCause.THROWER;
                         if (specialCause instanceof Player) {
                             Player player = (Player) specialCause;
-                            ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                            ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueId());
                         }
                     }
                 }
@@ -1036,7 +1036,7 @@ public final class CauseTracker {
 
                     if (specialCause instanceof Player) {
                         Player player = (Player) specialCause;
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, player.getUniqueId());
                     }
                 }
                 // Special case for Tameables
@@ -1147,8 +1147,8 @@ public final class CauseTracker {
                         } else if (this.hasTickingEntity()) { // Falling Blocks
                             IMixinEntity spongeEntity = (IMixinEntity) this.getCurrentTickEntity().get();
                             sourcePos = ((net.minecraft.entity.Entity) this.getCurrentTickEntity().get()).getPosition();
-                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
+                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_NOTIFIER);
                             if (notifier.isPresent()) {
                                 IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
                                 spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);

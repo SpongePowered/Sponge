@@ -847,8 +847,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         if (this instanceof IMixinCustomDataHolder) {
-            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+            if (compound.hasKey(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
                 if (list != null && list.tagCount() != 0) {
                     for (int i = 0; i < list.tagCount(); i++) {
@@ -866,8 +866,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
             }
         }
-        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.CAN_GRIEF)) {
-            ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.CAN_GRIEF));
+        if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer() && compound.hasKey(NbtDataUtil.Entity.CAN_GRIEF)) {
+            ((IMixinGriefer) this).setCanGrief(compound.getBoolean(NbtDataUtil.Entity.CAN_GRIEF));
         }
     }
 
@@ -886,11 +886,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 for (DataView dataView : manipulatorViews) {
                     manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
                 }
-                compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+                compound.setTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
             }
         }
         if (this instanceof IMixinGriefer && ((IMixinGriefer) this).isGriefer()) {
-            compound.setBoolean(NbtDataUtil.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
+            compound.setBoolean(NbtDataUtil.Entity.CAN_GRIEF, ((IMixinGriefer) this).canGrief());
         }
     }
 
@@ -1009,7 +1009,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
-       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+       Optional<User> user = getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
        if (user.isPresent()) {
            return Optional.of(user.get().getUniqueId());
        } else {
@@ -1019,7 +1019,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<UUID> getNotifier() {
-        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+        Optional<User> user = getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_NOTIFIER);
         if (user.isPresent()) {
             return Optional.of(user.get().getUniqueId());
         } else {
@@ -1029,12 +1029,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void setCreator(@Nullable UUID uuid) {
-        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid);
+        trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR, uuid);
     }
 
     @Override
     public void setNotifier(@Nullable UUID uuid) {
-        trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, uuid);
+        trackEntityUniqueId(NbtDataUtil.Entity.SPONGE_ENTITY_NOTIFIER, uuid);
     }
 
     @Override

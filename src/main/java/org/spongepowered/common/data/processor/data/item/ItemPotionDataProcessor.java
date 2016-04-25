@@ -65,7 +65,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
             ((net.minecraft.potion.PotionEffect) effect).writeCustomPotionEffectToNBT(potionCompound);
             potionList.appendTag(potionCompound);
         }
-        mainCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, potionList);
+        mainCompound.setTag(NbtDataUtil.Item.CUSTOM_POTION_EFFECTS, potionList);
         return true;
     }
 
@@ -111,7 +111,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
         }
 
         final NBTTagCompound tagCompound = itemStack.getTagCompound();
-        tagCompound.setTag(NbtDataUtil.CUSTOM_POTION_EFFECTS, new NBTTagList());
+        tagCompound.setTag(NbtDataUtil.Item.CUSTOM_POTION_EFFECTS, new NBTTagList());
         if (currentEffects.isPresent()) {
             return DataTransactionResult.successRemove(constructImmutableValue(currentEffects.get()));
         } else {

@@ -97,7 +97,7 @@ public class SkullUtils {
 
     public static Optional<GameProfile> getProfile(ItemStack skull) {
         if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
-            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.ITEM_SKULL_OWNER, false);
+            final NBTTagCompound nbt = skull.getSubCompound(NbtDataUtil.Item.SKULL_OWNER, false);
             final com.mojang.authlib.GameProfile mcProfile = nbt == null ? null : NBTUtil.readGameProfileFromNBT(nbt);
             return Optional.ofNullable((GameProfile) mcProfile);
         }
@@ -108,12 +108,12 @@ public class SkullUtils {
         if (isValidItemStack(skull) && getSkullType(skull).equals(SkullTypes.PLAYER)) {
             if (profile == null || profile.equals(SpongeRepresentedPlayerData.NULL_PROFILE)) {
                 if (skull.getTagCompound() != null) {
-                    skull.getTagCompound().removeTag(NbtDataUtil.ITEM_SKULL_OWNER);
+                    skull.getTagCompound().removeTag(NbtDataUtil.Item.SKULL_OWNER);
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();
                 NBTUtil.writeGameProfile(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
-                skull.setTagInfo(NbtDataUtil.ITEM_SKULL_OWNER, nbt);
+                skull.setTagInfo(NbtDataUtil.Item.SKULL_OWNER, nbt);
             }
             return true;
         }

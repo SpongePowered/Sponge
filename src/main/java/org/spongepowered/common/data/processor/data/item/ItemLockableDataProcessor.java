@@ -77,7 +77,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
     @Override
     protected boolean set(ItemStack stack, String value) {
         NBTTagCompound mainCompound = NbtDataUtil.getOrCreateCompound(stack);
-        NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.BLOCK_ENTITY_TAG);
+        NBTTagCompound tileCompound = NbtDataUtil.getOrCreateSubCompound(mainCompound, NbtDataUtil.TileEntity.TILE_ENTITY_ROOT);
         LockCode code = new LockCode(value);
         if (code.isEmpty()) {
             tileCompound.removeTag("Lock");
@@ -92,7 +92,7 @@ public final class ItemLockableDataProcessor extends AbstractItemSingleDataProce
         if (container.getTagCompound() == null) {
             return Optional.of("");
         }
-        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(NbtDataUtil.BLOCK_ENTITY_TAG);
+        NBTTagCompound tileCompound = container.getTagCompound().getCompoundTag(NbtDataUtil.TileEntity.TILE_ENTITY_ROOT);
         LockCode code = LockCode.fromNBT(tileCompound);
         if (code.isEmpty()) {
             return Optional.empty();

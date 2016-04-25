@@ -77,7 +77,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
         if ((boolean) keyValues.get(Keys.HIDE_MISCELLANEOUS)) {
             flag |= DataConstants.HIDE_MISCELLANEOUS_FLAG;
         }
-        dataHolder.getTagCompound().setInteger(NbtDataUtil.ITEM_HIDE_FLAGS, flag);
+        dataHolder.getTagCompound().setInteger(NbtDataUtil.Item.HIDE_FLAGS, flag);
         return true;
     }
 
@@ -87,7 +87,7 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
             return Maps.newHashMap();
         }
         Map<Key<?>, Boolean> map = Maps.newHashMap();
-        int flag = dataHolder.getTagCompound().getInteger(NbtDataUtil.ITEM_HIDE_FLAGS);
+        int flag = dataHolder.getTagCompound().getInteger(NbtDataUtil.Item.HIDE_FLAGS);
 
         map.put(Keys.HIDE_MISCELLANEOUS, (flag & DataConstants.HIDE_MISCELLANEOUS_FLAG) != 0);
         map.put(Keys.HIDE_CAN_PLACE, (flag & DataConstants.HIDE_CAN_PLACE_FLAG) != 0);
@@ -124,8 +124,8 @@ public class HideDataProcessor extends AbstractMultiDataSingleTargetProcessor<It
     public DataTransactionResult remove(DataHolder dataHolder) {
         if (supports(dataHolder)) {
             ItemStack data = (ItemStack) dataHolder;
-            if (data.hasTagCompound() && data.getTagCompound().hasKey(NbtDataUtil.ITEM_HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
-                data.getTagCompound().removeTag(NbtDataUtil.ITEM_HIDE_FLAGS);
+            if (data.hasTagCompound() && data.getTagCompound().hasKey(NbtDataUtil.Item.HIDE_FLAGS, NbtDataUtil.TAG_INT)) {
+                data.getTagCompound().removeTag(NbtDataUtil.Item.HIDE_FLAGS);
             }
             return DataTransactionResult.successNoData();
         }

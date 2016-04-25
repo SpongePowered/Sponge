@@ -61,14 +61,14 @@ public class UnbreakableValueProcessor extends AbstractSpongeValueProcessor<Item
         if (!container.hasTagCompound()) {
             container.setTagCompound(new NBTTagCompound());
         }
-        container.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, value);
+        container.getTagCompound().setBoolean(NbtDataUtil.Item.UNBREAKABLE, value);
         return true;
     }
 
     @Override
     public Optional<Boolean> getVal(ItemStack container) {
-        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
-            return Optional.of(container.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+        if (container.hasTagCompound() && container.getTagCompound().hasKey(NbtDataUtil.Item.UNBREAKABLE)) {
+            return Optional.of(container.getTagCompound().getBoolean(NbtDataUtil.Item.UNBREAKABLE));
         }
         return Optional.of(false);
     }

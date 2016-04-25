@@ -102,9 +102,9 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
     public SpongeBlockSnapshotBuilder position(Vector3i position) {
         this.coords = checkNotNull(position);
         if (this.compound != null) {
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_X, position.getX());
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Y, position.getY());
-            this.compound.setInteger(NbtDataUtil.TILE_ENTITY_POSITION_Z, position.getZ());
+            this.compound.setInteger(NbtDataUtil.TileEntity.POS_X, position.getX());
+            this.compound.setInteger(NbtDataUtil.TileEntity.POS_Y, position.getY());
+            this.compound.setInteger(NbtDataUtil.TileEntity.POS_Z, position.getZ());
         }
         return this;
     }
