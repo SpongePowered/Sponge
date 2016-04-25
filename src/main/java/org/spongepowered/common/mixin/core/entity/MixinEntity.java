@@ -217,6 +217,15 @@ public abstract class MixinEntity implements IMixinEntity {
 
     // @formatter:on
 
+    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
+    private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
+        if (worldIn instanceof IMixinWorldServer) {
+            self.dimension = ((IMixinWorldServer) worldIn).getDimensionId();
+        } else {
+            self.dimension = dimensionId;
+        }
+    }
+
     @Override
     public boolean isInConstructPhase() {
         return this.isConstructing;

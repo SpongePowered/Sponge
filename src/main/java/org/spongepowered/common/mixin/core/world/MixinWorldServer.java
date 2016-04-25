@@ -38,10 +38,12 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketSpawnGlobalEntity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldProvider;
@@ -85,6 +87,7 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -157,6 +160,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private Integer dimensionId = null;
 
 
+    @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
@@ -396,6 +400,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
     }
 
+    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
+        return this.getDimensionId();
+    }
+
     @Override
     public Collection<ScheduledBlockUpdate> getScheduledUpdates(int x, int y, int z) {
         BlockPos position = new BlockPos(x, y, z);
@@ -542,6 +551,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), this.getCauseTracker()))
                 .process()
                 .isCancelled();
+    }
+
+    /**
+     * @author gabizou - April 24th, 2016
+     * @reason Needs to redirect the dimension id for the packet being sent to players
+     * so that the dimension is correctly adjusted
+     *
+     * @param id The world provider's dimension id
+     * @return True if the spawn was successful and the effect is played.
+     */
+    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    public int getDimensionIdForWeatherEffect(DimensionType id) {
+        return this.getDimensionId();
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------

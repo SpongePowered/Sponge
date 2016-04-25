@@ -381,6 +381,7 @@
         "world.MixinWorld_Data",
         "world.MixinWorld_Effect",
         "world.MixinWorldBorder",
+        "world.MixinWorldManager",
         "world.MixinWorldProvider",
         "world.MixinWorldServer",
         "world.MixinWorldServerMulti",

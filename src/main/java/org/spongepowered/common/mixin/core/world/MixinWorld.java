@@ -192,7 +192,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
+    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
+        return false; // Note this is not actually going to return false, it's just a target
+    };
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
