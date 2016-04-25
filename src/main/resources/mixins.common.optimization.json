@@ -7,7 +7,6 @@
         "world.MixinWorld_Lighting",
         "world.MixinWorldServer_Lighting",
         "world.MixinChunk_Chunk_Cache",
-        "world.gen.MixinChunkProviderServer_Lighting",
         "world.gen.MixinChunkProviderServer_Chunk_Cache"
     ],
     "injectors": {

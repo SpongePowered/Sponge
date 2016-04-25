@@ -80,8 +80,6 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting",
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
-            .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Lighting",
-                    SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.gen.MixinChunkProviderServer_Chunk_Cache",
                     SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",

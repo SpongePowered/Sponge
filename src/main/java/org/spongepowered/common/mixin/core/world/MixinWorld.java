@@ -89,6 +89,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -110,6 +111,7 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -127,6 +129,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.interfaces.world.IMixinWorldType;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
@@ -197,7 +200,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
@@ -961,6 +963,58 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
             }
         }
+    }
+
+    /**
+     * @author amaranth - April 25th, 2016
+     * @reason Avoid 25 chunk map lookups per entity per tick by using neighbor pointers
+     *
+     * @param xStart X block start coordinate
+     * @param yStart Y block start coordinate
+     * @param zStart Z block start coordinate
+     * @param xEnd X block end coordinate
+     * @param yEnd Y block end coordinate
+     * @param zEnd Z block end coordinate
+     * @param allowEmpty Whether empty chunks should be accepted
+     * @return If the chunks for the area are loaded
+     */
+    @Overwrite
+    public boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
+        if (yEnd < 0 || yStart > 255) {
+            return false;
+        }
+
+        xStart = xStart >> 4;
+        zStart = zStart >> 4;
+        xEnd = xEnd >> 4;
+        zEnd = zEnd >> 4;
+
+        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, xEnd);
+        if (base == null) {
+            return false;
+        }
+
+        for (int i = xStart; i <= xEnd; i++) {
+            Optional<Chunk> column = base.getNeighbor(Direction.EAST);
+            if (!column.isPresent()) {
+                return false;
+            }
+
+            Chunk unwrapped = column.get();
+            for (int j = zStart; j <= zEnd; j++) {
+                Optional<Chunk> row = unwrapped.getNeighbor(Direction.SOUTH);
+                if (!row.isPresent()) {
+                    return false;
+                }
+
+                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row.get()).isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+
     }
 
 }
