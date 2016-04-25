@@ -344,7 +344,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
 
         if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
-            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, location);
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
         } else {
             if (thisEntity instanceof EntityPlayerMP) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),

@@ -44,7 +44,6 @@ import net.minecraft.network.play.server.SPacketHeldItemChange;
 import net.minecraft.network.play.server.SPacketJoinGame;
 import net.minecraft.network.play.server.SPacketPlayerAbilities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
-import net.minecraft.network.play.server.SPacketRespawn;
 import net.minecraft.network.play.server.SPacketServerDifficulty;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.network.play.server.SPacketUpdateHealth;
@@ -91,6 +90,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -437,20 +437,7 @@ public abstract class MixinPlayerList {
             toTransform = event.getFromTransform();
         }
 
-        final WorldServer toWorldServer = (WorldServer) toTransform.getExtent();
-        if (fromTransform.getExtent().equals(toTransform.getExtent())) {
-
-            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(((IMixinWorldServer) toWorldServer).getDimensionId(), toWorldServer.getDifficulty(),
-                    toWorldServer.getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
-        }
-
-        ((Player) entityPlayerMP).setTransform(toTransform);
-
-        if (fromTransform.getExtent().equals(toTransform.getExtent())) {
-            toWorldServer.getChunkProvider().provideChunk((int) toTransform.getLocation().getX() >> 4, (int) toTransform.getLocation().getZ() >> 4);
-        }
-
-        toWorldServer.spawnEntityInWorld(entityPlayerMP);
+        EntityUtil.changeWorld(entityPlayerMP, toTransform);
 
         // TODO Following still needed?
         // Reset the health.
