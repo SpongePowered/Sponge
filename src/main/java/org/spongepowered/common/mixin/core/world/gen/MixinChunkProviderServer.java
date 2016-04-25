@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import net.minecraft.util.LongHashMap;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -33,14 +35,26 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+
+import javax.annotation.Nullable;
 
 @Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer {
+public abstract class MixinChunkProviderServer implements IMixinChunkProviderServer {
 
     @Shadow public WorldServer worldObj;
+    @Shadow private LongHashMap<Chunk> id2ChunkMap;
+
     @Shadow public abstract Chunk provideChunk(int x, int z);
 
-    @Redirect(method = "populate", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
+    @Nullable
+    @Override
+    public Chunk getChunkIfLoaded(int x, int z) {
+        return this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
+    }
+
+    @Redirect(method = "populate",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
     public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
         IMixinWorld world = (IMixinWorld) this.worldObj;
         boolean capturingTerrain = world.getCauseTracker().isCapturingTerrainGen();

@@ -28,7 +28,7 @@ import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nullable;
 
-public interface IMIxinChunkProviderServer {
+public interface IMixinChunkProviderServer {
 
     /**
      * Gets the chunk at the desired position. If there is no

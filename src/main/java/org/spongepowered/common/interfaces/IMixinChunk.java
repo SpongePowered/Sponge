@@ -30,6 +30,8 @@ import net.minecraft.util.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.common.entity.PlayerTracker;
 
 import java.util.Map;
@@ -59,5 +61,7 @@ public interface IMixinChunk {
     void setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
 
     void setTrackedShortPlayerPositions(Map<Short, PlayerTracker> trackedPlayerPositions);
+
+    void setNeighbor(Direction direction, Chunk neighbor);
 
 }

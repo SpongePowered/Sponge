@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -84,6 +87,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -111,6 +115,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Cause populateCause;
     private org.spongepowered.api.world.World world;
     private UUID uuid;
+    private Chunk[] neighbors = new Chunk[4];
 
     private static final int NUM_XZ_BITS = 4;
     private static final int NUM_SHORT_Y_BITS = 8;
@@ -142,6 +147,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
 
+    // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
     @Shadow protected abstract void relightBlock(int x, int y, int z);
@@ -153,6 +159,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     @Shadow(prefix = "shadow$")
     public abstract Block shadow$getBlock(int x, int y, int z);
+    // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -173,12 +180,34 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
         }
+
+        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        for (Direction direction : directions) {
+            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+                    (neighborPosition.getX(), neighborPosition.getZ());
+            if (neighbor != null) {
+                this.setNeighbor(direction, (Chunk) neighbor);
+                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), this);
+            }
+        }
     }
 
     @Inject(method = "onChunkUnload()V", at = @At("RETURN"))
     public void onChunkUnloadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
+        }
+
+        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        for (Direction direction : directions) {
+            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+                    (neighborPosition.getX(), neighborPosition.getZ());
+            if (neighbor != null) {
+                this.setNeighbor(direction, null);
+                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), null);
+            }
         }
     }
 
@@ -222,9 +251,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.worldObj.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.worldObj.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp_float(((float)this.worldObj.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp_float(((float) this.worldObj.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
-        f3 += MathHelper.clamp_float((float)this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+        f3 += MathHelper.clamp_float((float) this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp_float(moon * 0.25F, 0.0F, f2);
         return f3;
     }
@@ -237,7 +266,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         } else if (region > 4) {
             return 1.0;
         } else {
-            return (region - 2.0)/ 2.0;
+            return (region - 2.0) / 2.0;
         }
     }
 
@@ -378,7 +407,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @SuppressWarnings({"unchecked"})
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
-    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_, CallbackInfo ci) {
+    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
+            CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;
         }
@@ -393,13 +423,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         } else if (event.isCancelled()) {
             listToFill.clear();
         } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
+            listToFill = (List<net.minecraft.entity.Entity>) (List<?>) event.getEntities();
         }
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
-    public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_, CallbackInfo ci) {
+    public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
+            CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;
         }
@@ -414,7 +445,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         } else if (event.isCancelled()) {
             listToFill.clear();
         } else {
-            listToFill = (List<net.minecraft.entity.Entity>)(List<?>) event.getEntities();
+            listToFill = (List<net.minecraft.entity.Entity>) (List<?>) event.getEntities();
         }
     }
 
@@ -520,7 +551,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // Sponge start - Ignore block activations during block placement captures unless it's
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
-                if (!((IMixinWorld)this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
+                if (!((IMixinWorld) this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
                     if (newBlockSnapshot == null) {
                         block.onBlockAdded(this.worldObj, pos, newState);
                     }
@@ -558,7 +589,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             }
         }
 
-        if (!SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType)block).getId())) {
+        if (!SpongeHooks.getActiveConfig(this.worldObj).getConfig().getBlockTracking().getBlockBlacklist().contains(((BlockType) block).getId())) {
             SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, true);
         } else {
             SpongeHooks.logBlockTrack(this.worldObj, block, pos, user, false);
@@ -568,24 +599,31 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             short blockPos = blockPosToShort(pos);
             if (this.trackedShortBlockPositions.get(blockPos) != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedShortBlockPositions.get(blockPos).ownerIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
+                    this.trackedShortBlockPositions.get(blockPos).ownerIndex =
+                            ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
+                    this.trackedShortBlockPositions.get(blockPos).notifierIndex =
+                            ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
                 } else {
-                    this.trackedShortBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
+                    this.trackedShortBlockPositions.get(blockPos).notifierIndex =
+                            ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
                 }
             } else {
-                this.trackedShortBlockPositions.put(blockPos, new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
+                this.trackedShortBlockPositions.put(blockPos,
+                        new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
             }
         } else {
             int blockPos = blockPosToInt(pos);
             if (this.trackedIntBlockPositions.get(blockPos) != null) {
                 if (trackerType == PlayerTracker.Type.OWNER) {
-                    this.trackedIntBlockPositions.get(blockPos).ownerIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
+                    this.trackedIntBlockPositions.get(blockPos).ownerIndex =
+                            ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
                 } else {
-                    this.trackedIntBlockPositions.get(blockPos).notifierIndex = ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
+                    this.trackedIntBlockPositions.get(blockPos).notifierIndex =
+                            ((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId());
                 }
             } else {
-                this.trackedIntBlockPositions.put(blockPos, new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
+                this.trackedIntBlockPositions.put(blockPos,
+                        new PlayerTracker(((IMixinWorldInfo) this.worldObj.getWorldInfo()).getIndexForUniqueId(user.getUniqueId()), trackerType));
             }
         }
     }
@@ -723,14 +761,14 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     /**
-    * Modifies bits in an integer.
-    *
-    * @param num Integer to modify
-    * @param data Bits of data to add
-    * @param which Index of nibble to start at
-    * @param bitsToReplace The number of bits to replace starting from nibble index
-    * @return The modified integer
-    */
+     * Modifies bits in an integer.
+     *
+     * @param num Integer to modify
+     * @param data Bits of data to add
+     * @param which Index of nibble to start at
+     * @param bitsToReplace The number of bits to replace starting from nibble index
+     * @return The modified integer
+     */
     public int setNibble(int num, int data, int which, int bitsToReplace) {
         return (num & ~(bitsToReplace << (which * 4)) | (data << (which * 4)));
     }
@@ -826,7 +864,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public Collection<org.spongepowered.api.block.tileentity.TileEntity>
-            getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
+    getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
         Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
         for (Entry<BlockPos, TileEntity> entry : this.chunkTileEntityMap.entrySet()) {
             if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {
@@ -899,6 +937,94 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     private User userForUUID(UUID uuid) {
         return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null));
+    }
+
+    @Override
+    public void setNeighbor(Direction direction, @Nullable Chunk neighbor) {
+        this.neighbors[directionToIndex(direction)] = neighbor;
+    }
+
+    @Override
+    public Optional<Chunk> getNeighbor(Direction direction, boolean shouldLoad) {
+        checkNotNull(direction, "direction");
+        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
+
+        if (direction.isUpright() || direction == Direction.NONE) {
+            return Optional.of(this);
+        }
+
+        int index = directionToIndex(direction);
+        Direction secondary = getSecondaryDirection(direction);
+        Chunk neighbor = this.neighbors[index];
+
+        if (neighbor == null && shouldLoad) {
+            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
+            Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
+            if (cardinal.isPresent()) {
+                neighbor = cardinal.get();
+            }
+        }
+
+        if (neighbor != null) {
+            if (secondary != Direction.NONE) {
+                return neighbor.getNeighbor(secondary, shouldLoad);
+            } else {
+                return Optional.of(neighbor);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private static int directionToIndex(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return 0;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return 1;
+            case EAST:
+                return 2;
+            case WEST:
+                return 3;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    private static Direction getCardinalDirection(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return Direction.NORTH;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return Direction.SOUTH;
+            case EAST:
+                return Direction.EAST;
+            case WEST:
+                return Direction.WEST;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    private static Direction getSecondaryDirection(Direction direction) {
+        switch (direction) {
+            case NORTHEAST:
+            case SOUTHEAST:
+                return Direction.EAST;
+            case NORTHWEST:
+            case SOUTHWEST:
+                return Direction.WEST;
+            default:
+                return Direction.NONE;
+        }
     }
 
 }
