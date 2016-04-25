@@ -289,6 +289,7 @@ public class GeneralFunctions {
 
     }
 
+    @SuppressWarnings("unchecked")
     public static void processPostBlockCaptures(List<BlockSnapshot> blockSnapshots, CauseTracker causeTracker, IPhaseState unwindingState,
             PhaseContext context) {
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];

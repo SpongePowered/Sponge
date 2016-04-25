@@ -213,7 +213,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
-    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
@@ -664,7 +664,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        newExplosion(EntityUtil.toNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
+        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
                 origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks()
         );

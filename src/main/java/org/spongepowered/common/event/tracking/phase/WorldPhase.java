@@ -296,29 +296,51 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final TileEntity tickingTile = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
-                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
+                phaseContext.getCapturedBlockSupplier()
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes for tile entity, but wasn't!", phaseContext))
+                        .ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
 
-                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
+                phaseContext.getCapturedEntitySupplier()
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns for a tile entity, but wasn't!", phaseContext))
+                        .ifPresentAndNotEmpty(entities -> {
                     // TODO the entity spawn causes are not likely valid, need to investigate further.
                     final Cause cause = Cause.source(BlockSpawnCause.builder()
                                             .block(tickingTile.getLocation().createSnapshot())
                                             .type(InternalSpawnTypes.PLACEMENT)
                                             .build())
                                     .build();
-                    final ImmutableList<EntitySnapshot>
-                            snapshots =
-                            entities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
+                    final ImmutableList<EntitySnapshot> snapshots = entities.stream()
+                                    .map(Entity::createSnapshot)
+                                    .collect(GuavaCollectors.toImmutableList());
                     EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
-                            .nonCancelled(event -> {
-                                event.getEntities().forEach(entity -> {
-                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                });
-                            })
+                            .nonCancelled(event -> event.getEntities().forEach(entity -> {
+                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }))
                             .process();
                 });
+                phaseContext.getCapturedItemsSupplier()
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops for a tile entity, but wasn't!", phaseContext))
+                        .ifPresentAndNotEmpty(entities -> {
+                            final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                        .block(tickingTile.getLocation().createSnapshot())
+                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .build())
+                                    .build();
+                            final ImmutableList<EntitySnapshot> snapshots = entities.stream()
+                                    .map(Entity::createSnapshot)
+                                    .collect(GuavaCollectors.toImmutableList());
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                                    .nonCancelled(event -> {
+                                        event.getEntities().forEach(entity -> {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        });
+                                    })
+                                    .process();
+                        });
             }
 
             @Override

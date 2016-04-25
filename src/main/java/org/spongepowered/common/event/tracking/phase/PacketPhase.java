@@ -71,6 +71,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.item.inventory.InteractInventoryEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -79,6 +80,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -89,6 +91,7 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -170,6 +173,13 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
+                        .entity(EntityUtil.fromNative(playerMP))
+                        .type(InternalSpawnTypes.DROPPED_ITEM)
+                        .build())
+                        .named(NamedCause.of("Container", openContainer))
+                        .build();
+
                 Iterator<Entity> iterator = capturedEntities.iterator();
                 ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 while (iterator.hasNext()) {
@@ -178,7 +188,7 @@ public final class PacketPhase extends TrackingPhase {
                     entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropFull(cause, transaction, capturedEntities,
+                return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities,
                         entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
             }
         },
@@ -189,6 +199,13 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public InteractInventoryEvent createInventoryEvent(EntityPlayerMP playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
                     List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, Cause cause, int usedButton) {
+                final Cause spawnCause = Cause.source(EntitySpawnCause.builder()
+                            .entity(EntityUtil.fromNative(playerMP))
+                            .type(InternalSpawnTypes.DROPPED_ITEM)
+                            .build())
+                        .named(NamedCause.of("Container", openContainer))
+                        .build();
+
                 final Iterator<Entity> iterator = capturedEntities.iterator();
                 final ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 while (iterator.hasNext()) {
@@ -197,7 +214,7 @@ public final class PacketPhase extends TrackingPhase {
                     entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropSingle(cause, transaction, capturedEntities,
+                return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities,
                         entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
 
             }

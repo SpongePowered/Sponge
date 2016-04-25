@@ -53,6 +53,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.ResourcePackStatusEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -510,6 +511,12 @@ public interface PacketFunction {
                             if (clickInventory.getCursorTransaction().getCustom().isPresent()) {
                                 PacketPhaseUtil.handleCustomCursor(player, clickInventory.getCursorTransaction().getFinal());
                             }
+                        }
+                        if (inventoryEvent instanceof SpawnEntityEvent) {
+                            ((SpawnEntityEvent) inventoryEvent).getEntities().forEach(entity -> {
+                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
+                            });
                         }
                     }).post(event -> slotTransactions.clear())
                     .process();

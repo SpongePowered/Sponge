@@ -70,7 +70,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
     public boolean onPrime(World world, Entity tnt) {
         IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
         mixin.setDetonator(this.igniter);
-        this.primeCancelled = !mixin.shouldPrime(Cause.of(NamedCause.of(NamedCause.IGNITER, this.igniter)));
+        this.primeCancelled = !mixin.shouldPrime(this.igniter == null ? null : Cause.of(NamedCause.of(NamedCause.IGNITER, this.igniter)));
         return !this.primeCancelled && world.spawnEntityInWorld(tnt);
     }
 

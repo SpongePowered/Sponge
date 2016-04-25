@@ -47,6 +47,7 @@ import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinServerCommandManager;
 import org.spongepowered.common.interfaces.command.IMixinCommandHandler;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -95,7 +96,10 @@ public class MinecraftCommandWrapper implements CommandCallable {
                     .getTranslationById(TRANSLATION_NO_PERMISSION).get()));
         }
 
-        CommandHandler handler = (CommandHandler) ((ICommandSender) source).getServer().getCommandManager();
+        CommandHandler handler = (CommandHandler) (source instanceof ICommandSender
+                                                   ? ((ICommandSender) source)
+                                                   : ((IMixinCommandSource) source).asICommandSender()
+        ).getServer().getCommandManager();
         final ICommandSender mcSender = WrapperICommandSender.of(source);
         final String[] splitArgs = splitArgs(arguments);
         int usernameIndex = handler.getUsernameIndex(this.command, splitArgs);
