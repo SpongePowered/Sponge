@@ -636,7 +636,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        newExplosion(EntityUtil.toNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
+        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
                 origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks()
         );

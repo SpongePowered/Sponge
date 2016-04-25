@@ -56,6 +56,8 @@ import org.spongepowered.common.world.DimensionManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 public final class EntityUtil {
 
     /**
@@ -151,6 +153,17 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a native Entity for this implementation!");
         }
         return (Entity) tickingEntity;
+    }
+
+    @Nullable
+    public static Entity toNullableNative(@Nullable org.spongepowered.api.entity.Entity entity) {
+        if (entity == null) {
+            return null;
+        }
+        if (!(entity instanceof Entity)) {
+            throw new IllegalArgumentException("Not a native Entity for this implementation!");
+        }
+        return (Entity) entity;
     }
 
     public static org.spongepowered.api.entity.Entity fromNative(Entity entity) {
