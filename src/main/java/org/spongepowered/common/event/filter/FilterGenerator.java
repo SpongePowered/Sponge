@@ -35,6 +35,7 @@ import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.ICONST_0;
 import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
@@ -60,6 +61,7 @@ import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.api.util.generator.event.factory.ClassGenerator;
 import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
@@ -211,7 +213,9 @@ public class FilterGenerator {
             for (int i = 1; i < params.length; i++) {
                 mv.visitInsn(DUP);
                 mv.visitIntInsn(BIPUSH, i);
-                mv.visitVarInsn(ALOAD, plocals[i - 1]);
+                Type paramType = Type.getType(params[i].getType());
+                mv.visitVarInsn(paramType.getOpcode(ILOAD), plocals[i - 1]);
+                ClassGenerator.visitBoxingMethod(mv, paramType);
                 mv.visitInsn(AASTORE);
             }
             mv.visitInsn(ARETURN);
