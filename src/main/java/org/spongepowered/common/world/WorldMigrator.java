@@ -88,7 +88,8 @@ public class WorldMigrator {
         }
 
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(oldWorldContainer,
-                entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")))) {
+                entry -> !entry.getFileName().equals(worldContainer.getFileName()) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry
+                        .resolve("sponge_level.dat")))) {
             for (Path oldWorldPath : stream) {
                 Path worldPath = worldContainer.resolve(oldWorldPath.getFileName());
 
