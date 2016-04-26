@@ -108,6 +108,9 @@ public class PacketUtil {
                         .add(NamedCause.of(InternalNamedCauses.Packet.IGNORING_CREATIVE, ignoreCreative));
 
                 final PacketPhase.IPacketState packetState = TrackingPhases.PACKET.getStateForPacket(packetIn);
+                if (packetState == null) {
+                    throw new IllegalArgumentException("Found a null packet phase for packet: " + packetIn.getClass());
+                }
                 TrackingPhases.PACKET.populateContext(packetIn, packetPlayer, packetState, context);
                 context.complete();
                 causeTracker.switchToPhase(TrackingPhases.PACKET, packetState, context);

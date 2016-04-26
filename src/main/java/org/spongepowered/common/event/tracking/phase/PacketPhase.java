@@ -554,7 +554,8 @@ public final class PacketPhase extends TrackingPhase {
         HANDLED_EXTERNALLY,
         RESOURCE_PACK,
         STOP_RIDING_JUMP,
-        SWAP_HAND_ITEMS;
+        SWAP_HAND_ITEMS,
+        START_FALL_FLYING;
 
         @Override
         public PacketPhase getPhase() {
@@ -722,14 +723,15 @@ public final class PacketPhase extends TrackingPhase {
 
 
     public static final ImmutableMap<CPacketEntityAction.Action, IPacketState> PLAYER_ACTION_MAPPINGS = ImmutableMap.<CPacketEntityAction.Action, IPacketState>builder()
-            .put(CPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
-            .put(CPacketEntityAction.Action.START_RIDING_JUMP, PacketPhase.General.START_RIDING_JUMP)
-            .put(CPacketEntityAction.Action.STOP_RIDING_JUMP, PacketPhase.General.STOP_RIDING_JUMP)
             .put(CPacketEntityAction.Action.START_SNEAKING, PacketPhase.General.START_SNEAKING)
             .put(CPacketEntityAction.Action.STOP_SNEAKING, PacketPhase.General.STOP_SNEAKING)
+            .put(CPacketEntityAction.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
             .put(CPacketEntityAction.Action.START_SPRINTING, PacketPhase.General.START_SPRINTING)
             .put(CPacketEntityAction.Action.STOP_SPRINTING, PacketPhase.General.STOP_SPRINTING)
-            .put(CPacketEntityAction.Action.STOP_SLEEPING, PacketPhase.General.STOP_SLEEPING)
+            .put(CPacketEntityAction.Action.START_RIDING_JUMP, PacketPhase.General.START_RIDING_JUMP)
+            .put(CPacketEntityAction.Action.STOP_RIDING_JUMP, PacketPhase.General.STOP_RIDING_JUMP)
+            .put(CPacketEntityAction.Action.OPEN_INVENTORY, Inventory.OPEN_INVENTORY)
+            .put(CPacketEntityAction.Action.START_FALL_FLYING, PacketPhase.General.START_FALL_FLYING)
             .build();
 
     public static final ImmutableMap<CPacketPlayerDigging.Action, IPacketState> INTERACTION_ACTION_MAPPINGS = ImmutableMap.<CPacketPlayerDigging.Action, IPacketState>builder()
