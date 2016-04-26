@@ -427,11 +427,13 @@ public final class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 final CPacketUseEntity useEntityPacket = (CPacketUseEntity) packet;
                 net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
-                context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-                context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
-                final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
-                if (stack != null) {
-                    context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                if (entity != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
+                    final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
+                    if (stack != null) {
+                        context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
+                    }
                 }
             }
 
@@ -467,8 +469,10 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
                 final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(playerMP.worldObj);
-                context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
-                context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
+                if (entity != null) {
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
+                    context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
+                }
             }
         },
         CHAT() {
