@@ -989,7 +989,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         xEnd = xEnd >> 4;
         zEnd = zEnd >> 4;
 
-        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, xEnd);
+        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
         if (base == null) {
             return false;
         }
