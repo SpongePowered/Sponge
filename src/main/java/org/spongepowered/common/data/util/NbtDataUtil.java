@@ -106,7 +106,7 @@ public final class NbtDataUtil {
     public static final String USER_SPAWN_Z = "SpawnZ";
     public static final String USER_SPAWN_FORCED = "SpawnForced";
     public static final String USER_SPAWN_LIST = "Spawns";
-    public static final String USER_SPAWN_DIM = "Dim";
+    public static final String UUID = "UUID";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
@@ -135,15 +135,10 @@ public final class NbtDataUtil {
     public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
-    public static final String LEVEL_NAME = "LevelName";
-    public static final String WORLD_UUID_MOST = "uuid_most";
-    public static final String WORLD_UUID_LEAST = "uuid_least";
     public static final String CAN_GRIEF = "CanGrief";
 
     // Compatibility tags for Forge
-    public static final String FORGE_DATA_TAG = "ForgeData";
-    public static final String UUID_MOST = "UUIDMost";
-    public static final String UUID_LEAST = "UUIDLeast";
+    public static final String FORGE_DATA = "ForgeData";
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
     public static final String INVALID_TITLE = "invalid";
@@ -159,6 +154,29 @@ public final class NbtDataUtil {
     public static final String ENTITY_TYPE_ID = "id";
     public static final String MINECART_TYPE = "Type";
     public static final String ENTITY_POSITION = "Pos";
+
+    public static final class Deprecated {
+
+        public static final class Entity {
+            public static final String UUID_LEAST_1_8 = "uuid_least";
+            public static final String UUID_MOST_1_8 = "uuid_most";
+
+            private Entity() {
+            }
+        }
+
+        public static final class World {
+
+            public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
+            public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
+
+            private World() {
+            }
+        }
+
+        private Deprecated() {
+        }
+    }
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
@@ -218,8 +236,8 @@ public final class NbtDataUtil {
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
-            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
+        if (rootCompound.hasKey(FORGE_DATA, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA);
             if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }

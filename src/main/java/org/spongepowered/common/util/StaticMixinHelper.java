@@ -33,7 +33,6 @@ public class StaticMixinHelper {
     // Set before firing an internal Forge BlockBreak event to handle extended blockstate
     public static boolean convertingMapFormat = false;
 
-
     // For animation packet
     public static int lastAnimationPacketTick = 0;
     public static int lastSecondaryPacketTick = 0;

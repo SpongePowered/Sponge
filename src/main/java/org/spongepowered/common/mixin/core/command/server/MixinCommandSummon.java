@@ -32,7 +32,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
@@ -68,7 +67,7 @@ public abstract class MixinCommandSummon extends CommandBase {
             "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
     @Redirect(method = "execute", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
-    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double d1, double d2, double d3, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
+    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double x, double y, double z, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
         if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
                     EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
@@ -82,29 +81,10 @@ public abstract class MixinCommandSummon extends CommandBase {
         if (type == null) {
             return null;
         }
-        Vec3d vec3 = sender.getPositionVector();
 
-        double x = vec3.xCoord;
-        double y = vec3.yCoord;
-        double z = vec3.zCoord;
-
-        try {
-            if (args.length >= 4) {
-                x = parseDouble(x, args[1], true);
-                y = parseDouble(y, args[2], false);
-                z = parseDouble(z, args[3], true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
         SpawnCause cause = getSpawnCause(sender);
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        if (event.isCancelled()) {
-            return null;
-        }
         return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
     }
 

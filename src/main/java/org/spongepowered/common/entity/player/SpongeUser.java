@@ -46,10 +46,9 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.util.RespawnLocation;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
@@ -91,70 +90,59 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
 
     public void readFromNbt(NBTTagCompound compound) {
         this.reset();
+
         // See EntityPlayer#readEntityFromNBT
-        if (compound.hasKey(NbtDataUtil.USER_SPAWN_X, NbtDataUtil.TAG_ANY_NUMERIC)
-                && compound.hasKey(NbtDataUtil.USER_SPAWN_Y, NbtDataUtil.TAG_ANY_NUMERIC)
-                && compound.hasKey(NbtDataUtil.USER_SPAWN_Z, NbtDataUtil.TAG_ANY_NUMERIC)) {
-            Vector3d pos = new Vector3d(compound.getInteger(NbtDataUtil.USER_SPAWN_X),
-                    compound.getInteger(NbtDataUtil.USER_SPAWN_Y),
-                    compound.getInteger(NbtDataUtil.USER_SPAWN_Z));
-            final UUID key = WorldPropertyRegistryModule.dimIdToUuid(0);
-            this.spawnLocations.put(key, RespawnLocation.builder()
-                    .world(key)
-                    .position(pos)
-                    .forceSpawn(compound.getBoolean(NbtDataUtil.USER_SPAWN_FORCED))
-                    .build());
-        }
-        NBTTagList spawnlist = compound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
-        for (int i = 0; i < spawnlist.tagCount(); i++) {
-            NBTTagCompound spawndata = spawnlist.getCompoundTagAt(i);
-            UUID uuid = WorldPropertyRegistryModule.dimIdToUuid(spawndata.getInteger(NbtDataUtil.USER_SPAWN_DIM));
-            if (uuid != null) {
-                this.spawnLocations.put(uuid, RespawnLocation.builder()
-                        .world(uuid)
-                        .position(new Vector3d(spawndata.getInteger(NbtDataUtil.USER_SPAWN_X),
-                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Y),
-                                spawndata.getInteger(NbtDataUtil.USER_SPAWN_Z)))
-                        .forceSpawn(spawndata.getBoolean(NbtDataUtil.USER_SPAWN_FORCED))
-                        .build());
+        final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA).getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        if (!spongeCompound.hasNoTags()) {
+            final NBTTagList spawnList = spongeCompound.getTagList(NbtDataUtil.USER_SPAWN_LIST, NbtDataUtil.TAG_COMPOUND);
+
+            for (int i = 0; i < spawnList.tagCount(); i++) {
+                final NBTTagCompound spawnCompound = spawnList.getCompoundTagAt(i);
+
+                final UUID uuid = spawnCompound.getUniqueId(NbtDataUtil.UUID);
+
+                if (uuid.getLeastSignificantBits() != 0 && uuid.getMostSignificantBits() != 0) {
+                    final double xPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_X);
+                    final double yPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Y);
+                    final double zPos = spawnCompound.getDouble(NbtDataUtil.USER_SPAWN_Z);
+                    final boolean forced = spawnCompound.getBoolean(NbtDataUtil.USER_SPAWN_FORCED);
+                    this.spawnLocations.put(uuid, new RespawnLocation.Builder()
+                            .forceSpawn(forced)
+                            .position(new Vector3d(xPos, yPos, zPos))
+                            .world(uuid)
+                            .build());
+                }
             }
         }
+
+
         // TODO Read: inventory, any other data that should be
         // available through data manipulators.
     }
 
     public void writeToNbt(NBTTagCompound compound) {
-        // Clear data that we may or may not write back
-        compound.removeTag(NbtDataUtil.USER_SPAWN_X);
-        compound.removeTag(NbtDataUtil.USER_SPAWN_Y);
-        compound.removeTag(NbtDataUtil.USER_SPAWN_Z);
-        compound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
 
-        NBTTagList spawnlist = new NBTTagList();
+        final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
+        final NBTTagCompound spongeCompound = forgeCompound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+        spongeCompound.removeTag(NbtDataUtil.USER_SPAWN_LIST);
+
+        final NBTTagList spawnList = new NBTTagList();
         for (Entry<UUID, RespawnLocation> entry : this.spawnLocations.entrySet()) {
-            int dim = WorldPropertyRegistryModule.uuidToDimId(entry.getKey());
-            if (dim == Integer.MIN_VALUE) {
-                continue;
-            }
-            Vector3d position = entry.getValue().getPosition();
-            boolean forced = entry.getValue().isForced();
-            if (dim == 0) { // Overworld
-                compound.setDouble(NbtDataUtil.USER_SPAWN_X, position.getX());
-                compound.setDouble(NbtDataUtil.USER_SPAWN_Y, position.getY());
-                compound.setDouble(NbtDataUtil.USER_SPAWN_Z, position.getZ());
-                compound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, forced);
-            } else {
-                NBTTagCompound spawndata = new NBTTagCompound();
-                spawndata.setInteger(NbtDataUtil.USER_SPAWN_DIM, dim);
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_X, position.getX());
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Y, position.getY());
-                spawndata.setDouble(NbtDataUtil.USER_SPAWN_Z, position.getZ());
-                spawndata.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, forced);
-                spawnlist.appendTag(spawndata);
-            }
+            final RespawnLocation respawn = entry.getValue();
+
+            final NBTTagCompound spawnCompound = new NBTTagCompound();
+            spawnCompound.setUniqueId(NbtDataUtil.UUID, entry.getKey());
+            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_X, respawn.getPosition().getX());
+            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Y, respawn.getPosition().getY());
+            spawnCompound.setDouble(NbtDataUtil.USER_SPAWN_Z, respawn.getPosition().getZ());
+            spawnCompound.setBoolean(NbtDataUtil.USER_SPAWN_FORCED, false); // No way to know
+            spawnList.appendTag(spawnCompound);
         }
-        if (!spawnlist.hasNoTags()) {
-            compound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnlist);
+
+        if (!spawnList.hasNoTags()) {
+            spongeCompound.setTag(NbtDataUtil.USER_SPAWN_LIST, spawnList);
+            forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, spongeCompound);
+            compound.setTag(NbtDataUtil.FORGE_DATA, forgeCompound);
         }
     }
 
@@ -296,7 +284,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
         File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
         NBTTagCompound tag;
         if (dataFile.isFile()) {
@@ -314,7 +302,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
             CompressedStreamTools.writeCompressed(tag, new FileOutputStream(dataFile));
             dirtyUsers.remove(this);
         } catch (IOException e) {
-            SpongeHooks.logWarning("Failed to save user file {}. {}", dataFile, e);
+            SpongeImpl.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
         }
     }
 

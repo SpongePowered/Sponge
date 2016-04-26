@@ -35,8 +35,8 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -46,7 +46,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -59,11 +58,9 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
 import java.time.Instant;
@@ -136,11 +133,9 @@ public class SpongeCommand {
                 ++successes;
             }
             if (args.hasAny("dimension")) {
-                // TODO 1.9 - This isn't right but I can't fix until I fix dimension configs.
-                for (DimensionType dimension : args.<DimensionType>getAll("dimension")) {
-                    WorldProvider provider = DimensionManager.getWorldFromDimId(((SpongeDimensionType) dimension).getDimensionTypeId()).provider;
-                    src.sendMessage(Text.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)
-                                    .getDimensionConfig(), dimension, src, args)));
+                for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
+                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((IMixinDimensionType) dimensionType).
+                            getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }

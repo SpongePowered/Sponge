@@ -22,34 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.interfaces.world;
 
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
+import org.spongepowered.api.service.context.Context;
+import org.spongepowered.common.config.SpongeConfig;
 
-import java.util.Arrays;
+public interface IMixinDimensionType {
 
-public abstract class SpongeWorldType extends WorldType {
+    SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
 
-    protected SpongeWorldType(String name) {
-        super(getNextID(), name);
-    }
-
-    private static int getNextID() {
-        for (int x = 0; x < worldTypes.length; x++) {
-            if (worldTypes[x] == null) {
-                return x;
-            }
-        }
-
-        int oldLen = worldTypes.length;
-        worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
-        return oldLen;
-    }
-
-    public abstract BiomeProvider getBiomeProvider(World world);
-
-    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
+    Context getContext();
 }

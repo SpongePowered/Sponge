@@ -35,7 +35,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -76,7 +75,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -87,9 +85,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.DestructEntityEvent;
-import org.spongepowered.api.event.message.MessageEvent;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -125,26 +120,19 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
-import org.spongepowered.common.event.InternalNamedCauses;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -179,7 +167,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
-    private SpongeChunkGenerator spongegen;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -200,11 +187,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
+    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
+        return false; // Note this is not actually going to return false, it's just a target
+    };
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
@@ -232,6 +222,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
     @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
     @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -454,12 +445,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.keepSpawnLoaded = keepLoaded;
     }
 
+
     @Override
     public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
-
-
 
     @Override
     public Optional<Entity> getEntity(UUID uuid) {
@@ -499,19 +489,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         mixin.setLoadOnStartup(properties.loadOnStartup());
 
         return (WorldCreationSettings) (Object) settings;
-    }
-
-
-
-    @Override
-    public SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator) {
-        return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
-                newGenerator.getBiomeGenerator());
-    }
-
-    @Override
-    public WorldProvider getWorldProvider() {
-        return this.provider;
     }
 
     @Override
@@ -642,11 +619,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
                 .filter(filter)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(((IMixinWorldProvider) this.provider).getDimensionId()) != null;
     }
 
     @Override

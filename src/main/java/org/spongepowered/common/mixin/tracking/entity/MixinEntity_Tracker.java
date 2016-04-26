@@ -71,11 +71,11 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         } else {
             NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
 
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
+            if (!creatorNbt.hasKey(NbtDataUtil.UUID)) {
                 return Optional.empty();
             }
 
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
+            UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
             // get player if online
             EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
             if (player != null) {

@@ -28,13 +28,9 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.network.Packet;
 import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.SoundEvent;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
@@ -45,9 +41,7 @@ import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -55,23 +49,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.effect.particle.SpongeParticleEffect;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.List;
-import java.util.Random;
 
-@Mixin(net.minecraft.world.World.class)
-public abstract class MixinWorld_Effect implements World, IMixinWorld {
+@Mixin(net.minecraft.world.WorldServer.class)
+public abstract class MixinWorld_Effect extends MixinWorld implements World, IMixinWorldServer {
 
     private long weatherStartTime;
     private Weather prevWeather;
-
-    @Shadow @Final public Random rand;
-    @Shadow @Final public WorldProvider provider;
-    @Shadow protected WorldInfo worldInfo;
-
-    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     @Inject(method = "init", at = @At("HEAD"))
     protected void onWorldEffectsInit(CallbackInfoReturnable<net.minecraft.world.World> cir) {
@@ -108,14 +94,14 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
         List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
 
         if (!packets.isEmpty()) {
-            PlayerList playerList = ((net.minecraft.world.World) (Object) this).getMinecraftServer().getPlayerList();
+            PlayerList playerList = this.getMinecraftServer().getPlayerList();
 
             double x = position.getX();
             double y = position.getY();
             double z = position.getZ();
 
             for (Packet packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, ((IMixinWorldProvider) this.provider).getDimensionId(), packet);
+                playerList.sendToAllNearExcept(null, x, y, z, radius, getDimensionId(), packet);
             }
         }
     }

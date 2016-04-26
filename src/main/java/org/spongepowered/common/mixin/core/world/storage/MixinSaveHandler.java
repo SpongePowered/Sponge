@@ -39,11 +39,9 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -152,8 +150,7 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
 
     private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Only save dimension data to root world
-        if (this.worldDirectory.getParentFile() == null || (SpongeImpl.getGame().getPlatform().getType().isClient() && this.worldDirectory.getParentFile().equals(
-            SpongeImpl.getGame().getSavesDirectory()))) {
+        if (this.worldDirectory.toPath().equals(DimensionManager.getCurrentSavesDirectory().get())) {
             final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
             final NBTTagCompound customDimensionDataCompound = DimensionManager.saveDimensionDataMap();
             customWorldDataCompound.setTag("DimensionData", customDimensionDataCompound);
@@ -200,10 +197,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
         }
         UUID playerId = null;
-        if (compound.hasKey(NbtDataUtil.UUID_MOST, NbtDataUtil.TAG_LONG) && compound.hasKey(NbtDataUtil.UUID_LEAST, NbtDataUtil.TAG_LONG)) {
-            playerId = new UUID(compound.getLong(NbtDataUtil.UUID_MOST), compound.getLong(NbtDataUtil.UUID_LEAST));
-        } else if (compound.hasKey("UUID", NbtDataUtil.TAG_STRING)) {
-            playerId = UUID.fromString(compound.getString("UUID"));
+        if (compound.hasUniqueId(NbtDataUtil.UUID)) {
+            playerId = compound.getUniqueId(NbtDataUtil.UUID);
         }
         if (playerId != null) {
             Optional<Instant> savedFirst = SpongePlayerDataHandler.getFirstJoined(playerId);

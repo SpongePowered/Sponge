@@ -22,34 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.mixin.core.world;
 
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.DimensionType;
+import net.minecraft.world.WorldManager;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import java.util.Arrays;
+@Mixin(WorldManager.class)
+public abstract class MixinWorldManager {
 
-public abstract class SpongeWorldType extends WorldType {
+    @Shadow private WorldServer theWorldServer;
 
-    protected SpongeWorldType(String name) {
-        super(getNextID(), name);
+    @Redirect(method = "playSoundToAllNearExcept", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    private int getDimensionForPlayingSound(DimensionType dimensionType) {
+        return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
     }
 
-    private static int getNextID() {
-        for (int x = 0; x < worldTypes.length; x++) {
-            if (worldTypes[x] == null) {
-                return x;
-            }
-        }
-
-        int oldLen = worldTypes.length;
-        worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
-        return oldLen;
+    @Redirect(method = "playAuxSFX", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    private int getDimensionForSoundEffects(DimensionType dimensionType) {
+        return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
     }
 
-    public abstract BiomeProvider getBiomeProvider(World world);
-
-    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
 }

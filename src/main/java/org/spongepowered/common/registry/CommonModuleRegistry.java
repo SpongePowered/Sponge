@@ -289,7 +289,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(Difficulty.class, new DifficultyRegistryModule())
-            .registerModule(DimensionType.class, DimensionRegistryModule.getInstance())
+            .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
             .registerModule(DisplaySlot.class,DisplaySlotRegistryModule.getInstance())

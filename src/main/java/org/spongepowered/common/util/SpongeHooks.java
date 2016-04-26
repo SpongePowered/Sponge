@@ -45,6 +45,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.world.Dimension;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.DimensionConfig;
@@ -53,9 +54,9 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
 
 import java.io.File;
@@ -102,7 +103,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDeathLogging()) {
-            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldProvider) entity.worldObj.provider).getDimensionId(), entity);
+            logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), entity);
             logStack(config);
         }
     }
@@ -114,7 +115,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(entity.worldObj);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
-            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldProvider) entity.worldObj.provider).getDimensionId(), reason, entity);
+            logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), reason, entity);
             logStack(config);
         }
     }
@@ -136,7 +137,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     entity.worldObj.getWorldInfo().getWorldName(),
-                    ((IMixinWorldProvider) entity.worldObj.provider).getDimensionId());
+                    ((IMixinWorldServer) entity.worldObj).getDimensionId());
             logStack(config);
         }
     }
@@ -150,7 +151,7 @@ public class SpongeHooks {
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
-                    world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldProvider) world.provider).getDimensionId() + ")",
+                    world.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) world).getDimensionId() + ")",
                     ((BlockType) block).getId(),
                     pos);
             logStack(config);
@@ -158,7 +159,7 @@ public class SpongeHooks {
             logInfo("Blacklisted! Unable to track Block " + "[RootCause: {0}][World: {1}][DimId: {2}][Block: {3}][Pos: {4}]",
                     user.getName(),
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldProvider) world.provider).getDimensionId(),
+                    ((IMixinWorldServer) world).getDimensionId(),
                     ((BlockType) block).getId(),
                     pos.getX() + ", " + pos.getY() + ", " + pos.getZ());
         }
@@ -180,7 +181,7 @@ public class SpongeHooks {
                     getFriendlyCauseName(cause),
                     user.isPresent() ? user.get().getName() : "None",
                     world.getWorldInfo().getWorldName(),
-                    ((IMixinWorldProvider) world.provider).getDimensionId(),
+                    ((IMixinWorldServer) world).getDimensionId(),
                     transaction.getOriginal().getState(),
                     transaction.getFinal().getState());
             logStack(config);
@@ -194,7 +195,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
-            logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldProvider) world.provider).getDimensionId(), chunkPos.getX(),
+            logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -207,7 +208,7 @@ public class SpongeHooks {
 
         SpongeConfig<?> config = getActiveConfig(world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
-            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldProvider) world.provider).getDimensionId(), chunkPos.getX(),
+            logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
             logStack(config);
         }
@@ -375,7 +376,7 @@ public class SpongeHooks {
         public int dimensionId;
 
         public CollisionWarning(World world, Entity entity) {
-            this.dimensionId = ((IMixinWorldProvider) world.provider).getDimensionId();
+            this.dimensionId = ((IMixinWorldServer) world).getDimensionId();
             this.blockPos = new BlockPos(entity.chunkCoordX, entity.chunkCoordY, entity.chunkCoordZ);
         }
 
@@ -422,11 +423,11 @@ public class SpongeHooks {
 
     public static SpongeConfig<?> getActiveConfig(World world) {
         final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
-        final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinWorldProvider) world.provider).getDimensionConfig();
+        final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType()).getDimensionConfig();
         if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
             return worldConfig;
         } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-            return ((IMixinWorldProvider) world.provider).getDimensionConfig();
+            return dimensionConfig;
         } else {
             return SpongeImpl.getGlobalConfig();
         }
@@ -452,9 +453,10 @@ public class SpongeHooks {
                         return worldConfig;
                     }
 
+
                     // If we've gotten here, see if this world's dimension's config is enabled.
-                    final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
+                    final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType())
+                            .getDimensionConfig();
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }
@@ -463,8 +465,8 @@ public class SpongeHooks {
                     return SpongeImpl.getGlobalConfig();
                 } else {
                     // If we've gotten here, we have no world config so see if this world's dimension's config is enabled.
-                    final SpongeConfig<DimensionConfig> dimensionConfig =
-                            DimensionRegistryModule.getInstance().getConfig(world.provider.getDimensionType().getId());
+                    final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType())
+                            .getDimensionConfig();
                     if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
                         return dimensionConfig;
                     }

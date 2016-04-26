@@ -52,6 +52,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Map;
 

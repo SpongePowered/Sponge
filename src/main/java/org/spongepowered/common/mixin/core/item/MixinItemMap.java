@@ -39,39 +39,39 @@ public class MixinItemMap extends ItemMapBase {
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "loadItemData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/WorldSavedData;"))
     private WorldSavedData loadOverworldMapData(World worldIn, Class <? extends WorldSavedData> clazz, String dataId) {
-        return DimensionManager.getWorldFromDimId(0).loadItemData(clazz, dataId);
+        return DimensionManager.getWorldByDimensionId(0).get().loadItemData(clazz, dataId);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World worldIn, String key) {
-        return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
+        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 
     @Redirect(method = "func_185063_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreatedGetOverworldUniqueDataId(World worldIn, String key) {
-        return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
+        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "func_185064_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreatedGetOverworldUniqueDataId2(World worldIn, String key) {
-        return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
+        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "func_185063_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private static void onCreatedWithScale(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 
     @Redirect(method = "func_185064_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private static void onCreatedWithTrackingPosition(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 }

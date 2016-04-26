@@ -22,34 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.type;
+package org.spongepowered.common.util;
 
-import net.minecraft.world.World;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeProvider;
-import net.minecraft.world.chunk.IChunkGenerator;
+import java.util.function.Supplier;
 
-import java.util.Arrays;
+public class FunctionalUtil {
 
-public abstract class SpongeWorldType extends WorldType {
-
-    protected SpongeWorldType(String name) {
-        super(getNextID(), name);
+    public static Supplier<IllegalArgumentException> invalidArgument(String string) {
+        return () -> new IllegalArgumentException(string);
     }
 
-    private static int getNextID() {
-        for (int x = 0; x < worldTypes.length; x++) {
-            if (worldTypes[x] == null) {
-                return x;
-            }
-        }
-
-        int oldLen = worldTypes.length;
-        worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
-        return oldLen;
-    }
-
-    public abstract BiomeProvider getBiomeProvider(World world);
-
-    public abstract IChunkGenerator getChunkGenerator(World world, String generatorOptions);
 }

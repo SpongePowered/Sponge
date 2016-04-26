@@ -30,6 +30,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import com.typesafe.config.ConfigRenderOptions;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
 import net.minecraft.block.ITileEntityProvider;
@@ -37,26 +38,32 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.play.server.SPacketSpawnGlobalEntity;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.DimensionType;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
+import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.translator.ConfigurateTranslator;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityTypes;
@@ -77,10 +84,12 @@ import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -90,6 +99,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
@@ -107,16 +117,20 @@ import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeGenerationPopulator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
+import org.spongepowered.common.world.type.SpongeWorldType;
 
+import java.io.BufferedWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -149,8 +163,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
+    private Integer dimensionId = null;
 
 
+    @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
@@ -159,8 +175,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstructed(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn,
             CallbackInfo ci) {
-        ((WorldServer) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(),
-                ((IMixinWorldProvider) this.getWorldProvider()).getDimensionId()));
+        ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -178,14 +193,33 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateWorldGenerator();
     }
 
+
+    @Override
+    public int getDimensionId() {
+        return dimensionId;
+    }
+
+    @Override
+    public boolean isLoaded() {
+        return DimensionManager.getWorldByDimensionId(getDimensionId()).isPresent();
+    }
+
+    @Override
+    public void setDimensionId(int dimensionId) {
+        if (this.dimensionId != null) {
+            throw new RuntimeException("Attempt was made to re-set dimension id on world!");
+        }
+
+        this.dimensionId = dimensionId;
+    }
+
     @Override
     public void updateWorldGenerator() {
 
-        IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
         // Get the default generator for the world type
         DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
 
-        SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
+        SpongeWorldGenerator newGenerator = createWorldGenerator(generatorSettings);
         // If the base generator is an IChunkProvider which implements
         // IPopulatorProvider we request that it add its populators not covered
         // by the base generation populator
@@ -207,7 +241,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
         }
 
-        this.spongegen = createChunkProvider(newGenerator);
+        this.spongegen = createChunkGenerator(newGenerator);
         this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
         this.spongegen.setPopulators(newGenerator.getPopulators());
         this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
@@ -216,6 +250,52 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         chunkProviderServer.chunkGenerator = this.spongegen;
     }
 
+    @Override
+    public SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator) {
+        return new SpongeChunkGenerator((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
+                newGenerator.getBiomeGenerator());
+    }
+
+    @Override
+    public SpongeWorldGenerator createWorldGenerator(DataContainer settings) {
+        // Minecraft uses a string for world generator settings
+        // This string can be a JSON string, or be a string of a custom format
+
+        // Try to convert to custom format
+        Optional<String> optCustomSettings = settings.getString(DataQueries.WORLD_CUSTOM_SETTINGS);
+        if (optCustomSettings.isPresent()) {
+            return this.createWorldGenerator(optCustomSettings.get());
+        }
+
+        final StringWriter writer = new StringWriter();
+        try {
+            HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
+                    .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
+        } catch (Exception e) {
+            SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings, ((net
+                    .minecraft.world.World) (Object) this).getWorldType(), this, e);
+        }
+
+        return this.createWorldGenerator(writer.toString());
+    }
+
+    @Override
+    public SpongeWorldGenerator createWorldGenerator(String settings) {
+        final WorldServer worldServer = (WorldServer) (Object) this;
+        final WorldType worldType = worldServer.getWorldType();
+        final IChunkGenerator chunkGenerator;
+        final BiomeProvider biomeProvider;
+        if (worldType instanceof SpongeWorldType) {
+            chunkGenerator = ((SpongeWorldType) worldType).getChunkGenerator(worldServer, settings);
+            biomeProvider = ((SpongeWorldType) worldType).getBiomeProvider(worldServer);
+        } else {
+            final WorldProvider worldProvider = worldServer.provider;
+            ((IMixinWorldProvider) worldProvider).setGeneratorSettings(settings);
+            chunkGenerator = worldProvider.createChunkGenerator();
+            biomeProvider = worldServer.provider.biomeProvider;
+        }
+        return new SpongeWorldGenerator(worldServer, (BiomeGenerator) biomeProvider, SpongeGenerationPopulator.of(worldServer, chunkGenerator));
+    }
 
     @Override
     public WorldGenerator getWorldGenerator() {
@@ -321,6 +401,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return fireBlockEvent(event);
         }
         return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
+    }
+
+    @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    private int onGetDimensionIdForBlockEvents(DimensionType dimensionType) {
+        return this.getDimensionId();
     }
 
     @Override
@@ -469,6 +554,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), this.getCauseTracker()))
                 .process()
                 .isCancelled();
+    }
+
+    /**
+     * @author gabizou - April 24th, 2016
+     * @reason Needs to redirect the dimension id for the packet being sent to players
+     * so that the dimension is correctly adjusted
+     *
+     * @param id The world provider's dimension id
+     * @return True if the spawn was successful and the effect is played.
+     */
+    @Redirect(method = "addWeatherEffect", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    public int getDimensionIdForWeatherEffect(DimensionType id) {
+        return this.getDimensionId();
     }
 
     // ------------------------- Start Cause Tracking overrides of Minecraft World methods ----------
@@ -684,6 +782,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
+    public void onSpongeEntityRemoved(net.minecraft.entity.Entity entity) {
+        this.onEntityRemoved(entity);
+    }
+
+    @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState state = causeTracker.getStack().peekState();
@@ -755,6 +858,5 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
         return new SpongeBlockSnapshot(this.builder, updateFlag);
     }
-
 
 }

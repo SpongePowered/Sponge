@@ -53,4 +53,30 @@ public final class DataVersions {
 
     }
 
+    public static final class PlayerData {
+
+        public static final int RESPAWN_DATA_1_9_VERSION = 2;
+
+        private PlayerData() {
+        }
+
+    }
+
+    public static final class World {
+
+        public static final int WORLD_UUID_1_9_VERSION = 3;
+
+        private World() {
+        }
+
+    }
+
+    public static final class Entity {
+
+        public static final int TRACKER_ID_VERSION = 2;
+
+        private Entity() {
+        }
+
+    }
 }

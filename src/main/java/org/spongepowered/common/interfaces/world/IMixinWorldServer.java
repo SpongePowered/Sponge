@@ -28,14 +28,22 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.Chunk;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
+import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 
 import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
+
+    int getDimensionId();
+
+    void setDimensionId(int dimensionId);
 
     void updateWorldGenerator();
 
@@ -53,8 +61,23 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void onSpongeEntityAdded(Entity entity);
 
+    void onSpongeEntityRemoved(Entity entity);
+
     void addEntityRotationUpdate(Entity entity, Vector3d rotation);
 
     SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
+
+
+    SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator);
+
+    WorldProvider getWorldProvider();
+
+    SpongeWorldGenerator createWorldGenerator();
+
+    SpongeWorldGenerator createWorldGenerator(DataContainer settings);
+
+    SpongeWorldGenerator createWorldGenerator(String settings);
+
+    SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator);
 
 }
