@@ -40,6 +40,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.util.GuavaCollectors;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -61,9 +62,9 @@ import javax.annotation.Nullable;
 @Mixin(PlayerProfileCache.class)
 public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
-    @Shadow private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
-    @Shadow private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
-    @Shadow private LinkedList<com.mojang.authlib.GameProfile> gameProfiles;
+    @Shadow @Final private Map<String, IMixinPlayerProfileCacheEntry> usernameToProfileEntryMap;
+    @Shadow @Final private Map<UUID, IMixinPlayerProfileCacheEntry> uuidToProfileEntryMap;
+    @Shadow @Final private LinkedList<com.mojang.authlib.GameProfile> gameProfiles;
     @Shadow abstract void addEntry(com.mojang.authlib.GameProfile profile, @Nullable Date expiry);
     @Nullable @Shadow public abstract com.mojang.authlib.GameProfile getProfileByUUID(UUID uniqueId);
     @Shadow public abstract void save();
