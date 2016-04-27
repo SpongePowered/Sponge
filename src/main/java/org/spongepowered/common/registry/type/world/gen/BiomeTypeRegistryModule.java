@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
+import net.minecraft.init.Biomes;
 import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
@@ -62,82 +63,81 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
 
     @Override
     public void registerDefaults() {
-        BiomeGenBase[] biomeArray = BiomeGenBase.getBiomeGenArray();
-        for (BiomeGenBase biome : biomeArray) {
+        for (BiomeGenBase biome : BiomeGenBase.biomeRegistry) {
             if (biome != null) {
                 this.biomeTypes.add((BiomeType) biome);
             }
         }
-        this.biomeTypeMappings.put("ocean", (BiomeType) BiomeGenBase.ocean);
-        this.biomeTypeMappings.put("plains", (BiomeType) BiomeGenBase.plains);
-        this.biomeTypeMappings.put("desert", (BiomeType) BiomeGenBase.desert);
-        this.biomeTypeMappings.put("extreme_hills", (BiomeType) BiomeGenBase.extremeHills);
-        this.biomeTypeMappings.put("forest", (BiomeType) BiomeGenBase.forest);
-        this.biomeTypeMappings.put("taiga", (BiomeType) BiomeGenBase.taiga);
-        this.biomeTypeMappings.put("swampland", (BiomeType) BiomeGenBase.swampland);
-        this.biomeTypeMappings.put("river", (BiomeType) BiomeGenBase.river);
-        this.biomeTypeMappings.put("hell", (BiomeType) BiomeGenBase.hell);
-        this.biomeTypeMappings.put("sky", (BiomeType) BiomeGenBase.sky);
-        this.biomeTypeMappings.put("frozen_ocean", (BiomeType) BiomeGenBase.frozenOcean);
-        this.biomeTypeMappings.put("frozen_river", (BiomeType) BiomeGenBase.frozenRiver);
-        this.biomeTypeMappings.put("ice_plains", (BiomeType) BiomeGenBase.icePlains);
-        this.biomeTypeMappings.put("ice_mountains", (BiomeType) BiomeGenBase.iceMountains);
-        this.biomeTypeMappings.put("mushroom_island", (BiomeType) BiomeGenBase.mushroomIsland);
-        this.biomeTypeMappings.put("mushroom_island_shore", (BiomeType) BiomeGenBase.mushroomIslandShore);
-        this.biomeTypeMappings.put("beach", (BiomeType) BiomeGenBase.beach);
-        this.biomeTypeMappings.put("desert_hills", (BiomeType) BiomeGenBase.desertHills);
-        this.biomeTypeMappings.put("forest_hills", (BiomeType) BiomeGenBase.forestHills);
-        this.biomeTypeMappings.put("taiga_hills", (BiomeType) BiomeGenBase.taigaHills);
-        this.biomeTypeMappings.put("extreme_hills_edge", (BiomeType) BiomeGenBase.extremeHillsEdge);
-        this.biomeTypeMappings.put("jungle", (BiomeType) BiomeGenBase.jungle);
-        this.biomeTypeMappings.put("jungle_hills", (BiomeType) BiomeGenBase.jungleHills);
-        this.biomeTypeMappings.put("jungle_edge", (BiomeType) BiomeGenBase.jungleEdge);
-        this.biomeTypeMappings.put("deep_ocean", (BiomeType) BiomeGenBase.deepOcean);
-        this.biomeTypeMappings.put("stone_beach", (BiomeType) BiomeGenBase.stoneBeach);
-        this.biomeTypeMappings.put("cold_beach", (BiomeType) BiomeGenBase.coldBeach);
-        this.biomeTypeMappings.put("birch_forest", (BiomeType) BiomeGenBase.birchForest);
-        this.biomeTypeMappings.put("birch_forest_hills", (BiomeType) BiomeGenBase.birchForestHills);
-        this.biomeTypeMappings.put("roofed_forest", (BiomeType) BiomeGenBase.roofedForest);
-        this.biomeTypeMappings.put("cold_taiga", (BiomeType) BiomeGenBase.coldTaiga);
-        this.biomeTypeMappings.put("cold_taiga_hills", (BiomeType) BiomeGenBase.coldTaigaHills);
-        this.biomeTypeMappings.put("mega_taiga", (BiomeType) BiomeGenBase.megaTaiga);
-        this.biomeTypeMappings.put("mega_taiga_hills", (BiomeType) BiomeGenBase.megaTaigaHills);
-        this.biomeTypeMappings.put("extreme_hills_plus", (BiomeType) BiomeGenBase.extremeHillsPlus);
-        this.biomeTypeMappings.put("savanna", (BiomeType) BiomeGenBase.savanna);
-        this.biomeTypeMappings.put("savanna_plateau", (BiomeType) BiomeGenBase.savannaPlateau);
-        this.biomeTypeMappings.put("mesa", (BiomeType) BiomeGenBase.mesa);
-        this.biomeTypeMappings.put("mesa_plateau_forest", (BiomeType) BiomeGenBase.mesaPlateau_F);
-        this.biomeTypeMappings.put("mesa_plateau", (BiomeType) BiomeGenBase.mesaPlateau);
-        this.biomeTypeMappings.put("sunflower_plains", (BiomeType) biomeArray[BiomeGenBase.plains.biomeID + 128]);
-        this.biomeTypeMappings.put("desert_mountains", (BiomeType) biomeArray[BiomeGenBase.desert.biomeID + 128]);
-        this.biomeTypeMappings.put("flower_forest", (BiomeType) biomeArray[BiomeGenBase.forest.biomeID + 128]);
-        this.biomeTypeMappings.put("taiga_mountains", (BiomeType) biomeArray[BiomeGenBase.taiga.biomeID + 128]);
-        this.biomeTypeMappings.put("swampland_mountains", (BiomeType) biomeArray[BiomeGenBase.swampland.biomeID + 128]);
-        this.biomeTypeMappings.put("ice_plains_spikes", (BiomeType) biomeArray[BiomeGenBase.icePlains.biomeID + 128]);
-        this.biomeTypeMappings.put("jungle_mountains", (BiomeType) biomeArray[BiomeGenBase.jungle.biomeID + 128]);
-        this.biomeTypeMappings.put("jungle_edge_mountains", (BiomeType) biomeArray[BiomeGenBase.jungleEdge.biomeID + 128]);
-        this.biomeTypeMappings.put("cold_taiga_mountains", (BiomeType) biomeArray[BiomeGenBase.coldTaiga.biomeID + 128]);
-        this.biomeTypeMappings.put("savanna_mountains", (BiomeType) biomeArray[BiomeGenBase.savanna.biomeID + 128]);
-        this.biomeTypeMappings.put("savanna_plateau_mountains", (BiomeType) biomeArray[BiomeGenBase.savannaPlateau.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_bryce", (BiomeType) biomeArray[BiomeGenBase.mesa.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_plateau_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.mesaPlateau_F.biomeID + 128]);
-        this.biomeTypeMappings.put("mesa_plateau_mountains", (BiomeType) biomeArray[BiomeGenBase.mesaPlateau.biomeID + 128]);
-        this.biomeTypeMappings.put("birch_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.birchForest.biomeID + 128]);
-        this.biomeTypeMappings.put("birch_forest_hills_mountains", (BiomeType) biomeArray[BiomeGenBase.birchForestHills.biomeID + 128]);
-        this.biomeTypeMappings.put("roofed_forest_mountains", (BiomeType) biomeArray[BiomeGenBase.roofedForest.biomeID + 128]);
-        this.biomeTypeMappings.put("mega_spruce_taiga", (BiomeType) biomeArray[BiomeGenBase.megaTaiga.biomeID + 128]);
-        this.biomeTypeMappings.put("extreme_hills_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHills.biomeID + 128]);
-        this.biomeTypeMappings.put("extreme_hills_plus_mountains", (BiomeType) biomeArray[BiomeGenBase.extremeHillsPlus.biomeID + 128]);
-        this.biomeTypeMappings.put("mega_spruce_taiga_hills", (BiomeType) biomeArray[BiomeGenBase.megaTaigaHills.biomeID + 128]);
+        this.biomeTypeMappings.put("ocean", (BiomeType) Biomes.ocean);
+        this.biomeTypeMappings.put("plains", (BiomeType) Biomes.plains);
+        this.biomeTypeMappings.put("desert", (BiomeType) Biomes.desert);
+        this.biomeTypeMappings.put("extreme_hills", (BiomeType) Biomes.extremeHills);
+        this.biomeTypeMappings.put("forest", (BiomeType) Biomes.forest);
+        this.biomeTypeMappings.put("taiga", (BiomeType) Biomes.taiga);
+        this.biomeTypeMappings.put("swampland", (BiomeType) Biomes.swampland);
+        this.biomeTypeMappings.put("river", (BiomeType) Biomes.river);
+        this.biomeTypeMappings.put("hell", (BiomeType) Biomes.hell);
+        this.biomeTypeMappings.put("sky", (BiomeType) Biomes.sky);
+        this.biomeTypeMappings.put("frozen_ocean", (BiomeType) Biomes.frozenOcean);
+        this.biomeTypeMappings.put("frozen_river", (BiomeType) Biomes.frozenRiver);
+        this.biomeTypeMappings.put("ice_plains", (BiomeType) Biomes.icePlains);
+        this.biomeTypeMappings.put("ice_mountains", (BiomeType) Biomes.iceMountains);
+        this.biomeTypeMappings.put("mushroom_island", (BiomeType) Biomes.mushroomIsland);
+        this.biomeTypeMappings.put("mushroom_island_shore", (BiomeType) Biomes.mushroomIslandShore);
+        this.biomeTypeMappings.put("beach", (BiomeType) Biomes.beach);
+        this.biomeTypeMappings.put("desert_hills", (BiomeType) Biomes.desertHills);
+        this.biomeTypeMappings.put("forest_hills", (BiomeType) Biomes.forestHills);
+        this.biomeTypeMappings.put("taiga_hills", (BiomeType) Biomes.taigaHills);
+        this.biomeTypeMappings.put("extreme_hills_edge", (BiomeType) Biomes.extremeHillsEdge);
+        this.biomeTypeMappings.put("jungle", (BiomeType) Biomes.jungle);
+        this.biomeTypeMappings.put("jungle_hills", (BiomeType) Biomes.jungleHills);
+        this.biomeTypeMappings.put("jungle_edge", (BiomeType) Biomes.jungleEdge);
+        this.biomeTypeMappings.put("deep_ocean", (BiomeType) Biomes.deepOcean);
+        this.biomeTypeMappings.put("stone_beach", (BiomeType) Biomes.stoneBeach);
+        this.biomeTypeMappings.put("cold_beach", (BiomeType) Biomes.coldBeach);
+        this.biomeTypeMappings.put("birch_forest", (BiomeType) Biomes.birchForest);
+        this.biomeTypeMappings.put("birch_forest_hills", (BiomeType) Biomes.birchForestHills);
+        this.biomeTypeMappings.put("roofed_forest", (BiomeType) Biomes.roofedForest);
+        this.biomeTypeMappings.put("cold_taiga", (BiomeType) Biomes.coldTaiga);
+        this.biomeTypeMappings.put("cold_taiga_hills", (BiomeType) Biomes.coldTaigaHills);
+        this.biomeTypeMappings.put("mega_taiga", (BiomeType) Biomes.megaTaiga);
+        this.biomeTypeMappings.put("mega_taiga_hills", (BiomeType) Biomes.megaTaigaHills);
+        this.biomeTypeMappings.put("extreme_hills_plus", (BiomeType) Biomes.extremeHillsPlus);
+        this.biomeTypeMappings.put("savanna", (BiomeType) Biomes.savanna);
+        this.biomeTypeMappings.put("savanna_plateau", (BiomeType) Biomes.savannaPlateau);
+        this.biomeTypeMappings.put("mesa", (BiomeType) Biomes.mesa);
+        this.biomeTypeMappings.put("mesa_plateau_forest", (BiomeType) Biomes.mesaPlateau_F);
+        this.biomeTypeMappings.put("mesa_plateau", (BiomeType) Biomes.mesaPlateau);
+        this.biomeTypeMappings.put("sunflower_plains", (BiomeType) Biomes.mutated_plains);
+        this.biomeTypeMappings.put("desert_mountains", (BiomeType) Biomes.mutated_desert);
+        this.biomeTypeMappings.put("flower_forest", (BiomeType) Biomes.mutated_forest);
+        this.biomeTypeMappings.put("taiga_mountains", (BiomeType) Biomes.mutated_taiga);
+        this.biomeTypeMappings.put("swampland_mountains", (BiomeType) Biomes.mutated_swampland);
+        this.biomeTypeMappings.put("ice_plains_spikes", (BiomeType) Biomes.mutated_ice_flats);
+        this.biomeTypeMappings.put("jungle_mountains", (BiomeType) Biomes.mutated_jungle);
+        this.biomeTypeMappings.put("jungle_edge_mountains", (BiomeType) Biomes.mutated_jungle_edge);
+        this.biomeTypeMappings.put("cold_taiga_mountains", (BiomeType) Biomes.mutated_taiga_cold);
+        this.biomeTypeMappings.put("savanna_mountains", (BiomeType) Biomes.mutated_savanna);
+        this.biomeTypeMappings.put("savanna_plateau_mountains", (BiomeType) Biomes.mutated_savanna_rock);
+        this.biomeTypeMappings.put("mesa_bryce", (BiomeType) Biomes.mutated_mesa);
+        this.biomeTypeMappings.put("mesa_plateau_forest_mountains", (BiomeType) Biomes.mutated_mesa_rock);
+        this.biomeTypeMappings.put("mesa_plateau_mountains", (BiomeType) Biomes.mutated_mesa_clear_rock);
+        this.biomeTypeMappings.put("birch_forest_mountains", (BiomeType) Biomes.mutated_birch_forest);
+        this.biomeTypeMappings.put("birch_forest_hills_mountains", (BiomeType) Biomes.mutated_birch_forest_hills);
+        this.biomeTypeMappings.put("roofed_forest_mountains", (BiomeType) Biomes.mutated_roofed_forest);
+        this.biomeTypeMappings.put("mega_spruce_taiga", (BiomeType) Biomes.mutated_redwood_taiga);
+        this.biomeTypeMappings.put("extreme_hills_mountains", (BiomeType) Biomes.mutated_extreme_hills);
+        this.biomeTypeMappings.put("extreme_hills_plus_mountains", (BiomeType) Biomes.mutated_extreme_hills_with_trees);
+        this.biomeTypeMappings.put("mega_spruce_taiga_hills", (BiomeType) Biomes.mutated_redwood_taiga_hills);
+        this.biomeTypeMappings.put("void", (BiomeType) Biomes.voidBiome);
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        BiomeGenBase[] biomeArray = BiomeGenBase.getBiomeGenArray();
-        for (BiomeGenBase biome : biomeArray) {
+        for (BiomeGenBase biome : BiomeGenBase.biomeRegistry) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
-                this.biomeTypeMappings.put(biome.biomeName.toLowerCase(Locale.ENGLISH), (BiomeType) biome);
+                this.biomeTypeMappings.put(biome.getBiomeName().toLowerCase(Locale.ENGLISH), (BiomeType) biome);
             }
         }
         // Re-map fields in case mods have changed vanilla world types

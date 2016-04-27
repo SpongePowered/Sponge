@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import net.minecraft.entity.passive.EntityWolf;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.SittingData;
 import org.spongepowered.api.entity.living.animal.Wolf;
@@ -40,10 +41,7 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAggressiveData;
 import org.spongepowered.common.interfaces.entity.IMixinAggressive;
@@ -61,8 +59,6 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
     @Shadow(prefix = "shadow$")
     public abstract void shadow$setAngry(boolean angry);
 
-    private ItemStack currentItemStack;
-
     @Intrinsic
     public boolean aggr$isAngry() {
         return shadow$isAngry();
@@ -73,24 +69,21 @@ public abstract class MixinEntityWolf extends MixinEntityAnimal implements Wolf 
         this.shadow$setAngry(angry);
     }
 
-    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityWolf;isTamed()Z", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
-        if (currentItemStack != null) {
-            this.currentItemStack = currentItemStack.copy();
-        }
-    }
-
-    @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player) {
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !SpongeImpl
-            .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
-                NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) this.currentItemStack).createSnapshot())),
-                this))) {
-            this.currentItemStack = null;
-            return random;
+        if (random == 0) {
+            stack.stackSize++;
+            if (!SpongeImpl
+                    .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
+                            NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
+                            this))) {
+
+                stack.stackSize--;
+                return random;
+            }
+
         }
-        this.currentItemStack = null;
         return 1;
     }
 

@@ -29,8 +29,12 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
 import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.Items;
+import net.minecraft.item.ItemAxe;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import org.spongepowered.api.entity.living.monster.Monster;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -41,7 +45,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.event.DamageEventHandler;
+import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.mixin.core.entity.MixinEntityCreature;
 
 import java.util.ArrayList;
@@ -53,8 +57,13 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
     /**
      * @author gabizou - April 8th, 2016
-     * @reason Rewrite this to throw an {@link AttackEntityEvent}
-     * and process correctly.
+     * @author gabizou - April 11th, 2016 - Update for 1.9 additions
+     *
+     * @reason Rewrite this to throw an {@link AttackEntityEvent} and process correctly.
+     *
+     * float f        | baseDamage
+     * int i          | knockbackModifier
+     * boolean flag   | attackSucceeded
      *
      * @param targetEntity The entity to attack
      * @return True if the attack was successful
@@ -63,14 +72,14 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
     public boolean attackEntityAsMob(Entity targetEntity) {
         // Sponge Start - Prepare our event values
         // float baseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
-        final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        final double originalBaseDamage = this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         final List<Tuple<DamageModifier, Function<? super Double, Double>>> originalFunctions = new ArrayList<>();
         // Sponge End
         int knockbackModifier = 0;
 
         if (targetEntity instanceof EntityLivingBase) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute()));
+            originalFunctions.addAll(DamageEventHandler.createAttackEnchamntmentFunction(this.getHeldItemMainhand(), ((EntityLivingBase) targetEntity).getCreatureAttribute()));
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackModifier((EntityMob) (Object) this);
         }
@@ -88,9 +97,8 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
         boolean attackSucceeded = targetEntity.attackEntityFrom(damageSource, (float) event.getFinalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
-            if (knockbackModifier > 0) {
-                targetEntity.addVelocity((double) (-MathHelper.sin(this.rotationYaw * (float) Math.PI / 180.0F) * (float) knockbackModifier * 0.5F), 0.1D,
-                        (double) (MathHelper.cos(this.rotationYaw * (float) Math.PI / 180.0F) * (float) knockbackModifier * 0.5F));
+            if (knockbackModifier > 0 && targetEntity instanceof EntityLivingBase) {
+                ((EntityLivingBase) targetEntity).knockBack((EntityMob) (Object) this, (float) knockbackModifier * 0.5F, (double) MathHelper.sin(this.rotationYaw * 0.017453292F), (double) (-MathHelper.cos(this.rotationYaw * 0.017453292F)));
                 this.motionX *= 0.6D;
                 this.motionZ *= 0.6D;
             }
@@ -99,6 +107,21 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
 
             if (j > 0) {
                 targetEntity.setFire(j * 4);
+            }
+
+            if (targetEntity instanceof EntityPlayer) {
+                EntityPlayer entityplayer = (EntityPlayer) targetEntity;
+                ItemStack itemstack = this.getHeldItemMainhand();
+                ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : null;
+
+                if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.shield) {
+                    float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityMob) (Object) this) * 0.05F;
+
+                    if (this.rand.nextFloat() < f1) {
+                        entityplayer.getCooldownTracker().setCooldown(Items.shield, 100);
+                        this.worldObj.setEntityState(entityplayer, (byte) 30);
+                    }
+                }
             }
 
             this.applyEnchantments((EntityMob) (Object) this, targetEntity);

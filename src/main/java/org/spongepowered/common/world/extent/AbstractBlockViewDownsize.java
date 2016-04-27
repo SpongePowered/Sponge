@@ -32,7 +32,7 @@ import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.util.gen.ShortArrayMutableBlockBuffer;
+import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
 
 public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implements BlockVolume {
 
@@ -89,7 +89,7 @@ public abstract class AbstractBlockViewDownsize<V extends BlockVolume> implement
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new ShortArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);
+                return new CharArrayMutableBlockBuffer(ExtentBufferUtil.copyToArray(this, this.min, this.max, this.size), this.min, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());

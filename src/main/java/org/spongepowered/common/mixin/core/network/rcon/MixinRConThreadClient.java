@@ -28,7 +28,6 @@ import net.minecraft.network.rcon.IServer;
 import net.minecraft.network.rcon.RConConsoleSource;
 import net.minecraft.network.rcon.RConThreadBase;
 import net.minecraft.network.rcon.RConThreadClient;
-import net.minecraft.server.MinecraftServer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -67,7 +66,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     }
 
     private void initSource() {
-        this.source = new RConConsoleSource();
+        this.source = new RConConsoleSource(SpongeImpl.getServer());
         Object clientThread = this;
         ((IMixinRConConsoleSource) this.source).setConnection((RConThreadClient) clientThread);
     }
@@ -87,7 +86,7 @@ public abstract class MixinRConThreadClient extends RConThreadBase implements Re
     public String commandExecutionHook(IServer server, String commandStr) {
         try {
             synchronized (this.clientSocket) {
-                MinecraftServer.getServer().getCommandManager().executeCommand(this.source, commandStr);
+                SpongeImpl.getServer().getCommandManager().executeCommand(this.source, commandStr);
                 final String logContents = this.source.getLogContents();
                 this.source.resetLog();
                 return logContents;

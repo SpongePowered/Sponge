@@ -62,7 +62,7 @@ public class GameModeDataProcessor extends
 
     @Override
     protected Optional<GameMode> getVal(EntityPlayerMP entity) {
-        return Optional.of((GameMode) (Object) entity.theItemInWorldManager.getGameType());
+        return Optional.of((GameMode) (Object) entity.interactionManager.getGameType());
     }
 
     @Override

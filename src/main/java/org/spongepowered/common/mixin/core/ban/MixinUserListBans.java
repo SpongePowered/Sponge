@@ -99,7 +99,7 @@ public abstract class MixinUserListBans extends UserList<com.mojang.authlib.Game
      * @return The banned GameProfile
      */
     @Overwrite
-    public com.mojang.authlib.GameProfile isUsernameBanned(String username) {
+    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
         for (Ban.Profile ban: Sponge.getServiceManager().provideUnchecked(BanService.class).getProfileBans()) {
             if (ban.getProfile().getName().isPresent()) {
                 if (ban.getProfile().getName().get().equals(username)) {

@@ -52,7 +52,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     @Shadow @Final private ByteBuf buf;
 
     @Shadow protected abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
-    @Shadow protected abstract void writeNBTTagCompoundToBuffer(NBTTagCompound compound);
+    @Shadow protected abstract PacketBuffer writeNBTTagCompoundToBuffer(NBTTagCompound compound);
 
     private ChannelBuf oppositeOrder;
 

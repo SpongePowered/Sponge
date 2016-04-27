@@ -26,9 +26,14 @@ package org.spongepowered.common.profile.query;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.mojang.authlib.Agent;
+import com.mojang.authlib.ProfileLookupCallback;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerProfileCache;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.api.profile.ProfileNotFoundException;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.api.util.Identifiable;
 
 import java.util.ArrayList;

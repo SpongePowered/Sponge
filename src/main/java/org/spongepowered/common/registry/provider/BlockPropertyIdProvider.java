@@ -137,13 +137,13 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
     }
 
     BlockPropertyIdProvider() {
+        register(BlockHorizontal.FACING, "minecraft:horizontal_facing");
         register(BlockRotatedPillar.AXIS, "minecraft:pillar_axis");
         register(BlockDirectional.FACING, "minecraft:directional_facing");
         register(BlockLog.LOG_AXIS, "minecraft:log_axis");
         register(BlockNewLog.VARIANT, "minecraft:new_log_variant");
         register(BlockOldLog.VARIANT, "minecraft:log_variant");
         register(BlockFarmland.MOISTURE, "minecraft:farmland_moisture");
-        register(BlockPistonBase.FACING, "minecraft:piston_facing");
         register(BlockPistonBase.EXTENDED, "minecraft:piston_extended");
         register(BlockVine.NORTH, "minecraft:vine_north");
         register(BlockVine.EAST, "minecraft:vine_east");
@@ -158,7 +158,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockTorch.FACING, "minecraft:torch_facing");
         register(BlockDirt.SNOWY, "minecraft:dirt_snowy");
         register(BlockDirt.VARIANT, "minecraft:dirt_variant");
-        register(BlockEndPortalFrame.FACING, "minecraft:end_portal_facing");
         register(BlockEndPortalFrame.EYE, "minecraft:end_portal_eye");
         register(BlockCarpet.COLOR, "minecraft:carpet_color");
         register(BlockStone.VARIANT, "minecraft:stone_variant");
@@ -170,10 +169,8 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockWall.SOUTH, "minecraft:wall_south");
         register(BlockWall.WEST, "minecraft:wall_west");
         register(BlockWall.VARIANT, "minecraft:wall_variant");
-        register(BlockStairs.FACING, "minecraft:stairs_facing");
         register(BlockStairs.HALF, "minecraft:stairs_half");
         register(BlockStairs.SHAPE, "minecraft:stairs_shape");
-        register(BlockButton.FACING, "minecraft:button_facing");
         register(BlockButton.POWERED, "minecraft:button_powered");
         register(BlockCactus.AGE, "minecraft:cactus_age");
         register(BlockCrops.AGE, "minecraft:crops_age");
@@ -181,7 +178,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockDoublePlant.VARIANT, "minecraft:double_plant_variant");
         register(BlockDoublePlant.HALF, "minecraft:double_plant_half");
         register(BlockStem.AGE, "minecraft:stem_age");
-        register(BlockStem.FACING, "minecraft:stem_facing");
         register(BlockTallGrass.TYPE, "minecraft:tall_grass_type");
         register(BlockSapling.TYPE, "minecraft:sapling_type");
         register(BlockSapling.STAGE, "minecraft:sapling_stage");
@@ -197,7 +193,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockPane.WEST, "minecraft:pane_west");
         register(BlockStainedGlassPane.COLOR, "minecraft:stained_dyed_color");
         register(BlockQuartz.VARIANT, "minecraft:quartz_variant");
-        register(BlockPistonExtension.FACING, "minecraft:piston_extension_facing");
         register(BlockPistonExtension.TYPE, "minecraft:piston_extension_type");
         register(BlockPistonExtension.SHORT, "minecraft:piston_extension_short");
         register(BlockSandStone.TYPE, "minecraft:sand_stone_type");
@@ -215,52 +210,37 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockNewLeaf.VARIANT, "minecraft:new_leaves_variant");
         register(BlockGrass.SNOWY, "minecraft:grass_snowy");
         register(BlockCauldron.LEVEL, "minecraft:cauldron_level");
-        register(BlockFurnace.FACING, "minecraft:furnace_facing");
-        register(BlockBanner.FACING, "minecraft:banner_facing");
         register(BlockBanner.ROTATION, "minecraft:banner_rotation");
-        register(BlockCommandBlock.TRIGGERED, "minecraft:command_block_triggered");
-        register(BlockChest.FACING, "minecraft:chest_facing");
-        register(BlockSkull.FACING, "minecraft:skull_facing");
         register(BlockSkull.NODROP, "minecraft:skull_no_drop");
         register(BlockStandingSign.ROTATION, "minecraft:standing_sign_rotation");
-        register(BlockWallSign.FACING, "minecraft:wall_sign_facing");
         register(BlockBrewingStand.HAS_BOTTLE[0], "minecraft:brewing_stand_1_has_bottle");
         register(BlockBrewingStand.HAS_BOTTLE[1], "minecraft:brewing_stand_2_has_bottle");
         register(BlockBrewingStand.HAS_BOTTLE[2], "minecraft:brewing_stand_3_has_bottle");
         register(BlockHopper.ENABLED, "minecraft:hopper_enabled");
         register(BlockHopper.FACING, "minecraft:hopper_facing");
-        register(BlockEnderChest.FACING, "minecraft:ender_chest_facing");
         register(BlockFlowerPot.LEGACY_DATA, "minecraft:flower_pot_legacy");
         register(BlockFlowerPot.CONTENTS, "minecraft:flower_pot_contents");
         register(BlockDaylightDetector.POWER, "minecraft:daylight_detector_power");
-        register(BlockDispenser.FACING, "minecraft:dispenser_facing");
         register(BlockDispenser.TRIGGERED, "minecraft:dispenser_triggered");
         register(BlockJukebox.HAS_RECORD, "minecraft:jukebox_has_record");
         register(BlockSand.VARIANT, "minecraft:sand_variant");
         register(BlockAnvil.DAMAGE, "minecraft:anvil_damage");
-        register(BlockAnvil.FACING, "minecraft:anvil_facing");
         register(BlockCake.BITES, "minecraft:cake_bites");
         register(BlockFire.AGE, "minecraft:fire_age");
-        register(BlockFire.ALT, "minecraft:fire_alt");
         register(BlockFire.NORTH, "minecraft:fire_north");
         register(BlockFire.EAST, "minecraft:fire_east");
         register(BlockFire.SOUTH, "minecraft:fire_south");
         register(BlockFire.WEST, "minecraft:fire_west");
         register(BlockFire.UPPER, "minecraft:fire_upper");
-        register(BlockFire.FLIP, "minecraft:fire_flip");
         register(BlockSlab.HALF, "minecraft:slab_half");
         register(BlockStoneSlabNew.SEAMLESS, "minecraft:stone_slab_new_seamless");
         register(BlockStoneSlabNew.VARIANT, "minecraft:stone_slab_new_variant");
         register(BlockStoneSlab.SEAMLESS, "minecraft:stone_slab_seamless");
         register(BlockStoneSlab.VARIANT, "minecraft:stone_slab_variant");
         register(BlockWoodSlab.VARIANT, "minecraft:wood_slab_variant");
-        register(BlockLadder.FACING, "minecraft:ladder_facing");
         register(BlockSponge.WET, "minecraft:sponge_wet");
-        register(BlockTripWireHook.FACING, "minecraft:trip_wire_hook_facing");
         register(BlockTripWireHook.ATTACHED, "minecraft:trip_wire_hook_attached");
         register(BlockTripWireHook.POWERED, "minecraft:trip_wire_hook_powered");
-        register(BlockTripWireHook.SUSPENDED, "minecraft:trip_wire_hook_suspended");
-        register(BlockDoor.FACING, "minecraft:door_facing");
         register(BlockDoor.OPEN, "minecraft:door_open");
         register(BlockDoor.HINGE, "minecraft:door_hinge");
         register(BlockDoor.POWERED, "minecraft:door_powered");
@@ -273,7 +253,7 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockBed.OCCUPIED, "minecraft:bed_occupied");
         register(BlockRedstoneComparator.MODE, "minecraft:comparator_mode");
         register(BlockRedstoneComparator.POWERED, "minecraft:comparator_powered");
-        register(BlockCocoa.AGE, "minecraft:cocoa_facing");
+        register(BlockCocoa.AGE, "minecraft:cocoa_age");
         register(BlockFenceGate.IN_WALL, "minecraft:fence_gate_in_wall");
         register(BlockFenceGate.OPEN, "minecraft:fence_gate_open");
         register(BlockFenceGate.POWERED, "minecraft:fence_gate_powered");
@@ -283,7 +263,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockRedstoneWire.WEST, "minecraft:redstone_west");
         register(BlockRedstoneWire.POWER, "minecraft:redstone_power");
         register(BlockTripWire.POWERED, "minecraft:trip_wire_powered");
-        register(BlockTripWire.SUSPENDED, "minecraft:trip_wire_suspended");
         register(BlockTripWire.ATTACHED, "minecraft:trip_wire_attached");
         register(BlockTripWire.DISARMED, "minecraft:trip_wire_disarmed");
         register(BlockTripWire.NORTH, "minecraft:trip_wire_north");
@@ -292,7 +271,6 @@ public class BlockPropertyIdProvider implements TypeProvider<IProperty<?>, Strin
         register(BlockTripWire.WEST, "minecraft:trip_wire_west");
         register(BlockPressurePlateWeighted.POWER, "minecraft:weighted_pressure_plate_power");
         register(BlockPressurePlate.POWERED, "minecraft:pressure_plate_power");
-        register(BlockTrapDoor.FACING, "minecraft:trap_door_facing");
         register(BlockTrapDoor.OPEN, "minecraft:trap_door_open");
         register(BlockTrapDoor.HALF, "minecraft:trap_door_half");
         register(BlockRedstoneRepeater.DELAY, "minecraft:redstone_repeater_delay");

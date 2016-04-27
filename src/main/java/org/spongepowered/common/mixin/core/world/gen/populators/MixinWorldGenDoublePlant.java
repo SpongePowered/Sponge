@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.BlockDoublePlant;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenDoublePlant;
 import org.spongepowered.api.data.type.DoublePlantType;
@@ -63,7 +63,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     private Function<Location<Chunk>, DoublePlantType> override = null;
     private VariableAmount count;
 
-    @Shadow private BlockDoublePlant.EnumPlantType field_150549_a;
+    @Shadow private BlockDoublePlant.EnumPlantType plantType;
 
     @Inject(method = "<init>()V", at = @At("RETURN") )
     public void onConstructed(CallbackInfo ci) {
@@ -109,7 +109,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         boolean flag = false;
 
         if (this.types.isEmpty()) {
-            this.types.add(new WeightedObject<DoublePlantType>((DoublePlantType) (Object) this.field_150549_a, 1));
+            this.types.add(new WeightedObject<DoublePlantType>((DoublePlantType) (Object) this.plantType, 1));
         }
         DoublePlantType type = DoublePlantTypes.GRASS;
         List<DoublePlantType> result;
@@ -121,7 +121,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
             if (worldIn.isAirBlock(blockpos1) && (!worldIn.provider.getHasNoSky() || blockpos1.getY() < 254)
                     && Blocks.double_plant.canPlaceBlockAt(worldIn, blockpos1)) {
                 if (this.override != null) {
-                    Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector(blockpos1));
+                    Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos1));
                     type = this.override.apply(pos);
                 } else {
                     result = this.types.get(rand);

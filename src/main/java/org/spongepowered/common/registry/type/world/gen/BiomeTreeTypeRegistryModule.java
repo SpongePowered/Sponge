@@ -35,8 +35,8 @@ import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.gen.feature.WorldGenBigTree;
+import net.minecraft.world.gen.feature.WorldGenBirchTree;
 import net.minecraft.world.gen.feature.WorldGenCanopyTree;
-import net.minecraft.world.gen.feature.WorldGenForest;
 import net.minecraft.world.gen.feature.WorldGenMegaJungle;
 import net.minecraft.world.gen.feature.WorldGenMegaPineTree;
 import net.minecraft.world.gen.feature.WorldGenSavannaTree;
@@ -78,7 +78,8 @@ public class BiomeTreeTypeRegistryModule implements CatalogRegistryModule<BiomeT
     @Override
     public void registerDefaults() {
         this.biomeTreeTypeMappings.put("oak", new SpongeBiomeTreeType("oak", (PopulatorObject) new WorldGenTrees(false), (PopulatorObject) new WorldGenBigTree(false)));
-        this.biomeTreeTypeMappings.put("birch", new SpongeBiomeTreeType("birch", (PopulatorObject) new WorldGenForest(false, false), (PopulatorObject) new WorldGenForest(false, true)));
+        this.biomeTreeTypeMappings.put("birch", new SpongeBiomeTreeType("birch", (PopulatorObject) new WorldGenBirchTree(false, false), (PopulatorObject)
+                new WorldGenBirchTree(false, true)));
 
         WorldGenMegaPineTree tall_megapine = new WorldGenMegaPineTree(false, true);
         WorldGenMegaPineTree megapine = new WorldGenMegaPineTree(false, false);

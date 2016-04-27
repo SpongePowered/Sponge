@@ -30,7 +30,7 @@ import net.minecraft.block.BlockNewLeaf;
 import net.minecraft.block.BlockOldLeaf;
 import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;
 import org.spongepowered.api.data.key.Keys;
@@ -40,6 +40,7 @@ import org.spongepowered.api.data.manipulator.immutable.block.ImmutableTreeData;
 import org.spongepowered.api.data.type.TreeType;
 import org.spongepowered.api.data.type.TreeTypes;
 import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -48,8 +49,11 @@ import org.spongepowered.common.data.ImmutableDataCachingUtil;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeDecayableData;
 import org.spongepowered.common.data.manipulator.immutable.block.ImmutableSpongeTreeData;
 import org.spongepowered.common.data.util.TreeTypeResolver;
-import org.spongepowered.common.event.CauseTracker;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.List;
 import java.util.Optional;
@@ -58,23 +62,43 @@ import java.util.Optional;
 @Mixin(BlockLeaves.class)
 public abstract class MixinBlockLeaves extends MixinBlock {
 
-    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
+    @Redirect(method = "updateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z"))
     public boolean onUpdateDecayState(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int flags) {
-        IMixinWorld spongeWorld = (IMixinWorld) worldIn;
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setCapturingBlockDecay(true);
+        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IBlockState blockState = worldIn.getBlockState(pos);
+        final IBlockState actualState = blockState.getBlock().getActualState(blockState, worldIn, pos);
+        if (isBlockAlready) {
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
+                    .addCaptures()
+                    .complete());
+        }
         boolean result = worldIn.setBlockState(pos, state, flags);
-        causeTracker.setCapturingBlockDecay(false);
+        if (isBlockAlready) {
+            causeTracker.completePhase();
+        }
         return result;
     }
 
-    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/BlockPos;)Z") )
+    @Redirect(method = "destroy", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z") )
     private boolean onDestroyLeaves(net.minecraft.world.World worldIn, BlockPos pos) {
-        IMixinWorld spongeWorld = (IMixinWorld) worldIn;
+        IMixinWorldServer spongeWorld = (IMixinWorldServer) worldIn;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.setCapturingBlockDecay(true);
+        final boolean isBlockAlready = causeTracker.getStack().current() != TrackingPhases.BLOCK;
+        final IBlockState blockState = worldIn.getBlockState(pos);
+        final IBlockState actualState = blockState.getBlock().getActualState(blockState, worldIn, pos);
+        if (isBlockAlready) {
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DECAY, PhaseContext.start()
+                    .add(NamedCause.source(spongeWorld.createSpongeBlockSnapshot(blockState, actualState, pos, 3)))
+                    .addCaptures()
+                    .complete());
+        }
         boolean result = worldIn.setBlockToAir(pos);
-        causeTracker.setCapturingBlockDecay(false);
+        if (isBlockAlready) {
+            causeTracker.completePhase();
+        }
         return result;
     }
 

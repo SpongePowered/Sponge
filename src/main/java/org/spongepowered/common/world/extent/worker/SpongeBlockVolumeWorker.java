@@ -28,6 +28,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 
 import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.extent.BlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
@@ -36,6 +38,12 @@ import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMapper;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeMerger;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeReducer;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.PluginPhase;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.util.function.BiFunction;
 
@@ -68,13 +76,33 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int xMax = unmodifiableVolume.getBlockMax().getX();
         final int yMax = unmodifiableVolume.getBlockMax().getY();
         final int zMax = unmodifiableVolume.getBlockMax().getZ();
+        // TODO integrate with the cause tracker to handle the block sets in
+        // a single go, requiring only one event
+        IMixinWorldServer mixinWorld = null;
+        if (destination instanceof IMixinWorldServer) {
+            mixinWorld = (IMixinWorldServer) destination;
+        } else if (destination instanceof Chunk) {
+            mixinWorld = (IMixinWorldServer) ((Chunk) destination).getWorld();
+        }
+        if (mixinWorld != null) {
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                    .add(NamedCause.source(this))
+                    .addCaptures()
+                    .complete());
+        }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
                     final BlockState block = mapper.map(unmodifiableVolume, x, y, z);
+
                     destination.setBlock(x + xOffset, y + yOffset, z + zOffset, block);
                 }
             }
+        }
+        if (mixinWorld != null) {
+            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
+            causeTracker.completePhase();
         }
     }
 
@@ -96,6 +124,14 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
         final int yMax = firstUnmodifiableVolume.getBlockMax().getY();
         final int zMax = firstUnmodifiableVolume.getBlockMax().getZ();
         final UnmodifiableBlockVolume secondUnmodifiableVolume = second.getUnmodifiableBlockView();
+        // TODO integrate with the cause tracker to handle the block sets in
+        // a single go, requiring only one event
+        if (destination instanceof IMixinWorldServer) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
+            causeTracker.switchToPhase(TrackingPhases.PLUGIN, PluginPhase.State.BLOCK_WORKER, PhaseContext.start()
+                    .add(NamedCause.source(this))
+                    .complete());
+        }
         for (int z = zMin; z <= zMax; z++) {
             for (int y = yMin; y <= yMax; y++) {
                 for (int x = xMin; x <= xMax; x++) {
@@ -104,6 +140,10 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
                     destination.setBlock(x + xOffsetDestination, y + yOffsetDestination, z + zOffsetDestination, block);
                 }
             }
+        }
+        if (destination instanceof IMixinWorldServer) {
+            final CauseTracker causeTracker = ((IMixinWorldServer) destination).getCauseTracker();
+            causeTracker.completePhase();
         }
     }
 
@@ -147,7 +187,7 @@ public class SpongeBlockVolumeWorker<V extends BlockVolume> implements BlockVolu
     private Vector3i align(BlockVolume other) {
         final Vector3i thisSize = this.volume.getBlockSize();
         final Vector3i otherSize = other.getBlockSize();
-        checkArgument(otherSize.getX() >= thisSize.getX() && otherSize.getY() >= thisSize.getY() && otherSize.getY() >= thisSize.getY(),
+        checkArgument(otherSize.getX() >= thisSize.getX() && otherSize.getY() >= thisSize.getY() && otherSize.getZ() >= thisSize.getZ(),
             "Other volume is smaller than work volume");
         return other.getBlockMin().sub(this.volume.getBlockMin());
     }

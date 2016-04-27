@@ -28,16 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.mojang.authlib.GameProfile;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.BanList;
-import net.minecraft.server.management.IPBanEntry;
 import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListIPBans;
+import net.minecraft.server.management.UserListIPBansEntry;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.ban.BanTypes;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.net.InetAddress;
@@ -132,8 +131,8 @@ public class SpongeBanBuilder implements Ban.Builder {
             checkState(this.address != null, "Address cannot be null!");
 
             // This *should* be a static method, but apparently not...
-            BanList ipBans = MinecraftServer.getServer().getConfigurationManager().getBannedIPs();
-            return (Ban) new IPBanEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
+            UserListIPBans ipBans = SpongeImpl.getServer().getPlayerList().getBannedIPs();
+            return (Ban) new UserListIPBansEntry(ipBans.addressToString(new InetSocketAddress(this.address, 0)), Date.from(this.start), sourceName,
                     this.toDate(this.end), this.reason.isPresent() ? SpongeTexts.toLegacy(this.reason.get()) : null);
         }
     }

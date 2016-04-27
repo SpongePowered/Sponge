@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.base.Objects;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -72,7 +72,7 @@ public class SeaFloorPopulator implements SeaFloor {
             // This method is incorrectly named, it simply gets the top block
             // that blocks movement and isn't leaves
             pos = world.getTopSolidOrLiquidBlock(pos);
-            if (world.getBlockState(pos).getBlock().getMaterial() != Material.water) {
+            if (world.getBlockState(pos).getMaterial() != Material.water) {
                 continue;
             }
             int radius = this.radius.getFlooredAmount(random);

@@ -29,7 +29,7 @@ import com.google.common.base.Objects;
 import net.minecraft.block.BlockTallGrass;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenTallGrass;
 import net.minecraft.world.gen.feature.WorldGenerator;
@@ -93,7 +93,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
             BlockPos pos = position.add(random.nextInt(16) + 8, 0, random.nextInt(16) + 8);
             pos = world.getTopSolidOrLiquidBlock(pos).add(0, 1, 0);
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(pos));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
                 stype = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);

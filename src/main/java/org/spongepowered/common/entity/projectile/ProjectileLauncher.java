@@ -36,7 +36,6 @@ import net.minecraft.entity.item.EntityEnderPearl;
 import net.minecraft.entity.item.EntityExpBottle;
 import net.minecraft.entity.item.EntityFireworkRocket;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.entity.projectile.EntityEgg;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityLargeFireball;
@@ -44,19 +43,20 @@ import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.entity.projectile.EntitySmallFireball;
 import net.minecraft.entity.projectile.EntitySnowball;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.entity.projectile.EntityTippedArrow;
 import net.minecraft.entity.projectile.EntityWitherSkull;
 import net.minecraft.init.Items;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntityDispenser;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.MathHelper;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.block.tileentity.carrier.Dispenser;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.projectile.Arrow;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.Egg;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.EyeOfEnder;
@@ -245,7 +245,7 @@ public class ProjectileLauncher {
     }
 
     // Internal
-    private static Cause createCause(Object source) {
+    static Cause createCause(Object source) {
         return Cause.source(SpawnCause.builder().type(InternalSpawnTypes.PROJECTILE).build())
                 .named("ProjectileSource", source).build();
     }
@@ -310,7 +310,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Arrow arrow = (Arrow) new EntityArrow(source.worldObj, source, 2);
+                Arrow arrow = (Arrow) new EntityTippedArrow(source.worldObj, source);
                 return doLaunch(loc.getExtent(), arrow, createCause(source));
             }
         });
@@ -326,7 +326,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3 lookVec = source.getLook(1);
+                Vec3d lookVec = source.getLook(1);
                 SmallFireball fireball = (SmallFireball) new EntitySmallFireball(source.worldObj, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntitySmallFireball) fireball).posY += source.getEyeHeight();
@@ -370,7 +370,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<LargeFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3 lookVec = source.getLook(1);
+                Vec3d lookVec = source.getLook(1);
                 LargeFireball fireball = (LargeFireball) new EntityLargeFireball(source.worldObj, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntityLargeFireball) fireball).posY += source.getEyeHeight();
@@ -397,7 +397,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<WitherSkull> createProjectile(EntityLivingBase source, Location<?> loc) {
-                Vec3 lookVec = source.getLook(1);
+                Vec3d lookVec = source.getLook(1);
                 WitherSkull skull = (WitherSkull) new EntityWitherSkull(source.worldObj, source,
                         lookVec.xCoord * 4, lookVec.yCoord * 4, lookVec.zCoord * 4);
                 ((EntityWitherSkull) skull).posY += source.getEyeHeight();
@@ -420,7 +420,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, 0);
+                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, new ItemStack(Items.splash_potion, 1));
                 return doLaunch(loc.getExtent(), potion, createCause(source));
             }
         });

@@ -34,7 +34,8 @@ import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -47,17 +48,23 @@ import org.spongepowered.api.data.manipulator.ImmutableDataManipulator;
 import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
-import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.BlockPhase;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.BlockChange;
 
 import java.util.Collection;
 import java.util.List;
@@ -86,7 +93,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable final UUID notifierUniqueId;
     // Internal use only
     private int updateFlag;
-    public CaptureType captureType; // used for post event
+    public BlockChange blockChange; // used for post event
 
     // Internal use for restores
     public SpongeBlockSnapshot(SpongeBlockSnapshotBuilder builder, int flag) {
@@ -168,19 +175,27 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         }
 
         net.minecraft.world.World world = (net.minecraft.world.World) SpongeImpl.getGame().getServer().getWorld(this.worldUniqueId).get();
-        CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
-        causeTracker.setRestoringBlocks(true);
+        CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
+        final IPhaseState currentState = causeTracker.getStack().peekState();
+        if (currentState.tracksBlockRestores()) {
+            causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.RESTORING_BLOCKS,
+                    PhaseContext.start()
+                            .add(NamedCause.of(InternalNamedCauses.General.RESTORING_BLOCK, this))
+                            .complete());
+        }
+
         BlockPos pos = VecHelper.toBlockPos(this.pos);
         IBlockState current = world.getBlockState(pos);
         IBlockState replaced = (IBlockState) this.blockState;
-        if (!force && (current.getBlock() != replaced.getBlock()
-            || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
-            causeTracker.setRestoringBlocks(false);
+        if (!force && (current.getBlock() != replaced.getBlock() || current.getBlock().getMetaFromState(current) != replaced.getBlock().getMetaFromState(replaced))) {
+            if (currentState.tracksBlockRestores()) {
+                causeTracker.completePhase();
+            }
             return false;
         }
 
         world.setBlockState(pos, replaced, notifyNeighbors ? 3 : 2);
-        world.markBlockForUpdate(pos);
+        ((WorldServer) world).getPlayerChunkMap().markBlockForUpdate(pos);
         if (this.compound != null) {
             final TileEntity te = world.getTileEntity(pos);
             if (te != null) {
@@ -188,8 +203,9 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
                 te.markDirty();
             }
         }
-
-        causeTracker.setRestoringBlocks(false);
+        if (currentState.tracksBlockRestores()) {
+            causeTracker.completePhase();
+        }
         return true;
     }
 

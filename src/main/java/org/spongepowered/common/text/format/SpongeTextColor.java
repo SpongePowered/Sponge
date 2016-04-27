@@ -26,7 +26,7 @@ package org.spongepowered.common.text.format;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 import org.spongepowered.api.text.format.TextColor;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -35,7 +35,7 @@ import org.spongepowered.common.registry.type.text.TextColorRegistryModule;
 @NonnullByDefault
 public class SpongeTextColor implements TextColor {
 
-    private final EnumChatFormatting handle;
+    private final TextFormatting handle;
     private final Color color;
 
     @Override
@@ -43,12 +43,12 @@ public class SpongeTextColor implements TextColor {
         return this.handle.name();
     }
 
-    public SpongeTextColor(EnumChatFormatting handle, Color color) {
+    public SpongeTextColor(TextFormatting handle, Color color) {
         this.handle = checkNotNull(handle, "handle");
         this.color = checkNotNull(color, "color");
     }
 
-    public EnumChatFormatting getHandle() {
+    public TextFormatting getHandle() {
         return this.handle;
     }
 
@@ -67,7 +67,7 @@ public class SpongeTextColor implements TextColor {
         return getName();
     }
 
-    public static SpongeTextColor of(EnumChatFormatting color) {
+    public static SpongeTextColor of(TextFormatting color) {
         return TextColorRegistryModule.enumChatColor.get(color);
     }
 

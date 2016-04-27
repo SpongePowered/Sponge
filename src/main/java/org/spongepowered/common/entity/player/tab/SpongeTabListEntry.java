@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Objects;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
@@ -40,7 +40,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 /*
- * This is intentionally not a mixin of S38PacketPlayerListItem.AddPlayerData.
+ * This is intentionally not a mixin of SPacketPlayerListItem.AddPlayerData.
  */
 public final class SpongeTabListEntry implements TabListEntry {
 
@@ -78,7 +78,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setDisplayName(@Nullable Text displayName) {
         this.displayName = displayName;
-        this.sendUpdate(S38PacketPlayerListItem.Action.UPDATE_DISPLAY_NAME);
+        this.sendUpdate(SPacketPlayerListItem.Action.UPDATE_DISPLAY_NAME);
         return this;
     }
 
@@ -90,7 +90,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setLatency(int latency) {
         this.latency = latency;
-        this.sendUpdate(S38PacketPlayerListItem.Action.UPDATE_LATENCY);
+        this.sendUpdate(SPacketPlayerListItem.Action.UPDATE_LATENCY);
         return this;
     }
 
@@ -102,11 +102,11 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setGameMode(GameMode gameMode) {
         this.gameMode = checkNotNull(gameMode, "game mode");
-        this.sendUpdate(S38PacketPlayerListItem.Action.UPDATE_GAME_MODE);
+        this.sendUpdate(SPacketPlayerListItem.Action.UPDATE_GAME_MODE);
         return this;
     }
 
-    private void sendUpdate(S38PacketPlayerListItem.Action action) {
+    private void sendUpdate(SPacketPlayerListItem.Action action) {
         // We may be updating our values, so we don't want to send any updates
         // since that will result in a continuous loop.
         if (this.updateWithoutSend) {

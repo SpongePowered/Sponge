@@ -31,7 +31,7 @@ import static io.netty.buffer.Unpooled.wrappedBuffer;
 import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.server.S3FPacketCustomPayload;
+import net.minecraft.network.play.server.SPacketCustomPayload;
 import org.spongepowered.api.network.ChannelBinding;
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.ChannelRegistrar;
@@ -52,12 +52,12 @@ public abstract class SpongeNetworkManager implements ChannelRegistrar {
         return optPlugin.get();
     }
 
-    protected static S3FPacketCustomPayload getRegPacket(String channelName) {
-        return new S3FPacketCustomPayload("REGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
+    protected static SPacketCustomPayload getRegPacket(String channelName) {
+        return new SPacketCustomPayload("REGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
-    protected static S3FPacketCustomPayload getUnregPacket(String channelName) {
-        return new S3FPacketCustomPayload("UNREGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
+    protected static SPacketCustomPayload getUnregPacket(String channelName) {
+        return new SPacketCustomPayload("UNREGISTER", new PacketBuffer(wrappedBuffer(channelName.getBytes(Charsets.UTF_8))));
     }
 
     public static ChannelBuf toChannelBuf(ByteBuf buf) {

@@ -28,7 +28,6 @@ import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.IMixinScore;
 import org.spongepowered.common.interfaces.IMixinScoreObjective;
 import org.spongepowered.common.text.SpongeTexts;
@@ -37,7 +36,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 public class SpongeScore implements Score {
 
@@ -79,7 +77,7 @@ public class SpongeScore implements Score {
             if (j != this.score || score.forceUpdate)
             {
                 score.forceUpdate = false;
-                score.getScoreScoreboard().func_96536_a(score);
+                score.getScoreScoreboard().onScoreUpdated(score);
             }
         }
     }

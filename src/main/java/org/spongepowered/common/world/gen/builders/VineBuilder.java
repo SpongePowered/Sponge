@@ -31,7 +31,7 @@ import org.spongepowered.api.world.gen.populator.Vine.Builder;
 
 public class VineBuilder implements Vine.Builder {
 
-    VariableAmount count;
+    private VariableAmount count;
 
     public VineBuilder() {
     }

@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.text;
 
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 import javax.annotation.Nullable;
 
 public final class ResolvedChatStyle {
 
     @Nullable
-    public final EnumChatFormatting color;
+    public final TextFormatting color;
     public final boolean bold;
     public final boolean italic;
     public final boolean underlined;
     public final boolean strikethrough;
     public final boolean obfuscated;
 
-    public ResolvedChatStyle(@Nullable EnumChatFormatting color,
+    public ResolvedChatStyle(@Nullable TextFormatting color,
             boolean bold, boolean italic, boolean underlined, boolean strikethrough, boolean obfuscated) {
         this.color = color;
         this.bold = bold;

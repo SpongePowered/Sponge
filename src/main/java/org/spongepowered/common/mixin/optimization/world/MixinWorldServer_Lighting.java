@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.mixin.optimization.world;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
@@ -74,7 +75,7 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
     @Override
     public int getLight(BlockPos pos, boolean checkNeighbors) {
         if (pos.getX() >= -30000000 && pos.getZ() >= -30000000 && pos.getX() < 30000000 && pos.getZ() < 30000000) {
-            if (checkNeighbors && this.getBlockState(pos).getBlock().getUseNeighborBrightness()) {
+            if (checkNeighbors && this.getBlockState(pos).useNeighborBrightness()) {
                 int i1 = this.getLight(pos.up(), false);
                 int i = this.getLight(pos.east(), false);
                 int j = this.getLight(pos.west(), false);

@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.type.item;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
@@ -69,36 +70,15 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public void registerDefaults() {
-        this.enchantmentMappings.put("minecraft:protection", (Enchantment) net.minecraft.enchantment.Enchantment.protection);
-        this.enchantmentMappings.put("minecraft:fire_protection", (Enchantment) net.minecraft.enchantment.Enchantment.fireProtection);
-        this.enchantmentMappings.put("minecraft:feather_falling", (Enchantment) net.minecraft.enchantment.Enchantment.featherFalling);
-        this.enchantmentMappings.put("minecraft:blast_protection", (Enchantment) net.minecraft.enchantment.Enchantment.blastProtection);
-        this.enchantmentMappings.put("minecraft:projectile_protection", (Enchantment) net.minecraft.enchantment.Enchantment.projectileProtection);
-        this.enchantmentMappings.put("minecraft:respiration", (Enchantment) net.minecraft.enchantment.Enchantment.respiration);
-        this.enchantmentMappings.put("minecraft:aqua_affinity", (Enchantment) net.minecraft.enchantment.Enchantment.aquaAffinity);
-        this.enchantmentMappings.put("minecraft:thorns", (Enchantment) net.minecraft.enchantment.Enchantment.thorns);
-        this.enchantmentMappings.put("minecraft:depth_strider", (Enchantment) net.minecraft.enchantment.Enchantment.depthStrider);
-        this.enchantmentMappings.put("minecraft:sharpness", (Enchantment) net.minecraft.enchantment.Enchantment.sharpness);
-        this.enchantmentMappings.put("minecraft:smite", (Enchantment) net.minecraft.enchantment.Enchantment.smite);
-        this.enchantmentMappings.put("minecraft:bane_of_arthropods", (Enchantment) net.minecraft.enchantment.Enchantment.baneOfArthropods);
-        this.enchantmentMappings.put("minecraft:knockback", (Enchantment) net.minecraft.enchantment.Enchantment.knockback);
-        this.enchantmentMappings.put("minecraft:fire_aspect", (Enchantment) net.minecraft.enchantment.Enchantment.fireAspect);
-        this.enchantmentMappings.put("minecraft:looting", (Enchantment) net.minecraft.enchantment.Enchantment.looting);
-        this.enchantmentMappings.put("minecraft:efficiency", (Enchantment) net.minecraft.enchantment.Enchantment.efficiency);
-        this.enchantmentMappings.put("minecraft:silk_touch", (Enchantment) net.minecraft.enchantment.Enchantment.silkTouch);
-        this.enchantmentMappings.put("minecraft:unbreaking", (Enchantment) net.minecraft.enchantment.Enchantment.unbreaking);
-        this.enchantmentMappings.put("minecraft:fortune", (Enchantment) net.minecraft.enchantment.Enchantment.fortune);
-        this.enchantmentMappings.put("minecraft:power", (Enchantment) net.minecraft.enchantment.Enchantment.power);
-        this.enchantmentMappings.put("minecraft:punch", (Enchantment) net.minecraft.enchantment.Enchantment.punch);
-        this.enchantmentMappings.put("minecraft:flame", (Enchantment) net.minecraft.enchantment.Enchantment.flame);
-        this.enchantmentMappings.put("minecraft:infinity", (Enchantment) net.minecraft.enchantment.Enchantment.infinity);
-        this.enchantmentMappings.put("minecraft:luck_of_the_sea", (Enchantment) net.minecraft.enchantment.Enchantment.luckOfTheSea);
-        this.enchantmentMappings.put("minecraft:lure", (Enchantment) net.minecraft.enchantment.Enchantment.lure);
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
+            this.enchantmentMappings.put(key.toString(), (Enchantment) net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(key));
+        }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (net.minecraft.enchantment.Enchantment enchantment : net.minecraft.enchantment.Enchantment.enchantmentsList) {
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
+            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(key);
             if (enchantment == null) {
                 continue;
             }

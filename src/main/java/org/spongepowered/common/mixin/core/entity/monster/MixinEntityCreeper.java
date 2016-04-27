@@ -199,7 +199,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         }
     }
 
-    @Redirect(method = "interact", at = @At(value = "INVOKE", target = TARGET_IGNITE))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_IGNITE))
     protected void onInteractIgnite(EntityCreeper self) {
         this.interactPrimeCancelled = !shouldPrime(this.primeCause);
         if (!this.interactPrimeCancelled) {
@@ -207,7 +207,7 @@ public abstract class MixinEntityCreeper extends MixinEntityMob implements Creep
         }
     }
 
-    @Redirect(method = "interact", at = @At(value = "INVOKE", target = TARGET_DAMAGE_ITEM))
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = TARGET_DAMAGE_ITEM))
     protected void onDamageFlintAndSteel(ItemStack fas, int amount, EntityLivingBase player) {
         if (!this.interactPrimeCancelled) {
             fas.damageItem(amount, player);

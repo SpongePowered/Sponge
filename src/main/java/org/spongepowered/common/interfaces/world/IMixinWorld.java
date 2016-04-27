@@ -25,21 +25,14 @@
 package org.spongepowered.common.interfaces.world;
 
 import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.command.ICommand;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.BlockPos;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.cause.Cause;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.WorldProvider;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.event.CauseTracker;
-import org.spongepowered.common.world.CaptureType;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
+import org.spongepowered.common.world.gen.SpongeChunkGenerator;
 import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-
-import java.util.List;
 
 import javax.annotation.Nullable;
 
@@ -47,30 +40,14 @@ public interface IMixinWorld {
 
     SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
 
-    CauseTracker getCauseTracker();
-
-    BlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
-
-    void updateWorldGenerator();
-
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);
-
-    void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation);
 
     @Nullable
     EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
 
     @Nullable
     EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
-
-    void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause);
-
-    SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator);
-
-    void onSpongeEntityAdded(net.minecraft.entity.Entity entity);
-
-    void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
 }

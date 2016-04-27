@@ -26,8 +26,8 @@ package org.spongepowered.common.interfaces.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.key.Key;

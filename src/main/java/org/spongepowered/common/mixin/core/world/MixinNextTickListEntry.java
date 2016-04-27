@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.NextTickListEntry;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
@@ -50,7 +50,7 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinBlock
     @Override
     public void setWorld(World world) {
         checkState(this.location == null, "World already known");
-        this.location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector(this.position));
+        this.location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
         this.world = world;
     }
 

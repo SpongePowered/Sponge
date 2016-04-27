@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.util.ban.Ban;
 import org.spongepowered.api.util.ban.BanType;
@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import java.util.Date;
 
 @Mixin(UserListBansEntry.class)
-public abstract class MixinUserBanEntry extends BanEntry<com.mojang.authlib.GameProfile> implements Ban.Profile {
+public abstract class MixinUserBanEntry extends UserListEntryBan<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
     public MixinUserBanEntry(com.mojang.authlib.GameProfile valueIn, Date startDate, String banner, Date endDate, String banReason) {
         super(valueIn, startDate, banner, endDate, banReason);

@@ -1,0 +1,14 @@
+{
+    "minVersion": "0.5.3",
+    "package": "org.spongepowered.common.mixin.optimization",
+    "refmap": "mixins.common.refmap.json",
+    "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
+    "mixins": [
+        "MixinEntity_Item_Pre_Merge",
+        "MixinSpongeImplHooks_Item_Pre_Merge",
+        "MixinInventoryHelper"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

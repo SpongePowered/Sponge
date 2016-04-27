@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.google.common.base.Preconditions;
 import net.minecraft.world.chunk.ChunkPrimer;
-import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.MapGenBase;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
@@ -38,14 +38,14 @@ import org.spongepowered.common.util.gen.ChunkBufferPrimer;
 @Mixin(MapGenBase.class)
 public abstract class MixinMapGenBase implements GenerationPopulator {
 
-    @Shadow
-    public abstract void generate(IChunkProvider chunkProvider, net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
+    @Shadow public abstract void generate(net.minecraft.world.World worldIn, int x, int z, ChunkPrimer chunkData);
 
     @Override
     public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+        Preconditions.checkNotNull(world);
         int x = buffer.getBlockMin().getX() / 16;
         int z = buffer.getBlockMin().getZ() / 16;
-        generate(((net.minecraft.world.World) world).getChunkProvider(), (net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
+        generate((net.minecraft.world.World) world, x, z, new ChunkBufferPrimer(buffer));
     }
 
 }

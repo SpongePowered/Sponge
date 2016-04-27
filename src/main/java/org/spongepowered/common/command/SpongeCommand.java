@@ -35,8 +35,8 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -46,7 +46,6 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -59,11 +58,9 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
 import java.time.Instant;
@@ -83,6 +80,7 @@ public class SpongeCommand {
     static final Text INDENT_TEXT = Text.of(INDENT);
     static final Text NEWLINE_TEXT = Text.NEW_LINE;
     static final Text SEPARATOR_TEXT = Text.of(", ");
+    static final Text UNKNOWN = Text.of("UNKNOWN");
 
     /**
      * Create a new instance of the Sponge command structure.
@@ -135,10 +133,9 @@ public class SpongeCommand {
                 ++successes;
             }
             if (args.hasAny("dimension")) {
-                for (DimensionType dimension : args.<DimensionType>getAll("dimension")) {
-                    WorldProvider provider = DimensionManager.getWorldFromDimId(((SpongeDimensionType) dimension).getDimensionTypeId()).provider;
-                    src.sendMessage(Text.of("Dimension ", dimension.getName(), ": ", processDimension(((IMixinWorldProvider) provider)
-                                    .getDimensionConfig(), dimension, src, args)));
+                for (DimensionType dimensionType : args.<DimensionType>getAll("dimension")) {
+                    src.sendMessage(Text.of("Dimension ", dimensionType.getName(), ": ", processDimension(((IMixinDimensionType) dimensionType).
+                            getDimensionConfig(), dimensionType, src, args)));
                     ++successes;
                 }
             }
@@ -235,9 +232,9 @@ public class SpongeCommand {
                     }
 
                     protected Text getChunksInfo(WorldServer worldserver) {
-                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionId()), NEWLINE_TEXT,
-                                key("Loaded chunks: "), value(worldserver.theChunkProviderServer.getLoadedChunkCount()), NEWLINE_TEXT,
-                                key("Active chunks: "), value(worldserver.activeChunkSet.size()), NEWLINE_TEXT,
+                        return Text.of(NEWLINE_TEXT, key("Dimension: "), value(worldserver.provider.getDimensionType().getId()), NEWLINE_TEXT,
+                                key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), NEWLINE_TEXT,
+                                key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), NEWLINE_TEXT,
                                 key("Entities: "), value(worldserver.loadedEntityList.size()), NEWLINE_TEXT,
                                 key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), NEWLINE_TEXT,
                                 key("Removed Entities:"), value(worldserver.unloadedEntityList.size()), NEWLINE_TEXT,
@@ -334,7 +331,8 @@ public class SpongeCommand {
                     Text.Builder builder = Text.builder().append(IMPLEMENTATION_NAME);
 
                     for (PluginContainer container : SpongeImpl.getInternalPlugins()) {
-                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), Text.of(container.getVersion().orElse("unknown")));
+                        builder.append(NEWLINE_TEXT, Text.of(TextColors.GRAY, INDENT + container.getName(), ": "), container.getVersion().isPresent
+                                () ? Text.of(container.getVersion().get()) : UNKNOWN);
                     }
 
                     src.sendMessage(builder.build());
@@ -415,7 +413,6 @@ public class SpongeCommand {
 
                             next.getVersion()
                                     .ifPresent(version -> pluginBuilder.onHover(TextActions.showText(Text.of("Version " + version))));
-
                             build.append(pluginBuilder.build());
                         }
                         src.sendMessage(build.build());

@@ -43,8 +43,8 @@ import java.util.List;
 @Mixin(TileEntityBeacon.class)
 public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable implements Beacon {
 
-    @Shadow private int primaryEffect;
-    @Shadow private int secondaryEffect;
+    @Shadow private Potion primaryEffect;
+    @Shadow private Potion secondaryEffect;
     @Shadow private int levels;
 
     @Override
@@ -54,18 +54,14 @@ public abstract class MixinTileEntityBeacon extends MixinTileEntityLockable impl
 
     /**
      * @author gabizou - March 4th, 2016
+     *
      * @reason Bypass the vanilla check that sprouted between 1.8 and 1.8.8 such that it
      * prevented any non-vanilla beacon defined potions from being applied
      * to a beacon. This method is used for both setfield and when reading from nbt.
      */
     @Overwrite
-    private int func_183001_h(int p_183001_1_) {
-        if (p_183001_1_ >= 0 && p_183001_1_ < Potion.potionTypes.length && Potion.potionTypes[p_183001_1_] != null) {
-            Potion potion = Potion.potionTypes[p_183001_1_];
-            return potion == null ? 0 : p_183001_1_;
-        } else {
-            return 0;
-        }
+    private static Potion isBeaconEffect(int p_184279_0_) {
+        return Potion.getPotionById(p_184279_0_);
     }
 
 

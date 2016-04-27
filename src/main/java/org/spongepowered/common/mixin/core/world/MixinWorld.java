@@ -33,7 +33,7 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Predicates;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.minecraft.block.ITileEntityProvider;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -45,28 +45,30 @@ import net.minecraft.entity.item.EntityPainting;
 import net.minecraft.entity.item.EntityPainting.EnumArt;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.entity.projectile.EntityPotion;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.network.play.server.S23PacketBlockChange;
+import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.EnumFacing;
+import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
+import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.commons.lang3.reflect.ConstructorUtils;
-import org.spongepowered.api.Platform;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -77,14 +79,12 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
@@ -105,8 +105,6 @@ import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.api.world.gen.WorldGenerator;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -117,30 +115,24 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.IMixinWorldType;
-import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeChunkPreGenerate;
-import org.spongepowered.common.world.border.PlayerBorderListener;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
 import org.spongepowered.common.world.extent.ExtentViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
-import org.spongepowered.common.world.gen.SpongeChunkProvider;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
-import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.util.ArrayList;
@@ -168,14 +160,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private static final Vector2i BIOME_SIZE = BIOME_MAX.sub(BIOME_MIN).add(1, 1);
     private static final String
             CHECK_NO_ENTITY_COLLISION =
-            "checkNoEntityCollision(Lnet/minecraft/util/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
+            "checkNoEntityCollision(Lnet/minecraft/util/math/AxisAlignedBB;Lnet/minecraft/entity/Entity;)Z";
     private static final String
             GET_ENTITIES_WITHIN_AABB =
-            "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;";
+            "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
-    private SpongeChunkProvider spongegen;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -183,7 +174,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public Random rand;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
-    @Shadow @Final private net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
@@ -197,24 +187,42 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
-    @Shadow public abstract boolean addWeatherEffect(net.minecraft.entity.Entity entityIn);
+    @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
+        return false; // Note this is not actually going to return false, it's just a target
+    };
     @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
-    @Shadow public abstract WorldChunkManager getWorldChunkManager();
+    @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
     @Shadow public abstract boolean isBlockPowered(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromChunkCoords(int chunkX, int chunkZ);
     @Shadow public abstract boolean isChunkLoaded(int x, int z, boolean allowEmpty);
-    @Shadow public abstract net.minecraft.world.Explosion newExplosion(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
+    @Shadow public abstract net.minecraft.world.Explosion newExplosion(@Nullable net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength,
             boolean isFlaming, boolean isSmoking);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntities(Class<net.minecraft.entity.Entity> entityType,
             com.google.common.base.Predicate<net.minecraft.entity.Entity> filter);
     @Shadow public abstract List<net.minecraft.entity.Entity> getEntitiesWithinAABBExcludingEntity(net.minecraft.entity.Entity entityIn, AxisAlignedBB bb);
+    @Shadow public abstract MinecraftServer getMinecraftServer();
+    // Methods needed for MixinWorldServer & Tracking
+    @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
+    @Shadow public abstract void updateAllPlayersSleepingFlag();
+    @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
+    @Shadow protected abstract boolean isValid(BlockPos pos);
+    @Shadow public abstract void forceBlockUpdateTick(Block blockType, BlockPos pos, Random random);
+    @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
+    @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);
+    @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
+    @Shadow public abstract void notifyNeighborsOfStateChange(BlockPos pos, Block blockType);
+    @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
+    @Shadow public abstract void notifyBlockUpdate(BlockPos pos, IBlockState oldState, IBlockState newState, int flags);
+    @Shadow public abstract void scheduleBlockUpdate(BlockPos pos, Block blockIn, int delay, int priority);
+    @Shadow public abstract void playSound(EntityPlayer p_184148_1_, double p_184148_2_, double p_184148_4_, double p_184148_6_, SoundEvent p_184148_8_, net.minecraft.util.SoundCategory p_184148_9_, float p_184148_10_, float p_184148_11_);
 
     // @formatter:on
     @Inject(method = "<init>", at = @At("RETURN"))
@@ -227,45 +235,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     "sponge$dummy_world");
         }
         this.worldContext = new Context(Context.WORLD_KEY, this.worldInfo.getWorldName());
-        if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
-            this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
-        }
-    }
-
-    @Override
-    public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
-        this.builder.reset();
-        Location<World> location = new Location<>((World) this, VecHelper.toVector(pos));
-        this.builder.blockState((BlockState) state)
-                .extendedState((BlockState) extended)
-                .worldId(location.getExtent().getUniqueId())
-                .position(location.getBlockPosition());
-        Optional<UUID> creator = getCreator(pos.getX(), pos.getY(), pos.getZ());
-        Optional<UUID> notifier = getNotifier(pos.getX(), pos.getY(), pos.getZ());
-        if (creator.isPresent()) {
-            this.builder.creator(creator.get());
-        }
-        if (notifier.isPresent()) {
-            this.builder.notifier(notifier.get());
-        }
-        if (state.getBlock() instanceof ITileEntityProvider) {
-            net.minecraft.tileentity.TileEntity te = getTileEntity(pos);
-            if (te != null) {
-                TileEntity tile = (TileEntity) te;
-                for (DataManipulator<?, ?> manipulator : tile.getContainers()) {
-                    this.builder.add(manipulator);
-                }
-                NBTTagCompound nbt = new NBTTagCompound();
-                te.writeToNBT(nbt);
-                this.builder.unsafeNbt(nbt);
-            }
-        }
-        return new SpongeBlockSnapshot(this.builder, updateFlag);
     }
 
     @SuppressWarnings("rawtypes")
-    @Inject(method = "getCollidingBoundingBoxes(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/AxisAlignedBB;)Ljava/util/List;", at = @At("HEAD"), cancellable = true)
-    public void onGetCollidingBoundingBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
+    @Inject(method = "getCollisionBoxes", at = @At("HEAD"), cancellable = true)
+    public void onGetCollisionBoxes(net.minecraft.entity.Entity entity, AxisAlignedBB axis,
             CallbackInfoReturnable<List> cir) {
         if (!entity.worldObj.isRemote && SpongeHooks.checkBoundingBoxSize(entity, axis)) {
             // Removing misbehaved living entities
@@ -290,8 +264,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(x, z)) {
-            chunk = worldserver.theChunkProviderServer.provideChunk(x, z);
+        if (worldserver.getChunkProvider().chunkExists(x, z)) {
+            chunk = worldserver.getChunkProvider().getLoadedChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }
@@ -308,8 +282,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
         WorldServer worldserver = (WorldServer) (Object) this;
         net.minecraft.world.chunk.Chunk chunk = null;
-        if (worldserver.theChunkProviderServer.chunkExists(x, z) || shouldGenerate) {
-            chunk = worldserver.theChunkProviderServer.loadChunk(x, z);
+        if (worldserver.getChunkProvider().chunkExists(x, z) || shouldGenerate) {
+            chunk = worldserver.getChunkProvider().loadChunk(x, z);
         }
         return Optional.ofNullable((Chunk) chunk);
     }
@@ -324,7 +298,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public BlockType getBlockType(int x, int y, int z) {
         checkBlockBounds(x, y, z);
         // avoid intermediate object creation from using BlockState
-        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlock(x, y, z);
+        return (BlockType) getChunkFromChunkCoords(x >> 4, z >> 4).getBlockState(new BlockPos(x, y, z)).getBlock();
     }
 
     @Override
@@ -380,7 +354,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         // Not all entities have a single World parameter as their constructor
         if (entityClass.isAssignableFrom(EntityLightningBolt.class)) {
-            entity = (Entity) new EntityLightningBolt(world, x, y, z);
+            entity = (Entity) new EntityLightningBolt(world, x, y, z, false);
         } else if (entityClass.isAssignableFrom(EntityEnderPearl.class)) {
             EntityArmorStand tempEntity = new EntityArmorStand(world, x, y, z);
             tempEntity.posY -= tempEntity.getEyeHeight();
@@ -418,11 +392,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             }
         }*/
 
-        // Last chance to fix null fields
-        if (entity instanceof EntityPotion) {
-            // make sure EntityPotion.potionDamage is not null
-            ((EntityPotion) entity).getPotionDamage();
-        } else if (entity instanceof EntityPainting) {
+        if (entity instanceof EntityPainting) {
             // This is default when art is null when reading from NBT, could
             // choose a random art instead?
             ((EntityPainting) entity).art = EnumArt.KEBAB;
@@ -475,12 +445,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.keepSpawnLoaded = keepLoaded;
     }
 
+
     @Override
     public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
-
-
 
     @Override
     public Optional<Entity> getEntity(UUID uuid) {
@@ -520,60 +489,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         mixin.setLoadOnStartup(properties.loadOnStartup());
 
         return (WorldCreationSettings) (Object) settings;
-    }
-
-    @Override
-    public void updateWorldGenerator() {
-
-        IMixinWorldType worldType = (IMixinWorldType) this.getProperties().getGeneratorType();
-        // Get the default generator for the world type
-        DataContainer generatorSettings = this.getProperties().getGeneratorSettings();
-
-        SpongeWorldGenerator newGenerator = worldType.createGenerator(this, generatorSettings);
-        // If the base generator is an IChunkProvider which implements
-        // IPopulatorProvider we request that it add its populators not covered
-        // by the base generation populator
-        if (newGenerator.getBaseGenerationPopulator() instanceof IChunkProvider) {
-            // We check here to ensure that the IPopulatorProvider is one of our mixed in ones and not
-            // from a mod chunk provider extending a provider that we mixed into
-            if (WorldGenConstants.isValid((IChunkProvider) newGenerator.getBaseGenerationPopulator(), IPopulatorProvider.class)) {
-                ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
-            }
-        } else if (newGenerator.getBaseGenerationPopulator() instanceof IPopulatorProvider) {
-            // If its not a chunk provider but is a populator provider then we call it as well
-            ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
-        }
-
-        // Re-apply all world generator modifiers
-        WorldCreationSettings creationSettings = this.getCreationSettings();
-
-        for (WorldGeneratorModifier modifier : this.getProperties().getGeneratorModifiers()) {
-            modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
-        }
-
-        this.spongegen = createChunkProvider(newGenerator);
-        this.spongegen.setGenerationPopulators(newGenerator.getGenerationPopulators());
-        this.spongegen.setPopulators(newGenerator.getPopulators());
-        this.spongegen.setBiomeOverrides(newGenerator.getBiomeSettings());
-
-        ChunkProviderServer chunkProviderServer = (ChunkProviderServer) this.getChunkProvider();
-        chunkProviderServer.serverChunkGenerator = this.spongegen;
-    }
-
-    @Override
-    public SpongeChunkProvider createChunkProvider(SpongeWorldGenerator newGenerator) {
-        return new SpongeChunkProvider((net.minecraft.world.World) (Object) this, newGenerator.getBaseGenerationPopulator(),
-                newGenerator.getBiomeGenerator());
-    }
-
-    @Override
-    public void onSpongeEntityAdded(net.minecraft.entity.Entity entity) {
-        this.onEntityAdded(entity);
-    }
-
-    @Override
-    public WorldGenerator getWorldGenerator() {
-        return this.spongegen;
     }
 
     @Override
@@ -707,11 +622,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean isLoaded() {
-        return DimensionManager.getWorldFromDimId(this.provider.getDimensionId()) != null;
-    }
-
-    @Override
     public Optional<String> getGameRule(String gameRule) {
         return this.getProperties().getGameRule(gameRule);
     }
@@ -726,8 +636,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(explosion, "explosion");
         Location<World> origin = explosion.getLocation();
         checkNotNull(origin, "location");
-        newExplosion(
-                (net.minecraft.entity.Entity) explosion.getSourceExplosive().orElse(null), origin.getX(),
+        newExplosion(EntityUtil.toNullableNative(explosion.getSourceExplosive().orElse(null)), origin.getX(),
                 origin.getY(), origin.getZ(), explosion.getRadius(), explosion.canCauseFire(),
                 explosion.shouldBreakBlocks()
         );
@@ -797,40 +706,20 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public Optional<UUID> getCreator(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        Optional<User> user = spongeChunk.getBlockOwner(pos);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier(int x, int y, int z) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        Optional<User> user = spongeChunk.getBlockNotifier(pos);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
     public void setCreator(int x, int y, int z, @Nullable UUID uuid) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockCreator(pos, uuid);
     }
 
     @Override
     public void setNotifier(int x, int y, int z, @Nullable UUID uuid) {
-        BlockPos pos = new BlockPos(x, y, z);
-        IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(pos);
-        spongeChunk.setBlockNotifier(pos, uuid);
     }
 
 
@@ -921,31 +810,32 @@ public abstract class MixinWorld implements World, IMixinWorld {
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        SpawnEntityEvent.ChunkLoad chunkLoad = SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList,
-            snapshotBuilder.build(), this);
-        SpongeImpl.postEvent(chunkLoad);
-        if (!chunkLoad.isCancelled()) {
-            for (Entity successful : chunkLoad.getEntities()) {
-                this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
-                this.onEntityAdded((net.minecraft.entity.Entity) successful);
-            }
-        }
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
+            .nonCancelled(event -> {
+                for (Entity successful : event.getEntities()) {
+                    this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
+                    this.onEntityAdded((net.minecraft.entity.Entity) successful);
+                }
+            })
+            .process();
         callbackInfo.cancel();
     }
 
-    @Inject(method = "playSoundAtEntity", at = @At("HEAD"), cancellable = true)
-    private void spongePlaySoundAtEntity(net.minecraft.entity.Entity entity, String name, float volume, float pitch, CallbackInfo callbackInfo) {
-        if (((IMixinEntity) entity).isVanished()) {
-            callbackInfo.cancel();
+    @Inject(method = "playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V", at = @At("HEAD"), cancellable = true)
+    private void spongePlaySoundAtEntity(EntityPlayer entity, double x, double y, double z, SoundEvent name, net.minecraft.util.SoundCategory category, float volume, float pitch, CallbackInfo callbackInfo) {
+        if (entity instanceof IMixinEntity) {
+            if (((IMixinEntity) entity).isVanished()) {
+                callbackInfo.cancel();
+            }
         }
     }
 
     @Override
     public void sendBlockChange(int x, int y, int z, BlockState state) {
         checkNotNull(state, "state");
-        S23PacketBlockChange packet = new S23PacketBlockChange();
+        SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = (IBlockState) state;
+        packet.blockState = BlockUtil.toBlockState(state);
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
@@ -956,7 +846,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public void resetBlockChange(int x, int y, int z) {
-        S23PacketBlockChange packet = new S23PacketBlockChange((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
+        SPacketBlockChange packet = new SPacketBlockChange((net.minecraft.world.World) (Object) this, new BlockPos(x, y, z));
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
@@ -965,4 +855,21 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
+    // These are overriden in MixinWorldServer where they should be.
+
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
+    protected void onUpdateWeatherEffect(net.minecraft.entity.Entity entityIn) {
+        entityIn.onUpdate();
+    }
+
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
+    protected void onUpdateTileEntities(ITickable tile) {
+        tile.update();
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
+    protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
+        entity.onUpdate();
+    }
 }

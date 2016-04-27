@@ -72,12 +72,12 @@ public class BodyRotationsValueProcessor extends AbstractSpongeValueProcessor<En
     protected Optional<Map<BodyPart, Vector3d>> getVal(EntityArmorStand container) {
         Map<BodyPart, Vector3d> values = Maps.newHashMap();
         
-        values.put(BodyParts.HEAD, VecHelper.toVector(container.getHeadRotation()));
-        values.put(BodyParts.CHEST, VecHelper.toVector(container.getBodyRotation()));
-        values.put(BodyParts.LEFT_ARM, VecHelper.toVector(container.leftArmRotation));
-        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector(container.rightArmRotation));
-        values.put(BodyParts.LEFT_LEG, VecHelper.toVector(container.leftLegRotation));
-        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector(container.rightLegRotation));
+        values.put(BodyParts.HEAD, VecHelper.toVector3d(container.getHeadRotation()));
+        values.put(BodyParts.CHEST, VecHelper.toVector3d(container.getBodyRotation()));
+        values.put(BodyParts.LEFT_ARM, VecHelper.toVector3d(container.leftArmRotation));
+        values.put(BodyParts.RIGHT_ARM, VecHelper.toVector3d(container.rightArmRotation));
+        values.put(BodyParts.LEFT_LEG, VecHelper.toVector3d(container.leftLegRotation));
+        values.put(BodyParts.RIGHT_LEG, VecHelper.toVector3d(container.rightLegRotation));
         return Optional.of(values);
     }
 

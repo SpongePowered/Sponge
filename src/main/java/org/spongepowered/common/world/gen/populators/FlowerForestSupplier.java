@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.PlantType;
@@ -53,7 +53,7 @@ public class FlowerForestSupplier implements Function<Location<Chunk>, PlantType
         double noise =
                 MathHelper.clamp_double((1.0D + GRASS_COLOR_NOISE.func_151601_a(pos.getX() / 48.0D, pos.getZ() / 48.0D)) / 2.0D,
                         0.0D, 0.9999D);
-        PlantType flower = options[(int) (noise * (double) options.length)];
+        PlantType flower = options[(int) (noise * options.length)];
         if (flower == PlantTypes.BLUE_ORCHID) {
             return PlantTypes.POPPY;
         }

@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public class OptimizationPlugin implements IMixinConfigPlugin {
 
@@ -86,6 +85,12 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
                     SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
             .put("org.spongepowered.common.mixin.optimization.world.MixinChunk_Chunk_Cache",
                     SpongeConfig.OptimizationCategory::isUseCachedChunkMap)
+            .put("org.spongepowered.common.mixin.optimization.MixinSpongeImplHooks_Item_Pre_Merge",
+                    SpongeConfig.OptimizationCategory::doDropsPreMergeItemDrops)
+            .put("org.spongepowered.common.mixin.optimization.MixinInventoryHelper",
+                    SpongeConfig.OptimizationCategory::doDropsPreMergeItemDrops)
+            .put("org.spongepowered.common.mixin.optimization.MixinEntity_Item_Pre_Merge",
+                    SpongeConfig.OptimizationCategory::doEntityDropsPreMerge)
             .build();
 
 }

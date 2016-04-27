@@ -78,7 +78,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
         return data.getCompoundTag(NbtDataUtil.SPONGE_DATA);
     }
 
-    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) { }
+    default void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+    }
 
     /**
      * Read extra data (SpongeData) from the entity's NBT tag.
@@ -108,8 +109,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setUntargetable(boolean untargetable);
 
-    @Nullable
-    Text getDisplayNameText();
+    @Nullable Text getDisplayNameText();
 
     void setDisplayName(@Nullable Text displayName);
 

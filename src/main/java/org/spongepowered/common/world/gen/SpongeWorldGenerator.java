@@ -37,7 +37,7 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
-import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
+import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 
 import java.util.HashMap;
 import java.util.List;
@@ -66,15 +66,15 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     private GenerationPopulator baseGenerator;
 
     public SpongeWorldGenerator(World world, BiomeGenerator biomeGenerator, GenerationPopulator baseGenerator) {
-        this.world = world;
-        this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
-        this.baseGenerator = checkNotNull(baseGenerator, "baseGenerator");
+        this.world = checkNotNull(world);
+        this.biomeGenerator = checkNotNull(biomeGenerator);
+        this.baseGenerator = checkNotNull(baseGenerator);
         this.populators = Lists.newArrayList();
         this.generationPopulators = Lists.newArrayList();
         this.biomeSettings = Maps.newHashMap();
-        this.world.provider.worldChunkMgr = CustomWorldChunkManager.of(biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -85,9 +85,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
 
     @Override
     public List<GenerationPopulator> getGenerationPopulators(Class<? extends GenerationPopulator> type) {
-        return this.generationPopulators.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.generationPopulators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -97,9 +95,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
 
     @Override
     public List<Populator> getPopulators(Class<? extends Populator> type) {
-        return this.populators.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.populators.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -111,9 +107,9 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     public void setBiomeGenerator(BiomeGenerator biomeGenerator) {
         this.biomeGenerator = checkNotNull(biomeGenerator, "biomeGenerator");
         // Replace biome generator with possible modified one
-        this.world.provider.worldChunkMgr = CustomWorldChunkManager.of(biomeGenerator);
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(biomeGenerator);
+        this.world.provider.biomeProvider = CustomBiomeProvider.of(biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(biomeGenerator);
         }
     }
 
@@ -125,8 +121,8 @@ public final class SpongeWorldGenerator implements WorldGenerator {
     @Override
     public void setBaseGenerationPopulator(GenerationPopulator generator) {
         this.baseGenerator = checkNotNull(generator, "generator");
-        if (this.baseGenerator instanceof IChunkProviderGenerate) {
-            ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
+        if (this.baseGenerator instanceof IChunkProviderOverworld) {
+            ((IChunkProviderOverworld) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
     }
 
@@ -135,7 +131,7 @@ public final class SpongeWorldGenerator implements WorldGenerator {
         checkNotNull(type);
         if (!this.biomeSettings.containsKey(type)) {
             if (!(this.biomeSettings instanceof HashMap)) {
-                this.biomeSettings = new HashMap<BiomeType, BiomeGenerationSettings>(this.biomeSettings);
+                this.biomeSettings = new HashMap<>(this.biomeSettings);
             }
             this.biomeSettings.put(type, ((IBiomeGenBase) type).initPopulators(this.world));
         }

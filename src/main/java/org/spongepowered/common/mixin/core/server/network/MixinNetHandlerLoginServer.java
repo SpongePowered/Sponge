@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.minecraft.network.NetworkManager;
-import net.minecraft.network.login.server.S00PacketDisconnect;
+import net.minecraft.network.login.server.SPacketDisconnect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.ServerConfigurationManager;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.network.NetHandlerLoginServer;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.message.MessageEvent;
@@ -66,16 +66,16 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     @Shadow public abstract String getConnectionInfo();
     @Shadow public abstract com.mojang.authlib.GameProfile getOfflineProfile(com.mojang.authlib.GameProfile profile);
 
-    @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ServerConfigurationManager;"
+    @Redirect(method = "tryAcceptPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerList;"
             + "allowUserToConnect(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Ljava/lang/String;"))
-    public String onAllowUserToConnect(ServerConfigurationManager confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
+    public String onAllowUserToConnect(PlayerList confMgr, SocketAddress address, com.mojang.authlib.GameProfile profile) {
         return null; // We handle disconnecting
     }
 
-    private void closeConnection(IChatComponent reason) {
+    private void closeConnection(ITextComponent reason) {
         try {
             logger.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedText());
-            this.networkManager.sendPacket(new S00PacketDisconnect(reason));
+            this.networkManager.sendPacket(new SPacketDisconnect(reason));
             this.networkManager.closeChannel(reason);
         } catch (Exception exception) {
             logger.error("Error whilst disconnecting player", exception);
@@ -83,11 +83,11 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
     }
 
     private void disconnectClient(Optional<Text> disconnectMessage) {
-        IChatComponent reason = null;
+        ITextComponent reason = null;
         if (disconnectMessage.isPresent()) {
             reason = SpongeTexts.toComponent(disconnectMessage.get());
         } else {
-            reason = new ChatComponentTranslation("disconnect.disconnected");
+            reason = new TextComponentTranslation("disconnect.disconnected");
         }
         this.closeConnection(reason);
     }

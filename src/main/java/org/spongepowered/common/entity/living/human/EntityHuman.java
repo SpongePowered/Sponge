@@ -36,24 +36,26 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.SharedMonsterAttributes;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S0CPacketSpawnPlayer;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketSpawnPlayer;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.MathHelper;
+import net.minecraft.util.EnumHand;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldSettings;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
-import org.spongepowered.api.entity.ArmorEquipable;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.SpongeImpl;
@@ -85,7 +87,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
                 @Override
                 public PropertyMap load(UUID uuid) throws Exception {
-                    return MinecraftServer.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
+                    return SpongeImpl.getServer().getMinecraftSessionService().fillProfileProperties(new GameProfile(uuid, ""), true)
                             .getProperties();
                 }
             });
@@ -95,6 +97,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     private GameProfile fakeProfile;
     @Nullable private UUID skinUuid;
+    private boolean aiDisabled = false;
 
     public EntityHuman(World worldIn) {
         super(worldIn);
@@ -106,17 +109,30 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     protected void applyEntityAttributes() {
         super.applyEntityAttributes();
-        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.attackDamage).setBaseValue(1.0D);
+        this.getAttributeMap().registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).setBaseValue(1.0D);
     }
 
     @Override
     protected void entityInit() {
-        super.entityInit();
-        this.dataWatcher.addObject(16, (byte) 0);
-        this.dataWatcher.addObject(17, 0.0F);
-        this.dataWatcher.addObject(18, 0);
-        // Enables all skin features
-        this.dataWatcher.addObject(10, (byte) 0xFF);
+        this.dataManager.register(EntityLivingBase.HAND_STATES, Byte.valueOf((byte)0));
+        this.dataManager.register(EntityLivingBase.POTION_EFFECTS, Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBase.HIDE_PARTICLES, Boolean.valueOf(false));
+        this.dataManager.register(EntityLivingBase.ARROW_COUNT_IN_ENTITY, Integer.valueOf(0));
+        this.dataManager.register(EntityLivingBase.HEALTH, Float.valueOf(1.0F));
+        this.dataManager.register(EntityPlayer.ABSORPTION, 0.0F);
+        this.dataManager.register(EntityPlayer.PLAYER_SCORE, 0);
+        this.dataManager.register(EntityPlayer.MAIN_HAND, (byte) 1);
+        this.dataManager.register(EntityPlayer.PLAYER_MODEL_FLAG, (byte) 0xFF);
+    }
+
+    @Override
+    public boolean isLeftHanded() {
+        return this.dataManager.get(EntityPlayer.MAIN_HAND) == 0;
+    }
+
+    @Override
+    public boolean isAIDisabled() {
+        return this.aiDisabled;
     }
 
     @Override
@@ -177,13 +193,13 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    protected String getSwimSound() {
-        return "game.player.swim";
+    protected SoundEvent getSwimSound() {
+        return SoundEvents.entity_player_swim;
     }
 
     @Override
-    protected String getSplashSound() {
-        return "game.player.swim.splash";
+    protected SoundEvent getSplashSound() {
+        return SoundEvents.entity_player_splash;
     }
 
     @Override
@@ -206,13 +222,13 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     @Override
-    protected String getHurtSound() {
-        return "game.player.hurt";
+    protected SoundEvent getHurtSound() {
+        return SoundEvents.entity_player_hurt;
     }
 
     @Override
-    protected String getDeathSound() {
-        return "game.player.die";
+    protected SoundEvent getDeathSound() {
+        return SoundEvents.entity_player_death;
     }
 
     @Override
@@ -222,14 +238,13 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public float getAIMoveSpeed() {
-        return (float) this.getEntityAttribute(SharedMonsterAttributes.movementSpeed).getAttributeValue();
+        return (float) this.getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).getAttributeValue();
     }
 
     @Override
-    protected String getFallSoundString(int damageValue) {
-        return damageValue > 4 ? "game.player.hurt.fall.big" : "game.player.hurt.fall.small";
+    protected SoundEvent getFallSound(int p_184588_1_) {
+        return p_184588_1_ > 4 ? SoundEvents.entity_player_big_fall : SoundEvents.entity_player_small_fall;
     }
-
     @Override
     public float getEyeHeight() {
         return 1.62f;
@@ -237,7 +252,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     public float getAbsorptionAmount() {
-        return this.getDataWatcher().getWatchableObjectFloat(17);
+        return this.getDataManager().get(EntityPlayer.ABSORPTION);
     }
 
     @Override
@@ -245,7 +260,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         if (amount < 0.0F) {
             amount = 0.0F;
         }
-        this.getDataWatcher().updateObject(17, amount);
+        this.getDataManager().set(EntityPlayer.ABSORPTION, amount);
     }
 
     @Override
@@ -259,12 +274,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     @Override
     public boolean attackEntityAsMob(Entity entityIn) {
         super.attackEntityAsMob(entityIn);
-        swingItem();
-        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.attackDamage).getAttributeValue();
+        this.swingArm(EnumHand.MAIN_HAND);
+        float f = (float) this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).getAttributeValue();
         int i = 0;
 
         if (entityIn instanceof EntityLivingBase) {
-            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) entityIn).getCreatureAttribute());
+            f += EnchantmentHelper.getModifierForCreature(this.getHeldItem(EnumHand.MAIN_HAND), ((EntityLivingBase) entityIn).getCreatureAttribute());
             i += EnchantmentHelper.getKnockbackModifier(this);
         }
 
@@ -306,7 +321,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
         return true;
     }
 
-    public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, S38PacketPlayerListItem removePacket) {
+    public void removeFromTabListDelayed(@Nullable EntityPlayerMP player, SPacketPlayerListItem removePacket) {
         int delay = SpongeImpl.getGlobalConfig().getConfig().getEntity().getHumanPlayerListRemoveDelay();
         Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
@@ -317,7 +332,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     public boolean setSkinUuid(UUID skin) {
-        if (!MinecraftServer.getServer().isServerInOnlineMode()) {
+        if (!((MinecraftServer) Sponge.getServer()).isServerInOnlineMode()) {
             // Skins only work when online-mode = true
             return false;
         }
@@ -356,9 +371,9 @@ public class EntityHuman extends EntityCreature implements TeamMember {
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new S13PacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(S38PacketPlayerListItem.Action.ADD_PLAYER));
+        this.pushPackets(new SPacketDestroyEntities(this.getEntityId()), this.createPlayerListPacket(SPacketPlayerListItem.Action.ADD_PLAYER));
         this.pushPackets(this.createSpawnPacket());
-        removeFromTabListDelayed(null, this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
+        removeFromTabListDelayed(null, this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
@@ -381,41 +396,39 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      */
     public void onRemovedFrom(EntityPlayerMP player) {
         this.playerPacketMap.remove(player.getUniqueID());
-        player.playerNetServerHandler.sendPacket(this.createPlayerListPacket(S38PacketPlayerListItem.Action.REMOVE_PLAYER));
+        player.playerNetServerHandler.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
-     * Creates a {@link S0CPacketSpawnPlayer} packet.
+     * Creates a {@link SPacketSpawnPlayer} packet.
      *
      * Copied directly from the constructor of the packet, because that can't be
      * used as we're not an EntityPlayer.
      *
      * @return A new spawn packet
      */
-    public S0CPacketSpawnPlayer createSpawnPacket() {
-        S0CPacketSpawnPlayer packet = new S0CPacketSpawnPlayer();
+    public SPacketSpawnPlayer createSpawnPacket() {
+        SPacketSpawnPlayer packet = new SPacketSpawnPlayer();
         packet.entityId = this.getEntityId();
-        packet.playerId = this.fakeProfile.getId();
-        packet.x = MathHelper.floor_double(this.posX * 32.0D);
-        packet.y = MathHelper.floor_double(this.posY * 32.0D);
-        packet.z = MathHelper.floor_double(this.posZ * 32.0D);
+        packet.uniqueId = this.fakeProfile.getId();
+        packet.x = this.posX;
+        packet.y = this.posY;
+        packet.z = this.posZ;
         packet.yaw = (byte) ((int) (this.rotationYaw * 256.0F / 360.0F));
         packet.pitch = (byte) ((int) (this.rotationPitch * 256.0F / 360.0F));
-        ItemStack itemstack = (ItemStack) ((ArmorEquipable) this).getItemInHand().orElse(null);
-        packet.currentItem = itemstack == null ? 0 : Item.getIdFromItem(itemstack.getItem());
-        packet.watcher = this.getDataWatcher();
+        packet.watcher = this.getDataManager();
         return packet;
     }
 
     /**
-     * Creates a {@link S38PacketPlayerListItem} packet with the given action.
+     * Creates a {@link SPacketPlayerListItem} packet with the given action.
      *
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
     @SuppressWarnings("unchecked")
-    public S38PacketPlayerListItem createPlayerListPacket(S38PacketPlayerListItem.Action action) {
-        S38PacketPlayerListItem packet = new S38PacketPlayerListItem(action);
+    public SPacketPlayerListItem createPlayerListPacket(SPacketPlayerListItem.Action action) {
+        SPacketPlayerListItem packet = new SPacketPlayerListItem(action);
         packet.players.add(packet.new AddPlayerData(this.fakeProfile, 0, WorldSettings.GameType.NOT_SET, this.getDisplayName()));
         return packet;
     }

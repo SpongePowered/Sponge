@@ -37,6 +37,7 @@ import org.spongepowered.api.data.type.*;
 import org.spongepowered.api.effect.particle.*;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
+import org.spongepowered.api.effect.sound.SoundCategory;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
@@ -108,7 +109,7 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.entity.ai.*;
 import org.spongepowered.common.entity.ai.target.SpongeFindNearestAttackableTargetAIBuilder;
 import org.spongepowered.common.entity.player.tab.TabListEntryBuilder;
-import org.spongepowered.common.event.*;
+import org.spongepowered.common.event.damage.*;
 import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
@@ -125,6 +126,7 @@ import org.spongepowered.common.registry.type.data.DataFormatRegistryModule;
 import org.spongepowered.common.registry.type.economy.TransactionTypeRegistryModule;
 import org.spongepowered.common.registry.type.effect.ParticleRegistryModule;
 import org.spongepowered.common.registry.type.effect.PotionEffectTypeRegistryModule;
+import org.spongepowered.common.registry.type.effect.SoundCategoryRegistryModule;
 import org.spongepowered.common.registry.type.effect.SoundRegistryModule;
 import org.spongepowered.common.registry.type.entity.*;
 import org.spongepowered.common.registry.type.event.DamageModifierTypeRegistryModule;
@@ -220,12 +222,13 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(Task.Builder.class, SpongeTaskBuilder::new)
             .registerBuilderSupplier(BigMushroom.Builder.class, BigMushroomBuilder::new)
             .registerBuilderSupplier(BlockBlob.Builder.class, BlockBlobBuilder::new)
+            .registerBuilderSupplier(ChorusFlower.Builder.class, ChorusFlowerBuilder::new)
             .registerBuilderSupplier(Cactus.Builder.class, CactusBuilder::new)
             .registerBuilderSupplier(DeadBush.Builder.class, DeadBushBuilder::new)
             .registerBuilderSupplier(DesertWell.Builder.class, DesertWellBuilder::new)
             .registerBuilderSupplier(DoublePlant.Builder.class, DoublePlantBuilder::new)
             .registerBuilderSupplier(Dungeon.Builder.class, DungeonBuilder::new)
-            .registerBuilderSupplier(EnderCrystalPlatform.Builder.class, EnderCrystalPlatformBuilder::new)
+            .registerBuilderSupplier(EndIsland.Builder.class, EndIslandBuilder::new)
             .registerBuilderSupplier(Flower.Builder.class, FlowerBuilder::new)
             .registerBuilderSupplier(Forest.Builder.class, ForestBuilder::new)
             .registerBuilderSupplier(Glowstone.Builder.class, GlowstoneBuilder::new)
@@ -286,7 +289,7 @@ public final class CommonModuleRegistry {
             .registerModule(DamageType.class, new DamageTypeRegistryModule())
             .registerModule(DataFormat.class, new DataFormatRegistryModule())
             .registerModule(Difficulty.class, new DifficultyRegistryModule())
-            .registerModule(DimensionType.class, DimensionRegistryModule.getInstance())
+            .registerModule(DimensionType.class, DimensionTypeRegistryModule.getInstance())
             .registerModule(DirtType.class, new DirtTypeRegistryModule())
             .registerModule(DisguisedBlockType.class, new DisguisedBlockTypeRegistryModule())
             .registerModule(DisplaySlot.class,DisplaySlotRegistryModule.getInstance())
@@ -334,6 +337,7 @@ public final class CommonModuleRegistry {
             .registerModule(SlabType.class, new SlabTypeRegistryModule())
             .registerModule(SoundType.class, new SoundRegistryModule())
             .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
+            .registerModule(SoundCategory.class, new SoundCategoryRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
             .registerModule(TextColor.class, new TextColorRegistryModule())

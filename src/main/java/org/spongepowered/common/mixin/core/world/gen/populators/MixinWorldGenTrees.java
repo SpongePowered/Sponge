@@ -26,13 +26,12 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenTrees;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.gen.IWorldGenTrees;
@@ -75,7 +74,7 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
             for (int k = x - b0; k <= x + b0 && flag; ++k) {
                 for (l = z - b0; l <= z + b0 && flag; ++l) {
                     if (j >= 0 && j < 256) {
-                        if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
+                        if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(k, j, l)).getBlock())) {
                             flag = false;
                         }
                     } else {

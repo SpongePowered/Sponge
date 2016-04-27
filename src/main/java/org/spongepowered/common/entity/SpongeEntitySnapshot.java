@@ -85,6 +85,8 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     private final ImmutableSet<ImmutableValue<?>> values;
     @Nullable private final NBTTagCompound compound;
     @Nullable private final WeakReference<Entity> entityReference;
+    // TODO write optimization to lazy load and evaluate all of the manipulators for entities during events.
+    private boolean isDirty = true;
 
     SpongeEntitySnapshot(SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;

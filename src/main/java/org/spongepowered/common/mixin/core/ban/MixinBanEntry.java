@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.ban;
 
-import net.minecraft.server.management.BanEntry;
 import net.minecraft.server.management.UserListEntry;
+import net.minecraft.server.management.UserListEntryBan;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.living.player.Player;
@@ -45,7 +45,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @SuppressWarnings("rawtypes")
-@Mixin(BanEntry.class)
+@Mixin(UserListEntryBan.class)
 public abstract class MixinBanEntry<T> extends UserListEntry<T> implements Ban {
 
     public MixinBanEntry(T p_i1146_1_) {

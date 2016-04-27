@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.service.user;
 
+import com.google.common.base.Preconditions;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.collect.Sets;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.BanEntry;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.server.management.UserListBans;
-import net.minecraft.server.management.UserListBansEntry;
+import net.minecraft.server.management.UserListEntryBan;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import net.minecraft.world.storage.SaveHandler;
@@ -57,6 +56,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 class UserDiscoverer {
 
@@ -101,7 +101,7 @@ class UserDiscoverer {
     }
 
     static User findByUsername(String username) {
-        PlayerProfileCache cache = MinecraftServer.getServer().getPlayerProfileCache();
+        PlayerProfileCache cache = SpongeImpl.getServer().getPlayerProfileCache();
         HashSet<String> names = Sets.newHashSet(cache.getUsernames());
         if (names.contains(username.toLowerCase(Locale.ROOT))) {
             GameProfile profile = cache.getGameProfileForUsername(username);
@@ -113,15 +113,14 @@ class UserDiscoverer {
     }
 
     static Collection<org.spongepowered.api.profile.GameProfile> getAllProfiles() {
+        Preconditions.checkState(Sponge.isServerAvailable(), "Server is not available!");
         Set<org.spongepowered.api.profile.GameProfile> profiles = Sets.newHashSet();
 
         // Add all cached profiles
-        for (User user : userCache.asMap().values()) {
-            profiles.add(user.getProfile());
-        }
+        profiles.addAll(userCache.asMap().values().stream().map(User::getProfile).collect(Collectors.toList()));
 
         // Add all known profiles from the data files
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
 
@@ -131,23 +130,22 @@ class UserDiscoverer {
                 continue;
             }
 
-            GameProfile profile = MinecraftServer.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
+            GameProfile profile = SpongeImpl.getServer().getPlayerProfileCache().getProfileByUUID(UUID.fromString(playerUuid));
             if (profile != null) {
                 profiles.add((org.spongepowered.api.profile.GameProfile) profile);
             }
         }
 
         // Add all whitelisted users
-        UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         for (UserListWhitelistEntry entry : whiteList.getValues().values()) {
             profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
         }
 
         // Add all banned users
-        UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        for (UserListBansEntry entry : banList.getValues().values()) {
-            profiles.add((org.spongepowered.api.profile.GameProfile) entry.value);
-        }
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
+        profiles.addAll(banList.getValues().values().stream().filter(entry -> entry != null).map(entry -> (org.spongepowered.api.profile.GameProfile)
+                entry.value).collect(Collectors.toList()));
         return profiles;
     }
 
@@ -163,7 +161,7 @@ class UserDiscoverer {
     }
 
     private static User getOnlinePlayer(UUID uniqueId) {
-        ServerConfigurationManager confMgr = MinecraftServer.getServer().getConfigurationManager();
+        PlayerList confMgr = SpongeImpl.getServer().getPlayerList();
         if (confMgr == null) { // Server not started yet
             return null;
         }
@@ -218,7 +216,7 @@ class UserDiscoverer {
 
     private static User getFromWhitelist(UUID uniqueId) {
         GameProfile profile = null;
-        UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         UserListWhitelistEntry whiteListData = whiteList.getEntry(new GameProfile(uniqueId, ""));
         if (whiteListData != null) {
             profile = whiteListData.value;
@@ -231,10 +229,10 @@ class UserDiscoverer {
 
     private static User getFromBanlist(UUID uniqueId) {
         GameProfile profile = null;
-        UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
-        UserListBansEntry banData = banList.getEntry(new GameProfile(uniqueId, ""));
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
+        UserListEntryBan banData = banList.getEntry(new GameProfile(uniqueId, ""));
         if (banData != null) {
-            profile = banData.value;
+            profile = (GameProfile) banData.value;
         }
         if (profile != null) {
             return create(profile);
@@ -244,7 +242,7 @@ class UserDiscoverer {
 
     private static File getPlayerDataFile(UUID uniqueId) {
         // Note: Uses the overworld's player data
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldFromDimId(0).getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
             if (uniqueId.toString().equals(playerUuid)) {
@@ -268,13 +266,13 @@ class UserDiscoverer {
     }
 
     private static boolean deleteWhitelistEntry(UUID uniqueId) {
-        UserListWhitelist whiteList = MinecraftServer.getServer().getConfigurationManager().getWhitelistedPlayers();
+        UserListWhitelist whiteList = SpongeImpl.getServer().getPlayerList().getWhitelistedPlayers();
         whiteList.removeEntry(new GameProfile(uniqueId, ""));
         return true;
     }
 
     private static boolean deleteBanlistEntry(UUID uniqueId) {
-        UserListBans banList = MinecraftServer.getServer().getConfigurationManager().getBannedPlayers();
+        UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
         banList.removeEntry(new GameProfile(uniqueId, ""));
         return true;
     }

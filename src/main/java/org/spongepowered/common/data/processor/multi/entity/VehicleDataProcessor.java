@@ -36,7 +36,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeVehicleData;
 import org.spongepowered.common.data.processor.common.AbstractEntityDataProcessor;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 
 import java.util.Map;
@@ -55,14 +54,14 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
 
     @Override
     protected boolean set(net.minecraft.entity.Entity entity, Map<Key<?>, Object> keyValues) {
-        final EntitySnapshot vehicle = (EntitySnapshot) keyValues.get(Keys.VEHICLE);
-        Optional<Entity> entity1 = vehicle.restore();
-        return EntityUtil.setVehicle(entity, (net.minecraft.entity.Entity) entity1.orElse(null));
+        return ((Entity) entity).setVehicle(((EntitySnapshot) keyValues.get(Keys.VEHICLE)).restore().orElse(null)).isSuccessful();
+
     }
 
     @Override
     protected Map<Key<?>, ?> getValues(net.minecraft.entity.Entity entity) {
-        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.ridingEntity).createSnapshot(), Keys.BASE_VEHICLE, EntityUtil.getBaseVehicle(entity));
+        return ImmutableMap.of(Keys.VEHICLE, ((Entity) entity.ridingEntity).createSnapshot(), Keys.BASE_VEHICLE, ((Entity) entity
+                .getLowestRidingEntity()).createSnapshot());
     }
 
     @Override
@@ -81,9 +80,9 @@ public class VehicleDataProcessor extends AbstractEntityDataProcessor<net.minecr
         if (supports(dataHolder)) {
             net.minecraft.entity.Entity entity = ((net.minecraft.entity.Entity) dataHolder);
             if (entity.isRiding()) {
-                Entity ridingEntity = (Entity) entity.ridingEntity;
-                entity.mountEntity(null);
-                return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, ridingEntity.createSnapshot()));
+                final EntitySnapshot previousVehicle = ((Entity) entity.getRidingEntity()).createSnapshot();
+                entity.dismountRidingEntity();
+                return DataTransactionResult.successResult(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicle));
             }
             return DataTransactionResult.builder().result(DataTransactionResult.Type.SUCCESS).build();
         } else {

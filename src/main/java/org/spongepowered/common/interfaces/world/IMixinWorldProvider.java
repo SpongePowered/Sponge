@@ -25,25 +25,13 @@
 package org.spongepowered.common.interfaces.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.util.BlockPos;
-import net.minecraft.world.chunk.IChunkProvider;
-import org.spongepowered.common.config.SpongeConfig;
+import net.minecraft.util.math.BlockPos;
 
 public interface IMixinWorldProvider {
 
-    String getSaveFolder();
+    void setGeneratorSettings(String generatorSettings);
 
-    void setDimension(int dim);
-
-    void setDimensionConfig(SpongeConfig<SpongeConfig.DimensionConfig> config);
-
-    SpongeConfig<SpongeConfig.DimensionConfig> getDimensionConfig();
-
-    int getAverageGroundLevel();
+    int getRespawnDimension(EntityPlayerMP entityPlayerMP);
 
     BlockPos getRandomizedSpawnPoint();
-
-    int getRespawnDimension(EntityPlayerMP playerIn);
-
-    IChunkProvider createChunkGenerator(String settings);
 }

@@ -65,6 +65,7 @@ import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PrismarineType;
+import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.data.type.QuartzType;
 import org.spongepowered.api.data.type.RabbitType;
 import org.spongepowered.api.data.type.RailDirection;
@@ -186,7 +187,7 @@ public class KeyRegistry {
         keyMap.put("walking_speed", makeSingleKey(Double.class, Value.class, of("WalkingSpeed")));
         keyMap.put("flying_speed", makeSingleKey(Double.class, Value.class, of("FlyingSpeed")));
         keyMap.put("slime_size", makeSingleKey(Integer.class, MutableBoundedValue.class, of("SlimeSize")));
-        keyMap.put("is_villager_zombie", makeSingleKey(Boolean.class, Value.class, of("IsVillagerZombie")));
+        keyMap.put("villager_zombie_profession", makeSingleKey(Profession.class, Value.class, of("VillagerZombieProfession")));
         keyMap.put("is_playing", makeSingleKey(Boolean.class, Value.class, of("IsPlaying")));
         keyMap.put("is_sitting", makeSingleKey(Boolean.class, Value.class, of("IsSitting")));
         keyMap.put("is_sheared", makeSingleKey(Boolean.class, Value.class, of("IsSheared")));

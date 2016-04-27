@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.text.action;
 
-import net.minecraft.event.ClickEvent;
+import net.minecraft.util.text.event.ClickEvent;
+
 import org.spongepowered.api.text.action.ClickAction;
 
 import java.util.UUID;

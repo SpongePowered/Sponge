@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.gen;
 
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderEnd;
 import net.minecraft.world.gen.ChunkProviderFlat;
-import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.ChunkProviderHell;
+import net.minecraft.world.gen.ChunkProviderOverworld;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.SeededVariableAmount;
@@ -43,9 +43,9 @@ public final class WorldGenConstants {
     public static final String VILLAGE_FLAG = "VILLAGE";
 
     private static final Class<?>[] MIXINED_CHUNK_PROVIDERS =
-            new Class<?>[] {ChunkProviderGenerate.class, ChunkProviderFlat.class, ChunkProviderHell.class, ChunkProviderEnd.class};
+            new Class<?>[] {ChunkProviderOverworld.class, ChunkProviderFlat.class, ChunkProviderHell.class, ChunkProviderEnd.class};
 
-    public static boolean isValid(IChunkProvider cp, Class<?> api_type) {
+    public static boolean isValid(IChunkGenerator cp, Class<?> api_type) {
         if (api_type.isInstance(cp)) {
             for (Class<?> mixind : MIXINED_CHUNK_PROVIDERS) {
                 if (cp.getClass().equals(mixind)) {

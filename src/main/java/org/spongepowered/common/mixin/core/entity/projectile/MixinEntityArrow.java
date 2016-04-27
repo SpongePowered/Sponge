@@ -29,11 +29,11 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.projectile.EntityArrow;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.MovingObjectPosition;
-import net.minecraft.util.Vec3;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.Vec3d;
 import org.spongepowered.api.data.manipulator.DataManipulator;
-import org.spongepowered.api.entity.projectile.Arrow;
+import org.spongepowered.api.entity.projectile.arrow.Arrow;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -53,7 +53,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityArrow.class)
 public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
 
-    private static final String RTR_CTOR_ENTITY = "net/minecraft/util/MovingObjectPosition.entityHit:Lnet/minecraft/entity/Entity;";
+    private static final String RTR_CTOR_ENTITY = "net/minecraft/util/math/RayTraceResult.entityHit:Lnet/minecraft/entity/Entity;";
     private EntityArrow mcEntity = (EntityArrow) (Object) this;
 
     @Shadow public Entity shootingEntity;
@@ -105,9 +105,9 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
     /**
      * This is the injection used in dev.
      */
-    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 3, shift = At.Shift.AFTER),
-            locals = LocalCapture.CAPTURE_FAILSOFT, cancellable = true, require = 0)
-    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3 vecA, Vec3 vecB, MovingObjectPosition hitResult, Entity entity, List<Entity> aabbs, double d0) {
+    @Inject(method = "onUpdate", at = @At(value = "FIELD", target = RTR_CTOR_ENTITY, ordinal = 2, shift = At.Shift.AFTER),
+            locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true, require = 0)
+    private void onArrowImpact(CallbackInfo ci, BlockPos pos, IBlockState state, Block block, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult, Entity entity) {
         this.arrowImpact(ci, hitResult);
     }
 
@@ -115,14 +115,14 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
      * This is the injection used in production.
      */
     @Surrogate
-    private void onArrowImpact(CallbackInfo ci, Vec3 vecA, Vec3 vecB, MovingObjectPosition hitResult) {
+    private void onArrowImpact(CallbackInfo ci, Vec3d vecA, Vec3d vecB, RayTraceResult hitResult) {
         this.arrowImpact(ci, hitResult);
     }
 
     /**
      * Collide impact event post for plugins to cancel impact.
      */
-    private void arrowImpact(CallbackInfo ci, MovingObjectPosition hitResult) {
+    private void arrowImpact(CallbackInfo ci, RayTraceResult hitResult) {
         if (!this.worldObj.isRemote) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent(this.mcEntity, getShooter(), hitResult)) {
                 // deflect and drop to ground

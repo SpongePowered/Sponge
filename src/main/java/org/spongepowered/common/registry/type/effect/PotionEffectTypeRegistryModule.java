@@ -28,11 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.potion.Potion;
-import net.minecraft.util.ResourceLocation;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.potion.PotionEffectTypes;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.registry.CatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
@@ -45,7 +43,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType> {
+public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCatalogRegistryModule<PotionEffectType>,
+        AlternateCatalogRegistryModule<PotionEffectType> {
 
     public static PotionEffectTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
@@ -57,7 +56,20 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     private final Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
 
     @Override
+    public Map<String, PotionEffectType> provideCatalogMap() {
+        Map<String, PotionEffectType> potionEffectTypeMap = new HashMap<>();
+        for (Map.Entry<String, PotionEffectType> entry : this.potionEffectTypeMap.entrySet()) {
+            potionEffectTypeMap.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return potionEffectTypeMap;
+    }
+
+
+    @Override
     public Optional<PotionEffectType> getById(String id) {
+        if (!checkNotNull(id).contains(":")) {
+            id = "minecraft:" + id; // assume vanilla
+        }
         return Optional.ofNullable(this.potionEffectTypeMap.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
@@ -69,39 +81,27 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     @SuppressWarnings("unchecked")
     @Override
     public void registerDefaults() {
-        for (Potion potion : Potion.potionTypes) {
+        for (Potion potion : Potion.potionRegistry) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(potion.getName().toLowerCase(Locale.ENGLISH), potionEffectType);
+                this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
             }
         }
-        Potion.field_180150_I.entrySet().stream()
-            .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH)))
-            .forEach(entry -> {
-                this.potionList.add((PotionEffectType) entry.getValue());
-                this.potionEffectTypeMap.put(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH), (PotionEffectType) entry.getValue());
-            });
     }
 
     @SuppressWarnings("unchecked")
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
-        for (Potion potion : Potion.potionTypes) {
+        for (Potion potion : Potion.potionRegistry) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(potion.getName().toLowerCase(Locale.ENGLISH), potionEffectType);
+                    this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
                 }
             }
         }
-        Potion.field_180150_I.entrySet().stream()
-            .filter(entry -> !this.potionEffectTypeMap.containsKey(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH)))
-            .forEach(entry -> {
-                this.potionList.add((PotionEffectType) entry.getValue());
-                this.potionEffectTypeMap.put(entry.getKey().getResourcePath().toLowerCase(Locale.ENGLISH), (PotionEffectType) entry.getValue());
-            });
     }
 
     @Override

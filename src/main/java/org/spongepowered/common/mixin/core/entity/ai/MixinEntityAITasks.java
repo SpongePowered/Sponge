@@ -39,6 +39,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ai.AITaskEvent;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,12 +54,13 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 @Mixin(EntityAITasks.class)
 @Implements(value = @Interface(iface = Goal.class, prefix = "goal$"))
 public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
-    @Shadow private List<EntityAITasks.EntityAITaskEntry> taskEntries;
-    @Shadow private List<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
+    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> taskEntries;
+    @Shadow @Final private Set<EntityAITasks.EntityAITaskEntry> executingTaskEntries;
 
     @Shadow public abstract void addTask(int priority, EntityAIBase task);
 
@@ -129,7 +131,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
     }
 
     @Override
-    public List<EntityAITasks.EntityAITaskEntry> getTasksUnsafe() {
+    public Set<EntityAITasks.EntityAITaskEntry> getTasksUnsafe() {
         return this.taskEntries;
     }
 
@@ -143,12 +145,12 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
      * @param base
      * @return
      */
-    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false))
-    private boolean onAddEntityTask(List<EntityAITasks.EntityAITaskEntry> list, Object entry, int priority, EntityAIBase base) {
+    @Redirect(method = "addTask", at = @At(value = "INVOKE", target =  "Ljava/util/Set;add(Ljava/lang/Object;)Z", remap = false))
+    private boolean onAddEntityTask(Set<EntityAITasks.EntityAITaskEntry> set, Object entry, int priority, EntityAIBase base) {
         ((IMixinEntityAIBase) base).setGoal((Goal<?>) this);
         if (((IMixinEntity) this.owner).isInConstructPhase()) {
             // Event is fired in firePostConstructEvents
-            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
+            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(priority, base));
         }
         final AITaskEvent.Add event = SpongeEventFactory.createAITaskEventAdd(Cause.source(Sponge.getGame()).build(), priority, priority,
                 (Goal<?>) this, (Agent) this.owner, (AITask<?>) base);
@@ -157,7 +159,7 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             ((IMixinEntityAIBase) base).setGoal(null);
             return false;
         } else {
-            return list.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
+            return set.add(((EntityAITasks) (Object) this).new EntityAITaskEntry(event.getPriority(), base));
         }
     }
 
@@ -200,22 +202,24 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
             final EntityAITasks.EntityAITaskEntry entityaitaskentry = (EntityAITasks.EntityAITaskEntry)iterator.next();
             final EntityAIBase otherAiBase = entityaitaskentry.action;
 
-            // Sponge Start - check equals, not instance equality
-            // if (entityaibase == task) {
+            // Sponge start
             if (otherAiBase.equals(aiBase)) {
                 final AITaskEvent.Remove event = SpongeEventFactory.createAITaskEventRemove(Cause.of(NamedCause.source(Sponge.getGame())),
                     (Goal) this, (Agent) this.owner, (AITask) otherAiBase, entityaitaskentry.priority);
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
-                    // Sponge End
-                    if (this.executingTaskEntries.contains(entityaitaskentry)) {
+
+                    if (entityaitaskentry.field_188524_c) {
+                        entityaitaskentry.field_188524_c = false;
                         otherAiBase.resetTask();
                         this.executingTaskEntries.remove(entityaitaskentry);
                     }
 
                     iterator.remove();
+                    return;
                 }
             }
+            // Sponge end
         }
     }
 

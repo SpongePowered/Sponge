@@ -32,11 +32,9 @@ import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -54,6 +52,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.util.StaticMixinHelper;
 
 import java.util.Map;
 
@@ -146,7 +145,7 @@ public class MixinAnvilChunkLoader {
     private Entity onReadEntity(NBTTagCompound compound, World world) {
         if ("Minecart".equals(compound.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             compound.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.EnumMinecartType.byNetworkID(compound.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
+                    EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             compound.removeTag(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));

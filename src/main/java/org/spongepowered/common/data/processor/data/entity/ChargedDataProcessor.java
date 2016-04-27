@@ -48,13 +48,13 @@ public class ChargedDataProcessor
 
     @Override
     protected boolean set(EntityCreeper entity, Boolean value) {
-        entity.getDataWatcher().updateObject(17, (value ? (byte) 1 : (byte) 0));
+        entity.getDataManager().set(EntityCreeper.POWERED, value);
         return true;
     }
 
     @Override
     protected Optional<Boolean> getVal(EntityCreeper entity) {
-        return Optional.of(entity.getDataWatcher().getWatchableObjectByte(17) == 1);
+        return Optional.of(entity.getPowered());
     }
 
     @Override

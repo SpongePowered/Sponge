@@ -27,7 +27,7 @@ package org.spongepowered.common.data.util;
 import static org.spongepowered.api.data.DataTransactionResult.successNoData;
 
 import net.minecraft.block.Block;
-import net.minecraft.block.state.BlockState;
+import net.minecraft.block.state.BlockStateContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -57,7 +57,7 @@ public final class ItemsHelper {
                 if (data instanceof BlockItemData) {
                     BlockItemData blockData = (BlockItemData) data;
                     return Optional
-                            .of(Block.getBlockFromItem((Item) type).damageDropped((BlockState.StateImplementation) blockData.state()));
+                            .of(Block.getBlockFromItem((Item) type).damageDropped((BlockStateContainer.StateImplementation) blockData.state()));
                 }
             }
         } else if (((Item) type).getHasSubtypes()) {

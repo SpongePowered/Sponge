@@ -27,9 +27,9 @@ package org.spongepowered.common.text;
 import com.google.common.collect.Lists;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
-import net.minecraft.util.ChatComponentText;
-import net.minecraft.util.ChatComponentTranslation;
-import net.minecraft.util.IChatComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextComponentString;
+import net.minecraft.util.text.TextComponentTranslation;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.interfaces.text.IMixinChatComponent;
@@ -44,20 +44,20 @@ public final class SpongeTexts {
     private SpongeTexts() {
     }
 
-    public static Text[] splitChatMessage(ChatComponentTranslation component) {
+    public static Text[] splitChatMessage(TextComponentTranslation component) {
         Text source = null;
         Text body = null;
         for (Object arg : component.getFormatArgs()) {
             if (source == null) {
-                if (arg instanceof IChatComponent) {
-                    source = SpongeTexts.toText((IChatComponent) arg);
+                if (arg instanceof ITextComponent) {
+                    source = SpongeTexts.toText((ITextComponent) arg);
                 } else {
                     source = Text.of(arg.toString());
                 }
             } else {
                 Text text;
-                if (arg instanceof IChatComponent) {
-                    text = SpongeTexts.toText((IChatComponent) arg);
+                if (arg instanceof ITextComponent) {
+                    text = SpongeTexts.toText((ITextComponent) arg);
                 } else {
                     text = Text.of(arg.toString());
                 }
@@ -71,15 +71,15 @@ public final class SpongeTexts {
         return new Text[] {source, body};
     }
 
-    public static IChatComponent toComponent(Text text) {
+    public static ITextComponent toComponent(Text text) {
         return ((IMixinText) text).toComponent();
     }
 
-    public static Text toText(IChatComponent component) {
+    public static Text toText(ITextComponent component) {
         return ((IMixinChatComponent) component).toText();
     }
 
-    public static String toPlain(IChatComponent component) {
+    public static String toPlain(ITextComponent component) {
         return ((IMixinChatComponent) component).toPlain();
     }
 
@@ -91,20 +91,20 @@ public final class SpongeTexts {
         return TextSerializers.LEGACY_FORMATTING_CODE.serialize(text);
     }
 
-    public static String toLegacy(IChatComponent component) {
+    public static String toLegacy(ITextComponent component) {
         return ((IMixinChatComponent) component).toLegacy(COLOR_CHAR);
     }
 
     @SuppressWarnings("unchecked")
-    public static IChatComponent fixActionBarFormatting(IChatComponent component) {
+    public static ITextComponent fixActionBarFormatting(ITextComponent component) {
         if (!component.getSiblings().isEmpty()) {
-            List<IChatComponent> children = component.getSiblings();
+            List<ITextComponent> children = component.getSiblings();
             for (int i = 0; i < children.size(); i++) {
                 children.set(i, fixActionBarFormatting(children.get(i)));
             }
         }
 
-        ChatComponentText result = new ChatComponentText(((IMixinChatComponent) component).getLegacyFormatting());
+        TextComponentString result = new TextComponentString(((IMixinChatComponent) component).getLegacyFormatting());
         result.appendSibling(component);
         return result;
     }

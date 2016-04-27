@@ -28,7 +28,10 @@ import net.minecraft.block.BlockTNT;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.util.BlockPos;
+import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -44,12 +47,10 @@ import org.spongepowered.common.interfaces.entity.explosive.IMixinFusedExplosive
 @Mixin(BlockTNT.class)
 public abstract class MixinBlockTNT extends MixinBlock {
 
-    private static final String TARGET_PRIME = "Lnet/minecraft/world/World;spawnEntityInWorld"
-            + "(Lnet/minecraft/entity/Entity;)Z";
-    private static final String TARGET_PRIME_SOUND = "Lnet/minecraft/world/World;playSoundAtEntity"
-            + "(Lnet/minecraft/entity/Entity;Ljava/lang/String;FF)V";
-    private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;setBlockToAir"
-            + "(Lnet/minecraft/util/BlockPos;)Z";
+    private static final String TARGET_PRIME = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
+    private static final String TARGET_PRIME_SOUND = "Lnet/minecraft/world/World;playSound(Lnet/minecraft/entity/player/EntityPlayer;DDDLnet/minecraft/util/SoundEvent;Lnet/minecraft/util/SoundCategory;FF)V";
+    private static final String TARGET_REMOVE = "Lnet/minecraft/world/World;setBlockToAir(Lnet/minecraft/util/math/BlockPos;)Z";
+    private static final String TARGET_REMOVE_BLOCK = "Lnet/minecraft/world/World;setBlockState(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;I)Z";
 
     private EntityLivingBase igniter;
     private boolean primeCancelled;
@@ -69,14 +70,14 @@ public abstract class MixinBlockTNT extends MixinBlock {
     public boolean onPrime(World world, Entity tnt) {
         IMixinEntityTNTPrimed mixin = (IMixinEntityTNTPrimed) tnt;
         mixin.setDetonator(this.igniter);
-        this.primeCancelled = !mixin.shouldPrime(Cause.of(NamedCause.of(NamedCause.IGNITER, this.igniter)));
+        this.primeCancelled = !mixin.shouldPrime(this.igniter == null ? null : Cause.of(NamedCause.of(NamedCause.IGNITER, this.igniter)));
         return !this.primeCancelled && world.spawnEntityInWorld(tnt);
     }
 
     @Redirect(method = "explode", at = @At(value = "INVOKE", target = TARGET_PRIME_SOUND))
-    public void onPrimeSound(World world, Entity tnt, String sound, float volume, float pitch) {
+    public void onPrimeSound(World world, EntityPlayer player, double x, double y, double z, SoundEvent soundIn, SoundCategory category, float volume, float pitch) {
         if (!this.primeCancelled) {
-            world.playSoundAtEntity(tnt, sound, volume, pitch);
+            world.playSound(null, x, y, z, soundIn, category, volume, pitch);
         }
     }
 
@@ -99,10 +100,12 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return onRemove(world, pos);
     }
 
-    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = TARGET_REMOVE))
-    public boolean onRemovePostInteract(World world, BlockPos pos) {
+    @Redirect(method = "onBlockActivated", at = @At(value = "INVOKE", target = TARGET_REMOVE_BLOCK))
+    public boolean onRemovePostInteract(World world, BlockPos pos, IBlockState state, int flag) {
         // Called when player manually ignites TNT
-        return onRemove(world, pos);
+        boolean removed = !this.primeCancelled && world.setBlockState(pos, state, flag);
+        this.primeCancelled = false;
+        return removed;
     }
 
     @Redirect(method = "onEntityCollidedWithBlock", at = @At(value = "INVOKE", target = TARGET_REMOVE))

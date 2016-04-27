@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.entity.item;
 
+import static org.spongepowered.api.data.DataQuery.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 

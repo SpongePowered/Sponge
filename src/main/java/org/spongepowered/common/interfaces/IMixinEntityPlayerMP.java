@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces;
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.text.channel.MessageChannel;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import javax.annotation.Nullable;
 
@@ -47,5 +48,7 @@ public interface IMixinEntityPlayerMP {
     void initScoreboard();
 
     void resetAttributeMap();
+
+    IMixinWorldServer getMixinWorld();
 
 }

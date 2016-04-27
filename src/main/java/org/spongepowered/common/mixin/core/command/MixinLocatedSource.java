@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
-import net.minecraft.entity.EntityMinecartCommandBlock;
+import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.world.Locatable;
@@ -41,7 +41,7 @@ public abstract class MixinLocatedSource implements Locatable, IMixinCommandSour
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
+        return new Location<>((World) asICommandSender().getEntityWorld(), VecHelper.toVector3d(asICommandSender().getPositionVector()));
     }
 
 }

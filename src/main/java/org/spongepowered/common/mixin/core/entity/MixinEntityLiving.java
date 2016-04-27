@@ -29,6 +29,7 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.EntityAITasks;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import org.objectweb.asm.Opcodes;
@@ -58,7 +59,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.manipulator.mutable.entity.SpongeAgentData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -77,6 +77,8 @@ import javax.annotation.Nullable;
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
+    private static final String GET_CLOSEST_PLAYER =
+            "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;";
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
@@ -86,14 +88,15 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow protected abstract void setNoAI(boolean p_94061_1_);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
-    @Shadow public abstract ItemStack getHeldItem();
+    @Shadow protected abstract void initEntityAI();
 
-    @Inject(method = "<init>", at = @At(value = "RETURN"))
-    public void onConstruct(CallbackInfo ci) {
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;initEntityAI()V"))
+    public void onInitAi(EntityLiving this$0) {
         ((IMixinEntityAITasks) this.tasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.tasks).setType(GoalTypes.NORMAL);
         ((IMixinEntityAITasks) this.targetTasks).setOwner((EntityLiving) (Object) this);
         ((IMixinEntityAITasks) this.targetTasks).setType(GoalTypes.TARGET);
+        this.initEntityAI();
     }
 
     @Override
@@ -118,14 +121,13 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
         }
     }
 
-    @Inject(method = "interactFirst", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
-    public void callLeashEvent(EntityPlayer playerIn, CallbackInfoReturnable<Boolean> ci, ItemStack itemstack) {
+    @Inject(method = "processInitialInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLiving;setLeashedToEntity(Lnet/minecraft/entity/Entity;Z)V"), cancellable = true)
+    public void callLeashEvent(EntityPlayer playerIn, ItemStack itemStack, EnumHand hand, CallbackInfoReturnable<Boolean> ci) {
         if (!playerIn.worldObj.isRemote) {
-            Entity leashedEntity = this;
-            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), leashedEntity);
+            final LeashEntityEvent event = SpongeEventFactory.createLeashEntityEvent(Cause.of(NamedCause.source(playerIn)), this);
             SpongeImpl.postEvent(event);
             if(event.isCancelled()) {
-                ci.cancel();
+                ci.setReturnValue(false);
             }
         }
     }
@@ -155,7 +157,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     }
 
     @Nullable
-    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getClosestPlayerToEntity(Lnet/minecraft/entity/Entity;D)Lnet/minecraft/entity/player/EntityPlayer;"))
+    @Redirect(method = "despawnEntity", at = @At(value = "INVOKE", target = GET_CLOSEST_PLAYER))
     public EntityPlayer onDespawnEntity(World world, net.minecraft.entity.Entity entity, double distance) {
         return ((IMixinWorld) world).getClosestPlayerToEntityWhoAffectsSpawning(entity, distance);
     }

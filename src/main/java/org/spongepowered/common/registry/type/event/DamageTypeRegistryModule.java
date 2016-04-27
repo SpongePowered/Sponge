@@ -32,7 +32,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.event.SpongeDamageType;
+import org.spongepowered.common.event.damage.SpongeDamageType;
 
 import java.util.Collection;
 import java.util.Locale;
@@ -55,6 +55,7 @@ public final class DamageTypeRegistryModule implements CatalogRegistryModule<Dam
         .put("projectile", new SpongeDamageType("projectile"))
         .put("suffocate", new SpongeDamageType("suffocate"))
         .put("void", new SpongeDamageType("void"))
+            .put("sweeping_attack", new SpongeDamageType("sweeping_attack"))
         .build();
 
     @Override

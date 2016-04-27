@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.entity.passive;
 import net.minecraft.entity.passive.EntityOcelot;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.EnumHand;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.OcelotData;
@@ -40,6 +41,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.TameEntityEvent;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -61,35 +63,23 @@ import java.util.Random;
 @Mixin(EntityOcelot.class)
 public abstract class MixinEntityOcelot extends MixinEntityTameable implements Ocelot {
 
-    private ItemStack currentItemStack;
-
     @Shadow public abstract int getTameSkin();
 
-    @Inject(method = "interact", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/passive/EntityOcelot;isTamed()Z", shift = At.Shift.BEFORE, ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir, ItemStack currentItemStack) {
-        if (currentItemStack != null) {
-            this.currentItemStack = currentItemStack.copy();
-        } else {
-            this.currentItemStack = null;
-        }
-    }
-
-    @Surrogate
-    public void afterGetCurrentItem(EntityPlayer player, CallbackInfoReturnable<Boolean> cir) {
-        this.currentItemStack = player.inventory.getCurrentItem().copy();
-    }
-
-    @Redirect(method = "interact", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
-    public int onTame(Random rand, int bound, EntityPlayer player) {
+    @Redirect(method = "processInteract", at = @At(value = "INVOKE", target = "Ljava/util/Random;nextInt(I)I", ordinal = 0, remap = false))
+    public int onTame(Random rand, int bound, EntityPlayer player, EnumHand hand, ItemStack stack) {
         int random = rand.nextInt(bound);
-        if (random == 0 && !SpongeImpl
-            .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
-                NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) this.currentItemStack).createSnapshot())),
-                this))) {
-            this.currentItemStack = null;
-            return random;
+        if (random == 0) {
+            stack.stackSize++;
+            if (!SpongeImpl
+                    .postEvent(SpongeEventFactory.createTameEntityEvent(Cause.of(NamedCause.source(player),
+                            NamedCause.of(TameEntityEvent.USED_ITEM, ((org.spongepowered.api.item.inventory.ItemStack) stack).createSnapshot())),
+                            this))) {
+
+                stack.stackSize--;
+                return random;
+            }
+
         }
-        this.currentItemStack = null;
         return 1;
     }
 

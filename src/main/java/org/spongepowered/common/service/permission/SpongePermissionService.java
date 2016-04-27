@@ -28,7 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.UserListOps;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -89,11 +88,11 @@ public class SpongePermissionService implements PermissionService {
     }
 
     static UserListOps getOps() {
-        return MinecraftServer.getServer().getConfigurationManager().getOppedPlayers();
+        return SpongeImpl.getServer().getPlayerList().getOppedPlayers();
     }
 
-    int getServerOpLevel() {
-        return MinecraftServer.getServer().getOpPermissionLevel();
+    static int getServerOpLevel() {
+        return SpongeImpl.getServer().getOpPermissionLevel();
     }
 
     public Subject getGroupForOpLevel(int level) {

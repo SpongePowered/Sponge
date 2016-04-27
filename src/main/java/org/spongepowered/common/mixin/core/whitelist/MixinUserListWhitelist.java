@@ -29,9 +29,7 @@ import net.minecraft.server.management.UserListEntry;
 import net.minecraft.server.management.UserListWhitelist;
 import net.minecraft.server.management.UserListWhitelistEntry;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -90,7 +88,7 @@ public abstract class MixinUserListWhitelist extends UserList<com.mojang.authlib
      * @return Gameprofile of the provided username
      */
     @Overwrite
-    public com.mojang.authlib.GameProfile getBannedProfile(String username) {
+    public com.mojang.authlib.GameProfile getByName(String username) {
         for (GameProfile profile: Sponge.getServiceManager().provideUnchecked(WhitelistService.class).getWhitelistedProfiles()) {
             if (profile.getName().get().equals(username)) {
                 return (com.mojang.authlib.GameProfile) profile;

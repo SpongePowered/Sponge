@@ -30,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.potion.PotionUtils;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.immutable.ImmutablePotionEffectData;
@@ -72,7 +73,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
     @SuppressWarnings("unchecked")
     @Override
     protected Optional<List<PotionEffect>> getVal(ItemStack dataHolder) {
-        final List<net.minecraft.potion.PotionEffect> effects = Items.potionitem.getEffects(dataHolder);
+        final List<net.minecraft.potion.PotionEffect> effects = PotionUtils.getEffectsFromStack(dataHolder);
         if (effects == null || effects.isEmpty()) {
             return Optional.empty();
         }

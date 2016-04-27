@@ -26,7 +26,7 @@ package org.spongepowered.common.interfaces;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -37,8 +37,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface IMixinChunk {
-
-    Cause getCurrentPopulateCause();
 
     Map<Short, PlayerTracker> getTrackedShortPlayerPositions();
 

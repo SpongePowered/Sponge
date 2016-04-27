@@ -24,10 +24,25 @@
  */
 package org.spongepowered.common.world.type;
 
+import net.minecraft.world.World;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.chunk.IChunkGenerator;
+import net.minecraft.world.gen.ChunkProviderOverworld;
+
 public class SpongeWorldTypeOverworld extends SpongeWorldType {
 
     public SpongeWorldTypeOverworld() {
         super("overworld");
         this.setCanBeCreated(false);
+    }
+
+    @Override
+    public BiomeProvider getBiomeProvider(World world) {
+        return new BiomeProvider(world.getWorldInfo());
+    }
+
+    @Override
+    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
+        return new ChunkProviderOverworld(world, world.getSeed(), world.getWorldInfo().isMapFeaturesEnabled(), generatorOptions);
     }
 }

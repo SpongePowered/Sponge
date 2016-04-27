@@ -58,6 +58,13 @@ public final class NbtDataUtil {
     private NbtDataUtil() {
     }
 
+    public static final class Minecraft {
+
+        public static final String PASSENGERS = "Passengers";
+
+        public static final String IS_FLYING = "flying";
+    }
+
     // These are the various tag compound id's for getting to various places
     public static final String BLOCK_ENTITY_TAG = "BlockEntityTag";
     public static final String BLOCK_ENTITY_ID = "id";
@@ -99,7 +106,7 @@ public final class NbtDataUtil {
     public static final String USER_SPAWN_Z = "SpawnZ";
     public static final String USER_SPAWN_FORCED = "SpawnForced";
     public static final String USER_SPAWN_LIST = "Spawns";
-    public static final String USER_SPAWN_DIM = "Dim";
+    public static final String UUID = "UUID";
 
     // These are the NBT Tag byte id's that can be used in various places while manipulating compound tags
     public static final byte TAG_END = 0;
@@ -128,15 +135,10 @@ public final class NbtDataUtil {
     public static final String BOAT_MOVE_ON_LAND = "moveOnLand";
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
-    public static final String LEVEL_NAME = "LevelName";
-    public static final String WORLD_UUID_MOST = "uuid_most";
-    public static final String WORLD_UUID_LEAST = "uuid_least";
     public static final String CAN_GRIEF = "CanGrief";
 
     // Compatibility tags for Forge
-    public static final String FORGE_DATA_TAG = "ForgeData";
-    public static final String UUID_MOST = "UUIDMost";
-    public static final String UUID_LEAST = "UUIDLeast";
+    public static final String FORGE_DATA = "ForgeData";
     public static final String DIMENSION_TYPE = "dimensionType";
     public static final String DIMENSION_ID = "dimensionId";
     public static final String INVALID_TITLE = "invalid";
@@ -152,6 +154,29 @@ public final class NbtDataUtil {
     public static final String ENTITY_TYPE_ID = "id";
     public static final String MINECART_TYPE = "Type";
     public static final String ENTITY_POSITION = "Pos";
+
+    public static final class Deprecated {
+
+        public static final class Entity {
+            public static final String UUID_LEAST_1_8 = "uuid_least";
+            public static final String UUID_MOST_1_8 = "uuid_most";
+
+            private Entity() {
+            }
+        }
+
+        public static final class World {
+
+            public static final String WORLD_UUID_LEAST_1_8 = "uuid_least";
+            public static final String WORLD_UUID_MOST_1_8 = "uuid_most";
+
+            private World() {
+            }
+        }
+
+        private Deprecated() {
+        }
+    }
 
     // These methods are provided as API like getters since the internal ItemStack does return nullable NBTTagCompounds.
 
@@ -211,8 +236,8 @@ public final class NbtDataUtil {
     }
 
     public static NBTTagCompound filterSpongeCustomData(NBTTagCompound rootCompound) {
-        if (rootCompound.hasKey(FORGE_DATA_TAG, TAG_COMPOUND)) {
-            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA_TAG);
+        if (rootCompound.hasKey(FORGE_DATA, TAG_COMPOUND)) {
+            final NBTTagCompound forgeCompound = rootCompound.getCompoundTag(FORGE_DATA);
             if (forgeCompound.hasKey(SPONGE_DATA, TAG_COMPOUND)) {
                 cleanseInnerCompound(forgeCompound, SPONGE_DATA);
             }
@@ -311,7 +336,7 @@ public final class NbtDataUtil {
             final short enchantmentId = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
             final short level = compound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
 
-            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+            final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
             if (enchantment == null) {
                 continue;
             }
@@ -335,7 +360,7 @@ public final class NbtDataUtil {
                 final NBTTagCompound enchantmentCompound = enchantments.getCompoundTagAt(i);
                 final short enchantmentId = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_ID);
                 final short level = enchantmentCompound.getShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL);
-                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentById(enchantmentId);
+                final Enchantment enchantment = (Enchantment) net.minecraft.enchantment.Enchantment.getEnchantmentByID(enchantmentId);
                 mergedMap.put(enchantment, (int) level);
             }
         }
@@ -345,10 +370,12 @@ public final class NbtDataUtil {
         final NBTTagList newList = new NBTTagList(); // Reconstruct the newly merged enchantment list
         for (Map.Entry<Enchantment, Integer> entry : mergedMap.entrySet()) {
             final NBTTagCompound enchantmentCompound = new NBTTagCompound();
-            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) ((net.minecraft.enchantment.Enchantment) entry.getKey()).effectId);
+            enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_ID, (short) net.minecraft.enchantment.Enchantment.getEnchantmentID((net.minecraft.enchantment.Enchantment) entry.getKey()));
             enchantmentCompound.setShort(NbtDataUtil.ITEM_ENCHANTMENT_LEVEL, entry.getValue().shortValue());
             newList.appendTag(enchantmentCompound);
         }
         compound.setTag(NbtDataUtil.ITEM_ENCHANTMENT_LIST, newList);
     }
+
+
 }

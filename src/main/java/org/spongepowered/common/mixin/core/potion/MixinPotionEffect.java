@@ -31,6 +31,7 @@ import org.spongepowered.api.data.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -43,7 +44,7 @@ import org.spongepowered.common.data.util.DataQueries;
 @Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class MixinPotionEffect implements PotionEffect {
 
-    @Shadow public abstract int getPotionID();
+    @Shadow @Final private Potion potion;
     @Shadow private int duration;
     @Shadow private int amplifier;
     @Shadow private boolean isAmbient;
@@ -51,7 +52,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
 
     @Override
     public PotionEffectType getType() {
-        return (PotionEffectType) Potion.potionTypes[getPotionID()];
+        return (PotionEffectType) this.potion;
     }
 
     @Intrinsic
@@ -83,7 +84,7 @@ public abstract class MixinPotionEffect implements PotionEffect {
     public DataContainer toContainer() {
         return new MemoryDataContainer()
                 .set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQueries.POTION_TYPE, Potion.potionTypes[getPotionID()].getName())
+                .set(DataQueries.POTION_TYPE, this.potion.getName())
                 .set(DataQueries.POTION_DURATION, this.duration)
                 .set(DataQueries.POTION_AMPLIFIER, this.amplifier)
                 .set(DataQueries.POTION_AMBIANCE, this.isAmbient)

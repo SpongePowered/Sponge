@@ -61,7 +61,7 @@ public class HealthDataProcessor extends AbstractEntityDataProcessor<EntityLivin
 
     @Override
     protected boolean set(EntityLivingBase entity, Map<Key<?>, Object> keyValues) {
-        entity.getEntityAttribute(SharedMonsterAttributes.maxHealth).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
+        entity.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(((Double) keyValues.get(Keys.MAX_HEALTH)).floatValue());
         float health = ((Double) keyValues.get(Keys.HEALTH)).floatValue();
         entity.setHealth(health);
         if (health == 0) {

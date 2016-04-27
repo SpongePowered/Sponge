@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
@@ -32,13 +33,10 @@ import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.DataWatcher;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.Item;
@@ -46,16 +44,15 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
-import net.minecraft.network.play.server.S07PacketRespawn;
-import net.minecraft.network.play.server.S08PacketPlayerPosLook;
-import net.minecraft.network.play.server.S13PacketDestroyEntities;
-import net.minecraft.network.play.server.S38PacketPlayerListItem;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.AxisAlignedBB;
-import net.minecraft.util.BlockPos;
+import net.minecraft.network.play.server.SPacketDestroyEntities;
+import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketPlayerPosLook;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
@@ -83,17 +80,16 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.RelativePositions;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.TeleportHelper;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -106,26 +102,20 @@ import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeListValue;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
+import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.event.DamageEventHandler;
-import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.event.damage.DamageEventHandler;
+import org.spongepowered.common.event.damage.MinecraftBlockDamageSource;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
-import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
-import org.spongepowered.common.world.DimensionManager;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -134,11 +124,13 @@ import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.entity.Entity.class)
-public abstract class MixinEntity implements Entity, IMixinEntity {
+@Implements(@Interface(iface = Entity.class, prefix = "entity$"))
+public abstract class MixinEntity implements IMixinEntity {
 
     private static final String LAVA_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;lava:Lnet/minecraft/util/DamageSource;";
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
@@ -159,7 +151,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Nullable private Text displayName;
     protected DamageSource lastDamageSource;
     private Cause destructCause;
-    private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -186,12 +177,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public int fireResistance;
     @Shadow public int fire;
     @Shadow public int dimension;
-    @Shadow public net.minecraft.entity.Entity riddenByEntity;
-    @Shadow public net.minecraft.entity.Entity ridingEntity;
-    @Shadow protected DataWatcher dataWatcher;
     @Shadow protected Random rand;
+    @Shadow public float prevDistanceWalkedModified;
+    @Shadow public float distanceWalkedModified;
     @Shadow public abstract void setPosition(double x, double y, double z);
-    @Shadow public abstract void mountEntity(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
     @Shadow public abstract boolean getFlag(int flag);
@@ -211,12 +200,31 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract void setSize(float width, float height);
     @Shadow public abstract boolean isSilent();
     @Shadow public abstract int getEntityId();
-    @Shadow public abstract void setEating(boolean eating);
+    @Shadow public abstract boolean isBeingRidden();
+    @Shadow public abstract SoundCategory getSoundCategory();
+    @Shadow public abstract List<net.minecraft.entity.Entity> shadow$getPassengers();
+    @Shadow public abstract net.minecraft.entity.Entity getLowestRidingEntity();
+    @Shadow public abstract net.minecraft.entity.Entity getRidingEntity();
+    @Shadow public abstract void dismountRidingEntity();
+    @Shadow public abstract void playSound(SoundEvent soundIn, float volume, float pitch);
+    @Shadow public abstract boolean isEntityInvulnerable(DamageSource source);
     @Shadow public abstract boolean isSprinting();
     @Shadow public abstract boolean isInWater();
+    @Shadow public abstract boolean isRiding();
     @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract boolean isOnSameTeam(net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract double getDistanceSqToEntity(net.minecraft.entity.Entity entityIn);
 
     // @formatter:on
+
+    @Redirect(method = "<init>", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;dimension:I", opcode = Opcodes.PUTFIELD))
+    private void onSet(net.minecraft.entity.Entity self, int dimensionId, net.minecraft.world.World worldIn) {
+        if (worldIn instanceof IMixinWorldServer) {
+            self.dimension = ((IMixinWorldServer) worldIn).getDimensionId();
+        } else {
+            self.dimension = dimensionId;
+        }
+    }
 
     @Override
     public boolean isInConstructPhase() {
@@ -249,7 +257,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             this.originalLava = DamageSource.lava;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.lava);
+                block.getBlock().getMaterial(block) == Material.lava);
             DamageSource.lava = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }
@@ -272,9 +280,9 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         // Sponge Start - Find the fire block!
         if (!this.worldObj.isRemote) {
             this.originalInFire = DamageSource.inFire;
-            AxisAlignedBB bb = this.getEntityBoundingBox().contract(0.001D, 0.001D, 0.001D);
+            AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block == Blocks.fire || block == Blocks.flowing_lava || block == Blocks.lava);
+                block.getBlock() == Blocks.fire || block.getBlock() == Blocks.flowing_lava || block.getBlock() == Blocks.lava);
             DamageSource.inFire = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
         }
     }
@@ -322,12 +330,34 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public void setLocation(Location<World> location) {
-        setLocation(location, true);
-    }
+        checkNotNull(location, "The location was null!");
+        checkState(location.getExtent().isLoaded(), "World is no longer loaded!");
+        checkState(!isRemoved(), "Trying to set location of removed entity!");
+        final net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) (Object) this;
+        final List<net.minecraft.entity.Entity> passengers = thisEntity.getPassengers();
 
-    @Override
-    public boolean setLocationSafely(Location<World> location) {
-        return setLocation(location, false);
+        if (thisEntity instanceof EntityPlayerMP) {
+            // Close open containers
+            if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
+                ((EntityPlayerMP) thisEntity).closeContainer();
+            }
+        }
+
+        if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
+            EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
+        } else {
+            if (thisEntity instanceof EntityPlayerMP) {
+                ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+                        thisEntity.rotationYaw, thisEntity.rotationPitch);
+            } else {
+                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
+            }
+        }
+
+        // Re-attach passengers
+        for (net.minecraft.entity.Entity passenger : passengers) {
+            passenger.startRiding(thisEntity, true);
+        }
     }
 
     @Override
@@ -337,171 +367,36 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation) {
-        boolean relocated = setLocation(location, false);
-        setRotation(rotation);
-        return relocated;
-    }
-
-    @Override
-    public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        return setLocationAndRotation(location, rotation, relativePositions, true);
-    }
-
-    public boolean setLocation(Location<World> location, boolean forced) {
-        checkNotNull(location, "The location was null!");
-        if (isRemoved()) {
-            return false;
-        }
-
-        Entity spongeEntity = this;
-        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
-
-        if (!forced) {
-            // Validate
-            TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
-            Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
-            if (!safeLocation.isPresent()) {
-                return false;
-            } else {
-                location = safeLocation.get();
-            }
-        }
-        // detach passengers
-        net.minecraft.entity.Entity passenger = thisEntity.riddenByEntity;
-        ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
-        while (passenger != null) {
-            if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
-                ((EntityPlayerMP) passenger).mountEntity(null);
-            }
-            net.minecraft.entity.Entity nextPassenger = null;
-            if (passenger.riddenByEntity != null) {
-                nextPassenger = passenger.riddenByEntity;
-                this.riddenByEntity.mountEntity(null);
-            }
-            passengers.add(passenger);
-            passenger = nextPassenger;
-        }
-
-        net.minecraft.world.World nmsWorld = null;
-        if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
-            nmsWorld = (net.minecraft.world.World) location.getExtent();
-            if (thisEntity instanceof EntityPlayerMP) {
-                // Close open containers
-                if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
-                    ((EntityPlayerMP) thisEntity).closeContainer();
-                }
-            }
-            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.getDimensionId(), forced);
-        } else {
-            if (thisEntity instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) thisEntity).playerNetServerHandler
-                    .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
-            } else {
-                setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
-            }
-        }
-
-        // re-attach passengers
-        net.minecraft.entity.Entity lastPassenger = thisEntity;
-        while (!passengers.isEmpty()) {
-            net.minecraft.entity.Entity passengerEntity = passengers.remove();
-            if (nmsWorld != null) {
-                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.getDimensionId(), true);
-            }
-
-            if (passengerEntity instanceof EntityPlayerMP && !this.worldObj.isRemote) {
-                // The actual mount is handled in our event as mounting must be set after client fully loads.
-                ((IMixinEntity) passengerEntity).setIsTeleporting(true);
-                ((IMixinEntity) passengerEntity).setTeleportVehicle(lastPassenger);
-            } else {
-                passengerEntity.mountEntity(lastPassenger);
-            }
-            lastPassenger = passengerEntity;
-        }
-
-        return true;
-    }
-
-    @Override
     public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        setLocationAndRotation(location, rotation, relativePositions, false);
-    }
-
-    @Inject(method = "onUpdate", at = @At("RETURN"))
-    private void spongeOnUpdate(CallbackInfo callbackInfo) {
-        if (this.pendingVisibilityUpdate && !this.worldObj.isRemote) {
-            final EntityTracker entityTracker = ((WorldServer) this.worldObj).getEntityTracker();
-            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
-            if (this.visibilityTicks % 4 == 0) {
-                if (this.isVanished) {
-                    for (EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
-                        entityPlayerMP.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(this.getEntityId()));
-                        if (((Object) this) instanceof EntityPlayerMP) {
-                            entityPlayerMP.playerNetServerHandler.sendPacket(
-                                    new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
-                        }
-                    }
-                } else {
-                    this.visibilityTicks = 1;
-                    this.pendingVisibilityUpdate = false;
-                    for (EntityPlayerMP entityPlayerMP : MinecraftServer.getServer().getConfigurationManager().getPlayerList()) {
-                        if (((Object) this) == entityPlayerMP) {
-                            continue;
-                        }
-                        if (((Object) this) instanceof EntityPlayerMP) {
-                            Packet<?> packet = new S38PacketPlayerListItem(S38PacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
-                            entityPlayerMP.playerNetServerHandler.sendPacket(packet);
-                        }
-                        Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
-                        entityPlayerMP.playerNetServerHandler.sendPacket(newPacket);
-                    }
-                }
-            }
-            if (this.visibilityTicks > 0) {
-                this.visibilityTicks--;
-            } else {
-                this.pendingVisibilityUpdate = false;
-            }
-        }
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions, boolean forced) {
-        boolean relocated = true;
-
         if (relativePositions.isEmpty()) {
-            // This is just a normal teleport that happens to set both.
-            relocated = setLocation(location, forced);
-            setRotation(rotation);
+            setLocationAndRotation(location, rotation);
         } else {
             if (((Entity) this) instanceof EntityPlayerMP) {
                 // Players use different logic, as they support real relative movement.
-                EnumSet relativeFlags = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
+                EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
                 if (relativePositions.contains(RelativePositions.X)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.X);
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X);
                 }
 
                 if (relativePositions.contains(RelativePositions.Y)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y);
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y);
                 }
 
                 if (relativePositions.contains(RelativePositions.Z)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Z);
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Z);
                 }
 
                 if (relativePositions.contains(RelativePositions.PITCH)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.X_ROT);
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.X_ROT);
                 }
 
                 if (relativePositions.contains(RelativePositions.YAW)) {
-                    relativeFlags.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
+                    relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
                 }
 
                 ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
-                    .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
+                        .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
                 Location<World> resultantLocation = getLocation();
                 Vector3d resultantRotation = getRotation();
@@ -527,12 +422,48 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 // From here just a normal teleport is needed.
-                relocated = setLocation(resultantLocation, forced);
+                setLocation(resultantLocation);
                 setRotation(resultantRotation);
             }
         }
+    }
 
-        return relocated;
+    @Inject(method = "onUpdate", at = @At("RETURN"))
+    private void spongeOnUpdate(CallbackInfo callbackInfo) {
+        if (this.pendingVisibilityUpdate && !this.worldObj.isRemote) {
+            final EntityTracker entityTracker = ((WorldServer) this.worldObj).getEntityTracker();
+            final EntityTrackerEntry lookup = entityTracker.trackedEntityHashTable.lookup(this.getEntityId());
+            if (this.visibilityTicks % 4 == 0) {
+                if (this.isVanished) {
+                    for (EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
+                        entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
+                        if (((Object) this) instanceof EntityPlayerMP) {
+                            entityPlayerMP.playerNetServerHandler.sendPacket(
+                                    new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
+                        }
+                    }
+                } else {
+                    this.visibilityTicks = 1;
+                    this.pendingVisibilityUpdate = false;
+                    for (EntityPlayerMP entityPlayerMP : worldObj.getMinecraftServer().getPlayerList().getPlayerList()) {
+                        if (((Object) this) == entityPlayerMP) {
+                            continue;
+                        }
+                        if (((Object) this) instanceof EntityPlayerMP) {
+                            Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
+                            entityPlayerMP.playerNetServerHandler.sendPacket(packet);
+                        }
+                        Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
+                        entityPlayerMP.playerNetServerHandler.sendPacket(newPacket);
+                    }
+                }
+            }
+            if (this.visibilityTicks > 0) {
+                this.visibilityTicks--;
+            } else {
+                this.pendingVisibilityUpdate = false;
+            }
+        }
     }
 
     @Override
@@ -559,27 +490,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public boolean transferToWorld(String worldName, Vector3d position) {
-        checkNotNull(worldName, "World name was null!");
+    public void transferToWorld(World world, Vector3d position) {
+        checkNotNull(world, "World was null!");
         checkNotNull(position, "Position was null!");
-        Optional<WorldProperties> props = WorldPropertyRegistryModule.getInstance().getWorldProperties(worldName);
-        if (props.isPresent()) {
-            if (props.get().isEnabled()) {
-                Optional<World> world = SpongeImpl.getGame().getServer().loadWorld(worldName);
-                if (world.isPresent()) {
-                    Location<World> location = new Location<>(world.get(), position);
-                    return setLocationSafely(location);
-                }
-            }
-        }
-        return false;
-    }
-
-    @Override
-    public boolean transferToWorld(UUID uuid, Vector3d position) {
-        checkNotNull(uuid, "The world uuid cannot be null!");
-        checkNotNull(position, "The position cannot be null!");
-        return transferToWorld(DimensionRegistryModule.getInstance().getWorldFolder(uuid), position);
+        setLocation(new Location<>(world, position));
     }
 
     @Override
@@ -590,13 +504,19 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
-        checkNotNull(rotation, "Rotation was null!");
-        ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+        checkNotNull(rotation, "The rotation was null!");
+        if (isRemoved()) {
+            return;
+        }
         if (((Entity) this) instanceof EntityPlayerMP) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
+            if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.
+                ((IMixinWorldServer) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
+            }
+
             // Let the entity tracker do its job, this just updates the variables
             shadow$setRotation((float) rotation.getY(), (float) rotation.getX());
         }
@@ -663,131 +583,54 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.entityUniqueID;
     }
 
-    @Override
-    public Optional<Entity> getPassenger() {
-        return Optional.ofNullable((Entity) this.riddenByEntity);
+    @Intrinsic
+    public List<Entity> entity$getPassengers() {
+        return (List<Entity>) (Object) shadow$getPassengers();
     }
 
     @Override
     public Optional<Entity> getVehicle() {
-        return Optional.ofNullable((Entity) this.ridingEntity);
+        return Optional.ofNullable((Entity) getRidingEntity());
     }
 
     @Override
     public Entity getBaseVehicle() {
-        if (this.ridingEntity == null) {
-            return this;
-        }
-
-        net.minecraft.entity.Entity baseVehicle = this.ridingEntity;
-        while (baseVehicle.ridingEntity != null) {
-            baseVehicle = baseVehicle.ridingEntity;
-        }
-        return (Entity) baseVehicle;
+        return (Entity) this.getLowestRidingEntity();
     }
 
     @Override
-    public DataTransactionResult setPassenger(@Nullable Entity entity) {
-        net.minecraft.entity.Entity passenger = (net.minecraft.entity.Entity) entity;
-        if (this.riddenByEntity == null && entity == null) {
-            return DataTransactionResult.successNoData();
-        }
-        Entity thisEntity = this;
-        DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (this.riddenByEntity != null) {
-            final Entity previous = ((Entity) this.riddenByEntity);
-            this.riddenByEntity.mountEntity(null); // eject current passenger
-            builder.replace(new ImmutableSpongeValue<>(Keys.PASSENGER, previous.createSnapshot()));
-        }
-        if (passenger != null) {
-            passenger.mountEntity((net.minecraft.entity.Entity) thisEntity);
-            builder.success(new ImmutableSpongeValue<>(Keys.PASSENGER, ((Entity) passenger).createSnapshot()));
-        }
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    public DataTransactionResult addPassenger(Entity entity) {
+        checkNotNull(entity);
+        final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
+        passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
 
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (!((net.minecraft.entity.Entity) entity).startRiding((net.minecraft.entity.Entity) (Object) this, true)) {
+            return builder.result(DataTransactionResult.Type.FAILURE).reject(new ImmutableSpongeListValue<>(Keys.PASSENGERS, ImmutableList.of(entity
+                    .createSnapshot()))).build();
+        }
+
+        passengerSnapshotsBuilder.add(entity.createSnapshot());
+
+        return builder.result(DataTransactionResult.Type.SUCCESS).success(new ImmutableSpongeListValue<>(Keys.PASSENGERS, passengerSnapshotsBuilder
+                .build())).build();
     }
 
     @Override
     public DataTransactionResult setVehicle(@Nullable Entity entity) {
-        if (this.ridingEntity == null && entity == null) {
+        if (getRidingEntity() == null && entity == null) {
             return DataTransactionResult.successNoData();
         }
-        DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (this.ridingEntity != null) {
-            Entity formerVehicle = (Entity) this.ridingEntity;
-            mountEntity(null);
-            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, formerVehicle.createSnapshot()));
+        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
+        if (getRidingEntity() != null) {
+            final EntitySnapshot previousVehicleSnapshot = ((Entity) getRidingEntity()).createSnapshot();
+            dismountRidingEntity();
+            builder.replace(new ImmutableSpongeValue<>(Keys.VEHICLE, previousVehicleSnapshot));
         }
         if (entity != null) {
-            net.minecraft.entity.Entity newVehicle = ((net.minecraft.entity.Entity) entity);
-            mountEntity(newVehicle);
-            builder.success(new ImmutableSpongeValue<>(Keys.VEHICLE, entity.createSnapshot()));
+            builder.from(entity.addPassenger(this));
         }
         return builder.result(DataTransactionResult.Type.SUCCESS).build();
-    }
-
-    // for sponge internal use only
-    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim, boolean forced) {
-        MinecraftServer mcServer = MinecraftServer.getServer();
-        final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
-        final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
-        if (entity instanceof EntityPlayer) {
-            fromWorld.getEntityTracker().removePlayerFromTrackers((EntityPlayerMP) entity);
-            fromWorld.getPlayerManager().removePlayer((EntityPlayerMP) entity);
-            mcServer.getConfigurationManager().getPlayerList().remove(entity);
-        } else {
-            fromWorld.getEntityTracker().untrackEntity(entity);
-        }
-
-        entity.worldObj.removePlayerEntityDangerously(entity);
-        entity.dimension = targetDim;
-        entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        if (forced) {
-            while (!toWorld.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
-                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
-            }
-        }
-
-        toWorld.theChunkProviderServer.loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
-
-        if (entity instanceof EntityPlayer) {
-            EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
-
-            // Support vanilla clients going into custom dimensions
-            int clientDimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, entityplayermp1);
-            if (((IMixinEntityPlayerMP) entityplayermp1).usesCustomClient()) {
-                DimensionManager.sendDimensionRegistration(toWorld, entityplayermp1, clientDimension);
-            } else {
-                // Force vanilla client to refresh their chunk cache if same dimension
-                if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
-                    entityplayermp1.playerNetServerHandler.sendPacket(
-                        new S07PacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
-                }
-            }
-
-            entityplayermp1.playerNetServerHandler.sendPacket(
-                new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                    entityplayermp1.theItemInWorldManager.getGameType()));
-            entity.setWorld(toWorld);
-            entity.isDead = false;
-            entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
-                entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
-            entityplayermp1.setSneaking(false);
-            mcServer.getConfigurationManager().updateTimeAndWeatherForPlayer(entityplayermp1, toWorld);
-            toWorld.getPlayerManager().addPlayer(entityplayermp1);
-            toWorld.spawnEntityInWorld(entityplayermp1);
-            mcServer.getConfigurationManager().getPlayerList().add(entityplayermp1);
-            entityplayermp1.theItemInWorldManager.setWorld(toWorld);
-            entityplayermp1.addSelfToInternalCraftingInventory();
-            entityplayermp1.setHealth(entityplayermp1.getHealth());
-        } else {
-            toWorld.spawnEntityInWorld(entity);
-        }
-
-        fromWorld.resetUpdateEntityTick();
-        toWorld.resetUpdateEntityTick();
-        return true;
     }
 
     /**
@@ -947,8 +790,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             final NBTTagCompound compound = new NBTTagCompound();
             writeToNBT(compound);
             net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
-            compound.setLong(NbtDataUtil.UUID_MOST, entity.getUniqueID().getMostSignificantBits());
-            compound.setLong(NbtDataUtil.UUID_LEAST, entity.getUniqueID().getLeastSignificantBits());
+            compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
             return (Entity) entity;
         } catch (Exception e) {
@@ -958,67 +800,38 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Override
     public Optional<User> getTrackedPlayer(String nbtKey) {
-        NBTTagCompound nbt = getSpongeData();
-        if (!nbt.hasKey(nbtKey)) {
-           return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_MOST) || !creatorNbt.hasKey(NbtDataUtil.WORLD_UUID_LEAST)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = new UUID(creatorNbt.getLong(NbtDataUtil.WORLD_UUID_MOST), creatorNbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
-            // player is not online, get user from storage if one exists
-            return Optional.of(SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().getOrCreate(GameProfile.of(uuid, null)));
-        }
+        return Optional.empty();
     }
 
     @Override
     public void trackEntityUniqueId(String nbtKey, UUID uuid) {
-        if (!getSpongeData().hasKey(nbtKey)) {
+        final NBTTagCompound spongeData = getSpongeData();
+        if (!spongeData.hasKey(nbtKey)) {
             if (uuid == null) {
                 return;
             }
 
             NBTTagCompound sourceNbt = new NBTTagCompound();
-            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
-            sourceNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
-            getSpongeData().setTag(nbtKey, sourceNbt);
+            sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
+            spongeData.setTag(nbtKey, sourceNbt);
         } else {
+            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
             if (uuid == null) {
-                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_LEAST);
-                getSpongeData().getCompoundTag(nbtKey).removeTag(NbtDataUtil.WORLD_UUID_MOST);
+                compoundTag.removeTag(NbtDataUtil.UUID);
             } else {
-                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_LEAST, uuid.getLeastSignificantBits());
-                getSpongeData().getCompoundTag(nbtKey).setLong(NbtDataUtil.WORLD_UUID_MOST, uuid.getMostSignificantBits());
+                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
             }
         }
     }
 
     @Override
     public Optional<UUID> getCreator() {
-       Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-       if (user.isPresent()) {
-           return Optional.of(user.get().getUniqueId());
-       } else {
-           return Optional.empty();
-       }
+       return Optional.empty();
     }
 
     @Override
     public Optional<UUID> getNotifier() {
-        Optional<User> user = getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-        if (user.isPresent()) {
-            return Optional.of(user.get().getUniqueId());
-        } else {
-            return Optional.empty();
-        }
+        return Optional.empty();
     }
 
     @Override
@@ -1044,7 +857,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
-    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         if (block == Blocks.air) {
             // ignore air blocks
@@ -1061,7 +874,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
         if (block == Blocks.air) {
             // ignore air blocks
@@ -1078,7 +891,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
     }
 
-    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
+    @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
         if (block == Blocks.air) {
             // ignore air blocks
@@ -1145,7 +958,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
      *
      * This prevents sounds from being sent to the server by entities that are invisible
      */
-    @Redirect(method = "playSound(Ljava/lang/String;FF)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
+    @Redirect(method = "playSound", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;isSilent()Z"))
     public boolean checkIsSilentOrInvis(net.minecraft.entity.Entity entity) {
         return entity.isSilent() || this.isVanished;
     }
@@ -1177,23 +990,25 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return this.displayName;
     }
 
+    private boolean skipSettingCustomNameTag = false;
+
     @Override
     public void setDisplayName(@Nullable Text displayName) {
         this.displayName = displayName;
 
-        StaticMixinHelper.setCustomNameTagSkip = true;
+        this.skipSettingCustomNameTag = true;
         if (this.displayName == null) {
             this.setCustomNameTag("");
         } else {
             this.setCustomNameTag(SpongeTexts.toLegacy(this.displayName));
         }
 
-        StaticMixinHelper.setCustomNameTagSkip = false;
+        this.skipSettingCustomNameTag = false;
     }
 
     @Inject(method = "setCustomNameTag", at = @At("RETURN"))
     public void onSetCustomNameTag(String name, CallbackInfo ci) {
-        if (!StaticMixinHelper.setCustomNameTagSkip) {
+        if (!this.skipSettingCustomNameTag) {
             this.displayName = SpongeTexts.fromLegacy(name);
         }
     }
@@ -1259,55 +1074,4 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return stack;
     }
 
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
-    }
-
-    @Inject(method = "setDead", at = @At("HEAD"))
-    public void onSetDead(CallbackInfo ci) {
-        if (this.worldObj.isRemote || (this.mcEntity instanceof EntityLivingBase && !(this.mcEntity instanceof EntityArmorStand))) {
-            return;
-        }
-
-        EntityPlayer player = StaticMixinHelper.packetPlayer;
-        IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-        // Check if entity is killing self (ex. item despawning)
-        if (spongeWorld.getCauseTracker().hasTickingEntity()) {
-            Entity tickingEntity = ((IMixinWorld) this.worldObj).getCauseTracker().getCurrentTickEntity().get();
-            if (tickingEntity == this.mcEntity)  {
-                this.destructCause = Cause.of(NamedCause.source(tickingEntity));
-            }
-        // Check if a player is colliding with this entity (ex. item pickup)
-        } else if (player != null) {
-            if (this.mcEntity.getUniqueID().equals(((IMixinEntityPlayer) player).getCollidingEntityUuid())) {
-                this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
-            }
-        // Check for a possible DamageSource
-        } else {
-            this.lastDamageSource = SpongeHooks.getEntityDamageSource(this.mcEntity);
-            if (this.lastDamageSource != null) {
-                this.destructCause = Cause.of(NamedCause.source(this.lastDamageSource));
-            } else {
-                if (spongeWorld.getCauseTracker().hasTickingTileEntity()) {
-                    TileEntity te = (TileEntity) spongeWorld.getCauseTracker().getCurrentTickTileEntity().get();
-                    this.destructCause = Cause.of(NamedCause.source(te));
-                }
-            }
-        }
-    }
-
-    @Override
-    public DamageSource getLastDamageSource() {
-        return this.lastDamageSource;
-    }
-
-    @Override
-    public Cause getNonLivingDestructCause() {
-        return this.destructCause;
-    }
 }

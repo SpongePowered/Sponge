@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.interfaces;
 
-import net.minecraft.world.chunk.storage.AnvilSaveHandler;
+import net.minecraft.world.WorldServer;
 
 import java.util.Hashtable;
 
@@ -32,7 +32,7 @@ public interface IMixinMinecraftServer {
 
     Hashtable<Integer, long[]> getWorldTickTimes();
 
-    AnvilSaveHandler getHandler(String worldName);
+    void prepareSpawnArea(WorldServer worldServer);
 
     void setSaveEnabled(boolean enabled);
 }

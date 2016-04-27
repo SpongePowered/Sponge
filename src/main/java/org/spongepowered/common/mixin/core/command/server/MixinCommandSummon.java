@@ -32,9 +32,11 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.BlockPos;
-import net.minecraft.util.Vec3;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.storage.AnvilChunkLoader;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.EntityTypes;
@@ -45,7 +47,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -56,20 +57,20 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 @Mixin(CommandSummon.class)
 public abstract class MixinCommandSummon extends CommandBase {
 
     private static final String LIGHTNINGBOLT_CLASS = "class=net/minecraft/entity/effect/EntityLightningBolt";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
-            "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
+            "Lnet/minecraft/world/chunk/storage/AnvilChunkLoader;readWorldEntityPos(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;DDDZ)Lnet/minecraft/entity/Entity;";
 
-    @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
-    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, ICommandSender sender, String[] args) {
+    @Redirect(method = "execute", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
+    private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, double x, double y, double z, boolean b, MinecraftServer server, ICommandSender sender, String[] args) {
         if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
             nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.EnumMinecartType.byNetworkID(nbt.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
+                    EntityMinecart.Type.values()[nbt.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             nbt.removeTag(NbtDataUtil.MINECART_TYPE);
         }
         Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID));
@@ -80,46 +81,23 @@ public abstract class MixinCommandSummon extends CommandBase {
         if (type == null) {
             return null;
         }
-        Vec3 vec3 = sender.getPositionVector();
 
-        double x = vec3.xCoord;
-        double y = vec3.yCoord;
-        double z = vec3.zCoord;
-
-        try {
-            if (args.length >= 4) {
-                x = parseDouble(x, args[1], true);
-                y = parseDouble(y, args[2], false);
-                z = parseDouble(z, args[3], true);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
         Transform<org.spongepowered.api.world.World> transform = new Transform<>(((org.spongepowered.api.world.World) world), new Vector3d(x, y, z));
         SpawnCause cause = getSpawnCause(sender);
         ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), type, transform);
-        SpongeImpl.postEvent(event);
-        return event.isCancelled() ? null : EntityList.createEntityFromNBT(nbt, world);
+        return event.isCancelled() ? null : AnvilChunkLoader.readWorldEntityPos(nbt, world, x, y, z, b);
     }
 
-    @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntity(World world, Entity entity, ICommandSender sender, String[] args) {
-        return ((org.spongepowered.api.world.World) world).spawnEntity((org.spongepowered.api.entity.Entity) entity,
-                Cause.of(NamedCause.source(getSpawnCause(sender))));
-    }
-
-    @Inject(method = "processCommand", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
+    @Inject(method = "execute", at = @At(value = "NEW", args = LIGHTNINGBOLT_CLASS), cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void onProcess(ICommandSender commandSender, String[] args, CallbackInfo callbackInfo, String unused, BlockPos position, Vec3 vector,
-            double x, double y, double z, World target) {
-        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) target, new Vector3d(x, y, z));
+    private void onProcess(MinecraftServer server, ICommandSender sender, String args[], CallbackInfo ci, String s, BlockPos blockpos, Vec3d vec3d, double x, double y, double z, World world) {
+        Transform<org.spongepowered.api.world.World> transform = new Transform<>((org.spongepowered.api.world.World) world, new Vector3d(x, y, z));
 
-        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(commandSender))),
+        ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(Cause.of(NamedCause.source(getSpawnCause(sender))),
                 EntityTypes.LIGHTNING, transform);
         SpongeImpl.postEvent(event);
         if (event.isCancelled()) {
-            callbackInfo.cancel();
+            ci.cancel();
         }
     }
 
@@ -127,16 +105,16 @@ public abstract class MixinCommandSummon extends CommandBase {
         if (commandSender instanceof Entity) {
             return EntitySpawnCause.builder()
                     .entity((org.spongepowered.api.entity.Entity) commandSender)
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         } else if (commandSender instanceof TileEntity) {
             return BlockSpawnCause.builder()
                     .block(((TileEntity) commandSender).getLocation().createSnapshot())
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         } else {
             return SpawnCause.builder()
-                    .type(SpawnTypes.PLACEMENT)
+                    .type(InternalSpawnTypes.PLACEMENT)
                     .build();
         }
     }

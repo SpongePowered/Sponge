@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.type;
 
+import net.minecraft.init.Biomes;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.WorldChunkManager;
-import net.minecraft.world.biome.WorldChunkManagerHell;
-import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.biome.BiomeProvider;
+import net.minecraft.world.biome.BiomeProviderSingle;
+import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.gen.ChunkProviderEnd;
 
 public class SpongeWorldTypeEnd extends SpongeWorldType {
@@ -38,11 +38,13 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
         setNotificationData();
     }
 
-    public WorldChunkManager getChunkManager(World world) {
-        return new WorldChunkManagerHell(BiomeGenBase.sky, 0f);
+    @Override
+    public BiomeProvider getBiomeProvider(World world) {
+        return new BiomeProviderSingle(Biomes.sky);
     }
 
-    public IChunkProvider getChunkGenerator(World world, String generatorOptions) {
-        return new ChunkProviderEnd(world, world.getSeed());
+    @Override
+    public IChunkGenerator getChunkGenerator(World world, String generatorOptions) {
+        return new ChunkProviderEnd(world, true, world.getSeed());
     }
 }

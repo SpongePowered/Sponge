@@ -25,12 +25,17 @@
 package org.spongepowered.common.mixin.core.entity.item;
 
 import net.minecraft.entity.item.EntityItemFrame;
+import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.data.manipulator.mutable.block.DirectionalData;
 import org.spongepowered.api.entity.hanging.ItemFrame;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.data.manipulator.mutable.block.SpongeDirectionalData;
+import org.spongepowered.common.data.util.DirectionResolver;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntityHanging;
 
 import java.util.Optional;
@@ -40,11 +45,8 @@ import javax.annotation.Nullable;
 @Mixin(EntityItemFrame.class)
 public abstract class MixinEntityItemFrame extends MixinEntityHanging implements ItemFrame {
 
-    @Shadow
-    public abstract net.minecraft.item.ItemStack getDisplayedItem();
-
-    @Shadow
-    public abstract void setDisplayedItem(net.minecraft.item.ItemStack p_82334_1_);
+    @Shadow @Nullable public abstract net.minecraft.item.ItemStack getDisplayedItem();
+    @Shadow public abstract void setDisplayedItem(@Nullable net.minecraft.item.ItemStack p_82334_1_);
 
     @Shadow(prefix = "shadow$")
     public abstract int shadow$getRotation();
@@ -53,11 +55,11 @@ public abstract class MixinEntityItemFrame extends MixinEntityHanging implements
     public abstract void setItemRotation(int p_82336_1_);
 
     public Optional<ItemStack> getItem() {
-        return Optional.ofNullable((ItemStack) getDisplayedItem());
+        return Optional.ofNullable(ItemStackUtil.fromNative(getDisplayedItem()));
     }
 
     public void setItem(@Nullable ItemStack item) {
-        setDisplayedItem((net.minecraft.item.ItemStack) item);
+        setDisplayedItem(ItemStackUtil.toNative(item));
     }
 
     public Rotation getItemRotation() {

@@ -26,17 +26,18 @@ package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.init.Blocks;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 
 /**
  * Wraps a {@link MutableBlockVolume} within a ChunkPrimer in order to be able
- * to pass the block buffer to vanilla populators.
- * TODO: this should be a mixin
+ * to pass the block buffer to vanilla populators. TODO: this should be a mixin
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 
+    private static final IBlockState defaultState = Blocks.air.getDefaultState();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
 
@@ -51,18 +52,20 @@ public class ChunkBufferPrimer extends ChunkPrimer {
     }
 
     @Override
-    public IBlockState getBlockState(int index) {
-        return getBlockState((index >> 12) & 0xf, (index) & 0xff, (index >> 8) & 0xf);
-    }
-
-    @Override
     public void setBlockState(int x, int y, int z, IBlockState state) {
         this.buffer.setBlock(this.min.getX() + x, this.min.getY() + y, this.min.getZ() + z, (BlockState) state);
     }
 
     @Override
-    public void setBlockState(int index, IBlockState state) {
-        setBlockState((index >> 12) & 0xf, (index) & 0xff, (index >> 8) & 0xf, state);
+    public int findGroundBlockIdx(int x, int z) {
+        for (int y = 255; y >= 0; --y) {
+            IBlockState iblockstate = getBlockState(x, y, z);
+
+            if (iblockstate != null && iblockstate != defaultState) {
+                return y;
+            }
+        }
+        return 0;
     }
 
 }

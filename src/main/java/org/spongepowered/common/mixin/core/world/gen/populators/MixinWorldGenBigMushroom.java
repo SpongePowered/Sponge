@@ -29,7 +29,7 @@ import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -92,7 +92,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
             z = random.nextInt(16) + 8;
             BlockPos pos = world.getHeight(chunkPos.add(x, 0, z));
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector(pos));
+                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);

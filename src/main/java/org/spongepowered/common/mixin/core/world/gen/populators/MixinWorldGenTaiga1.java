@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import net.minecraft.block.Block;
 import net.minecraft.init.Blocks;
-import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.gen.feature.WorldGenTaiga1;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorObject;
@@ -65,7 +65,7 @@ public abstract class MixinWorldGenTaiga1 extends MixinWorldGenAbstractTree impl
                 for (j1 = x - k2; j1 <= x + k2 && flag; ++j1) {
                     for (k1 = z - k2; k1 <= z + k2 && flag; ++k1) {
                         if (i1 >= 0 && i1 < 256) {
-                            if (!this.func_150523_a(worldIn.getBlockState(new BlockPos(j1, i1, k1)).getBlock())) {
+                            if (!this.canGrowInto(worldIn.getBlockState(new BlockPos(j1, i1, k1)).getBlock())) {
                                 flag = false;
                             }
                         } else {

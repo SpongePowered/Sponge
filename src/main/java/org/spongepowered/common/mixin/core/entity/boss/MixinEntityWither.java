@@ -167,7 +167,7 @@ public abstract class MixinEntityWither extends MixinEntityMob implements Wither
      * @param self This entity
      * @param fuseTicks Ticks until detonation
      */
-    @Redirect(method = "func_82206_m", at = @At(value = "INVOKE",
+    @Redirect(method = "ignite", at = @At(value = "INVOKE",
               target = "Lnet/minecraft/entity/boss/EntityWither;setInvulTime(I)V"))
     protected void onSpawnPrime(EntityWither self, int fuseTicks) {
         prime(Cause.source(this).build());

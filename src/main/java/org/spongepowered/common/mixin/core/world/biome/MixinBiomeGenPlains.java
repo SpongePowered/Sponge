@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.biome.BiomeGenPlains;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,9 +42,6 @@ public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements I
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         gensettings.getPopulators().add(new PlainsGrassPopulator(this.field_150628_aC));
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         // set flowers and grass to zero as they are handles by the plains grass
         // populator
         theBiomeDecorator.flowersPerChunk = 0;

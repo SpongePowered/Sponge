@@ -28,7 +28,6 @@ import net.minecraft.block.BlockDirt;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenMutated;
 import net.minecraft.world.biome.BiomeGenTaiga;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.DoublePlantTypes;
@@ -53,11 +52,11 @@ import java.util.Iterator;
 @Mixin(BiomeGenTaiga.class)
 public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
 
-    @Shadow private int field_150644_aH; // type
+    @Shadow private BiomeGenTaiga.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        if (this.field_150644_aH == 1 || this.field_150644_aH == 2) {
+        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
             BlockBlob blob = BlockBlob.builder()
                     .blobCount(VariableAmount.baseWithRandomAddition(0, 3))
                     .block((BlockState) Blocks.mossy_cobblestone.getDefaultState())
@@ -72,7 +71,7 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
                 .build();
         gensettings.getPopulators().add(fern);
         super.buildPopulators(world, gensettings);
-        if (this.field_150644_aH == 1 || this.field_150644_aH == 2) {
+        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
             gensettings.getGroundCoverLayers().clear();
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((Double seed) -> {
                 if (seed > 1.75D) {
@@ -87,9 +86,6 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
 
         }
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
-        if (BiomeGenMutated.class.isAssignableFrom(this.getClass())) {
-            theBiomeDecorator = ((BiomeGenMutated) (Object) this).baseBiome.theBiomeDecorator;
-        }
         for (Iterator<Shrub> it = gensettings.getPopulators(Shrub.class).iterator(); it.hasNext();) {
             Shrub next = it.next();
             if (next.getTypes().size() == 1) {
@@ -108,8 +104,8 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        if (this.field_150644_aH == 1 || this.field_150644_aH == 2) {
-            if (this.field_150644_aH == 1) {
+        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
+            if (this.type == BiomeGenTaiga.Type.MEGA) {
                 forest.type(BiomeTreeTypes.POINTY_TAIGA.getLargePopulatorObject().get(), 1);
                 forest.type(BiomeTreeTypes.TALL_TAIGA.getLargePopulatorObject().get(), 12);
             } else {

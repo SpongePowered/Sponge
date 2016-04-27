@@ -85,19 +85,7 @@ public abstract class MixinBlockLog extends MixinBlock {
         if (manipulator instanceof ImmutableTreeData) {
             final TreeType treeType = ((ImmutableTreeData) manipulator).type().get();
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLog) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                    treeType.equals(TreeTypes.BIRCH) ||
-                    treeType.equals(TreeTypes.SPRUCE) ||
-                    treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
-                }
-            } else if (blockState.getBlock() instanceof BlockNewLog) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
-                }
-            }
-            return Optional.empty();
+            return processLogType(blockState, type, treeType);
         } else if (manipulator instanceof ImmutableLogAxisData) {
             final LogAxis logAxis = ((ImmutableLogAxisData) manipulator).type().get();
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) (Object) logAxis));
@@ -110,28 +98,31 @@ public abstract class MixinBlockLog extends MixinBlock {
         if (key.equals(Keys.TREE_TYPE)) {
             final TreeType treeType = (TreeType) value;
             final BlockPlanks.EnumType type = TreeTypeResolver.getFor(treeType);
-            if (blockState.getBlock() instanceof BlockOldLog) {
-                if (treeType.equals(TreeTypes.OAK) ||
-                    treeType.equals(TreeTypes.BIRCH) ||
-                    treeType.equals(TreeTypes.SPRUCE) ||
-                    treeType.equals(TreeTypes.JUNGLE)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
-                }
-            } else if (blockState.getBlock() instanceof BlockNewLog) {
-                if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
-                    return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
-                }
-            }
-            return Optional.empty();
+            return processLogType(blockState, type, treeType);
         } else if (key.equals(Keys.LOG_AXIS)) {
             return Optional.of((BlockState) blockState.withProperty(BlockLog.LOG_AXIS, (BlockLog.EnumAxis) value));
         }
         return super.getStateWithValue(blockState, key, value);
     }
 
+    private Optional<BlockState> processLogType(IBlockState blockState, BlockPlanks.EnumType type, TreeType treeType) {
+        if (blockState.getBlock() instanceof BlockOldLog) {
+            if (treeType.equals(TreeTypes.OAK) ||
+                treeType.equals(TreeTypes.BIRCH) ||
+                treeType.equals(TreeTypes.SPRUCE) ||
+                treeType.equals(TreeTypes.JUNGLE)) {
+                return Optional.of((BlockState) blockState.withProperty(BlockOldLog.VARIANT, type));
+            }
+        } else if (blockState.getBlock() instanceof BlockNewLog) {
+            if (treeType.equals(TreeTypes.ACACIA) || treeType.equals(TreeTypes.DARK_OAK)) {
+                return Optional.of((BlockState) blockState.withProperty(BlockNewLog.VARIANT, type));
+            }
+        }
+        return Optional.empty();
+    }
+
     @Override
     public List<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
-        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState),
-                                                                getLogAxisData(blockState));
+        return ImmutableList.<ImmutableDataManipulator<?, ?>>of(getTreeData(blockState), getLogAxisData(blockState));
     }
 }
