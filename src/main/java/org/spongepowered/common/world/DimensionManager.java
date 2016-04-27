@@ -236,6 +236,8 @@ public class DimensionManager {
             SpongeImpl.getLogger().info("Loading dimension {} ({}) ({})", id, world.getWorldInfo().getWorldName(), world.getMinecraftServer());
         } else {
             final WorldServer server = worlds.remove(id);
+            IMixinWorld spongeWorld = (IMixinWorld) server;
+            spongeWorld.getActiveConfig().save();
             ((IMixinMinecraftServer) MinecraftServer.getServer()).getWorldTickTimes().remove(id);
             SpongeImpl.getLogger().info("Unloading dimension {} ({})", id, server.getWorldInfo().getWorldName());
         }

@@ -50,6 +50,7 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MathHelper;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.api.CatalogType;
@@ -73,8 +74,11 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.mixin.plugin.interfaces.IModData;
+import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.world.CaptureType;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -449,16 +453,26 @@ public class SpongeHooks {
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<?> getActiveConfig(World world) {
-        final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
-        final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinWorldProvider) world.provider).getDimensionConfig();
-        if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
-            return worldConfig;
-        } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-            return ((IMixinWorldProvider) world.provider).getDimensionConfig();
-        } else {
-            return SpongeImpl.getGlobalConfig();
+    public static SpongeConfig<?> getActiveConfig(World world, boolean refresh) {
+        SpongeConfig<?> activeConfig = ((IMixinWorld) world).getActiveConfig();
+        if (activeConfig == null || refresh) {
+            final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
+            final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinWorldProvider) world.provider).getDimensionConfig();
+            if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
+                activeConfig = worldConfig;
+            } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
+                activeConfig = ((IMixinWorldProvider) world.provider).getDimensionConfig();
+            } else {
+                activeConfig = SpongeImpl.getGlobalConfig();
+            }
+            ((IMixinWorld) world).setActiveConfig(activeConfig);
         }
+
+        return activeConfig;
+    }
+
+    public static SpongeConfig<?> getActiveConfig(World world) {
+        return getActiveConfig(world, false);
     }
 
     public static SpongeConfig<?> getActiveConfig(String dimensionType, String worldFolder) {
@@ -524,6 +538,24 @@ public class SpongeHooks {
 
         // Neither in-memory or on-disk enabled configs. Go global.
         return SpongeImpl.getGlobalConfig();
+    }
+
+    public static void refreshActiveConfigs() {
+        for (WorldServer world : DimensionManager.getWorlds()) {
+            ((IMixinWorld) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
+            for (Entity entity : world.loadedEntityList) {
+                if (entity instanceof IModData) {
+                    IModData spongeEntity = (IModData) entity;
+                    spongeEntity.requiresCacheRefresh(true);
+                }
+            }
+        }
+        for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
+            if (blockType instanceof IModData) {
+                IModData spongeBlock = (IModData) blockType;
+                spongeBlock.requiresCacheRefresh(true);
+            }
+        }
     }
 
     public static void setBlockState(World world, int x, int y, int z, BlockState state, boolean notifyNeighbors) {

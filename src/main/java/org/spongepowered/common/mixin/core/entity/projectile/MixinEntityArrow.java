@@ -44,6 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.entity.projectile.ProjectileSourceSerializer;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.entity.projectile.IMixinEntityArrow;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
@@ -51,7 +52,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 @Mixin(EntityArrow.class)
-public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
+public abstract class MixinEntityArrow extends MixinEntity implements Arrow, IMixinEntityArrow {
 
     private static final String RTR_CTOR_ENTITY = "net/minecraft/util/MovingObjectPosition.entityHit:Lnet/minecraft/entity/Entity;";
     private EntityArrow mcEntity = (EntityArrow) (Object) this;
@@ -59,6 +60,7 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
     @Shadow public Entity shootingEntity;
     @Shadow private int ticksInAir;
     @Shadow public double damage;
+    @Shadow public boolean inGround;
 
     // Not all ProjectileSources are entities (e.g. BlockProjectileSource).
     // This field is used to store a ProjectileSource that isn't an entity.
@@ -137,4 +139,8 @@ public abstract class MixinEntityArrow extends MixinEntity implements Arrow {
         }
     }
 
+    @Override
+    public boolean isInGround() {
+        return this.inGround;
+    }
 }

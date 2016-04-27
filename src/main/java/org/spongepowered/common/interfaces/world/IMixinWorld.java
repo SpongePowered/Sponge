@@ -73,4 +73,10 @@ public interface IMixinWorld {
 
     void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState old, IBlockState new_, int flags);
 
+    boolean isProcessingExplosion();
+
+    SpongeConfig<?> getActiveConfig();
+
+    void setActiveConfig(SpongeConfig<?> config);
+
 }

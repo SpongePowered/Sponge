@@ -285,6 +285,7 @@ public class SpongeCommand {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.reload();
+                        SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
                     }
                 })

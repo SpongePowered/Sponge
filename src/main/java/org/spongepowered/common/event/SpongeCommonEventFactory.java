@@ -557,7 +557,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
-        BlockSnapshot snapshot = world.createSnapshot(VecHelper.toVector(pos));
+        IBlockState blockstate = ((net.minecraft.world.World) world).getBlockState(pos);
         Map<Direction, BlockState> neighbors = new HashMap<>();
 
         for (Object obj : notifiedSides) {
@@ -572,16 +572,16 @@ public class SpongeCommonEventFactory {
 
         ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
         // Determine cause
-        Cause cause = Cause.of(NamedCause.source(snapshot));
+        Cause cause = Cause.of(NamedCause.source(blockstate));
         net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
         IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
         if (spongeChunk != null) {
             if (StaticMixinHelper.packetPlayer != null) {
-                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
+                cause = Cause.of(NamedCause.source(blockstate)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
             } else {
                 Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
                 if (notifier.isPresent()) {
-                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
+                    cause = Cause.of(NamedCause.source(blockstate)).with(NamedCause.notifier(notifier.get()));
                 }
             }
             Optional<User> owner = spongeChunk.getBlockOwner(pos);

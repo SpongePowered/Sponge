@@ -72,6 +72,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     }
 
     public static final String CONFIG_ENABLED = "config-enabled";
+    public static final String AUTO_POPULATE = "auto-populate";
+
+    // CATEGORIES
+    public static final String CATEGORY_ENTITY = "entity";
 
     // DEBUG
     public static final String DEBUG_THREAD_CONTENTION_MONITORING = "thread-contention-monitoring";
@@ -81,15 +85,17 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     // ENTITY
     public static final String ENTITY_MAX_BOUNDING_BOX_SIZE = "max-bounding-box-size";
+    public static final String ENTITY_MAX_ENTITIES_WITHIN_AABB = "max-entities-within-aabb";
     public static final String ENTITY_MAX_SPEED = "max-speed";
+    public static final String ENTITY_MAX_COLLISION_OVERRIDES = "max-collision-overrides";
     public static final String ENTITY_COLLISION_WARN_SIZE = "collision-warn-size";
     public static final String ENTITY_COUNT_WARN_SIZE = "count-warn-size";
     public static final String ENTITY_ITEM_DESPAWN_RATE = "item-despawn-rate";
-    public static final String ENTITY_ACTIVATION_RANGE_CREATURE = "creature-activation-range";
-    public static final String ENTITY_ACTIVATION_RANGE_MONSTER = "monster-activation-range";
-    public static final String ENTITY_ACTIVATION_RANGE_AQUATIC = "aquatic-activation-range";
-    public static final String ENTITY_ACTIVATION_RANGE_AMBIENT = "ambient-activation-range";
-    public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc-activation-range";
+    public static final String ENTITY_ACTIVATION_RANGE_CREATURE = "creature";
+    public static final String ENTITY_ACTIVATION_RANGE_MONSTER = "monster";
+    public static final String ENTITY_ACTIVATION_RANGE_AQUATIC = "aquatic";
+    public static final String ENTITY_ACTIVATION_RANGE_AMBIENT = "ambient";
+    public static final String ENTITY_ACTIVATION_RANGE_MISC = "misc";
     public static final String ENTITY_HUMAN_PLAYER_LIST_REMOVE_DELAY = "human-player-list-remove-delay";
     public static final String ENTITY_PAINTING_RESPAWN_DELAY = "entity-painting-respawn-delay";
 
@@ -125,6 +131,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
     // MODULES
     public static final String MODULE_ENTITY_ACTIVATION_RANGE = "entity-activation-range";
+    public static final String MODULE_ENTITY_COLLISIONS = "entity-collisions";
     public static final String MODULE_BUNGEECORD = "bungeecord";
 
     // WORLD
@@ -344,10 +351,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         private BlockTrackingCategory blockTracking = new BlockTrackingCategory();
         @Setting
         private DebugCategory debug = new DebugCategory();
-        @Setting
+        @Setting(value = CATEGORY_ENTITY)
         private EntityCategory entity = new EntityCategory();
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private EntityActivationRangeCategory entityActivationRange = new EntityActivationRangeCategory();
+        @Setting(value = MODULE_ENTITY_COLLISIONS)
+        private EntityCollisionCategory entityCollisionCategory = new EntityCollisionCategory();
         @Setting
         private GeneralCategory general = new GeneralCategory();
         @Setting
@@ -371,6 +380,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public EntityActivationRangeCategory getEntityActivationRange() {
             return this.entityActivationRange;
+        }
+
+        public EntityCollisionCategory getEntityCollisionCategory() {
+            return this.entityCollisionCategory;
         }
 
         public GeneralCategory getGeneral() {
@@ -485,13 +498,13 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class EntityCategory extends Category {
 
-        @Setting(value = ENTITY_MAX_BOUNDING_BOX_SIZE, comment = "Max size of an entity's bounding box before removing it. Set to 0 to disable")
+        @Setting(value = ENTITY_MAX_BOUNDING_BOX_SIZE, comment = "Max size of an entities bounding box before removing it. Set to 0 to disable")
         private int maxBoundingBoxSize = 1000;
-        @Setting(value = SpongeConfig.ENTITY_MAX_SPEED, comment = "Square of the max speed of an entity before removing it. Set to 0 to disable")
-        private int maxSpeed = 100;
         @Setting(value = ENTITY_COLLISION_WARN_SIZE,
-                comment = "Number of colliding entities in one spot before logging a warning. Set to 0 to disable")
+        comment = "Number of colliding entities in one spot before logging a warning. Set to 0 to disable")
         private int maxCollisionSize = 200;
+        @Setting(value = ENTITY_MAX_SPEED, comment = "Square of the max speed of an entity before removing it. Set to 0 to disable")
+        private int maxSpeed = 100;
         @Setting(value = ENTITY_COUNT_WARN_SIZE,
                 comment = "Number of entities in one dimension before logging a warning. Set to 0 to disable")
         private int maxCountWarnSize = 0;
@@ -504,14 +517,6 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
                 comment = "Number of ticks before a painting is respawned on clients when their art is changed")
         private int paintingRespawnDelaly = 2;
 
-        public int getMaxBoundingBoxSize() {
-            return this.maxBoundingBoxSize;
-        }
-
-        public void setMaxBoundingBoxSize(int maxBoundingBoxSize) {
-            this.maxBoundingBoxSize = maxBoundingBoxSize;
-        }
-
         public int getMaxSpeed() {
             return this.maxSpeed;
         }
@@ -520,20 +525,28 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.maxSpeed = maxSpeed;
         }
 
-        public int getMaxCollisionSize() {
-            return this.maxCollisionSize;
-        }
-
-        public void setMaxCollisionSize(int maxCollisionSize) {
-            this.maxCollisionSize = maxCollisionSize;
-        }
-
         public int getMaxCountWarnSize() {
             return this.maxCountWarnSize;
         }
 
         public void setMaxCountWarnSize(int maxCountWarnSize) {
             this.maxCountWarnSize = maxCountWarnSize;
+        }
+
+        public int getMaxBoundingBoxSize() {
+            return this.maxBoundingBoxSize;
+        }
+
+        public void setMaxBoundingBoxSize(int maxBoundingBoxSize) {
+            this.maxBoundingBoxSize = maxBoundingBoxSize;
+        }
+
+        public int getMaxCollisionSize() {
+            return this.maxCollisionSize;
+        }
+
+        public void setMaxCollisionSize(int maxCollisionSize) {
+            this.maxCollisionSize = maxCollisionSize;
         }
 
         public int getItemDespawnRate() {
@@ -559,6 +572,106 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         public void setPaintingRespawnDelaly(int paintingRespawnDelaly) {
             this.paintingRespawnDelaly = Math.min(paintingRespawnDelaly, 1);
         }
+
+    }
+
+    @ConfigSerializable
+    public static class EntityCollisionCategory extends Category {
+        @Setting(value = AUTO_POPULATE, comment = "If enabled, newly discovered entities/blocks will be added to this config with a default value.")
+        private boolean autoPopulate = false;
+        @Setting(value = ENTITY_MAX_ENTITIES_WITHIN_AABB, comment = "Max amount of entities any given entity or block can collide with. This improves performance when there are more than 8 entities on top of eachother such as a 1x1 spawn pen. Set to 0 to disable.")
+        private int maxEntitiesWithinAABB = 8;
+        @SuppressWarnings("serial")
+        @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overidden.")
+        private Map<String, Integer> defaultMaxCollisions = new HashMap<String, Integer>()
+        {{
+            put("blocks", 8);
+            put("entities", 8);
+        }};
+        @SuppressWarnings("serial")
+        @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
+        private Map<String, CollisionModNode> modList = new HashMap<String, CollisionModNode>()
+        {{
+            put("minecraft", new CollisionModNode("minecraft"));
+        }};
+
+        public boolean autoPopulateData() {
+            return this.autoPopulate;
+        }
+
+        public Map<String, CollisionModNode> getModList() {
+            return this.modList;
+        }
+
+        public Map<String, Integer> getDefaultMaxCollisions() {
+            return this.defaultMaxCollisions;
+        }
+
+        public int getMaxEntitiesWithinAABB() {
+            return this.maxEntitiesWithinAABB;
+        }
+
+        public void setMaxEntitiesWithinAABB(int maxEntities) {
+            this.maxEntitiesWithinAABB = maxEntities;
+        }
+    }
+
+    @ConfigSerializable
+    public static class CollisionModNode extends Category {
+        @Setting(value = "enabled", comment = "Set to false if you want mod to ignore entity collision rules.")
+        private boolean isEnabled = true;
+        @SuppressWarnings("serial")
+        @Setting(value = "defaults", comment = "Default max collisions used for all entities/blocks unless overidden.")
+        private Map<String, Integer> defaultMaxCollisions = new HashMap<String, Integer>()
+        {{
+            put("blocks", 8);
+            put("entities", 8);
+        }};
+        @Setting(value = "blocks")
+        private Map<String, Integer> blockList = new HashMap<String, Integer>();
+        @Setting(value = "entities")
+        private Map<String, Integer> entityList = new HashMap<String, Integer>();
+
+        public CollisionModNode() {
+            
+        }
+
+        @SuppressWarnings("serial")
+        public CollisionModNode(String modId) {
+            if (modId.equals("minecraft")) {
+                this.blockList = new HashMap<String, Integer>()
+                {{
+                    put("detector_rail", 1);
+                    put("heavy_weighted_pressure_plate", 150);
+                    put("light_weighted_pressure_plate", 15);
+                    put("mob_spawner", -1);
+                    put("stone_pressure_plate", 1);
+                    put("wooden_button", 1);
+                    put("wooden_pressure_plate", 1);
+                }};
+
+                this.entityList = new HashMap<String, Integer>()
+                {{
+                    put("thrownpotion", -1);
+                }};
+            }
+        }
+
+        public boolean isEnabled() {
+            return this.isEnabled;
+        }
+
+        public Map<String, Integer> getDefaultMaxCollisions() {
+            return this.defaultMaxCollisions;
+        }
+
+        public Map<String, Integer>  getBlockList() {
+            return this.blockList;
+        }
+
+        public Map<String, Integer>  getEntityList() {
+            return this.entityList;
+        }
     }
 
     @ConfigSerializable
@@ -576,55 +689,54 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class EntityActivationRangeCategory extends Category {
 
-        @Setting(value = ENTITY_ACTIVATION_RANGE_CREATURE)
-        private int creatureActivationRange = 32;
-        @Setting(value = ENTITY_ACTIVATION_RANGE_MONSTER)
-        private int monsterActivationRange = 32;
-        @Setting(value = ENTITY_ACTIVATION_RANGE_AQUATIC)
-        private int aquaticActivationRange = 32;
-        @Setting(value = ENTITY_ACTIVATION_RANGE_AMBIENT)
-        private int ambientActivationRange = 32;
-        @Setting(value = ENTITY_ACTIVATION_RANGE_MISC)
-        private int miscActivationRange = 16;
+        @Setting(value = AUTO_POPULATE, comment = "If enabled, newly discovered entities will be added to this config with a default value.")
+        private boolean autoPopulate = false;
+        @SuppressWarnings("serial")
+        @Setting(value = "defaults", comment = "Default activation ranges used for all entities unless overidden.")
+        private Map<String, Integer> defaultRanges = new HashMap<String, Integer>()
+        {{
+            put("ambient", 32);
+            put("aquatic", 32);
+            put("creature", 32);
+            put("monster", 32);
+            put("misc", 16);
+        }};
 
-        public int getCreatureActivationRange() {
-            return this.creatureActivationRange;
+        @Setting(value = "mods", comment = "Per-mod overrides. Refer to the minecraft default mod for example.")
+        private Map<String, EntityActivationModNode> modList = Maps.newHashMap();
+
+        public boolean autoPopulateData() {
+            return this.autoPopulate;
         }
 
-        public void setCreatureActivationRange(int creatureActivationRange) {
-            this.creatureActivationRange = creatureActivationRange;
+        public Map<String, Integer> getDefaultRanges() {
+            return this.defaultRanges;
         }
 
-        public int getMonsterActivationRange() {
-            return this.monsterActivationRange;
+        public Map<String, EntityActivationModNode> getModList() {
+            return this.modList;
+        }
+    }
+
+    @ConfigSerializable
+    public static class EntityActivationModNode extends Category {
+        @Setting(value = "enabled", comment = "Set to false if you want mod to ignore entity activation rules and always tick.")
+        private boolean isEnabled = true;
+        @Setting(value = "defaults")
+        private Map<String, Integer> defaultRanges = Maps.newHashMap();
+        @Setting(value = "entities")
+        private Map<String, Integer> entityList = Maps.newHashMap();
+
+        public boolean isEnabled() {
+            return this.isEnabled;
         }
 
-        public void setMonsterActivationRange(int monsterActivationRange) {
-            this.monsterActivationRange = monsterActivationRange;
+        public Map<String, Integer> getDefaultRanges() {
+            return this.defaultRanges;
         }
 
-        public int getAquaticActivationRange() {
-            return this.aquaticActivationRange;
-        }
-
-        public void setAquaticActivationRange(int aquaticActivationRange) {
-            this.aquaticActivationRange = aquaticActivationRange;
-        }
-
-        public int getAmbientActivationRange() {
-            return this.ambientActivationRange;
-        }
-
-        public void setAmbientActivationRange(int ambientActivationRange) {
-            this.ambientActivationRange = ambientActivationRange;
-        }
-
-        public int getMiscActivationRange() {
-            return this.miscActivationRange;
-        }
-
-        public void setMiscActivationRange(int miscActivationRange) {
-            this.miscActivationRange = miscActivationRange;
+        public Map<String, Integer>  getEntityList() {
+            return this.entityList;
         }
     }
 
@@ -803,6 +915,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = MODULE_ENTITY_ACTIVATION_RANGE)
         private boolean pluginEntityActivation = true;
 
+        @Setting(value = MODULE_ENTITY_COLLISIONS)
+        private boolean pluginEntityCollisions = true;
+
         @Setting("timings")
         private boolean pluginTimings = true;
 
@@ -826,6 +941,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPluginEntityActivation(boolean state) {
             this.pluginEntityActivation = state;
+        }
+
+        public boolean usePluginEntityCollisions() {
+            return this.pluginEntityCollisions;
+        }
+
+        public void setPluginEntityCollisions(boolean state) {
+            this.pluginEntityCollisions = state;
         }
 
         public boolean usePluginTimings() {

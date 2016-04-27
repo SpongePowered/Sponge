@@ -46,6 +46,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
 import net.minecraft.entity.projectile.EntityThrowable;
+import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
@@ -1127,6 +1128,10 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
         if (!this.getMinecraftWorld().isRemote) {
             IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
+            if (iblockstate == Blocks.air.getDefaultState()) {
+                iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
+                return;
+            }
 
             try {
                 if (!this.getMinecraftWorld().isRemote) {

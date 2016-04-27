@@ -179,6 +179,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private boolean keepSpawnLoaded;
     private Context worldContext;
     private SpongeChunkProvider spongegen;
+    protected boolean processingExplosion = false;
+    private SpongeConfig<?> activeConfig;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -232,6 +234,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         if (SpongeImpl.getGame().getPlatform().getType() == Platform.Type.SERVER) {
             this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
         }
+        this.activeConfig = SpongeHooks.getActiveConfig((net.minecraft.world.World)(Object) this);
     }
 
     @Override
@@ -1017,4 +1020,18 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     }
 
+    @Override
+    public boolean isProcessingExplosion() {
+        return this.processingExplosion;
+    }
+
+    @Override
+    public SpongeConfig<?> getActiveConfig() {
+        return this.activeConfig;
+    }
+
+    @Override
+    public void setActiveConfig(SpongeConfig<?> config) {
+        this.activeConfig = config;
+    }
 }

@@ -322,4 +322,14 @@ public abstract class MixinWorldServer extends MixinWorld {
     private void onGetSpawnList(EnumCreatureType creatureType, BlockPos pos, CallbackInfoReturnable<BiomeGenBase.SpawnListEntry> callbackInfo) {
         StaticMixinHelper.gettingSpawnList = true;
     }
+
+    @Inject(method = "newExplosion", at = @At(value = "HEAD"))
+    public void onExplosionHead(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
+        this.processingExplosion = true;
+    }
+
+    @Inject(method = "newExplosion", at = @At(value = "RETURN"))
+    public void onExplosionReturn(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
+        this.processingExplosion = false;
+    }
 }
