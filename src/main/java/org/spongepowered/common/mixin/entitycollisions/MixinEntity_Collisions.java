@@ -48,14 +48,18 @@ public class MixinEntity_Collisions implements IModData_Collisions {
     private int maxCollisions = 8;
     private boolean refreshCache = false;
     private SpongeEntityType spongeEntityType;
-    private String entityName;
-    private String entityModId;
+    private String entityName = "unknown";
+    private String entityModId = "unknown";
     @Shadow public World worldObj;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onEntityConstruction(World world, CallbackInfo ci) {
         if (world != null && ((IMixinWorldInfo) world.getWorldInfo()).isValid()) {
             this.spongeEntityType = (SpongeEntityType) ((Entity) this.mcEntity).getType();
+            if (spongeEntityType == null) {
+                return;
+            }
+
             if (mcEntity instanceof EntityItem) {
                 EntityItem item = (EntityItem) mcEntity;
                 ItemStack itemstack = item.getEntityItem();
@@ -65,6 +69,7 @@ public class MixinEntity_Collisions implements IModData_Collisions {
             } else {
                 this.entityName = this.spongeEntityType.getName();
             }
+
             this.entityModId = this.spongeEntityType.getModId();
             initializeCollisionState();
         }
