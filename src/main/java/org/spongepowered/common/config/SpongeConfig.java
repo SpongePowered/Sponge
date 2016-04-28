@@ -43,6 +43,7 @@ import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.util.IpSet;
+import org.spongepowered.common.util.LanguageUtil;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -51,6 +52,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ForkJoinPool;
@@ -105,6 +107,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     // GENERAL
     public static final String GENERAL_DISABLE_WARNINGS = "disable-warnings";
     public static final String GENERAL_CHUNK_LOAD_OVERRIDE = "chunk-load-override";
+    public static final String GENERAL_LOCALE = "locale";
 
     // LOGGING
     public static final String LOGGING_BLOCK_BREAK = "block-break";
@@ -488,6 +491,8 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = GENERAL_CHUNK_LOAD_OVERRIDE,
                 comment = "Forces Chunk Loading on provide requests (speedup for mods that don't check if a chunk is loaded)")
         private boolean chunkLoadOverride = false;
+        @Setting(value = GENERAL_LOCALE, comment = "IEFT localization string (e.g. \"en_US\")")
+        private String locale = "en_US";
 
         public boolean disableWarnings() {
             return this.disableWarnings;
@@ -503,6 +508,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setChunkLoadOverride(boolean chunkLoadOverride) {
             this.chunkLoadOverride = chunkLoadOverride;
+        }
+
+        public Locale getLocale() {
+            return LanguageUtil.LOCALE_CACHE.getUnchecked(this.locale);
         }
     }
 
