@@ -69,6 +69,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.Profession;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -673,6 +674,9 @@ public final class EntityUtil {
             throw new IllegalArgumentException("Not a native SpongeAPI entity!");
         }
         return (org.spongepowered.api.entity.Entity) mixinEntity;
+    }
+    public static EntitySnapshot createSnapshot(Entity entity) {
+        return fromNative(entity).createSnapshot();
     }
 
     public static boolean changeWorld(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {

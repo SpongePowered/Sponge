@@ -166,7 +166,7 @@ public final class DataQueries {
     public static final DataQuery LOCAL_DATE_MONTH = of("LocalDateMonth");
     public static final DataQuery LOCAL_DATE_DAY = of("LocalDateDay");
     public static final DataQuery ZONE_TIME_ID = of("ZoneDateTimeId");
-    public static final DataQuery FORGE_DATA = of(NbtDataUtil.FORGE_DATA_TAG);
+    public static final DataQuery FORGE_DATA = of(NbtDataUtil.FORGE_DATA);
 
     private DataQueries() {
     }
@@ -184,7 +184,7 @@ public final class DataQueries {
     public static final class Compatibility {
 
         public static final class Forge {
-            public static final DataQuery ROOT = of(NbtDataUtil.FORGE_DATA_TAG);
+            public static final DataQuery ROOT = of(NbtDataUtil.FORGE_DATA);
         }
 
     }
@@ -194,5 +194,15 @@ public final class DataQueries {
         public static final DataQuery SPONGE_ROOT = of(NbtDataUtil.SPONGE_DATA);
 
         public static final DataQuery CUSTOM_MANIPULATOR_LIST = of(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+    }
+
+    public static final class EntityArchetype {
+
+        public static final DataQuery ENTITY_TYPE = of("EntityType");
+        public static final DataQuery ENTITY_DATA = of("EntityData");
+
+        private EntityArchetype() {
+        }
+
     }
 }

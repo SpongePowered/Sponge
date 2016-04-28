@@ -72,7 +72,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
     }
 
     @Override
-    public void apply(Location<World> location, Cause cause) {
+    public boolean apply(Location<World> location, Cause cause) {
         final BlockState currentState = location.getBlock();
         final Block currentBlock = BlockUtil.toBlock(currentState);
         final Block newBlock = BlockUtil.toBlock(this.blockState);
@@ -92,7 +92,7 @@ public class SpongeTileEntityArchetype extends AbstractArchetype<TileEntityType,
         compound.setInteger("y", blockpos.getY());
         compound.setInteger("z", blockpos.getZ());
         tileEntity.readFromNBT(compound);
-
+        return true;
     }
 
     @Override

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.nbt.value;
 
 import net.minecraft.nbt.NBTTagCompound;
+import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.value.BaseValue;

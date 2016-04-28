@@ -56,6 +56,12 @@ public final class DataVersions {
         }
     }
 
+    public static final class EntityArchetype {
+
+        public static final int BASE_VERSION = 1;
+
+    }
+
     private DataVersions() {
 
     }
@@ -93,4 +99,5 @@ public final class DataVersions {
         public static final int INVISIBILITY_DATA_WITH_VANISH = 2;
 
     }
+
 }
