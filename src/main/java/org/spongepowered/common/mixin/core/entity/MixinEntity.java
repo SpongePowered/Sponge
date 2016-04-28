@@ -49,7 +49,9 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.play.server.S07PacketRespawn;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S13PacketDestroyEntities;
+import net.minecraft.network.play.server.S1DPacketEntityEffect;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
+import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
@@ -748,6 +750,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         }
 
         entity.worldObj.removePlayerEntityDangerously(entity);
+        entity.isDead = false;
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
         if (forced) {
@@ -769,8 +772,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 // Force vanilla client to refresh their chunk cache if same dimension
                 if (currentDim != targetDim && (currentDim == clientDimension || targetDim == clientDimension)) {
                     entityplayermp1.playerNetServerHandler.sendPacket(
-                        new S07PacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
-                            entityplayermp1.theItemInWorldManager.getGameType()));
+                        new S07PacketRespawn((byte) (clientDimension >= 0 ? -1 : 0), toWorld.getDifficulty(),
+                            toWorld.getWorldInfo().getTerrainType(), entityplayermp1.theItemInWorldManager.getGameType()));
                 }
             }
 
@@ -778,7 +781,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 new S07PacketRespawn(clientDimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(),
                     entityplayermp1.theItemInWorldManager.getGameType()));
             entity.setWorld(toWorld);
-            entity.isDead = false;
             entityplayermp1.playerNetServerHandler.setPlayerLocation(entityplayermp1.posX, entityplayermp1.posY, entityplayermp1.posZ,
                 entityplayermp1.rotationYaw, entityplayermp1.rotationPitch);
             entityplayermp1.setSneaking(false);
@@ -789,7 +791,11 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             entityplayermp1.theItemInWorldManager.setWorld(toWorld);
             entityplayermp1.addSelfToInternalCraftingInventory();
             entityplayermp1.setHealth(entityplayermp1.getHealth());
+            for (Object effect : entityplayermp1.getActivePotionEffects()) {
+                entityplayermp1.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(entityplayermp1.getEntityId(), (PotionEffect) effect));
+            }
         } else {
+            entity.setWorld(toWorld);
             toWorld.spawnEntityInWorld(entity);
         }
 
