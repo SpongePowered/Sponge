@@ -80,6 +80,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -566,7 +567,7 @@ public final class CauseTracker {
                 } else {
                     builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
                 }
-    
+
                 Cause spawnCause = builder.build();
                 if (cause.root() == StaticMixinHelper.packetPlayer) {
                     cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
@@ -954,7 +955,13 @@ public final class CauseTracker {
         for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
             if (entry.getKey().equals(NamedCause.SOURCE)) {
                 if (!(entry.getValue() instanceof SpawnCause)) {
-                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
+                    SpawnType type;
+                    if (entity instanceof EntityItem) {
+                        type = SpawnTypes.DROPPED_ITEM;
+                    } else {
+                        type = SpawnTypes.CUSTOM;
+                    }
+                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(type).build()));
                 } else {
                     namedCauses.add(NamedCause.source(entry.getValue()));
                 }
@@ -980,13 +987,17 @@ public final class CauseTracker {
             }
 
             if (this.getMinecraftWorld().isRemote || flag || this.spawningDeathDrops) {
+                if (SpongeImpl.postEvent(SpongeEventFactory.createSpawnEntityEventCustom(cause, Lists.newArrayList(entity),
+                        Lists.newArrayList(entity.createSnapshot()), getWorld())) && !flag) {
+                    return false;
+                }
                 this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
                 this.getMinecraftWorld().loadedEntityList.add(entityIn);
                 this.getMixinWorld().onSpongeEntityAdded(entityIn);
                 return true;
             }
 
-            if (!flag && this.processingCaptureCause) {
+            if (!flag && this.processingCaptureCause && !this.captureTerrainGen) {
                 if (this.currentTickBlock != null) {
                     BlockPos sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
                     Block targetBlock = getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
@@ -1059,28 +1070,10 @@ public final class CauseTracker {
 
                 if (entityIn instanceof EntityItem) {
                     this.capturedEntityItems.add((Item) entityIn);
-                    final List<NamedCause> dropCauses = new ArrayList<>();
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            dropCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build()));
-                        } else {
-                            dropCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                    cause = Cause.of(namedCauses);
                     event = SpongeEventFactory.createDropItemEventCustom(cause, this.capturedEntityItems,
                             entitySnapshotBuilder.build(), this.getWorld());
                 } else {
                     this.capturedEntities.add((Entity) entityIn);
-                    final List<NamedCause> customCauses = new ArrayList<>();
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            customCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                        } else {
-                            customCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                        }
-                    }
-                    cause = Cause.of(customCauses);
                     event = SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                             entitySnapshotBuilder.build(), this.getWorld());
                 }
