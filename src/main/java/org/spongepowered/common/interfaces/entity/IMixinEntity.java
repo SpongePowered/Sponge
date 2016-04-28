@@ -99,6 +99,8 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     boolean isUntargetable();
 
     void setUntargetable(boolean untargetable);
+    
+    void setSpongeSize(float width, float height, float scale);
 
     @Nullable
     Text getDisplayNameText();
