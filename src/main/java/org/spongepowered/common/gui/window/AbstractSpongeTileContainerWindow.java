@@ -35,15 +35,15 @@ import org.spongepowered.api.world.World;
 
 import java.util.Optional;
 
-public abstract class AbstractSpongeTileContainerWindow<T1 extends TileEntity & IInteractionObject, T2 extends org.spongepowered.api.block.tileentity.TileEntity>
-        extends AbstractSpongeContainerWindow implements TileBackedWindow<T2> {
+public abstract class AbstractSpongeTileContainerWindow<McTile extends TileEntity & IInteractionObject, ApiTile extends org.spongepowered.api.block.tileentity.TileEntity>
+        extends AbstractSpongeContainerWindow implements TileBackedWindow<ApiTile> {
 
-    private final Class<T1> tileClass;
-    protected T1 tileEntity;
-    protected T1 virtualTile;
+    private final Class<McTile> tileClass;
+    protected McTile tileEntity;
+    protected McTile virtualTile;
     protected Location<World> loc;
 
-    public AbstractSpongeTileContainerWindow(Class<T1> tileClass) {
+    public AbstractSpongeTileContainerWindow(Class<McTile> tileClass) {
         this.tileClass = tileClass;
     }
 
@@ -64,7 +64,7 @@ public abstract class AbstractSpongeTileContainerWindow<T1 extends TileEntity & 
         return this.virtualTile;
     }
 
-    protected abstract T1 createVirtualTile();
+    protected abstract McTile createVirtualTile();
 
     @Override
     public void onClientClose(Packet<INetHandlerPlayServer> packet) {
@@ -105,9 +105,9 @@ public abstract class AbstractSpongeTileContainerWindow<T1 extends TileEntity & 
 
     @SuppressWarnings("unchecked")
     @Override
-    public void setTileEntity(T2 tileEntity) {
+    public void setTileEntity(ApiTile tileEntity) {
         checkNotOpen();
-        this.tileEntity = (T1) tileEntity;
+        this.tileEntity = (McTile) tileEntity;
         this.loc = tileEntity == null ? null : tileEntity.getLocation();
     }
 

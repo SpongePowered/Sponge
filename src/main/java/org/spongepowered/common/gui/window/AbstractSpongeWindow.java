@@ -85,7 +85,7 @@ public abstract class AbstractSpongeWindow implements Window {
     // Called when the client closes the GUI, as determined by the packet sent.
     // see PacketUtil#handleGuiClose
     public void onClientClose(Packet<INetHandlerPlayServer> packet) {
-        ((IMixinEntityPlayerMP) this.player).informGuiClosed();
+        ((IMixinEntityPlayerMP) this.player).informWindowClosed();
         this.player = null;
     }
 

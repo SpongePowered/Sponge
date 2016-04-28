@@ -56,8 +56,8 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     // todo
     void restorePacketItem();
 
-    void informGuiClosed();
+    void informWindowClosed();
 
-    int incrementWindowId();
+    int incrementAndGetWindowId();
 
 }

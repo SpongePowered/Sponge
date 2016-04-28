@@ -202,6 +202,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public int newTotalExperience = 0;
     public boolean keepsLevel = false;
     private boolean sleepingIgnored;
+    private AbstractSpongeWindow openWindow;
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
@@ -831,8 +832,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
     }
 
-    private AbstractSpongeWindow openWindow;
-
     @Override
     public boolean showWindow(Window window) {
         checkNotNull(window, "window");
@@ -863,12 +862,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void informGuiClosed() {
+    public void informWindowClosed() {
         this.openWindow = null;
     }
 
     @Override
-    public int incrementWindowId() {
+    public int incrementAndGetWindowId() {
         getNextWindowId();
         return this.currentWindowId;
     }

@@ -74,7 +74,7 @@ public class SpongeHorseInventoryWindow extends AbstractSpongeContainerWindow im
         this.player.playerNetServerHandler.sendPacket(new S0FPacketSpawnMob(horse));
 
         // Open window on client and configure container
-        int windowId = ((IMixinEntityPlayerMP) this.player).incrementWindowId();
+        int windowId = ((IMixinEntityPlayerMP) this.player).incrementAndGetWindowId();
         this.player.playerNetServerHandler.sendPacket(
                 new S2DPacketOpenWindow(windowId, "EntityHorse", horse.getDisplayName(), inventory.getSizeInventory(), horse.getEntityId()));
         this.player.openContainer = createContainerHorse(horse, inventory);

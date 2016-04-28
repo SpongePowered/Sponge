@@ -73,7 +73,7 @@ public abstract class AbstractSpongeContainerWindow extends AbstractSpongeWindow
 
     // Mostly copied from displayGUIChest, except use createVirtualContainer
     private void displayVirtualGui(IInteractionObject obj) {
-        int windowId = ((IMixinEntityPlayerMP) this.player).incrementWindowId();
+        int windowId = ((IMixinEntityPlayerMP) this.player).incrementAndGetWindowId();
         S2DPacketOpenWindow packet;
         if (obj instanceof IInventory) {
             packet = new S2DPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName(), ((InventoryPlayer) obj).getSizeInventory());
