@@ -54,6 +54,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -151,6 +152,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private Text displayName;
     protected DamageSource lastDamageSource;
     private Cause destructCause;
+    private BlockState currentCollidingBlock;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -869,9 +871,13 @@ public abstract class MixinEntity implements IMixinEntity {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.NONE)) {
+        IBlockState state = world.getBlockState(pos);
+        this.setCurrentCollidingBlock((BlockState) state);
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, entity);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
@@ -886,9 +892,12 @@ public abstract class MixinEntity implements IMixinEntity {
             return;
         }
 
+        this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
@@ -903,9 +912,13 @@ public abstract class MixinEntity implements IMixinEntity {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.UP)) {
+        IBlockState state = world.getBlockState(pos);
+        this.setCurrentCollidingBlock((BlockState) state);
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Override
@@ -1073,5 +1086,16 @@ public abstract class MixinEntity implements IMixinEntity {
         this.custom = null;
         return stack;
     }
+    @Override
+    public void setCurrentCollidingBlock(BlockState state) {
+        this.currentCollidingBlock = state;
+    }
 
+    @Override
+    public BlockState getCurrentCollidingBlock() {
+        if (this.currentCollidingBlock == null) {
+            return (BlockState) Blocks.air.getDefaultState();
+        }
+        return this.currentCollidingBlock;
+    }
 }

@@ -22,30 +22,53 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.entitycollisions;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.block.Block;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.mixin.plugin.entitycollisions.interfaces.IModData_Collisions;
 
-import javax.annotation.Nullable;
+@Mixin(Block.class)
+public abstract class MixinBlock_Collisions implements IModData_Collisions {
 
-public interface IMixinWorld {
+    private int maxCollisions = 8;
+    private String modId;
+    @SuppressWarnings("unused")
+    private String modBlockName;
+    private boolean refreshCache = true;
 
-    long getWeatherStartTime();
+    @Override
+    public int getMaxCollisions() {
+        return this.maxCollisions;
+    }
 
-    void setWeatherStartTime(long weatherStartTime);
+    @Override
+    public void setMaxCollisions(int max) {
+        this.maxCollisions = max;
+    }
 
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
+    @Override
+    public void setModDataName(String name) {
+        this.modBlockName = name;
+    }
 
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+    @Override
+    public String getModDataId() {
+        return this.modId;
+    }
 
+    @Override
+    public void setModDataId(String id) {
+        this.modId = id;
+    }
+
+    @Override
+    public void requiresCacheRefresh(boolean flag) {
+        this.refreshCache = flag;
+    }
+
+    @Override
+    public boolean requiresCacheRefresh() {
+        return this.refreshCache;
+    }
 }

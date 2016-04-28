@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -88,6 +91,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.extent.ExtentViewDownsize;
@@ -113,6 +117,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
+    private Chunk[] clientNeighbors = new Chunk[4];
+    private Chunk[] neighbors = new Chunk[4];
 
     private static final int NUM_XZ_BITS = 4;
     private static final int NUM_SHORT_Y_BITS = 8;
@@ -144,6 +150,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow private boolean isTerrainPopulated;
     @Shadow private boolean isModified;
 
+    // @formatter:off
     @Shadow @Nullable public abstract TileEntity getTileEntity(BlockPos pos, EnumCreateEntityType p_177424_2_);
     @Shadow public abstract void generateSkylightMap();
     @Shadow protected abstract void relightBlock(int x, int y, int z);
@@ -154,6 +161,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
+    // @formatter:on
 
     @Inject(method = "<init>(Lnet/minecraft/world/World;II)V", at = @At("RETURN"), remap = false)
     public void onConstructed(World world, int x, int z, CallbackInfo ci) {
@@ -169,10 +177,22 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         }
     }
 
+    @SuppressWarnings("unchecked")
     @Inject(method = "onChunkLoad()V", at = @At("RETURN"))
     public void onChunkLoadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkLoad(this.worldObj, this.chunkPos);
+        }
+
+        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        for (Direction direction : directions) {
+            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+                    (neighborPosition.getX(), neighborPosition.getZ());
+            if (neighbor != null) {
+                this.setNeighbor(direction, (Chunk) neighbor);
+                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), this);
+            }
         }
     }
 
@@ -180,6 +200,17 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public void onChunkUnloadInject(CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
             SpongeHooks.logChunkUnload(this.worldObj, this.chunkPos);
+        }
+
+        Direction[] directions = {Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST};
+        for (Direction direction : directions) {
+            Vector3i neighborPosition = this.getPosition().add(direction.toVector3d().toInt());
+            net.minecraft.world.chunk.Chunk neighbor = ((IMixinChunkProviderServer) this.worldObj.getChunkProvider()).getChunkIfLoaded
+                    (neighborPosition.getX(), neighborPosition.getZ());
+            if (neighbor != null) {
+                this.setNeighbor(direction, null);
+                ((IMixinChunk) neighbor).setNeighbor(direction.getOpposite(), null);
+            }
         }
     }
 
@@ -223,9 +254,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public double getRegionalDifficultyFactor() {
         final boolean flag = this.worldObj.getDifficulty() == EnumDifficulty.HARD;
         float moon = this.worldObj.getCurrentMoonPhaseFactor();
-        float f2 = MathHelper.clamp_float(((float)this.worldObj.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
+        float f2 = MathHelper.clamp_float(((float) this.worldObj.getWorldTime() + -72000.0F) / 1440000.0F, 0.0F, 1.0F) * 0.25F;
         float f3 = 0.0F;
-        f3 += MathHelper.clamp_float((float)this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
+        f3 += MathHelper.clamp_float((float) this.inhabitedTime / 3600000.0F, 0.0F, 1.0F) * (flag ? 1.0F : 0.75F);
         f3 += MathHelper.clamp_float(moon * 0.25F, 0.0F, f2);
         return f3;
     }
@@ -238,7 +269,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         } else if (region > 4) {
             return 1.0;
         } else {
-            return (region - 2.0)/ 2.0;
+            return (region - 2.0) / 2.0;
         }
     }
 
@@ -379,7 +410,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @SuppressWarnings({"unchecked"})
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
-    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_, CallbackInfo ci) {
+    public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
+            CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;
         }
@@ -396,7 +428,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
-    public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_, CallbackInfo ci) {
+    public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
+            CallbackInfo ci) {
         if (this.worldObj.isRemote) {
             return;
         }
@@ -681,7 +714,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public Collection<org.spongepowered.api.block.tileentity.TileEntity>
-            getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
+    getTileEntities(java.util.function.Predicate<org.spongepowered.api.block.tileentity.TileEntity> filter) {
         Set<org.spongepowered.api.block.tileentity.TileEntity> tiles = Sets.newHashSet();
         for (Entry<BlockPos, TileEntity> entry : this.chunkTileEntityMap.entrySet()) {
             if (filter.test((org.spongepowered.api.block.tileentity.TileEntity) entry.getValue())) {
@@ -765,6 +798,103 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                     .complete());
             generator.populate(x, z);
             causeTracker.completePhase();
+        }
+    }
+
+    @Override
+    public void setNeighbor(Direction direction, @Nullable Chunk neighbor) {
+        if (this.worldObj.isRemote) {
+            this.clientNeighbors[directionToIndex(direction)] = neighbor;
+        } else {
+            this.neighbors[directionToIndex(direction)] = neighbor;
+        }
+    }
+
+//    @Override
+//    public Optional<Chunk> getNeighbor(Direction direction, boolean shouldLoad) {
+//        checkNotNull(direction, "direction");
+//        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
+//
+//        if (direction.isUpright() || direction == Direction.NONE) {
+//            return Optional.of(this);
+//        }
+//
+//        int index = directionToIndex(direction);
+//        Direction secondary = getSecondaryDirection(direction);
+//        Chunk neighbor = null;
+//        if (this.worldObj.isRemote) {
+//            neighbor = this.clientNeighbors[index];
+//        } else {
+//            neighbor = this.neighbors[index];
+//        }
+//
+//        if (neighbor == null && shouldLoad) {
+//            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
+//            Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
+//            if (cardinal.isPresent()) {
+//                neighbor = cardinal.get();
+//            }
+//        }
+//
+//        if (neighbor != null) {
+//            if (secondary != Direction.NONE) {
+//                return neighbor.getNeighbor(secondary, shouldLoad);
+//            } else {
+//                return Optional.of(neighbor);
+//            }
+//        }
+//
+//        return Optional.empty();
+//    }
+
+    private static int directionToIndex(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return 0;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return 1;
+            case EAST:
+                return 2;
+            case WEST:
+                return 3;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    private static Direction getCardinalDirection(Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return Direction.NORTH;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return Direction.SOUTH;
+            case EAST:
+                return Direction.EAST;
+            case WEST:
+                return Direction.WEST;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
+    private static Direction getSecondaryDirection(Direction direction) {
+        switch (direction) {
+            case NORTHEAST:
+            case SOUTHEAST:
+                return Direction.EAST;
+            case NORTHWEST:
+            case SOUTHWEST:
+                return Direction.WEST;
+            default:
+                return Direction.NONE;
         }
     }
 

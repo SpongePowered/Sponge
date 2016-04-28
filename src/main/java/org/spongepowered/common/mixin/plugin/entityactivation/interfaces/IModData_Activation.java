@@ -22,30 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.plugin.entityactivation.interfaces;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 
-import javax.annotation.Nullable;
+public interface IModData_Activation extends IModData {
 
-public interface IMixinWorld {
+    // entity activation
+    void inactiveTick();
 
-    long getWeatherStartTime();
+    byte getActivationType();
 
-    void setWeatherStartTime(long weatherStartTime);
+    long getActivatedTick();
 
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
+    boolean getDefaultActivationState();
 
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+    void setActivatedTick(long tick);
+
+    int getActivationRange();
+
+    void setActivationRange(int range);
 
 }

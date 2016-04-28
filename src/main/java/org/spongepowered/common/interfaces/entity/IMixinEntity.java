@@ -25,9 +25,11 @@
 package org.spongepowered.common.interfaces.entity;
 
 import com.flowpowered.math.vector.Vector3d;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
@@ -54,19 +56,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setTeleportVehicle(Entity entity);
 
-    byte getActivationType();
-
-    long getActivatedTick();
-
-    boolean getDefaultActivationState();
-
     Optional<User> getTrackedPlayer(String nbtKey);
 
     void trackEntityUniqueId(String nbtKey, UUID uuid);
-
-    void setActivatedTick(long tick);
-
-    void inactiveTick();
 
     NBTTagCompound getEntityData();
 
@@ -116,5 +108,9 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     DamageSource getLastDamageSource();
 
     Cause getNonLivingDestructCause();
+
+    void setCurrentCollidingBlock(BlockState state);
+
+    BlockState getCurrentCollidingBlock();
 
 }

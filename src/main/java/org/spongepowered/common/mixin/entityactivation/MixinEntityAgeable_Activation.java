@@ -22,30 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.entityactivation;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.entity.EntityAgeable;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.world.World;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.SoftOverride;
 
-import javax.annotation.Nullable;
+@NonnullByDefault
+@Mixin(EntityAgeable.class)
+public abstract class MixinEntityAgeable_Activation extends EntityCreature {
 
-public interface IMixinWorld {
+    private MixinEntityAgeable_Activation super$;
 
-    long getWeatherStartTime();
+    public MixinEntityAgeable_Activation(World worldIn) {
+        super(worldIn);
+    }
 
-    void setWeatherStartTime(long weatherStartTime);
+    @Shadow public abstract int getGrowingAge();
+    @Shadow public abstract void setGrowingAge(int age);
+    @Shadow public abstract void setScaleForAge(boolean baby);
 
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
+    @SoftOverride
+    public void inactiveTick() {
+        this.super$.inactiveTick();
 
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+        if (this.worldObj.isRemote) {
+            this.setScaleForAge(this.isChild());
+        } else {
+            int i = this.getGrowingAge();
+
+            if (i < 0) {
+                ++i;
+                this.setGrowingAge(i);
+            } else if (i > 0) {
+                --i;
+                this.setGrowingAge(i);
+            }
+        }
+    }
 
 }

@@ -29,7 +29,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.interfaces.world.gen.IMIxinChunkProviderServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
@@ -54,7 +54,7 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
             }
             // Sponge Start - Use our hook to get the chunk only if it is loaded
             // return this.getChunkFromBlockCoords(pos).getLightSubtracted(pos, 0);
-            final Chunk chunk = ((IMIxinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+            final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
             return chunk == null ? 0 : chunk.getLightSubtracted(pos, 0);
             // Sponge End
         }
@@ -109,7 +109,7 @@ public abstract class MixinWorldServer_Lighting extends MixinWorld_Lighting {
                 // Sponge - Gets only loaded chunks, unloaded chunks will not get loaded to check lighting
                 // Chunk chunk = this.getChunkFromBlockCoords(pos);
                 // return chunk.getLightSubtracted(pos, this.skylightSubtracted);
-                final Chunk chunk = ((IMIxinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
+                final Chunk chunk = ((IMixinChunkProviderServer) this.chunkProvider).getChunkIfLoaded(pos.getX() >> 4, pos.getZ() >> 4);
                 return chunk == null ? 0 : chunk.getLightSubtracted(pos, this.getSkylightSubtracted());
                 // Sponge End
             }

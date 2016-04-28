@@ -22,30 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.interfaces.world.gen;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.world.chunk.Chunk;
 
 import javax.annotation.Nullable;
 
-public interface IMixinWorld {
+public interface IMixinChunkProviderServer {
 
-    long getWeatherStartTime();
-
-    void setWeatherStartTime(long weatherStartTime);
-
+    /**
+     * Gets the chunk at the desired position. If there is no
+     * loaded chunk at the position, {@code null} is returned.
+     *
+     * @param x The chunk x position
+     * @param z The chunk z position
+     * @return The chunk, if loaded
+     */
     @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
-
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+    Chunk getChunkIfLoaded(int x, int z);
 
 }

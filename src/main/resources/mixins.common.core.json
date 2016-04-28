@@ -410,6 +410,7 @@
         "world.gen.MixinMapGenBase",
         "world.gen.MixinMapGenStructure",
         "world.gen.MixinMapGenVillage",
+        "world.gen.MixinChunkProviderServer",
         "world.gen.populators.MixinWorldGenAbstractTree",
         "world.gen.populators.MixinWorldGenBigMushroom",
         "world.gen.populators.MixinWorldGenBigTree",

@@ -22,30 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.entityactivation;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
 
-import javax.annotation.Nullable;
+@NonnullByDefault
+@Mixin(net.minecraft.world.World.class)
+public abstract class MixinWorld_Activation implements IMixinWorld {
 
-public interface IMixinWorld {
-
-    long getWeatherStartTime();
-
-    void setWeatherStartTime(long weatherStartTime);
-
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
-
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+    @Inject(method = "updateEntities()V", at = @At(value = "INVOKE_STRING",
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}))
+    private void onInvokeProfiler(CallbackInfo ci) {
+        if (!((net.minecraft.world.World) (Object) this).isRemote) {
+            ActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
+        }
+    }
 
 }

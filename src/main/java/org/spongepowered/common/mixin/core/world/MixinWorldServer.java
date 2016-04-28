@@ -80,6 +80,7 @@ import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
+import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
@@ -99,6 +100,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -115,8 +117,10 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.SpongeHooks;
@@ -164,7 +168,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
     private Integer dimensionId = null;
-
+    private SpongeConfig<?> activeConfig;
 
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
@@ -193,6 +197,27 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         updateWorldGenerator();
     }
 
+
+    @Override
+    public boolean isProcessingExplosion() {
+        return this.processingExplosion;
+    }
+
+    @Override
+    public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
+        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
+    }
+
+
+    @Override
+    public SpongeConfig<?> getActiveConfig() {
+        return this.activeConfig;
+    }
+
+    @Override
+    public void setActiveConfig(SpongeConfig<?> config) {
+        this.activeConfig = config;
+    }
 
     @Override
     public int getDimensionId() {
@@ -859,4 +884,67 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return new SpongeBlockSnapshot(this.builder, updateFlag);
     }
 
+
+    @Inject(method = "newExplosion", at = @At(value = "HEAD"))
+    public void onExplosionHead(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
+        this.processingExplosion = true;
+    }
+
+    @Inject(method = "newExplosion", at = @At(value = "RETURN"))
+    public void onExplosionReturn(net.minecraft.entity.Entity entityIn, double x, double y, double z, float strength, boolean isFlaming, boolean isSmoking, CallbackInfoReturnable<net.minecraft.world.Explosion> cir) {
+        this.processingExplosion = false;
+    }
+
+    /**
+     * @author amaranth - April 25th, 2016
+     * @reason Avoid 25 chunk map lookups per entity per tick by using neighbor pointers
+     *
+     * @param xStart X block start coordinate
+     * @param yStart Y block start coordinate
+     * @param zStart Z block start coordinate
+     * @param xEnd X block end coordinate
+     * @param yEnd Y block end coordinate
+     * @param zEnd Z block end coordinate
+     * @param allowEmpty Whether empty chunks should be accepted
+     * @return If the chunks for the area are loaded
+     */
+    @Override
+    public boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
+        if (yEnd < 0 || yStart > 255) {
+            return false;
+        }
+
+        xStart = xStart >> 4;
+        zStart = zStart >> 4;
+        xEnd = xEnd >> 4;
+        zEnd = zEnd >> 4;
+
+        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
+        if (base == null) {
+            return false;
+        }
+
+        for (int i = xStart; i <= xEnd; i++) {
+            Optional<Chunk> column = base.getNeighbor(Direction.EAST);
+            if (!column.isPresent()) {
+                return false;
+            }
+
+            Chunk unwrapped = column.get();
+            for (int j = zStart; j <= zEnd; j++) {
+                Optional<Chunk> row = unwrapped.getNeighbor(Direction.SOUTH);
+                if (!row.isPresent()) {
+                    return false;
+                }
+
+                // This is redundant
+                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row.get()).isEmpty()) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+
+    }
 }

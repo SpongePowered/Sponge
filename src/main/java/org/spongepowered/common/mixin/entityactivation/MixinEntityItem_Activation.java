@@ -22,30 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.mixin.entityactivation;
 
-import com.flowpowered.math.vector.Vector3d;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.WorldProvider;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.common.config.SpongeConfig;
-import org.spongepowered.common.world.gen.SpongeChunkGenerator;
-import org.spongepowered.common.world.gen.SpongeWorldGenerator;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.item.ItemStack;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-import javax.annotation.Nullable;
+@NonnullByDefault
+@Mixin(EntityItem.class)
+public abstract class MixinEntityItem_Activation extends MixinEntity_Activation {
 
-public interface IMixinWorld {
+    @Shadow public abstract ItemStack getEntityItem();
 
-    long getWeatherStartTime();
+    @Shadow private int delayBeforeCanPickup;
+    @Shadow private int age;
 
-    void setWeatherStartTime(long weatherStartTime);
+    @Override
+    public void inactiveTick() {
+        if (this.delayBeforeCanPickup > 0 && this.delayBeforeCanPickup != 32767) {
+            --this.delayBeforeCanPickup;
+        }
 
-    @Nullable
-    EntityPlayer getClosestPlayerToEntityWhoAffectsSpawning(net.minecraft.entity.Entity entity, double d1tance);
-
-    @Nullable
-    EntityPlayer getClosestPlayerWhoAffectsSpawning(double x, double y, double z, double distance);
+        if (!this.worldObj.isRemote && this.age >= ((IMixinWorldServer) this.worldObj).getWorldConfig().getConfig().getEntity().getItemDespawnRate()) {
+            this.setDead();
+        }
+    }
 
 }

@@ -89,6 +89,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -108,6 +109,7 @@ import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -125,6 +127,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -167,6 +170,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
+    protected boolean processingExplosion = false;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -443,12 +447,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setKeepSpawnLoaded(boolean keepLoaded) {
         this.keepSpawnLoaded = keepLoaded;
-    }
-
-
-    @Override
-    public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 
     @Override
@@ -872,4 +870,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         entity.onUpdate();
     }
+
+
+
 }
