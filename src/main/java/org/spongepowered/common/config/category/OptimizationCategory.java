@@ -32,6 +32,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeImplHooks;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 @ConfigSerializable
 public class OptimizationCategory extends ConfigCategory {
@@ -61,6 +63,20 @@ public class OptimizationCategory extends ConfigCategory {
                                                                + "for such a simple check. This may however break mods that alter\n"
                                                                + "world heights and can thus be disabled in those cases.")
     private boolean inlineBlockPositionChecks = true;
+
+    @Setting(value = "structure-saving", comment = "Toggles structures that should be saved to disk. Certain structures\n"
+                                                   + "are not neccessarily required to be saved to perform their proper\n"
+                                                   + "function. As such, saving these structures may take unnecessary \n"
+                                                   + "storage space, and/or time during world saves. By default, \n"
+                                                   + "\"Mineshaft\" is \"false\".")
+    public Map<String, Boolean> structureMap = generateMap();
+
+    private static Map<String, Boolean> generateMap() {
+        final Map<String, Boolean> map = new HashMap<>();
+        map.put("Mineshaft", false); // Let everything else be true
+        return map;
+    }
+
 
     public OptimizationCategory() {
         try {
