@@ -115,8 +115,8 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
         }
 
         @Override
-        public void setCustomer(EntityPlayer p_70932_1_) {
-            this.customer = p_70932_1_;
+        public void setCustomer(EntityPlayer player) {
+            this.customer = player;
         }
 
         @Override
@@ -125,8 +125,8 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
         }
 
         @Override
-        public MerchantRecipeList getRecipes(EntityPlayer p_70934_1_) {
-            if (p_70934_1_ == this.customer) {
+        public MerchantRecipeList getRecipes(EntityPlayer player) {
+            if (player == this.customer) {
                 return this.recipes;
             }
             return null;

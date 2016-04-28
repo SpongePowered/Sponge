@@ -24,51 +24,9 @@
  */
 package org.spongepowered.common.gui.window;
 
-import org.spongepowered.api.gui.window.AnvilWindow;
-import org.spongepowered.api.gui.window.BeaconWindow;
-import org.spongepowered.api.gui.window.BookWindow;
-import org.spongepowered.api.gui.window.BrewingStandWindow;
-import org.spongepowered.api.gui.window.ChestWindow;
-import org.spongepowered.api.gui.window.CommandBlockWindow;
-import org.spongepowered.api.gui.window.CraftingTableWindow;
-import org.spongepowered.api.gui.window.DemoWindow;
-import org.spongepowered.api.gui.window.DispenserWindow;
-import org.spongepowered.api.gui.window.DropperWindow;
-import org.spongepowered.api.gui.window.EnchantmentTableWindow;
-import org.spongepowered.api.gui.window.FurnaceWindow;
-import org.spongepowered.api.gui.window.HopperWindow;
-import org.spongepowered.api.gui.window.HorseInventoryWindow;
-import org.spongepowered.api.gui.window.PlayerInventoryWindow;
-import org.spongepowered.api.gui.window.SignWindow;
-import org.spongepowered.api.gui.window.SleepingWindow;
-import org.spongepowered.api.gui.window.VillagerTradeWindow;
-import org.spongepowered.api.gui.window.WinGameWindow;
 import org.spongepowered.api.gui.window.Window;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 
 public abstract class SpongeWindowBuilder<W extends Window, B extends Window.Builder<W, B>> implements Window.Builder<W, B> {
-
-    public static void registerBuilders(SpongeGameRegistry registry) {
-        registry.registerBuilderSupplier(AnvilWindow.Builder.class, SpongeAnvilWindow.Builder::new);
-        registry.registerBuilderSupplier(BeaconWindow.Builder.class, SpongeBeaconWindow.Builder::new);
-        registry.registerBuilderSupplier(BookWindow.Builder.class, SpongeBookWindow.Builder::new);
-        registry.registerBuilderSupplier(BrewingStandWindow.Builder.class, SpongeBrewingStandWindow.Builder::new);
-        registry.registerBuilderSupplier(ChestWindow.Builder.class, SpongeChestWindow.Builder::new);
-        registry.registerBuilderSupplier(CommandBlockWindow.Builder.class, SpongeCommandBlockWindow.Builder::new);
-        registry.registerBuilderSupplier(CraftingTableWindow.Builder.class, SpongeCraftingTableWindow.Builder::new);
-        registry.registerBuilderSupplier(DemoWindow.Builder.class, SpongeDemoWindow.Builder::new);
-        registry.registerBuilderSupplier(DispenserWindow.Builder.class, SpongeDispenserWindow.Builder::new);
-        registry.registerBuilderSupplier(DropperWindow.Builder.class, SpongeDropperWindow.Builder::new);
-        registry.registerBuilderSupplier(EnchantmentTableWindow.Builder.class, SpongeEnchantmentTableWindow.Builder::new);
-        registry.registerBuilderSupplier(FurnaceWindow.Builder.class, SpongeFurnaceWindow.Builder::new);
-        registry.registerBuilderSupplier(HopperWindow.Builder.class, SpongeHopperWindow.Builder::new);
-        registry.registerBuilderSupplier(HorseInventoryWindow.Builder.class, SpongeHorseInventoryWindow.Builder::new);
-        registry.registerBuilderSupplier(PlayerInventoryWindow.Builder.class, SpongePlayerInventoryWindow.Builder::new);
-        registry.registerBuilderSupplier(SignWindow.Builder.class, SpongeSignWindow.Builder::new);
-        registry.registerBuilderSupplier(SleepingWindow.Builder.class, SpongeSleepingWindow.Builder::new);
-        registry.registerBuilderSupplier(VillagerTradeWindow.Builder.class, SpongeVillagerTradeWindow.Builder::new);
-        registry.registerBuilderSupplier(WinGameWindow.Builder.class, SpongeWinGameWindow.Builder::new);
-    }
 
     @Override
     public B from(W value) {

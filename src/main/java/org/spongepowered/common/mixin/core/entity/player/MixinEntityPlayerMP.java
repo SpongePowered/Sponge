@@ -162,6 +162,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow protected abstract void getNextWindowId();
 
+    private AbstractSpongeWindow openWindow;
+
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
@@ -619,8 +621,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.playerNetServerHandler.sendPacket(packet);
     }
 
-    private AbstractSpongeWindow openWindow;
-
     @Override
     public boolean showWindow(Window window) {
         checkNotNull(window, "window");
@@ -651,12 +651,12 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public void informGuiClosed() {
+    public void informWindowClosed() {
         this.openWindow = null;
     }
 
     @Override
-    public int incrementWindowId() {
+    public int incrementAndGetWindowId() {
         getNextWindowId();
         return this.currentWindowId;
     }

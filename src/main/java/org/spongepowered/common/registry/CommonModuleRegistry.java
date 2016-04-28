@@ -58,6 +58,7 @@ import org.spongepowered.api.event.cause.entity.spawn.*;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
+import org.spongepowered.api.gui.window.*;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
@@ -112,7 +113,7 @@ import org.spongepowered.common.event.*;
 import org.spongepowered.common.event.spawn.*;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackBuilder;
 import org.spongepowered.common.extra.fluid.SpongeFluidStackSnapshotBuilder;
-import org.spongepowered.common.gui.window.SpongeWindowBuilder;
+import org.spongepowered.common.gui.window.*;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
 import org.spongepowered.common.item.inventory.SpongeItemStackBuilder;
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
@@ -257,8 +258,26 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
             .registerBuilderSupplier(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
             .registerBuilderSupplier(WeatherSpawnCause.Builder.class, SpongeWeatherSpawnCauseBuilder::new)
+            .registerBuilderSupplier(AnvilWindow.Builder.class, SpongeAnvilWindow.Builder::new)
+            .registerBuilderSupplier(BeaconWindow.Builder.class, SpongeBeaconWindow.Builder::new)
+            .registerBuilderSupplier(BookWindow.Builder.class, SpongeBookWindow.Builder::new)
+            .registerBuilderSupplier(BrewingStandWindow.Builder.class, SpongeBrewingStandWindow.Builder::new)
+            .registerBuilderSupplier(ChestWindow.Builder.class, SpongeChestWindow.Builder::new)
+            .registerBuilderSupplier(CommandBlockWindow.Builder.class, SpongeCommandBlockWindow.Builder::new)
+            .registerBuilderSupplier(CraftingTableWindow.Builder.class, SpongeCraftingTableWindow.Builder::new)
+            .registerBuilderSupplier(DemoWindow.Builder.class, SpongeDemoWindow.Builder::new)
+            .registerBuilderSupplier(DispenserWindow.Builder.class, SpongeDispenserWindow.Builder::new)
+            .registerBuilderSupplier(DropperWindow.Builder.class, SpongeDropperWindow.Builder::new)
+            .registerBuilderSupplier(EnchantmentTableWindow.Builder.class, SpongeEnchantmentTableWindow.Builder::new)
+            .registerBuilderSupplier(FurnaceWindow.Builder.class, SpongeFurnaceWindow.Builder::new)
+            .registerBuilderSupplier(HopperWindow.Builder.class, SpongeHopperWindow.Builder::new)
+            .registerBuilderSupplier(HorseInventoryWindow.Builder.class, SpongeHorseInventoryWindow.Builder::new)
+            .registerBuilderSupplier(PlayerInventoryWindow.Builder.class, SpongePlayerInventoryWindow.Builder::new)
+            .registerBuilderSupplier(SignWindow.Builder.class, SpongeSignWindow.Builder::new)
+            .registerBuilderSupplier(SleepingWindow.Builder.class, SpongeSleepingWindow.Builder::new)
+            .registerBuilderSupplier(VillagerTradeWindow.Builder.class, SpongeVillagerTradeWindow.Builder::new)
+            .registerBuilderSupplier(WinGameWindow.Builder.class, SpongeWinGameWindow.Builder::new)
         ;
-        SpongeWindowBuilder.registerBuilders(registry);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

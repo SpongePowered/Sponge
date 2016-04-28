@@ -48,8 +48,8 @@ public interface IMixinEntityPlayerMP {
 
     void resetAttributeMap();
 
-    void informGuiClosed();
+    void informWindowClosed();
 
-    int incrementWindowId();
+    int incrementAndGetWindowId();
 
 }

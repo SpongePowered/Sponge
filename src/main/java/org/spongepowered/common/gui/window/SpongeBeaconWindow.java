@@ -56,8 +56,8 @@ public class SpongeBeaconWindow extends AbstractSpongeTileContainerWindow<TileEn
         if (this.beaconData != null) {
             ((Beacon) this.virtualTile).offer(this.beaconData);
         } else {
-            this.virtualTile.setField(1, -1);
-            this.virtualTile.setField(2, -1);
+            this.virtualTile.setField(1, -1); // Primary effect
+            this.virtualTile.setField(2, -1); // Secondary effect
         }
         this.virtualTile.setField(0, this.levels);
     }
