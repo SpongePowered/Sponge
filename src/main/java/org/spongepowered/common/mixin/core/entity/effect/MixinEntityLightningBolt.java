@@ -96,7 +96,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     private boolean onStrikeBlock(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
-        if (!this.effect) {
+        if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             Vector3i pos3i = VecHelper.toVector(pos);
             Transaction<BlockSnapshot> transaction = new Transaction<BlockSnapshot>(new SpongeBlockSnapshotBuilder()
                     .blockState((BlockState) world.getBlockState(pos)).world(((World) world).getProperties()).position(pos3i).build(),
@@ -105,6 +105,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             if (!this.struckBlocks.contains(transaction)) {
                 this.struckBlocks.add(transaction);
             }
+            return true;
         }
         return false;
     }
