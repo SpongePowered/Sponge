@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import org.spongepowered.api.setting.Setting;
+import org.spongepowered.api.setting.simple.SimpleSetting;
 import org.spongepowered.api.setting.type.SettingType;
 import org.spongepowered.api.setting.value.SettingValue;
 import org.spongepowered.api.text.Text;
@@ -75,7 +76,7 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
         checkState(this.type != null, "type must be set");
         checkState(this.name != null, "name must be set");
 
-        throw new UnsupportedOperationException();
+        return new SimpleSetting<>(this.id, this.type, this.name, this.defaultValue);
     }
 
     @Override
