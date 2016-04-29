@@ -128,7 +128,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
-    @Shadow @Final private IntHashMap pendingTransactions;
+    @Shadow @Final private IntHashMap<Short> pendingTransactions;
     @Shadow public EntityPlayerMP playerEntity;
 
     @Shadow public abstract void sendPacket(final Packet<?> packetIn);

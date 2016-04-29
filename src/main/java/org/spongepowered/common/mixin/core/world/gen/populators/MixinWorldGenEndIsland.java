@@ -136,8 +136,9 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
         }
     }
 
-    /*
-     * Author: Deamon Purpose: it use the initial radius, radius decrement, and
+    /**
+     * @author Deamon
+     * @reason Make it use the initial radius, radius decrement, and
      * block type fields
      */
     @Override

@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(WorldGenerator.class)
 public abstract class MixinWorldGenerator {
 
-    @Shadow public abstract void func_175904_e();
+    @Shadow public abstract void setDecorationDefaults();
     
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     public boolean isAir(IBlockState state, World worldIn, BlockPos pos) {

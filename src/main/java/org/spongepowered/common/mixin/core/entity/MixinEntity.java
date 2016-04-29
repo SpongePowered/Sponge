@@ -585,9 +585,10 @@ public abstract class MixinEntity implements IMixinEntity {
         return this.entityUniqueID;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Intrinsic
     public List<Entity> entity$getPassengers() {
-        return (List<Entity>) (Object) shadow$getPassengers();
+        return (List) shadow$getPassengers();
     }
 
     @Override

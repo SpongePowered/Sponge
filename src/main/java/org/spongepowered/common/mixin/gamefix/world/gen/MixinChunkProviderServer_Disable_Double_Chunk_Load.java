@@ -33,9 +33,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(value = ChunkProviderServer.class, priority = 1111)
 public abstract class MixinChunkProviderServer_Disable_Double_Chunk_Load {
 
-    private static final String LOAD_CHUNK_FROM_FILE = "Lnet/minecraft/world/gen/ChunkProviderServer;loadChunkFromFile(II)Lnet/minecraft/world/Chunk;";
-
-    @Redirect(method = "provideChunk", at = @At(value = "INVOKE", target = LOAD_CHUNK_FROM_FILE))
+    @Redirect(method = "provideChunk",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/gen/ChunkProviderServer;"
+                    + "loadChunkFromFile(II)Lnet/minecraft/world/chunk/Chunk;"))
     private Chunk onRedirectLoadChunkFromFile(ChunkProviderServer provider, int x, int y) {
         return null;
     }

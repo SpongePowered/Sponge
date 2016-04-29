@@ -36,11 +36,11 @@ import org.spongepowered.common.world.gen.populators.PlainsGrassPopulator;
 @Mixin(BiomeGenPlains.class)
 public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements IBiomeGenPlains {
 
-    @Shadow protected boolean field_150628_aC;
+    @Shadow protected boolean sunflowers;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getPopulators().add(new PlainsGrassPopulator(this.field_150628_aC));
+        gensettings.getPopulators().add(new PlainsGrassPopulator(this.sunflowers));
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
         // set flowers and grass to zero as they are handles by the plains grass
         // populator
@@ -51,6 +51,6 @@ public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements I
 
     @Override
     public boolean hasSunflowers() {
-        return this.field_150628_aC;
+        return this.sunflowers;
     }
 }

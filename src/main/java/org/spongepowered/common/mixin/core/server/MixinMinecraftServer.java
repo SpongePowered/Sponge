@@ -385,19 +385,22 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         causeTracker.completePhase();
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<World> loadWorld(UUID uuid) {
-        return (Optional<World>) (Object) DimensionManager.loadWorld(uuid);
+        return (Optional) DimensionManager.loadWorld(uuid);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
-        return (Optional<World>) (Object) DimensionManager.loadWorld(properties);
+        return (Optional) DimensionManager.loadWorld(properties);
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<World> loadWorld(String worldName) {
-        return (Optional<World>) (Object) DimensionManager.loadWorld(worldName);
+        return (Optional) DimensionManager.loadWorld(worldName);
     }
 
     @Override

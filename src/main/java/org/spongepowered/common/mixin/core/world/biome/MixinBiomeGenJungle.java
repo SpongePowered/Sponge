@@ -47,7 +47,7 @@ import java.util.Iterator;
 @Mixin(BiomeGenJungle.class)
 public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
 
-    @Shadow private boolean field_150614_aC;
+    @Shadow private boolean isEdge;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
@@ -86,7 +86,7 @@ public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
         forest.type(BiomeTreeTypes.OAK.getLargePopulatorObject().get(), 1);
         forest.type(BiomeTreeTypes.JUNGLE_BUSH.getPopulatorObject(), 4.5);
-        if (!this.field_150614_aC) {
+        if (!this.isEdge) {
             forest.type(BiomeTreeTypes.JUNGLE.getLargePopulatorObject().get(), 1.2);
             forest.type(BiomeTreeTypes.JUNGLE.getPopulatorObject(), 3);
         } else {

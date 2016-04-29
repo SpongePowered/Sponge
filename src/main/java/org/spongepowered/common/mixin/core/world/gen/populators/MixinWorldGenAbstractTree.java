@@ -37,7 +37,7 @@ import java.util.Random;
 public abstract class MixinWorldGenAbstractTree extends MixinWorldGenerator {
 
     @Shadow protected abstract boolean canGrowInto(Block p_150523_1_);
-    @Shadow public abstract void func_180711_a(World worldIn, Random p_180711_2_, BlockPos p_180711_3_);
+    @Shadow public abstract void generateSaplings(World worldIn, Random p_180711_2_, BlockPos p_180711_3_);
 
     public boolean isReplaceable(World world, BlockPos pos) {
         net.minecraft.block.state.IBlockState state = world.getBlockState(pos);

@@ -120,8 +120,8 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SET_CONTAINS))
-    public boolean onUpdateScoreValue(Set set, Object object) {
+    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    public boolean onUpdateScoreValue(Set<?> set, Object object) {
         return true;
     }
 

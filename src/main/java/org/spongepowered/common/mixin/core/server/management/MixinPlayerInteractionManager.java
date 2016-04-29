@@ -97,7 +97,8 @@ public abstract class MixinPlayerInteractionManager {
     }
 
     /**
-     * Activate the clicked on block, otherwise use the held item.
+     * @author Aaron1011
+     * @reason Fire interact block event.
      */
     @Overwrite
     public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {

@@ -57,7 +57,7 @@ import javax.annotation.Nullable;
 @Mixin(WorldGenBush.class)
 public abstract class MixinWorldGenBush implements Mushroom {
 
-    @Shadow public BlockBush field_175908_a;
+    @Shadow public BlockBush block;
 
     @Shadow
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
@@ -103,9 +103,9 @@ public abstract class MixinWorldGenBush implements Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                this.field_175908_a = Blocks.BROWN_MUSHROOM;
+                this.block = Blocks.BROWN_MUSHROOM;
             } else {
-                this.field_175908_a = Blocks.RED_MUSHROOM;
+                this.block = Blocks.RED_MUSHROOM;
             }
             generate(world, random, height);
 

@@ -36,9 +36,8 @@ import java.util.Collection;
 public class MixinSpongeImplHooks_Item_Pre_Merge {
 
     /**
-     * author gabizou - April 7th, 2016
-     *
-     * Iterates over the collection to find possible matches for any merges that can take place.
+     * @author gabizou - April 7th, 2016
+     * @reason Iterates over the collection to find possible matches for any merges that can take place.
      *
      * @param itemStacks The collection of item stacks to add on to
      * @param itemStack The item stack being merged in

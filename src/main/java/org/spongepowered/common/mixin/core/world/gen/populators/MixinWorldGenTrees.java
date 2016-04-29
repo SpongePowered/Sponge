@@ -99,9 +99,9 @@ public abstract class MixinWorldGenTrees extends MixinWorldGenAbstractTree imple
     public void placeObject(World world, Random random, int x, int y, int z) {
         this.minTreeHeight = this.minHeight.getFlooredAmount(random);
         BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
+        setDecorationDefaults();
         if (generate((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 
