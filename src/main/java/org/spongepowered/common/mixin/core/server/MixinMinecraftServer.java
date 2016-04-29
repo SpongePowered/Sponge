@@ -752,6 +752,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         WorldInfo worldInfo = savehandler.loadWorldInfo();
 
         if (worldInfo != null) {
+            worldInfo.setWorldName(worldName);
             if (WorldPropertyRegistryModule.getInstance().isWorldRegistered(((WorldProperties) worldInfo).getWorldName())) {
                 return Optional.of((WorldProperties) worldInfo);
             }

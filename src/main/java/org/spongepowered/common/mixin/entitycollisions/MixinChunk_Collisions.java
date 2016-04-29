@@ -28,7 +28,6 @@ import com.google.common.base.Predicate;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -66,7 +65,7 @@ public class MixinChunk_Collisions {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "INVOKE", args = "log=true", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"), cancellable = true)
+    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"), cancellable = true)
     public <T extends Entity> void onAddCollisionEntity(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
             Predicate<? super T> p_177430_4_, CallbackInfo ci) {
         // ignore player checks

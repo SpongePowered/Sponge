@@ -1077,19 +1077,19 @@ public final class CauseTracker {
                     event = SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
                             entitySnapshotBuilder.build(), this.getWorld());
                 }
-                if (!SpongeImpl.postEvent(event) && !entity.isRemoved()) {
+                boolean cancelled = SpongeImpl.postEvent(event);
+                if (entityIn instanceof EntityItem) {
+                    this.capturedEntityItems.remove(entityIn);
+                } else {
+                    this.capturedEntities.remove(entityIn);
+                }
+                if (!cancelled && !entity.isRemoved()) {
                     if (entityIn instanceof EntityWeatherEffect) {
                         return addWeatherEffect(entityIn, cause);
                     }
-
                     this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
                     this.getMinecraftWorld().loadedEntityList.add(entityIn);
                     this.getMixinWorld().onSpongeEntityAdded(entityIn);
-                    if (entityIn instanceof EntityItem) {
-                        this.capturedEntityItems.remove(entityIn);
-                    } else {
-                        this.capturedEntities.remove(entityIn);
-                    }
                     return true;
                 }
 
