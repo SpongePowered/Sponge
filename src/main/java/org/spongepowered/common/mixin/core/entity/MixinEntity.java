@@ -404,7 +404,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             }
             teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.getDimensionId(), forced);
         } else {
-            if (thisEntity instanceof EntityPlayerMP) {
+            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).playerNetServerHandler != null) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler
                     .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
                         thisEntity.rotationYaw, thisEntity.rotationPitch);
@@ -486,7 +486,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             relocated = setLocation(location, forced);
             setRotation(rotation);
         } else {
-            if (((Entity) this) instanceof EntityPlayerMP) {
+            if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
                 // Players use different logic, as they support real relative movement.
                 EnumSet relativeFlags = EnumSet.noneOf(S08PacketPlayerPosLook.EnumFlags.class);
 
@@ -602,7 +602,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     public void setRotation(Vector3d rotation) {
         checkNotNull(rotation, "Rotation was null!");
         ((IMixinWorld) getWorld()).addEntityRotationUpdate((net.minecraft.entity.Entity) (Entity) this, rotation);
-        if (((Entity) this) instanceof EntityPlayerMP) {
+        if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
@@ -761,7 +761,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
         toWorld.theChunkProviderServer.loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
 
-        if (entity instanceof EntityPlayer) {
+        if (entity instanceof EntityPlayerMP && ((EntityPlayerMP) entity).playerNetServerHandler != null) {
             EntityPlayerMP entityplayermp1 = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
