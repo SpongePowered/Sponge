@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -33,6 +35,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
@@ -296,6 +299,14 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
+    private Entity checkNotSpawned(net.minecraft.entity.Entity entity) {
+        checkState(((net.minecraft.world.World) (Object) this).getEntityByID((checkNotNull(entity, "Entity cannot be null!")).getEntityId()) == null
+                && !getCauseTracker().getCapturedEntities().contains(entity)
+                && !(entity instanceof EntityItem && getCauseTracker().getCapturedEntityItems().contains(entity)),
+                "Entity %s already spawned in the world!", entity);
+        return (Entity) entity;
+    }
+
     /**
      * @author bloodmc
      *
@@ -303,11 +314,12 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
      */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return this.getCauseTracker().processSpawnEntity((Entity) entity, Cause.of(NamedCause.source(this)));
+        return this.getCauseTracker().processSpawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this)));
     }
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
+        checkNotSpawned((net.minecraft.entity.Entity) entity);
         boolean prevCaptureCause = this.getCauseTracker().isProcessingCaptureCause();
         // Don't process capturing causes when a cause has explicitly been given
         this.getCauseTracker().setProcessingCaptureCause(false);
