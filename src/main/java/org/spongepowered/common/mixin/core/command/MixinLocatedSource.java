@@ -24,8 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.command.source.LocatedSource;
 import org.spongepowered.api.world.Location;
@@ -41,12 +45,22 @@ public abstract class MixinLocatedSource implements LocatedSource, IMixinCommand
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) asICommandSender().getEntityWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
+        return new Location<>(getWorld(), VecHelper.toVector(asICommandSender().getPositionVector()));
     }
 
     @Override
     public World getWorld() {
-        return (World) asICommandSender().getEntityWorld();
+        ICommandSender commandSender = asICommandSender();
+        // May be null in some cases like when constructing
+        if (commandSender == null) {
+            if ((Object) this instanceof Entity) {
+                return (World) ((Entity) (Object) this).worldObj;
+            } else if ((Object) this instanceof TileEntity) {
+                return (World) ((TileEntity) (Object) this).getWorld();
+            }
+            commandSender = MinecraftServer.getServer();
+        }
+        return (World) commandSender.getEntityWorld();
     }
 
 }
