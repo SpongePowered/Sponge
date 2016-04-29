@@ -46,7 +46,7 @@ public abstract class MixinStateImplementation extends BlockStateBase {
     /**
      * @author gabizou - April 8th, 2016
      *
-     * This is done to improve the performance of the method by removing an
+     * @reason This is done to improve the performance of the method by removing an
      * unnecessary hash lookup. The same logic can be computed with 1 hash
      * lookup instead of 2.
      *
@@ -72,7 +72,7 @@ public abstract class MixinStateImplementation extends BlockStateBase {
     /**
      * @author gabizou - April 8th, 2016
      *
-     * This is done to improve the performance of the method by removing an
+     * @reason This is done to improve the performance of the method by removing an
      * unnecessary hash lookup. The same logic can be computed with 1 hash
      * lookup instead of 2.
      *

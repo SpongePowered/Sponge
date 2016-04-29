@@ -57,7 +57,8 @@ public class MixinChunk_Collisions {
 
     @Shadow @Final private World worldObj;
 
-    @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"), cancellable = true)
+    @Inject(method = "getEntitiesWithinAABBForEntity",
+            at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
     public void onAddCollisionEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> predicate,
             CallbackInfo ci) {
         // ignore players
@@ -70,7 +71,8 @@ public class MixinChunk_Collisions {
         }
     }
 
-    @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z"), cancellable = true)
+    @Inject(method = "getEntitiesOfTypeWithinAAAB",
+            at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
     public <T extends Entity> void onAddCollisionEntity(Class<? extends T> entityClass, AxisAlignedBB aabb, List<T> listToFill,
             Predicate<? super T> p_177430_4_, CallbackInfo ci) {
         // ignore player checks
