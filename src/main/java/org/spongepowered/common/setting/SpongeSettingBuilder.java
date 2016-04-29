@@ -33,12 +33,19 @@ import org.spongepowered.api.setting.simple.SimpleSetting;
 import org.spongepowered.api.setting.type.SettingType;
 import org.spongepowered.api.setting.value.SettingValue;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.util.GuavaCollectors;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
 
 import javax.annotation.Nullable;
 
 public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
 
     @Nullable private String id;
+    private Collection<String> aliases = Collections.emptySet();
     @Nullable private SettingType<T, SettingValue<T>> type;
     @Nullable private Text name;
     @Nullable private T defaultValue;
@@ -46,8 +53,29 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
     @Override
     public Setting.Builder<T> id(String id) {
         checkNotNull(id, "id");
+        id = id.toLowerCase(Locale.ENGLISH);
         checkArgument(Setting.ID_PATTERN.matcher(id).matches(), "id does not match setting id pattern");
         this.id = id;
+        return this;
+    }
+
+    @Override
+    public Setting.Builder<T> aliases(String... aliases) {
+        checkNotNull(aliases, "aliases");
+        return this.aliases(Arrays.asList(aliases));
+    }
+
+    @Override
+    public Setting.Builder<T> aliases(Collection<String> aliases) {
+        checkNotNull(aliases, "aliases");
+
+        this.aliases = aliases.stream()
+                .filter(alias -> {
+                    checkNotNull(alias, "null alias");
+                    return true;
+                })
+                .map(alias -> alias.toLowerCase(Locale.ENGLISH))
+                .collect(GuavaCollectors.toImmutableSet());
         return this;
     }
 
@@ -76,12 +104,13 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
         checkState(this.type != null, "type must be set");
         checkState(this.name != null, "name must be set");
 
-        return new SimpleSetting<>(this.id, this.type, this.name, this.defaultValue);
+        return new SimpleSetting<>(this.id, this.aliases, this.type, this.name, this.defaultValue);
     }
 
     @Override
     public Setting.Builder<T> from(Setting<T> value) {
         this.id = value.getId();
+        this.aliases = value.getAliases();
         this.type = value.getType();
         this.name = value.getName(null);
         this.defaultValue = value.getDefaultValue().orElse(null);
@@ -91,6 +120,7 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
     @Override
     public Setting.Builder<T> reset() {
         this.id = null;
+        this.aliases = Collections.emptySet();
         this.type = null;
         this.name = null;
         this.defaultValue = null;
