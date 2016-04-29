@@ -26,8 +26,14 @@ package org.spongepowered.common.plugin;
 
 import com.google.common.base.Objects;
 import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.service.ServiceManager;
+import org.spongepowered.common.util.ServiceManagerFactory;
+
+import javax.annotation.Nullable;
 
 public abstract class AbstractPluginContainer implements PluginContainer {
+
+    @Nullable private ServiceManager serviceManager;
 
     protected AbstractPluginContainer() {
     }
@@ -59,6 +65,14 @@ public abstract class AbstractPluginContainer implements PluginContainer {
     public static String getUnqualifiedId(String id) {
         int pos = id.lastIndexOf('.');
         return pos >= 0 ? id.substring(pos + 1) : id;
+    }
+
+    @Override
+    public ServiceManager getServiceManager() {
+        if (this.serviceManager == null) {
+            this.serviceManager = ServiceManagerFactory.createServiceManager();
+        }
+        return this.serviceManager;
     }
 
 }
