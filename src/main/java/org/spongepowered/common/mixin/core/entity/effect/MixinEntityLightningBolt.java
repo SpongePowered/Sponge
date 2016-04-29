@@ -81,6 +81,11 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void setEffect(boolean effect) {
         this.effect = effect;
+        if (effect) {
+            this.struckBlocks.clear();
+            this.struckEntities.clear();
+            this.struckEntitySnapshots.clear();
+        }
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
