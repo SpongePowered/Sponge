@@ -84,7 +84,7 @@ public class SpongeEntityType extends SpongeCatalogType.Translatable implements 
         this.entityName = name.toLowerCase(Locale.ENGLISH);
         this.entityClass = clazz;
         this.modId = modId.toLowerCase(Locale.ENGLISH);
-        String translationName = EntityList.classToStringMapping.get(clazz);
+        String translationName = EntityList.CLASS_TO_NAME.get(clazz);
         if (translationName == null) {
             translationName = "generic";
         }

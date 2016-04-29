@@ -50,7 +50,7 @@ public class StoredEnchantmentDataProcessor extends
         AbstractItemSingleDataProcessor<List<ItemEnchantment>, ListValue<ItemEnchantment>, StoredEnchantmentData, ImmutableStoredEnchantmentData> {
 
     public StoredEnchantmentDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.enchanted_book), Keys.STORED_ENCHANTMENTS);
+        super(stack -> stack.getItem().equals(Items.ENCHANTED_BOOK), Keys.STORED_ENCHANTMENTS);
     }
 
     @Override

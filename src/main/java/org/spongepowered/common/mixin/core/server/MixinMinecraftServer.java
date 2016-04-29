@@ -31,7 +31,6 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.profiler.Profiler;
-import net.minecraft.profiler.Snooper;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.datafix.DataFixer;
@@ -88,7 +87,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.fixer.PlayerRespawnData;
 import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
 import org.spongepowered.common.data.fixer.world.LevelSpongeId;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
@@ -97,7 +95,6 @@ import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.IMixinSubject;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.profile.SpongeProfileManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
@@ -105,7 +102,6 @@ import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.world.DimensionManager;
-import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.IOException;
@@ -123,7 +119,7 @@ import java.util.concurrent.CompletableFuture;
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
-    @Shadow @Final private static Logger logger;
+    @Shadow @Final private static Logger LOG;
     @Shadow @Final public Profiler theProfiler;
     @Shadow @Final public long[] tickTimeArray;
     @Shadow private boolean enableBonusChest;
@@ -367,7 +363,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 .complete());
         int i = 0;
         this.setUserMessage("menu.generatingTerrain");
-        logger.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
+        LOG.info("Preparing start region for level {} ({})", ((IMixinWorldServer) worldServer).getDimensionId(), ((World) worldServer).getName());
         BlockPos blockpos = worldServer.getSpawnPoint();
         long j = MinecraftServer.getCurrentTimeMillis();
 

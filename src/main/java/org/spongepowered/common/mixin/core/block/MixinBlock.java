@@ -105,12 +105,12 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Override
     public String getId() {
-        return Block.blockRegistry.getNameForObject((Block) (Object) this).toString();
+        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
     }
 
     @Override
     public String getName() {
-        return Block.blockRegistry.getNameForObject((Block) (Object) this).toString();
+        return Block.REGISTRY.getNameForObject((Block) (Object) this).toString();
     }
 
     @Override

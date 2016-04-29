@@ -66,7 +66,7 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
         }
 
         final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
-        final ItemStack emeraldStack = new ItemStack(Items.emerald);
+        final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
         final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }

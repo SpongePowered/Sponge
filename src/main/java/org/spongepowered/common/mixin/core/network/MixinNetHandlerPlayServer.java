@@ -42,10 +42,7 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.client.CPacketAnimation;
-import net.minecraft.network.play.client.CPacketClickWindow;
-import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketCustomPayload;
-import net.minecraft.network.play.client.CPacketHeldItemChange;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
@@ -100,8 +97,6 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
@@ -130,7 +125,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     private static final String PLAYER_ATTACK_TARGET_ENTITY = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V";
     private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
 
-    @Shadow @Final private static Logger logger;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
     @Shadow @Final private MinecraftServer serverController;
     @Shadow @Final private IntHashMap pendingTransactions;
@@ -259,7 +254,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
      * @param ci callback
      * @param packetIn method param
      */
-    @Inject(method = "processVanilla250Packet", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
+    @Inject(method = "processCustomPayload", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;"
                     + "Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V"), cancellable = true)
     public void processCommandBlock(CPacketCustomPayload packetIn, CallbackInfo ci) {
@@ -320,7 +315,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                             this.playerEntity.addChatMessage(new TextComponentTranslation("advMode.setCommand.success", new Object[] {s1}));
                         }
                     } catch (Exception exception1) {
-                        logger.error("Couldn\'t set command block", exception1);
+                        LOGGER.error("Couldn\'t set command block", exception1);
                     } finally {
                         packetbuffer.release();
                     }

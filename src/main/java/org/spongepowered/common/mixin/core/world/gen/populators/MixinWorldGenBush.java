@@ -103,9 +103,9 @@ public abstract class MixinWorldGenBush implements Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                this.field_175908_a = Blocks.brown_mushroom;
+                this.field_175908_a = Blocks.BROWN_MUSHROOM;
             } else {
-                this.field_175908_a = Blocks.red_mushroom;
+                this.field_175908_a = Blocks.RED_MUSHROOM;
             }
             generate(world, random, height);
 

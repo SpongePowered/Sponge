@@ -802,8 +802,8 @@ public class DimensionManager {
                             dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
-                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType = Sponge.getRegistry().getType(org.spongepowered.api.world
-                        .DimensionType.class, dimensionTypeId);
+                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType
+                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId);
                 if (!optDimensionType.isPresent()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
                             worldFolderName, DimensionTypes.OVERWORLD.getName());

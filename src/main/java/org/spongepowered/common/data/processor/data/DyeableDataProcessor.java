@@ -59,16 +59,16 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
     }
 
     public static boolean isDyeable(Item item) {
-        if (item.equals(Items.dye)) {
+        if (item.equals(Items.DYE)) {
             return true;
         }
 
         Block block = Block.getBlockFromItem(item);
         return block != null
-            && (block.equals(Blocks.wool)
-                || block.equals(Blocks.stained_glass)
-                || block.equals(Blocks.stained_glass_pane)
-                || block.equals(Blocks.stained_hardened_clay));
+            && (block.equals(Blocks.WOOL)
+                || block.equals(Blocks.STAINED_GLASS)
+                || block.equals(Blocks.STAINED_GLASS_PANE)
+                || block.equals(Blocks.STAINED_HARDENED_CLAY));
     }
 
     @Override
@@ -90,7 +90,7 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
             } else if (dataHolder instanceof EntityWolf) {
                 return Optional.of(new SpongeDyeableData((DyeColor) (Object) ((EntityWolf) dataHolder).getCollarColor()));
             } else if (dataHolder instanceof ItemStack) {
-                if(((ItemStack) dataHolder).getItem().equals(Items.dye)) {
+                if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {
                     return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byDyeDamage(((ItemStack) dataHolder).getItemDamage())));
                 } else {
                     return Optional.of(new SpongeDyeableData((DyeColor) (Object) EnumDyeColor.byMetadata(((ItemStack) dataHolder).getItemDamage())));
@@ -122,7 +122,7 @@ public class DyeableDataProcessor extends AbstractSingleDataProcessor<DyeColor, 
                 ((EntityWolf) dataHolder).setCollarColor((EnumDyeColor) (Object) merged.type().get());
                 return DataTransactionResult.successReplaceResult(origin.type().asImmutable(), merged.type().asImmutable());
             } else if (dataHolder instanceof ItemStack) {
-                if(((ItemStack) dataHolder).getItem().equals(Items.dye)) {
+                if(((ItemStack) dataHolder).getItem().equals(Items.DYE)) {
                     ((ItemStack) dataHolder).setItemDamage(((EnumDyeColor) (Object) merged.type().get()).getDyeDamage());
                 } else {
                     ((ItemStack) dataHolder).setItemDamage(((EnumDyeColor) (Object) merged.type().get()).getMetadata());

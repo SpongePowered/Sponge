@@ -80,7 +80,7 @@ public abstract class MixinWorldGenBirchTree extends MixinWorldGenAbstractTree i
             if (flag) {
                 BlockPos down = new BlockPos(x, y - 1, z);
                 Block block1 = worldIn.getBlockState(down).getBlock();
-                if (canSustainPlant(block1, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
+                if (canSustainPlant(block1, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1) {
                     return true;
                 }
             }

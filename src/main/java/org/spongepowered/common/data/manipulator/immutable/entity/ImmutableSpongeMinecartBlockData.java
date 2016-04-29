@@ -48,14 +48,14 @@ public class ImmutableSpongeMinecartBlockData extends AbstractImmutableData<Immu
     private final ImmutableValue<Integer> offsetValue;
 
     public ImmutableSpongeMinecartBlockData() {
-        this((BlockState) Blocks.air.getDefaultState(), 6);
+        this((BlockState) Blocks.AIR.getDefaultState(), 6);
     }
 
     public ImmutableSpongeMinecartBlockData(BlockState block, int offset) {
         super(ImmutableMinecartBlockData.class);
         this.block = Preconditions.checkNotNull(block);
         this.offset = offset;
-        this.blockValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.air.getDefaultState(), block);
+        this.blockValue = new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), block);
         this.offsetValue = new ImmutableSpongeValue<>(Keys.OFFSET, 6, offset);
         registerGetters();
     }

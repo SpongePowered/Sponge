@@ -48,13 +48,13 @@ public class EndSpikePopulator implements Populator {
     @Override
     public void populate(Chunk chunk, Random random) {
         World worldIn = (World) chunk.getWorld();
-        WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.func_185426_a(worldIn);
+        WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.getSpikesForWorld(worldIn);
         BlockPos pos = VecHelper.toBlockPos(chunk.getBlockMin());
         for (WorldGenSpikes.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
-            if (worldgenspikes$endspike.func_186154_a(pos)) {
-                this.spikeGen.func_186143_a(worldgenspikes$endspike);
+            if (worldgenspikes$endspike.doesStartInChunk(pos)) {
+                this.spikeGen.setSpike(worldgenspikes$endspike);
                 this.spikeGen.generate(worldIn, random,
-                        new BlockPos(worldgenspikes$endspike.func_186151_a(), 45, worldgenspikes$endspike.func_186152_b()));
+                        new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
             }
         }
     }

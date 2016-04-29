@@ -59,7 +59,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     @Override
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
-        if (container.getItem() == Items.written_book) {
+        if (container.getItem() == Items.WRITTEN_BOOK) {
             NBTTagCompound mainCompound = container.getTagCompound();
             mainCompound.setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
         } else {
@@ -71,7 +71,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     @SuppressWarnings("deprecation")
     @Override
     protected Optional<Text> getVal(ItemStack container) {
-        if (container.getItem() == Items.written_book) {
+        if (container.getItem() == Items.WRITTEN_BOOK) {
             final NBTTagCompound mainCompound = container.getTagCompound();
             if (mainCompound == null) {
                 return Optional.empty(); // Basically, this book wasn't initialized properly.

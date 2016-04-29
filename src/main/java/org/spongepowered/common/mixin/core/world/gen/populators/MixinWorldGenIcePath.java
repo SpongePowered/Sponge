@@ -89,7 +89,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
             position = position.down();
         }
 
-        if (worldIn.getBlockState(position).getBlock() != Blocks.snow) {
+        if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW) {
             return false;
         }
         // Sponge start
@@ -107,7 +107,7 @@ public abstract class MixinWorldGenIcePath implements IcePath {
                         BlockPos blockpos1 = new BlockPos(j, j1, k);
                         Block block = worldIn.getBlockState(blockpos1).getBlock();
 
-                        if (block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
+                        if (block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
                             worldIn.setBlockState(blockpos1, this.block.getDefaultState(), 2);
                         }
                     }

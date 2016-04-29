@@ -50,7 +50,7 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         RandomBlock lava1 = RandomBlock.builder()
-                .block((BlockState) Blocks.flowing_lava.getDefaultState())
+                .block((BlockState) Blocks.FLOWING_LAVA.getDefaultState())
                 .perChunk(8)
                 .height(VariableAmount.baseWithRandomAddition(4, 120))
                 .placementTarget(WorldGenConstants.HELL_LAVA)
@@ -105,7 +105,7 @@ public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
         gensettings.getPopulators().add(quartz);
 
         RandomBlock lava2 = RandomBlock.builder()
-                .block((BlockState) Blocks.flowing_lava.getDefaultState())
+                .block((BlockState) Blocks.FLOWING_LAVA.getDefaultState())
                 .perChunk(16)
                 .height(VariableAmount.baseWithRandomAddition(10, 108))
                 .placementTarget(WorldGenConstants.HELL_LAVA_ENCLOSED)

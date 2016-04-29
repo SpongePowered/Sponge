@@ -135,7 +135,7 @@ public abstract class MixinPlayerInteractionManager {
             if (event.isCancelled()) {
                 final IBlockState state = worldIn.getBlockState(pos);
 
-                if (state.getBlock() == Blocks.command_block) {
+                if (state.getBlock() == Blocks.COMMAND_BLOCK) {
                     // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
                     ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketCloseWindow(0));
 
@@ -151,7 +151,7 @@ public abstract class MixinPlayerInteractionManager {
                 } else if (stack != null) {
                     // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                     if (stack.getItem() instanceof ItemDoor || (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock()
-                            .equals(Blocks.double_plant))) {
+                            .equals(Blocks.DOUBLE_PLANT))) {
                         ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                     }
                 }

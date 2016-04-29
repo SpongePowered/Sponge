@@ -70,15 +70,15 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
 
     @Override
     public void registerDefaults() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
-            this.enchantmentMappings.put(key.toString(), (Enchantment) net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(key));
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
+            this.enchantmentMappings.put(key.toString(), (Enchantment) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key));
         }
     }
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
-            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(key);
+        for (ResourceLocation key: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
+            net.minecraft.enchantment.Enchantment enchantment = net.minecraft.enchantment.Enchantment.REGISTRY.getObject(key);
             if (enchantment == null) {
                 continue;
             }

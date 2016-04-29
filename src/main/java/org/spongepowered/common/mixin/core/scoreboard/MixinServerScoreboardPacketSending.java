@@ -183,7 +183,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
+    @Redirect(method = "addObjective", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
             false))
     public Iterator onGetPlayerIteratorForObjectives(List list) {
         return this.players.iterator();

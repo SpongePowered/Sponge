@@ -503,7 +503,7 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, ItemStackSnapshot.NONE.createStack()));
                 }
                 context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_POSITION, placeBlock.getPos()));
-                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.func_187024_b()));
+                context.add(NamedCause.of(InternalNamedCauses.Packet.PLACED_BLOCK_FACING, placeBlock.getDirection()));
             }
 
             @Override
@@ -653,7 +653,7 @@ public final class PacketPhase extends TrackingPhase {
             // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
             final CPacketPlayerTryUseItem blockPlace = (CPacketPlayerTryUseItem) packet;
             final BlockPos blockPos = blockPlace.getPos();
-            final EnumFacing front = blockPlace.func_187024_b();
+            final EnumFacing front = blockPlace.getDirection();
             final MinecraftServer server = SpongeImpl.getServer();
             if (blockPos.getY() < server.getBuildLimit() - 1 || front != EnumFacing.UP && blockPos.getY() < server.getBuildLimit()) {
                 return PacketPhase.General.PLACE_BLOCK;

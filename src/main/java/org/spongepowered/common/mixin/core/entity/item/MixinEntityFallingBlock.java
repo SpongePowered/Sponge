@@ -55,7 +55,7 @@ public abstract class MixinEntityFallingBlock extends MixinEntity implements Fal
 
     @Inject(method = "fall(FF)V", at = @At(value = "JUMP", opcode = Opcodes.IFEQ, ordinal = 1))
     public void beforeFall(float distance, float damageMultipleier, CallbackInfo callbackInfo) {
-        this.isAnvil = this.fallTile.getBlock() == Blocks.anvil;
+        this.isAnvil = this.fallTile.getBlock() == Blocks.ANVIL;
         this.original = this.isAnvil ? DamageSource.anvil : DamageSource.fallingBlock;
         if (this.isAnvil) {
             DamageSource.anvil = new MinecraftFallingBlockDamageSource("anvil", (EntityFallingBlock) (Object) this);

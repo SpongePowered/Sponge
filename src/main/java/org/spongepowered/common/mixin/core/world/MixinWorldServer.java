@@ -297,8 +297,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             HoconConfigurationLoader.builder().setRenderOptions(ConfigRenderOptions.concise().setJson(true))
                     .setSink(() -> new BufferedWriter(writer)).build().save(ConfigurateTranslator.instance().translateData(settings));
         } catch (Exception e) {
-            SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings, ((net
-                    .minecraft.world.World) (Object) this).getWorldType(), this, e);
+            SpongeImpl.getLogger().warn("Failed to convert settings from [{}] for GeneratorType [{}] used by World [{}].", settings,
+                    ((net.minecraft.world.World) (Object) this).getWorldType(), this, e);
         }
 
         return this.createWorldGenerator(writer.toString());

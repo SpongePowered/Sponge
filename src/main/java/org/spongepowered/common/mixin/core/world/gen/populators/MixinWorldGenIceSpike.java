@@ -95,7 +95,7 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
             position = position.down();
         }
 
-        if (worldIn.getBlockState(position).getBlock() != Blocks.snow) {
+        if (worldIn.getBlockState(position).getBlock() != Blocks.SNOW) {
             return false;
         }
         position = position.up(rand.nextInt(4));
@@ -126,16 +126,16 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
                         IBlockState iblockstate = worldIn.getBlockState(position.add(i1, k, j1));
                         Block block = iblockstate.getBlock();
 
-                        if (iblockstate.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
-                            this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.packed_ice.getDefaultState());
+                        if (iblockstate.getMaterial() == Material.AIR || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
+                            this.setBlockAndNotifyAdequately(worldIn, position.add(i1, k, j1), Blocks.PACKED_ICE.getDefaultState());
                         }
 
                         if (k != 0 && l > 1) {
                             iblockstate = worldIn.getBlockState(position.add(i1, -k, j1));
                             block = iblockstate.getBlock();
 
-                            if (iblockstate.getMaterial() == Material.air || block == Blocks.dirt || block == Blocks.snow || block == Blocks.ice) {
-                                this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.packed_ice.getDefaultState());
+                            if (iblockstate.getMaterial() == Material.AIR || block == Blocks.DIRT || block == Blocks.SNOW || block == Blocks.ICE) {
+                                this.setBlockAndNotifyAdequately(worldIn, position.add(i1, -k, j1), Blocks.PACKED_ICE.getDefaultState());
                             }
                         }
                     }
@@ -164,12 +164,12 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
                     IBlockState iblockstate1 = worldIn.getBlockState(blockpos);
                     Block block1 = iblockstate1.getBlock();
 
-                    if (iblockstate1.getMaterial() != Material.air && block1 != Blocks.dirt && block1 != Blocks.snow && block1 != Blocks.ice
-                            && block1 != Blocks.packed_ice) {
+                    if (iblockstate1.getMaterial() != Material.AIR && block1 != Blocks.DIRT && block1 != Blocks.SNOW && block1 != Blocks.ICE
+                            && block1 != Blocks.PACKED_ICE) {
                         break;
                     }
 
-                    this.setBlockAndNotifyAdequately(worldIn, blockpos, Blocks.packed_ice.getDefaultState());
+                    this.setBlockAndNotifyAdequately(worldIn, blockpos, Blocks.PACKED_ICE.getDefaultState());
                     blockpos = blockpos.down();
                     --j2;
 

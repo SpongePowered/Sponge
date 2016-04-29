@@ -509,7 +509,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         int newBlockLightOpacity = SpongeImplHooks.getBlockLightOpacity(newState, this.worldObj, pos);
 
         if (extendedblockstorage == net.minecraft.world.chunk.Chunk.NULL_BLOCK_STORAGE) {
-            if (newBlock == Blocks.air) {
+            if (newBlock == Blocks.AIR) {
                 return null;
             }
 

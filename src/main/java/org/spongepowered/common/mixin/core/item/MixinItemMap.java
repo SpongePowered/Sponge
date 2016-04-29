@@ -53,23 +53,23 @@ public class MixinItemMap extends ItemMapBase {
         DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 
-    @Redirect(method = "func_185063_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreatedGetOverworldUniqueDataId(World worldIn, String key) {
         return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
-    @Redirect(method = "func_185064_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
+    @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreatedGetOverworldUniqueDataId2(World worldIn, String key) {
         return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
-    @Redirect(method = "func_185063_a", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+    @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private static void onCreatedWithScale(World worldIn, String dataId, WorldSavedData data) {
         DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 
-    @Redirect(method = "func_185064_b", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
+    @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private static void onCreatedWithTrackingPosition(World worldIn, String dataId, WorldSavedData data) {
         DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);

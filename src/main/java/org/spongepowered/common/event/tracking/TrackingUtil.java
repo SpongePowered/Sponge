@@ -202,11 +202,11 @@ public final class TrackingUtil {
         final Block newBlock = newState.getBlock();
 
         if (phaseState == BlockPhase.State.BLOCK_DECAY) {
-            if (newBlock == Blocks.air) {
+            if (newBlock == Blocks.AIR) {
                 ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.DECAY;
                 capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
             }
-        } else if (newBlock == Blocks.air) {
+        } else if (newBlock == Blocks.AIR) {
             ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.BREAK;
             capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
         } else if (newBlock != currentState.getBlock()) {

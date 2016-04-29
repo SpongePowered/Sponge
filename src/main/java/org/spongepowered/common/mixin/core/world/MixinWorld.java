@@ -369,9 +369,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (entityClass.isAssignableFrom(EntityFallingBlock.class)) {
-            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.sand.getDefaultState());
+            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.SAND.getDefaultState());
         } else if (entityClass.isAssignableFrom(EntityItem.class)) {
-            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.stone));
+            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.STONE));
         }
 
         if (entity == null) {

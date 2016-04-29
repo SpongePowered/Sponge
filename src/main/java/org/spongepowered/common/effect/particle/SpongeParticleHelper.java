@@ -85,7 +85,7 @@ public final class SpongeParticleHelper {
             int data = 0;
 
             if (internal == EnumParticleTypes.ITEM_CRACK) {
-                id = Item.itemRegistry.getIDForObject((Item) itemType);
+                id = Item.REGISTRY.getIDForObject((Item) itemType);
                 data = ((net.minecraft.item.ItemStack) item).getItemDamage();
             }
 
@@ -101,7 +101,7 @@ public final class SpongeParticleHelper {
             Block block = blockState.getBlock();
             if (internal == EnumParticleTypes.BLOCK_CRACK || internal == EnumParticleTypes.BLOCK_DUST) {
                 // Only block types are allowed
-                int id = Block.blockRegistry.getIDForObject(block);
+                int id = Block.REGISTRY.getIDForObject(block);
                 int data = block.damageDropped(blockState);
                 extra = new int[] {id, data};
             }
