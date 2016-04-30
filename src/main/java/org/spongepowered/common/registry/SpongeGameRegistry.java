@@ -58,6 +58,8 @@ import org.spongepowered.api.registry.util.PluginProvidedRegistryModule;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
+import org.spongepowered.api.setting.SettingRegistry;
+import org.spongepowered.api.setting.simple.SimpleSettingRegistry;
 import org.spongepowered.api.statistic.BlockStatistic;
 import org.spongepowered.api.statistic.EntityStatistic;
 import org.spongepowered.api.statistic.ItemStatistic;
@@ -137,6 +139,7 @@ public class SpongeGameRegistry implements GameRegistry {
     final Map<Class<? extends RegistryModule>, RegistryModule> classMap = new IdentityHashMap<>();
     private final Map<Class<?>, Supplier<?>> builderSupplierMap = new IdentityHashMap<>();
     private final Set<RegistryModule> registryModules = new HashSet<>();
+    private final SettingRegistry settingRegistry = new SimpleSettingRegistry();
 
     public SpongeGameRegistry() {
     }
@@ -406,6 +409,11 @@ public class SpongeGameRegistry implements GameRegistry {
     @Override
     public RecipeRegistry getRecipeRegistry() {
         throw new UnsupportedOperationException(); // TODO
+    }
+
+    @Override
+    public SettingRegistry getSettingRegistry() {
+        return this.settingRegistry;
     }
 
     @Override
