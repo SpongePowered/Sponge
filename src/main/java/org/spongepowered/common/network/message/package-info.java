@@ -22,46 +22,4 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
-
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.keyboard.KeyBinding;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
-public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
-    }
-
-    User getUserObject();
-
-    void setVelocityOverride(@Nullable Vector3d velocity);
-
-    MessageChannel getDeathMessageChannel();
-
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    IMixinWorldServer getMixinWorld();
-
-    void refreshXpHealthAndFood();
-
-    // todo
-    void restorePacketItem();
-
-    void setKeyBindings(Collection<KeyBinding> keyBindings);
-
-    long getKeyPressStartTime(int internalId);
-
-    void setKeyPressStartTime(int internalId, long time);
-}
+@org.spongepowered.api.util.annotation.NonnullByDefault package org.spongepowered.common.network.message;

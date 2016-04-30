@@ -29,7 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.common.entity.CombatHelper.getNewTracker;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
+import gnu.trove.map.TIntLongMap;
+import gnu.trove.map.hash.TIntLongHashMap;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
@@ -91,11 +94,13 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
+import org.spongepowered.api.event.keyboard.InteractKeyEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -147,6 +152,8 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
+import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
@@ -156,6 +163,8 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -202,6 +211,9 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private boolean sleepingIgnored;
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
+
+    private Collection<KeyBinding> keyBindings = Collections.emptySet();
+    private TIntLongMap keyPressedTimes = new TIntLongHashMap();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -794,6 +806,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
     }
 
+<<<<<<< HEAD
     @Override
     public void stopActiveHand() {
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
@@ -827,5 +840,44 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             mixinContainer.setCaptureInventory(false);
             mixinContainer.getCapturedTransactions().clear();
         }
+    }
+
+    @Inject(method = "onUpdate", at = @At("HEAD"))
+    public void onPlayerTick() {
+        if (this.keyBindings.isEmpty()) {
+            return;
+        }
+        Cause cause = Cause.source(this).build();
+        this.keyPressedTimes.forEachEntry((key, value) -> {
+            if (value != -1) {
+                KeyBinding keyBinding = KeyBindingRegistryModule.getInstance().getByInternalId(key).orElse(null);
+                if (keyBinding != null) {
+                    int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
+                    InteractKeyEvent.Tick event = SpongeEventFactory.createInteractKeyEventTick(cause, keyBinding, this, pressedTime);
+                    Sponge.getEventManager().post(event);
+                }
+            }
+            return true;
+        });
+    }
+
+    @Override
+    public Collection<KeyBinding> getKeyBindings() {
+        return this.keyBindings;
+    }
+
+    @Override
+    public void setKeyBindings(Collection<KeyBinding> keyBindings) {
+        this.keyBindings = ImmutableSet.copyOf(keyBindings);
+    }
+
+    @Override
+    public long getKeyPressStartTime(int internalId) {
+        return this.keyPressedTimes.putIfAbsent(internalId, -1);
+    }
+
+    @Override
+    public void setKeyPressStartTime(int internalId, long time) {
+        this.keyPressedTimes.put(internalId, time);
     }
 }

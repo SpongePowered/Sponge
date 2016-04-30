@@ -83,6 +83,8 @@ import org.spongepowered.api.item.inventory.ItemStackGenerator;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
+import org.spongepowered.api.keyboard.KeyBinding;
+import org.spongepowered.api.keyboard.KeyCategory;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -154,6 +156,8 @@ import org.spongepowered.common.item.inventory.archetype.SpongeInventoryArchetyp
 import org.spongepowered.common.item.inventory.generation.SpongeItemStackGenerator;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferBuilder;
 import org.spongepowered.common.item.merchant.SpongeTradeOfferGenerator;
+import org.spongepowered.common.keyboard.SpongeKeyBindingBuilder;
+import org.spongepowered.common.keyboard.SpongeKeyCategoryBuilder;
 import org.spongepowered.common.registry.factory.ResourcePackFactoryModule;
 import org.spongepowered.common.registry.factory.TimingsFactoryModule;
 import org.spongepowered.common.registry.type.*;
@@ -179,6 +183,8 @@ import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
+import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
+import org.spongepowered.common.registry.type.keyboard.KeyCategoryRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
@@ -315,6 +321,8 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(InventoryArchetype.Builder.class, SpongeInventoryArchetypeBuilder::new)
             .registerBuilderSupplier(Inventory.Builder.class, SpongeInventoryBuilder::new)
             .registerBuilderSupplier(SoundType.Builder.class, SpongeSoundBuilder::new)
+            .registerBuilderSupplier(KeyCategory.Builder.class, SpongeKeyCategoryBuilder::new)
+            .registerBuilderSupplier(KeyBinding.Builder.class, SpongeKeyBindingBuilder::new)
         ;
     }
 
@@ -424,6 +432,8 @@ public final class CommonModuleRegistry {
             .registerModule((Class<Key<?>>) (Class<?>) Key.class, KeyRegistryModule.getInstance())
             .registerModule(ZombieType.class, ZombieTypeRegistryModule.getInstance())
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
+            .registerModule(KeyCategory.class, KeyCategoryRegistryModule.getInstance())
+            .registerModule(KeyBinding.class, KeyBindingRegistryModule.getInstance())
             ;
     }
 

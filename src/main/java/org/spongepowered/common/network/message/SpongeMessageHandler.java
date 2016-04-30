@@ -38,6 +38,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.keyboard.KeyNetworkHandler;
 
 import java.util.Optional;
 
@@ -56,6 +57,8 @@ public final class SpongeMessageHandler {
         channel = Sponge.getChannelRegistrar().createChannel(SpongeImpl.getPlugin(), "Sponge");
         channel.registerMessage(MessageTrackerDataRequest.class, 0, Platform.Type.SERVER, SpongeMessageHandler::handleRequest);
         channel.registerMessage(MessageTrackerDataResponse.class, 1);
+        channel.registerMessage(MessageKeyboardData.class, 2);
+        channel.registerMessage(MessageKeyState.class, 3, Platform.Type.SERVER, KeyNetworkHandler::handleKeyState);
     }
 
     public static void handleRequest(MessageTrackerDataRequest message, RemoteConnection connection, Platform.Type side) {

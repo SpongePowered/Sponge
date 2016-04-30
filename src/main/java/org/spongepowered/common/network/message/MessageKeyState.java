@@ -22,46 +22,41 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.entity.player;
+package org.spongepowered.common.network.message;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.keyboard.KeyBinding;
-import org.spongepowered.api.text.channel.MessageChannel;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.api.network.ChannelBuf;
+import org.spongepowered.api.network.Message;
 
-import java.util.Collection;
+public class MessageKeyState implements Message {
 
-import javax.annotation.Nullable;
+    private int keyBinding;
+    private boolean state;
 
-public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    public MessageKeyState() {
     }
 
-    User getUserObject();
+    public MessageKeyState(int keyBinding, boolean state) {
+        this.keyBinding = keyBinding;
+        this.state = state;
+    }
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+    public int getKeyBindingId() {
+        return this.keyBinding;
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public boolean getState() {
+        return this.state;
+    }
 
-    void initScoreboard();
+    @Override
+    public void readFrom(ChannelBuf buf) {
+        this.keyBinding = buf.readInteger();
+        this.state = buf.readBoolean();
+    }
 
-    void resetAttributeMap();
-
-    IMixinWorldServer getMixinWorld();
-
-    void refreshXpHealthAndFood();
-
-    // todo
-    void restorePacketItem();
-
-    void setKeyBindings(Collection<KeyBinding> keyBindings);
-
-    long getKeyPressStartTime(int internalId);
-
-    void setKeyPressStartTime(int internalId, long time);
+    @Override
+    public void writeTo(ChannelBuf buf) {
+        buf.writeInteger(this.keyBinding);
+        buf.writeBoolean(this.state);
+    }
 }
