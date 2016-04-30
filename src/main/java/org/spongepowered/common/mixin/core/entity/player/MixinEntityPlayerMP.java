@@ -105,6 +105,8 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.user.UserStorageService;
+import org.spongepowered.api.setting.SettingManager;
+import org.spongepowered.api.setting.simple.SimpleSettingManager;
 import org.spongepowered.api.text.BookView;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageChannel;
@@ -214,6 +216,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
+    private SettingManager settingManager = new SimpleSettingManager(Sponge.getRegistry().getSettingRegistry());
 
     private GameType pendingGameType;
 
@@ -842,4 +845,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             ((IMixinContainer) this.openContainer).setSpectatorChest(true);
         }
     }
+
+    @Override
+    public SettingManager getSettingManager() {
+        return this.settingManager;
+    }
+
 }
