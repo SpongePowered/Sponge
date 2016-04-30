@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.base.Objects;
 import org.spongepowered.api.setting.Setting;
 import org.spongepowered.api.setting.simple.SimpleSetting;
 import org.spongepowered.api.setting.type.SettingType;
@@ -129,6 +130,17 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
         this.name = null;
         this.defaultValue = null;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("aliases", this.aliases)
+                .add("type", this.type)
+                .add("name", this.name)
+                .add("defaultValue", this.defaultValue)
+                .toString();
     }
 
 }
