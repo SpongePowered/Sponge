@@ -74,6 +74,10 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
                     checkNotNull(alias, "null alias");
                     return true;
                 })
+                .filter(alias -> {
+                    checkArgument(Setting.ID_PATTERN.matcher(alias).matches(), "alias does not match setting id pattern");
+                    return true;
+                })
                 .map(alias -> alias.toLowerCase(Locale.ENGLISH))
                 .collect(GuavaCollectors.toImmutableSet());
         return this;
