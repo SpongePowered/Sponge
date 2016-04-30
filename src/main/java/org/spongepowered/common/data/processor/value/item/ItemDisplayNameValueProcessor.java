@@ -33,10 +33,8 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
@@ -61,7 +59,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.getItem() == Items.written_book) {
             NBTTagCompound mainCompound = container.getTagCompound();
-            mainCompound.setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
+            mainCompound.setString(NbtDataUtil.Item.Book.TITLE, legacy);
         } else {
             container.setStackDisplayName(legacy);
         }
@@ -76,12 +74,12 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
             if (mainCompound == null) {
                 return Optional.empty(); // Basically, this book wasn't initialized properly.
             }
-            final String titleString = mainCompound.getString(NbtDataUtil.ITEM_BOOK_TITLE);
+            final String titleString = mainCompound.getString(NbtDataUtil.Item.Book.TITLE);
             return Optional.of(SpongeTexts.fromLegacy(titleString));
         }
-        final NBTTagCompound mainCompound = container.getSubCompound(NbtDataUtil.ITEM_DISPLAY, false);
-        if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.ITEM_DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
-            final String displayString = mainCompound.getString(NbtDataUtil.ITEM_DISPLAY_NAME);
+        final NBTTagCompound mainCompound = container.getSubCompound(NbtDataUtil.Item.DISPLAY_TAG, false);
+        if (mainCompound != null && mainCompound.hasKey(NbtDataUtil.Item.DISPLAY_NAME, NbtDataUtil.TAG_STRING)) {
+            final String displayString = mainCompound.getString(NbtDataUtil.Item.DISPLAY_NAME);
             return Optional.of(SpongeTexts.fromLegacy(displayString));
         } else {
             return Optional.empty();

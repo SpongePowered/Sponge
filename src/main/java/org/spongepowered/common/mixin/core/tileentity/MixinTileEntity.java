@@ -212,8 +212,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         if (this instanceof IMixinCustomDataHolder) {
-            if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-                final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+            if (compound.hasKey(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+                final NBTTagList list = compound.getTagList(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
                 final ImmutableList.Builder<DataView> builder = ImmutableList.builder();
                 if (list != null && list.tagCount() != 0) {
                     for (int i = 0; i < list.tagCount(); i++) {
@@ -246,7 +246,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             for (DataView dataView : manipulatorViews) {
                 manipulatorTagList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            compound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
+            compound.setTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, manipulatorTagList);
         }
     }
 

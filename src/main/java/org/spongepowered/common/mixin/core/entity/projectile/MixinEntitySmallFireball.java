@@ -57,15 +57,15 @@ public abstract class MixinEntitySmallFireball extends MixinEntityFireball imple
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        if (compound.hasKey(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT)) {
+            this.damage = compound.getFloat(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT);
         }
     }
 
     @Override
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
-        compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+        compound.setFloat(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT, this.damage);
     }
 
     @Redirect(method = "onImpact", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/GameRules;getBoolean(Ljava/lang/String;)Z"))

@@ -62,15 +62,15 @@ public class DurabilityDataProcessor extends AbstractItemDataProcessor<Durabilit
         if (!itemStack.hasTagCompound()) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setBoolean(NbtDataUtil.ITEM_UNBREAKABLE, unbreakable);
+        itemStack.getTagCompound().setBoolean(NbtDataUtil.Item.UNBREAKABLE, unbreakable);
         return true;
     }
 
     @Override
     public Map<Key<?>, ?> getValues(ItemStack itemStack) {
-        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_UNBREAKABLE)) {
+        if (itemStack.hasTagCompound() && itemStack.getTagCompound().hasKey(NbtDataUtil.Item.UNBREAKABLE)) {
             return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(),
-                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(NbtDataUtil.ITEM_UNBREAKABLE));
+                    Keys.UNBREAKABLE, itemStack.getTagCompound().getBoolean(NbtDataUtil.Item.UNBREAKABLE));
         }
         return ImmutableMap.of(Keys.ITEM_DURABILITY, itemStack.getMaxDamage() - itemStack.getItemDamage(), Keys.UNBREAKABLE, false);
     }

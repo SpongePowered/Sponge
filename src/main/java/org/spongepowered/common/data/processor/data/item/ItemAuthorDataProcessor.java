@@ -66,16 +66,16 @@ public class ItemAuthorDataProcessor extends AbstractItemSingleDataProcessor<Tex
         if (!itemStack.hasTagCompound()) {
             itemStack.setTagCompound(new NBTTagCompound());
         }
-        itemStack.getTagCompound().setString(NbtDataUtil.ITEM_BOOK_AUTHOR, SpongeTexts.toLegacy(value));
+        itemStack.getTagCompound().setString(NbtDataUtil.Item.Book.AUTHOR, SpongeTexts.toLegacy(value));
         return true;
     }
 
     @Override
     protected Optional<Text> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_AUTHOR)) {
+        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.Item.Book.AUTHOR)) {
             return Optional.empty();
         }
-        final String json = itemStack.getTagCompound().getString(NbtDataUtil.ITEM_BOOK_AUTHOR);
+        final String json = itemStack.getTagCompound().getString(NbtDataUtil.Item.Book.AUTHOR);
         final Text author = TextSerializers.JSON.deserializeUnchecked(json);
         return Optional.of(author);
     }

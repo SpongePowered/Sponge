@@ -49,7 +49,7 @@ public abstract class MixinIndirectEntityDamageSource extends MixinEntityDamageS
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(CallbackInfo callbackInfo) {
         if (!(this.indirectEntity instanceof User)) {
-            this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            this.owner = ((IMixinEntity) super.getSource()).getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
             if (this.indirectEntity == null && this.owner.isPresent() && this.owner.get() instanceof Entity) {
                 this.indirectEntity = (Entity) this.owner.get();
             }

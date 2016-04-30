@@ -67,12 +67,12 @@ public abstract class MixinCommandSummon extends CommandBase {
 
     @Redirect(method = "processCommand", at = @At(value = "INVOKE", target = ENTITY_LIST_CREATE_FROM_NBT))
     private Entity onAttemptSpawnEntity(NBTTagCompound nbt, World world, ICommandSender sender, String[] args) {
-        if ("Minecart".equals(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID))) {
-            nbt.setString(NbtDataUtil.ENTITY_TYPE_ID,
-                    EntityMinecart.EnumMinecartType.byNetworkID(nbt.getInteger(NbtDataUtil.MINECART_TYPE)).getName());
-            nbt.removeTag(NbtDataUtil.MINECART_TYPE);
+        if ("Minecart".equals(nbt.getString(NbtDataUtil.Entity.ENTITY_TYPE_ID))) {
+            nbt.setString(NbtDataUtil.Entity.ENTITY_TYPE_ID,
+                    EntityMinecart.EnumMinecartType.byNetworkID(nbt.getInteger(NbtDataUtil.Entity.Minecart.MINECART_TYPE)).getName());
+            nbt.removeTag(NbtDataUtil.Entity.Minecart.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(nbt.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(nbt.getString(NbtDataUtil.Entity.ENTITY_TYPE_ID));
         if (entityClass == null) {
             return null;
         }

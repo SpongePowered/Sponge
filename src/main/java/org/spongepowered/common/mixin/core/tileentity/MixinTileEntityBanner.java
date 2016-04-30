@@ -102,10 +102,10 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
             SpongeGameRegistry registry = SpongeImpl.getGame().getRegistry();
             for (int i = 0; i < this.patterns.tagCount(); i++) {
                 NBTTagCompound tagCompound = this.patterns.getCompoundTagAt(i);
-                String patternId = tagCompound.getString(NbtDataUtil.BANNER_PATTERN_ID);
+                String patternId = tagCompound.getString(NbtDataUtil.TileEntity.BANNER_PATTERN_ID);
                 this.patternLayers.add(new SpongePatternLayer(
                     SpongeImpl.getRegistry().getType(BannerPatternShape.class, patternId).get(),
-                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.BANNER_PATTERN_COLOR)).getName()).get()));
+                    registry.getType(DyeColor.class, EnumDyeColor.byDyeDamage(tagCompound.getInteger(NbtDataUtil.TileEntity.BANNER_PATTERN_COLOR)).getName()).get()));
             }
         }
         this.markDirtyAndUpdate();
@@ -123,8 +123,8 @@ public abstract class MixinTileEntityBanner extends MixinTileEntity implements B
         this.patterns = new NBTTagList();
         for (PatternLayer layer : this.patternLayers) {
             NBTTagCompound compound = new NBTTagCompound();
-            compound.setString(NbtDataUtil.BANNER_PATTERN_ID, ((TileEntityBanner.EnumBannerPattern) (Object) layer.getShape()).getPatternID());
-            compound.setInteger(NbtDataUtil.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
+            compound.setString(NbtDataUtil.TileEntity.BANNER_PATTERN_ID, ((TileEntityBanner.EnumBannerPattern) (Object) layer.getShape()).getPatternID());
+            compound.setInteger(NbtDataUtil.TileEntity.BANNER_PATTERN_COLOR, ((EnumDyeColor) (Object) layer.getColor()).getDyeDamage());
             this.patterns.appendTag(compound);
         }
         markDirtyAndUpdate();

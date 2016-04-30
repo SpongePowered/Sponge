@@ -100,8 +100,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Inject(method = "readFromNBT", at = @At("RETURN"))
     private void onRead(NBTTagCompound compound, CallbackInfo info) {
-        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.General.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.General.SPONGE_DATA));
         }
     }
 
@@ -127,8 +127,8 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Inject(method = "setTagCompound", at = @At("RETURN"))
     private void onSet(NBTTagCompound compound, CallbackInfo callbackInfo) {
-        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.SPONGE_DATA));
+        if (hasTagCompound() && getTagCompound().hasKey(NbtDataUtil.General.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            readFromNbt(getTagCompound().getCompoundTag(NbtDataUtil.General.SPONGE_DATA));
         }
     }
 
@@ -186,10 +186,10 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                 .set(DataQueries.ITEM_DAMAGE_VALUE, this.getItemDamage());
         if (hasTagCompound()) { // no tag? no data, simple as that.
             final NBTTagCompound compound = (NBTTagCompound) getTagCompound().copy();
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-                if (spongeCompound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.hasKey(NbtDataUtil.General.SPONGE_DATA)) {
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.General.SPONGE_DATA);
+                if (spongeCompound.hasKey(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.removeTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
@@ -239,10 +239,10 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
 
     @Override
     public void readFromNbt(NBTTagCompound compound) {
-        if (compound.hasKey(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
-            final NBTTagList list = compound.getTagList(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
+        if (compound.hasKey(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_LIST)) {
+            final NBTTagList list = compound.getTagList(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, NbtDataUtil.TAG_COMPOUND);
             if (!list.hasNoTags()) {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                compound.removeTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST);
                 final List<DataView> views = Lists.newArrayList();
                 for (int i = 0; i < list.tagCount(); i++) {
                     final NBTTagCompound dataCompound = list.getCompoundTagAt(i);
@@ -253,15 +253,15 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
                     offerCustom(manipulator, MergeFunction.IGNORE_ALL);
                 }
             } else {
-                compound.removeTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST);
+                compound.removeTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST);
                 if (compound.hasNoTags()) {
-                    getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
+                    getTagCompound().removeTag(NbtDataUtil.General.SPONGE_DATA);
                     return;
                 }
             }
         }
         if (compound.hasNoTags()) {
-            getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
+            getTagCompound().removeTag(NbtDataUtil.General.SPONGE_DATA);
             if (getTagCompound().hasNoTags()) {
                 setTagCompound(null);
             }
@@ -316,11 +316,11 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
             for (DataView dataView : manipulatorViews) {
                 newList.appendTag(NbtTranslator.getInstance().translateData(dataView));
             }
-            final NBTTagCompound spongeCompound = getSubCompound(NbtDataUtil.SPONGE_DATA, true);
-            spongeCompound.setTag(NbtDataUtil.CUSTOM_MANIPULATOR_TAG_LIST, newList);
+            final NBTTagCompound spongeCompound = getSubCompound(NbtDataUtil.General.SPONGE_DATA, true);
+            spongeCompound.setTag(NbtDataUtil.General.CUSTOM_MANIPULATOR_TAG_LIST, newList);
         } else {
             if (hasTagCompound()) {
-                this.getTagCompound().removeTag(NbtDataUtil.SPONGE_DATA);
+                this.getTagCompound().removeTag(NbtDataUtil.General.SPONGE_DATA);
             }
             if (this.getTagCompound().hasNoTags()) {
                 this.setTagCompound(null);

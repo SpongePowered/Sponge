@@ -163,8 +163,8 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
         this.damageValue = getData(container, DataQueries.ITEM_DAMAGE_VALUE, Integer.class);
         if (container.contains(DataQueries.UNSAFE_NBT)) {
             final NBTTagCompound compound = NbtTranslator.getInstance().translateData(container.getView(DataQueries.UNSAFE_NBT).get());
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
-                compound.removeTag(NbtDataUtil.SPONGE_DATA);
+            if (compound.hasKey(NbtDataUtil.General.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+                compound.removeTag(NbtDataUtil.General.SPONGE_DATA);
             }
             this.compound = compound;
         }
@@ -213,7 +213,7 @@ public class SpongeItemStackBuilder implements ItemStack.Builder {
             final Optional<NBTTagCompound> compound = ((SpongeBlockSnapshot) blockSnapshot).getCompound();
             if (compound.isPresent()) {
                 this.compound = new NBTTagCompound();
-                this.compound.setTag(NbtDataUtil.BLOCK_ENTITY_TAG, compound.get());
+                this.compound.setTag(NbtDataUtil.TileEntity.TILE_ENTITY_ROOT, compound.get());
             }
             // todo probably needs more testing, but this'll do donkey...
         } else { // TODO handle through the API specifically handling the rest of the data stuff

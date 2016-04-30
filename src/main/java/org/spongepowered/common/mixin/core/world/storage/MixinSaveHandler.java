@@ -122,8 +122,8 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
             final NBTTagCompound compound = CompressedStreamTools.readCompressed(new FileInputStream(spongeFile.exists() ? spongeFile :
                     spongeOldFile));
             ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
-            if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                ((IMixinWorldInfo) info).readSpongeNbt(compound.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+            if (compound.hasKey(NbtDataUtil.General.SPONGE_DATA)) {
+                ((IMixinWorldInfo) info).readSpongeNbt(compound.getCompoundTag(NbtDataUtil.General.SPONGE_DATA));
             }
         }
     }
@@ -208,10 +208,10 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         NBTTagCompound compound = CompressedStreamTools.readCompressed(inputStream);
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
-        if (compound.hasKey(NbtDataUtil.BUKKIT, NbtDataUtil.TAG_COMPOUND)) {
-            final NBTTagCompound bukkitCompound = compound.getCompoundTag(NbtDataUtil.BUKKIT);
-            creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_FIRST_PLAYED));
-            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.BUKKIT_LAST_PLAYED));
+        if (compound.hasKey(NbtDataUtil.Compatibility.Bukkit.BUKKIT_ROOT, NbtDataUtil.TAG_COMPOUND)) {
+            final NBTTagCompound bukkitCompound = compound.getCompoundTag(NbtDataUtil.Compatibility.Bukkit.BUKKIT_ROOT);
+            creation = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.Compatibility.Bukkit.FIRST_PLAYED));
+            lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(NbtDataUtil.Compatibility.Bukkit.LAST_PLAYED));
         }
         UUID playerId = null;
         if (compound.hasKey(NbtDataUtil.UUID_MOST, NbtDataUtil.TAG_LONG) && compound.hasKey(NbtDataUtil.UUID_LEAST, NbtDataUtil.TAG_LONG)) {

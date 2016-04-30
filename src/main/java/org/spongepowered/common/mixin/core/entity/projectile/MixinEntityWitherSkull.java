@@ -67,8 +67,8 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     @Override
     public void readFromNbt(NBTTagCompound compound) {
         super.readFromNbt(compound);
-        if (compound.hasKey(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT)) {
-            this.damage = compound.getFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+        if (compound.hasKey(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT)) {
+            this.damage = compound.getFloat(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT);
             this.damageSet = true;
         }
     }
@@ -77,9 +77,9 @@ public abstract class MixinEntityWitherSkull extends MixinEntityFireball impleme
     public void writeToNbt(NBTTagCompound compound) {
         super.writeToNbt(compound);
         if (this.damageSet) {
-            compound.setFloat(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT, this.damage);
+            compound.setFloat(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT, this.damage);
         } else {
-            compound.removeTag(NbtDataUtil.PROJECTILE_DAMAGE_AMOUNT);
+            compound.removeTag(NbtDataUtil.Entity.Projectile.DAMAGE_AMOUNT);
         }
     }
 

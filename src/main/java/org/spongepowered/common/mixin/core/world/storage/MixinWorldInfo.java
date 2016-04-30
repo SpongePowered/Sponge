@@ -147,8 +147,8 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.spongeRootLevelNbt = new NBTTagCompound();
         this.spongeNbt = new NBTTagCompound();
         this.playerUniqueIdNbt = new NBTTagList();
-        this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
-        this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+        this.spongeNbt.setTag(NbtDataUtil.Chunk.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+        this.spongeRootLevelNbt.setTag(NbtDataUtil.General.SPONGE_DATA, this.spongeNbt);
 
         if (this.dimensionType == null) {
             this.dimensionType = DimensionTypes.OVERWORLD;
@@ -671,12 +671,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setSpongeRootLevelNBT(NBTTagCompound nbt) {
         this.spongeRootLevelNbt = nbt;
-        if (nbt.hasKey(NbtDataUtil.SPONGE_DATA)) {
-            this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.SPONGE_DATA);
-            if (this.spongeNbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE)) {
-                this.playerUniqueIdNbt = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, 10);
+        if (nbt.hasKey(NbtDataUtil.General.SPONGE_DATA)) {
+            this.spongeNbt = nbt.getCompoundTag(NbtDataUtil.General.SPONGE_DATA);
+            if (this.spongeNbt.hasKey(NbtDataUtil.Chunk.SPONGE_PLAYER_UUID_TABLE)) {
+                this.playerUniqueIdNbt = this.spongeNbt.getTagList(NbtDataUtil.Chunk.SPONGE_PLAYER_UUID_TABLE, 10);
             } else {
-                this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
+                this.spongeNbt.setTag(NbtDataUtil.Chunk.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
             }
         } else {
             // Migrate old NBT data to new location
@@ -684,16 +684,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
             if (nbt.hasKey(SpongeImpl.ECOSYSTEM_NAME)) {
                 this.spongeNbt = nbt.getCompoundTag(SpongeImpl.ECOSYSTEM_NAME);
             }
-            this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
+            this.spongeRootLevelNbt.setTag(NbtDataUtil.General.SPONGE_DATA, this.spongeNbt);
         }
     }
 
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
-        this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
+        this.dimension = nbt.getInteger(NbtDataUtil.World.DIMENSION_ID);
         this.uuid = new UUID(nbt.getLong(NbtDataUtil.WORLD_UUID_MOST), nbt.getLong(NbtDataUtil.WORLD_UUID_LEAST));
-        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
-        DimensionRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
+        this.isMod = nbt.getBoolean(NbtDataUtil.World.IS_MOD);
+        DimensionRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.World.DIMENSION_TYPE)))
                 .forEach(type -> this.dimensionType = type);
         this.trackedUniqueIdCount = 0;
         for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
@@ -705,16 +705,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
-        this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
+        this.spongeNbt.setInteger(NbtDataUtil.World.DIMENSION_ID, this.dimension);
         if (this.dimensionType != null) {
-            this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
+            this.spongeNbt.setString(NbtDataUtil.World.DIMENSION_TYPE, this.dimensionType.getId());
         }
         if (this.uuid != null) {
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());
         }
         if (this.isMod) {
-            this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, true);
+            this.spongeNbt.setBoolean(NbtDataUtil.World.IS_MOD, true);
         }
 
         Iterator<UUID> iterator = this.pendingUniqueIds.iterator();

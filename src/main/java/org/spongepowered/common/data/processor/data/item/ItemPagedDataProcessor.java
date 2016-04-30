@@ -89,7 +89,7 @@ public class ItemPagedDataProcessor extends AbstractItemSingleDataProcessor<List
 
     @Override
     protected Optional<List<Text>> getVal(ItemStack itemStack) {
-        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.ITEM_BOOK_PAGES)) {
+        if (!itemStack.hasTagCompound() || !itemStack.getTagCompound().hasKey(NbtDataUtil.Item.Book.PAGES)) {
             return Optional.empty();
         }
         return Optional.of(NbtDataUtil.getPagesFromNBT(getTagCompound(itemStack)));

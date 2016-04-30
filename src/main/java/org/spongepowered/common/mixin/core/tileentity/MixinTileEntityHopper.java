@@ -61,7 +61,7 @@ public abstract class MixinTileEntityHopper extends MixinTileEntityLockable impl
     @Inject(method = "putDropInInventoryAllSlots", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;getEntityItem()Lnet/minecraft/item/ItemStack;"))
     private static void onPutDrop(IInventory inventory, EntityItem entityItem, CallbackInfoReturnable<Boolean> callbackInfo) {
         IMixinEntity spongeEntity = (IMixinEntity) entityItem;
-        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.Entity.SPONGE_ENTITY_CREATOR);
         if (owner.isPresent()) {
             if (inventory instanceof TileEntity) {
                 TileEntity te = (TileEntity) inventory;

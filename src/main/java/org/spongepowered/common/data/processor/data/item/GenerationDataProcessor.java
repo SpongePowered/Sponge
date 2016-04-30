@@ -66,13 +66,13 @@ public final class GenerationDataProcessor
 
     @Override
     protected boolean set(ItemStack stack, Integer value) {
-        NbtDataUtil.getOrCreateCompound(stack).setInteger(NbtDataUtil.ITEM_BOOK_GENERATION, value);
+        NbtDataUtil.getOrCreateCompound(stack).setInteger(NbtDataUtil.Item.Book.GENERATION, value);
         return true;
     }
 
     @Override
     protected Optional<Integer> getVal(ItemStack stack) {
-        return Optional.of(NbtDataUtil.getItemCompound(stack).map(tag -> tag.getInteger(NbtDataUtil.ITEM_BOOK_GENERATION)).orElse(0));
+        return Optional.of(NbtDataUtil.getItemCompound(stack).map(tag -> tag.getInteger(NbtDataUtil.Item.Book.GENERATION)).orElse(0));
     }
 
     @Override
