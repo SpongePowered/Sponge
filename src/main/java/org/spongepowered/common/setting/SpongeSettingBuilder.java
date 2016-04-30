@@ -43,16 +43,16 @@ import java.util.Locale;
 
 import javax.annotation.Nullable;
 
-public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
+public class SpongeSettingBuilder<T, V extends SettingValue<T>> implements Setting.Builder<T, V> {
 
     @Nullable private String id;
     private Collection<String> aliases = Collections.emptySet();
-    @Nullable private SettingType<T, SettingValue<T>> type;
+    @Nullable private SettingType<T, V> type;
     @Nullable private Text name;
     @Nullable private T defaultValue;
 
     @Override
-    public Setting.Builder<T> id(String id) {
+    public Setting.Builder<T, V> id(String id) {
         checkNotNull(id, "id");
         id = id.toLowerCase(Locale.ENGLISH);
         checkArgument(Setting.ID_PATTERN.matcher(id).matches(), "id does not match setting id pattern");
@@ -61,13 +61,13 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
     }
 
     @Override
-    public Setting.Builder<T> aliases(String... aliases) {
+    public Setting.Builder<T, V> aliases(String... aliases) {
         checkNotNull(aliases, "aliases");
         return this.aliases(Arrays.asList(aliases));
     }
 
     @Override
-    public Setting.Builder<T> aliases(Collection<String> aliases) {
+    public Setting.Builder<T, V> aliases(Collection<String> aliases) {
         checkNotNull(aliases, "aliases");
 
         this.aliases = aliases.stream()
@@ -85,45 +85,47 @@ public class SpongeSettingBuilder<T> implements Setting.Builder<T> {
     }
 
     @Override
-    public Setting.Builder<T> type(SettingType<T, SettingValue<T>> type) {
+    public Setting.Builder<T, V> type(SettingType<T, V> type) {
         this.type = checkNotNull(type, "type");
         return this;
     }
 
     @Override
-    public Setting.Builder<T> name(Text name) {
+    public Setting.Builder<T, V> name(Text name) {
         this.name = checkNotNull(name, "name");
         return this;
     }
 
     @Override
-    public Setting.Builder<T> defaultValue(@Nullable T defaultValue) {
+    public Setting.Builder<T, V> defaultValue(@Nullable T defaultValue) {
         this.defaultValue = defaultValue;
         return this;
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Setting<T> build() {
         checkState(this.id != null, "id must be set");
         checkState(Setting.ID_PATTERN.matcher(this.id).matches(), "id does not match setting id pattern");
         checkState(this.type != null, "type must be set");
         checkState(this.name != null, "name must be set");
 
-        return new SimpleSetting<>(this.id, this.aliases, this.type, this.name, this.defaultValue);
+        return new SimpleSetting<>(this.id, this.aliases, (SettingType<T, SettingValue<T>>) this.type, this.name, this.defaultValue);
     }
 
     @Override
-    public Setting.Builder<T> from(Setting<T> value) {
+    @SuppressWarnings("unchecked")
+    public Setting.Builder<T, V> from(Setting<T> value) {
         this.id = value.getId();
         this.aliases = value.getAliases();
-        this.type = value.getType();
+        this.type = (SettingType<T, V>) value.getType();
         this.name = value.getName(null);
         this.defaultValue = value.getDefaultValue().orElse(null);
         return this;
     }
 
     @Override
-    public Setting.Builder<T> reset() {
+    public Setting.Builder<T, V> reset() {
         this.id = null;
         this.aliases = Collections.emptySet();
         this.type = null;
