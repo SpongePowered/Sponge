@@ -107,6 +107,7 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
         com.mojang.authlib.GameProfile profile = this.getServer().getMinecraftSessionService().fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
         if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
+            this.addEntry(profile, null);
             return Optional.of((GameProfile) profile);
         } else {
             return Optional.empty();
@@ -123,6 +124,7 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
         for (UUID uniqueId : uniqueIds) {
             com.mojang.authlib.GameProfile profile = service.fillProfileProperties(new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (profile != null && profile.getName() != null && !profile.getName().isEmpty()) {
+                this.addEntry(profile, null);
                 result.put(uniqueId, Optional.of((GameProfile) profile));
             } else {
                 result.put(uniqueId, Optional.empty());
@@ -184,7 +186,12 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
         this.getServer().getGameProfileRepository().findProfilesByNames(new String[]{name}, Agent.MINECRAFT, callback);
 
-        return callback.getResult();
+        Optional<GameProfile> profile = callback.getResult();
+        if (profile.isPresent()) {
+            this.addEntry((com.mojang.authlib.GameProfile) profile.get(), null);
+        }
+
+        return profile;
     }
 
     @Override
@@ -195,7 +202,16 @@ public abstract class MixinPlayerProfileCache implements GameProfileCache {
 
         this.getServer().getGameProfileRepository().findProfilesByNames(Iterables.toArray(names, String.class), Agent.MINECRAFT, new MapProfileLookupCallback(result));
 
-        return result.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(result);
+        if (!result.isEmpty()) {
+            for (Optional<GameProfile> entry : result.values()) {
+                if (entry.isPresent()) {
+                    this.addEntry((com.mojang.authlib.GameProfile) entry.get(), null);
+                }
+            }
+            return ImmutableMap.copyOf(result);
+        } else {
+            return ImmutableMap.of();
+        }
     }
 
     @Override
