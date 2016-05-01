@@ -300,7 +300,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     }
 
     private Entity checkNotSpawned(net.minecraft.entity.Entity entity) {
-        if (entity != null && entity.worldObj.isRemote) {
+        if (this.isRemote) {
             return (Entity) entity;
         }
 
