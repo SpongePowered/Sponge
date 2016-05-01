@@ -44,6 +44,8 @@ import java.util.Optional;
 
 public final class SpongeMessageHandler {
 
+    public static final String CHANNEL_NAME = "Sponge";
+
     private SpongeMessageHandler() {
     }
 
@@ -54,7 +56,7 @@ public final class SpongeMessageHandler {
     }
 
     public static void init() {
-        channel = Sponge.getChannelRegistrar().createChannel(SpongeImpl.getPlugin(), "Sponge");
+        channel = Sponge.getChannelRegistrar().createChannel(SpongeImpl.getPlugin(), CHANNEL_NAME);
         channel.registerMessage(MessageTrackerDataRequest.class, 0, Platform.Type.SERVER, SpongeMessageHandler::handleRequest);
         channel.registerMessage(MessageTrackerDataResponse.class, 1);
         channel.registerMessage(MessageKeyboardData.class, 2);

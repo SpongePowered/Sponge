@@ -185,6 +185,7 @@ import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
 import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 import org.spongepowered.common.registry.type.keyboard.KeyCategoryRegistryModule;
+import org.spongepowered.common.registry.type.keyboard.KeyboardRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.ObjectiveDisplayModeRegistryModule;
@@ -434,6 +435,7 @@ public final class CommonModuleRegistry {
             .registerModule(InventoryArchetype.class, InventoryArchetypeRegistryModule.getInstance())
             .registerModule(KeyCategory.class, KeyCategoryRegistryModule.getInstance())
             .registerModule(KeyBinding.class, KeyBindingRegistryModule.getInstance())
+            .registerModule(new KeyboardRegistryModule())
             ;
     }
 

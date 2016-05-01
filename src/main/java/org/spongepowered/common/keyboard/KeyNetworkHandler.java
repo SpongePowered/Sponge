@@ -49,12 +49,13 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-// TODO: Register this listener somewhere
 public class KeyNetworkHandler {
 
     @Listener
     public void onRegisterChannel(ChannelRegistrationEvent.Register event, @First PlayerConnection connection) {
-        handleKeyRegistration(connection.getPlayer());
+        if (event.getChannel().equals(SpongeMessageHandler.CHANNEL_NAME)) {
+            handleKeyRegistration(connection.getPlayer());
+        }
     }
 
     public static void handleKeyRegistration(Player player) {
