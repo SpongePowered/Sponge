@@ -1208,7 +1208,7 @@ public final class CauseTracker {
             IBlockState newState = (IBlockState) newBlockSnapshot.getState();
             BlockSnapshot currentTickingBlock = this.getCurrentTickBlock().orElse(null);
             // Containers get placed automatically
-            if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
+            if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.setCurrentTickBlock(this.getMixinWorld().createSpongeBlockSnapshot(newState,
                         newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag));
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
