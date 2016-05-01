@@ -31,11 +31,10 @@ import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.entity.vehicle.minecart.Minecart;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Constant;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.interfaces.IMixinMinecart;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
@@ -46,27 +45,47 @@ import javax.annotation.Nullable;
 @Mixin(EntityMinecart.class)
 public abstract class MixinEntityMinecart extends MixinEntity implements Minecart, IMixinMinecart {
 
-    private static final String IS_RIDDN = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z";
-    private static final String MINECART_MOTION_X_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionX:D";
-    private static final String MINECART_MOTION_Z_FIELD = "Lnet/minecraft/entity/item/EntityMinecart;motionZ:D";
+    private static final String IS_RIDDEN = "Lnet/minecraft/entity/item/EntityMinecart;isBeingRidden()Z";
     protected double maxSpeed = 0.4D;
     private boolean slowWhenEmpty = true;
     protected Vector3d airborneMod = new Vector3d(0.94999998807907104D, 0.94999998807907104D, 0.94999998807907104D);
     protected Vector3d derailedMod = new Vector3d(0.5D, 0.5D, 0.5D);
 
-    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_X_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
-    private void onDecelerateX(EntityMinecart self, double modifier) {
-        self.motionX *= this.derailedMod.getX();
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.5D, ordinal = 0))
+    private double onDecelerateX(double defaultValue) {
+        return this.derailedMod.getX();
     }
-    // note there would be a vanilla variant for the Y derail, however Forge re-assigns the motionY once, so the ordinals are out of sync
 
-    @Redirect(method = "moveDerailedMinecart", at = @At(value = "FIELD", target = MINECART_MOTION_Z_FIELD, opcode = Opcodes.PUTFIELD, ordinal = 1))
-    private void onDecelerateZ(EntityMinecart self, double modifier) {
-        self.motionZ *= this.derailedMod.getZ();
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.5D, ordinal = 1))
+    private double onDecelerateY(double defaultValue) {
+        return this.derailedMod.getY();
+    }
+
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.5D, ordinal = 2))
+    private double onDecelerateZ(double defaultValue) {
+        return this.derailedMod.getZ();
+    }
+
+    // These next few are not valid in a forge environment since they overwrite the constants with
+    // a method invocation, but for Vanilla, this should work perfectly fine.
+
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 0), require = 0)
+    private double onAirX(double defaultValue) {
+        return this.airborneMod.getX();
+    }
+
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 1), require = 0)
+    private double onAirY(double defaultValue) {
+        return this.airborneMod.getY();
+    }
+
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 2), require = 0)
+    private double onAirZ(double defaultValue) {
+        return this.airborneMod.getZ();
     }
 
     @Nullable
-    @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = IS_RIDDN, opcode = Opcodes.GETFIELD))
+    @Redirect(method = "applyDrag", at = @At(value = "INVOKE", target = IS_RIDDEN, opcode = Opcodes.GETFIELD))
     private boolean onIsRidden(EntityMinecart self) {
         if (!this.isBeingRidden() && !this.slowWhenEmpty) {
             return false;

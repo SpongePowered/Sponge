@@ -348,7 +348,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
             EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
         } else {
-            if (thisEntity instanceof EntityPlayerMP) {
+            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).playerNetServerHandler != null) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                         thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
@@ -373,7 +373,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (relativePositions.isEmpty()) {
             setLocationAndRotation(location, rotation);
         } else {
-            if (((Entity) this) instanceof EntityPlayerMP) {
+            if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
                 // Players use different logic, as they support real relative movement.
                 EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
@@ -506,11 +506,11 @@ public abstract class MixinEntity implements IMixinEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
-        checkNotNull(rotation, "The rotation was null!");
+        checkNotNull(rotation, "Rotation was null!");
         if (isRemoved()) {
             return;
         }
-        if (((Entity) this) instanceof EntityPlayerMP) {
+        if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
