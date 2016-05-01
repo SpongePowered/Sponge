@@ -2,11 +2,11 @@
 
 ext.api = common.project('SpongeAPI')
 
-// Apply shared Gradle configuration in SpongeAPI
-apply from: api.file('gradle/sponge.gradle')
-
 // Finish configuring SpongeAPI first
 evaluationDependsOn api.path
+
+// Apply shared Gradle configuration in SpongeAPI
+apply from: api.file('gradle/sponge.gradle')
 
 // Apply MixinGradle plugin to project
 apply plugin: 'org.spongepowered.mixin'
@@ -56,14 +56,6 @@ ext.ats = ['common_at.cfg']
 jar {
     // Include Java 6 classes
     from sourceSets.java6.output
-
-    manifest {
-        attributes(
-                'Specification-Title': api.name,
-                'Specification-Version': api.version,
-                'Specification-Vendor': api.url
-        )
-    }
 
     afterEvaluate {
         manifest {
@@ -124,14 +116,8 @@ uploadArchives.repositories.mavenDeployer.pom.whenConfigured {
     })
 }
 
-configure([jar, devJar]) {
-    // Append API revision to the SpongeAPI version
-    dependsOn common.resolveApiRevision
-}
-
-common.tasks.resolveApiRevision << {
-    jar.manifest.attributes('Specification-Version': common.apiVersion)
-}
+// Append API revision to the SpongeAPI version
+devJar.dependsOn api.resolveApiRevision
 
 // Code style configuration
 sortAccessTransformers {
