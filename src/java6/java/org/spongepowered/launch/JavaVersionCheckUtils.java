@@ -71,12 +71,19 @@ public class JavaVersionCheckUtils {
         String[] versionParts = version.split("\\.");
         double versionValue = 0;
         for(int i = 0; i < versionParts.length; i++) {
-            int part = Integer.valueOf(versionParts[i]);
-            // The value of the part of the version is related to it's proximity to the beginning
-            // Multiply by 3 to "pad" each of the parts a bit more so a higher value
-            // of a less significant version part couldn't as easily outweight the
-            // more significant version parts.
-            versionValue += part * Math.pow(10, versionParts.length - (i - 1) * 3);
+            try {
+                int part = Integer.valueOf(versionParts[i]);
+                // The value of the part of the version is related to it's proximity to the beginning
+                // Multiply by 3 to "pad" each of the parts a bit more so a higher value
+                // of a less significant version part couldn't as easily outweight the
+                // more significant version parts.
+                versionValue += part * Math.pow(10, versionParts.length - (i - 1) * 3);
+            } catch(NumberFormatException e) {
+                if (!GraphicsEnvironment.isHeadless()) {
+                    JOptionPane.showMessageDialog(null, "Encountered a malformed JVM version: " + version, "Malformed JVM version", JOptionPane.ERROR_MESSAGE);
+                }
+                continue;
+            }
         }
         return versionValue;
     }
