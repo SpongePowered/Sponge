@@ -39,7 +39,7 @@ public class JavaVersionCheckUtils {
 
     public static void ensureJava8() {
         String version = getCurrentVersion();
-        if (version.compareTo(REQUIRED_VERSION) < 0) {
+        if (getVersionValue(version) < getVersionValue(REQUIRED_VERSION)) {
             String error = String.format(ERROR_MESSAGE, version, REQUIRED_VERSION);
 
             if (!GraphicsEnvironment.isHeadless()) {
@@ -51,5 +51,33 @@ public class JavaVersionCheckUtils {
 
     private static String getCurrentVersion() {
         return System.getProperty("java.version");
+    }
+
+    /**
+     * Calculates a double value based on a Java version string such that a
+     * higher version will produce a higher value
+     *
+     * @param version The Java version
+     * @return The double value of the Java version
+     */
+    private static double getVersionValue(String version) {
+        // Get rid of any dashes, such as those in early access versions which have "-ea" on the end of the version
+        if(version.contains("-")) {
+            version = version.substring(0, version.indexOf('-'));
+        }
+        // Replace underscores with periods for easier String splitting
+        version = version.replace('_', '.');
+        // Split the version up into parts
+        String[] versionParts = version.split("\\.");
+        double versionValue = 0;
+        for(int i = 0; i < versionParts.length; i++) {
+            int part = Integer.valueOf(versionParts[i]);
+            // The value of the part of the version is related to it's proximity to the beginning
+            // Multiply by 3 to "pad" each of the parts a bit more so a higher value
+            // of a less significant version part couldn't as easily outweight the
+            // more significant version parts.
+            versionValue += part * Math.pow(10, versionParts.length - (i - 1) * 3);
+        }
+        return versionValue;
     }
 }
