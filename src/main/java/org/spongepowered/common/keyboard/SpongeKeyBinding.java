@@ -37,7 +37,7 @@ public class SpongeKeyBinding implements KeyBinding {
 
     private int internalId = -1;
 
-    public SpongeKeyBinding(String id, String name, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
+    private SpongeKeyBinding(String id, String name, SpongeKeyCategory keyCategory, boolean def, Text displayName) {
         this.keyCategory = keyCategory;
         this.displayName = displayName;
         this.name = name;
@@ -45,12 +45,20 @@ public class SpongeKeyBinding implements KeyBinding {
         this.id = id;
     }
 
-    public SpongeKeyBinding(String id, String name, SpongeKeyCategory keyCategory, Text displayName) {
-        this(id, name, keyCategory, displayName, false);
+    public SpongeKeyBinding(String pluginId, String name, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
+        this(pluginId + ':' + name, name, keyCategory, def, displayName);
+    }
+
+    public SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
+        this(id, SpongeKeyCategory.getName(id), keyCategory, def, displayName);
+    }
+
+    public SpongeKeyBinding(String pluginId, String name, SpongeKeyCategory keyCategory, Text displayName) {
+        this(pluginId, name, keyCategory, displayName, false);
     }
 
     public SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName) {
-        this(id, SpongeKeyCategory.getName(id), keyCategory, displayName, false);
+        this(id, keyCategory, displayName, false);
     }
 
     @Override

@@ -843,7 +843,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Inject(method = "onUpdate", at = @At("HEAD"))
-    public void onPlayerTick() {
+    public void onPlayerTick(CallbackInfo ci) {
         if (this.keyBindings.isEmpty()) {
             return;
         }

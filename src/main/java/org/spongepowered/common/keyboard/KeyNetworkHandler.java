@@ -76,8 +76,9 @@ public class KeyNetworkHandler {
                 if (((SpongeKeyBinding) keyBinding).isDefault()) {
                     continue;
                 }
-                if (KeyBindingRegistryModule.getInstance().isRegistered(keyBinding)) {
-                    SpongeImpl.getLogger().warn("There was an attempt to apply key binding that isn't registered: {}", keyBinding.getId());
+                if (!KeyBindingRegistryModule.getInstance().isRegistered(keyBinding)) {
+                    SpongeImpl.getLogger().warn("There was an attempt to apply a key binding that isn't registered: {}", keyBinding.getId());
+                    continue;
                 }
                 finalKeyBindings.add((SpongeKeyBinding) keyBinding);
                 keyCategories.add((SpongeKeyCategory) keyBinding.getCategory());

@@ -43,14 +43,18 @@ public class SpongeKeyCategory implements KeyCategory {
 
     private int internalId = -1;
 
-    public SpongeKeyCategory(String id, String name, Text title) {
+    private SpongeKeyCategory(String id, Text title, String name) {
         this.title = title;
         this.name = name;
         this.id = id;
     }
 
+    public SpongeKeyCategory(String pluginId, String name, Text title) {
+        this(pluginId + ':' + name, title, name);
+    }
+
     public SpongeKeyCategory(String id, Text title) {
-        this(id, getName(id), title);
+        this(id, title, getName(id));
     }
 
     static String getName(String id) {
