@@ -34,16 +34,11 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.PacketThreadUtil;
 import net.minecraft.network.play.server.SPacketBlockChange;
-import net.minecraft.network.play.server.SPacketChat;
 import net.minecraft.network.play.server.SPacketCloseWindow;
-import net.minecraft.network.play.server.SPacketSetSlot;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityChest;
@@ -51,13 +46,9 @@ import net.minecraft.util.EnumActionResult;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.TextComponentTranslation;
-import net.minecraft.util.text.TextFormatting;
 import net.minecraft.world.ILockableContainer;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -70,16 +61,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.TristateUtil;
 
 import java.util.Optional;
 
-@Mixin(value = PlayerInteractionManager.class, priority = 1000)
+@Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager {
 
     @Shadow public EntityPlayerMP thisPlayerMP;
@@ -89,7 +77,7 @@ public abstract class MixinPlayerInteractionManager {
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
 
-    @Inject(method = "processRightClick", at = @At("HEAD"))
+    @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
     public void onProcessrightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, CallbackInfoReturnable<EnumActionResult> cir) {
         if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
             cir.setReturnValue(EnumActionResult.FAIL);
