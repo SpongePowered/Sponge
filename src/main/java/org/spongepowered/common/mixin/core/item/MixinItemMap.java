@@ -38,7 +38,10 @@ public class MixinItemMap extends ItemMapBase {
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "loadItemData(Ljava/lang/Class;Ljava/lang/String;)Lnet/minecraft/world/WorldSavedData;"))
-    private WorldSavedData loadOverworldMapData(World worldIn, Class <? extends WorldSavedData> clazz, String dataId) {
+    private WorldSavedData loadOverworldMapData(World worldIn, Class<? extends WorldSavedData> clazz, String dataId) {
+        if (worldIn.isRemote) {
+            return worldIn.loadItemData(clazz, dataId);
+        }
         return DimensionManager.getWorldFromDimId(0).loadItemData(clazz, dataId);
     }
 
@@ -55,12 +58,19 @@ public class MixinItemMap extends ItemMapBase {
 
     @Redirect(method = "onCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int onCreatedGetOverworldUniqueDataId(World worldIn, String key) {
+        if (worldIn.isRemote) {
+            return worldIn.getUniqueDataId(key);
+        }
         return DimensionManager.getWorldFromDimId(0).getUniqueDataId(key);
     }
 
     @Redirect(method = "onCreated", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private void onCreatedSetOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        if (worldIn.isRemote) {
+            worldIn.setItemData(dataId, data);
+        } else {
+            DimensionManager.getWorldFromDimId(0).setItemData(dataId, data);
+        }
     }
 }
