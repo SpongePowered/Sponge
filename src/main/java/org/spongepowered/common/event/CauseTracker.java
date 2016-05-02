@@ -370,6 +370,8 @@ public final class CauseTracker {
             event = SpongeEventFactory.createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), this.getWorld());
         }
 
+        boolean wasProcessing = this.processingCaptureCause;
+        this.processingCaptureCause = false;
         if (!(SpongeImpl.postEvent(event))) {
             Iterator<Entity> iterator = event.getEntities().iterator();
             while (iterator.hasNext()) {
@@ -394,6 +396,7 @@ public final class CauseTracker {
         } else {
             this.capturedEntities.clear();
         }
+        this.processingCaptureCause = wasProcessing;
     }
 
     public void handlePostTickCaptures(Cause cause) {
@@ -1065,24 +1068,14 @@ public final class CauseTracker {
                 }
 
                 org.spongepowered.api.event.Event event = null;
-                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
-                entitySnapshotBuilder.add(((Entity) entityIn).createSnapshot());
-
+                List<Entity> entitiesToSpawn = Lists.newArrayList(entity);
+                ImmutableList<EntitySnapshot> entitySnapshots = ImmutableList.of(entity.createSnapshot());
                 if (entityIn instanceof EntityItem) {
-                    this.capturedEntityItems.add((Item) entityIn);
-                    event = SpongeEventFactory.createDropItemEventCustom(cause, this.capturedEntityItems,
-                            entitySnapshotBuilder.build(), this.getWorld());
+                    event = SpongeEventFactory.createDropItemEventCustom(cause, entitiesToSpawn, entitySnapshots, this.getWorld());
                 } else {
-                    this.capturedEntities.add((Entity) entityIn);
-                    event = SpongeEventFactory.createSpawnEntityEventCustom(cause, this.capturedEntities,
-                            entitySnapshotBuilder.build(), this.getWorld());
+                    event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, entitySnapshots, this.getWorld());
                 }
                 boolean cancelled = SpongeImpl.postEvent(event);
-                if (entityIn instanceof EntityItem) {
-                    this.capturedEntityItems.remove(entityIn);
-                } else {
-                    this.capturedEntities.remove(entityIn);
-                }
                 if (!cancelled && !entity.isRemoved()) {
                     if (entityIn instanceof EntityWeatherEffect) {
                         return addWeatherEffect(entityIn, cause);
