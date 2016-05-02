@@ -574,8 +574,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         checkArgument(cause.root() instanceof PluginContainer, "PluginContainer must be at the ROOT of a cause!");
         List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
-        final List<EntitySnapshot> snapshots = entitiesToSpawn.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-        return !EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, snapshots, this))
+        return !EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, this))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), this.getCauseTracker()))
                 .process()
                 .isCancelled();
@@ -775,7 +774,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         if (!this.isRemote && (flags & 1) != 0) {
-            this.notifyNeighborsRespectDebug(pos, oldState.getBlock());
+            this.notifyNeighborsRespectDebug(pos, newState.getBlock());
 
             if (newState.getBlock().hasComparatorInputOverride(newState)) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());

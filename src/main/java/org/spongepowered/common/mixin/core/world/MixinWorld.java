@@ -799,16 +799,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return;
         }
         List<Entity> entityList = new ArrayList<>();
-        ImmutableList.Builder<EntitySnapshot> snapshotBuilder = ImmutableList.builder();
         for (net.minecraft.entity.Entity entity : entities) {
             entityList.add((Entity) entity);
-            snapshotBuilder.add(((Entity) entity).createSnapshot());
         }
         SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this))
             .nonCancelled(event -> {
                 for (Entity successful : event.getEntities()) {
                     this.loadedEntityList.add((net.minecraft.entity.Entity) successful);

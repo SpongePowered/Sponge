@@ -110,8 +110,7 @@ public class SpongeCommonEventFactory {
         }
 
         List<Entity> spEntities = (List<Entity>) (List<?>) entities;
-        ImmutableList<EntitySnapshot> originalEntities = spEntities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
-        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, spEntities, originalEntities, (World) world);
+        CollideEntityEvent event = SpongeEventFactory.createCollideEntityEvent(cause, spEntities, (World) world);
         SpongeImpl.postEvent(event);
         return event;
     }
@@ -216,11 +215,9 @@ public class SpongeCommonEventFactory {
                     targetBlock.getLocation().get(), side);
             return SpongeImpl.postEvent(event);
         } else if (movingObjectPosition.entityHit != null) { // entity
-            ImmutableList.Builder<EntitySnapshot> entityBuilder = new ImmutableList.Builder<>();
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            entityBuilder.add(((Entity) movingObjectPosition.entityHit).createSnapshot());
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityList, entityBuilder.build(), impactPoint,
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityList, impactPoint,
                     (World) projectile.worldObj);
             return SpongeImpl.postEvent(event);
         }

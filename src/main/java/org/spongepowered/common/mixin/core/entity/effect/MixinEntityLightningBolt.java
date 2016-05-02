@@ -67,7 +67,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     public Cause cause = Cause.source(this).build();
 
     private final List<Entity> struckEntities = Lists.newArrayList();
-    private final List<EntitySnapshot> struckEntitySnapshots = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
     private boolean effect = false;
 
@@ -84,7 +83,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
         if (effect) {
             this.struckBlocks.clear();
             this.struckEntities.clear();
-            this.struckEntitySnapshots.clear();
         }
     }
 
@@ -122,7 +120,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             Entity entity = (Entity) mcEntity;
             if (!this.struckEntities.contains(entity)) {
                 this.struckEntities.add(entity);
-                this.struckEntitySnapshots.add(new SpongeEntitySnapshotBuilder().from(mcEntity).build());
             }
         }
     }
@@ -133,8 +130,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             return;
         }
         World world = (World) this.worldObj;
-        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities,
-                this.struckEntitySnapshots, world, this.struckBlocks);
+        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities, world, this.struckBlocks);
         Sponge.getEventManager().post(strike);
 
         if (!strike.isCancelled()) {

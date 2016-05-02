@@ -181,15 +181,12 @@ public final class PacketPhase extends TrackingPhase {
                         .build();
 
                 Iterator<Entity> iterator = capturedEntities.iterator();
-                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 while (iterator.hasNext()) {
                     Entity currentEntity = iterator.next();
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
-                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities,
-                        entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
+                return SpongeEventFactory.createClickInventoryEventDropFull(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
             }
         },
         DROP_ITEMS,
@@ -207,15 +204,12 @@ public final class PacketPhase extends TrackingPhase {
                         .build();
 
                 final Iterator<Entity> iterator = capturedEntities.iterator();
-                final ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 while (iterator.hasNext()) {
                     final Entity currentEntity = iterator.next();
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, playerMP.getUniqueID());
-                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
                 final org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) playerMP.worldObj;
-                return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities,
-                        entitySnapshotBuilder.build(), openContainer, spongeWorld, slotTransactions);
+                return SpongeEventFactory.createClickInventoryEventDropSingle(spawnCause, transaction, capturedEntities, openContainer, spongeWorld, slotTransactions);
 
             }
         },

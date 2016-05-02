@@ -136,15 +136,13 @@ public class EntityFunction {
     }
 
     static void destructItemsWithCause(List<Entity> items, Cause cause, CauseTracker causeTracker) {
-        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }
 
     static void processEntitiesWithCause(List<Entity> entityList, Cause cause, CauseTracker causeTracker) {
-        final List<EntitySnapshot> snapshots = entityList.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entityList, snapshots, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entityList, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }
