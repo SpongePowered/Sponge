@@ -51,14 +51,14 @@ public abstract class MixinChunkProviderEnd implements IChunkProvider, Generatio
     @Shadow
     public abstract void setBlocksInChunk(int p_180520_1_, int p_180520_2_, ChunkPrimer p_180520_3_);
 
-    @Shadow private @Final MapGenEndCity field_185972_n;
+    @Shadow private @Final MapGenEndCity endCityGen;
     @Shadow private @Final boolean mapFeaturesEnabled;
 
     @Override
     public void addPopulators(WorldGenerator generator) {
         if (this.mapFeaturesEnabled) {
-            generator.getPopulators().add((Populator) this.field_185972_n);
-            generator.getGenerationPopulators().add((GenerationPopulator) this.field_185972_n);
+            generator.getPopulators().add((Populator) this.endCityGen);
+            generator.getGenerationPopulators().add((GenerationPopulator) this.endCityGen);
         }
     }
 

@@ -104,13 +104,12 @@ public final class EntityPhase extends TrackingPhase {
                                     minecraftEntity.posZ, item))
                             .map(EntityUtil::fromNative)
                             .collect(Collectors.toList());
-                    final List<EntitySnapshot> entitySnapshots = itemEntities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                     final Cause cause = Cause.source(EntitySpawnCause.builder().entity(dyingEntity)
                             .type(InternalSpawnTypes.ENTITY_DEATH)
                             .build())
                             .named(NamedCause.of("Attacker", damageSource))
                             .build();
-                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, entitySnapshots, causeTracker.getWorld()))
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
                             .nonCancelled(event -> event.getEntities().stream().forEach(entity -> {
                                 TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
                                 causeTracker.getMixinWorld().forceSpawnEntity(entity);

@@ -120,7 +120,7 @@ public abstract class MixinPlayerList {
             SERVER_SEND_PACKET_TO_ALL_PLAYERS =
             "Lnet/minecraft/server/management/PlayerList;sendPacketToAllPlayers(Lnet/minecraft/network/Packet;)V";
     private static final String NET_HANDLER_SEND_PACKET = "Lnet/minecraft/network/NetHandlerPlayServer;sendPacket(Lnet/minecraft/network/Packet;)V";
-    @Shadow @Final private static Logger logger;
+    @Shadow @Final private static Logger LOG;
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final public Map<UUID, EntityPlayerMP> uuidToPlayerMap;
     @Shadow @Final public List<EntityPlayerMP> playerEntityList;
@@ -160,11 +160,11 @@ public abstract class MixinPlayerList {
         }
 
         try {
-            logger.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
+            LOG.info("Disconnecting " + (profile != null ? profile.toString() + " (" + netManager.getRemoteAddress().toString() + ")" : String.valueOf(netManager.getRemoteAddress() + ": " + reason.getUnformattedText())));
             netManager.sendPacket(new SPacketDisconnect(reason));
             netManager.closeChannel(reason);
         } catch (Exception exception) {
-            logger.error("Error whilst disconnecting player", exception);
+            LOG.error("Error whilst disconnecting player", exception);
         }
     }
 
@@ -276,7 +276,7 @@ public abstract class MixinPlayerList {
         handler.sendPacket(new SPacketPlayerAbilities(playerIn.capabilities));
         handler.sendPacket(new SPacketHeldItemChange(playerIn.inventory.currentItem));
         this.updatePermissionLevel(playerIn);
-        playerIn.getStatFile().func_150877_d();
+        playerIn.getStatFile().markAllDirty();
         playerIn.getStatFile().sendAchievements(playerIn);
         this.mcServer.refreshStatusNextTick();
 
@@ -284,7 +284,7 @@ public abstract class MixinPlayerList {
         this.playerLoggedIn(playerIn);
 
         // Sponge start - add world name to message
-        logger.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
+        LOG.info(playerIn.getName() + "[" + s1 + "] logged in with entity id " + playerIn.getEntityId() + " in "
                 + worldServer.getWorldInfo().getWorldName() + "(" + ((IMixinWorldServer) worldServer).getDimensionId()
                 + ") at (" + playerIn.posX + ", " + playerIn.posY + ", " + playerIn.posZ + ")");
         // Sponge end
@@ -332,11 +332,11 @@ public abstract class MixinPlayerList {
                     }
 
                     if (!playerIn.isRiding()) {
-                        logger.warn("Couldn\'t reattach entity to player");
-                        worldServer.removePlayerEntityDangerously(entity2);
+                        LOG.warn("Couldn\'t reattach entity to player");
+                        worldServer.removeEntityDangerously(entity2);
 
                         for (Entity entity3 : entity2.getRecursivePassengers()) {
-                            worldServer.removePlayerEntityDangerously(entity3);
+                            worldServer.removeEntityDangerously(entity3);
                         }
                     }
                 }

@@ -228,8 +228,8 @@ public class DamageEventHandler {
 
     public static Optional<Tuple<DamageModifier, Function<? super Double, Double>>> createResistanceModifier(EntityLivingBase entityLivingBase,
                                                                                                              DamageSource damageSource) {
-        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.resistance) && damageSource != DamageSource.outOfWorld) {
-            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.resistance));
+        if (!damageSource.isDamageAbsolute() && entityLivingBase.isPotionActive(MobEffects.RESISTANCE) && damageSource != DamageSource.outOfWorld) {
+            PotionEffect effect = ((PotionEffect) entityLivingBase.getActivePotionEffect(MobEffects.RESISTANCE));
             return Optional.of(new Tuple<>(DamageModifier.builder()
                                                .cause(Cause.of(NamedCause.of(DamageEntityEvent.RESISTANCE, effect)))
                                                .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)

@@ -66,7 +66,7 @@ public class FireworkUtils {
     }
 
     public static FireworkEffect getChargeEffect(ItemStack item) {
-        Preconditions.checkArgument(item.getItem() == Items.firework_charge, "Item is not a firework!");
+        Preconditions.checkArgument(item.getItem() == Items.FIREWORK_CHARGE, "Item is not a firework!");
         NBTTagCompound firework = NbtDataUtil.getOrCreateCompound(item).getCompoundTag("Explosion");
         if(firework == null) return null;
 
@@ -145,14 +145,14 @@ public class FireworkUtils {
         }
         if(item == null) return false;
 
-        if(item.getItem() == Items.firework_charge) {
+        if(item.getItem() == Items.FIREWORK_CHARGE) {
             if(effects.size() != 0) {
                 NbtDataUtil.getOrCreateCompound(item).setTag("Explosion", toNbt(effects.get(0)));
             } else {
                 NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
             }
             return true;
-        } else if(item.getItem() == Items.fireworks) {
+        } else if(item.getItem() == Items.FIREWORKS) {
             NBTTagList nbtEffects = new NBTTagList();
             effects.stream().map(FireworkUtils::toNbt).forEach(nbtEffects::appendTag);
 
@@ -174,7 +174,7 @@ public class FireworkUtils {
         if(item == null) return Optional.empty();
 
         List<FireworkEffect> effects;
-        if(item.getItem() == Items.fireworks) {
+        if(item.getItem() == Items.FIREWORKS) {
             NBTTagCompound fireworks = item.getSubCompound("Fireworks", false);
             if(fireworks == null || !fireworks.hasKey("Explosions")) return Optional.empty();
 
@@ -203,10 +203,10 @@ public class FireworkUtils {
         }
         if(item == null) return false;
 
-        if(item.getItem() == Items.firework_charge) {
+        if(item.getItem() == Items.FIREWORK_CHARGE) {
             NbtDataUtil.getOrCreateCompound(item).removeTag("Explosion");
             return true;
-        } else if(item.getItem() == Items.fireworks) {
+        } else if(item.getItem() == Items.FIREWORKS) {
             NBTTagCompound fireworks = item.getSubCompound("Fireworks", true);
             fireworks.removeTag("Explosions");
             return true;

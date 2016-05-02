@@ -81,7 +81,7 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
             }
             Block block = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
 
-            if ((block == Blocks.grass || block == Blocks.dirt) && y < 256 - i - 1) {
+            if ((block == Blocks.GRASS || block == Blocks.DIRT) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -91,9 +91,9 @@ public abstract class MixinWorldGenCanopyTree extends WorldGenAbstractTree imple
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
+        setDecorationDefaults();
         if (generate((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

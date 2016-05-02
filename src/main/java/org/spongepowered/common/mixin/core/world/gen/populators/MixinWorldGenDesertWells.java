@@ -48,7 +48,7 @@ import java.util.Random;
 @Mixin(WorldGenDesertWells.class)
 public abstract class MixinWorldGenDesertWells extends WorldGenerator implements DesertWell, PopulatorObject {
 
-    @Shadow @Final private static BlockStateMatcher field_175913_a;
+    @Shadow @Final private static BlockStateMatcher IS_SAND;
 
     private double spawnProbability;
     private PopulatorObject obj;
@@ -108,7 +108,7 @@ public abstract class MixinWorldGenDesertWells extends WorldGenerator implements
         {
             position = position.down();
         }
-        if (!field_175913_a.apply(worldIn.getBlockState(position))) {
+        if (!IS_SAND.apply(worldIn.getBlockState(position))) {
             return false;
         }
         int i;

@@ -46,7 +46,7 @@ import java.util.Optional;
 public class FishDataProcessor extends AbstractItemSingleDataProcessor<Fish, Value<Fish>, FishData, ImmutableFishData> {
 
     public FishDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.fish), Keys.FISH_TYPE);
+        super(stack -> stack.getItem().equals(Items.FISH), Keys.FISH_TYPE);
     }
 
     @Override

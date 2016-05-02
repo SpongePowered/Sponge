@@ -50,13 +50,13 @@ import java.util.Random;
 @Mixin(WorldGenBlockBlob.class)
 public abstract class MixinWorldGenBlockBlob implements BlockBlob {
 
-    private BlockState block;
+    private BlockState blockState;
     private VariableAmount radius;
     private VariableAmount count;
 
     @Inject(method = "<init>(Lnet/minecraft/block/Block;I)V", at = @At("RETURN") )
     public void onConstructed(Block block, int radius, CallbackInfo ci) {
-        this.block = (BlockState) block.getDefaultState();
+        this.blockState = (BlockState) block.getDefaultState();
         this.radius = VariableAmount.fixed(radius);
         this.count = VariableAmount.baseWithRandomAddition(0, 3);
     }
@@ -96,7 +96,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
                     if (!worldIn.isAirBlock(position.down())) {
                         Block block = worldIn.getBlockState(position.down()).getBlock();
 
-                        if (block == Blocks.grass || block == Blocks.dirt || block == Blocks.stone) {
+                        if (block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.STONE) {
                             break label47;
                         }
                     }
@@ -129,7 +129,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
 
                     if (blockpos1.distanceSq(position) <= f * f) {
 //                        worldIn.setBlockState(blockpos1, this.field_150545_a.getDefaultState(), 4);
-                        worldIn.setBlockState(blockpos1, (IBlockState) this.block, 4);
+                        worldIn.setBlockState(blockpos1, (IBlockState) this.blockState, 4);
                     }
                 }
 
@@ -149,12 +149,12 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
 
     @Override
     public BlockState getBlock() {
-        return this.block;
+        return this.blockState;
     }
 
     @Override
     public void setBlock(BlockState state) {
-        this.block = state;
+        this.blockState = state;
     }
 
     @Override
@@ -181,7 +181,7 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
     public String toString() {
         return Objects.toStringHelper(this)
                 .add("Type", "BlockBlob")
-                .add("Block", this.block)
+                .add("Block", this.blockState)
                 .add("Radius", this.radius)
                 .add("Count", this.count)
                 .toString();

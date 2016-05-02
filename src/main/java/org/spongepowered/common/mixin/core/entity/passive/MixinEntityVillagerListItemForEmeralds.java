@@ -61,10 +61,10 @@ public class MixinEntityVillagerListItemForEmeralds implements TradeOfferGenerat
         ItemStack itemstack1;
 
         if (amount < 0) {
-            itemstack = new ItemStack(Items.emerald, 1, 0);
+            itemstack = new ItemStack(Items.EMERALD, 1, 0);
             itemstack1 = new ItemStack(this.itemToBuy.getItem(), -amount, this.itemToBuy.getMetadata());
         } else {
-            itemstack = new ItemStack(Items.emerald, amount, 0);
+            itemstack = new ItemStack(Items.EMERALD, amount, 0);
             itemstack1 = new ItemStack(this.itemToBuy.getItem(), 1, this.itemToBuy.getMetadata());
         }
 

@@ -97,7 +97,7 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
 
     @Override
     public BigMushroom build() throws IllegalStateException {
-        BigMushroom populator = (BigMushroom) new WorldGenBigMushroom(Blocks.brown_mushroom);
+        BigMushroom populator = (BigMushroom) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM);
         populator.getTypes().clear();
         populator.getTypes().addAll(this.types);
         populator.setMushroomsPerChunk(this.count);

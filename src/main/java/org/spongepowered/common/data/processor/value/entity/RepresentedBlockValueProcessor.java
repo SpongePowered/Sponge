@@ -47,7 +47,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected Value<BlockState> constructValue(BlockState value) {
-        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.air.getDefaultState(), value);
+        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override
@@ -64,7 +64,7 @@ public class RepresentedBlockValueProcessor extends AbstractSpongeValueProcessor
 
     @Override
     protected ImmutableValue<BlockState> constructImmutableValue(BlockState value) {
-        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.air.getDefaultState(), value);
+        return new ImmutableSpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), value);
     }
 
     @Override

@@ -37,7 +37,7 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
  */
 public class ChunkBufferPrimer extends ChunkPrimer {
 
-    private static final IBlockState defaultState = Blocks.air.getDefaultState();
+    private static final IBlockState defaultState = Blocks.AIR.getDefaultState();
     private final MutableBlockVolume buffer;
     private final Vector3i min;
 

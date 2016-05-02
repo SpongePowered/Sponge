@@ -94,9 +94,9 @@ public class HellMushroomPopulator implements Populator, Mushroom {
                 type = result.get(0);
             }
             if (type == MushroomTypes.BROWN) {
-                this.feature.field_175908_a = Blocks.brown_mushroom;
+                this.feature.block = Blocks.BROWN_MUSHROOM;
             } else {
-                this.feature.field_175908_a = Blocks.red_mushroom;
+                this.feature.block = Blocks.RED_MUSHROOM;
             }
             this.feature.generate(world, random, height);
 

@@ -39,7 +39,7 @@ import java.util.List;
 @Mixin(UserList.class)
 public abstract class MixinUserList {
 
-    @Shadow private static Logger logger;
+    @Shadow private static Logger LOGGER;
     @Shadow public File saveFile;
     @Shadow public abstract String getObjectKey(Object obj);
 
@@ -52,7 +52,7 @@ public abstract class MixinUserList {
     @Inject(method = "readSavedFile", at = @At("HEAD"), cancellable = true)
     private void onReadSavedFile(CallbackInfo ci) {
         if (!this.saveFile.exists()) {
-            logger.warn("{} does not exist, creating it.", this.saveFile.getName());
+            LOGGER.warn("{} does not exist, creating it.", this.saveFile.getName());
             ci.cancel();
         }
     }

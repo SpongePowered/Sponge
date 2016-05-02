@@ -120,8 +120,8 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
         this.sendToPlayers(packet);
     }
 
-    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SET_CONTAINS))
-    public boolean onUpdateScoreValue(Set set, Object object) {
+    @Redirect(method = "onScoreUpdated", at = @At(value = "INVOKE", target = SET_CONTAINS, remap = false))
+    public boolean onUpdateScoreValue(Set<?> set, Object object) {
         return true;
     }
 
@@ -183,7 +183,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     }
 
     @SuppressWarnings("rawtypes")
-    @Redirect(method = "func_96549_e", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
+    @Redirect(method = "addObjective", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", ordinal = 0, remap =
             false))
     public Iterator onGetPlayerIteratorForObjectives(List list) {
         return this.players.iterator();

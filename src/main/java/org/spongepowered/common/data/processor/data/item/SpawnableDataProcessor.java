@@ -48,15 +48,15 @@ import java.util.Optional;
 public class SpawnableDataProcessor extends AbstractItemSingleDataProcessor<EntityType, Value<EntityType>, SpawnableData, ImmutableSpawnableData> {
 
     public SpawnableDataProcessor() {
-        super(input -> input.getItem().equals(Items.spawn_egg), Keys.SPAWNABLE_ENTITY_TYPE);
+        super(input -> input.getItem().equals(Items.SPAWN_EGG), Keys.SPAWNABLE_ENTITY_TYPE);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean set(ItemStack itemStack, EntityType value) {
-        final String name = EntityList.classToStringMapping.get((Class<? extends Entity>) value.getEntityClass());
-        final int id = EntityList.stringToIDMapping.get(name);
-        if (EntityList.entityEggs.containsKey(id)) {
+        final String name = EntityList.CLASS_TO_NAME.get((Class<? extends Entity>) value.getEntityClass());
+        final int id = EntityList.NAME_TO_ID.get(name);
+        if (EntityList.ENTITY_EGGS.containsKey(id)) {
             itemStack.setItemDamage(id);
             return true;
         }

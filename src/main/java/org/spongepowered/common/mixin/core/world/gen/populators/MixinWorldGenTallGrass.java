@@ -103,7 +103,7 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
                 stype = result.get(0);
             }
             BlockTallGrass.EnumType type = (BlockTallGrass.EnumType) (Object) stype;
-            this.tallGrassState = Blocks.tallgrass.getDefaultState().withProperty(BlockTallGrass.TYPE, type);
+            this.tallGrassState = Blocks.TALLGRASS.getDefaultState().withProperty(BlockTallGrass.TYPE, type);
             generate(world, random, pos);
         }
     }

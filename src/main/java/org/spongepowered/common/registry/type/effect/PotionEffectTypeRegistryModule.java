@@ -81,11 +81,11 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     @SuppressWarnings("unchecked")
     @Override
     public void registerDefaults() {
-        for (Potion potion : Potion.potionRegistry) {
+        for (Potion potion : Potion.REGISTRY) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 this.potionList.add(potionEffectType);
-                this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
+                this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
             }
         }
     }
@@ -93,12 +93,12 @@ public final class PotionEffectTypeRegistryModule implements SpongeAdditionalCat
     @SuppressWarnings("unchecked")
     @AdditionalRegistration
     public void additionalRegistration() { // I'm guessing that this should work very well.
-        for (Potion potion : Potion.potionRegistry) {
+        for (Potion potion : Potion.REGISTRY) {
             if (potion != null) {
                 PotionEffectType potionEffectType = (PotionEffectType) potion;
                 if (!this.potionList.contains(potionEffectType)) {
                     this.potionList.add(potionEffectType);
-                    this.potionEffectTypeMap.put(Potion.potionRegistry.getNameForObject(potion).toString(), potionEffectType);
+                    this.potionEffectTypeMap.put(Potion.REGISTRY.getNameForObject(potion).toString(), potionEffectType);
                 }
             }
         }

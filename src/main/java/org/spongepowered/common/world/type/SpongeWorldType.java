@@ -38,14 +38,14 @@ public abstract class SpongeWorldType extends WorldType {
     }
 
     private static int getNextID() {
-        for (int x = 0; x < worldTypes.length; x++) {
-            if (worldTypes[x] == null) {
+        for (int x = 0; x < WORLD_TYPES.length; x++) {
+            if (WORLD_TYPES[x] == null) {
                 return x;
             }
         }
 
-        int oldLen = worldTypes.length;
-        worldTypes = Arrays.copyOf(worldTypes, oldLen + 16);
+        int oldLen = WORLD_TYPES.length;
+        WORLD_TYPES = Arrays.copyOf(WORLD_TYPES, oldLen + 16);
         return oldLen;
     }
 

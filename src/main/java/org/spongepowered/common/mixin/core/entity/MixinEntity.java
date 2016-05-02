@@ -54,6 +54,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
@@ -151,6 +152,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Nullable private Text displayName;
     protected DamageSource lastDamageSource;
     private Cause destructCause;
+    private BlockState currentCollidingBlock;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -257,7 +259,7 @@ public abstract class MixinEntity implements IMixinEntity {
             this.originalLava = DamageSource.lava;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock().getMaterial(block) == Material.lava);
+                block.getBlock().getMaterial(block) == Material.LAVA);
             DamageSource.lava = new MinecraftBlockDamageSource("lava", location).setFireDamage();
         }
     }
@@ -282,7 +284,7 @@ public abstract class MixinEntity implements IMixinEntity {
             this.originalInFire = DamageSource.inFire;
             AxisAlignedBB bb = this.getEntityBoundingBox().expand(-0.001D, -0.001D, -0.001D);
             Location<World> location = DamageEventHandler.findFirstMatchingBlock((net.minecraft.entity.Entity) (Object) this, bb, block ->
-                block.getBlock() == Blocks.fire || block.getBlock() == Blocks.flowing_lava || block.getBlock() == Blocks.lava);
+                block.getBlock() == Blocks.FIRE || block.getBlock() == Blocks.FLOWING_LAVA || block.getBlock() == Blocks.LAVA);
             DamageSource.inFire = new MinecraftBlockDamageSource("inFire", location).setFireDamage();
         }
     }
@@ -346,7 +348,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
             EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
         } else {
-            if (thisEntity instanceof EntityPlayerMP) {
+            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).playerNetServerHandler != null) {
                 ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                         thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
@@ -371,7 +373,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (relativePositions.isEmpty()) {
             setLocationAndRotation(location, rotation);
         } else {
-            if (((Entity) this) instanceof EntityPlayerMP) {
+            if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
                 // Players use different logic, as they support real relative movement.
                 EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
@@ -504,11 +506,11 @@ public abstract class MixinEntity implements IMixinEntity {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public void setRotation(Vector3d rotation) {
-        checkNotNull(rotation, "The rotation was null!");
+        checkNotNull(rotation, "Rotation was null!");
         if (isRemoved()) {
             return;
         }
-        if (((Entity) this) instanceof EntityPlayerMP) {
+        if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
             // Force an update, this also set the rotation in this entity
             ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
@@ -583,9 +585,10 @@ public abstract class MixinEntity implements IMixinEntity {
         return this.entityUniqueID;
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Intrinsic
     public List<Entity> entity$getPassengers() {
-        return (List<Entity>) (Object) shadow$getPassengers();
+        return (List) shadow$getPassengers();
     }
 
     @Override
@@ -857,26 +860,31 @@ public abstract class MixinEntity implements IMixinEntity {
         return new Vector3d(this.motionX, this.motionY, this.motionZ);
     }
 
-    @Redirect(method = "moveEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+    @Redirect(method = "moveEntity",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
+            + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
+        if (block == Blocks.AIR) {
             // ignore air blocks
             return;
         }
 
         if (world.isRemote) {
-            block.onEntityCollidedWithBlock(world, pos, entity);
+            block.onEntityWalk(world, pos, entity);
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.NONE)) {
-            block.onEntityCollidedWithBlock(world, pos, entity);
+        IBlockState state = world.getBlockState(pos);
+        this.setCurrentCollidingBlock((BlockState) state);
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
+            block.onEntityWalk(world, pos, entity);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "doBlockCollisions", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;onEntityCollidedWithBlock(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlockState(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity) {
-        if (block == Blocks.air) {
+        if (block == Blocks.AIR) {
             // ignore air blocks
             return;
         }
@@ -886,14 +894,17 @@ public abstract class MixinEntity implements IMixinEntity {
             return;
         }
 
+        this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Redirect(method = "updateFallState", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
     public void onBlockFallenUpon(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity, float fallDistance) {
-        if (block == Blocks.air) {
+        if (block == Blocks.AIR) {
             // ignore air blocks
             return;
         }
@@ -903,9 +914,13 @@ public abstract class MixinEntity implements IMixinEntity {
             return;
         }
 
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, world.getBlockState(pos), entity, Direction.UP)) {
+        IBlockState state = world.getBlockState(pos);
+        this.setCurrentCollidingBlock((BlockState) state);
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
         }
+
+        this.setCurrentCollidingBlock(null);
     }
 
     @Override
@@ -1073,5 +1088,16 @@ public abstract class MixinEntity implements IMixinEntity {
         this.custom = null;
         return stack;
     }
+    @Override
+    public void setCurrentCollidingBlock(BlockState state) {
+        this.currentCollidingBlock = state;
+    }
 
+    @Override
+    public BlockState getCurrentCollidingBlock() {
+        if (this.currentCollidingBlock == null) {
+            return (BlockState) Blocks.AIR.getDefaultState();
+        }
+        return this.currentCollidingBlock;
+    }
 }

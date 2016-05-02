@@ -100,11 +100,11 @@ public final class ParticleRegistryModule implements CatalogRegistryModule<Parti
         this.addParticleType("heart", new SpongeParticleType(EnumParticleTypes.HEART, "heart", false));
         this.addParticleType("barrier", new SpongeParticleType(EnumParticleTypes.BARRIER, "barrier", false));
         this.addParticleType("item_crack",
-                             new SpongeParticleType.Item(EnumParticleTypes.ITEM_CRACK, "item_crack", new net.minecraft.item.ItemStack(Blocks.stone), true));
+                             new SpongeParticleType.Item(EnumParticleTypes.ITEM_CRACK, "item_crack", new net.minecraft.item.ItemStack(Blocks.STONE), true));
         this.addParticleType("block_crack",
-                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_CRACK, "block_crack", (BlockState) Blocks.stone.getDefaultState(), true));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_CRACK, "block_crack", (BlockState) Blocks.STONE.getDefaultState(), true));
         this.addParticleType("block_dust",
-                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_DUST, "block_dust", (BlockState) Blocks.stone.getDefaultState(), true));
+                             new SpongeParticleType.Block(EnumParticleTypes.BLOCK_DUST, "block_dust", (BlockState) Blocks.STONE.getDefaultState(), true));
         this.addParticleType("water_drop", new SpongeParticleType(EnumParticleTypes.WATER_DROP, "water_drop", false));
         // Is this particle available to be spawned? It's not registered on the
         // client though

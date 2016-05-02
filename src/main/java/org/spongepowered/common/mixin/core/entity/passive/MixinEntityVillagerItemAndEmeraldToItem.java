@@ -48,7 +48,7 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
     @Shadow public ItemStack buyingItemStack;
     @Shadow public EntityVillager.PriceInfo buyingPriceInfo;
     @Shadow public ItemStack sellingItemstack;
-    @Shadow public EntityVillager.PriceInfo field_179408_d;
+    @Shadow public EntityVillager.PriceInfo sellingPriceInfo;
 
     @Override
     public TradeOffer apply(Random random) {
@@ -61,12 +61,12 @@ public class MixinEntityVillagerItemAndEmeraldToItem implements TradeOfferGenera
 
         int sellingCount = 1;
 
-        if (this.field_179408_d != null) {
-            sellingCount = this.field_179408_d.getPrice(random);
+        if (this.sellingPriceInfo != null) {
+            sellingCount = this.sellingPriceInfo.getPrice(random);
         }
 
         final ItemStack itemStackBuying = new ItemStack(this.buyingItemStack.getItem(), buyingCount, this.buyingItemStack.getMetadata());
-        final ItemStack emeraldStack = new ItemStack(Items.emerald);
+        final ItemStack emeraldStack = new ItemStack(Items.EMERALD);
         final ItemStack itemStackSelling = new ItemStack(this.sellingItemstack.getItem(), sellingCount, this.sellingItemstack.getMetadata());
         return (TradeOffer) new MerchantRecipe(itemStackBuying, emeraldStack, itemStackSelling);
     }

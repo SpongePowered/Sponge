@@ -148,12 +148,12 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         if (this.settings.useWaterLakes) {
             Lake lake = Lake.builder()
                     .chance(1d / this.settings.waterLakeChance)
-                    .liquidType((BlockState) Blocks.water.getDefaultState())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
                 BiomeGenBase biomegenbase = this.worldObj.getBiomeGenForCoords(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
-                return biomegenbase != Biomes.desert && biomegenbase != Biomes.desertHills;
+                return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
             generator.getPopulators().add(filtered);
@@ -162,7 +162,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         if (this.settings.useLavaLakes) {
             Lake lake = Lake.builder()
                     .chance(1d / this.settings.waterLakeChance)
-                    .liquidType((BlockState) Blocks.water.getDefaultState())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
                     .build();

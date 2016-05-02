@@ -51,12 +51,12 @@ import javax.annotation.Nullable;
 @Mixin(ServerStatusResponse.class)
 public abstract class MixinServerStatusResponse implements ClientPingServerEvent.Response {
 
-    @Shadow @Nullable private ITextComponent serverMotd;
-    @Shadow @Nullable private ServerStatusResponse.Players playerCount;
-    @Shadow private ServerStatusResponse.Version protocolVersion;
+    @Shadow @Nullable private ITextComponent description;
+    @Shadow @Nullable private ServerStatusResponse.Players players;
+    @Shadow private ServerStatusResponse.Version version;
     @Shadow @Nullable private String favicon;
 
-    private Text description = Text.of();
+    private Text descriptionText = Text.of();
     @Nullable private ServerStatusResponse.Players playerBackup;
     @Nullable private Favicon faviconHandle;
 
@@ -67,13 +67,13 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
 
     @Override
     public Text getDescription() {
-        return this.description;
+        return this.descriptionText;
     }
 
     @Override
     public void setDescription(Text description) {
-        this.description = checkNotNull(description, "description");
-        this.serverMotd = SpongeTexts.toComponent(description); // TODO: Hope we get sent the locale
+        this.descriptionText = checkNotNull(description, "description");
+        this.description = SpongeTexts.toComponent(description); // TODO: Hope we get sent the locale
     }
 
     /**
@@ -85,27 +85,27 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
     @Overwrite
     public void setServerDescription(@Nullable ITextComponent motd) {
         if (motd != null) {
-            this.serverMotd = motd;
-            this.description = SpongeTexts.toText(motd);
+            this.description = motd;
+            this.descriptionText = SpongeTexts.toText(motd);
         } else {
-            this.serverMotd = new TextComponentString("");
-            this.description = Text.of();
+            this.description = new TextComponentString("");
+            this.descriptionText = Text.of();
         }
     }
 
     @Override
     public Optional<Players> getPlayers() {
-        return Optional.ofNullable((Players) this.playerCount);
+        return Optional.ofNullable((Players) this.players);
     }
 
     @Override
     public void setHidePlayers(boolean hide) {
-        if ((this.playerCount == null) != hide) {
+        if ((this.players == null) != hide) {
             if (hide) {
-                this.playerBackup = this.playerCount;
-                this.playerCount = null;
+                this.playerBackup = this.players;
+                this.players = null;
             } else {
-                this.playerCount = this.playerBackup;
+                this.players = this.playerBackup;
                 this.playerBackup = null;
             }
         }
@@ -113,7 +113,7 @@ public abstract class MixinServerStatusResponse implements ClientPingServerEvent
 
     @Override
     public MinecraftVersion getVersion() {
-        return (MinecraftVersion) this.protocolVersion;
+        return (MinecraftVersion) this.version;
     }
 
     @Override

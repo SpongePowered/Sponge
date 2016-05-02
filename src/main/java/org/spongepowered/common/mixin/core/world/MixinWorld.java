@@ -89,6 +89,7 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -108,6 +109,7 @@ import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -125,6 +127,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
+import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -167,6 +170,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
     private boolean keepSpawnLoaded;
     private Context worldContext;
+    protected boolean processingExplosion = false;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -365,9 +369,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
         // Some entities need to have non-null fields (and the easiest way to
         // set them is to use the more specialised constructor).
         if (entityClass.isAssignableFrom(EntityFallingBlock.class)) {
-            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.sand.getDefaultState());
+            entity = (Entity) new EntityFallingBlock(world, x, y, z, Blocks.SAND.getDefaultState());
         } else if (entityClass.isAssignableFrom(EntityItem.class)) {
-            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.stone));
+            entity = (Entity) new EntityItem(world, x, y, z, new ItemStack(Blocks.STONE));
         }
 
         if (entity == null) {
@@ -443,12 +447,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setKeepSpawnLoaded(boolean keepLoaded) {
         this.keepSpawnLoaded = keepLoaded;
-    }
-
-
-    @Override
-    public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
-        return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 
     @Override
@@ -801,16 +799,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
             return;
         }
         List<Entity> entityList = new ArrayList<>();
-        ImmutableList.Builder<EntitySnapshot> snapshotBuilder = ImmutableList.builder();
         for (net.minecraft.entity.Entity entity : entities) {
             entityList.add((Entity) entity);
-            snapshotBuilder.add(((Entity) entity).createSnapshot());
         }
         SpawnCause cause = SpawnCause.builder().type(InternalSpawnTypes.CHUNK_LOAD).build();
         List<NamedCause> causes = new ArrayList<>();
         causes.add(NamedCause.source(cause));
         causes.add(NamedCause.of("World", this));
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, snapshotBuilder.build(), this))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEventChunkLoad(Cause.of(causes), entityList, this))
             .nonCancelled(event -> {
                 for (Entity successful : event.getEntities()) {
                     this.loadedEntityList.add((net.minecraft.entity.Entity) successful);
@@ -872,4 +868,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         entity.onUpdate();
     }
+
+
+
 }

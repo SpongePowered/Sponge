@@ -100,7 +100,7 @@ public class GeneralFunctions {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void processBlockCaptures(List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState state, PhaseContext context) {
         if (snapshots.isEmpty()) {
             return;
@@ -272,14 +272,13 @@ public class GeneralFunctions {
                 })
                 .map(EntityUtil::fromNative)
                 .collect(Collectors.toList());
-        final List<EntitySnapshot> snapshots = itemDrops.stream().map(Entity::createSnapshot).collect(Collectors.toList());
         final Cause.Builder builder = Cause.source(BlockSpawnCause.builder()
                 .block(oldBlockSnapshot)
                 .type(InternalSpawnTypes.DROPPED_ITEM)
                 .build());
         phaseContext.firstNamed(NamedCause.NOTIFIER, User.class).map(NamedCause::notifier).ifPresent(builder::named);
         final Cause spawnCauses = builder.build();
-        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, snapshots, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld()))
                 .nonCancelled(event -> event.getEntities().forEach(entity -> {
                             TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
@@ -289,7 +288,7 @@ public class GeneralFunctions {
 
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static void processPostBlockCaptures(List<BlockSnapshot> blockSnapshots, CauseTracker causeTracker, IPhaseState unwindingState,
             PhaseContext context) {
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];

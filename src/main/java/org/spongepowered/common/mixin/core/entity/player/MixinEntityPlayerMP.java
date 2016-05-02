@@ -590,13 +590,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     /**
      * @author gabizou, April 7th, 2016
      *
-     * Technically an overwrite of {@link EntityPlayer#dropOneItem(boolean)}
+     * Technically an overwrite of {@link EntityPlayer#dropItem(boolean)}
      * @param dropAll
      * @return
      */
     @Override
     @Nullable
-    public EntityItem dropOneItem(boolean dropAll) {
+    public EntityItem dropItem(boolean dropAll) {
         final ItemStack currentItem = this.inventory.getCurrentItem();
         if (currentItem == null) {
             return null;

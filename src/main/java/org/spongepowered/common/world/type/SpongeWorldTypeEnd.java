@@ -40,7 +40,7 @@ public class SpongeWorldTypeEnd extends SpongeWorldType {
 
     @Override
     public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.sky);
+        return new BiomeProviderSingle(Biomes.SKY);
     }
 
     @Override

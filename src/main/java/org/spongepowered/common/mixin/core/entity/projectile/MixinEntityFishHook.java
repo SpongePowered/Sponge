@@ -65,7 +65,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
     @Shadow private EntityPlayer angler;
     @Shadow public net.minecraft.entity.Entity caughtEntity;
     @Shadow private int ticksCatchable;
-    @Shadow public abstract void func_184527_k();
+    @Shadow public abstract void bringInHookedEntity();
 
     @Nullable
     public ProjectileSource projectileSource;
@@ -117,7 +117,7 @@ public abstract class MixinEntityFishHook extends MixinEntity implements FishHoo
             int i = 0;
 
             if (this.caughtEntity != null) {
-                this.func_184527_k();
+                this.bringInHookedEntity();
                 this.worldObj.setEntityState((EntityFishHook) (Object) this, (byte)31);
                 i = this.caughtEntity instanceof EntityItem ? 3 : 5;
 

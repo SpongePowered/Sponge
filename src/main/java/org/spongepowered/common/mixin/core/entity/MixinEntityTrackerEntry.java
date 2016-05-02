@@ -103,7 +103,7 @@ public abstract class MixinEntityTrackerEntry {
         }
     }
 
-    @Inject(method = "func_180233_c", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isVisibleTo", at = @At("HEAD"), cancellable = true)
     private void onVisibilityCheck(EntityPlayerMP entityPlayerMP, CallbackInfoReturnable<Boolean> callbackInfoReturnable) {
         if (((IMixinEntity) this.trackedEntity).isVanished()) {
             callbackInfoReturnable.setReturnValue(false);

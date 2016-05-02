@@ -76,7 +76,7 @@ public class PlainsGrassPopulator implements Populator {
     public void populate(Chunk chunk, Random random) {
         Vector3i min = chunk.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
-        double d0 = this.noise.func_151601_a((double) (chunkPos.getX() + 8) / 200.0D, (double) (chunkPos.getZ() + 8) / 200.0D);
+        double d0 = this.noise.getValue((double) (chunkPos.getX() + 8) / 200.0D, (double) (chunkPos.getZ() + 8) / 200.0D);
 
         if (d0 < -0.8D) {
             this.flowers.setFlowersPerChunk(15 * 64);

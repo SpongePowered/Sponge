@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.adapter.impl.slots;
 import net.minecraft.inventory.IInventory;
 import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -47,11 +48,11 @@ import java.util.Collections;
 import java.util.Optional;
 
 public class SlotAdapter extends Adapter implements Slot {
-    
+
     private final SlotLens<IInventory, net.minecraft.item.ItemStack> slot;
-    
+
     private final int ordinal;
-    
+
     private SlotAdapter nextSlot;
 
     // Internal use for events, will be removed soon!
@@ -67,11 +68,11 @@ public class SlotAdapter extends Adapter implements Slot {
         this.slot = lens;
         this.ordinal = lens.getOrdinal(inventory);
     }
-    
+
     public int getOrdinal() {
         return this.ordinal;
     }
-    
+
     @Override
     public int getStackSize() {
         net.minecraft.item.ItemStack stack = this.slot.getStack(this.inventory);
@@ -153,13 +154,13 @@ public class SlotAdapter extends Adapter implements Slot {
 //        }
 //        this.inventory.markDirty();
 //        return InventoryTransactionResult.successNoTransactions();
-        
+
         Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
-        
+
         int maxStackSize = this.slot.getMaxStackSize(this.inventory);
         int remaining = stack.getQuantity();
-        
+
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
         int push = Math.min(remaining, maxStackSize);
         if (old == null && this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
@@ -169,14 +170,14 @@ public class SlotAdapter extends Adapter implements Slot {
             old.stackSize += push;
             remaining -= push;
         }
-        
+
         if (remaining == stack.getQuantity()) {
             // No items were consumed
             result.reject(ItemStackUtil.cloneDefensive(nativeStack));
         } else {
             stack.setQuantity(remaining);
         }
-        
+
         return result.build();
     }
 
@@ -184,19 +185,23 @@ public class SlotAdapter extends Adapter implements Slot {
     public InventoryTransactionResult set(ItemStack stack) {
         Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
         net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
-        
+
         net.minecraft.item.ItemStack old = this.slot.getStack(this.inventory);
+        if (stack.getItem() == ItemTypes.NONE) {
+            clear(); // NONE item will clear the slot
+            return result.replace(ItemStackUtil.fromNative(old)).build();
+        }
         int remaining = stack.getQuantity();
         int push = Math.min(remaining, this.slot.getMaxStackSize(this.inventory));
         if (this.slot.setStack(this.inventory, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
             result.replace(ItemStackUtil.fromNative(old));
             remaining -= push;
         }
-        
+
         if (remaining > 0) {
             result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
         }
-        
+
         return result.build();
     }
 
@@ -265,7 +270,7 @@ public class SlotAdapter extends Adapter implements Slot {
 
 //    @Override
 //    public Iterator<Inventory> iterator() {
-//        // TODO 
+//        // TODO
 //        return super.iterator();
 //    }
 }
