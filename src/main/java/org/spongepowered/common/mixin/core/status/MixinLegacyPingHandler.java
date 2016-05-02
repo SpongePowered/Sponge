@@ -45,7 +45,7 @@ import java.net.InetSocketAddress;
 @Mixin(LegacyPingHandler.class)
 public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapter {
 
-    @Shadow @Final private static Logger logger;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow private NetworkSystem networkSystem;
 
     @Shadow abstract void writeAndFlush(ChannelHandlerContext ctx, ByteBuf data);
@@ -111,14 +111,14 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
         int i = buf.readableBytes();
         switch (i) {
             case 0:
-                logger.debug("Ping: (<=1.3) from {}:{}", client.getAddress(), client.getPort());
+                LOGGER.debug("Ping: (<=1.3) from {}:{}", client.getAddress(), client.getPort());
 
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_3, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("%s§%d§%d",
                             SpongeStatusResponse.getUnformattedMotd(response),
-                            response.getPlayerCountData().getOnlinePlayerCount(),
-                            response.getPlayerCountData().getMaxPlayers()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -129,16 +129,16 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
                     return false;
                 }
 
-                logger.debug("Ping: (1.4-1.5) from {}:{}", client.getAddress(), client.getPort());
+                LOGGER.debug("Ping: (1.4-1.5) from {}:{}", client.getAddress(), client.getPort());
 
                 response = SpongeStatusResponse.postLegacy(server, client, SpongeLegacyMinecraftVersion.V1_5, null);
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.getProtocolVersionInfo().getProtocol(),
-                            response.getProtocolVersionInfo().getName(),
+                            response.getVersion().getProtocol(),
+                            response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.getPlayerCountData().getOnlinePlayerCount(),
-                            response.getPlayerCountData().getMaxPlayers()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }
@@ -171,7 +171,7 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
                 String host = buf.readBytes(length * 2).toString(Charsets.UTF_16BE);
                 int port = buf.readInt();
 
-                logger.debug("Ping: (1.6) from {}:{}", client.getAddress(), client.getPort());
+                LOGGER.debug("Ping: (1.6) from {}:{}", client.getAddress(), client.getPort());
 
                 response =
                         SpongeStatusResponse.postLegacy(server, client,
@@ -179,11 +179,11 @@ public abstract class MixinLegacyPingHandler extends ChannelInboundHandlerAdapte
                                 InetSocketAddress.createUnresolved(host, port));
                 if (response != null) {
                     this.writeResponse(ctx, String.format("§1\u0000%d\u0000%s\u0000%s\u0000%d\u0000%d",
-                            response.getProtocolVersionInfo().getProtocol(),
-                            response.getProtocolVersionInfo().getName(),
+                            response.getVersion().getProtocol(),
+                            response.getVersion().getName(),
                             SpongeStatusResponse.getMotd(response),
-                            response.getPlayerCountData().getOnlinePlayerCount(),
-                            response.getPlayerCountData().getMaxPlayers()));
+                            response.getPlayers().getOnlinePlayerCount(),
+                            response.getPlayers().getMaxPlayers()));
                 } else {
                     ctx.close();
                 }

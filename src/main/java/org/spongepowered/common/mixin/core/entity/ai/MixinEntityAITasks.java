@@ -209,8 +209,8 @@ public abstract class MixinEntityAITasks implements IMixinEntityAITasks {
                 SpongeImpl.postEvent(event);
                 if (!event.isCancelled()) {
 
-                    if (entityaitaskentry.field_188524_c) {
-                        entityaitaskentry.field_188524_c = false;
+                    if (entityaitaskentry.using) {
+                        entityaitaskentry.using = false;
                         otherAiBase.resetTask();
                         this.executingTaskEntries.remove(entityaitaskentry);
                     }

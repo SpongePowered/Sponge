@@ -53,7 +53,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow public List<Slot> inventorySlots;
     @Shadow public List<ItemStack> inventoryItemStacks;
     @Shadow public int windowId;
-    @Shadow protected List<ICrafting> crafters;
+    @Shadow protected List<ICrafting> listeners;
 
     @SuppressWarnings("rawtypes")
     @Shadow
@@ -72,14 +72,14 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Overwrite
     public void onCraftGuiOpened(ICrafting listener) {
         Container container = (Container) (Object) this;
-        if (this.crafters.contains(listener)) {
+        if (this.listeners.contains(listener)) {
             // Sponge start
             // throw new IllegalArgumentException("Listener already listening");
             listener.updateCraftingInventory(container, this.getInventory());
             container.detectAndSendChanges();
             // Sponge end
         } else {
-            this.crafters.add(listener);
+            this.listeners.add(listener);
             listener.updateCraftingInventory(container, this.getInventory());
             container.detectAndSendChanges();
         }
@@ -114,8 +114,8 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
                 itemstack1 = itemstack == null ? null : itemstack.copy();
                 this.inventoryItemStacks.set(i, itemstack1);
 
-                for (int j = 0; j < this.crafters.size(); ++j) {
-                    this.crafters.get(j).sendSlotContents((Container) (Object) this, i, itemstack1);
+                for (int j = 0; j < this.listeners.size(); ++j) {
+                    this.listeners.get(j).sendSlotContents((Container) (Object) this, i, itemstack1);
                 }
             }
         }

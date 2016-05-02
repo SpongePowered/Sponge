@@ -91,10 +91,10 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
     public boolean generate(World worldIn, Random rand, BlockPos position) {
         if (!worldIn.isAirBlock(position)) {
             return false;
-        } else if (worldIn.getBlockState(position.up()).getBlock() != Blocks.netherrack) {
+        } else if (worldIn.getBlockState(position.up()).getBlock() != Blocks.NETHERRACK) {
             return false;
         } else {
-            worldIn.setBlockState(position, Blocks.glowstone.getDefaultState(), 2);
+            worldIn.setBlockState(position, Blocks.GLOWSTONE.getDefaultState(), 2);
             // Sponge start
             int a = this.attempts.getFlooredAmount(rand);
             for (int i = 0; i < a; ++i) {
@@ -110,7 +110,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
                     for (int l = 0; l < k; ++l) {
                         EnumFacing enumfacing = aenumfacing[l];
 
-                        if (worldIn.getBlockState(blockpos1.offset(enumfacing)).getBlock() == Blocks.glowstone) {
+                        if (worldIn.getBlockState(blockpos1.offset(enumfacing)).getBlock() == Blocks.GLOWSTONE) {
                             ++j;
                         }
 
@@ -120,7 +120,7 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
                     }
 
                     if (j == 1) {
-                        worldIn.setBlockState(blockpos1, Blocks.glowstone.getDefaultState(), 2);
+                        worldIn.setBlockState(blockpos1, Blocks.GLOWSTONE.getDefaultState(), 2);
                     }
                 }
             }

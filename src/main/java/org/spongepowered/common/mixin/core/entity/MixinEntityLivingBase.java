@@ -263,7 +263,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
             if (this.getHealth() <= 0.0F) {
                 return false;
-            } else if (source.isFireDamage() && this.isPotionActive(MobEffects.fireResistance)) {
+            } else if (source.isFireDamage() && this.isPotionActive(MobEffects.FIRE_RESISTANCE)) {
                 return false;
             } else {
                 // Spon - ignore as this is handled in our damageEntityHookge

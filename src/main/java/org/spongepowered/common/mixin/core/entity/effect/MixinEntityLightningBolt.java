@@ -67,7 +67,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     public Cause cause = Cause.source(this).build();
 
     private final List<Entity> struckEntities = Lists.newArrayList();
-    private final List<EntitySnapshot> struckEntitySnapshots = Lists.newArrayList();
     private final List<Transaction<BlockSnapshot>> struckBlocks = Lists.newArrayList();
     private boolean effect = false;
 
@@ -81,6 +80,10 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     @Override
     public void setEffect(boolean effect) {
         this.effect = effect;
+        if (effect) {
+            this.struckBlocks.clear();
+            this.struckEntities.clear();
+        }
     }
 
     @Redirect(method = "<init>", at = @At(value = "INVOKE",
@@ -96,7 +99,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
     }
 
     private boolean onStrikeBlock(net.minecraft.world.World world, BlockPos pos, IBlockState blockState) {
-        if (!this.effect) {
+        if (!this.effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
             Vector3i pos3i = VecHelper.toVector3i(pos);
             Transaction<BlockSnapshot> transaction = new Transaction<BlockSnapshot>(new SpongeBlockSnapshotBuilder()
                     .blockState((BlockState) world.getBlockState(pos)).world(((World) world).getProperties()).position(pos3i).build(),
@@ -105,6 +108,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             if (!this.struckBlocks.contains(transaction)) {
                 this.struckBlocks.add(transaction);
             }
+            return true;
         }
         return false;
     }
@@ -116,7 +120,6 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             Entity entity = (Entity) mcEntity;
             if (!this.struckEntities.contains(entity)) {
                 this.struckEntities.add(entity);
-                this.struckEntitySnapshots.add(new SpongeEntitySnapshotBuilder().from(mcEntity).build());
             }
         }
     }
@@ -127,8 +130,7 @@ public abstract class MixinEntityLightningBolt extends MixinEntityWeatherEffect 
             return;
         }
         World world = (World) this.worldObj;
-        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities,
-                this.struckEntitySnapshots, world, this.struckBlocks);
+        LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(this.cause, this.struckEntities, world, this.struckBlocks);
         Sponge.getEventManager().post(strike);
 
         if (!strike.isCancelled()) {

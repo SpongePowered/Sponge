@@ -483,7 +483,7 @@ public final class CauseTracker {
             }
 
             // Sponge Start - throw an event
-            EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), ImmutableList.of(entity.createSnapshot()), getWorld()))
+            EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), getWorld()))
                 .nonCancelled(event -> getMixinWorld().forceSpawnEntity(entity))
                 .process();
                 // Sponge end

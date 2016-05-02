@@ -45,12 +45,12 @@ import java.util.Random;
 @Mixin(BiomeGenMesa.class)
 public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
 
-    @Shadow private boolean field_150626_aH; // Bryce
-    @Shadow private boolean field_150620_aI; // More trees
+    @Shadow private boolean brycePillars;
+    @Shadow private boolean hasForest;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.field_150626_aH, this.field_150620_aI));
+        gensettings.getGenerationPopulators().add(new MesaBiomeGenerationPopulator(this.brycePillars, this.hasForest));
         super.buildPopulators(world, gensettings);
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
         gensettings.getGroundCoverLayers().clear();

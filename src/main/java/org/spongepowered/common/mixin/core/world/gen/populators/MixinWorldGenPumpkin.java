@@ -85,10 +85,10 @@ public class MixinWorldGenPumpkin implements Pumpkin {
             BlockPos blockpos1 =
                     p_180709_3_.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4), rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.grass
-                    && Blocks.pumpkin.canPlaceBlockAt(worldIn, blockpos1)) {
+            if (worldIn.isAirBlock(blockpos1) && worldIn.getBlockState(blockpos1.down()).getBlock() == Blocks.GRASS
+                    && Blocks.PUMPKIN.canPlaceBlockAt(worldIn, blockpos1)) {
                 worldIn.setBlockState(blockpos1,
-                        Blocks.pumpkin.getDefaultState().withProperty(BlockPumpkin.FACING, EnumFacing.Plane.HORIZONTAL.random(rand)), 2);
+                        Blocks.PUMPKIN.getDefaultState().withProperty(BlockPumpkin.FACING, EnumFacing.Plane.HORIZONTAL.random(rand)), 2);
             }
         }
 

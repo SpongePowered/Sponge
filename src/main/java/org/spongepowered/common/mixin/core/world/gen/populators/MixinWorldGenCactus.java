@@ -102,8 +102,8 @@ public abstract class MixinWorldGenCactus implements Cactus {
         if (worldIn.isAirBlock(position)) {
             int height = this.height.getFlooredAmount(rand);
             for (int k = 0; k < height; ++k) {
-                if (Blocks.cactus.canBlockStay(worldIn, position)) {
-                    worldIn.setBlockState(position.up(k), Blocks.cactus.getDefaultState(), 2);
+                if (Blocks.CACTUS.canBlockStay(worldIn, position)) {
+                    worldIn.setBlockState(position.up(k), Blocks.CACTUS.getDefaultState(), 2);
                 } else {
                     break;
                 }

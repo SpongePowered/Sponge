@@ -33,7 +33,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.village.MerchantRecipe;
 import org.spongepowered.api.item.merchant.TradeOffer;
 import org.spongepowered.api.item.merchant.TradeOfferGenerator;
-import org.spongepowered.api.item.merchant.TradeOfferListMutator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -47,7 +46,7 @@ import java.util.Random;
 @Mixin(EntityVillager.EmeraldForItems.class)
 public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
 
-    @Shadow public Item sellItem; // Not actually the selling item, it's the buying item: https://github.com/ModCoderPack/MCPBot-Issues/issues/66
+    @Shadow public Item buyingItem;
     @Shadow public EntityVillager.PriceInfo price;
 
     @Override
@@ -59,8 +58,8 @@ public class MixinEntityVillagerEmeraldForItems implements TradeOfferGenerator {
             buyingCount = this.price.getPrice(random);
         }
 
-        final ItemStack buyingItem = new ItemStack(this.sellItem, buyingCount, 0);
-        return (TradeOffer) new MerchantRecipe(buyingItem, Items.emerald);
+        final ItemStack buyingItem = new ItemStack(this.buyingItem, buyingCount, 0);
+        return (TradeOffer) new MerchantRecipe(buyingItem, Items.EMERALD);
     }
 
     @Override

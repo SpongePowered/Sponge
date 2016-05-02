@@ -96,9 +96,9 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         this.populatorObjectMappings.put("pointy_taiga", (PopulatorObject) new WorldGenTaiga1());
         this.populatorObjectMappings.put("mega_tall_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, true));
         this.populatorObjectMappings.put("mega_pointy_taiga", (PopulatorObject) new WorldGenMegaPineTree(false, false));
-        IBlockState jlog = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
-        IBlockState jleaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-        IBlockState leaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         this.populatorObjectMappings.put("jungle", (PopulatorObject) trees);
@@ -110,7 +110,7 @@ public class PopulatorObjectRegistryModule implements AdditionalCatalogRegistryM
         this.populatorObjectMappings.put("swamp", (PopulatorObject) new WorldGenSwamp());
 
         // Mushrooms
-        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.brown_mushroom));
-        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.red_mushroom));
+        this.populatorObjectMappings.put("brown", (PopulatorObject) new WorldGenBigMushroom(Blocks.BROWN_MUSHROOM));
+        this.populatorObjectMappings.put("red", (PopulatorObject) new WorldGenBigMushroom(Blocks.RED_MUSHROOM));
     }
 }

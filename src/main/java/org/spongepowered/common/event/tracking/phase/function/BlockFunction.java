@@ -51,8 +51,7 @@ public final class BlockFunction {
                     .type(InternalSpawnTypes.DROPPED_ITEM)
                     .build())
                 .build();
-            final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, snapshots, causeTracker.getWorld()))
+            EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
                     .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
                     .process();
         };
@@ -62,8 +61,7 @@ public final class BlockFunction {
                         .type(InternalSpawnTypes.DISPENSE)
                         .build())
                     .build();
-            final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-            EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
+            EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
                     .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
                     .process();
         };
@@ -80,8 +78,7 @@ public final class BlockFunction {
                         .type(InternalSpawnTypes.BLOCK_SPAWNING)
                         .build())
                     .build();
-            final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
                     .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
                     .process();
         };

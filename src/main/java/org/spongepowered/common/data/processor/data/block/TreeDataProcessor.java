@@ -84,11 +84,11 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
             } else {
                 // converting block so we can set new types to the log/leave
                 if (stack.getItem() == ItemTypes.LOG) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.log2));
+                    stack.setItem(Item.getItemFromBlock(Blocks.LOG2));
                     stack.setItemDamage(this.setToMeta(value) - 4);
                     return true;
                 } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.leaves2));
+                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES2));
                     stack.setItemDamage(this.setToMeta(value) - 4);
                     return true;
                 }
@@ -100,9 +100,9 @@ public class TreeDataProcessor extends AbstractCatalogDataProcessor<TreeType, Va
             } else {
                 // converting block so we can set old types to the log/leave
                 if (stack.getItem() == ItemTypes.LOG2) {
-                    stack.setItem(Item.getItemFromBlock(Blocks.log));
+                    stack.setItem(Item.getItemFromBlock(Blocks.LOG));
                 } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.leaves));
+                    stack.setItem(Item.getItemFromBlock(Blocks.LEAVES));
                 }
                 stack.setItemDamage(this.setToMeta(value));
                 return true;

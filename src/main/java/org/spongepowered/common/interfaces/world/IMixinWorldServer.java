@@ -32,6 +32,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.world.gen.SpongeChunkGenerator;
@@ -40,6 +41,12 @@ import org.spongepowered.common.world.gen.SpongeWorldGenerator;
 import javax.annotation.Nullable;
 
 public interface IMixinWorldServer extends IMixinWorld {
+
+    SpongeConfig<?> getActiveConfig();
+
+    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
+
+    void setActiveConfig(SpongeConfig<?> config);
 
     int getDimensionId();
 
@@ -67,7 +74,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
-
     SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator);
 
     WorldProvider getWorldProvider();
@@ -79,5 +85,7 @@ public interface IMixinWorldServer extends IMixinWorld {
     SpongeWorldGenerator createWorldGenerator(String settings);
 
     SpongeChunkGenerator createChunkGenerator(SpongeWorldGenerator newGenerator);
+
+    boolean isProcessingExplosion();
 
 }

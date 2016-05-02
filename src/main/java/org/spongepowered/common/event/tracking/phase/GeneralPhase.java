@@ -129,10 +129,7 @@ public final class GeneralPhase extends TrackingPhase {
                                 .type(InternalSpawnTypes.PLACEMENT)
                                 .build())
                                 .build();
-                        final ImmutableList<EntitySnapshot>
-                                snapshots =
-                                entities.stream().map(Entity::createSnapshot).collect(GuavaCollectors.toImmutableList());
-                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, causeTracker.getWorld()))
+                        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
                                     event.getEntities().forEach(entity -> {
                                         TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());

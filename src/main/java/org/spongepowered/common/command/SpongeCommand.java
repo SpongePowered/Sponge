@@ -60,6 +60,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
 
 import java.io.File;
@@ -145,7 +146,7 @@ public class SpongeCommand {
                     if (!world.isPresent()) {
                         throw new CommandException(Text.of("World ", properties.getWorldName(), " is not loaded, cannot work with it"));
                     }
-                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorld) world.get()).getWorldConfig(),
+                    src.sendMessage(Text.of("World ", properties.getWorldName(), ": ", processWorld(((IMixinWorldServer) world.get()).getWorldConfig(),
                             world.get(), src, args)));
                     ++successes;
                 }
@@ -282,6 +283,7 @@ public class SpongeCommand {
                     @Override
                     protected Text process(SpongeConfig<?> config, CommandSource source, CommandContext args) throws CommandException {
                         config.reload();
+                        SpongeHooks.refreshActiveConfigs();
                         return Text.of("Reloaded configuration");
                     }
                 })

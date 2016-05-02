@@ -80,7 +80,7 @@ public abstract class MixinWorldGenTaiga2 extends MixinWorldGenAbstractTree impl
             }
             BlockPos down = new BlockPos(x, y - 1, z);
             Block block = worldIn.getBlockState(down).getBlock();
-            if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.sapling) && y < 256 - i - 1) {
+            if (canSustainPlant(block, worldIn, down, EnumFacing.UP, Blocks.SAPLING) && y < 256 - i - 1) {
                 return true;
             }
         }
@@ -90,9 +90,9 @@ public abstract class MixinWorldGenTaiga2 extends MixinWorldGenAbstractTree impl
     @Override
     public void placeObject(World world, Random random, int x, int y, int z) {
         BlockPos pos = new BlockPos(x, y, z);
-        func_175904_e();
+        setDecorationDefaults();
         if (generate((net.minecraft.world.World) world, random, pos)) {
-            func_180711_a((net.minecraft.world.World) world, random, pos);
+            generateSaplings((net.minecraft.world.World) world, random, pos);
         }
     }
 

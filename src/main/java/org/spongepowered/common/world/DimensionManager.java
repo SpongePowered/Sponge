@@ -47,6 +47,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
@@ -365,7 +366,7 @@ public class DimensionManager {
     // TODO Result
     public static boolean unloadWorld(WorldServer worldServer) {
         checkNotNull(worldServer);
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final MinecraftServer server = SpongeImpl.getServer();
 
         if (worldByDimensionId.containsValue(worldServer)) {
             if (!worldServer.playerEntities.isEmpty()) {
@@ -378,7 +379,9 @@ public class DimensionManager {
                 e.printStackTrace();
             }
             finally {
-                final int dimensionId = ((IMixinWorldServer) worldServer).getDimensionId();
+                final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+                final int dimensionId = mixinWorldServer.getDimensionId();
+                mixinWorldServer.getActiveConfig().save();
                 worldByDimensionId.remove(dimensionId);
                 ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
                 SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
@@ -799,8 +802,8 @@ public class DimensionManager {
                             dimensionId, DimensionTypes.OVERWORLD.getName());
                 }
 
-                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType = Sponge.getRegistry().getType(org.spongepowered.api.world
-                        .DimensionType.class, dimensionTypeId);
+                final Optional<org.spongepowered.api.world.DimensionType> optDimensionType
+                        = Sponge.getRegistry().getType(org.spongepowered.api.world.DimensionType.class, dimensionTypeId);
                 if (!optDimensionType.isPresent()) {
                     SpongeImpl.getLogger().warn("World [{}] (DIM{}) has specified dimension type that is not registered. Defaulting to [{}]...",
                             worldFolderName, DimensionTypes.OVERWORLD.getName());

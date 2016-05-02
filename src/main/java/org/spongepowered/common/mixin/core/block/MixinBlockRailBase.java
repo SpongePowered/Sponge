@@ -115,7 +115,7 @@ public abstract class MixinBlockRailBase extends MixinBlock {
         return super.getStateWithValue(blockState, key, value);
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private ImmutableRailDirectionData getRailDirectionFor(IBlockState blockState) {
         if (blockState.getBlock() instanceof BlockRail) {
             return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeRailDirectionData.class,

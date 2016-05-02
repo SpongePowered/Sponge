@@ -48,7 +48,7 @@ import java.util.Optional;
 public class CoalDataProcessor extends AbstractItemSingleDataProcessor<CoalType, Value<CoalType>, CoalData, ImmutableCoalData> {
 
     public CoalDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.coal), Keys.COAL_TYPE);
+        super(stack -> stack.getItem().equals(Items.COAL), Keys.COAL_TYPE);
     }
 
     @Override

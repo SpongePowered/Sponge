@@ -157,7 +157,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
             if (flag) {
                 Block block1 = worldIn.getBlockState(new BlockPos(x, y - 1, z)).getBlock();
 
-                if (block1 == Blocks.dirt || block1 == Blocks.grass || block1 == Blocks.mycelium) {
+                if (block1 == Blocks.DIRT || block1 == Blocks.GRASS || block1 == Blocks.MYCELIUM) {
                     return true;
                 }
             }

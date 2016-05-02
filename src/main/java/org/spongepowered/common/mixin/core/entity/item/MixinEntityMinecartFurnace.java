@@ -32,6 +32,9 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(EntityMinecartFurnace.class)
 public abstract class MixinEntityMinecartFurnace extends MixinEntityMinecart implements FurnaceMinecart {
 
+    // This overrides the field initializer since MinecartFurnaces use a different maximum speed
+    protected double maxSpeed = 0.2D;
+
     @Shadow private int fuel;
 
     @Override

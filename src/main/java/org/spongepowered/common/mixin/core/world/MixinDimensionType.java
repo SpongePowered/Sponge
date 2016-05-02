@@ -88,8 +88,8 @@ public abstract class MixinDimensionType implements IMixinDimensionType {
     }
 
     /**
-     * Author: Zidane - March 30th, 2016
-     * This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
+     * @author Zidane - March 30th, 2016
+     * @reason This method generally checks dimension type ids (-1 | 0 | 1) in Vanilla. I change this assumption to dimension
      * instance ids. Since the DimensionManager tracks dimension instance ids by dimension type ids and Vanilla keeps
      * their ids 1:1, this is a safe change that ensures a mixup can't happen.
      */

@@ -371,7 +371,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {
         double d0 = 0.03125D;
-        this.stoneNoise = this.noise4.func_151599_a(this.stoneNoise, (double) (x * 16), (double) (z * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
+        this.stoneNoise = this.noise4.getRegion(this.stoneNoise, (double) (x * 16), (double) (z * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
         Vector2i min = biomes.getBiomeMin();
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {
@@ -395,9 +395,9 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         int i = 0;
         for (int currentY = 255; currentY >= 0; --currentY) {
             IBlockState nextBlock = chunk.getBlockState(relativeZ, currentY, relativeX);
-            if (nextBlock.getMaterial() == Material.air) {
+            if (nextBlock.getMaterial() == Material.AIR) {
                 k = -1;
-            } else if (nextBlock.getBlock() == Blocks.stone) {
+            } else if (nextBlock.getBlock() == Blocks.STONE) {
                 if (k == -1) {
                     if (groundcover.isEmpty()) {
                         k = 0;
@@ -421,7 +421,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
                         }
                     } else if (currentY < seaLevel - 7 - k) {
                         k = 0;
-                        chunk.setBlockState(relativeZ, currentY, relativeX, Blocks.gravel.getDefaultState());
+                        chunk.setBlockState(relativeZ, currentY, relativeX, Blocks.GRAVEL.getDefaultState());
                     } else {
                         ++i;
                         if (i < groundcover.size()) {

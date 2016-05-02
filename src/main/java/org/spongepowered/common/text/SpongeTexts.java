@@ -83,10 +83,12 @@ public final class SpongeTexts {
         return ((IMixinChatComponent) component).toPlain();
     }
 
+    @SuppressWarnings("deprecation")
     public static Text fromLegacy(String legacy) {
         return TextSerializers.LEGACY_FORMATTING_CODE.deserialize(legacy);
     }
 
+    @SuppressWarnings("deprecation")
     public static String toLegacy(Text text) {
         return TextSerializers.LEGACY_FORMATTING_CODE.serialize(text);
     }

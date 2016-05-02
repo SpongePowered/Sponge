@@ -48,7 +48,7 @@ import java.util.Optional;
 public class CookedFishDataProcessor extends AbstractItemSingleDataProcessor<CookedFish, Value<CookedFish>, CookedFishData, ImmutableCookedFishData> {
 
     public CookedFishDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.cooked_fish), Keys.COOKED_FISH);
+        super(stack -> stack.getItem().equals(Items.COOKED_FISH), Keys.COOKED_FISH);
     }
 
     @Override
