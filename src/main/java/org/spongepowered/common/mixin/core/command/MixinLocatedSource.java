@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import net.minecraft.command.ICommandSender;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityCommandBlock;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.util.VecHelper;
@@ -41,7 +45,22 @@ public abstract class MixinLocatedSource implements Locatable, IMixinCommandSour
 
     @Override
     public Location<World> getLocation() {
-        return new Location<>((World) asICommandSender().getEntityWorld(), VecHelper.toVector3d(asICommandSender().getPositionVector()));
+        return new Location<>(getWorld(), VecHelper.toVector3d(asICommandSender().getPositionVector()));
+    }
+
+    @Override
+    public World getWorld() {
+        ICommandSender commandSender = asICommandSender();
+        // May be null in some cases like when constructing
+        if (commandSender == null) {
+            if ((Object) this instanceof Entity) {
+                return (World) ((Entity) (Object) this).worldObj;
+            } else if ((Object) this instanceof TileEntity) {
+                return (World) ((TileEntity) (Object) this).getWorld();
+            }
+            commandSender = SpongeImpl.getServer();
+        }
+        return (World) commandSender.getEntityWorld();
     }
 
 }

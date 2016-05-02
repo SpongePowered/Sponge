@@ -1,0 +1,14 @@
+{
+    "minVersion": "0.5.1",
+    "package": "org.spongepowered.common.mixin.entitycollisions",
+    "plugin": "org.spongepowered.common.mixin.plugin.entitycollisions.EntityCollisionsPlugin",
+    "refmap": "mixins.common.refmap.json",
+    "mixins": [
+        "MixinBlock_Collisions",
+        "MixinChunk_Collisions",
+        "MixinEntity_Collisions"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.optimization.world;
 
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -68,4 +69,19 @@ public abstract class MixinWorld_Lighting {
         }
     }
 
+    @Inject(method = "getRawLight", at = @At(value = "HEAD"), cancellable = true)
+    public void onGetRawLight(BlockPos pos, EnumSkyBlock lightType, CallbackInfoReturnable<Integer> callbackInfo) {
+        if (!this.isBlockLoaded(pos)) {
+            callbackInfo.setReturnValue(0);
+            callbackInfo.cancel();
+        }
+    }
+
+    @Inject(method = "checkLightFor", at = @At(value = "HEAD"), cancellable = true)
+    public void onCheckLightFor(EnumSkyBlock lightType, BlockPos pos, CallbackInfoReturnable<Boolean> callbackInfo) {
+        if (!this.isBlockLoaded(pos)) {
+            callbackInfo.setReturnValue(false);
+            callbackInfo.cancel();
+        }
+    }
 }

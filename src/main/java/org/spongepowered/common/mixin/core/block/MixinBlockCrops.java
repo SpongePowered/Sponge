@@ -45,7 +45,7 @@ import java.util.Optional;
 public abstract class MixinBlockCrops extends MixinBlock {
 
     @Shadow protected abstract PropertyInteger getAgeProperty();
-    @Shadow protected abstract int func_185526_g();
+    @Shadow protected abstract int getMaxAge();
 
     @Override
     public ImmutableList<ImmutableDataManipulator<?, ?>> getManipulators(IBlockState blockState) {
@@ -61,8 +61,8 @@ public abstract class MixinBlockCrops extends MixinBlock {
     public Optional<BlockState> getStateWithData(IBlockState blockState, ImmutableDataManipulator<?, ?> manipulator) {
         if (manipulator instanceof ImmutableGrowthData) {
             int growth = ((ImmutableGrowthData) manipulator).growthStage().get();
-            if (growth > func_185526_g()) {
-                growth = func_185526_g();
+            if (growth > getMaxAge()) {
+                growth = getMaxAge();
             }
             return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
@@ -73,8 +73,8 @@ public abstract class MixinBlockCrops extends MixinBlock {
     public <E> Optional<BlockState> getStateWithValue(IBlockState blockState, Key<? extends BaseValue<E>> key, E value) {
         if (key.equals(Keys.GROWTH_STAGE)) {
             int growth = (Integer) value;
-            if (growth > func_185526_g()) {
-                growth = func_185526_g();
+            if (growth > getMaxAge()) {
+                growth = getMaxAge();
             }
             return Optional.of((BlockState) blockState.withProperty(getAgeProperty(), growth));
         }
@@ -82,7 +82,7 @@ public abstract class MixinBlockCrops extends MixinBlock {
     }
 
     private ImmutableGrowthData getGrowthData(IBlockState blockState) {
-        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, func_185526_g());
+        return ImmutableDataCachingUtil.getManipulator(ImmutableSpongeGrowthData.class, blockState.getValue(getAgeProperty()), 0, getMaxAge());
     }
 
 }

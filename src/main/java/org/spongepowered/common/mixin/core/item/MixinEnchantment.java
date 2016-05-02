@@ -25,10 +25,7 @@
 package org.spongepowered.common.mixin.core.item;
 
 import com.google.common.base.Objects;
-import net.minecraft.enchantment.EnumEnchantmentType;
-import net.minecraft.inventory.EntityEquipmentSlot;
 import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.Enchantment;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -49,7 +46,7 @@ import org.spongepowered.common.interfaces.IMixinEnchantment;
 public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment {
 
     @Shadow protected String name;
-    @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity weight;
+    @Shadow @Final private net.minecraft.enchantment.Enchantment.Rarity rarity;
 
     @Shadow public abstract int getMinLevel();
     @Shadow public abstract int getMaxLevel();
@@ -62,8 +59,8 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
 
     @Inject(method = "registerEnchantments", at = @At("RETURN"))
     private static void onRegister(CallbackInfo ci) {
-        for (ResourceLocation resourceLocation: net.minecraft.enchantment.Enchantment.enchantmentRegistry.getKeys()) {
-            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.enchantmentRegistry.getObject(resourceLocation)).setId(resourceLocation);
+        for (ResourceLocation resourceLocation: net.minecraft.enchantment.Enchantment.REGISTRY.getKeys()) {
+            ((IMixinEnchantment) net.minecraft.enchantment.Enchantment.REGISTRY.getObject(resourceLocation)).setId(resourceLocation);
         }
     }
 
@@ -79,7 +76,7 @@ public abstract class MixinEnchantment implements Enchantment, IMixinEnchantment
 
     @Override
     public int getWeight() {
-        return this.weight.getWeight();
+        return this.rarity.getWeight();
     }
 
     @Override

@@ -100,7 +100,7 @@ public abstract class MixinWorld_Effect extends MixinWorld implements World, IMi
             double y = position.getY();
             double z = position.getZ();
 
-            for (Packet packet : packets) {
+            for (Packet<?> packet : packets) {
                 playerList.sendToAllNearExcept(null, x, y, z, radius, getDimensionId(), packet);
             }
         }

@@ -22,23 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.mixin.plugin.interfaces;
 
-import net.minecraft.world.chunk.Chunk;
+public interface IModData {
 
-import javax.annotation.Nullable;
+    String getModDataName();
 
-public interface IMIxinChunkProviderServer {
+    void setModDataName(String name);
 
-    /**
-     * Gets the chunk at the desired position. If there is no
-     * loaded chunk at the position, {@code null} is returned.
-     *
-     * @param x The chunk x position
-     * @param z The chunk z position
-     * @return The chunk, if loaded
-     */
-    @Nullable
-    Chunk getChunkIfLoaded(int x, int z);
+    String getModDataId();
 
+    void setModDataId(String id);
+
+    void requiresCacheRefresh(boolean flag);
+
+    boolean requiresCacheRefresh();
 }

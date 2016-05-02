@@ -51,7 +51,7 @@ import java.util.Optional;
 public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<List<PotionEffect>, ListValue<PotionEffect>, PotionEffectData, ImmutablePotionEffectData> {
 
     public ItemPotionDataProcessor() {
-        super(itemStack -> itemStack.getItem() == Items.potionitem, Keys.POTION_EFFECTS);
+        super(itemStack -> itemStack.getItem() == Items.POTIONITEM, Keys.POTION_EFFECTS);
     }
 
     @Override
@@ -102,7 +102,7 @@ public class ItemPotionDataProcessor extends AbstractItemSingleDataProcessor<Lis
         }
         ItemStack itemStack = (ItemStack) container;
         Item item = itemStack.getItem();
-        if (item != Items.potionitem) {
+        if (item != Items.POTIONITEM) {
             return DataTransactionResult.failNoData();
         }
 

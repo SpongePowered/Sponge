@@ -40,7 +40,7 @@ public class SpongeWorldTypeNether extends SpongeWorldType {
 
     @Override
     public BiomeProvider getBiomeProvider(World world) {
-        return new BiomeProviderSingle(Biomes.hell);
+        return new BiomeProviderSingle(Biomes.HELL);
     }
 
     @Override

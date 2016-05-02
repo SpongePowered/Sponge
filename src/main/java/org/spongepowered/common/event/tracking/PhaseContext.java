@@ -168,7 +168,7 @@ public class PhaseContext {
     }
 
     public Optional<Multimap<BlockPos, ItemStack>> getCapturedBlockDrops() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(CapturedMultiMapSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(BlockItemDropsSupplier::get);
     }
 
     public Optional<Collection<ItemStack>> getCapturedBlockDrops(BlockPos position) {
@@ -181,7 +181,7 @@ public class PhaseContext {
     }
 
     public Optional<Multimap<UUID, ItemStack>> getCapturedEntityDrops() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(CapturedMultiMapSupplier::get);
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(EntityItemDropsSupplier::get);
     }
 
     public Optional<Collection<ItemStack>> getCapturedEntityDrops(UUID position) {
@@ -222,7 +222,7 @@ public class PhaseContext {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(@Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -289,14 +289,14 @@ public class PhaseContext {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
             if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            final CapturedSupplier other = (CapturedSupplier) obj;
+            final CapturedMultiMapSupplier<?, ?> other = (CapturedMultiMapSupplier<?, ?>) obj;
             return Objects.equals(this.captured, other.captured);
         }
 
@@ -364,14 +364,14 @@ public class PhaseContext {
         }
 
         @Override
-        public boolean equals(Object obj) {
+        public boolean equals(@Nullable Object obj) {
             if (this == obj) {
                 return true;
             }
             if (obj == null || getClass() != obj.getClass()) {
                 return false;
             }
-            final CapturedSupplier other = (CapturedSupplier) obj;
+            final CapturedSupplier<?> other = (CapturedSupplier<?>) obj;
             return Objects.equals(this.captured, other.captured);
         }
 

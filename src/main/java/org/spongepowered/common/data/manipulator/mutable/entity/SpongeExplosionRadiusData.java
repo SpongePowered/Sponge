@@ -71,7 +71,7 @@ public class SpongeExplosionRadiusData extends AbstractSingleData<Optional<Integ
         return new SpongeOptionalValue<>(Keys.EXPLOSION_RADIUS, getValue());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public static int compare(ValueContainer dis, ValueContainer dat) {
         Optional<Integer> value = ((OptionalValue<Integer>) dis.get(Keys.EXPLOSION_RADIUS).get()).get();
         Optional<Integer> other = ((OptionalValue<Integer>) dat.get(Keys.EXPLOSION_RADIUS).get()).get();

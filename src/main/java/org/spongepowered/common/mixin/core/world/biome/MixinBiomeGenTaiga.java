@@ -59,7 +59,7 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
         if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
             BlockBlob blob = BlockBlob.builder()
                     .blobCount(VariableAmount.baseWithRandomAddition(0, 3))
-                    .block((BlockState) Blocks.mossy_cobblestone.getDefaultState())
+                    .block((BlockState) Blocks.MOSSY_COBBLESTONE.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(0, 2))
                     .build();
             gensettings.getPopulators().add(blob);
@@ -75,11 +75,11 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
             gensettings.getGroundCoverLayers().clear();
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((Double seed) -> {
                 if (seed > 1.75D) {
-                    return (BlockState) Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
+                    return (BlockState) Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.COARSE_DIRT);
                 } else if (seed > -0.95D) {
-                    return (BlockState) Blocks.dirt.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
+                    return (BlockState) Blocks.DIRT.getDefaultState().withProperty(BlockDirt.VARIANT, BlockDirt.DirtType.PODZOL);
                 }
-                return (BlockState) Blocks.grass.getDefaultState();
+                return (BlockState) Blocks.GRASS.getDefaultState();
 
             } , WorldGenConstants.GROUND_COVER_DEPTH));
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((BlockState) this.fillerBlock, WorldGenConstants.GROUND_COVER_DEPTH));

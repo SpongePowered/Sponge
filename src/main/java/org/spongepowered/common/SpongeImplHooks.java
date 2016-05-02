@@ -29,6 +29,12 @@ import net.minecraft.block.Block;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityCreature;
+import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.monster.EntityMob;
+import net.minecraft.entity.monster.EntitySlime;
+import net.minecraft.entity.passive.EntityAmbientCreature;
+import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
@@ -111,13 +117,13 @@ public final class SpongeImplHooks {
             if (world.isBlockLoaded(neighborPosition)) {
                 IBlockState iblockstate = world.getBlockState(neighborPosition);
 
-                if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
+                if (Blocks.UNPOWERED_COMPARATOR.isAssociatedBlock(iblockstate.getBlock())) {
                     iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                 } else if (iblockstate.getBlock().isNormalCube(iblockstate)) {
                     neighborPosition = neighborPosition.offset(enumfacing);
                     iblockstate = world.getBlockState(neighborPosition);
 
-                    if (Blocks.unpowered_comparator.isAssociatedBlock(iblockstate.getBlock())) {
+                    if (Blocks.UNPOWERED_COMPARATOR.isAssociatedBlock(iblockstate.getBlock())) {
                         iblockstate.getBlock().onNeighborBlockChange(world, neighborPosition, iblockstate, blockIn);
                     }
                 }
@@ -143,5 +149,23 @@ public final class SpongeImplHooks {
             return true;
         }
         return true;
+    }
+
+    public static boolean isCreatureOfType(Entity entity, EnumCreatureType type) {
+        if (entity instanceof EntityMob || entity instanceof EntitySlime) {
+          return type == EnumCreatureType.MONSTER;
+        } else if (entity instanceof EntityWaterMob) {
+            return type == EnumCreatureType.WATER_CREATURE;
+        } else if (entity instanceof EntityAmbientCreature) {
+            return type == EnumCreatureType.AMBIENT;
+        } else if (((entity instanceof EntityCreature))) {
+          return type == EnumCreatureType.CREATURE;
+        }
+
+        return false;
+    }
+
+    public static boolean isFakePlayer(Entity entity) {
+        return false;
     }
 }

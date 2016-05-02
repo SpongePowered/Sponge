@@ -32,6 +32,7 @@ import static org.spongepowered.api.data.key.KeyFactory.makeSetKey;
 import static org.spongepowered.api.data.key.KeyFactory.makeSingleKey;
 
 import com.flowpowered.math.vector.Vector3d;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.MapMaker;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -309,6 +310,15 @@ public class KeyRegistry {
         keyMap.put("fuse_duration", makeSingleKey(Integer.class, Value.class, of("FuseDuration")));
         keyMap.put("ticks_remaining", makeSingleKey(Integer.class, Value.class, of("TicksRemaining")));
         keyMap.put("explosion_radius", makeSingleKey(Integer.class, Value.class, of("ExplosionRadius")));
+        keyMap.put("armor_stand_has_arms", makeSingleKey(Boolean.class, Value.class, of("HasArms")));
+        keyMap.put("armor_stand_has_base_plate", makeSingleKey(Boolean.class, Value.class, of("HasBasePlate")));
+        keyMap.put("armor_stand_has_gravity", makeSingleKey(Boolean.class, Value.class, of("HasGravity")));
+        keyMap.put("armor_stand_marker", makeSingleKey(Boolean.class, Value.class, of("IsMarker")));
+        keyMap.put("armor_stand_is_small", makeSingleKey(Boolean.class, Value.class, of("IsSmall")));
+        keyMap.put("exit_portal", makeSingleKey(Vector3i.class, Value.class, of("ExitPortal")));
+        keyMap.put("exact_teleport", makeSingleKey(Boolean.class, Value.class, of("ExactTeleport")));
+        keyMap.put("structure_position", makeSingleKey(Vector3i.class, Value.class, of("StructurePosition")));
+        keyMap.put("structure_size", makeSingleKey(Vector3i.class, Value.class, of("StructureSize")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

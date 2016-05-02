@@ -230,9 +230,9 @@ class UserDiscoverer {
     private static User getFromBanlist(UUID uniqueId) {
         GameProfile profile = null;
         UserListBans banList = SpongeImpl.getServer().getPlayerList().getBannedPlayers();
-        UserListEntryBan banData = banList.getEntry(new GameProfile(uniqueId, ""));
+        UserListEntryBan<GameProfile> banData = banList.getEntry(new GameProfile(uniqueId, ""));
         if (banData != null) {
-            profile = (GameProfile) banData.value;
+            profile = banData.value;
         }
         if (profile != null) {
             return create(profile);

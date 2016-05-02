@@ -39,11 +39,11 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 @Mixin(BiomeGenSnow.class)
 public abstract class MixinBiomeGenSnow extends MixinBiomeGenBase {
 
-    @Shadow private boolean field_150615_aC;
+    @Shadow private boolean superIcy;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        if (this.field_150615_aC) {
+        if (this.superIcy) {
             IceSpike spike = IceSpike.builder()
                     .spikesPerChunk(3)
                     .build();

@@ -47,19 +47,19 @@ import java.util.Random;
 @Mixin(ChunkProviderHell.class)
 public abstract class MixinChunkProviderHell implements IChunkProvider, GenerationPopulator, IPopulatorProvider {
 
-    @Shadow @Final private boolean field_185953_o;
+    @Shadow @Final private boolean generateStructures;
     @Shadow @Final public Random rand;
     @Shadow @Final private net.minecraft.world.World world;
     @Shadow @Final private MapGenNetherBridge genNetherBridge;
     @Shadow @Final private MapGenBase genNetherCaves;
-    @Shadow public abstract void func_185936_a(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
-    @Shadow public abstract void func_185937_b(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
+    @Shadow public abstract void prepareHeights(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
+    @Shadow public abstract void buildSurfaces(int p_180515_1_, int p_180515_2_, ChunkPrimer p_180515_3_);
 
     @Override
     public void addPopulators(WorldGenerator generator) {
         generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherCaves);
 
-        if (this.field_185953_o) {
+        if (this.generateStructures) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
             generator.getPopulators().add((Populator) this.genNetherBridge);
             // TODO: Remove once structures are properly implemented
@@ -73,8 +73,8 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
         int z = GenericMath.floor(buffer.getBlockMin().getZ() / 16f);
         ChunkPrimer chunkprimer = new ChunkBufferPrimer(buffer);
         this.rand.setSeed((long) x * 341873128712L + (long) z * 132897987541L);
-        this.func_185936_a(x, z, chunkprimer);
-        this.func_185937_b(x, z, chunkprimer);
+        this.prepareHeights(x, z, chunkprimer);
+        this.buildSurfaces(x, z, chunkprimer);
     }
 
 }

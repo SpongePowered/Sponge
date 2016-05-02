@@ -67,7 +67,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
             if (!value.equals(SlabTypes.RED_SAND)) {
                 stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
             } else {
-                stack.setItem(Item.getItemFromBlock(Blocks.stone_slab2));
+                stack.setItem(Item.getItemFromBlock(Blocks.STONE_SLAB2));
                 stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
             }
         } else if (stack.getItem() == ItemTypes.STONE_SLAB2) {
@@ -75,7 +75,7 @@ public class SlabDataProcessor extends AbstractCatalogDataProcessor<SlabType, Va
                 if (value.equals(SlabTypes.RED_SAND)) {
                     stack.setItemDamage(((BlockStoneSlabNew.EnumType) (Object) value).getMetadata());
                 } else {
-                    stack.setItem(Item.getItemFromBlock(Blocks.stone_slab));
+                    stack.setItem(Item.getItemFromBlock(Blocks.STONE_SLAB));
                     stack.setItemDamage(((BlockStoneSlab.EnumType) (Object) value).getMetadata());
                 }
             }

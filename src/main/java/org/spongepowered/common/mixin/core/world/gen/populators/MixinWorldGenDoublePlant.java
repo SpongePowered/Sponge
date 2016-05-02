@@ -119,7 +119,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
                     rand.nextInt(8) - rand.nextInt(8));
 
             if (worldIn.isAirBlock(blockpos1) && (!worldIn.provider.getHasNoSky() || blockpos1.getY() < 254)
-                    && Blocks.double_plant.canPlaceBlockAt(worldIn, blockpos1)) {
+                    && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, blockpos1)) {
                 if (this.override != null) {
                     Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos1));
                     type = this.override.apply(pos);
@@ -130,7 +130,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
                     }
                     type = result.get(0);
                 }
-                Blocks.double_plant.placeAt(worldIn, blockpos1,
+                Blocks.DOUBLE_PLANT.placeAt(worldIn, blockpos1,
                         (BlockDoublePlant.EnumPlantType) (Object) type, 2);
                 flag = true;
             }

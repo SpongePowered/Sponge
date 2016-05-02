@@ -288,13 +288,12 @@ public interface PacketFunction {
             context.getCapturedItemsSupplier()
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(items -> {
-                        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
                                 .entity(EntityUtil.fromNative(player))
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
                                 .nonCancelled(event ->
                                         event.getEntities().forEach(entity -> {
                                             EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -318,13 +317,12 @@ public interface PacketFunction {
             context.getCapturedItemsSupplier()
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(items -> {
-                        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
                                 .entity(EntityUtil.fromNative(player))
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
                                 .nonCancelled(event ->
                                         event.getEntities().forEach(entity -> {
                                             EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -353,7 +351,7 @@ public interface PacketFunction {
                                 .type(InternalSpawnTypes.DROPPED_ITEM)
                                 .build())
                                 .build();
-                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, snapshots, causeTracker.getWorld()))
+                        EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
                                 .nonCancelled(event ->
                                         event.getEntities().forEach(entity -> {
                                             EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
@@ -399,17 +397,15 @@ public interface PacketFunction {
             final CreativeInventoryEvent event;
             if (packetIn.getSlotId() == -1 && capturedEntityItems.size() > 0) {
                 Iterator<Entity> iterator = capturedEntityItems.iterator();
-                ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
                 while (iterator.hasNext()) {
                     Entity currentEntity = iterator.next();
                     ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                    entitySnapshotBuilder.add(currentEntity.createSnapshot());
                 }
                 cause =
                         Cause.source(EntitySpawnCause.builder().entity(EntityUtil.fromNative(player)).type(InternalSpawnTypes.DROPPED_ITEM).build())
                                 .build();
                 event = SpongeEventFactory.createCreativeInventoryEventDrop(cause, cursorTransaction, capturedEntityItems,
-                        entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) openContainer, (World) player.worldObj,
+                        ContainerUtil.fromNative(openContainer), (World) player.worldObj,
                         capturedTransactions);
             } else {
                 cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", ""));
@@ -537,8 +533,7 @@ public interface PacketFunction {
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
-                    final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
                             .process();
                 });
@@ -564,8 +559,7 @@ public interface PacketFunction {
                             .build())
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
-                    final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, snapshots, spongeWorld))
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
                             .process();
                 });

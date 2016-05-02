@@ -194,12 +194,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     protected SoundEvent getSwimSound() {
-        return SoundEvents.entity_player_swim;
+        return SoundEvents.ENTITY_PLAYER_SWIM;
     }
 
     @Override
     protected SoundEvent getSplashSound() {
-        return SoundEvents.entity_player_splash;
+        return SoundEvents.ENTITY_PLAYER_SPLASH;
     }
 
     @Override
@@ -223,12 +223,12 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     protected SoundEvent getHurtSound() {
-        return SoundEvents.entity_player_hurt;
+        return SoundEvents.ENTITY_PLAYER_HURT;
     }
 
     @Override
     protected SoundEvent getDeathSound() {
-        return SoundEvents.entity_player_death;
+        return SoundEvents.ENTITY_PLAYER_DEATH;
     }
 
     @Override
@@ -243,7 +243,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
 
     @Override
     protected SoundEvent getFallSound(int p_184588_1_) {
-        return p_184588_1_ > 4 ? SoundEvents.entity_player_big_fall : SoundEvents.entity_player_small_fall;
+        return p_184588_1_ > 4 ? SoundEvents.ENTITY_PLAYER_BIG_FALL : SoundEvents.ENTITY_PLAYER_SMALL_FALL;
     }
     @Override
     public float getEyeHeight() {

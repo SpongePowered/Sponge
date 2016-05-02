@@ -62,7 +62,7 @@ public class SkullUtils {
     }
 
     public static boolean isValidItemStack(Object container) {
-        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.skull);
+        return container instanceof ItemStack && ((ItemStack) container).getItem().equals(Items.SKULL);
     }
 
     public static SkullType getSkullType(TileEntitySkull tileEntitySkull) {

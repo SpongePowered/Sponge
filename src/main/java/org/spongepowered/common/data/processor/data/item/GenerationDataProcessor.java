@@ -46,7 +46,7 @@ public final class GenerationDataProcessor
         extends AbstractItemSingleDataProcessor<Integer, MutableBoundedValue<Integer>, GenerationData, ImmutableGenerationData> {
 
     public GenerationDataProcessor() {
-        super(stack -> stack.getItem().equals(Items.written_book), Keys.GENERATION);
+        super(stack -> stack.getItem().equals(Items.WRITTEN_BOOK), Keys.GENERATION);
     }
 
     @Override

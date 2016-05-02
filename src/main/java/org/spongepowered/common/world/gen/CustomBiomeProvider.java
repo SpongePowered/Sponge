@@ -116,7 +116,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         // Downscale
         byte[] biomesForBlocks = buffer.detach();
         for (int i = 0; i < biomeArrayZoomedOut.length; i++) {
-            biomeArrayZoomedOut[i] = BiomeGenBase.getBiomeFromBiomeList(biomesForBlocks[i * 4] & 0xff, Biomes.ocean);
+            biomeArrayZoomedOut[i] = BiomeGenBase.getBiomeFromBiomeList(biomesForBlocks[i * 4] & 0xff, Biomes.OCEAN);
         }
 
         return biomeArrayZoomedOut;
@@ -198,7 +198,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
             // all positions to ocean first, every position not set will be
             // ocean, and not some random biome from the last time this array
             // was used
-            Arrays.fill(biomeArray, Biomes.ocean);
+            Arrays.fill(biomeArray, Biomes.OCEAN);
         }
 
         MutableBiomeArea biomeArea = new ObjectArrayMutableBiomeBuffer(biomeArray, new Vector2i(startX, startZ), new Vector2i(sizeX, sizeZ));

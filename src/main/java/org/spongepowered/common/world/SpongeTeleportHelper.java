@@ -199,12 +199,12 @@ public class SpongeTeleportHelper implements TeleportHelper {
     }
 
     private boolean isSafeFloorMaterial(Material material) {
-        return !(material == Material.cactus || material == Material.fire || material == Material.lava);
+        return !(material == Material.CACTUS || material == Material.FIRE || material == Material.LAVA);
     }
 
     private boolean isSafeBodyMaterial(Material material) {
-        return (material == Material.air || material == Material.grass || material == Material.plants
-                || material == Material.water || material == Material.redstoneLight || material == Material.circuits
-                || material == Material.snow || material == Material.portal || material == Material.web || material == Material.vine);
+        return (material == Material.AIR || material == Material.GRASS || material == Material.PLANTS
+                || material == Material.WATER || material == Material.REDSTONE_LIGHT || material == Material.CIRCUITS
+                || material == Material.SNOW || material == Material.PORTAL || material == Material.WEB || material == Material.VINE);
     }
 }

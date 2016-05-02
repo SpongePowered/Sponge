@@ -136,8 +136,9 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
         }
     }
 
-    /*
-     * Author: Deamon Purpose: it use the initial radius, radius decrement, and
+    /**
+     * @author Deamon
+     * @reason Make it use the initial radius, radius decrement, and
      * block type fields
      */
     @Override
@@ -183,7 +184,7 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
                 long k = p_185960_1_ + i;
                 long l = p_185960_2_ + j;
 
-                if (k * k + l * l > 4096L && this.noise.func_151605_a(k, l) < -0.8999999761581421D) {
+                if (k * k + l * l > 4096L && this.noise.getValue(k, l) < -0.8999999761581421D) {
                     float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;

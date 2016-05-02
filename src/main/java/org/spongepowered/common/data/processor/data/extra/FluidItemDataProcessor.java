@@ -53,17 +53,17 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     private static final FluidStackSnapshot LAVA = new SpongeFluidStackBuilder().fluid(FluidTypes.LAVA).volume(1000).build().createSnapshot();
 
     public FluidItemDataProcessor() {
-        super((item) -> item.getItem() == Items.bucket || item.getItem() == Items.water_bucket || item.getItem() == Items.lava_bucket, Keys.FLUID_ITEM_STACK);
+        super((item) -> item.getItem() == Items.BUCKET || item.getItem() == Items.WATER_BUCKET || item.getItem() == Items.LAVA_BUCKET, Keys.FLUID_ITEM_STACK);
     }
 
     @Override
     protected boolean set(ItemStack dataHolder, FluidStackSnapshot value) {
         FluidType fluidType = value.getFluid();
         if (fluidType == FluidTypes.WATER) {
-            dataHolder.setItem(Items.water_bucket);
+            dataHolder.setItem(Items.WATER_BUCKET);
             return true;
         } else if (fluidType == FluidTypes.LAVA) {
-            dataHolder.setItem(Items.lava_bucket);
+            dataHolder.setItem(Items.LAVA_BUCKET);
             return true;
         } else {
             return false;
@@ -72,9 +72,9 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
 
     @Override
     protected Optional<FluidStackSnapshot> getVal(ItemStack dataHolder) {
-        if (dataHolder.getItem() == Items.water_bucket) {
+        if (dataHolder.getItem() == Items.WATER_BUCKET) {
             return Optional.of(WATER);
-        } else if (dataHolder.getItem() == Items.lava_bucket) {
+        } else if (dataHolder.getItem() == Items.LAVA_BUCKET) {
             return Optional.of(LAVA);
         }
         return Optional.empty();
@@ -99,11 +99,11 @@ public class FluidItemDataProcessor extends AbstractItemSingleDataProcessor<Flui
     public DataTransactionResult removeFrom(ValueContainer<?> container) {
         if (container instanceof ItemStack) {
             final ItemStack itemStack = (ItemStack) container;
-            if (itemStack.getItem() == Items.water_bucket) {
-                itemStack.setItem(Items.bucket);
+            if (itemStack.getItem() == Items.WATER_BUCKET) {
+                itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(WATER));
-            } else if (itemStack.getItem() == Items.lava_bucket) {
-                itemStack.setItem(Items.bucket);
+            } else if (itemStack.getItem() == Items.LAVA_BUCKET) {
+                itemStack.setItem(Items.BUCKET);
                 return DataTransactionResult.successRemove(constructImmutableValue(LAVA));
             }
         }

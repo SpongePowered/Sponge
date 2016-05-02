@@ -51,11 +51,11 @@ public class SnowPopulator implements Populator {
                 BlockPos blockpos2 = blockpos1.down();
 
                 if (worldObj.canBlockFreezeWater(blockpos2)) {
-                    worldObj.setBlockState(blockpos2, Blocks.ice.getDefaultState(), 2);
+                    worldObj.setBlockState(blockpos2, Blocks.ICE.getDefaultState(), 2);
                 }
 
                 if (worldObj.canSnowAt(blockpos1, true)) {
-                    worldObj.setBlockState(blockpos1, Blocks.snow_layer.getDefaultState(), 2);
+                    worldObj.setBlockState(blockpos1, Blocks.SNOW_LAYER.getDefaultState(), 2);
                 }
             }
         }

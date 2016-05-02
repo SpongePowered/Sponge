@@ -38,6 +38,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldServer;
 import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
@@ -57,7 +58,10 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.plugin.interfaces.IModData;
+import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.DimensionManager;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -101,7 +105,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         if (config.getConfig().getLogging().entityDeathLogging()) {
             logInfo("Dim: {0} setDead(): {1}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), entity);
             logStack(config);
@@ -113,7 +117,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         if (config.getConfig().getLogging().entityDespawnLogging()) {
             logInfo("Dim: {0} Despawning ({1}): {2}", ((IMixinWorldServer) entity.worldObj).getDimensionId(), reason, entity);
             logStack(config);
@@ -131,7 +135,7 @@ public class SpongeHooks {
         }
 
         Optional<User> user = cause.first(User.class);
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         if (config.getConfig().getLogging().entitySpawnLogging()) {
             logInfo("SPAWNED " + spawnName + " [RootCause: {0}][User: {1}][World: {2}][DimId: {3}]",
                     getFriendlyCauseName(cause),
@@ -147,7 +151,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(world);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) world);
         if (config.getConfig().getLogging().blockTrackLogging() && allowed) {
             logInfo("Tracking Block " + "[RootCause: {0}][World: {1}][Block: {2}][Pos: {3}]",
                     user.getName(),
@@ -170,7 +174,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(world);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) world);
         Optional<User> user = cause.first(User.class);
         SpongeConfig.LoggingCategory logging = config.getConfig().getLogging();
         if (logging.blockBreakLogging() && type == BlockChange.BREAK
@@ -193,7 +197,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(world);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkLoadLogging()) {
             logInfo("Load Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
@@ -206,7 +210,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(world);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) world);
         if (config.getConfig().getLogging().chunkUnloadLogging()) {
             logInfo("Unload Chunk At [{0}] ({1}, {2})", ((IMixinWorldServer) world).getDimensionId(), chunkPos.getX(),
                     chunkPos.getZ());
@@ -219,7 +223,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
         if (config.getConfig().getLogging().logExploitSignCommandUpdates) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to exploit sign in world ''{1}'' located at ''{2}'' with command ''{3}''",
                     player.getName(),
@@ -235,7 +239,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
         if (config.getConfig().getLogging().logExploitItemStackNameOverflow) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to send a creative itemstack update with a display name length of ''{1}'' (Max allowed length is 32767). This has been blocked to avoid server overflow.",
                     player.getName(),
@@ -249,7 +253,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(player.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) player.worldObj);
         if (config.getConfig().getLogging().logExploitRespawnInvisibility) {
             logInfo("[EXPLOIT] Player ''{0}'' attempted to perform a respawn invisibility exploit to surrounding players.",
                     player.getName());
@@ -262,7 +266,7 @@ public class SpongeHooks {
             return false;
         }
 
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         if (!(entity instanceof EntityLivingBase) || entity instanceof EntityPlayer) {
             return false; // only check living entities that are not players
         }
@@ -301,7 +305,7 @@ public class SpongeHooks {
             return false;
         }
 
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
@@ -347,7 +351,7 @@ public class SpongeHooks {
             return;
         }
 
-        SpongeConfig<?> config = getActiveConfig(entity.worldObj);
+        SpongeConfig<?> config = getActiveConfig((WorldServer) entity.worldObj);
         if (!config.getConfig().getLogging().logEntityCollisionChecks()) {
             return;
         }
@@ -421,16 +425,27 @@ public class SpongeHooks {
         mbean.setThreadContentionMonitoringEnabled(true);
     }
 
-    public static SpongeConfig<?> getActiveConfig(World world) {
-        final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
-        final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType()).getDimensionConfig();
-        if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
-            return worldConfig;
-        } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
-            return dimensionConfig;
-        } else {
-            return SpongeImpl.getGlobalConfig();
+    public static SpongeConfig<?> getActiveConfig(WorldServer world, boolean refresh) {
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) world;
+        SpongeConfig<?> activeConfig = mixinWorldServer.getActiveConfig();
+        if (activeConfig == null || refresh) {
+            final SpongeConfig<WorldConfig> worldConfig = mixinWorldServer.getWorldConfig();
+            final SpongeConfig<DimensionConfig> dimensionConfig = ((IMixinDimensionType) ((Dimension) world.provider).getType()).getDimensionConfig();
+            if (worldConfig != null && worldConfig.getConfig().isConfigEnabled()) {
+                activeConfig = worldConfig;
+            } else if (dimensionConfig != null && dimensionConfig.getConfig().isConfigEnabled()) {
+                activeConfig = dimensionConfig;
+            } else {
+                activeConfig = SpongeImpl.getGlobalConfig();
+            }
+            mixinWorldServer.setActiveConfig(activeConfig);
         }
+
+        return activeConfig;
+    }
+
+    public static SpongeConfig<?> getActiveConfig(WorldServer world) {
+        return getActiveConfig(world, false);
     }
 
     public static SpongeConfig<?> getActiveConfig(String dimensionType, String worldFolder) {
@@ -445,7 +460,7 @@ public class SpongeHooks {
             // If this is a loaded world then we only return configs on the loaded objects. Don't go to disk.
             if (optWorld.isPresent()) {
                 final World world = (World) optWorld.get();
-                final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorld) world).getWorldConfig();
+                final SpongeConfig<WorldConfig> worldConfig = ((IMixinWorldServer) world).getWorldConfig();
 
                 if (worldConfig != null) {
                     // Return world config if its present and enabled
@@ -498,6 +513,25 @@ public class SpongeHooks {
         // Neither in-memory or on-disk enabled configs. Go global.
         return SpongeImpl.getGlobalConfig();
     }
+
+    public static void refreshActiveConfigs() {
+        for (WorldServer world : DimensionManager.getWorlds()) {
+            ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
+            for (Entity entity : world.loadedEntityList) {
+                if (entity instanceof IModData) {
+                    IModData spongeEntity = (IModData) entity;
+                    spongeEntity.requiresCacheRefresh(true);
+                }
+            }
+        }
+        for (BlockType blockType : BlockTypeRegistryModule.getInstance().getAll()) {
+            if (blockType instanceof IModData) {
+                IModData spongeBlock = (IModData) blockType;
+                spongeBlock.requiresCacheRefresh(true);
+            }
+        }
+    }
+
 
     public static String getFriendlyCauseName(Cause cause) {
         String causedBy = "Unknown";

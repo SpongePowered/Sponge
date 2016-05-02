@@ -73,7 +73,7 @@ public final class GeneratorRegistryModule implements CatalogRegistryModule<Gene
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (WorldType worldType : WorldType.worldTypes) {
+        for (WorldType worldType : WorldType.WORLD_TYPES) {
             if (worldType != null && !this.generatorTypeMappings.values().contains(worldType)) {
                 this.generatorTypeMappings.put(worldType.getWorldTypeName().toLowerCase(Locale.ENGLISH), (GeneratorType) worldType);
             }

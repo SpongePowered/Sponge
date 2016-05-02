@@ -38,23 +38,23 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(WorldGenerator.class)
 public abstract class MixinWorldGenerator {
 
-    @Shadow public abstract void func_175904_e();
+    @Shadow public abstract void setDecorationDefaults();
     
     //These are overridden in forge to call the forge added Block.isAir/isLeaves
     public boolean isAir(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.air;
+        return state.getBlock().getMaterial(state) == Material.AIR;
     }
 
     public boolean isLeaves(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.leaves;
+        return state.getBlock().getMaterial(state) == Material.LEAVES;
     }
 
     public boolean isWood(IBlockState state, World worldIn, BlockPos pos) {
-        return state.getBlock().getMaterial(state) == Material.wood;
+        return state.getBlock().getMaterial(state) == Material.WOOD;
     }
     
     public boolean canSustainPlant(Block block, World worldIn, BlockPos pos, EnumFacing direction, Block plant) {
-        return block == Blocks.grass || block == Blocks.dirt || block == Blocks.farmland;
+        return block == Blocks.GRASS || block == Blocks.DIRT || block == Blocks.FARMLAND;
     }
     
 }

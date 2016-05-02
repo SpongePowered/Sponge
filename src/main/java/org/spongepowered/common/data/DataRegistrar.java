@@ -177,6 +177,9 @@ public class DataRegistrar {
 
         // Entity Processors
 
+        dataManager.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
+                ImmutableArmorStandData.class, ImmutableSpongeArmorStandData.class, new ArmorStandDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
 
@@ -618,6 +621,12 @@ public class DataRegistrar {
         dataManager.registerDataProcessorAndImpl(BeaconData.class, SpongeBeaconData.class,
                 ImmutableBeaconData.class, ImmutableSpongeBeaconData.class, new BeaconDataProcessor());
 
+        dataManager.registerDataProcessorAndImpl(EndGatewayData.class, SpongeEndGatewayData.class,
+            ImmutableEndGatewayData.class, ImmutableSpongeEndGatewayData.class, new EndGatewayDataProcessor());
+
+        dataManager.registerDataProcessorAndImpl(StructureData.class, SpongeStructureData.class,
+            ImmutableStructureData.class, ImmutableSpongeStructureData.class, new StructureDataProcessor());
+
         // Values
 
         dataManager.registerValueProcessor(Keys.FUSE_DURATION, new FuseDurationValueProcessor());
@@ -698,6 +707,11 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.RIGHT_LEG_ROTATION, new RightLegRotationValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_PRIMARY_EFFECT, new BeaconPrimaryEffectValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_SECONDARY_EFFECT, new BeaconSecondaryEffectValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_BASE_PLATE, new ArmorStandBasePlateValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_GRAVITY, new ArmorStandGravityValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_MARKER, new ArmorStandMarkerValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_IS_SMALL, new ArmorStandSmallValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_ARMS, new ArmorStandArmsValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();
