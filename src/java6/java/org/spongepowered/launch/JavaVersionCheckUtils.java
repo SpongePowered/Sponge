@@ -40,12 +40,16 @@ public class JavaVersionCheckUtils {
     public static void ensureJava8() {
         String version = getCurrentVersion();
         if (getVersionValue(version) < getVersionValue(REQUIRED_VERSION)) {
-            String error = String.format(ERROR_MESSAGE, version, REQUIRED_VERSION);
+            if(!version.startsWith("1.8")) {
+                String error = String.format(ERROR_MESSAGE, version, REQUIRED_VERSION);
 
-            if (!GraphicsEnvironment.isHeadless()) {
-                JOptionPane.showMessageDialog(null, error, "PEBKACException!", JOptionPane.ERROR_MESSAGE);
+                if (!GraphicsEnvironment.isHeadless()) {
+                    JOptionPane.showMessageDialog(null, error, "PEBKACException!", JOptionPane.ERROR_MESSAGE);
+                }
+                throw new RuntimeException(error);
+            } else {
+                System.out.println("You may be running an outdated version of Java. Any crashes from Sponge may require an update to Java.");
             }
-            throw new RuntimeException(error);
         }
     }
 
@@ -79,9 +83,6 @@ public class JavaVersionCheckUtils {
                 // more significant version parts.
                 versionValue += part * Math.pow(10, versionParts.length - (i - 1) * 3);
             } catch(NumberFormatException e) {
-                if (!GraphicsEnvironment.isHeadless()) {
-                    JOptionPane.showMessageDialog(null, "Encountered a malformed JVM version: " + version, "Malformed JVM version", JOptionPane.ERROR_MESSAGE);
-                }
                 continue;
             }
         }
