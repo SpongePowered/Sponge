@@ -91,7 +91,7 @@ public class DisplayNameDataProcessor extends AbstractSingleDataProcessor<Text, 
                 return Optional.empty();
             }
 
-            if (stack.getItem() == Items.written_book) {
+            if (stack.getItem() == Items.WRITTEN_BOOK) {
                 final NBTTagCompound compound = stack.getTagCompound();
                 if (compound == null) {
                     return Optional.empty(); // The book wasn't initialized.

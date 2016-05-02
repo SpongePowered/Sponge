@@ -58,6 +58,10 @@ public abstract class MixinEntity_Item_Pre_Merge {
 
     @Shadow public abstract UUID getUniqueID();
 
+    /**
+     * @author gabizou
+     * @reason Track the items for pre-merging.
+     */
     @Overwrite
     @Nullable
     public EntityItem entityDropItem(net.minecraft.item.ItemStack itemStackIn, float offsetY) {

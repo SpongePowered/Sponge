@@ -48,7 +48,7 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
     private int offset;
 
     public SpongeMinecartBlockData() {
-        this((BlockState) Blocks.air.getDefaultState(), 6);
+        this((BlockState) Blocks.AIR.getDefaultState(), 6);
     }
 
     public SpongeMinecartBlockData(BlockState block, int offset) {
@@ -62,7 +62,7 @@ public class SpongeMinecartBlockData extends AbstractData<MinecartBlockData, Imm
 
     @Override
     public Value<BlockState> block() {
-        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.air.getDefaultState(), this.block);
+        return new SpongeValue<>(Keys.REPRESENTED_BLOCK, (BlockState) Blocks.AIR.getDefaultState(), this.block);
     }
 
     @Override

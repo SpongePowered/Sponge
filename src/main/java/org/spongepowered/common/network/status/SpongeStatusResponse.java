@@ -53,11 +53,11 @@ public final class SpongeStatusResponse {
     public static ServerStatusResponse postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
             InetSocketAddress virtualHost) {
         ServerStatusResponse response = create(server);
-        response.setProtocolVersionInfo(
-                new ServerStatusResponse.Version(response.getProtocolVersionInfo().getName(), Byte.MAX_VALUE));
+        response.setVersion(
+                new ServerStatusResponse.Version(response.getVersion().getName(), Byte.MAX_VALUE));
         response = call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
-        if (response != null && response.getPlayerCountData() == null) {
-            response.setPlayerCountData(new ServerStatusResponse.Players(-1, 0));
+        if (response != null && response.getPlayers() == null) {
+            response.setPlayers(new ServerStatusResponse.Players(-1, 0));
         }
         return response;
     }
@@ -82,8 +82,8 @@ public final class SpongeStatusResponse {
             ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
         }
 
-        clone.setPlayerCountData(clone(original.getPlayerCountData()));
-        clone.setProtocolVersionInfo(clone(original.getProtocolVersionInfo()));
+        clone.setPlayers(clone(original.getPlayers()));
+        clone.setVersion(clone(original.getVersion()));
         return clone;
     }
 

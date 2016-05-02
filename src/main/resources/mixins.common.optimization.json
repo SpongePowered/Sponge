@@ -4,11 +4,11 @@
     "refmap": "mixins.common.refmap.json",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "mixins": [
+        "block.state.MixinStateImplementation",
         "world.MixinWorld_Lighting",
         "world.MixinWorldServer_Lighting",
         "world.MixinChunk_Chunk_Cache",
         "world.gen.MixinChunkProviderServer_Chunk_Cache",
-        "world.gen.MixinChunkProviderServer_Lighting",
         "MixinEntity_Item_Pre_Merge",
         "MixinSpongeImplHooks_Item_Pre_Merge",
         "MixinInventoryHelper"

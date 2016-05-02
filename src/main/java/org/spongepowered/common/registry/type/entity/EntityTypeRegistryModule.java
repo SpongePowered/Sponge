@@ -167,8 +167,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
 
     @SuppressWarnings("unchecked")
     private SpongeEntityType newEntityTypeFromName(String spongeName, String mcName) {
-        return new SpongeEntityType(EntityList.stringToIDMapping.get(mcName), spongeName,
-                EntityList.stringToClassMapping.get(mcName),
+        return new SpongeEntityType(EntityList.NAME_TO_ID.get(mcName), spongeName,
+                EntityList.NAME_TO_CLASS.get(mcName),
                 new SpongeTranslation("entity." + mcName + ".name"));
     }
 
@@ -179,8 +179,8 @@ public final class EntityTypeRegistryModule implements ExtraClassCatalogRegistry
     @SuppressWarnings("unchecked")
     private SpongeEntityType registerCustomEntity(Class<? extends Entity> entityClass, String entityName, int entityId, Translation translation) {
         String entityFullName = String.format("%s.%s", SpongeImpl.ECOSYSTEM_NAME, entityName);
-        EntityList.classToStringMapping.put(entityClass, entityFullName);
-        EntityList.stringToClassMapping.put(entityFullName, entityClass);
+        EntityList.CLASS_TO_NAME.put(entityClass, entityFullName);
+        EntityList.NAME_TO_CLASS.put(entityFullName, entityClass);
         return new SpongeEntityType(entityId, entityName, SpongeImpl.ECOSYSTEM_NAME, entityClass, translation);
     }
 

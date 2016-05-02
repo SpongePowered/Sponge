@@ -88,9 +88,9 @@ public class BiomeTreeTypeRegistryModule implements CatalogRegistryModule<BiomeT
         this.biomeTreeTypeMappings.put("pointy_taiga",
                                        new SpongeBiomeTreeType("pointy_taiga", (PopulatorObject) new WorldGenTaiga1(), (PopulatorObject) megapine));
 
-        IBlockState jlog = Blocks.log.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
-        IBlockState jleaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
-        IBlockState leaf = Blocks.leaves.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState jlog = Blocks.LOG.getDefaultState().withProperty(BlockOldLog.VARIANT, BlockPlanks.EnumType.JUNGLE);
+        IBlockState jleaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
+        IBlockState leaf = Blocks.LEAVES.getDefaultState().withProperty(BlockOldLeaf.VARIANT, BlockPlanks.EnumType.JUNGLE).withProperty(BlockLeaves.CHECK_DECAY, Boolean.valueOf(false));
         IWorldGenTrees trees = (IWorldGenTrees) new WorldGenTrees(false, 4, jlog, jleaf, true);
         trees.setMinHeight(VariableAmount.baseWithRandomAddition(4, 7));
         WorldGenMegaJungle mega = new WorldGenMegaJungle(false, 10, 20, jlog, jleaf);

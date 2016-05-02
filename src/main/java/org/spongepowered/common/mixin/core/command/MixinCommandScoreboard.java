@@ -47,7 +47,8 @@ import java.util.UUID;
 public abstract class MixinCommandScoreboard extends CommandBase implements IMixinCommandBase {
 
     // The static method's owner is CommandScoreboard for some odd reason, despite it coming from CommandBase
-    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;func_184891_e(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
+    private static final String GET_ENTITY_NAME = "Lnet/minecraft/command/server/CommandScoreboard;getEntityName"
+            + "(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/command/ICommandSender;Ljava/lang/String;)Ljava/lang/String;";
 
     private static final String ITERATOR_NEXT = "Ljava/util/Iterator;next()Ljava/lang/Object;";
 
@@ -89,12 +90,12 @@ public abstract class MixinCommandScoreboard extends CommandBase implements IMix
             this.realName = null;
             return newString;
         }
-        return CommandBase.func_184891_e(server, sender, string);
+        return CommandBase.getEntityName(server, sender, string);
     }
 
     @Redirect(method = "leaveTeam", at = @At(value = "INVOKE", target = GET_ENTITY_NAME, ordinal = 1))
     public String onGetEntityNameLeaveSecond(MinecraftServer server, ICommandSender sender, String string) throws EntityNotFoundException {
-        String entityName = CommandBase.func_184891_e(server, sender, string);
+        String entityName = CommandBase.getEntityName(server, sender, string);
         if (this.isExpandedSelector()) {
             try {
                 UUID uuid = UUID.fromString(entityName);

@@ -109,7 +109,7 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
             BlockFlower.EnumFlowerType enumflowertype = (BlockFlower.EnumFlowerType) (Object) type;
             BlockFlower blockflower = enumflowertype.getBlockType().getBlock();
 
-            if (enumflowertype != null && blockflower.getMaterial(blockflower.getDefaultState()) != Material.air) {
+            if (enumflowertype != null && blockflower.getMaterial(blockflower.getDefaultState()) != Material.AIR) {
                 setGeneratedBlock(blockflower, enumflowertype);
                 generate(world, random, blockpos);
             }

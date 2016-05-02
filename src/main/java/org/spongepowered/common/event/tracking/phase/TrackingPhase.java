@@ -150,15 +150,13 @@ public abstract class TrackingPhase {
     }
 
     private void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
-        final List<EntitySnapshot> snapshots = items.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), items, snapshots, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), items, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }
 
     protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
-        final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), entities, snapshots, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), entities, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }

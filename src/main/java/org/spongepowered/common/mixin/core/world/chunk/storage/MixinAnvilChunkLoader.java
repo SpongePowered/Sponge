@@ -148,7 +148,7 @@ public class MixinAnvilChunkLoader {
                     EntityMinecart.Type.values()[compound.getInteger(NbtDataUtil.MINECART_TYPE)].getName());
             compound.removeTag(NbtDataUtil.MINECART_TYPE);
         }
-        Class<? extends Entity> entityClass = EntityList.stringToClassMapping.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));
+        Class<? extends Entity> entityClass = EntityList.NAME_TO_CLASS.get(compound.getString(NbtDataUtil.ENTITY_TYPE_ID));
         if (entityClass == null) {
             return null;
         }

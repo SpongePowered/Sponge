@@ -177,6 +177,9 @@ public class DataRegistrar {
 
         // Entity Processors
 
+        dataManager.registerDataProcessorAndImpl(ArmorStandData.class, SpongeArmorStandData.class,
+                ImmutableArmorStandData.class, ImmutableSpongeArmorStandData.class, new ArmorStandDataProcessor());
+
         dataManager.registerDataProcessorAndImpl(FuseData.class, SpongeFuseData.class, ImmutableFuseData.class,
                 ImmutableSpongeFuseData.class, new FuseDataProcessor());
 
@@ -368,6 +371,9 @@ public class DataRegistrar {
 
         dataManager.registerDualProcessor(CustomNameVisibleData.class, SpongeCustomNameVisibleData.class, ImmutableCustomNameVisibleData.class,
                 ImmutableSpongeCustomNameVisibleData.class, new CustomNameVisibleProcessor());
+
+        dataManager.registerDualProcessor(PickupRuleData.class, SpongePickupRuleData.class, ImmutablePickupRuleData.class,
+                ImmutableSpongePickupRuleData.class, new PickupRuleDataProcessor());
 
         // Item Processors
 
@@ -698,6 +704,11 @@ public class DataRegistrar {
         dataManager.registerValueProcessor(Keys.RIGHT_LEG_ROTATION, new RightLegRotationValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_PRIMARY_EFFECT, new BeaconPrimaryEffectValueProcessor());
         dataManager.registerValueProcessor(Keys.BEACON_SECONDARY_EFFECT, new BeaconSecondaryEffectValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_BASE_PLATE, new ArmorStandBasePlateValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_GRAVITY, new ArmorStandGravityValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_MARKER, new ArmorStandMarkerValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_IS_SMALL, new ArmorStandSmallValueProcessor());
+        dataManager.registerValueProcessor(Keys.ARMOR_STAND_HAS_ARMS, new ArmorStandArmsValueProcessor());
 
         // Properties
         final PropertyRegistry propertyRegistry = SpongePropertyRegistry.getInstance();

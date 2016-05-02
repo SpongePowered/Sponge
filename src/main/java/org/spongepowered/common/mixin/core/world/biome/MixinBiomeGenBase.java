@@ -109,7 +109,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         }
 
         Ore dirt = Ore.builder()
-                .ore((BlockState) Blocks.dirt.getDefaultState())
+                .ore((BlockState) Blocks.DIRT.getDefaultState())
                 .size(settings.dirtSize)
                 .perChunk(settings.dirtCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.dirtMinHeight, settings.dirtMaxHeight))
@@ -117,7 +117,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(dirt);
 
         Ore gravel = Ore.builder()
-                .ore((BlockState) Blocks.gravel.getDefaultState())
+                .ore((BlockState) Blocks.GRAVEL.getDefaultState())
                 .size(settings.gravelSize)
                 .perChunk(settings.gravelCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.gravelMinHeight, settings.gravelMaxHeight))
@@ -125,7 +125,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(gravel);
 
         Ore diorite = Ore.builder()
-                .ore((BlockState) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.DIORITE))
                 .size(settings.dioriteSize)
                 .perChunk(settings.dioriteCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.dioriteMinHeight, settings.dioriteMaxHeight))
@@ -133,7 +133,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(diorite);
 
         Ore granite = Ore.builder()
-                .ore((BlockState) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.GRANITE))
                 .size(settings.graniteSize)
                 .perChunk(settings.graniteCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.graniteMinHeight, settings.graniteMaxHeight))
@@ -141,7 +141,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(granite);
 
         Ore andesite = Ore.builder()
-                .ore((BlockState) Blocks.stone.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE))
+                .ore((BlockState) Blocks.STONE.getDefaultState().withProperty(BlockStone.VARIANT, BlockStone.EnumType.ANDESITE))
                 .size(settings.andesiteSize)
                 .perChunk(settings.andesiteCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.andesiteMinHeight, settings.andesiteMaxHeight))
@@ -149,7 +149,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(andesite);
 
         Ore coal = Ore.builder()
-                .ore((BlockState) Blocks.coal_ore.getDefaultState())
+                .ore((BlockState) Blocks.COAL_ORE.getDefaultState())
                 .size(settings.coalSize)
                 .perChunk(settings.coalCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.coalMinHeight, settings.coalMaxHeight))
@@ -157,7 +157,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(coal);
 
         Ore iron = Ore.builder()
-                .ore((BlockState) Blocks.iron_ore.getDefaultState())
+                .ore((BlockState) Blocks.IRON_ORE.getDefaultState())
                 .size(settings.ironSize)
                 .perChunk(settings.ironCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.ironMinHeight, settings.ironMaxHeight))
@@ -165,7 +165,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(iron);
 
         Ore gold = Ore.builder()
-                .ore((BlockState) Blocks.gold_ore.getDefaultState())
+                .ore((BlockState) Blocks.GOLD_ORE.getDefaultState())
                 .size(settings.goldSize)
                 .perChunk(settings.goldCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.goldMinHeight, settings.goldMaxHeight))
@@ -173,7 +173,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(gold);
 
         Ore redstone = Ore.builder()
-                .ore((BlockState) Blocks.redstone_ore.getDefaultState())
+                .ore((BlockState) Blocks.REDSTONE_ORE.getDefaultState())
                 .size(settings.redstoneSize)
                 .perChunk(settings.redstoneCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.redstoneMinHeight, settings.redstoneMaxHeight))
@@ -181,7 +181,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(redstone);
 
         Ore diamond = Ore.builder()
-                .ore((BlockState) Blocks.diamond_ore.getDefaultState())
+                .ore((BlockState) Blocks.DIAMOND_ORE.getDefaultState())
                 .size(settings.diamondSize)
                 .perChunk(settings.diamondCount)
                 .height(VariableAmount.baseWithRandomAddition(settings.diamondMinHeight, settings.diamondMaxHeight))
@@ -189,7 +189,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getPopulators().add(diamond);
 
         Ore lapis = Ore.builder()
-                .ore((BlockState) Blocks.lapis_ore.getDefaultState())
+                .ore((BlockState) Blocks.LAPIS_ORE.getDefaultState())
                 .size(settings.lapisSize)
                 .perChunk(settings.lapisCount)
                 .height(VariableAmount.baseWithVariance(settings.lapisCenterHeight, settings.lapisSpread))
@@ -198,7 +198,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
         if (theBiomeDecorator.sandPerChunk2 > 0) {
             SeaFloor sand = SeaFloor.builder()
-                    .block((BlockState) Blocks.sand.getDefaultState())
+                    .block((BlockState) Blocks.SAND.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 5))
                     .depth(2)
                     .perChunk(theBiomeDecorator.sandPerChunk2)
@@ -208,7 +208,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         }
         if (theBiomeDecorator.clayPerChunk > 0) {
             SeaFloor clay = SeaFloor.builder()
-                    .block((BlockState) Blocks.clay.getDefaultState())
+                    .block((BlockState) Blocks.CLAY.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 2))
                     .depth(1)
                     .perChunk(theBiomeDecorator.clayPerChunk)
@@ -218,7 +218,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         }
         if (theBiomeDecorator.sandPerChunk > 0) {
             SeaFloor gravelSeaFloor = SeaFloor.builder()
-                    .block((BlockState) Blocks.gravel.getDefaultState())
+                    .block((BlockState) Blocks.GRAVEL.getDefaultState())
                     .radius(VariableAmount.baseWithRandomAddition(2, 4))
                     .depth(2)
                     .perChunk(theBiomeDecorator.sandPerChunk)
@@ -296,14 +296,14 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         }
         if (theBiomeDecorator.generateLakes) {
             RandomBlock water = RandomBlock.builder()
-                    .block((BlockState) Blocks.flowing_water.getDefaultState())
+                    .block((BlockState) Blocks.FLOWING_WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, VariableAmount.baseWithRandomAddition(8, 248)))
                     .perChunk(50)
                     .placementTarget(WorldGenConstants.CAVE_LIQUIDS)
                     .build();
             gensettings.getPopulators().add(water);
             RandomBlock lava = RandomBlock.builder()
-                    .block((BlockState) Blocks.flowing_lava.getDefaultState())
+                    .block((BlockState) Blocks.FLOWING_LAVA.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithRandomAddition(8, 240))))
                     .perChunk(20)

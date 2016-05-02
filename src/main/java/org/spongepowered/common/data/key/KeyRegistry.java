@@ -61,6 +61,7 @@ import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.data.type.LogAxis;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.OcelotType;
+import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.api.data.type.PistonType;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PortionType;
@@ -309,6 +310,12 @@ public class KeyRegistry {
         keyMap.put("fuse_duration", makeSingleKey(Integer.class, Value.class, of("FuseDuration")));
         keyMap.put("ticks_remaining", makeSingleKey(Integer.class, Value.class, of("TicksRemaining")));
         keyMap.put("explosion_radius", makeSingleKey(Integer.class, Value.class, of("ExplosionRadius")));
+        keyMap.put("armor_stand_has_arms", makeSingleKey(Boolean.class, Value.class, of("HasArms")));
+        keyMap.put("armor_stand_has_base_plate", makeSingleKey(Boolean.class, Value.class, of("HasBasePlate")));
+        keyMap.put("armor_stand_has_gravity", makeSingleKey(Boolean.class, Value.class, of("HasGravity")));
+        keyMap.put("armor_stand_marker", makeSingleKey(Boolean.class, Value.class, of("IsMarker")));
+        keyMap.put("armor_stand_is_small", makeSingleKey(Boolean.class, Value.class, of("IsSmall")));
+        keyMap.put("pickup_rule", makeSingleKey(PickupRule.class, Value.class, of("PickupRule")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap

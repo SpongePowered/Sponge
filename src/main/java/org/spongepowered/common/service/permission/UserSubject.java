@@ -126,7 +126,7 @@ public class UserSubject extends SpongeSubject {
         if (ret == Tristate.UNDEFINED) {
             ret = getDataPermissionValue(this.collection.getService().getDefaultData(), permission);
         }
-        if (ret == Tristate.UNDEFINED && getOpLevel() >= this.collection.getService().getServerOpLevel()) {
+        if (ret == Tristate.UNDEFINED && getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
             ret = Tristate.TRUE;
         }
         return ret;

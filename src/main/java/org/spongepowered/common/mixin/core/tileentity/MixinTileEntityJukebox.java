@@ -57,7 +57,7 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
     @Override
     public void ejectRecord() {
         IBlockState block = this.worldObj.getBlockState(this.pos);
-        if (block.getBlock() == Blocks.jukebox) {
+        if (block.getBlock() == Blocks.JUKEBOX) {
             ((BlockJukebox) block.getBlock()).dropRecord(this.worldObj, this.pos, block);
             this.worldObj.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, false), 2);
         }
@@ -70,7 +70,7 @@ public abstract class MixinTileEntityJukebox extends MixinTileEntity implements 
             return;
         }
         IBlockState block = this.worldObj.getBlockState(this.pos);
-        if (block.getBlock() == Blocks.jukebox) {
+        if (block.getBlock() == Blocks.JUKEBOX) {
             // Don't use BlockJukebox#insertRecord - it looses item data
             this.setRecord(itemStack);
             this.worldObj.setBlockState(this.pos, block.withProperty(BlockJukebox.HAS_RECORD, true), 2);

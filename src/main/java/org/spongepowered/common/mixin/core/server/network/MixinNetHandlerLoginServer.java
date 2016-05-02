@@ -58,7 +58,7 @@ import java.util.Optional;
 @Mixin(NetHandlerLoginServer.class)
 public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLoginServer {
 
-    @Shadow @Final private static Logger logger;
+    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager networkManager;
     @Shadow @Final private MinecraftServer server;
     @Shadow private com.mojang.authlib.GameProfile loginGameProfile;
@@ -74,11 +74,11 @@ public abstract class MixinNetHandlerLoginServer implements IMixinNetHandlerLogi
 
     private void closeConnection(ITextComponent reason) {
         try {
-            logger.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedText());
+            LOGGER.info("Disconnecting " + this.getConnectionInfo() + ": " + reason.getUnformattedText());
             this.networkManager.sendPacket(new SPacketDisconnect(reason));
             this.networkManager.closeChannel(reason);
         } catch (Exception exception) {
-            logger.error("Error whilst disconnecting player", exception);
+            LOGGER.error("Error whilst disconnecting player", exception);
         }
     }
 

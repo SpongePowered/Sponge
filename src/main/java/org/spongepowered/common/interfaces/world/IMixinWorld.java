@@ -38,8 +38,6 @@ import javax.annotation.Nullable;
 
 public interface IMixinWorld {
 
-    SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig();
-
     long getWeatherStartTime();
 
     void setWeatherStartTime(long weatherStartTime);

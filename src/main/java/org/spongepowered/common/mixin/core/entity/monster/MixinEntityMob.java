@@ -114,11 +114,11 @@ public abstract class MixinEntityMob extends MixinEntityCreature implements Mons
                 ItemStack itemstack = this.getHeldItemMainhand();
                 ItemStack itemstack1 = entityplayer.isHandActive() ? entityplayer.getActiveItemStack() : null;
 
-                if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.shield) {
+                if (itemstack != null && itemstack1 != null && itemstack.getItem() instanceof ItemAxe && itemstack1.getItem() == Items.SHIELD) {
                     float f1 = 0.25F + (float) EnchantmentHelper.getEfficiencyModifier((EntityMob) (Object) this) * 0.05F;
 
                     if (this.rand.nextFloat() < f1) {
-                        entityplayer.getCooldownTracker().setCooldown(Items.shield, 100);
+                        entityplayer.getCooldownTracker().setCooldown(Items.SHIELD, 100);
                         this.worldObj.setEntityState(entityplayer, (byte) 30);
                     }
                 }

@@ -58,7 +58,7 @@ public class MixinEntityVillagerListEnchantedItemForEmeralds implements TradeOff
             emeraldCount = this.priceInfo.getPrice(random);
         }
 
-        ItemStack itemstack = new ItemStack(Items.emerald, emeraldCount, 0);
+        ItemStack itemstack = new ItemStack(Items.EMERALD, emeraldCount, 0);
         ItemStack itemstack1 = new ItemStack(this.enchantedItemStack.getItem(), 1, this.enchantedItemStack.getMetadata());
         itemstack1 = EnchantmentHelper.addRandomEnchantment(random, itemstack1, 5 + random.nextInt(15), false);
         return (TradeOffer) new MerchantRecipe(itemstack, itemstack1);

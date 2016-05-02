@@ -22,27 +22,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.world.gen;
+package org.spongepowered.common.mixin.core.data.types;
 
-import net.minecraft.util.LongHashMap;
-import net.minecraft.world.ChunkCoordIntPair;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.gen.ChunkProviderServer;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.entity.projectile.EntityArrow;
+import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.world.gen.IMIxinChunkProviderServer;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import javax.annotation.Nullable;
+import java.util.Locale;
 
-@Mixin(ChunkProviderServer.class)
-public abstract class MixinChunkProviderServer_Lighting implements IMIxinChunkProviderServer {
+@Mixin(EntityArrow.PickupStatus.class)
+public class MixinEntityArrowPickupStatus implements PickupRule {
 
-    @Shadow @Final private LongHashMap<Chunk> id2ChunkMap;
+    private String id;
+    private String name;
 
-    @Nullable
-    @Override
-    public Chunk getChunkIfLoaded(int x, int z) {
-        return this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void construct(CallbackInfo ci) {
+        this.name = ((Enum) (Object) this).name();
+        this.id = this.name.toLowerCase(Locale.ENGLISH);
     }
+
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.name;
+    }
+
 }

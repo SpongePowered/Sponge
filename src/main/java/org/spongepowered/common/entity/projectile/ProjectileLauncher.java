@@ -288,7 +288,7 @@ public class ProjectileLauncher {
 
         @SuppressWarnings("unchecked")
         private <P extends Projectile> Optional<P> launch(TileEntityDispenser dispenser, Class<P> projectileClass, Item item) {
-            BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.dispenseBehaviorRegistry.getObject(item);
+            BehaviorDefaultDispenseItem behavior = (BehaviorDefaultDispenseItem) BlockDispenser.DISPENSE_BEHAVIOR_REGISTRY.getObject(item);
             List<net.minecraft.entity.Entity> entityList = dispenser.getWorld().loadedEntityList;
             int numEntities = entityList.size();
             behavior.dispense(new BlockSourceImpl(dispenser.getWorld(), dispenser.getPos()), new ItemStack(item));
@@ -306,7 +306,7 @@ public class ProjectileLauncher {
 
         registerProjectileSourceLogic(Dispenser.class, new DispenserSourceLogic());
 
-        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.arrow) {
+        registerProjectileLogic(Arrow.class, new SimpleItemLaunchLogic<Arrow>(Arrow.class, Items.ARROW) {
 
             @Override
             protected Optional<Arrow> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -314,7 +314,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), arrow, createCause(source));
             }
         });
-        registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.egg) {
+        registerProjectileLogic(Egg.class, new SimpleItemLaunchLogic<Egg>(Egg.class, Items.EGG) {
 
             @Override
             protected Optional<Egg> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -322,7 +322,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), egg, createCause(source));
             }
         });
-        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.fire_charge) {
+        registerProjectileLogic(SmallFireball.class, new SimpleItemLaunchLogic<SmallFireball>(SmallFireball.class, Items.FIRE_CHARGE) {
 
             @Override
             protected Optional<SmallFireball> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -333,7 +333,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), fireball, createCause(source));
             }
         });
-        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.fireworks) {
+        registerProjectileLogic(Firework.class, new SimpleItemLaunchLogic<Firework>(Firework.class, Items.FIREWORKS) {
 
             @Override
             protected Optional<Firework> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -341,7 +341,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), firework, createCause(source));
             }
         });
-        registerProjectileLogic(Snowball.class, new SimpleItemLaunchLogic<Snowball>(Snowball.class, Items.snowball) {
+        registerProjectileLogic(Snowball.class, new SimpleItemLaunchLogic<Snowball>(Snowball.class, Items.SNOWBALL) {
 
             @Override
             protected Optional<Snowball> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -349,7 +349,7 @@ public class ProjectileLauncher {
                 return doLaunch(loc.getExtent(), snowball, createCause(source));
             }
         });
-        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.experience_bottle) {
+        registerProjectileLogic(ThrownExpBottle.class, new SimpleItemLaunchLogic<ThrownExpBottle>(ThrownExpBottle.class, Items.EXPERIENCE_BOTTLE) {
 
             @Override
             protected Optional<ThrownExpBottle> createProjectile(EntityLivingBase source, Location<?> loc) {
@@ -420,7 +420,7 @@ public class ProjectileLauncher {
 
             @Override
             protected Optional<ThrownPotion> createProjectile(EntityLivingBase source, Location<?> loc) {
-                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, new ItemStack(Items.splash_potion, 1));
+                ThrownPotion potion = (ThrownPotion) new EntityPotion(source.worldObj, source, new ItemStack(Items.SPLASH_POTION, 1));
                 return doLaunch(loc.getExtent(), potion, createCause(source));
             }
         });

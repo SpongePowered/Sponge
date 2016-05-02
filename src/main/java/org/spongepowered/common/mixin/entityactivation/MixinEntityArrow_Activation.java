@@ -22,23 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world.gen;
+package org.spongepowered.common.mixin.entityactivation;
 
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.entity.projectile.EntityArrow;
+import org.spongepowered.api.util.annotation.NonnullByDefault;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
+@NonnullByDefault
+@Mixin(EntityArrow.class)
+public abstract class MixinEntityArrow_Activation extends MixinEntity_Activation {
 
-public interface IMIxinChunkProviderServer {
+    @Shadow private int ticksInGround;
 
-    /**
-     * Gets the chunk at the desired position. If there is no
-     * loaded chunk at the position, {@code null} is returned.
-     *
-     * @param x The chunk x position
-     * @param z The chunk z position
-     * @return The chunk, if loaded
-     */
-    @Nullable
-    Chunk getChunkIfLoaded(int x, int z);
-
+    @Override
+    public void inactiveTick() {
+        if (this.onGround) {
+            this.ticksInGround += 1;
+        }
+        super.inactiveTick();
+    }
 }

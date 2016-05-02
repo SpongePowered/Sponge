@@ -46,34 +46,34 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 @Mixin(BiomeGenHills.class)
 public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
 
-    @Shadow @Final private BiomeGenHills.Type field_150638_aH;
+    @Shadow @Final private BiomeGenHills.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         super.buildPopulators(world, gensettings);
         gensettings.getGroundCoverLayers().clear();
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
-            IBlockState result = Blocks.grass.getDefaultState();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.field_150638_aH == BiomeGenHills.Type.MUTATED) {
-                result = Blocks.gravel.getDefaultState();
-            } else if (stoneNoise > 1.0D && this.field_150638_aH != BiomeGenHills.Type.EXTRA_TREES) {
-                result = Blocks.stone.getDefaultState();
+            IBlockState result = Blocks.GRASS.getDefaultState();
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeGenHills.Type.MUTATED) {
+                result = Blocks.GRAVEL.getDefaultState();
+            } else if (stoneNoise > 1.0D && this.type != BiomeGenHills.Type.EXTRA_TREES) {
+                result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
         } , SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
-            IBlockState result = Blocks.dirt.getDefaultState();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.field_150638_aH == BiomeGenHills.Type.MUTATED) {
-                result = Blocks.gravel.getDefaultState();
-            } else if (stoneNoise > 1.0D && this.field_150638_aH != BiomeGenHills.Type.EXTRA_TREES) {
-                result = Blocks.stone.getDefaultState();
+            IBlockState result = Blocks.DIRT.getDefaultState();
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeGenHills.Type.MUTATED) {
+                result = Blocks.GRAVEL.getDefaultState();
+            } else if (stoneNoise > 1.0D && this.type != BiomeGenHills.Type.EXTRA_TREES) {
+                result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
         } , WorldGenConstants.GROUND_COVER_DEPTH));
 
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
         Ore emerald = Ore.builder()
-                .ore((BlockState) Blocks.emerald_ore.getDefaultState())
+                .ore((BlockState) Blocks.EMERALD_ORE.getDefaultState())
                 .placementCondition(WorldGenConstants.STONE)
                 .perChunk(VariableAmount.baseWithRandomAddition(3, 6))
                 .height(VariableAmount.baseWithRandomAddition(0, 16))
@@ -82,7 +82,7 @@ public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
         gensettings.getPopulators().add(emerald);
 
         Ore silverfish = Ore.builder()
-                .ore((BlockState) Blocks.monster_egg.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE))
+                .ore((BlockState) Blocks.MONSTER_EGG.getDefaultState().withProperty(BlockSilverfish.VARIANT, BlockSilverfish.EnumType.STONE))
                 .perChunk(7)
                 .height(VariableAmount.baseWithRandomAddition(0, 64))
                 .size(9)

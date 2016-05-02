@@ -85,8 +85,8 @@ public class ChorusFlowerPopulator implements ChorusFlower {
 
                     if (z > 0) {
                         if (worldObj.isAirBlock(chunkPos.add(x, z, y))
-                                && worldObj.getBlockState(chunkPos.add(x, z - 1, y)).getBlock() == Blocks.end_stone) {
-                            BlockChorusFlower.func_185603_a(worldObj, chunkPos.add(x, z, y), rand, 8);
+                                && worldObj.getBlockState(chunkPos.add(x, z - 1, y)).getBlock() == Blocks.END_STONE) {
+                            BlockChorusFlower.generatePlant(worldObj, chunkPos.add(x, z, y), rand, 8);
                         }
                     }
                 }
@@ -112,7 +112,7 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                 long k = x + i;
                 long l = z + j;
 
-                if (k * k + l * l > 4096L && this.noise.func_151605_a(k, l) < -0.8999999761581421D) {
+                if (k * k + l * l > 4096L && this.noise.getValue(k, l) < -0.8999999761581421D) {
                     float f3 = (MathHelper.abs(k) * 3439.0F + MathHelper.abs(l) * 147.0F) % 13.0F + 9.0F;
                     f = p_185960_3_ - i * 2;
                     f1 = p_185960_4_ - j * 2;

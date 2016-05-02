@@ -76,7 +76,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
         if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lake")) {
             Lake lake = Lake.builder()
                     .chance(1 / 4d)
-                    .liquidType((BlockState) Blocks.water.getDefaultState())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake);
@@ -87,7 +87,7 @@ public class MixinChunkProviderFlat implements GenerationPopulator, IPopulatorPr
         if (this.flatWorldGenInfo.getWorldFeatures().containsKey("lava_lake")) {
             Lake lake = Lake.builder()
                     .chance(1 / 8d)
-                    .liquidType((BlockState) Blocks.water.getDefaultState())
+                    .liquidType((BlockState) Blocks.WATER.getDefaultState())
                     .height(VariableAmount.baseWithVariance(0,
                             VariableAmount.baseWithRandomAddition(8, VariableAmount.baseWithOptionalAddition(55, 193, 0.1))))
                     .build();
