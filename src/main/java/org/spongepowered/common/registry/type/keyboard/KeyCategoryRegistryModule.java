@@ -101,7 +101,7 @@ public class KeyCategoryRegistryModule implements AlternateCatalogRegistryModule
     private void registerDefaultCategory(String name, int internalId) {
         Text title = Sponge.getRegistry().getTranslationById("key.categories." + name).map(translation -> (Text) Text.of(translation))
                 .orElseGet(() -> Text.of(name));
-        registerAdditionalCategory(new SpongeKeyCategory("minecraft", name, title), internalId);
+        registerAdditionalCategory(new SpongeKeyCategory("minecraft", name, title, true), internalId);
     }
 
     @Override

@@ -873,7 +873,10 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public long getKeyPressStartTime(int internalId) {
-        return this.keyPressedTimes.putIfAbsent(internalId, -1);
+        if (this.keyPressedTimes.containsKey(internalId)) {
+            return this.keyPressedTimes.get(internalId);
+        }
+        return -1;
     }
 
     @Override

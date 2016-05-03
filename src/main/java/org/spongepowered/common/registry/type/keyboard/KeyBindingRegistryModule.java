@@ -130,7 +130,7 @@ public class KeyBindingRegistryModule implements CatalogRegistryModule<KeyBindin
         mappings.put("hotbar_8", buildDefaultBinding("hotbar8", KeyCategories.INVENTORY, 11, "hotbar.8"));
         mappings.put("hotbar_9", buildDefaultBinding("hotbar9", KeyCategories.INVENTORY, 12, "hotbar.9"));
         mappings.put("inventory", buildDefaultBinding("inventory", KeyCategories.INVENTORY, 13, "inventory"));
-        mappings.put("swapHandItems", buildDefaultBinding("swapHandItems", KeyCategories.INVENTORY, 14, "swapHands"));
+        mappings.put("swap_hand_items", buildDefaultBinding("swapHandItems", KeyCategories.INVENTORY, 14, "swapHands"));
         registerAndClearMappings(KeyBindings.Inventory.class, mappings);
         mappings.put("fullscreen", buildDefaultBinding("fullscreen", KeyCategories.MISC, 15, "fullscreen"));
         mappings.put("screenshot", buildDefaultBinding("screenshot", KeyCategories.MISC, 16, "screenshot"));

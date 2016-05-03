@@ -50,13 +50,13 @@ public class MessageKeyState implements Message {
 
     @Override
     public void readFrom(ChannelBuf buf) {
-        this.keyBinding = buf.readInteger();
+        this.keyBinding = buf.readShort();
         this.state = buf.readBoolean();
     }
 
     @Override
     public void writeTo(ChannelBuf buf) {
-        buf.writeInteger(this.keyBinding);
+        buf.writeShort((short) this.keyBinding);
         buf.writeBoolean(this.state);
     }
 }

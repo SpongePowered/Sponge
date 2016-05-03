@@ -40,21 +40,27 @@ public class SpongeKeyCategory implements KeyCategory {
     private final String id;
     private final String name;
     private final Text title;
+    private final boolean def;
 
     private int internalId = -1;
 
-    private SpongeKeyCategory(String id, Text title, String name) {
+    private SpongeKeyCategory(String id, Text title, String name, boolean def) {
         this.title = title;
         this.name = name;
+        this.def = def;
         this.id = id;
     }
 
+    public SpongeKeyCategory(String pluginId, String name, Text title, boolean def) {
+        this(pluginId + ':' + name, title, name, def);
+    }
+
     public SpongeKeyCategory(String pluginId, String name, Text title) {
-        this(pluginId + ':' + name, title, name);
+        this(pluginId, name, title, false);
     }
 
     public SpongeKeyCategory(String id, Text title) {
-        this(id, title, getName(id));
+        this(id, title, getName(id), false);
     }
 
     static String getName(String id) {
@@ -92,5 +98,9 @@ public class SpongeKeyCategory implements KeyCategory {
 
     public void setInternalId(int internalId) {
         this.internalId = internalId;
+    }
+
+    public boolean isDefault() {
+        return this.def;
     }
 }

@@ -81,7 +81,9 @@ public class KeyNetworkHandler {
                     continue;
                 }
                 finalKeyBindings.add((SpongeKeyBinding) keyBinding);
-                keyCategories.add((SpongeKeyCategory) keyBinding.getCategory());
+                if (!((SpongeKeyCategory) keyBinding.getCategory()).isDefault()) {
+                    keyCategories.add((SpongeKeyCategory) keyBinding.getCategory());
+                }
             }
 
             // Register the custom client bindings on the client

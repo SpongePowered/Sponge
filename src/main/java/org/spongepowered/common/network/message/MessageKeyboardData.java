@@ -32,6 +32,7 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.keyboard.SpongeKeyBinding;
 import org.spongepowered.common.keyboard.SpongeKeyCategory;
+import org.spongepowered.common.registry.type.keyboard.KeyCategoryRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -62,9 +63,9 @@ public class MessageKeyboardData implements Message {
     @Override
     public void readFrom(ChannelBuf buf) {
         Map<Integer, SpongeKeyCategory> categories = new HashMap<>();
-        int keyCategoriesCount = buf.readInteger();
+        int keyCategoriesCount = buf.readShort();
         for (int i = 0; i < keyCategoriesCount; i++) {
-            int internalId = buf.readInteger();
+            int internalId = buf.readShort();
             String id = buf.readString();
             Text title = TextSerializers.JSON.deserializeUnchecked(buf.readString());
 
@@ -74,15 +75,19 @@ public class MessageKeyboardData implements Message {
             categories.put(internalId, keyCategory);
         }
         this.keyCategories = new HashSet<>(categories.values());
-        int keyBindingCount = buf.readInteger();
+        int keyBindingCount = buf.readShort();
         this.keyBindings = new HashSet<>(keyBindingCount);
         for (int i = 0; i < keyBindingCount; i++) {
-            int internalId = buf.readInteger();
+            int internalId = buf.readShort();
             String id = buf.readString();
-            int categoryId = buf.readInteger();
+            int categoryId = buf.readShort();
             Text displayName = TextSerializers.JSON.deserializeUnchecked(buf.readString());
 
-            SpongeKeyCategory keyCategory = checkNotNull(categories.get(categoryId));
+            SpongeKeyCategory keyCategory = categories.get(categoryId);
+            if (keyCategory == null) {
+                keyCategory = (SpongeKeyCategory) KeyCategoryRegistryModule.getInstance().getByInternalId(categoryId)
+                        .orElseThrow(() -> new IllegalArgumentException("Received key binding with unknown category"));
+            }
             SpongeKeyBinding keyBinding = new SpongeKeyBinding(id, keyCategory, displayName);
             keyCategory.setInternalId(internalId);
 
@@ -92,17 +97,17 @@ public class MessageKeyboardData implements Message {
 
     @Override
     public void writeTo(ChannelBuf buf) {
-        buf.writeInteger(this.keyCategories.size());
+        buf.writeShort((short) this.keyCategories.size());
         for (SpongeKeyCategory category : this.keyCategories) {
-            buf.writeInteger(category.getInternalId());
+            buf.writeShort((short) category.getInternalId());
             buf.writeString(category.getId());
             buf.writeString(TextSerializers.JSON.serialize(category.getTitle()));
         }
-        buf.writeInteger(this.keyBindings.size());
+        buf.writeShort((short) this.keyBindings.size());
         for (SpongeKeyBinding keyBinding : this.keyBindings) {
-            buf.writeInteger(keyBinding.getInternalId());
+            buf.writeShort((short) keyBinding.getInternalId());
             buf.writeString(keyBinding.getId());
-            buf.writeInteger(keyBinding.getCategory().getInternalId());
+            buf.writeShort((short) keyBinding.getCategory().getInternalId());
             buf.writeString(TextSerializers.JSON.serialize(keyBinding.getDisplayName()));
         }
     }
