@@ -1,8 +1,8 @@
 {
     "minVersion": "0.5.1",
-    "package": "org.spongepowered.common.mixin.bungee",
+    "package": "org.spongepowered.common.mixin.proxy",
     "refmap": "mixins.common.refmap.json",
-    "plugin": "org.spongepowered.common.mixin.plugin.BungeeCordPlugin",
+    "plugin": "org.spongepowered.common.mixin.plugin.ProxyPlugin",
     "mixins": [
     ],
     "server": [
