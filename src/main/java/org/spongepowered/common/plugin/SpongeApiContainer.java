@@ -27,6 +27,7 @@ package org.spongepowered.common.plugin;
 import com.google.inject.Singleton;
 import org.slf4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.Platform;
 import org.spongepowered.common.SpongeImpl;
 
 import java.util.Optional;
@@ -39,17 +40,17 @@ public final class SpongeApiContainer extends AbstractPluginContainer {
 
     @Override
     public String getId() {
-        return SpongeImpl.API_ID;
+        return Platform.API_ID;
     }
 
     @Override
     public String getName() {
-        return SpongeImpl.API_NAME;
+        return Platform.API_NAME;
     }
 
     @Override
     public Optional<String> getVersion() {
-        return SpongeImpl.API_VERSION;
+        return Platform.API_VERSION;
     }
 
     @Override

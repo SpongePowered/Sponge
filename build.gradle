@@ -33,9 +33,6 @@ buildscript {
 // and the Minecraft workspace defined as "provided" so they won't conflict with the implementation
 apply plugin: 'net.minecrell.vanilla.server.library'
 
-// Create task to resolve SpongeAPI revision
-apply from: 'api-revision.gradle'
-
 // Apply shared ForgeGradle configuration
 ext.common = project
 apply from: 'gradle/minecraft.gradle'
