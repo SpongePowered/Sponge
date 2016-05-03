@@ -47,6 +47,7 @@ import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 public class KeyNetworkHandler {
@@ -110,14 +111,25 @@ public class KeyNetworkHandler {
             }
             IMixinEntityPlayerMP mixinPlayer = (IMixinEntityPlayerMP) player;
             boolean state = message.getState();
-            InteractKeyEvent event;
             long startTime = mixinPlayer.getKeyPressStartTime(internalId);
             if (state) {
                 if (startTime != -1) {
                     SpongeImpl.getLogger().warn("The player {} never send a release message before sending a new press message.");
                 }
                 mixinPlayer.setKeyPressStartTime(internalId, System.currentTimeMillis());
-                event = SpongeEventFactory.createInteractKeyEventPress(Cause.source(player).build(), keyBinding, player);
+                Cause cause = Cause.source(player).build();
+                InteractKeyEvent.Press.Pre event = SpongeEventFactory.createInteractKeyEventPressPre(
+                        cause, keyBinding, player);
+                Sponge.getEventManager().post(event);
+                if (!event.isCancelled()) {
+                    BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getPressExecutor();
+                    if (consumer != null) {
+                        consumer.accept(player, keyBinding);
+                    }
+                    InteractKeyEvent.Press.Post event1 = SpongeEventFactory.createInteractKeyEventPressPost(
+                            cause, keyBinding, player);
+                    Sponge.getEventManager().post(event1);
+                }
             } else {
                 if (startTime == -1) {
                     SpongeImpl.getLogger().warn("The player {} send a release message before sending a press message.");
@@ -125,9 +137,21 @@ public class KeyNetworkHandler {
                 }
                 int pressedTime = (int) ((System.currentTimeMillis() - startTime) / 50);
                 mixinPlayer.setKeyPressStartTime(internalId, -1);
-                event = SpongeEventFactory.createInteractKeyEventRelease(Cause.source(player).build(), keyBinding, player, pressedTime);
+
+                Cause cause = Cause.source(player).build();
+                InteractKeyEvent.Release.Pre event = SpongeEventFactory.createInteractKeyEventReleasePre(
+                        cause, keyBinding, player, pressedTime);
+                Sponge.getEventManager().post(event);
+                if (!event.isCancelled()) {
+                    BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getReleaseExecutor();
+                    if (consumer != null) {
+                        consumer.accept(player, keyBinding);
+                    }
+                    InteractKeyEvent.Release.Post event1 = SpongeEventFactory.createInteractKeyEventReleasePost(
+                            cause, keyBinding, player, pressedTime);
+                    Sponge.getEventManager().post(event1);
+                }
             }
-            Sponge.getEventManager().post(event);
         });
     }
 }

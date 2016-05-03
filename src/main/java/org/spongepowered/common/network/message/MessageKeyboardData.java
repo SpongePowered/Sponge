@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.network.message;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.api.network.Message;
 import org.spongepowered.api.text.Text;

@@ -152,6 +152,7 @@ import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
+import org.spongepowered.common.keyboard.SpongeKeyBinding;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.registry.type.keyboard.KeyBindingRegistryModule;
 import org.spongepowered.common.text.SpongeTexts;
@@ -169,6 +170,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
@@ -806,7 +808,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && currentItem != null ? currentItem.stackSize : 1), false, true);
     }
 
-<<<<<<< HEAD
     @Override
     public void stopActiveHand() {
         // Our using item state is probably desynced from the client (e.g. from the initial air interaction of a bow being cancelled).
@@ -853,8 +854,18 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
                 KeyBinding keyBinding = KeyBindingRegistryModule.getInstance().getByInternalId(key).orElse(null);
                 if (keyBinding != null) {
                     int pressedTime = (int) ((System.currentTimeMillis() - value) / 50);
-                    InteractKeyEvent.Tick event = SpongeEventFactory.createInteractKeyEventTick(cause, keyBinding, this, pressedTime);
+                    InteractKeyEvent.Tick.Pre event = SpongeEventFactory.createInteractKeyEventTickPre(
+                            cause, keyBinding, this, pressedTime);
                     Sponge.getEventManager().post(event);
+                    if (!event.isCancelled()) {
+                        BiConsumer<Player, KeyBinding> consumer = ((SpongeKeyBinding) keyBinding).getTickExecutor();
+                        if (consumer != null) {
+                            consumer.accept(this, keyBinding);
+                        }
+                        InteractKeyEvent.Tick.Post event1 = SpongeEventFactory.createInteractKeyEventTickPost(
+                                cause, keyBinding, this, pressedTime);
+                        Sponge.getEventManager().post(event1);
+                    }
                 }
             }
             return true;

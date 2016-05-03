@@ -24,8 +24,13 @@
  */
 package org.spongepowered.common.keyboard;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.text.Text;
+
+import java.util.function.BiConsumer;
+
+import javax.annotation.Nullable;
 
 public class SpongeKeyBinding implements KeyBinding {
 
@@ -35,9 +40,19 @@ public class SpongeKeyBinding implements KeyBinding {
     private final String name;
     private final boolean def;
 
+    @Nullable private final BiConsumer<Player, KeyBinding> pressExecutor;
+    @Nullable private final BiConsumer<Player, KeyBinding> releaseExecutor;
+    @Nullable private final BiConsumer<Player, KeyBinding> tickExecutor;
+
     private int internalId = -1;
 
-    private SpongeKeyBinding(String id, String name, SpongeKeyCategory keyCategory, boolean def, Text displayName) {
+    private SpongeKeyBinding(String id, String name, SpongeKeyCategory keyCategory, boolean def, Text displayName,
+            @Nullable BiConsumer<Player, KeyBinding> pressExecutor,
+            @Nullable BiConsumer<Player, KeyBinding> releaseExecutor,
+            @Nullable BiConsumer<Player, KeyBinding> tickExecutor) {
+        this.releaseExecutor = releaseExecutor;
+        this.pressExecutor = pressExecutor;
+        this.tickExecutor = tickExecutor;
         this.keyCategory = keyCategory;
         this.displayName = displayName;
         this.name = name;
@@ -46,19 +61,18 @@ public class SpongeKeyBinding implements KeyBinding {
     }
 
     public SpongeKeyBinding(String pluginId, String name, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
-        this(pluginId + ':' + name, name, keyCategory, def, displayName);
+        this(pluginId + ':' + name, name, keyCategory, def, displayName, null, null, null);
     }
 
-    public SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName, boolean def) {
-        this(id, SpongeKeyCategory.getName(id), keyCategory, def, displayName);
-    }
-
-    public SpongeKeyBinding(String pluginId, String name, SpongeKeyCategory keyCategory, Text displayName) {
-        this(pluginId, name, keyCategory, displayName, false);
+    public SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName,
+            @Nullable BiConsumer<Player, KeyBinding> pressExecutor,
+            @Nullable BiConsumer<Player, KeyBinding> releaseExecutor,
+            @Nullable BiConsumer<Player, KeyBinding> tickExecutor) {
+        this(id, SpongeKeyCategory.getName(id), keyCategory, false, displayName, pressExecutor, releaseExecutor, tickExecutor);
     }
 
     public SpongeKeyBinding(String id, SpongeKeyCategory keyCategory, Text displayName) {
-        this(id, keyCategory, displayName, false);
+        this(id, SpongeKeyCategory.getName(id), keyCategory, false, displayName, null, null, null);
     }
 
     @Override
@@ -91,5 +105,20 @@ public class SpongeKeyBinding implements KeyBinding {
 
     public boolean isDefault() {
         return this.def;
+    }
+
+    @Nullable
+    public BiConsumer<Player, KeyBinding> getPressExecutor() {
+        return this.pressExecutor;
+    }
+
+    @Nullable
+    public BiConsumer<Player, KeyBinding> getReleaseExecutor() {
+        return this.releaseExecutor;
+    }
+
+    @Nullable
+    public BiConsumer<Player, KeyBinding> getTickExecutor() {
+        return this.tickExecutor;
     }
 }

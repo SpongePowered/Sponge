@@ -28,16 +28,22 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.keyboard.KeyBinding;
 import org.spongepowered.api.keyboard.KeyCategories;
 import org.spongepowered.api.keyboard.KeyCategory;
 import org.spongepowered.api.text.Text;
+
+import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
 public class SpongeKeyBindingBuilder implements KeyBinding.Builder {
 
     @Nullable private KeyCategory keyCategory;
+    @Nullable private BiConsumer<Player, KeyBinding> pressExecutor;
+    @Nullable private BiConsumer<Player, KeyBinding> releaseExecutor;
+    @Nullable private BiConsumer<Player, KeyBinding> tickExecutor;
     private Text displayName;
     private String id;
 
@@ -62,11 +68,29 @@ public class SpongeKeyBindingBuilder implements KeyBinding.Builder {
     }
 
     @Override
+    public KeyBinding.Builder pressExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
+        this.pressExecutor = executor;
+        return this;
+    }
+
+    @Override
+    public KeyBinding.Builder releaseExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
+        this.releaseExecutor = executor;
+        return this;
+    }
+
+    @Override
+    public KeyBinding.Builder tickExecutor(@Nullable BiConsumer<Player, KeyBinding> executor) {
+        this.tickExecutor = executor;
+        return this;
+    }
+
+    @Override
     public KeyBinding build() {
         checkState(this.displayName != null, "The display name must be set");
         checkState(this.id != null, "The id must be set");
         return new SpongeKeyBinding(this.id, (SpongeKeyCategory) (this.keyCategory == null ? KeyCategories.MISC : this.keyCategory),
-                this.displayName);
+                this.displayName, this.pressExecutor, this.releaseExecutor, this.tickExecutor);
     }
 
     @Override
