@@ -46,6 +46,7 @@ import org.spongepowered.api.data.property.PropertyRegistry;
 import org.spongepowered.api.data.property.block.*;
 import org.spongepowered.api.data.property.entity.*;
 import org.spongepowered.api.data.property.item.*;
+import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.extra.fluid.data.manipulator.immutable.ImmutableFluidItemData;
 import org.spongepowered.api.extra.fluid.data.manipulator.mutable.FluidItemData;
@@ -104,6 +105,7 @@ import org.spongepowered.common.data.property.SpongePropertyRegistry;
 import org.spongepowered.common.data.property.store.block.*;
 import org.spongepowered.common.data.property.store.entity.*;
 import org.spongepowered.common.data.property.store.item.*;
+import org.spongepowered.common.effect.particle.SpongeParticleEffectBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.world.storage.SpongePlayerData;
 
@@ -153,6 +155,9 @@ public class DataRegistrar {
         // Text stuff
         dataManager.registerBuilder(Text.class, new TextConfigSerializer());
         dataManager.registerBuilder(BookView.class, new BookViewDataBuilder());
+
+        // Effects stuff
+        dataManager.registerBuilder(ParticleEffect.class, new SpongeParticleEffectBuilder());
 
         // Util stuff
         dataManager.registerBuilder(VariableAmount.BaseAndAddition.class, new BaseAndAdditionBuilder());

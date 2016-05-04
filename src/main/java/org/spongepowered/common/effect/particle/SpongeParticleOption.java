@@ -24,46 +24,48 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.Objects.ToStringHelper;
-import com.google.common.collect.ImmutableMap;
-import net.minecraft.util.EnumParticleTypes;
 import org.spongepowered.api.effect.particle.ParticleOption;
-import org.spongepowered.api.effect.particle.ParticleType;
-import org.spongepowered.common.SpongeCatalogType;
 
-import java.util.Map;
-import java.util.Optional;
+import java.util.function.Function;
 
-public class SpongeParticleType extends SpongeCatalogType implements ParticleType {
+import javax.annotation.Nullable;
 
-    private final EnumParticleTypes internalType;
-    private final Map<ParticleOption<?>, Object> options;
+public class SpongeParticleOption<V> implements ParticleOption<V> {
 
-    public SpongeParticleType(String id, EnumParticleTypes internalType, Map<ParticleOption<?>, Object> options) {
-        super(id);
-        this.options = ImmutableMap.copyOf(options);
-        this.internalType = internalType;
+    private final String id;
+    private final Class<V> valueType;
+    @Nullable private final Function<V, IllegalStateException> valueValidator;
+
+    public SpongeParticleOption(String id, Class<V> valueType, @Nullable Function<V, IllegalStateException> valueValidator) {
+        this.valueValidator = valueValidator;
+        this.valueType = valueType;
+        this.id = id;
     }
 
-    public EnumParticleTypes getInternalType() {
-        return this.internalType;
+    public SpongeParticleOption(String id, Class<V> valueType) {
+        this(id, valueType, null);
     }
 
-    @Override
-    protected ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .add("type", this.internalType);
-    }
-
-    @SuppressWarnings("unchecked")
-    @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
-        return (Optional) Optional.ofNullable(this.options.get(option));
+    @Nullable
+    public IllegalStateException validateValue(V value) {
+        if (this.valueValidator != null) {
+            return this.valueValidator.apply(value);
+        }
+        return null;
     }
 
     @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
-        return this.options;
+    public Class<V> getValueType() {
+        return this.valueType;
     }
 
+    @Override
+    public String getId() {
+        return this.id;
+    }
+
+    @Override
+    public String getName() {
+        return this.id;
+    }
 }
