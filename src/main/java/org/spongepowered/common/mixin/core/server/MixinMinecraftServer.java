@@ -303,7 +303,6 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     /**
-     * @author Zidane - June 15th, 2015
      * @author blood - December 23rd, 2015
      * @author Zidane - March 13th, 2016
      *

@@ -31,7 +31,6 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
 import gnu.trove.iterator.TIntObjectIterator;
 import gnu.trove.map.TIntObjectMap;
@@ -40,21 +39,18 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
@@ -67,11 +63,9 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.mixin.core.server.MixinMinecraftServer;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -761,11 +755,9 @@ public class DimensionManager {
                 final Path spongeLevelPath = worldPath.resolve("level_sponge.dat");
                 final String worldFolderName = worldPath.getFileName().toString();
 
-                final NBTTagCompound compound;
+                NBTTagCompound compound;
                 try {
-                    final NBTTagCompound tempCompound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
-                    final MinecraftServer server = (MinecraftServer) Sponge.getServer();
-                    compound = server.getDataFixer().process(FixTypes.LEVEL, tempCompound);
+                    compound = CompressedStreamTools.readCompressed(Files.newInputStream(spongeLevelPath));
                 } catch (IOException e) {
                     SpongeImpl.getLogger().error("Failed loading Sponge data for World [{}]}. Report to Sponge ASAP.", worldFolderName, e);
                     continue;

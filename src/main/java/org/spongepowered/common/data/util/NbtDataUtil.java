@@ -51,6 +51,7 @@ import java.util.Optional;
  */
 public final class NbtDataUtil {
 
+    public static final String DATA_VERSION = "DataVersion";
     public static final String BANNER_PATTERN_ID = "Pattern";
     public static final String BANNER_PATTERN_COLOR = "Color";
     public static final String ENTITY_ROTATION = "Rotation";
@@ -63,6 +64,7 @@ public final class NbtDataUtil {
         public static final String PASSENGERS = "Passengers";
 
         public static final String IS_FLYING = "flying";
+
     }
 
     // These are the various tag compound id's for getting to various places

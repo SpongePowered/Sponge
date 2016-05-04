@@ -700,6 +700,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
+        this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, 169);
         this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());

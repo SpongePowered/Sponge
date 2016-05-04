@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.storage;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.datafix.FixTypes;
 import net.minecraft.world.storage.SaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
@@ -39,6 +40,7 @@ import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
@@ -107,7 +109,9 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
                     spongeOldFile));
             ((IMixinWorldInfo) info).setSpongeRootLevelNBT(compound);
             if (compound.hasKey(NbtDataUtil.SPONGE_DATA)) {
-                ((IMixinWorldInfo) info).readSpongeNbt(compound.getCompoundTag(NbtDataUtil.SPONGE_DATA));
+                final NBTTagCompound spongeCompound = compound.getCompoundTag(NbtDataUtil.SPONGE_DATA);
+                SpongeImpl.getServer().getDataFixer().process(FixTypes.LEVEL, spongeCompound);
+                ((IMixinWorldInfo) info).readSpongeNbt(spongeCompound);
             }
         }
     }
