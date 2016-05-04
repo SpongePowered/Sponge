@@ -56,6 +56,7 @@ public final class NotePitchRegistryModule implements CatalogRegistryModule<Note
 
     @Override
     public void registerDefaults() {
-        NoteUtils.pitchMappings.values().forEach(notePitch -> this.notePitchMap.put(notePitch.getId().toLowerCase(Locale.ENGLISH), notePitch));
+        NoteUtils.pitchMappings.values().forEach(notePitch ->
+                this.notePitchMap.put(notePitch.getId().toLowerCase(Locale.ENGLISH), notePitch));
     }
 }
