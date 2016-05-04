@@ -38,12 +38,19 @@ public class MixinItemEmptyMap extends ItemMapBase {
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World worldIn, String key) {
+        if (worldIn.isRemote) {
+            return worldIn.getUniqueDataId(key);
+        }
         return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+        if (worldIn.isRemote) {
+            worldIn.setItemData(dataId, data);
+        } else {
+            DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+        }
     }
 }

@@ -69,7 +69,7 @@ public final class MessageTrackerDataRequest implements Message {
 
     @Override
     public String toString() {
-        return String.format("MessageTrackerDataRequest - %d @%d, %d, %d", this.x, this.y, this.z);
+        return String.format("MessageTrackerDataRequest - type %d @ %d, %d, %d", this.type, this.x, this.y, this.z);
     }
 
 }
