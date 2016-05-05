@@ -425,7 +425,7 @@ public final class CauseTracker {
         final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
-        if (!isForced && !minecraftWorld.isChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         } else {
             if (minecraftEntity instanceof EntityPlayer) {
@@ -473,7 +473,7 @@ public final class CauseTracker {
         final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
         final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
-        if (!isForced && !minecraftWorld.isChunkLoaded(chunkX, chunkZ, true)) {
+        if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
         } else {
             if (minecraftEntity instanceof EntityPlayer) {

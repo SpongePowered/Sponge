@@ -88,4 +88,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     boolean isProcessingExplosion();
 
+    boolean isMinecraftChunkLoaded(int x, int z, boolean allowEmpty);
+
 }

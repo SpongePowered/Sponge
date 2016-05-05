@@ -204,6 +204,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
+    public boolean isMinecraftChunkLoaded(int x, int z, boolean allowEmpty) {
+        return this.isChunkLoaded(x, z, allowEmpty);
+    }
+
+    @Override
     public SpongeConfig<SpongeConfig.WorldConfig> getWorldConfig() {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }

@@ -243,7 +243,7 @@ public final class EntityUtil {
         int i = entity.chunkCoordX;
         int j = entity.chunkCoordZ;
 
-        if (entity.addedToChunk && fromWorld.isChunkLoaded(i, j, true))
+        if (entity.addedToChunk && fromMixinWorld.isMinecraftChunkLoaded(i, j, true))
         {
             fromWorld.getChunkFromChunkCoords(i, j).removeEntity(entity);
         }
