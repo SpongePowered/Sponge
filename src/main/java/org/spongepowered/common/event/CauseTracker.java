@@ -136,6 +136,7 @@ public final class CauseTracker {
     private List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
+    private Cause capturedSpawnCause;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         this.targetWorld = targetWorld;
@@ -489,6 +490,59 @@ public final class CauseTracker {
             }
         }
 
+        if (this.capturedSpawnCause != null) {
+            // The following is pretty messy, but essentially it tries to merge
+            // potentially two SOURCE causes into a single EntitySpawnCause.
+            // If one of the sources is a SpawnCause and the other is an Entity,
+            // it will convert that into an EntitySpawnCause.
+            // It prefers using the local 'cause' object when there's a clash
+            // with capturedSpawnCause
+            Map<String, Object> captureNamed = this.capturedSpawnCause.getNamedCauses();
+            Map<String, Object> currentNamed = cause.getNamedCauses();
+            SpawnCause spawnCause = null;
+            Entity causeEntity = null;
+            Cause.Builder builder = Cause.builder();
+            for (Map.Entry<String, Object> entry : captureNamed.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
+                    if (entry.getValue() instanceof SpawnCause) {
+                        spawnCause = (SpawnCause) entry.getValue();
+                        continue;
+                    } else if (entry.getValue() instanceof Entity) {
+                        causeEntity = (Entity) entry.getValue();
+                        continue;
+                    }
+                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
+            }
+            for (Map.Entry<String, Object> entry : currentNamed.entrySet()) {
+                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
+                    if (entry.getValue() instanceof SpawnCause) {
+                        if (spawnCause == null) {
+                            spawnCause = (SpawnCause) entry.getValue();
+                        } else {
+                            if (spawnCause.getType() == SpawnTypes.CUSTOM) {
+                                // Prefer non-custom types
+                                spawnCause = (SpawnCause) entry.getValue();
+                            }
+                        }
+                        continue;
+                    } else if (entry.getValue() instanceof Entity) {
+                        // Prefer this one
+                        causeEntity = (Entity) entry.getValue();
+                        continue;
+                    }
+                }
+                builder.suggestNamed(entry.getKey(), entry.getValue());
+            }
+            if (spawnCause != null && causeEntity != null) {
+                spawnCause = EntitySpawnCause.builder().entity(causeEntity).type(spawnCause.getType()).build();
+            } else if (spawnCause == null) {
+                spawnCause = SpawnCause.builder().type(SpawnTypes.CUSTOM).build();
+            }
+            builder.named(NamedCause.source(spawnCause));
+            cause = builder.build();
+        }
+        this.capturedSpawnCause = null;
         // Handle Entity captures
         if (this.capturedEntityItems.size() > 0) {
             if (StaticMixinHelper.dropCause != null) {
@@ -882,7 +936,7 @@ public final class CauseTracker {
             IMixinEntity spongeEntity = (IMixinEntity) entityIn;
             Cause cause = spongeEntity.getNonLivingDestructCause();;
             if (cause == null) {
-                cause = Cause.of(NamedCause.source(this));
+                cause = Cause.of(NamedCause.source(entityIn.worldObj));
             }
 
             if (cause.root() instanceof EntityDamageSource) {
@@ -1019,6 +1073,7 @@ public final class CauseTracker {
                 } else {
                     this.capturedEntities.add((Entity) entityIn);
                 }
+                this.capturedSpawnCause = this.capturedSpawnCause == null ? cause : cause.merge(this.capturedSpawnCause);
                 return true;
             } else { // Custom
 

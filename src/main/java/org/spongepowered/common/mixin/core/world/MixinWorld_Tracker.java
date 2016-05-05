@@ -318,18 +318,12 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
      */
     @Overwrite
     public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return this.getCauseTracker().processSpawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this)));
+        return this.spawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this)));
     }
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
-        checkNotSpawned((net.minecraft.entity.Entity) entity);
-        boolean prevCaptureCause = this.getCauseTracker().isProcessingCaptureCause();
-        // Don't process capturing causes when a cause has explicitly been given
-        this.getCauseTracker().setProcessingCaptureCause(false);
-        boolean result = this.getCauseTracker().processSpawnEntity(entity, cause);
-        this.getCauseTracker().setProcessingCaptureCause(prevCaptureCause);
-        return result;
+        return this.getCauseTracker().processSpawnEntity(checkNotSpawned((net.minecraft.entity.Entity) entity), cause);
     }
 
     /**
