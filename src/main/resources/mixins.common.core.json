@@ -370,6 +370,7 @@
         "tileentity.MixinTileEntitySkull",
         "util.MixinClassInheritanceMultiMap",
         "util.MixinPacketThreadUtil",
+        "util.datafix.MixinDataFixer",
         "whitelist.MixinUserListWhitelist",
         "world.MixinAnvilSaveHandler",
         "world.MixinChunk",

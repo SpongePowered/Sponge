@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.fixer;
+package org.spongepowered.common.data.fixer.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.Maps;

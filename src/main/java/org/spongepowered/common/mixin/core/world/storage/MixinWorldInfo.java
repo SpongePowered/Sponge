@@ -67,6 +67,7 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
@@ -700,7 +701,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     private void writeSpongeNbt() {
-        this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, 169);
+        this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
         this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
         this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());

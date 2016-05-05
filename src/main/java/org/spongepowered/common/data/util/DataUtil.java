@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.util.datafix.DataFixer;
+import net.minecraft.util.datafix.FixTypes;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataView;
@@ -44,6 +46,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.fixer.entity.EntityTrackedUser;
+import org.spongepowered.common.data.fixer.entity.player.PlayerRespawnData;
+import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 
 import java.util.List;
 import java.util.Optional;
@@ -51,6 +56,16 @@ import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 public class DataUtil {
+
+    // TODO Bump this when needing to fix sponge added file data
+    public static final int DATA_VERSION = 1;
+    public static final DataFixer spongeDataFixer = new DataFixer(DATA_VERSION);
+
+    static {
+        spongeDataFixer.registerFix(FixTypes.LEVEL, new SpongeLevelFixer());
+        spongeDataFixer.registerFix(FixTypes.ENTITY, new EntityTrackedUser());
+        spongeDataFixer.registerFix(FixTypes.PLAYER, new PlayerRespawnData());
+    }
 
     public static DataView checkDataExists(final DataView dataView, final DataQuery query) throws InvalidDataException {
         if (!checkNotNull(dataView).contains(checkNotNull(query))) {

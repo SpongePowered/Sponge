@@ -32,7 +32,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.UUID;
 
-public class LevelSpongeId implements IFixableData {
+public class SpongeLevelFixer implements IFixableData {
 
     @Override
     public int getFixVersion() {

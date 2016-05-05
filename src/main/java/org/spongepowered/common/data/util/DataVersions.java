@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.util;
 
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataSerializable;
 
 /**
@@ -55,7 +54,7 @@ public final class DataVersions {
 
     public static final class PlayerData {
 
-        public static final int RESPAWN_DATA_1_9_VERSION = 2;
+        public static final int RESPAWN_DATA_1_9_VERSION = 0;
 
         private PlayerData() {
         }
@@ -64,7 +63,7 @@ public final class DataVersions {
 
     public static final class World {
 
-        public static final int WORLD_UUID_1_9_VERSION = 3;
+        public static final int WORLD_UUID_1_9_VERSION = 0;
 
         private World() {
         }
@@ -73,7 +72,7 @@ public final class DataVersions {
 
     public static final class Entity {
 
-        public static final int TRACKER_ID_VERSION = 2;
+        public static final int TRACKER_ID_VERSION = 0;
 
         private Entity() {
         }
