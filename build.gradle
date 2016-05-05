@@ -46,6 +46,7 @@ ext.apiVersion = version
 
 minecraft {
     version = '1.9'
+	mappings = 'snapshot_20160429'	
 }
 
 dependencies {
