@@ -161,7 +161,7 @@ public abstract class MixinPlayerInteractionManager {
             }
             // Sponge end
 
-            EnumActionResult result = EnumActionResult.FAIL;
+            EnumActionResult result = EnumActionResult.PASS; // Sponge - Add local variable for handling with events
 
             if (!player.isSneaking() || player.getHeldItemMainhand() == null && player.getHeldItemOffhand() == null) {
                 // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
@@ -169,7 +169,9 @@ public abstract class MixinPlayerInteractionManager {
                 if (event.getUseBlockResult() != Tristate.FALSE) {
                     IBlockState iblockstate = worldIn.getBlockState(pos);
                     // TODO - should this always be called if event.getUseBlockResult() is Tristate.TRUE?
-                    result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ) ? EnumActionResult.SUCCESS : EnumActionResult.FAIL;
+                    result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
+                             ? EnumActionResult.SUCCESS
+                             : EnumActionResult.FAIL;
                 } else {
                     thisPlayerMP.playerNetServerHandler.sendPacket(new SPacketBlockChange(theWorld, pos));
                     result = TristateUtil.toActionResult(event.getUseItemResult());
@@ -180,22 +182,27 @@ public abstract class MixinPlayerInteractionManager {
 
             // Sponge start - store result instead of returning
             if (stack == null) {
+                // return EnumActionResult.PASS; // Sponge
                 result = EnumActionResult.PASS;
             } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
+                // return EnumActionResult.PASS; // Sponge
                 result = EnumActionResult.PASS;
-            } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player
-                    .canCommandSenderUseCommand(2, "")) {
+            } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player.canCommandSenderUseCommand(2, "")) {
+                // return EnumActionResult.FAIL; // Sponge
                 result = EnumActionResult.FAIL;
             // Sponge start - nest isCreative check instead of calling the method twice.
+                // } else if (this.isCreative()) {
             } else {
                 // Run if useItemResult is true, or if useItemResult is undefined and the block interaction failed
                 if (stack != null && (event.getUseItemResult() == Tristate.TRUE || (event.getUseItemResult() == Tristate.UNDEFINED && result == EnumActionResult.FAIL))) {
-                    int meta = stack.getMetadata();
-                    int size = stack.stackSize;
+                    int meta = stack.getMetadata(); // meta == j
+                    int size = stack.stackSize; // size == i
+                    // EnumActionResult enumactionresult = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ); // Sponge
                     result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
                     if (isCreative()) {
                         stack.setItemDamage(meta);
                         stack.stackSize = size;
+                        // return enumactionresult; // Sponge
                     }
                 }
             }
