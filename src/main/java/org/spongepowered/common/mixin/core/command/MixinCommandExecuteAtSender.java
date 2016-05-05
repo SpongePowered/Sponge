@@ -56,7 +56,7 @@ public abstract class MixinCommandExecuteAtSender implements ProxySource, IMixin
 
     @Override
     public void sendMessage(Text message) {
-        getOriginalSource().sendMessages(message);
+        getOriginalSource().sendMessage(message);
     }
 
     @Override

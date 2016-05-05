@@ -156,6 +156,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LocaleCache;
@@ -200,7 +201,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void openGuiHorseInventory(AbstractHorse horse, IInventory horseInventory);
 
     // Inventory
-    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
@@ -414,6 +414,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+    }
+
+    /**
+     * @author simon816 - 14th November, 2016
+     *
+     * @reason Redirect messages sent to the player to fire a message event. Once the
+     * event is handled, it will send the message to
+     * {@link #sendMessage(ChatType, Text)}.
+     *
+     * @param component The message
+     */
+    @Overwrite
+    public void sendMessage(ITextComponent component) {
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, true);
     }
 
     @Override

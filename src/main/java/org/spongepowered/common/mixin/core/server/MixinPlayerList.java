@@ -73,6 +73,7 @@ import net.minecraft.world.storage.WorldInfo;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -119,7 +120,6 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.network.play.server.IMixinSPacketWorldBorder;
-import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.core.entity.player.MixinEntityPlayer;
 import org.spongepowered.common.service.ban.SpongeIPBanList;
@@ -127,6 +127,7 @@ import org.spongepowered.common.service.ban.SpongeUserListBans;
 import org.spongepowered.common.service.permission.SpongePermissionService;
 import org.spongepowered.common.service.whitelist.SpongeUserListWhitelist;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
@@ -158,7 +159,6 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
     @Shadow public abstract NBTTagCompound readPlayerDataFromFile(EntityPlayerMP playerIn);
     @Shadow public abstract MinecraftServer getServerInstance();
     @Shadow public abstract int getMaxPlayers();
-    @Shadow public abstract void sendMessage(ITextComponent component);
     @Shadow public abstract void sendPacketToAllPlayers(Packet<?> packetIn);
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
@@ -876,4 +876,19 @@ public abstract class MixinPlayerList implements IMixinPlayerList {
         // Check the world info of the current world instead of overworld world info
         return player.world.getWorldInfo();
     }
+
+    /**
+     * @author simon816 - 14th November, 2016
+     *
+     * @reason Redirect chat broadcasts to fire an event for the message. Each receiver
+     * (typically a player) will handle the actual sending of the message.
+     *
+     * @param component The message
+     * @param isSystem Whether this is a system message
+     */
+    @Overwrite
+    public void sendMessage(ITextComponent component, boolean isSystem) {
+        ChatUtil.sendMessage(component, MessageChannel.TO_ALL, (CommandSource) this.mcServer, !isSystem);
+    }
+
 }
