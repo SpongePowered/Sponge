@@ -41,7 +41,6 @@ import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
-import net.minecraft.inventory.ContainerChest;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
@@ -75,7 +74,6 @@ import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.IInteractionObject;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -156,6 +154,7 @@ import org.spongepowered.common.interfaces.text.IMixinTitle;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
+import org.spongepowered.common.text.chat.ChatUtil;
 import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
@@ -199,7 +198,6 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public abstract void openGuiHorseInventory(EntityHorse horse, IInventory horseInventory);
 
     // Inventory
-    @Shadow public abstract void addChatMessage(ITextComponent component);
     @Shadow public abstract void closeScreen();
     @Shadow public int currentWindowId;
     @Shadow private void getNextWindowId() { }
@@ -393,6 +391,20 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         }
 
         this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+    }
+
+    /**
+     * @author simon816 - 14th November, 2016
+     *
+     * @reason Redirect messages sent to the player to fire a message event. Once the
+     * event is handled, it will send the message to
+     * {@link #sendMessage(ChatType, Text)}.
+     *
+     * @param component The message
+     */
+    @Overwrite
+    public void addChatMessage(ITextComponent component) {
+        ChatUtil.sendMessage(component, MessageChannel.fixed(this), (CommandSource) this.mcServer, true);
     }
 
     @Override
