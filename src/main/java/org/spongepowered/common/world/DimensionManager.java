@@ -696,18 +696,21 @@ public class DimensionManager {
         sorted.remove(worldServer);
         sorted.add(0, worldServer);
 
+        int count = 1;
         worldServer = worldByDimensionId.get(-1);
         if (worldServer != null) {
             sorted.remove(worldServer);
             sorted.add(1, worldServer);
+            count++;
         }
         worldServer = worldByDimensionId.get(1);
         if (worldServer != null) {
             sorted.remove(worldServer);
             sorted.add(2, worldServer);
+            count++;
         }
 
-        sorted.subList(3, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
+        sorted.subList(count, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
 
         //System.err.println("World order: ");
         //sorted.stream().forEach(w -> System.err.println("World id: " + w.getWorldInfo().getWorldName() + " " + ((IMixinWorld) w).getDimensionId()));

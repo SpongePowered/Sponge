@@ -81,7 +81,6 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -313,16 +312,11 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         StaticMixinHelper.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
-        if (!getAllowNether()) {
-            SpongeImpl.getLogger().warn("Multi-world capability has been disabled via [allow-nether] in [server.properties]. All "
-                    + "dimensions besides [{}] will be skipped.", overworldFolder);
-        } else {
-            DimensionManager.loadAllWorlds(worldName, seed, type, generatorOptions);
+        DimensionManager.loadAllWorlds(worldName, seed, type, generatorOptions);
 
-            this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldByDimensionId(0).get()});
-            this.setDifficultyForAllWorlds(this.getDifficulty());
-            this.initialWorldChunkLoad();
-        }
+        this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldByDimensionId(0).get()});
+        this.setDifficultyForAllWorlds(this.getDifficulty());
+        this.initialWorldChunkLoad();
     }
 
     /**
