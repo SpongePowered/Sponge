@@ -295,7 +295,7 @@ public final class CommonModuleRegistry {
             .registerModule(DisplaySlot.class,DisplaySlotRegistryModule.getInstance())
             .registerModule(DoublePlantType.class, new DoublePlantTypeRegistryModule())
             .registerModule(DyeColor.class, DyeColorRegistryModule.getInstance())
-            .registerModule(Enchantment.class, new EnchantmentRegistryModule())
+            .registerModule(Enchantment.class, EnchantmentRegistryModule.getInstance())
             .registerModule((Class<EnumTrait<?>>) (Class) EnumTrait.class, EnumTraitRegistryModule.getInstance())
             .registerModule(EntityType.class, EntityTypeRegistryModule.getInstance())
             .registerModule(EquipmentType.class, new EquipmentTypeRegistryModule())

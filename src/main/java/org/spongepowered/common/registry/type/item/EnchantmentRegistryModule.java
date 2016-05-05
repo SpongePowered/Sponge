@@ -33,6 +33,7 @@ import org.spongepowered.api.item.Enchantments;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +41,11 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class EnchantmentRegistryModule implements AlternateCatalogRegistryModule<Enchantment> {
+public final class EnchantmentRegistryModule implements SpongeAdditionalCatalogRegistryModule<Enchantment>, AlternateCatalogRegistryModule<Enchantment> {
+
+    public static EnchantmentRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @RegisterCatalog(Enchantments.class)
     private final Map<String, Enchantment> enchantmentMappings = new HashMap<>();
@@ -88,5 +93,28 @@ public final class EnchantmentRegistryModule implements AlternateCatalogRegistry
             }
         }
 
+    }
+
+    EnchantmentRegistryModule() {
+    }
+
+    @Override
+    public boolean allowsApiRegistration() {
+        return false;
+    }
+
+    @Override
+    public void registerAdditionalCatalog(Enchantment extraCatalog) {
+        checkNotNull(extraCatalog, "Enchantment cannot be null!");
+        this.enchantmentMappings.put(extraCatalog.getId(), extraCatalog);
+    }
+
+    public void registerFromGameData(String s, Enchantment obj) {
+        checkNotNull(obj, "Enchantment cannot be null!");
+        this.enchantmentMappings.put(s, obj);
+    }
+
+    static final class Holder {
+        static final EnchantmentRegistryModule INSTANCE = new EnchantmentRegistryModule();
     }
 }
