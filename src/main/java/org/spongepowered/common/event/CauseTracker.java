@@ -502,6 +502,7 @@ public final class CauseTracker {
             SpawnCause spawnCause = null;
             Entity causeEntity = null;
             Cause.Builder builder = Cause.builder();
+            boolean isEmpty = true;
             for (Map.Entry<String, Object> entry : captureNamed.entrySet()) {
                 if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
                     if (entry.getValue() instanceof SpawnCause) {
@@ -512,6 +513,7 @@ public final class CauseTracker {
                         continue;
                     }
                 }
+                isEmpty = false;
                 builder.suggestNamed(entry.getKey(), entry.getValue());
             }
             for (Map.Entry<String, Object> entry : currentNamed.entrySet()) {
@@ -532,6 +534,7 @@ public final class CauseTracker {
                         continue;
                     }
                 }
+                isEmpty = false;
                 builder.suggestNamed(entry.getKey(), entry.getValue());
             }
             if (spawnCause != null && causeEntity != null) {
@@ -539,8 +542,10 @@ public final class CauseTracker {
             } else if (spawnCause == null) {
                 spawnCause = SpawnCause.builder().type(SpawnTypes.CUSTOM).build();
             }
-            builder.named(NamedCause.source(spawnCause));
-            cause = builder.build();
+            cause = Cause.of(NamedCause.source(spawnCause));
+            if (!isEmpty) {
+                cause = cause.merge(builder.build());
+            }
         }
         this.capturedSpawnCause = null;
         // Handle Entity captures
