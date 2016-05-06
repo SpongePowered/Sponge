@@ -12,6 +12,8 @@ evaluationDependsOn api.path
 apply plugin: 'org.spongepowered.mixin'
 
 minecraft {
+    mappings = 'snapshot_20160429'
+
     runDir = 'run'
     atSource sourceSets.main
 
