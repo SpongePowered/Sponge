@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.entity;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -57,6 +59,7 @@ import org.spongepowered.api.data.value.mutable.MutableBoundedValue;
 import org.spongepowered.api.data.value.mutable.OptionalValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -88,6 +91,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.entity.projectile.ProjectileLauncher;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLivingBase;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
@@ -898,4 +902,15 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getHealthData());
     }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass) {
+        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, null);
+    }
+
+    @Override
+    public <T extends Projectile> Optional<T> launchProjectile(Class<T> projectileClass, Vector3d velocity) {
+        return ProjectileLauncher.launch(checkNotNull(projectileClass, "projectile class"), this, checkNotNull(velocity, "velocity"));
+    }
+
 }
