@@ -39,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 @NonnullByDefault
 @Mixin(WorldProvider.class)
@@ -59,7 +59,7 @@ public abstract class MixinWorldProvider implements Dimension, IMixinWorldProvid
     @SuppressWarnings("unchecked")
     @Inject(method = "<init>", at = @At("RETURN"))
     public void onConstruction(CallbackInfo ci) {
-        this.dimensionType = DimensionManager.getDimensionType((Class<? extends WorldProvider>)
+        this.dimensionType = WorldManager.getDimensionType((Class<? extends WorldProvider>)
                 (Object) getClass()).orElseThrow(() -> new RuntimeException("Attempt was made to create an instance of a WorldProvider who has no "
                 + "registered type!"));
     }

@@ -96,7 +96,7 @@ import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
 import java.io.IOException;
@@ -150,7 +150,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @SuppressWarnings("unchecked")
     @Override
     public Optional<World> getWorld(String worldName) {
-        return (Optional<World>) (Object) DimensionManager.getWorld(worldName);
+        return (Optional<World>) (Object) WorldManager.getWorld(worldName);
     }
 
     @Override
@@ -160,12 +160,12 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<WorldProperties> getWorldProperties(String worldName) {
-        return DimensionManager.getWorldProperties(worldName);
+        return WorldManager.getWorldProperties(worldName);
     }
 
     @Override
     public Collection<WorldProperties> getAllWorldProperties() {
-        return DimensionManager.getAllWorldProperties();
+        return WorldManager.getAllWorldProperties();
     }
 
     @Override
@@ -312,9 +312,9 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         StaticMixinHelper.convertingMapFormat = false;
         this.setUserMessage("menu.loadingLevel");
 
-        DimensionManager.loadAllWorlds(worldName, seed, type, generatorOptions);
+        WorldManager.loadAllWorlds(worldName, seed, type, generatorOptions);
 
-        this.getPlayerList().setPlayerManager(new WorldServer[]{DimensionManager.getWorldByDimensionId(0).get()});
+        this.getPlayerList().setPlayerManager(new WorldServer[]{WorldManager.getWorldByDimensionId(0).get()});
         this.setDifficultyForAllWorlds(this.getDifficulty());
         this.initialWorldChunkLoad();
     }
@@ -373,40 +373,40 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Optional<World> loadWorld(UUID uuid) {
-        return (Optional) DimensionManager.loadWorld(uuid);
+        return (Optional) WorldManager.loadWorld(uuid);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<World> loadWorld(WorldProperties properties) {
-        return (Optional) DimensionManager.loadWorld(properties);
+        return (Optional) WorldManager.loadWorld(properties);
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public Optional<World> loadWorld(String worldName) {
-        return (Optional) DimensionManager.loadWorld(worldName);
+        return (Optional) WorldManager.loadWorld(worldName);
     }
 
     @Override
     public WorldProperties createWorldProperties(WorldCreationSettings settings) {
-        return DimensionManager.createWorldProperties(settings);
+        return WorldManager.createWorldProperties(settings);
     }
 
     @Override
     public boolean unloadWorld(World world) {
-        return DimensionManager.unloadWorld((WorldServer) world);
+        return WorldManager.unloadWorld((WorldServer) world);
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<World> getWorlds() {
-        return (Collection<World>) (Object) Collections.unmodifiableCollection(DimensionManager.getWorlds());
+        return (Collection<World>) (Object) Collections.unmodifiableCollection(WorldManager.getWorlds());
     }
 
     @Override
     public Optional<World> getWorld(UUID uniqueId) {
-        for (WorldServer worldserver : DimensionManager.getWorlds()) {
+        for (WorldServer worldserver : WorldManager.getWorlds()) {
             if (((World) worldserver).getUniqueId().equals(uniqueId)) {
                 return Optional.of((World) worldserver);
             }
@@ -416,7 +416,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<WorldProperties> getDefaultWorld() {
-        return DimensionManager.getWorldByDimensionId(0).map(worldServer -> ((World) worldServer).getProperties());
+        return WorldManager.getWorldByDimensionId(0).map(worldServer -> ((World) worldServer).getProperties());
     }
 
     @Override
@@ -428,7 +428,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Override
     public Collection<WorldProperties> getUnloadedWorlds() {
         try {
-            return DimensionManager.getUnloadedWorlds();
+            return WorldManager.getUnloadedWorlds();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -436,27 +436,27 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<WorldProperties> getWorldProperties(UUID uniqueId) {
-        return DimensionManager.getWorldProperties(uniqueId);
+        return WorldManager.getWorldProperties(uniqueId);
     }
 
     @Override
     public CompletableFuture<Optional<WorldProperties>> copyWorld(WorldProperties worldProperties, String copyName) {
-        return DimensionManager.copyWorld(worldProperties, copyName);
+        return WorldManager.copyWorld(worldProperties, copyName);
     }
 
     @Override
     public Optional<WorldProperties> renameWorld(WorldProperties worldProperties, String newName) {
-        return DimensionManager.renameWorld(worldProperties, newName);
+        return WorldManager.renameWorld(worldProperties, newName);
     }
 
     @Override
     public CompletableFuture<Boolean> deleteWorld(WorldProperties worldProperties) {
-        return DimensionManager.deleteWorld(worldProperties);
+        return WorldManager.deleteWorld(worldProperties);
     }
 
     @Override
     public boolean saveWorldProperties(WorldProperties properties) {
-        return DimensionManager.saveWorldProperties(properties);
+        return WorldManager.saveWorldProperties(properties);
     }
 
     @Override
@@ -504,7 +504,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
-        return DimensionManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
+        return WorldManager.getWorldByDimensionId(0).map(worldServer -> (Scoreboard) worldServer.getScoreboard());
     }
 
     private void onTabCompleteChat(ICommandSender sender, String input, CallbackInfoReturnable<List<String>> cir, List<String> completions) {

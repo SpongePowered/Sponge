@@ -42,7 +42,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.DimensionType;
 import net.minecraft.world.MinecraftException;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldManager;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
@@ -95,7 +94,7 @@ import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
-public class DimensionManager {
+public final class WorldManager {
 
     public static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
@@ -293,20 +292,20 @@ public class DimensionManager {
             return ((org.spongepowered.api.world.World) optWorldServer.get()).getProperties();
         }
 
-        final Optional<WorldProperties> optWorldProperties = DimensionManager.getWorldProperties(worldName);
+        final Optional<WorldProperties> optWorldProperties = WorldManager.getWorldProperties(worldName);
 
         if (optWorldProperties.isPresent()) {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldName, true,
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldName, true,
                 ((MinecraftServer) Sponge.getServer()).getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo != null) {
-            final Optional<WorldProperties> optExistingWorldProperties = DimensionManager.getWorldProperties(worldInfo.getWorldName());
+            final Optional<WorldProperties> optExistingWorldProperties = WorldManager.getWorldProperties(worldInfo.getWorldName());
             if (!optExistingWorldProperties.isPresent()) {
-                DimensionManager.registerWorldProperties((WorldProperties) worldInfo);
+                WorldManager.registerWorldProperties((WorldProperties) worldInfo);
             }
         } else {
             worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
@@ -340,7 +339,7 @@ public class DimensionManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, ((MinecraftServer)
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, ((MinecraftServer)
                     Sponge.getServer()).getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         // No return values or exceptions so can only assume true.
@@ -409,7 +408,7 @@ public class DimensionManager {
         try (final DirectoryStream<Path> stream = Files.newDirectoryStream(optCurrentSavesDir.get(), LEVEL_AND_SPONGE)) {
             for (Path worldFolder : stream) {
                 final String worldFolderName = worldFolder.getFileName().toString();
-                final WorldInfo worldInfo = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
+                final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
                         ((MinecraftServer) Sponge.getServer()).getDataFixer()).loadWorldInfo();
                 if (worldInfo != null) {
                     worlds.add((WorldProperties) worldInfo);
@@ -457,7 +456,7 @@ public class DimensionManager {
         }
 
         if (saveHandler == null) {
-            saveHandler = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldName, true, ((MinecraftServer)
+            saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldName, true, ((MinecraftServer)
                     Sponge.getServer()).getDataFixer());
         }
 
@@ -579,7 +578,7 @@ public class DimensionManager {
                 saveHandler = ((MinecraftServer) Sponge.getServer()).getActiveAnvilConverter().getSaveLoader(((MinecraftServer)
                         Sponge.getServer()).getFolderName(), true);
             } else {
-                saveHandler = new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServer)
+                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServer)
                         Sponge.getServer()).getDataFixer());
             }
 
@@ -673,7 +672,7 @@ public class DimensionManager {
             worldServer.initialize(worldSettings);
         }
 
-        worldServer.addEventListener(new WorldManager(server, worldServer));
+        worldServer.addEventListener(new net.minecraft.world.WorldManager(server, worldServer));
 
         // This code changes from Mojang's to account for per-world API-set GameModes.
         if (!server.isSinglePlayer() && worldServer.getWorldInfo().getGameType().equals(WorldSettings.GameType.NOT_SET)) {
@@ -870,7 +869,7 @@ public class DimensionManager {
         final WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
         ((IMixinWorldInfo) info).createWorldConfig();
-        new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
+        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
                 Sponge.getServer()).getDataFixer()).saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
@@ -916,7 +915,7 @@ public class DimensionManager {
             ((IMixinWorldInfo) info).setUUID(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(DimensionManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
                     Sponge.getServer()).getDataFixer()).saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }

@@ -42,7 +42,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -120,7 +120,7 @@ class UserDiscoverer {
         profiles.addAll(userCache.asMap().values().stream().map(User::getProfile).collect(Collectors.toList()));
 
         // Add all known profiles from the data files
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
 
@@ -242,7 +242,7 @@ class UserDiscoverer {
 
     private static File getPlayerDataFile(UUID uniqueId) {
         // Note: Uses the overworld's player data
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         String[] uuids = saveHandler.getAvailablePlayerDat();
         for (String playerUuid : uuids) {
             if (uniqueId.toString().equals(playerUuid)) {

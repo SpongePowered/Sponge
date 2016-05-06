@@ -51,7 +51,7 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.entity.ProfessionRegistryModule;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -261,12 +261,12 @@ public final class EntityUtil {
             final EntityPlayerMP entityPlayerMP = (EntityPlayerMP) entity;
 
             // Support vanilla clients going into custom dimensions
-            final net.minecraft.world.DimensionType fromClientDimensionType = DimensionManager.getClientDimensionType(fromWorld.provider
+            final net.minecraft.world.DimensionType fromClientDimensionType = WorldManager.getClientDimensionType(fromWorld.provider
                     .getDimensionType());
-            final net.minecraft.world.DimensionType toClientDimensionType = DimensionManager.getClientDimensionType(toWorld.provider.getDimensionType
+            final net.minecraft.world.DimensionType toClientDimensionType = WorldManager.getClientDimensionType(toWorld.provider.getDimensionType
                     ());
             if (((IMixinEntityPlayerMP) entityPlayerMP).usesCustomClient()) {
-                DimensionManager.sendDimensionRegistration(entityPlayerMP, toClientDimensionType);
+                WorldManager.sendDimensionRegistration(entityPlayerMP, toClientDimensionType);
             } else {
                 final int currentDim =  fromMixinWorld.getDimensionId();
                 final int targetDim = toMixinWorld.getDimensionId();

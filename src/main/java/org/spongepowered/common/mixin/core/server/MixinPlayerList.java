@@ -98,7 +98,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.net.SocketAddress;
@@ -183,13 +183,13 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = DimensionManager.getWorldByDimensionId(playerIn.dimension).orElse(null);
+        WorldServer worldServer = WorldManager.getWorldByDimensionId(playerIn.dimension).orElse(null);
         BlockPos randomizedSpawnPos = null;
 
         if (worldServer == null) {
             SpongeImpl.getLogger().warn("Player [{}] has attempted to login to unloaded dimension [{}]. This is not safe so we have moved them to "
                     + "the default world's spawn point.", playerIn.getName(), playerIn.dimension);
-            worldServer = DimensionManager.getWorldByDimensionId(0).get();
+            worldServer = WorldManager.getWorldByDimensionId(0).get();
             randomizedSpawnPos = ((IMixinWorldProvider) worldServer.provider).getRandomizedSpawnPoint();
         }
 
@@ -261,9 +261,9 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
-        final DimensionType clientDimensionType = DimensionManager.getClientDimensionType(worldServer.provider.getDimensionType());
+        final DimensionType clientDimensionType = WorldManager.getClientDimensionType(worldServer.provider.getDimensionType());
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
-            DimensionManager.sendDimensionRegistration(playerIn, clientDimensionType);
+            WorldManager.sendDimensionRegistration(playerIn, clientDimensionType);
         }
 
         handler.sendPacket(new SPacketJoinGame(playerIn.getEntityId(), playerIn.interactionManager.getGameType(), worldinfo
@@ -419,7 +419,7 @@ public abstract class MixinPlayerList {
         }
 
         final Transform<World> fromTransform = ((Player) entityPlayerMP).getTransform();
-        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, DimensionManager.getWorldByDimensionId
+        Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(entityPlayerMP, WorldManager.getWorldByDimensionId
                 (targetDimension).orElse(null)), ((Player) entityPlayerMP).getRotation(), Vector3d.ZERO);
 
         ((IMixinEntityPlayerMP) entityPlayerMP).resetAttributeMap();

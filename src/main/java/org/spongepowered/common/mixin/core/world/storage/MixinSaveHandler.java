@@ -44,7 +44,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinSaveHandler;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
 import java.io.File;
@@ -148,15 +148,15 @@ public abstract class MixinSaveHandler implements IMixinSaveHandler {
         // Preserve dimension data from Sponge
         final NBTTagCompound customWorldDataCompound = compound.getCompoundTag("Forge");
         if (customWorldDataCompound.hasKey("DimensionData")) {
-            DimensionManager.loadDimensionDataMap(customWorldDataCompound.getCompoundTag("DimensionData"));
+            WorldManager.loadDimensionDataMap(customWorldDataCompound.getCompoundTag("DimensionData"));
         }
     }
 
     private void saveDimensionAndOtherData(SaveHandler handler, WorldInfo info, NBTTagCompound compound) {
         // Only save dimension data to root world
-        if (this.worldDirectory.toPath().equals(DimensionManager.getCurrentSavesDirectory().get())) {
+        if (this.worldDirectory.toPath().equals(WorldManager.getCurrentSavesDirectory().get())) {
             final NBTTagCompound customWorldDataCompound = new NBTTagCompound();
-            final NBTTagCompound customDimensionDataCompound = DimensionManager.saveDimensionDataMap();
+            final NBTTagCompound customDimensionDataCompound = WorldManager.saveDimensionDataMap();
             customWorldDataCompound.setTag("DimensionData", customDimensionDataCompound);
             // Share data back to Sponge
             compound.setTag("Forge", customWorldDataCompound);

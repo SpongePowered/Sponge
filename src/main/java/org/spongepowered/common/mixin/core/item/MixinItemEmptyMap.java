@@ -31,7 +31,7 @@ import net.minecraft.world.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 @Mixin(ItemEmptyMap.class)
 public class MixinItemEmptyMap extends ItemMapBase {
@@ -41,7 +41,7 @@ public class MixinItemEmptyMap extends ItemMapBase {
         if (worldIn.isRemote) {
             return worldIn.getUniqueDataId(key);
         }
-        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "onItemRightClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -50,7 +50,7 @@ public class MixinItemEmptyMap extends ItemMapBase {
         if (worldIn.isRemote) {
             worldIn.setItemData(dataId, data);
         } else {
-            DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+            WorldManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
         }
     }
 }

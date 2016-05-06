@@ -31,7 +31,7 @@ import net.minecraft.world.WorldSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 @Mixin(ItemMap.class)
 public class MixinItemMap extends ItemMapBase {
@@ -42,18 +42,18 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             return worldIn.loadItemData(clazz, dataId);
         }
-        return DimensionManager.getWorldByDimensionId(0).get().loadItemData(clazz, dataId);
+        return WorldManager.getWorldByDimensionId(0).get().loadItemData(clazz, dataId);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private int getOverworldUniqueDataId(World worldIn, String key) {
-        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "getMapData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
             + "setItemData(Ljava/lang/String;Lnet/minecraft/world/WorldSavedData;)V"))
     private void setOverworldMapData(World worldIn, String dataId, WorldSavedData data) {
-        DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+        WorldManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
     }
 
     // TODO This redirect no longer exists in onCreated...
@@ -62,13 +62,13 @@ public class MixinItemMap extends ItemMapBase {
 //        if (worldIn.isRemote) {
 //            return worldIn.getUniqueDataId(key);
 //        }
-//        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+//        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
 //
 //    }
 
     @Redirect(method = "enableMapTracking", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getUniqueDataId(Ljava/lang/String;)I"))
     private static int onCreatedGetOverworldUniqueDataId2(World worldIn, String key) {
-        return DimensionManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
+        return WorldManager.getWorldByDimensionId(0).get().getUniqueDataId(key);
     }
 
     @Redirect(method = "scaleMap", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;"
@@ -77,7 +77,7 @@ public class MixinItemMap extends ItemMapBase {
         if (worldIn.isRemote) {
             worldIn.setItemData(dataId, data);
         } else {
-            DimensionManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
+            WorldManager.getWorldByDimensionId(0).get().setItemData(dataId, data);
         }
     }
 }

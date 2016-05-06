@@ -56,12 +56,11 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.mixin.plugin.interfaces.IModData;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.lang.management.ManagementFactory;
@@ -515,7 +514,7 @@ public class SpongeHooks {
     }
 
     public static void refreshActiveConfigs() {
-        for (WorldServer world : DimensionManager.getWorlds()) {
+        for (WorldServer world : WorldManager.getWorlds()) {
             ((IMixinWorldServer) world).setActiveConfig(SpongeHooks.getActiveConfig(world, true));
             for (Entity entity : world.loadedEntityList) {
                 if (entity instanceof IModData) {

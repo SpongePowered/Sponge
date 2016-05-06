@@ -33,7 +33,7 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.common.registry.RegistryHelper;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -51,7 +51,7 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
 
     @Override
     public void registerDefaults() {;
-        for (net.minecraft.world.DimensionType dimensionType : DimensionManager.getDimensionTypes()) {
+        for (net.minecraft.world.DimensionType dimensionType : WorldManager.getDimensionTypes()) {
             final DimensionType apiDimensionType = (DimensionType) (Object) dimensionType;
             this.dimensionTypeMappings.put(apiDimensionType.getId(), apiDimensionType);
         }
@@ -65,7 +65,7 @@ public final class DimensionTypeRegistryModule implements SpongeAdditionalCatalo
     @Override
     public void registerAdditionalCatalog(DimensionType dimType) {
         this.dimensionTypeMappings.put(dimType.getName().toLowerCase(), dimType);
-        DimensionManager.registerDimensionType((net.minecraft.world.DimensionType) (Object) dimType);
+        WorldManager.registerDimensionType((net.minecraft.world.DimensionType) (Object) dimType);
     }
 
     @Override

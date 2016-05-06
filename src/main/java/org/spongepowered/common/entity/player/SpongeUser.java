@@ -49,7 +49,7 @@ import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.NbtDataUtil;
-import org.spongepowered.common.world.DimensionManager;
+import org.spongepowered.common.world.WorldManager;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -284,7 +284,7 @@ public class SpongeUser implements ArmorEquipable, Tamer, DataSerializable, Carr
     }
 
     public void save() {
-        SaveHandler saveHandler = (SaveHandler) DimensionManager.getWorldByDimensionId(0).get().getSaveHandler();
+        SaveHandler saveHandler = (SaveHandler) WorldManager.getWorldByDimensionId(0).get().getSaveHandler();
         File dataFile = new File(saveHandler.playersDirectory, getUniqueId() + ".dat");
         NBTTagCompound tag;
         if (dataFile.isFile()) {
