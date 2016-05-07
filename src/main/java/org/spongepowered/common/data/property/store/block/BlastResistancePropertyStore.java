@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.BlastResistanceProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -37,7 +37,7 @@ public class BlastResistancePropertyStore extends AbstractBlockPropertyStore<Bla
     }
 
     @Override
-    protected Optional<BlastResistanceProperty> getForBlock(Block block) {
-        return Optional.of(new BlastResistanceProperty(block.getExplosionResistance(null)));
+    protected Optional<BlastResistanceProperty> getForBlock(IBlockState block) {
+        return Optional.of(new BlastResistanceProperty(block.getBlock().getExplosionResistance(null)));
     }
 }

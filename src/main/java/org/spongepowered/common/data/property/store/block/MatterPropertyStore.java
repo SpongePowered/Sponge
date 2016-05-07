@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockLiquid;
 import net.minecraft.block.material.Material;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.MatterProperty.Matter;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
@@ -46,10 +46,10 @@ public class MatterPropertyStore extends AbstractBlockPropertyStore<MatterProper
     }
 
     @Override
-    protected Optional<MatterProperty> getForBlock(Block block) {
+    protected Optional<MatterProperty> getForBlock(IBlockState block) {
         if (block instanceof BlockLiquid) {
             return Optional.of(LIQUID);
-        } else if (block.getMaterial(null) == Material.AIR) {
+        } else if (block.getMaterial() == Material.AIR) {
             return Optional.of(GAS);
         } else {
             return Optional.of(SOLID);

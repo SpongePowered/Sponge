@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import org.spongepowered.api.data.property.block.HeldItemProperty;
@@ -40,8 +40,8 @@ public class HeldItemPropertyStore extends AbstractBlockPropertyStore<HeldItemPr
     }
 
     @Override
-    protected Optional<HeldItemProperty> getForBlock(Block block) {
-        final Item item = Item.getItemFromBlock(block);
+    protected Optional<HeldItemProperty> getForBlock(IBlockState block) {
+        final Item item = Item.getItemFromBlock(block.getBlock());
         if (item instanceof ItemBlock) {
             return Optional.of(new HeldItemProperty((ItemType) item));
         } else {

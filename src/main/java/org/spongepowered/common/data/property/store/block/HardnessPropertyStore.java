@@ -41,8 +41,8 @@ public class HardnessPropertyStore extends AbstractBlockPropertyStore<HardnessPr
     }
 
     @Override
-    protected Optional<HardnessProperty> getForBlock(Block block) {
-        final float hardness = block.getBlockHardness(null, null, null);
+    protected Optional<HardnessProperty> getForBlock(IBlockState block) {
+        final float hardness = block.getBlockHardness(null, null);
         if (hardness > 0) {
             return Optional.of(new HardnessProperty(hardness));
         }

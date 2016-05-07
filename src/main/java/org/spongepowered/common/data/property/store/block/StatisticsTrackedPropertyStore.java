@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.StatisticsTrackedProperty;
 import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
@@ -40,8 +40,8 @@ public class StatisticsTrackedPropertyStore extends AbstractBlockPropertyStore<S
     }
 
     @Override
-    protected Optional<StatisticsTrackedProperty> getForBlock(Block block) {
-        return Optional.of(block.getEnableStats() ? TRUE : FALSE);
+    protected Optional<StatisticsTrackedProperty> getForBlock(IBlockState block) {
+        return Optional.of(block.getBlock().getEnableStats() ? TRUE : FALSE);
     }
 
 }

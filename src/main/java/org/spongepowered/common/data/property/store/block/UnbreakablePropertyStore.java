@@ -44,8 +44,8 @@ public class UnbreakablePropertyStore extends AbstractBlockPropertyStore<Unbreak
     }
 
     @Override
-    protected Optional<UnbreakableProperty> getForBlock(Block block) {
-        return Optional.of(block.getBlockHardness(null, null, null) < 0 ? TRUE : FALSE);
+    protected Optional<UnbreakableProperty> getForBlock(IBlockState block) {
+        return Optional.of(block.getBlockHardness(null, null) < 0 ? TRUE : FALSE);
     }
 
     @Override

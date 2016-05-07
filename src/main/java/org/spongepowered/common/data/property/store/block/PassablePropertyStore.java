@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.state.IBlockState;
 import org.spongepowered.api.data.property.block.PassableProperty;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -43,8 +44,8 @@ public class PassablePropertyStore extends AbstractBlockPropertyStore<PassablePr
     }
 
     @Override
-    protected Optional<PassableProperty> getForBlock(Block block) {
-        return Optional.of(block.getMaterial(null).blocksMovement() ? FALSE : TRUE);
+    protected Optional<PassableProperty> getForBlock(IBlockState block) {
+        return Optional.of(block.getMaterial().blocksMovement() ? FALSE : TRUE);
     }
 
     @Override

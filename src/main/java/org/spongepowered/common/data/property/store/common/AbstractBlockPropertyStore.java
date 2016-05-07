@@ -53,7 +53,7 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
      * @param block The block
      * @return The property, if available
      */
-    protected abstract Optional<T> getForBlock(Block block);
+    protected abstract Optional<T> getForBlock(IBlockState block);
 
     /**
      * This is intended for properties that are intentionally for directional
