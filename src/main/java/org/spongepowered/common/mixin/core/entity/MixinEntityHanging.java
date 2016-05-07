@@ -44,10 +44,12 @@ import org.spongepowered.common.data.value.mutable.SpongeValue;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 @Mixin(EntityHanging.class)
 public abstract class MixinEntityHanging extends MixinEntity implements Hanging {
 
-    @Shadow public EnumFacing facingDirection;
+    @Shadow @Nullable public EnumFacing facingDirection;
     @Shadow private int tickCounter1;
 
     @Shadow public abstract boolean onValidSurface();
@@ -81,18 +83,12 @@ public abstract class MixinEntityHanging extends MixinEntity implements Hanging 
 
     @Override
     public DirectionalData getDirectionalData() {
-        if (this.facingDirection == null) {
-            this.facingDirection = EnumFacing.NORTH;
-        }
-        return new SpongeDirectionalData(DirectionResolver.getFor(this.facingDirection));
+        return new SpongeDirectionalData(this.facingDirection == null ? Direction.NONE : DirectionResolver.getFor(this.facingDirection ));
     }
 
     @Override
     public Value<Direction> direction() {
-        if (this.facingDirection == null) {
-            this.facingDirection = EnumFacing.NORTH;
-        }
-        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, DirectionResolver.getFor(this.facingDirection));
+        return new SpongeValue<>(Keys.DIRECTION, Direction.NONE, this.facingDirection == null ? Direction.NONE : DirectionResolver.getFor(this.facingDirection ));
     }
 
     @Override
