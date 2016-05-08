@@ -1312,8 +1312,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             if (this.mcEntity.getUniqueID().equals(((IMixinEntityPlayer) player).getCollidingEntityUuid())) {
                 this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
             }
+        }
+
         // Check for a possible DamageSource
-        } else {
+        if (this.destructCause == null) {
             this.lastDamageSource = SpongeHooks.getEntityDamageSource(this.mcEntity);
             if (this.lastDamageSource != null) {
                 this.destructCause = Cause.of(NamedCause.source(this.lastDamageSource));
