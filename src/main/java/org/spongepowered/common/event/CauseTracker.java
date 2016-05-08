@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -58,11 +59,13 @@ import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.stats.StatList;
+import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.MathHelper;
 import net.minecraft.util.ReportedException;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.EmptyChunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -93,6 +96,7 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
@@ -119,6 +123,7 @@ public final class CauseTracker {
 
     private boolean processingCaptureCause = false;
     private boolean processingBlockRandomTicks = false;
+    private boolean processingVanillaBlockEvent = false;
     private boolean captureEntitySpawns = true;
     private boolean captureBlockDecay = false;
     private boolean captureTerrainGen = false;
@@ -128,9 +133,11 @@ public final class CauseTracker {
     private boolean spawningDeathDrops = false;
     private List<Entity> capturedEntities = new ArrayList<>();
     private List<Entity> capturedEntityItems = new ArrayList<>();
+    @Nullable private User currentNotifier;
     @Nullable private BlockSnapshot currentTickBlock;
     @Nullable private Entity currentTickEntity;
     @Nullable private TileEntity currentTickTileEntity;
+    @Nullable public IMixinNextTickListEntry currentPendingBlockUpdate;
     @Nullable private Cause pluginCause;
     private List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
     private List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
@@ -168,6 +175,14 @@ public final class CauseTracker {
 
     public void setProcessingBlockRandomTicks(boolean processingBlockRandomTicks) {
         this.processingBlockRandomTicks = processingBlockRandomTicks;
+    }
+
+    public boolean isProcessingVanillaBlockEvent() {
+        return this.processingVanillaBlockEvent;
+    }
+
+    public void setProcessingVanillaBlockEvent(boolean processingVanillaBlockEvent) {
+        this.processingVanillaBlockEvent = processingVanillaBlockEvent;
     }
 
     public boolean isCaptureEntitySpawns() {
@@ -232,6 +247,18 @@ public final class CauseTracker {
 
     public List<Entity> getCapturedEntityItems() {
         return this.capturedEntityItems;
+    }
+
+    public boolean hasNotifier() {
+        return this.currentNotifier != null;
+    }
+
+    public Optional<User> getCurrentNotifier() {
+        return Optional.ofNullable(this.currentNotifier);
+    }
+
+    public void setCurrentNotifier(@Nullable User currentNotifier) {
+        this.currentNotifier = currentNotifier;
     }
 
     public boolean hasTickingBlock() {
@@ -410,49 +437,6 @@ public final class CauseTracker {
 
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet<?> packetIn = StaticMixinHelper.processingPacket;
-
-        // Attempt to find a Player cause if we do not have one
-        if (!cause.first(User.class).isPresent() && !(this.capturedSpongeBlockSnapshots.size() > 0
-                                                      && ((SpongeBlockSnapshot) this.capturedSpongeBlockSnapshots.get(0)).captureType
-                                                         == CaptureType.DECAY)) {
-            if ((cause.first(BlockSnapshot.class).isPresent() || cause.first(TileEntity.class).isPresent())) {
-                // Check for player at pos of first transaction
-                Optional<BlockSnapshot> snapshot = cause.first(BlockSnapshot.class);
-                Optional<TileEntity> te = cause.first(TileEntity.class);
-                BlockPos pos = null;
-                if (snapshot.isPresent()) {
-                    pos = VecHelper.toBlockPos(snapshot.get().getPosition());
-                } else {
-                    pos = ((net.minecraft.tileentity.TileEntity) te.get()).getPos();
-                }
-                net.minecraft.world.chunk.Chunk chunk = this.getMinecraftWorld().getChunkFromBlockCoords(pos);
-                if (chunk != null) {
-                    IMixinChunk spongeChunk = (IMixinChunk) chunk;
-
-                    Optional<User> owner = spongeChunk.getBlockOwner(pos);
-                    Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                    if (notifier.isPresent() && !cause.containsNamed(NamedCause.NOTIFIER)) {
-                        cause = cause.with(NamedCause.notifier(notifier.get()));
-                    }
-                    if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-                        cause = cause.with(NamedCause.owner(owner.get()));
-                    }
-                }
-            } else if (cause.first(Entity.class).isPresent()) {
-                Entity entity = cause.first(Entity.class).get();
-                if (entity instanceof EntityTameable) {
-                    EntityTameable tameable = (EntityTameable) entity;
-                    if (tameable.getOwner() != null && !cause.containsNamed(NamedCause.OWNER)) {
-                        cause = cause.with(NamedCause.owner(tameable.getOwner()));
-                    }
-                } else {
-                    Optional<User> owner = ((IMixinEntity) entity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (owner.isPresent() && !cause.contains(NamedCause.OWNER)) {
-                        cause = cause.with(NamedCause.owner(owner.get()));
-                    }
-                }
-            }
-        }
 
         // Handle Block Captures
         handleBlockCaptures(cause);
@@ -1060,18 +1044,14 @@ public final class CauseTracker {
             }
 
             if (!flag && this.processingCaptureCause && !this.captureTerrainGen) {
-                if (this.currentTickBlock != null) {
-                    BlockPos sourcePos = VecHelper.toBlockPos(this.currentTickBlock.getPosition());
-                    Block targetBlock = getMinecraftWorld().getBlockState(entityIn.getPosition()).getBlock();
-                    SpongeHooks
-                        .tryToTrackBlockAndEntity(this.getMinecraftWorld(), this.currentTickBlock, entityIn, sourcePos, targetBlock, entityIn.getPosition(),
-                            PlayerTracker.Type.NOTIFIER);
-                }
                 if (this.currentTickEntity != null) {
                     Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
                     if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
                         ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
                     }
+                }
+                if (StaticMixinHelper.packetPlayer != null) {
+                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, StaticMixinHelper.packetPlayer.getUniqueID());
                 }
                 if (entityIn instanceof EntityItem) {
                     this.capturedEntityItems.add((Item) entityIn);
@@ -1155,19 +1135,40 @@ public final class CauseTracker {
         this.processingCaptureCause = true;
         this.processingBlockRandomTicks = true;
         this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
+        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
+        this.trackBlockPositionCausePreTick(pos, cause);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
-        this.handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
+        this.handlePostTickCaptures(cause);
         this.currentTickBlock = null;
+        this.currentNotifier = null;
         this.processingCaptureCause = false;
         this.processingBlockRandomTicks = false;
     }
 
+    // By this point, currentPending(NextTickListEntry) should always be available
     public void updateTickBlock(Block block, BlockPos pos, IBlockState state, Random rand) {
         this.processingCaptureCause = true;
         this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
+        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
+        if (this.currentPendingBlockUpdate.hasTickingBlock()) {
+            cause = cause.merge(Cause.of(NamedCause.of("SchedulerSource", this.currentPendingBlockUpdate.getCurrentTickBlock().get())));
+        }
+        if (this.currentPendingBlockUpdate.hasTickingTileEntity()) {
+            cause = cause.merge(Cause.of(NamedCause.source(this.currentPendingBlockUpdate.getCurrentTickTileEntity().get())));
+        }
+        if (!this.currentPendingBlockUpdate.hasSourceUser()) {
+            this.currentNotifier = this.trackBlockPositionCausePreTick(pos, cause).orElse(null);
+        } else {
+            this.currentNotifier = this.currentPendingBlockUpdate.getSourceUser().get();
+            cause = cause.merge(Cause.of(NamedCause.notifier(this.currentNotifier)));
+        }
+
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
-        this.handlePostTickCaptures(Cause.of(NamedCause.source(this.currentTickBlock)));
+        this.handlePostTickCaptures(cause);
         this.currentTickBlock = null;
+        this.currentTickTileEntity = null;
+        this.currentPendingBlockUpdate = null;
+        this.currentNotifier = null;
         this.processingCaptureCause = false;
     }
 
@@ -1181,36 +1182,10 @@ public final class CauseTracker {
 
             try {
                 if (!this.getMinecraftWorld().isRemote) {
-                    if (StaticMixinHelper.packetPlayer != null) {
-                        IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                        if (!(spongeChunk instanceof EmptyChunk)) {
-                            spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, (User) StaticMixinHelper.packetPlayer,
-                                    PlayerTracker.Type.NOTIFIER);
-                        }
-                    } else {
-                        Object source = null;
+                    // determine user
+                    if (!this.tryAndTrackActiveUser(notifyPos, PlayerTracker.Type.NOTIFIER).isPresent()) {
                         if (this.hasTickingBlock()) {
-                            source = this.getCurrentTickBlock().get();
-                            sourcePos = VecHelper.toBlockPos(this.getCurrentTickBlock().get().getPosition());
-                        } else if (this.hasTickingTileEntity()) {
-                            source = this.getCurrentTickTileEntity().get();
-                            sourcePos = ((net.minecraft.tileentity.TileEntity) this.getCurrentTickTileEntity().get()).getPos();
-                        } else if (this.hasTickingEntity()) { // Falling Blocks
-                            IMixinEntity spongeEntity = (IMixinEntity) this.getCurrentTickEntity().get();
-                            sourcePos = ((net.minecraft.entity.Entity) this.getCurrentTickEntity().get()).getPosition();
-                            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                            Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
-                            if (notifier.isPresent()) {
-                                IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
-                            } else if (owner.isPresent()) {
-                                IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-                                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, owner.get(), PlayerTracker.Type.NOTIFIER);
-                            }
-                        }
-
-                        if (source != null) {
-                            SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, sourcePos, iblockstate.getBlock(), notifyPos,
+                            this.trackTargetBlockFromSource(((SpongeBlockSnapshot) this.currentTickBlock).getBlockPos(), sourcePos, iblockstate.getBlock(), notifyPos,
                                     PlayerTracker.Type.NOTIFIER);
                         }
                     }
@@ -1288,5 +1263,154 @@ public final class CauseTracker {
                && !this.isProcessingBlockRandomTicks() && !this.isCaptureCommand() && this.hasTickingBlock() && this.pluginCause == null
                && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof C03PacketPlayer);
 
+    }
+
+    private Predicate<net.minecraft.entity.Entity> entityTrackerPredicate = new Predicate<net.minecraft.entity.Entity>() {
+
+        @Override
+        public boolean apply(net.minecraft.entity.Entity input) {
+            if (input instanceof EntityLivingBase) {
+                return false;
+            }
+            if (input instanceof EntityItem) {
+                return false;
+            }
+            return true;
+        }
+
+    };
+    private static AxisAlignedBB entityAABB = AxisAlignedBB.fromBounds(0, 0, 0, 0, 0, 0);
+    private AxisAlignedBB getEntityAABBForBlockPos(BlockPos pos) {
+        entityAABB.minX = pos.getX();
+        entityAABB.minY = pos.getY();
+        entityAABB.minZ = pos.getZ();
+        entityAABB.maxX = pos.getX() + 0.1;
+        entityAABB.maxY = pos.getY() + 0.1;
+        entityAABB.maxZ = pos.getZ() + 0.1;
+        return entityAABB;
+    }
+
+    public Optional<User> tryAndTrackActiveUser(BlockPos targetPos, PlayerTracker.Type type) {
+        net.minecraft.world.World world = this.getMinecraftWorld();
+        if (targetPos == null || !world.isBlockLoaded(targetPos)) {
+            return Optional.empty();
+        }
+
+        User user = null;
+        IMixinWorld spongeWorld = (IMixinWorld) world;
+        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
+        if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
+            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            if (StaticMixinHelper.packetPlayer != null) {
+                user = (User) StaticMixinHelper.packetPlayer;
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, user, type);
+            } else if (causeTracker.hasNotifier()) {
+                user = causeTracker.getCurrentNotifier().get();
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, user, type);
+            }
+            // check if a non-living entity exists at target block position (ex. minecarts)
+            if (user != null) {
+                Chunk chunk = (Chunk) spongeChunk;
+                List<net.minecraft.entity.Entity> entityList = new ArrayList<>();
+                chunk.getEntitiesOfTypeWithinAAAB(net.minecraft.entity.Entity.class, this.getEntityAABBForBlockPos(targetPos), entityList, this.entityTrackerPredicate);
+                for (net.minecraft.entity.Entity entity : entityList) {
+                    ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, user.getUniqueId());
+                }
+            }
+        }
+
+        return Optional.ofNullable(user);
+    }
+
+    public Optional<User> trackTargetBlockFromSource(Object source, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
+        // first check to see if we have an active user
+        Optional<User> user = tryAndTrackActiveUser(targetPos, type);
+        if (user.isPresent()) {
+            return user;
+        }
+
+        net.minecraft.world.World world = this.getMinecraftWorld();
+        if (sourcePos == null || !world.isBlockLoaded(sourcePos)) {
+            return Optional.empty();
+        }
+
+        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(sourcePos);
+        if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
+            Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
+            Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
+            if (notifier.isPresent()) {
+                spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, notifier.get(), type);
+                return notifier;
+            } else if (owner.isPresent()) {
+                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, owner.get(), type);
+                return owner;
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<User> trackBlockPositionCausePreTick(BlockPos pos, Cause cause) {
+        if (pos == null || cause == null) {
+            return Optional.empty();
+        }
+
+        net.minecraft.world.World world = this.getMinecraftWorld();
+        IMixinWorld spongeWorld = (IMixinWorld) world;
+        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
+            Optional<User> owner = spongeChunk.getBlockOwner(pos);
+            Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+            if (notifier.isPresent()) {
+                User user = notifier.get();
+                causeTracker.setCurrentNotifier(user);
+                cause = cause.merge(Cause.of(NamedCause.notifier(user)));
+            }
+            if (owner.isPresent()) {
+                User user = owner.get();
+                cause = cause.merge(Cause.of(NamedCause.owner(user)));
+            }
+            if (notifier.isPresent()) {
+                return notifier;
+            } else {
+                return owner;
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public void trackEntityCausePreTick(net.minecraft.entity.Entity entity, Cause cause) {
+        if (entity == null || cause == null) {
+            return;
+        }
+
+        net.minecraft.world.World world = this.getMinecraftWorld();
+        IMixinWorld spongeWorld = (IMixinWorld) world;
+        IMixinEntity spongeEntity = (IMixinEntity) entity;
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+        if (!owner.isPresent()) {
+            if (entity instanceof EntityTameable) {
+                EntityTameable tameable = (EntityTameable) entity;
+                if (tameable.getOwner() != null) {
+                    owner = Optional.of((User) tameable.getOwner());
+                }
+            }
+        }
+        Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+        if (notifier.isPresent()) {
+            User user = notifier.get();
+            causeTracker.setCurrentNotifier(user);
+            cause = cause.merge(Cause.of(NamedCause.notifier(user)));
+        }
+        if (owner.isPresent()) {
+            User user = owner.get();
+            cause = cause.merge(Cause.of(NamedCause.owner(user)));
+            if (!notifier.isPresent()) {
+                causeTracker.setCurrentNotifier(user);
+            }
+        }
     }
 }

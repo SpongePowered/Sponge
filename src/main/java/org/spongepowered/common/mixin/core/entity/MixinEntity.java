@@ -162,6 +162,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     protected DamageSource lastDamageSource;
     private Cause destructCause;
     private BlockState currentCollidingBlock;
+    private BlockPos lastCollidedBlockPos;
     private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
 
     @Shadow private UUID entityUniqueID;
@@ -1074,6 +1075,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, entity);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -1094,6 +1096,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -1115,6 +1118,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -1349,5 +1353,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             return (BlockState) Blocks.air.getDefaultState();
         }
         return this.currentCollidingBlock;
+    }
+
+    @Override
+    public BlockPos getLastCollidedBlockPos() {
+        return this.lastCollidedBlockPos;
     }
 }

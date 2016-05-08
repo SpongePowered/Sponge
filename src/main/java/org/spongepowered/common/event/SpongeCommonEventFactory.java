@@ -99,6 +99,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -557,6 +558,7 @@ public class SpongeCommonEventFactory {
 
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
+        IMixinWorld spongeWorld = (IMixinWorld) world;
         BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
         Map<Direction, BlockState> neighbors = new HashMap<>();
 
@@ -570,24 +572,29 @@ public class SpongeCommonEventFactory {
             }
         }
 
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
         // Determine cause
         Cause cause = Cause.of(NamedCause.source(snapshot));
-        net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
-        IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
-        if (spongeChunk != null) {
-            if (StaticMixinHelper.packetPlayer != null) {
-                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
-            } else {
-                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                if (notifier.isPresent()) {
-                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
+        if (!causeTracker.hasNotifier()) {
+            net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
+            IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
+            if (spongeChunk != null) {
+                if (StaticMixinHelper.packetPlayer != null) {
+                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(StaticMixinHelper.packetPlayer));
+                } else {
+                    Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
+                    if (notifier.isPresent()) {
+                        cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
+                    }
+                }
+                Optional<User> owner = spongeChunk.getBlockOwner(pos);
+                if (owner.isPresent()) {
+                    cause = cause.with(NamedCause.owner(owner.get()));
                 }
             }
-            Optional<User> owner = spongeChunk.getBlockOwner(pos);
-            if (owner.isPresent()) {
-                cause = cause.with(NamedCause.owner(owner.get()));
-            }
+        } else {
+            cause = cause.with(NamedCause.notifier(causeTracker.getCurrentNotifier().get()));
         }
 
         NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(cause, originalNeighbors, neighbors);
@@ -609,30 +616,42 @@ public class SpongeCommonEventFactory {
 
     public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {
         Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
+        IMixinWorld spongeWorld = (IMixinWorld) world;
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         if (!(entity instanceof EntityPlayer)) {
-            IMixinEntity spongeEntity = (IMixinEntity) entity;
-            Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (user.isPresent()) {
-                cause = cause.with(NamedCause.owner(user.get()));
+            if (causeTracker.hasNotifier()) {
+                cause = cause.with(NamedCause.source(causeTracker.getCurrentNotifier()));
             }
         }
 
         // TODO: Add target side support
         CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector(pos)), direction);
-        return SpongeImpl.postEvent(event);
+        boolean cancelled = SpongeImpl.postEvent(event);
+        if (!cancelled) {
+            IMixinEntity spongeEntity = (IMixinEntity) entity;
+            if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
+                if (causeTracker.hasNotifier()) {
+                    IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+                    spongeChunk.addTrackedBlockPosition(block, pos, causeTracker.getCurrentNotifier().get(), PlayerTracker.Type.NOTIFIER);
+                }
+            }
+        }
+
+        return cancelled;
     }
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             MovingObjectPosition movingObjectPosition) {
         MovingObjectType movingObjectType = movingObjectPosition.typeOfHit;
         Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();
-        IMixinEntity spongeEntity = (IMixinEntity) projectile;
-        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-        if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-            cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
+        IMixinWorld spongeWorld = (IMixinWorld) projectile.worldObj;
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        if (causeTracker.hasNotifier()) {
+            cause = cause.with(NamedCause.owner(causeTracker.getCurrentNotifier()));
         }
 
         Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector(movingObjectPosition.hitVec));
+        boolean cancelled = false;
 
         if (movingObjectType == MovingObjectType.BLOCK) {
             BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector(movingObjectPosition.getBlockPos()));
@@ -643,17 +662,23 @@ public class SpongeCommonEventFactory {
 
             CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(cause, impactPoint, targetBlock.getState(),
                     targetBlock.getLocation().get(), side);
-            return SpongeImpl.postEvent(event);
+            cancelled = SpongeImpl.postEvent(event);
+            // Track impact block if event is not cancelled
+            if (!cancelled && causeTracker.hasNotifier()) {
+                BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
+                IMixinChunk spongeChunk = (IMixinChunk) projectile.worldObj.getChunkFromBlockCoords(targetPos);
+                spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, causeTracker.getCurrentNotifier().get(), PlayerTracker.Type.NOTIFIER);
+            }
         } else if (movingObjectPosition.entityHit != null) { // entity
             ImmutableList.Builder<Entity> entityBuilder = new ImmutableList.Builder<>();
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
             CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause,
                     entityBuilder.add((Entity) movingObjectPosition.entityHit).build(), entityList, impactPoint, (World) projectile.worldObj);
-            return SpongeImpl.postEvent(event);
+            cancelled = SpongeImpl.postEvent(event);
         }
 
-        return false;
+        return cancelled;
     }
 
     public static void handleEntityMovement(net.minecraft.entity.Entity entity) {

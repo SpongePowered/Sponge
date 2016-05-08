@@ -63,7 +63,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -76,7 +75,6 @@ import org.spongepowered.common.world.CaptureType;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -102,6 +100,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Shadow public abstract void notifyNeighborsRespectDebug(BlockPos pos, Block blockType);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
 
 
     @Inject(method = "init", at = @At("HEAD"))
@@ -135,7 +134,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
             // Don't capture if we are restoring blocks
             final CauseTracker causeTracker = this.getCauseTracker();
-            if (!this.isRemote && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()
+            if (!this.isRemote && !causeTracker.isProcessingVanillaBlockEvent() && !causeTracker.isRestoringBlocks() && !causeTracker.isWorldSpawnerRunning() && !causeTracker.isChunkSpawnerRunning()
                     && !causeTracker.isCapturingTerrainGen()) {
                 originalBlockSnapshot = null;
                 originalBlockSnapshot = createSpongeBlockSnapshot(currentState, currentState.getBlock().getActualState(currentState,
@@ -223,78 +222,70 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
-    @Redirect(method = "forceBlockUpdateTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    public void onForceBlockUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen()
-            || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
-            block.updateTick(worldIn, pos, state, rand);
-            return;
-        }
-
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCurrentTickBlock(createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, (IBlockAccess) this, pos), pos, 0));
-        block.updateTick(worldIn, pos, state, rand);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(causeTracker.getCurrentTickBlock().get())));
-        causeTracker.setCurrentTickBlock(null);
-        causeTracker.setProcessingCaptureCause(false);
-    }
-
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onUpdateEntities(net.minecraft.entity.Entity entityIn) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingEntity()) {
+        if (this.isRemote) {
             entityIn.onUpdate();
             return;
         }
 
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entityIn);
+        Cause cause = Cause.of(NamedCause.source(entityIn));
+        causeTracker.trackEntityCausePreTick(entityIn, cause);
         entityIn.onUpdate();
         updateRotation(entityIn);
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entityIn)));
+        causeTracker.handlePostTickCaptures(cause);
         causeTracker.setCurrentTickEntity(null);
+        causeTracker.setCurrentNotifier(null);
         causeTracker.setProcessingCaptureCause(false);
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
     public void onUpdateTileEntities(ITickable tile) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingTileEntity()) {
+        if (this.isRemote) {
             tile.update();
             return;
         }
 
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickTileEntity((TileEntity) tile);
+        Cause cause = Cause.of(NamedCause.source(tile));
+        causeTracker.trackBlockPositionCausePreTick(((net.minecraft.tileentity.TileEntity) tile).getPos(), cause);
         tile.update();
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(tile)));
+        causeTracker.handlePostTickCaptures(cause);
         causeTracker.setCurrentTickTileEntity(null);
         causeTracker.setProcessingCaptureCause(false);
+        causeTracker.setCurrentNotifier(null);
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     public void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingEntity() || StaticMixinHelper.packetPlayer != null) {
+        if (this.isRemote || StaticMixinHelper.packetPlayer != null) {
             entity.onUpdate();
             return;
         }
 
         causeTracker.setProcessingCaptureCause(true);
         causeTracker.setCurrentTickEntity((Entity) entity);
+        Cause cause = Cause.of(NamedCause.source(entity));
+        causeTracker.trackEntityCausePreTick(entity, cause);
         entity.onUpdate();
         updateRotation(entity);
         SpongeCommonEventFactory.handleEntityMovement(entity);
-        causeTracker.handlePostTickCaptures(Cause.of(NamedCause.source(entity)));
+        causeTracker.handlePostTickCaptures(cause);
         causeTracker.setCurrentTickEntity(null);
+        causeTracker.setCurrentNotifier(null);
         causeTracker.setProcessingCaptureCause(false);
     }
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
     public void onEntityRemoval(net.minecraft.entity.Entity entityIn, CallbackInfo ci) {
-        if ((!(entityIn instanceof EntityLivingBase) || entityIn instanceof EntityArmorStand)) {
+        if (!this.isRemote && (!(entityIn instanceof EntityLivingBase) || entityIn instanceof EntityArmorStand)) {
             getCauseTracker().handleNonLivingEntityDestruct(entityIn);
         }
     }
@@ -311,14 +302,11 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         return (Entity) entity;
     }
 
-    /**
-     * @author bloodmc
-     *
-     * @reason Redirects vanilla method to our method which includes a cause.
-     */
-    @Overwrite
-    public boolean spawnEntityInWorld(net.minecraft.entity.Entity entity) {
-        return this.spawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this)));
+    @Inject(method = "spawnEntityInWorld", at = @At("HEAD"), cancellable = true)
+    public void onSpawnEntityInWorld(net.minecraft.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isRemote) {
+            cir.setReturnValue(this.spawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this))));
+        }
     }
 
     @Override
@@ -404,16 +392,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Overwrite
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block blockIn) {
         this.getCauseTracker().notifyBlockOfStateChange(notifyPos, blockIn, null);
-    }
-
-    /**
-     * @author bloodmc - November 15th, 2015
-     *
-     * @reason Used to track comparators when they update levels.
-     */
-    @Overwrite
-    public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplHooks.updateComparatorOutputLevel((net.minecraft.world.World) (Object) this, pos, blockIn);
     }
 
     @Override

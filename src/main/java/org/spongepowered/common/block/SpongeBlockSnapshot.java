@@ -85,6 +85,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Nullable final UUID creatorUniqueId;
     @Nullable final UUID notifierUniqueId;
     // Internal use only
+    private final BlockPos blockPos;
     private int updateFlag;
     public CaptureType captureType; // used for post event
 
@@ -101,6 +102,7 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
         this.creatorUniqueId = builder.creatorUuid;
         this.notifierUniqueId = builder.notifierUuid;
         this.pos = checkNotNull(builder.coords);
+        this.blockPos = VecHelper.toBlockPos(this.pos);
         final ImmutableMap.Builder<Key<?>, ImmutableValue<?>> mapBuilder = ImmutableMap.builder();
         for (ImmutableValue<?> value : this.blockState.getValues()) {
             mapBuilder.put(value.getKey(), value);
@@ -419,6 +421,10 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     // Used internally for restores
     public int getUpdateFlag() {
         return this.updateFlag;
+    }
+
+    public BlockPos getBlockPos() {
+        return this.blockPos;
     }
 
     @Override

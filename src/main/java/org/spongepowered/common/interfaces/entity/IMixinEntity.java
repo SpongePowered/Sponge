@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
@@ -113,4 +114,5 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     BlockState getCurrentCollidingBlock();
 
+    BlockPos getLastCollidedBlockPos();
 }

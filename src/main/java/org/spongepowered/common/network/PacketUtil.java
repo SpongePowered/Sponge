@@ -39,6 +39,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
+import net.minecraft.util.EnumChatFormatting;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -147,7 +148,7 @@ public class PacketUtil {
                     }
                 }
             }
-            packetIn.getLines()[i] = new ChatComponentText(SpongeHooks.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
+            packetIn.getLines()[i] = new ChatComponentText(EnumChatFormatting.getTextWithoutFormattingCodes(packetIn.getLines()[i].getUnformattedText()));
         }
         return true;
 

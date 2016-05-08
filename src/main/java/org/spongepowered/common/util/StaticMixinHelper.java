@@ -34,7 +34,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.Packet;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -50,7 +49,6 @@ public class StaticMixinHelper {
     public static final BlockPos HANGING_OFFSET_NORTH = new BlockPos(0, 1, -1);
     public static final BlockPos HANGING_OFFSET_SOUTH = new BlockPos(0, 1, 1);
     public static EntityPlayerMP packetPlayer = null;
-    public static User blockEventUser = null;
     @SuppressWarnings("rawtypes")
     public static Packet processingPacket = null;
     public static boolean processingInternalForgeEvent = false;

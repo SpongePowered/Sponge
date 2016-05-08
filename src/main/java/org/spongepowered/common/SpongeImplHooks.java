@@ -36,11 +36,9 @@ import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Blocks;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
-import net.minecraft.util.EnumFacing;
 import net.minecraft.world.IBlockAccess;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.Player;
@@ -54,7 +52,6 @@ import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
 
-import java.util.Iterator;
 import java.util.Optional;
 
 /**
@@ -106,32 +103,6 @@ public final class SpongeImplHooks {
             return ((ITileEntityProvider)block).createNewTileEntity(world, block.getMetaFromState(state));
         }
         return null;
-    }
-
-    // TODO - Determine if this is still needed
-    @SuppressWarnings("unchecked")
-    public static void updateComparatorOutputLevel(net.minecraft.world.World world, BlockPos pos, Block blockIn) {
-        Iterator<EnumFacing> iterator = EnumFacing.Plane.HORIZONTAL.iterator();
-
-        while (iterator.hasNext()) {
-            EnumFacing enumfacing = iterator.next();
-            BlockPos blockpos1 = pos.offset(enumfacing);
-
-            if (world.isBlockLoaded(blockpos1)) {
-                IBlockState iblockstate = world.getBlockState(blockpos1);
-
-                if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
-                    iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
-                } else if (iblockstate.getBlock().isNormalCube()) {
-                    blockpos1 = blockpos1.offset(enumfacing);
-                    iblockstate = world.getBlockState(blockpos1);
-
-                    if (Blocks.unpowered_comparator.isAssociated(iblockstate.getBlock())) {
-                        iblockstate.getBlock().onNeighborBlockChange(world, blockpos1, iblockstate, blockIn);
-                    }
-                }
-            }
-        }
     }
 
     /**

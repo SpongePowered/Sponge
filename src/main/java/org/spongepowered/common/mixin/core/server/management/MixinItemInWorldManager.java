@@ -54,7 +54,9 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 
 import java.util.Optional;
@@ -134,6 +136,9 @@ public abstract class MixinItemInWorldManager {
                 if (event.getUseBlockResult() != Tristate.FALSE) {
                     IBlockState iblockstate = worldIn.getBlockState(pos);
                     result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, side, offsetX, offsetY, offsetZ);
+                    // update notification for block
+                    IMixinWorld spongeWorld = (IMixinWorld) this.theWorld;
+                    spongeWorld.getCauseTracker().tryAndTrackActiveUser(pos, PlayerTracker.Type.NOTIFIER);
                 } else {
                     this.thisPlayerMP.playerNetServerHandler.sendPacket(new S23PacketBlockChange(this.theWorld, pos));
                     result = event.getUseItemResult() != Tristate.TRUE;
