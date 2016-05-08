@@ -31,7 +31,11 @@ import java.util.List;
 
 public interface EntityListConsumer<E extends Entity> {
 
-    EntityListConsumer<Entity> FORCE_SPAWN = (list, causeTracker) -> list.forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity));
+    EntityListConsumer<Entity> FORCE_SPAWN = (list, causeTracker) -> {
+        for (Entity entity : list) {
+            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+        }
+    };
 
     void apply(List<? extends E> list, CauseTracker causeTracker);
 

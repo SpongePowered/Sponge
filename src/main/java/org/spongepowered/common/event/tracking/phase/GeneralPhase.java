@@ -131,10 +131,13 @@ public final class GeneralPhase extends TrackingPhase {
                                 .build();
                         EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
                                 .nonCancelled(event -> {
-                                    event.getEntities().forEach(entity -> {
-                                        TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    for (Entity entity : event.getEntities()) {
+                                        TrackingUtil.associateEntityCreator(phaseContext,
+                                                EntityUtil.toNative(entity),
+                                                causeTracker.getMinecraftWorld()
+                                        );
                                         causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                    });
+                                    }
                                 })
                                 .process();
                     });

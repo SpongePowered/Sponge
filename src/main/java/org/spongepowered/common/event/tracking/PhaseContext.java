@@ -202,7 +202,7 @@ public class PhaseContext {
     }
 
     public void forEach(Consumer<NamedCause> consumer) {
-        this.contextObjects.forEach(consumer::accept);
+        this.contextObjects.forEach(consumer);
     }
 
     public PrettyPrinter populatePrinter(PrettyPrinter printer) {

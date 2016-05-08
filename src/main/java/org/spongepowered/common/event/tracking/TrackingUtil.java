@@ -170,10 +170,11 @@ public final class TrackingUtil {
                     minecraftEntity.getPosition(), PlayerTracker.Type.NOTIFIER);
         });
         context.firstNamed(NamedCause.SOURCE, Entity.class).ifPresent(tickingEntity -> {
+            final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
             Stream.<Supplier<Optional<UUID>>>of(
-                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
                             .map(Identifiable::getUniqueId),
-                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
                             .map(Identifiable::getUniqueId)
                     )
                     .map(Supplier::get)
@@ -181,12 +182,10 @@ public final class TrackingUtil {
                     .map(Optional::get)
                     .findFirst()
                     .ifPresent(uuid ->
-                            EntityUtil.toMixin(minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
+                            mixinEntity.trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
                     );
-            Optional<User> creator = ((IMixinEntity) tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                ((IMixinEntity) minecraftEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-            }
+            mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                    .ifPresent(creator -> mixinEntity.trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.getUniqueId()));
         });
 
     }

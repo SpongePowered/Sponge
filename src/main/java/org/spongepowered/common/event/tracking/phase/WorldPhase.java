@@ -141,24 +141,27 @@ public final class WorldPhase extends TrackingPhase {
                                     .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
                             EventConsumer
                                     .event(SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld()))
-                                    .nonCancelled(event ->
-                                            event.getEntities().forEach(entity -> {
-                                                Stream.<Supplier<Optional<UUID>>>of(
-                                                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
-                                                                .map(Identifiable::getUniqueId),
-                                                    () -> EntityUtil.toMixin(tickingEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
-                                                                .map(Identifiable::getUniqueId)
+                                    .nonCancelled(event -> {
+                                                for (Entity entity : event.getEntities()) {
+                                                    Stream.<Supplier<Optional<UUID>>>of(
+                                                            () -> EntityUtil.toMixin(tickingEntity)
+                                                                    .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER)
+                                                                    .map(Identifiable::getUniqueId),
+                                                            () -> EntityUtil.toMixin(tickingEntity)
+                                                                    .getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR)
+                                                                    .map(Identifiable::getUniqueId)
                                                     )
-                                                    .map(Supplier::get)
-                                                    .filter(Optional::isPresent)
-                                                    .map(Optional::get)
-                                                    .findFirst()
-                                                    .ifPresent(uuid ->
-                                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
-                                                    );
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            })
-                                    )
+                                                            .map(Supplier::get)
+                                                            .filter(Optional::isPresent)
+                                                            .map(Optional::get)
+                                                            .findFirst()
+                                                            .ifPresent(uuid ->
+                                                                    EntityUtil.toMixin(entity)
+                                                                            .trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid)
+                                                            );
+                                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                                }
+                                    })
                                     .process();
                         });
                 phaseContext.getCapturedItemsSupplier()
@@ -174,13 +177,13 @@ public final class WorldPhase extends TrackingPhase {
                                     .ifPresent(creator -> builder.named(NamedCause.owner(creator)));
                             EventConsumer.event(SpongeEventFactory
                                     .createDropItemEventCustom(builder.build(), entities, causeTracker.getWorld()))
-                                    .nonCancelled(event ->
-                                            event.getEntities().forEach(entity -> {
-                                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
-                                                        causeTracker.getMinecraftWorld());
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            })
-                                    )
+                                    .nonCancelled(event -> {
+                                                for (Entity entity : event.getEntities()) {
+                                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
+                                                            causeTracker.getMinecraftWorld());
+                                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                                }
+                                    })
                                     .process();
                         });
                 phaseContext.getCapturedBlockSupplier()
@@ -190,8 +193,11 @@ public final class WorldPhase extends TrackingPhase {
                     return; // this is handled elsewhere
                 }
                 final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(tickingEntity);
-                if (minecraftEntity.lastTickPosX != minecraftEntity.posX || minecraftEntity.lastTickPosY != minecraftEntity.posY || minecraftEntity.lastTickPosZ != minecraftEntity.posZ
-                    || minecraftEntity.rotationPitch != minecraftEntity.prevRotationPitch || minecraftEntity.rotationYaw != minecraftEntity.prevRotationYaw) {
+                if (minecraftEntity.lastTickPosX != minecraftEntity.posX
+                    || minecraftEntity.lastTickPosY != minecraftEntity.posY
+                    || minecraftEntity.lastTickPosZ != minecraftEntity.posZ
+                    || minecraftEntity.rotationPitch != minecraftEntity.prevRotationPitch
+                    || minecraftEntity.rotationYaw != minecraftEntity.prevRotationYaw) {
                     // yes we have a move event.
                     final double currentPosX = minecraftEntity.posX;
                     final double currentPosY = minecraftEntity.posY;
@@ -202,21 +208,22 @@ public final class WorldPhase extends TrackingPhase {
                     Vector3d currentRotationVector = new Vector3d(currentRotPitch, currentRotYaw, 0);
                     DisplaceEntityEvent.Move event;
                     Transform<World> previous = new Transform<>(tickingEntity.getWorld(),
-                            new Vector3d(minecraftEntity.prevPosX, minecraftEntity.prevPosY, minecraftEntity.prevPosZ), new Vector3d(minecraftEntity.prevRotationPitch, minecraftEntity.prevRotationYaw,
-                            0));
+                            new Vector3d(minecraftEntity.prevPosX, minecraftEntity.prevPosY, minecraftEntity.prevPosZ),
+                            new Vector3d(minecraftEntity.prevRotationPitch, minecraftEntity.prevRotationYaw, 0)
+                    );
                     Location<World>
                             currentLocation = new Location<>(tickingEntity.getWorld(), currentPosX, currentPosY, currentPosZ);
                     Transform<org.spongepowered.api.world.World> current = new Transform<>(currentLocation, currentRotationVector, tickingEntity.getScale());
 
                     if (minecraftEntity instanceof Humanoid) {
-                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(minecraftEntity)), previous, current,
-                                (Humanoid) minecraftEntity);
+                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(tickingEntity)),
+                                previous, current, (Humanoid) minecraftEntity);
                     } else if (minecraftEntity instanceof Living) {
-                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetLiving(Cause.of(NamedCause.source(minecraftEntity)), previous, current,
-                                (Living) minecraftEntity);
+                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetLiving(Cause.of(NamedCause.source(tickingEntity)), previous,
+                                current, EntityUtil.fromNativeToLiving(minecraftEntity));
                     } else {
-                        event = SpongeEventFactory.createDisplaceEntityEventMove(Cause.of(NamedCause.source(minecraftEntity)), previous, current,
-                                (Entity) minecraftEntity);
+                        event = SpongeEventFactory.createDisplaceEntityEventMove(Cause.of(NamedCause.source(tickingEntity)), previous, current,
+                                tickingEntity);
                     }
                     SpongeImpl.postEvent(event);
                     if (event.isCancelled()) {
@@ -310,10 +317,12 @@ public final class WorldPhase extends TrackingPhase {
                                             .build())
                                     .build();
                     EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
-                            .nonCancelled(event -> event.getEntities().forEach(entity -> {
-                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }))
+                            .nonCancelled(event -> {
+                                for (Entity entity : event.getEntities()) {
+                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                }
+                            })
                             .process();
                 });
                 phaseContext.getCapturedItemsSupplier()
@@ -326,10 +335,11 @@ public final class WorldPhase extends TrackingPhase {
                                     .build();
                             EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
                                     .nonCancelled(event -> {
-                                        event.getEntities().forEach(entity -> {
-                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
+                                                    causeTracker.getMinecraftWorld());
                                             causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        });
+                                        }
                                     })
                                     .process();
                         });
@@ -380,12 +390,12 @@ public final class WorldPhase extends TrackingPhase {
                                         .build())
                                     .build();
                             EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, world))
-                                    .nonCancelled(event ->
-                                            event.getEntities().forEach(entity -> {
-                                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            })
-                                    )
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
                                     .process();
                         });
                 phaseContext.getCapturedItemsSupplier()
@@ -397,12 +407,12 @@ public final class WorldPhase extends TrackingPhase {
                                         .build())
                                     .build();
                             EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, items, world))
-                                    .nonCancelled(event ->
-                                            event.getEntities().forEach(entity -> {
-                                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
-                                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                            })
-                                    )
+                                    .nonCancelled(event -> {
+                                                for (Entity entity : event.getEntities()) {
+                                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
+                                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                                }
+                                    })
                                     .process();
                         });
             }
@@ -444,10 +454,10 @@ public final class WorldPhase extends TrackingPhase {
                     final Cause cause = Cause.source(BlockSpawnCause.builder().block(tickingBlock).type(InternalSpawnTypes.PLACEMENT).build()).build();
                     EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
                             .nonCancelled(event -> {
-                                event.getEntities().forEach(entity -> {
+                                for (Entity entity : event.getEntities()) {
                                     TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
                                     causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                });
+                                }
                             })
                             .process();
                 });

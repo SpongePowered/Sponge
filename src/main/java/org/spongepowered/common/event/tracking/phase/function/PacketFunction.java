@@ -93,9 +93,12 @@ import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @FunctionalInterface
@@ -159,12 +162,12 @@ public interface PacketFunction {
                     final PrettyPrinter printer = new PrettyPrinter(80);
                     printer.add("Processing Attack Entity").centre().hr();
                     printer.add("The item stacks captured are: ");
-                    map.asMap().entrySet().forEach(entry -> {
+                    for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
                         printer.add("  - Entity with UUID: %s", entry.getKey());
                         for (ItemStack stack : entry.getValue()) {
                             printer.add("    - %s", stack);
                         }
-                    });
+                    }
                     printer.trace(System.err);
                 });
 
@@ -211,12 +214,12 @@ public interface PacketFunction {
                         printer.add("Processing Interact Entity").centre().hr();
                         printer.add("The item stacks captured are: ");
 
-                        map.asMap().entrySet().forEach(entry -> {
+                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
                             for (ItemStack stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
-                        });
+                        }
                         printer.trace(System.err);
                     });
 
@@ -261,12 +264,12 @@ public interface PacketFunction {
                         printer.add("Processing Interact At Entity").centre().hr();
                         printer.add("The item stacks captured are: ");
 
-                        map.asMap().entrySet().forEach(entry -> {
+                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
                             for (ItemStack stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
-                        });
+                        }
                         printer.trace(System.err);
                     });
         }
@@ -294,12 +297,12 @@ public interface PacketFunction {
                                 .build())
                                 .build();
                         EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
-                                .nonCancelled(event ->
-                                        event.getEntities().forEach(entity -> {
-                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        })
-                                )
+                                .nonCancelled(event -> {
+                                    for (Entity entity : event.getEntities()) {
+                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                })
                                 .process();
                     });
             context.getCapturedEntityDropSupplier()
@@ -323,12 +326,12 @@ public interface PacketFunction {
                                 .build())
                                 .build();
                         EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
-                                .nonCancelled(event ->
-                                        event.getEntities().forEach(entity -> {
-                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        })
-                                )
+                                .nonCancelled(event -> {
+                                    for (Entity entity : event.getEntities()) {
+                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                })
                                 .process();
                     });
 
@@ -352,12 +355,12 @@ public interface PacketFunction {
                                 .build())
                                 .build();
                         EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
-                                .nonCancelled(event ->
-                                        event.getEntities().forEach(entity -> {
-                                            EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
-                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                        })
-                                )
+                                .nonCancelled(event -> {
+                                    for (Entity entity : event.getEntities()) {
+                                        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                        causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                    }
+                                })
                                 .process();
                     });
             context.getCapturedEntityDropSupplier()
@@ -369,12 +372,12 @@ public interface PacketFunction {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interaction").centre().hr();
                         printer.add("The item stacks captured are: ");
-                        map.asMap().entrySet().forEach(entry -> {
+                        for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
                             printer.add("  - Entity with UUID: %s", entry.getKey());
                             for (ItemStack stack : entry.getValue()) {
                                 printer.add("    - %s", stack);
                             }
-                        });
+                        }
                         printer.trace(System.err);
                     });
 
@@ -434,13 +437,10 @@ public interface PacketFunction {
                             PacketPhaseUtil.handleCustomCursor(player, creativeInventoryEvent.getCursorTransaction().getFinal());
                         }
                         if (creativeInventoryEvent instanceof CreativeInventoryEvent.Drop) {
-                            ((CreativeInventoryEvent.Drop) creativeInventoryEvent).getEntities()
-                                    .forEach(entity -> {
-                                        if (entity != null) {
-                                            TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), player.worldObj);
-                                            ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
-                                        }
-                                    });
+                            for (Entity entity : ((CreativeInventoryEvent.Drop) creativeInventoryEvent).getEntities()) {
+                                TrackingUtil.associateEntityCreator(context, EntityUtil.toNative(entity), player.worldObj);
+                                ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
+                            }
                         }
                     })
                     .process();
@@ -509,10 +509,10 @@ public interface PacketFunction {
                             }
                         }
                         if (inventoryEvent instanceof SpawnEntityEvent) {
-                            ((SpawnEntityEvent) inventoryEvent).getEntities().forEach(entity -> {
+                            for (Entity entity : ((SpawnEntityEvent) inventoryEvent).getEntities()) {
                                 EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                                 ((IMixinWorldServer) player.worldObj).forceSpawnEntity(entity);
-                            });
+                            }
                         }
                     }).post(event -> slotTransactions.clear())
                     .process();

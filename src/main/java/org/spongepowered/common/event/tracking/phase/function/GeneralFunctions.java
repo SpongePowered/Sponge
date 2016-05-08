@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityHanging;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
 import net.minecraft.util.math.BlockPos;
@@ -88,15 +89,15 @@ public class GeneralFunctions {
             Transaction<BlockSnapshot> transaction, @Nullable Entity tickingEntity) {
         if (change == BlockChange.BREAK) {
             final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            EntityUtil.findHangingEntities(minecraftWorld, blockPos).stream()
-                    .filter(entity -> entity instanceof EntityItemFrame)
-                    .forEach(hanging -> {
-                        final EntityItemFrame itemFrame = (EntityItemFrame) hanging;
-                        if (tickingEntity != null) {
-                            itemFrame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
-                        }
-                        itemFrame.setDead();
-                    });
+            for (EntityHanging entityHanging : EntityUtil.findHangingEntities(minecraftWorld, blockPos)) {
+                if (entityHanging instanceof EntityItemFrame) {
+                    final EntityItemFrame frame = (EntityItemFrame) entityHanging;
+                    if (tickingEntity != null) {
+                        frame.dropItemOrSelf(EntityUtil.toNative(tickingEntity), true);
+                    }
+                    frame.setDead();
+                }
+            }
         }
     }
 
@@ -114,9 +115,12 @@ public class GeneralFunctions {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
 
-        snapshots.stream()
-                .map(getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld))
-                .forEach(getTransactionConsumer(transactionBuilders));
+        final Consumer<Transaction<BlockSnapshot>> transactionConsumer = getTransactionConsumer(transactionBuilders);
+        final Function<BlockSnapshot, Transaction<BlockSnapshot>> blockSnapshotTransactionFunction =
+                getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld);
+        for (BlockSnapshot snapshot : snapshots) {
+            transactionConsumer.accept(blockSnapshotTransactionFunction.apply(snapshot));
+        }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
             transactionArrays[i] = transactionBuilders[i].build();
@@ -141,19 +145,21 @@ public class GeneralFunctions {
 
             if (blockEvent.isCancelled()) {
                 // Restore original blocks
-                Lists.reverse(blockEvent.getTransactions()).forEach(transaction -> transaction.getOriginal().restore(true, false));
+                for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                    transaction.getOriginal().restore(true, false);
+                }
                 return;
             } else {
                 // Need to undo any invalid changes
                 final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions()
                         .orElseThrow(PhaseUtil.throwWithContext("Not capturing invalid transactions!", context));
-                blockEvent.getTransactions().forEach(snapshotTransaction -> {
-                    if (!snapshotTransaction.isValid()) {
-                        invalid.add(snapshotTransaction);
+                for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
+                    if (!transaction.isValid()) {
+                        invalid.add(transaction);
                     } else {
-                        state.handleBlockChangeWithUser(blockChange, minecraftWorld, snapshotTransaction, context);
+                        state.handleBlockChangeWithUser(blockChange, minecraftWorld, transaction, context);
                     }
-                });
+                }
 
                 if (!invalid.isEmpty()) {
                     for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
@@ -279,10 +285,12 @@ public class GeneralFunctions {
         phaseContext.firstNamed(NamedCause.NOTIFIER, User.class).map(NamedCause::notifier).ifPresent(builder::named);
         final Cause spawnCauses = builder.build();
         EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(spawnCauses, itemDrops, causeTracker.getWorld()))
-                .nonCancelled(event -> event.getEntities().forEach(entity -> {
-                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                        })
+                .nonCancelled(event -> {
+                            for (Entity entity : event.getEntities()) {
+                                TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        }
                 )
                 .process();
 
@@ -300,9 +308,12 @@ public class GeneralFunctions {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
 
-        blockSnapshots.stream()
-                .map(getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld))
-                .forEach(getTransactionConsumer(transactionBuilders));
+        final Consumer<Transaction<BlockSnapshot>> transactionConsumer = getTransactionConsumer(transactionBuilders);
+        final Function<BlockSnapshot, Transaction<BlockSnapshot>> blockSnapshotTransactionFunction =
+                getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld);
+        for (BlockSnapshot snapshot : blockSnapshots) {
+            transactionConsumer.accept(blockSnapshotTransactionFunction.apply(snapshot));
+        }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
             transactionArrays[i] = transactionBuilders[i].build();
@@ -326,18 +337,21 @@ public class GeneralFunctions {
 
             if (blockEvent.isCancelled()) {
                 // Restore original blocks
-                Lists.reverse(blockEvent.getTransactions()).forEach(transaction -> transaction.getOriginal().restore(true, false));
+                for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
+                    transaction.getOriginal().restore(true, false);
+                }
                 return;
             } else {
                 // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions().get();
-                blockEvent.getTransactions().forEach(snapshotTransaction -> {
+                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions()
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to have invalid transactions on an event, but had none!", context));
+                for (Transaction<BlockSnapshot> snapshotTransaction : blockEvent.getTransactions()) {
                     if (!snapshotTransaction.isValid()) {
                         invalid.add(snapshotTransaction);
                     } else {
                         unwindingState.markPostNotificationChange(blockChange, minecraftWorld, context, snapshotTransaction);
                     }
-                });
+                }
 
                 if (invalid.size() > 0) {
                     for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
@@ -365,7 +379,9 @@ public class GeneralFunctions {
                     .event(SpongeEventFactory.createChangeBlockEventPost(builder.build(), world, transactions))
                     .cancelled(event -> {
                         // Transactions must be restored in reverse order.
-                        Lists.reverse(event.getTransactions()).forEach(transaction -> transaction.getOriginal().restore(true, false));
+                        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+                            transaction.getOriginal().restore(true, false);
+                        }
                     })
                     .process()
                     .isCancelled();

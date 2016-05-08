@@ -52,7 +52,11 @@ public final class BlockFunction {
                     .build())
                 .build();
             EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, items, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .nonCancelled(event ->  {
+                        for (Entity entity : event.getEntities()) {
+                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        }
+                    })
                     .process();
         };
         Drops DISPENSE = (blockSnapshot, causeTracker, phaseContext, items) -> {
@@ -62,7 +66,11 @@ public final class BlockFunction {
                         .build())
                     .build();
             EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, items, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .nonCancelled(event -> {
+                        for (Entity entity : event.getEntities()) {
+                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        }
+                    })
                     .process();
         };
 
@@ -79,7 +87,11 @@ public final class BlockFunction {
                         .build())
                     .build();
             EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
-                    .nonCancelled(event -> event.getEntities().forEach(entity -> causeTracker.getMixinWorld().forceSpawnEntity(entity)))
+                    .nonCancelled(event -> {
+                        for (Entity entity : event.getEntities()) {
+                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                        }
+                    })
                     .process();
         };
 

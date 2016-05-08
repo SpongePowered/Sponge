@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.item.EntityItem;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -51,14 +50,15 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 public final class EntityPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         DEATH_DROPS_SPAWNING,
-        DEATH_UPDATE,
-        ;
+        DEATH_UPDATE,;
 
         @Override
         public EntityPhase getPhase() {
@@ -75,7 +75,10 @@ public final class EntityPhase extends TrackingPhase {
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
         if (state == State.DEATH_DROPS_SPAWNING) {
-            final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class).orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
+            final Entity
+                    dyingEntity =
+                    phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
+                            .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities but we're not capturing!", phaseContext))
                     .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_DROPS.process(dyingEntity, causeTracker, phaseContext, items));
@@ -94,7 +97,11 @@ public final class EntityPhase extends TrackingPhase {
 
                 final Cause preCause = Cause.source(dyingEntity).named("Attacker", damageSource).build();
                 EventConsumer.event(SpongeEventFactory.createDropItemEventPre(preCause, originals, snapshots))
-                        .nonCancelled(event -> event.getDroppedItems().stream().map(ItemStackSnapshot::createStack).forEach(items::add))
+                        .nonCancelled(event -> {
+                            for (ItemStackSnapshot snapshot : event.getDroppedItems()) {
+                                items.add(snapshot.createStack());
+                            }
+                        })
                         .process();
                 if (!items.isEmpty()) {
                     final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(dyingEntity);
@@ -110,10 +117,13 @@ public final class EntityPhase extends TrackingPhase {
                             .named(NamedCause.of("Attacker", damageSource))
                             .build();
                     EventConsumer.event(SpongeEventFactory.createDropItemEventDestruct(cause, itemEntities, causeTracker.getWorld()))
-                            .nonCancelled(event -> event.getEntities().stream().forEach(entity -> {
-                                TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
-                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                            }))
+                            .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, entity, causeTracker.getMinecraftWorld());
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    }
+                            )
                             .process();
 
                 }
@@ -128,7 +138,8 @@ public final class EntityPhase extends TrackingPhase {
                     .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities from a dying entity!", phaseContext))
-                    .ifPresentAndNotEmpty(entities -> EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, entities));
+                    .ifPresentAndNotEmpty(entities ->
+                            EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, entities));
             phaseContext.getCapturedEntityDrops().ifPresent(map -> {
                 if (map.isEmpty()) {
                     return;
@@ -137,12 +148,12 @@ public final class EntityPhase extends TrackingPhase {
                 printer.add("Processing Entity Death Updates Spawning").centre().hr();
                 printer.add("Entity Dying: " + dyingEntity);
                 printer.add("The item stacks captured are: ");
-                map.asMap().entrySet().forEach(entry -> {
+                for (Map.Entry<UUID, Collection<ItemStack>> entry : map.asMap().entrySet()) {
                     printer.add("  - Entity with UUID: %s", entry.getKey());
                     for (ItemStack stack : entry.getValue()) {
                         printer.add("    - %s", stack);
                     }
-                });
+                }
                 printer.trace(System.err);
             });
         }
