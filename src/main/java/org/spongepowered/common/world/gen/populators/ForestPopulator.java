@@ -29,8 +29,8 @@ import com.google.common.base.Objects;
 import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
@@ -48,7 +48,7 @@ public class ForestPopulator implements Forest {
 
     private VariableAmount count;
     private WeightedTable<PopulatorObject> types;
-    private Function<Location<Chunk>, PopulatorObject> override = null;
+    private Function<Location<Extent>, PopulatorObject> override = null;
 
     public ForestPopulator() {
         this.count = VariableAmount.fixed(10);
@@ -61,8 +61,9 @@ public class ForestPopulator implements Forest {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
         int n = this.count.getFlooredAmount(random);
         int x;
         int z;
@@ -71,11 +72,11 @@ public class ForestPopulator implements Forest {
         List<PopulatorObject> result;
         PopulatorObject type;
         for (int i = 0; i < n; i++) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
-            pos = ((net.minecraft.world.World) chunk.getWorld()).getTopSolidOrLiquidBlock(new BlockPos(min.getX() + x, min.getY(), min.getZ() + z));
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
+            pos = ((net.minecraft.world.World) world).getTopSolidOrLiquidBlock(new BlockPos(min.getX() + x, min.getY(), min.getZ() + z));
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
+                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);
@@ -84,8 +85,8 @@ public class ForestPopulator implements Forest {
                 }
                 type = result.get(0);
             }
-            if (type.canPlaceAt(chunk.getWorld(), pos.getX(), pos.getY(), pos.getZ())) {
-                type.placeObject(chunk.getWorld(), random, pos.getX(), pos.getY(), pos.getZ());
+            if (type.canPlaceAt(world, pos.getX(), pos.getY(), pos.getZ())) {
+                type.placeObject(world, random, pos.getX(), pos.getY(), pos.getZ());
             }
         }
     }
@@ -106,12 +107,12 @@ public class ForestPopulator implements Forest {
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, PopulatorObject>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, PopulatorObject>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, PopulatorObject> override) {
         this.override = override;
     }
 

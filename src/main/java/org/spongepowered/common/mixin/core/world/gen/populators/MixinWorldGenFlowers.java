@@ -36,8 +36,8 @@ import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Flower;
@@ -59,7 +59,7 @@ import javax.annotation.Nullable;
 public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flower {
 
     private WeightedTable<PlantType> flowers;
-    private Function<Location<Chunk>, PlantType> override = null;
+    private Function<Location<Extent>, PlantType> override = null;
     private VariableAmount count;
 
     @Shadow
@@ -77,9 +77,10 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
 
         int x, y, z;
@@ -92,12 +93,12 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
         PlantType type = PlantTypes.DANDELION;
         List<PlantType> result;
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             blockpos = chunkPos.add(x, y, z);
             if(this.override != null) {
-                Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos));
+                Location<Extent> pos = new Location<>(extent, VecHelper.toVector3i(blockpos));
                 type = this.override.apply(pos);
             } else {
                 result = this.flowers.get(random);
@@ -138,12 +139,12 @@ public abstract class MixinWorldGenFlowers extends WorldGenerator implements Flo
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, PlantType>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, PlantType>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, PlantType> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, PlantType> override) {
         this.override = override;
     }
 

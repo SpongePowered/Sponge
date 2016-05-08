@@ -34,7 +34,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBlockBlob;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.BlockBlob;
@@ -67,16 +67,17 @@ public abstract class MixinWorldGenBlockBlob implements BlockBlob {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x, z;
         int n = this.count.getFlooredAmount(random);
 
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             generate(world, random, world.getHeight(chunkPos.add(x, 0, z)));
         }
     }

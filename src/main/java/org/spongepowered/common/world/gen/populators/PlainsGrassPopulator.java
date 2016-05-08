@@ -32,7 +32,7 @@ import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.PlantTypes;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.WeightedObject;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -73,10 +73,10 @@ public class PlainsGrassPopulator implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
-        double d0 = this.noise.getValue((double) (chunkPos.getX() + 8) / 200.0D, (double) (chunkPos.getZ() + 8) / 200.0D);
+        double d0 = this.noise.getValue((chunkPos.getX() + 8) / 200.0D, (chunkPos.getZ() + 8) / 200.0D);
 
         if (d0 < -0.8D) {
             this.flowers.setFlowersPerChunk(15 * 64);
@@ -88,16 +88,16 @@ public class PlainsGrassPopulator implements Populator {
             this.plant.getPossibleTypes().clear();
             this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.GRASS, 1));
             this.plant.setPlantsPerChunk(7 * 5);
-            this.plant.populate(chunk, random);
+            this.plant.populate(world, extent, random);
         }
-        this.flowers.populate(chunk, random);
-        this.grass.populate(chunk, random);
+        this.flowers.populate(world, extent, random);
+        this.grass.populate(world, extent, random);
 
         if (this.sunflowers) {
             this.plant.getPossibleTypes().clear();
             this.plant.getPossibleTypes().add(new WeightedObject<DoublePlantType>(DoublePlantTypes.SUNFLOWER, 1));
             this.plant.setPlantsPerChunk(10 * 5);
-            this.plant.populate(chunk, random);
+            this.plant.populate(world, extent, random);
         }
     }
 

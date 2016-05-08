@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.BlockColored;
 import net.minecraft.block.BlockDirt;
 import net.minecraft.block.BlockSand;
@@ -74,14 +75,15 @@ public class MesaBiomeGenerationPopulator implements GenerationPopulator {
         this.lastSeed = seed;
         int cx = buffer.getBlockMin().getX();
         int cz = buffer.getBlockMin().getZ();
+        Vector3i size = buffer.getBlockSize();
 
-        this.stoneNoise = this.noise1.getRegion(this.stoneNoise, cx, cz, 16, 16, 0.0625D, 0.0625D, 1.0D);
+        this.stoneNoise = this.noise1.getRegion(this.stoneNoise, cx, cz, size.getX(), size.getZ(), 0.0625D, 0.0625D, 1.0D);
 
         Random rand = new Random(cx / 16 * 341873128712L + cz / 16 * 132897987541L);
 
-        for (int x = 0; x < 16; x++) {
+        for (int x = 0; x < size.getX(); x++) {
             int xo = buffer.getBlockMin().getX() + x;
-            for (int z = 0; z < 16; z++) {
+            for (int z = 0; z < size.getZ(); z++) {
                 int zo = buffer.getBlockMin().getZ() + z;
                 performOnColumn(rand, buffer, world, xo, zo, this.stoneNoise[x + z * 16]);
             }

@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenDeadBush;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DeadBush;
@@ -58,13 +58,14 @@ public abstract class MixinWorldGenDeadBush extends WorldGenerator implements De
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        Vector3i min = chunk.getBlockMin();
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int n = (int) Math.ceil(this.count.getFlooredAmount(random) / 16f);
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.add(random.nextInt(16) + 8, 0, random.nextInt(16) + 8);
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             pos = world.getTopSolidOrLiquidBlock(pos).add(0, 1, 0);
             generate(world, random, pos);
         }

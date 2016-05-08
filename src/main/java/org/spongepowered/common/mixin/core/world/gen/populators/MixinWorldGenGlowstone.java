@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.EnumFacing;
@@ -33,7 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenGlowStone1;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Glowstone;
@@ -67,15 +68,17 @@ public abstract class MixinWorldGenGlowstone extends MixinWorldGenerator impleme
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
+        BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int n = this.count.getFlooredAmount(random);
         int x, y, z;
 
         for (int i = 0; i < n; i++) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             y = this.height.getFlooredAmount(random);
             generate(world, random, position.add(x, y, z));
         }

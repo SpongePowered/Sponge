@@ -32,8 +32,8 @@ import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.populator.Mushroom;
 import org.spongepowered.api.world.gen.populator.Mushroom.Builder;
 import org.spongepowered.api.world.gen.type.MushroomType;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 public class MushroomBuilder implements Mushroom.Builder {
 
     private ChanceTable<MushroomType> types;
-    @Nullable private Function<Location<Chunk>, MushroomType> override;
+    @Nullable private Function<Location<Extent>, MushroomType> override;
     private VariableAmount count;
 
     public MushroomBuilder() {
@@ -74,7 +74,7 @@ public class MushroomBuilder implements Mushroom.Builder {
     }
 
     @Override
-    public Builder supplier(@Nullable Function<Location<Chunk>, MushroomType> override) {
+    public Builder supplier(@Nullable Function<Location<Extent>, MushroomType> override) {
         this.override = override;
         return this;
     }

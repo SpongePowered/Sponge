@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeEndDecorator;
 import net.minecraft.world.gen.feature.WorldGenSpikes;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.util.VecHelper;
@@ -46,14 +47,15 @@ public class EndSpikePopulator implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World worldIn = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
+        Vector3i min = extent.getBlockMin();
+        World worldIn = (World) world;
         WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.getSpikesForWorld(worldIn);
-        BlockPos pos = VecHelper.toBlockPos(chunk.getBlockMin());
+        BlockPos pos = VecHelper.toBlockPos(min);
         for (WorldGenSpikes.EndSpike worldgenspikes$endspike : aworldgenspikes$endspike) {
             if (worldgenspikes$endspike.doesStartInChunk(pos)) {
                 this.spikeGen.setSpike(worldgenspikes$endspike);
-                this.spikeGen.generate(worldIn, random,
+                this.spikeGen.generate(worldIn, rand,
                         new BlockPos(worldgenspikes$endspike.getCenterX(), 45, worldgenspikes$endspike.getCenterZ()));
             }
         }

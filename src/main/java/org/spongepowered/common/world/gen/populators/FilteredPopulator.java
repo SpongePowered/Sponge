@@ -25,7 +25,7 @@
 package org.spongepowered.common.world.gen.populators;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
@@ -38,13 +38,13 @@ public class FilteredPopulator implements IFlaggedPopulator {
 
     private final Populator wrapped;
     private final List<String> requiredFlags = Lists.newArrayList();
-    private final Predicate<Chunk> check;
+    private final Predicate<Extent> check;
 
     public FilteredPopulator(Populator w) {
         this(w, (c) -> true);
     }
 
-    public FilteredPopulator(Populator w, Predicate<Chunk> c) {
+    public FilteredPopulator(Populator w, Predicate<Extent> c) {
         this.wrapped = w;
         this.check = c;
     }
@@ -62,19 +62,19 @@ public class FilteredPopulator implements IFlaggedPopulator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        this.wrapped.populate(chunk, random);
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
+        this.wrapped.populate(world, extent, rand);
     }
 
     @Override
-    public void populate(Chunk chunk, Random rand, List<String> flags) {
-        if (!this.check.test(chunk)) {
+    public void populate(Extent extent, org.spongepowered.api.world.World world, Random rand, List<String> flags) {
+        if (!this.check.test(extent)) {
             return;
         }
         if (!flags.containsAll(this.requiredFlags)) {
             return;
         }
-        this.wrapped.populate(chunk, rand);
+        this.wrapped.populate(world, extent, rand);
     }
 
 }

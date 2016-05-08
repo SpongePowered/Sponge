@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.util.math.BlockPos;
@@ -36,7 +37,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.property.block.MatterProperty;
 import org.spongepowered.api.data.property.block.MatterProperty.Matter;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Lake;
@@ -72,14 +73,16 @@ public abstract class MixinWorldGenLake implements Lake {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         if (random.nextDouble() < this.prob) {
-            int x = random.nextInt(16) + 8;
+            int x = random.nextInt(size.getX());
             int y = this.height.getFlooredAmount(random);
-            int z = random.nextInt(16) + 8;
-            generate(world, random, new BlockPos(x + chunk.getBlockMin().getX(), y + chunk.getBlockMin().getY(),
-                    z + chunk.getBlockMin().getZ()));
+            int z = random.nextInt(size.getZ());
+            generate(world, random, new BlockPos(x + min.getX(), y + min.getY(),
+                    z + min.getZ()));
         }
     }
 

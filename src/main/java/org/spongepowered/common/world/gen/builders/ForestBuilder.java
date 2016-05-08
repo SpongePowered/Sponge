@@ -30,8 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.populator.Forest.Builder;
@@ -45,7 +45,7 @@ public class ForestBuilder implements Forest.Builder {
     
     private VariableAmount count;
     private WeightedTable<PopulatorObject> types;
-    @Nullable private Function<Location<Chunk>, PopulatorObject> override;
+    @Nullable private Function<Location<Extent>, PopulatorObject> override;
     
     public ForestBuilder() {
         reset();
@@ -73,7 +73,7 @@ public class ForestBuilder implements Forest.Builder {
     }
 
     @Override
-    public Builder supplier(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
+    public Builder supplier(@Nullable Function<Location<Extent>, PopulatorObject> override) {
         this.override = override;
         return this;
     }

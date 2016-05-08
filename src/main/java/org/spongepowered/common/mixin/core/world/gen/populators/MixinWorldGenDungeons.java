@@ -34,7 +34,7 @@ import org.spongepowered.api.data.manipulator.mutable.MobSpawnerData;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.util.weighted.LootTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Dungeon;
@@ -80,18 +80,19 @@ public abstract class MixinWorldGenDungeons extends WorldGenerator implements Du
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
 
         int n = this.attempts.getFlooredAmount(random);
         int x, y, z;
 
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            y = random.nextInt(256);
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            y = random.nextInt(size.getY());
+            z = random.nextInt(size.getZ());
             generate(world, random, chunkPos.add(x, y, z));
         }
     }

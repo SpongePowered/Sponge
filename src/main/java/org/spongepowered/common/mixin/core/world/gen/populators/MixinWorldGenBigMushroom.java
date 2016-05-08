@@ -34,8 +34,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
@@ -62,7 +62,7 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 
     private WeightedTable<PopulatorObject> types;
-    private Function<Location<Chunk>, PopulatorObject> override = null;
+    private Function<Location<Extent>, PopulatorObject> override = null;
     private VariableAmount mushroomsPerChunk;
 
     @Inject(method = "<init>", at = @At("RETURN") )
@@ -77,9 +77,10 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x;
         int z;
@@ -88,11 +89,11 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
         PopulatorObject type = MushroomTypes.BROWN.getPopulatorObject();
         List<PopulatorObject> result;
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             BlockPos pos = world.getHeight(chunkPos.add(x, 0, z));
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
+                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);
@@ -171,12 +172,12 @@ public abstract class MixinWorldGenBigMushroom extends MixinWorldGenerator imple
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, PopulatorObject>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, PopulatorObject>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, PopulatorObject> override) {
         this.override = override;
     }
 

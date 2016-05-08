@@ -26,6 +26,7 @@ package org.spongepowered.common.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.state.IBlockState;
@@ -33,7 +34,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.SeaFloor;
@@ -63,12 +64,14 @@ public class SeaFloorPopulator implements SeaFloor {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         int n = this.count.getFlooredAmount(random);
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX() + 8, chunk.getBlockMin().getY(), chunk.getBlockMin().getZ() + 8);
+        BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.add(random.nextInt(16), 0, random.nextInt(16));
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             // This method is incorrectly named, it simply gets the top block
             // that blocks movement and isn't leaves
             pos = world.getTopSolidOrLiquidBlock(pos);

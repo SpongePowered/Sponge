@@ -27,6 +27,7 @@ package org.spongepowered.common.world.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -56,6 +57,7 @@ import org.spongepowered.api.event.world.chunk.PopulateChunkEvent;
 import org.spongepowered.api.world.biome.BiomeGenerationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.biome.GroundCoverLayer;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.BiomeGenerator;
@@ -75,6 +77,7 @@ import org.spongepowered.common.interfaces.world.gen.IChunkProviderOverworld;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
+import org.spongepowered.common.world.extent.SoftBufferExtentViewDownsize;
 import org.spongepowered.common.world.gen.populators.SnowPopulator;
 
 import java.util.ArrayList;
@@ -203,7 +206,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public Chunk provideChunk(int chunkX, int chunkZ) {
-        this.rand.setSeed((long) chunkX * 341873128712L + (long) chunkZ * 132897987541L);
+        this.rand.setSeed(chunkX * 341873128712L + chunkZ * 132897987541L);
         this.cachedBiomes.reuse(new Vector2i(chunkX * 16, chunkZ * 16));
         this.biomeGenerator.generateBiomes(this.cachedBiomes);
 
@@ -258,7 +261,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
         long j1 = this.rand.nextLong() / 2L * 2L + 1L;
-        this.rand.setSeed((long) chunkX * i1 + (long) chunkZ * j1 ^ this.world.getSeed());
+        this.rand.setSeed(chunkX * i1 + chunkZ * j1 ^ this.world.getSeed());
         BlockFalling.fallInstantly = true;
 
         BlockPos blockpos = new BlockPos(chunkX * 16, 0, chunkZ * 16);
@@ -291,22 +294,25 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
 
         List<String> flags = Lists.newArrayList();
+        Vector3i min = new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
+        org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) this.world;
+        Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 0, 15), min.sub(8, 0, 8), min.add(23, 0, 23));
         for (Populator populator : populators) {
             final PopulatorType type = populator.getType();
             if (type == null) {
                 System.err.printf("Found a populator with a null type: %s populator%n", populator);
             }
+            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
+                continue;
+            }
             causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
                     .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, type))
                     .addEntityCaptures()
                     .complete());
-            if (Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
-                continue;
-            }
             if (populator instanceof IFlaggedPopulator) {
-                ((IFlaggedPopulator) populator).populate(chunk, this.rand, flags);
+                ((IFlaggedPopulator) populator).populate(volume, spongeWorld, this.rand, flags);
             } else {
-                populator.populate(chunk, this.rand);
+                populator.populate(spongeWorld, volume, this.rand);
             }
             causeTracker.completePhase();
         }
@@ -371,7 +377,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {
         double d0 = 0.03125D;
-        this.stoneNoise = this.noise4.getRegion(this.stoneNoise, (double) (x * 16), (double) (z * 16), 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
+        this.stoneNoise = this.noise4.getRegion(this.stoneNoise, x * 16, z * 16, 16, 16, d0 * 2.0D, d0 * 2.0D, 1.0D);
         Vector2i min = biomes.getBiomeMin();
         for (int k = 0; k < 16; ++k) {
             for (int l = 0; l < 16; ++l) {

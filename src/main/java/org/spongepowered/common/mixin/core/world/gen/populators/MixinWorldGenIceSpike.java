@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import com.flowpowered.math.GenericMath;
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -36,7 +37,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenIceSpike;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.IceSpike;
@@ -70,15 +71,17 @@ public abstract class MixinWorldGenIceSpike extends WorldGenerator implements Ic
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         int x;
         int z;
-        BlockPos chunkPos = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
+        BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int n = this.count.getFlooredAmount(random);
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             generate(world, random, world.getHeight(chunkPos.add(x, 0, z)));
         }
     }

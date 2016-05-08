@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenWaterlily;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.WaterLily;
@@ -57,10 +58,12 @@ public abstract class MixinWorldGenWaterLily extends WorldGenerator implements W
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         int n = this.count.getFlooredAmount(random);
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
-        World world = (World) chunk.getWorld();
+        BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x, z;
 
         // The generate method makes 10 attempts, so divide the count by 10
@@ -70,8 +73,8 @@ public abstract class MixinWorldGenWaterLily extends WorldGenerator implements W
         }
 
         for (int i = 0; i < n; i++) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             BlockPos pos = position.add(x, 0, z);
             pos = world.getTopSolidOrLiquidBlock(pos);
             generate(world, random, pos);

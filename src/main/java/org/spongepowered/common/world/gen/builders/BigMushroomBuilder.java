@@ -32,8 +32,8 @@ import net.minecraft.world.gen.feature.WorldGenBigMushroom;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.populator.BigMushroom;
 import org.spongepowered.api.world.gen.populator.BigMushroom.Builder;
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 public class BigMushroomBuilder implements BigMushroom.Builder {
 
     private WeightedTable<PopulatorObject> types;
-    @Nullable private Function<Location<Chunk>, PopulatorObject> override;
+    @Nullable private Function<Location<Extent>, PopulatorObject> override;
     private VariableAmount count;
 
     public BigMushroomBuilder() {
@@ -74,7 +74,7 @@ public class BigMushroomBuilder implements BigMushroom.Builder {
     }
 
     @Override
-    public Builder supplier(@Nullable Function<Location<Chunk>, PopulatorObject> override) {
+    public Builder supplier(@Nullable Function<Location<Extent>, PopulatorObject> override) {
         this.override = override;
         return this;
     }

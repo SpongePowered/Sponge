@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.material.Material;
 import net.minecraft.init.Blocks;
@@ -31,7 +32,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenReed;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Reed;
@@ -61,12 +62,14 @@ public class MixinWorldGenReed implements Reed {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(),
-                chunk.getBlockMin().getZ());
-        int x = random.nextInt(16) + 8;
-        int z = random.nextInt(16) + 8;
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
+        BlockPos position = new BlockPos(min.getX(), min.getY(),
+                min.getZ());
+        int x = random.nextInt(size.getX());
+        int z = random.nextInt(size.getZ());
         position = world.getTopSolidOrLiquidBlock(position.add(x, 0, z));
         generate(world, random, position);
     }
@@ -93,11 +96,11 @@ public class MixinWorldGenReed implements Reed {
                         || worldIn.getBlockState(blockpos2.north()).getMaterial() == Material.WATER
                         || worldIn.getBlockState(blockpos2.south()).getMaterial() == Material.WATER) {
                     // Sponge start
-                    int j = this.height.getFlooredAmount(rand);
+                    int height = this.height.getFlooredAmount(rand);
                     // Sponge end
-                    for (int k = 0; k < j; ++k) {
+                    for (int y = 0; y < height; ++y) {
                         if (Blocks.REEDS.canBlockStay(worldIn, blockpos1)) {
-                            worldIn.setBlockState(blockpos1.up(k), Blocks.REEDS.getDefaultState(), 2);
+                            worldIn.setBlockState(blockpos1.up(y), Blocks.REEDS.getDefaultState(), 2);
                         }
                     }
                 }

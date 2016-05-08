@@ -36,8 +36,8 @@ import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -60,12 +60,13 @@ import javax.annotation.Nullable;
 public class MixinWorldGenDoublePlant implements DoublePlant {
 
     private WeightedTable<DoublePlantType> types;
-    private Function<Location<Chunk>, DoublePlantType> override = null;
+    private Function<Location<Extent>, DoublePlantType> override = null;
     private VariableAmount count;
+    private Extent currentExtent = null;
 
     @Shadow private BlockDoublePlant.EnumPlantType plantType;
 
-    @Inject(method = "<init>()V", at = @At("RETURN") )
+    @Inject(method = "<init>()V", at = @At("RETURN"))
     public void onConstructed(CallbackInfo ci) {
         this.types = new WeightedTable<>();
         this.count = VariableAmount.fixed(1);
@@ -77,19 +78,34 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        this.currentExtent = extent;
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x, y, z;
         int n = (int) Math.ceil(this.count.getFlooredAmount(random) / 8f);
 
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() + 32);
             generate(world, random, world.getHeight(chunkPos.add(x, y, z)));
         }
+        this.currentExtent = null;
+    }
+
+    private DoublePlantType getType(Vector3i position, Random rand) {
+        if (this.override != null && this.currentExtent != null) {
+            Location<Extent> pos = new Location<>(this.currentExtent, position);
+            return this.override.apply(pos);
+        }
+        List<DoublePlantType> result = this.types.get(rand);
+        if (result.isEmpty()) {
+            return DoublePlantTypes.GRASS;
+        }
+        return result.get(0);
     }
 
     private int nextInt(Random rand, int i) {
@@ -102,7 +118,7 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
      * @author Deamon - December 12th, 2015
      * 
      * @reason Completely changes the method to leverage the WeightedTable
-     * types. This method was almost completely rewritten.
+     *         types. This method was almost completely rewritten.
      */
     @Overwrite
     public boolean generate(World worldIn, Random rand, BlockPos position) {
@@ -111,26 +127,14 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
         if (this.types.isEmpty()) {
             this.types.add(new WeightedObject<DoublePlantType>((DoublePlantType) (Object) this.plantType, 1));
         }
-        DoublePlantType type = DoublePlantTypes.GRASS;
-        List<DoublePlantType> result;
-        Chunk chunk = (Chunk) worldIn.getChunkFromBlockCoords(position);
         for (int i = 0; i < 8; ++i) {
-            BlockPos blockpos1 = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
+            BlockPos next = position.add(rand.nextInt(8) - rand.nextInt(8), rand.nextInt(4) - rand.nextInt(4),
                     rand.nextInt(8) - rand.nextInt(8));
 
-            if (worldIn.isAirBlock(blockpos1) && (!worldIn.provider.getHasNoSky() || blockpos1.getY() < 254)
-                    && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, blockpos1)) {
-                if (this.override != null) {
-                    Location<Chunk> pos = new Location<>(chunk, VecHelper.toVector3i(blockpos1));
-                    type = this.override.apply(pos);
-                } else {
-                    result = this.types.get(rand);
-                    if (result.isEmpty()) {
-                        continue;
-                    }
-                    type = result.get(0);
-                }
-                Blocks.DOUBLE_PLANT.placeAt(worldIn, blockpos1,
+            if (worldIn.isAirBlock(next) && (!worldIn.provider.getHasNoSky() || next.getY() < 254)
+                    && Blocks.DOUBLE_PLANT.canPlaceBlockAt(worldIn, next)) {
+                DoublePlantType type = getType(VecHelper.toVector3i(next), rand);
+                Blocks.DOUBLE_PLANT.placeAt(worldIn, next,
                         (BlockDoublePlant.EnumPlantType) (Object) type, 2);
                 flag = true;
             }
@@ -155,12 +159,12 @@ public class MixinWorldGenDoublePlant implements DoublePlant {
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, DoublePlantType>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, DoublePlantType>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, DoublePlantType> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, DoublePlantType> override) {
         this.override = override;
     }
 

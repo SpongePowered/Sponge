@@ -38,7 +38,7 @@ import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.EndIsland;
@@ -115,12 +115,14 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
     }
 
     @Override
-    public void populate(Chunk chunk, Random rand) {
-        if (this.noise == null || chunk.getWorld().getProperties().getSeed() != this.lastSeed) {
-            this.lastSeed = chunk.getWorld().getProperties().getSeed();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random rand) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
+        if (this.noise == null || worldIn.getProperties().getSeed() != this.lastSeed) {
+            this.lastSeed = worldIn.getProperties().getSeed();
             this.noise = new NoiseGeneratorSimplex(new Random(this.lastSeed));
         }
-        Vector3i min = chunk.getBlockMin();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int chunkX = min.getX() / 16;
         int chunkZ = min.getZ() / 16;
@@ -128,9 +130,9 @@ public abstract class MixinWorldGenEndIsland extends WorldGenerator implements E
             float f = this.func_185960_a(chunkX, chunkZ, 1, 1);
 
             if (f < -20.0F && rand.nextInt(14) == 0) {
-                generate((World) chunk.getWorld(), rand, chunkPos.add(rand.nextInt(16) + 8, 55 + rand.nextInt(16), rand.nextInt(16) + 8));
+                generate(world, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 if (rand.nextInt(4) == 0) {
-                    generate((World) chunk.getWorld(), rand, chunkPos.add(rand.nextInt(16) + 8, 55 + rand.nextInt(16), rand.nextInt(16) + 8));
+                    generate((World) worldIn, rand, chunkPos.add(rand.nextInt(size.getX()), 55 + rand.nextInt(16), rand.nextInt(size.getZ())));
                 }
             }
         }

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenMelon;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Melon;
@@ -57,12 +58,14 @@ public class MixinWorldGenMelon implements Melon {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
+        BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int n = this.count.getFlooredAmount(random);
-        int x = random.nextInt(16) + 8;
-        int z = random.nextInt(16) + 8;
+        int x = random.nextInt(size.getX());
+        int z = random.nextInt(size.getZ());
         int y = nextInt(random, Math.min(world.getHeight(position.add(x, 0, z)).getY() * 2, 255));
         position = position.add(x, y, z);
         for (int i = 0; i < n; ++i) {

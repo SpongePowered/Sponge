@@ -27,8 +27,9 @@ package org.spongepowered.common.world.gen.populators;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorObject;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
@@ -63,19 +64,21 @@ public class RandomObjectPopulator implements RandomObject {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
         int n = this.count.getFlooredAmount(random);
-        int x = chunk.getBlockMin().getX() + 8;
-        int y = chunk.getBlockMin().getY();
-        int z = chunk.getBlockMin().getZ() + 8;
+        int x = min.getX();
+        int y = min.getY();
+        int z = min.getZ();
         for (int i = 0; i < n; i++) {
             if (random.nextDouble() < this.chance) {
-                int x0 = x + random.nextInt(16);
+                int x0 = x + random.nextInt(size.getX());
                 int y0 = y + this.height.getFlooredAmount(random);
-                int z0 = z + random.nextInt(16);
+                int z0 = z + random.nextInt(size.getZ());
 
-                if (this.obj.canPlaceAt(chunk.getWorld(), x0, y0, z0)) {
-                    this.obj.placeObject(chunk.getWorld(), random, x0, y0, z0);
+                if (this.obj.canPlaceAt(world, x0, y0, z0)) {
+                    this.obj.placeObject(world, random, x0, y0, z0);
                 }
             }
         }

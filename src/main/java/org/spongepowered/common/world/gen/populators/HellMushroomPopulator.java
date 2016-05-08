@@ -31,9 +31,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.gen.Populator;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
@@ -51,7 +50,7 @@ import java.util.function.Function;
  * seeded by the height. Ideally in the future I can create a kind of GenerationContext object that these
  * varying amounts can be based off of holding things like the random object, the chunk, the heightmap, etc.
  */
-public class HellMushroomPopulator implements Populator, Mushroom {
+public class HellMushroomPopulator implements Mushroom {
 
     private final WorldGenBush feature;
     private final Mushroom featureM;
@@ -67,9 +66,9 @@ public class HellMushroomPopulator implements Populator, Mushroom {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x;
         int y;
@@ -79,12 +78,12 @@ public class HellMushroomPopulator implements Populator, Mushroom {
         MushroomType type;
         List<MushroomType> result;
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             y = random.nextInt(128);
             BlockPos height = chunkPos.add(x, y, z);
             if (this.featureM.getSupplierOverride().isPresent()) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(height));
+                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
                 type = this.featureM.getSupplierOverride().get().apply(pos2);
             } else {
                 result = this.featureM.getTypes().get(random);
@@ -98,7 +97,7 @@ public class HellMushroomPopulator implements Populator, Mushroom {
             } else {
                 this.feature.block = Blocks.RED_MUSHROOM;
             }
-            this.feature.generate(world, random, height);
+            this.feature.generate((World) world, random, height);
 
         }
     }
@@ -119,12 +118,12 @@ public class HellMushroomPopulator implements Populator, Mushroom {
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, MushroomType>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, MushroomType>> getSupplierOverride() {
         return this.featureM.getSupplierOverride();
     }
 
     @Override
-    public void setSupplierOverride(Function<Location<Chunk>, MushroomType> override) {
+    public void setSupplierOverride(Function<Location<Extent>, MushroomType> override) {
         this.featureM.setSupplierOverride(override);
     }
 

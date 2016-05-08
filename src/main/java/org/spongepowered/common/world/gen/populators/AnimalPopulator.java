@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
@@ -43,14 +43,13 @@ public class AnimalPopulator implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World worldObj = (World) chunk.getWorld();
-        BlockPos blockpos = new BlockPos(chunk.getBlockMin().getX(), 0, chunk.getBlockMin().getZ());
-        int x = chunk.getPosition().getX();
-        int z = chunk.getPosition().getZ();
-        BiomeGenBase biomegenbase = worldObj.getBiomeGenForCoords(blockpos.add(16, 0, 16));
+    public void populate(World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        BiomeGenBase biomegenbase = (BiomeGenBase) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
 
-        WorldEntitySpawner.performWorldGenSpawning(worldObj, biomegenbase, x * 16 + 8, z * 16 + 8, 16, 16, random);
+        WorldEntitySpawner.performWorldGenSpawning((net.minecraft.world.World) world, biomegenbase, min.getX(), min.getZ(), size.getX(), size.getZ(),
+                random);
     }
 
 }

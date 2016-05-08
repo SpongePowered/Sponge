@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.interfaces.world.gen;
 
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 
 import java.util.List;
@@ -32,6 +33,6 @@ import java.util.Random;
 
 public interface IFlaggedPopulator extends Populator {
 
-    void populate(Chunk chunk, Random rand, List<String> flags);
+    void populate(Extent extent, World world, Random rand, List<String> flags);
 
 }

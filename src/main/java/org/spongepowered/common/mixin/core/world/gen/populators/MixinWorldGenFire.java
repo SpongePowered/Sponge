@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenFire;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.NetherFire;
@@ -61,13 +62,15 @@ public class MixinWorldGenFire implements NetherFire {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         int n = this.count.getFlooredAmount(random);
         for (int i = 0; i < n; i++) {
-            int x = chunk.getBlockMin().getX() + 8 + random.nextInt(16);
-            int z = chunk.getBlockMin().getZ() + 8 + random.nextInt(16);
-            int y = chunk.getBlockMin().getY() + 4 + random.nextInt(120);
+            int x = min.getX() + random.nextInt(size.getX());
+            int z = min.getZ() + random.nextInt(size.getZ());
+            int y = min.getY() + 4 + random.nextInt(120);
             generate(world, random, new BlockPos(x, y, z));
         }
     }

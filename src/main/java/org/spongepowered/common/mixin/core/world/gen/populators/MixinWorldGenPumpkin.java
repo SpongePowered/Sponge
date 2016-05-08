@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.block.BlockPumpkin;
 import net.minecraft.init.Blocks;
@@ -32,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenPumpkin;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Pumpkin;
@@ -62,13 +63,15 @@ public class MixinWorldGenPumpkin implements Pumpkin {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         if (random.nextDouble() < this.chance) {
-            World world = (World) chunk.getWorld();
-            int x = chunk.getBlockMin().getX() + 8 + random.nextInt(16);
-            int z = chunk.getBlockMin().getZ() + 8 + random.nextInt(16);
+            int x = min.getX() + random.nextInt(size.getX());
+            int z = min.getZ() + random.nextInt(size.getZ());
             int height = world.getHeight(new BlockPos(x, 0, z)).getY();
-            int y = chunk.getBlockMin().getY() + height < 1 ? 0 : random.nextInt(height * 2);
+            int y = min.getY() + height < 1 ? 0 : random.nextInt(height * 2);
             generate(world, random, new BlockPos(x, y, z));
         }
     }

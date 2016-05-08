@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
 import org.spongepowered.common.world.gen.WorldGenConstants;
@@ -46,9 +47,10 @@ import java.util.Random;
 public abstract class MixinMapGenVillage extends MapGenStructure implements IFlaggedPopulator {
 
     @Override
-    public void populate(Chunk chunk, Random rand, List<String> flags) {
-        World world = (World) chunk.getWorld();
-        boolean flag = generateStructure(world, rand, new ChunkCoordIntPair(chunk.getPosition().getX(), chunk.getPosition().getZ()));
+    public void populate(Extent extent, org.spongepowered.api.world.World worldIn, Random random, List<String> flags) {
+        Vector3i min = extent.getBlockMin();
+        World world = (World) worldIn;
+        boolean flag = generateStructure(world, random, new ChunkCoordIntPair((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
         if (flag) {
             flags.add(WorldGenConstants.VILLAGE_FLAG);
         }

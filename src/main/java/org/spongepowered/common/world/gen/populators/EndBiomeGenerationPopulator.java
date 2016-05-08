@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.world.World;
@@ -35,18 +36,14 @@ public class EndBiomeGenerationPopulator implements GenerationPopulator {
 
     @Override
     public void populate(World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
+        Vector3i min = buffer.getBlockMin();
+        Vector3i max = buffer.getBlockMax();
         BlockState iblockstate = BlockTypes.END_STONE.getDefaultState();
-        for (int i = 0; i < 16; ++i) {
-            int x = i + buffer.getBlockMin().getX();
-            for (int j = 0; j < 16; ++j) {
-                int z = j + buffer.getBlockMin().getZ();
-
-                for (int l = 255; l >= 0; --l) {
-                    int y = l + buffer.getBlockMin().getY();
+        for (int x = min.getX(); x <= max.getX(); ++x) {
+            for (int z = min.getZ(); z <= max.getZ(); ++z) {
+                for (int y = max.getY(); y >= min.getY(); --y) {
                     BlockState iblockstate2 = buffer.getBlock(x, y, z);
-
                     if (iblockstate2.getType() == BlockTypes.STONE) {
-
                         buffer.setBlock(x, y, z, iblockstate);
                     }
                 }

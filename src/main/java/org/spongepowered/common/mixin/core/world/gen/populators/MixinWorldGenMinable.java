@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import com.google.common.base.Predicate;
 import net.minecraft.block.state.IBlockState;
@@ -33,7 +34,7 @@ import net.minecraft.world.gen.feature.WorldGenMinable;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Ore;
@@ -70,12 +71,15 @@ public abstract class MixinWorldGenMinable extends WorldGenerator implements Ore
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         int n = this.count.getFlooredAmount(random);
-        World world = (World) chunk.getWorld();
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
+        // WorldGenMineable applies an 8 block offset to the blockpos
+        BlockPos position = new BlockPos(min.getX() - 8, min.getY(), min.getZ() - 8);
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.add(random.nextInt(16), this.height.getFlooredAmount(random), random.nextInt(16));
+            BlockPos pos = position.add(random.nextInt(size.getX()), this.height.getFlooredAmount(random), random.nextInt(size.getX()));
             this.numberOfBlocks = this.size.getFlooredAmount(random);
             generate(world, random, pos);
         }

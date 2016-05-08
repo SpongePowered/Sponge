@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenStructure;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,9 +54,10 @@ public abstract class MixinMapGenStructure implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        generateStructure(world, random, new ChunkCoordIntPair(chunk.getBlockMin().getX() / 16, chunk.getBlockMin().getZ() / 16));
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        World world = (World) worldIn;
+        generateStructure(world, random, new ChunkCoordIntPair((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
 }

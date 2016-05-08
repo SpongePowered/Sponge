@@ -38,8 +38,8 @@ import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Shrub;
@@ -63,10 +63,10 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     @Shadow private IBlockState tallGrassState;
 
     private WeightedTable<ShrubType> types;
-    @Nullable private Function<Location<Chunk>, ShrubType> override = null;
+    @Nullable private Function<Location<Extent>, ShrubType> override = null;
     private VariableAmount count;
 
-    @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN") )
+    @Inject(method = "<init>(Lnet/minecraft/block/BlockTallGrass$EnumType;)V", at = @At("RETURN"))
     public void onConstructed(BlockTallGrass.EnumType type, CallbackInfo ci) {
         this.types = new WeightedTable<ShrubType>();
         this.types.add(new WeightedObject<ShrubType>((ShrubType) (Object) type, 1));
@@ -79,9 +79,10 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        Vector3i min = chunk.getBlockMin();
-        World world = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         ShrubType stype = ShrubTypes.TALL_GRASS;
         List<ShrubType> result;
@@ -90,10 +91,10 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
         // divide the total count into batches of 128.
         int n = (int) Math.ceil(this.count.getFlooredAmount(random) / 128f);
         for (int i = 0; i < n; i++) {
-            BlockPos pos = position.add(random.nextInt(16) + 8, 0, random.nextInt(16) + 8);
+            BlockPos pos = position.add(random.nextInt(size.getX()), 0, random.nextInt(size.getZ()));
             pos = world.getTopSolidOrLiquidBlock(pos).add(0, 1, 0);
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(pos));
+                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(pos));
                 stype = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);
@@ -124,12 +125,12 @@ public abstract class MixinWorldGenTallGrass extends WorldGenerator implements S
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, ShrubType>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, ShrubType>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, ShrubType> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, ShrubType> override) {
         this.override = override;
     }
 

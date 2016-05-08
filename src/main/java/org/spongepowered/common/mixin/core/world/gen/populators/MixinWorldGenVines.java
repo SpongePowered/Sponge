@@ -26,13 +26,14 @@ package org.spongepowered.common.mixin.core.world.gen.populators;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.flowpowered.math.vector.Vector3i;
 import com.google.common.base.Objects;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenVines;
 import net.minecraft.world.gen.feature.WorldGenerator;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Vine;
@@ -59,14 +60,17 @@ public abstract class MixinWorldGenVines extends WorldGenerator implements Vine 
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        BlockPos position = new BlockPos(chunk.getBlockMin().getX(), chunk.getBlockMin().getY(), chunk.getBlockMin().getZ());
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
+        BlockPos position = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x, z;
         int n = this.count.getFlooredAmount(random);
         for (int i = 0; i < n; i++) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
-            generate((World) chunk.getWorld(), random, position.add(x, 128, z));
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getX());
+            generate(world, random, position.add(x, 128, z));
         }
     }
 

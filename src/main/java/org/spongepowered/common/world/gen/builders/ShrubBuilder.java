@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.populator.Shrub;
 import org.spongepowered.api.world.gen.populator.Shrub.Builder;
 
@@ -45,7 +45,7 @@ public class ShrubBuilder implements Shrub.Builder {
 
     private VariableAmount count;
     private WeightedTable<ShrubType> types;
-    @Nullable private Function<Location<Chunk>, ShrubType> override;
+    @Nullable private Function<Location<Extent>, ShrubType> override;
 
     public ShrubBuilder() {
         reset();
@@ -72,7 +72,7 @@ public class ShrubBuilder implements Shrub.Builder {
     }
 
     @Override
-    public Builder supplier(@Nullable Function<Location<Chunk>, ShrubType> override) {
+    public Builder supplier(@Nullable Function<Location<Extent>, ShrubType> override) {
         this.override = override;
         return this;
     }

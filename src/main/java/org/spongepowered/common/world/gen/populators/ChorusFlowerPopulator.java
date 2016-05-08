@@ -33,7 +33,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.NoiseGeneratorSimplex;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.ChorusFlower;
@@ -63,14 +63,15 @@ public class ChorusFlowerPopulator implements ChorusFlower {
     }
 
     @Override
-    public void populate(Chunk chunk, Random rand) {
-        if (this.noise == null || chunk.getWorld().getProperties().getSeed() != this.lastSeed) {
-            this.lastSeed = chunk.getWorld().getProperties().getSeed();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        if (this.noise == null || world.getProperties().getSeed() != this.lastSeed) {
+            this.lastSeed = world.getProperties().getSeed();
             this.noise = new NoiseGeneratorSimplex(new Random(this.lastSeed));
         }
 
-        World worldObj = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+        World worldObj = (World) world;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int chunkX = min.getX() / 16;
         int chunkZ = min.getZ() / 16;
@@ -79,8 +80,8 @@ public class ChorusFlowerPopulator implements ChorusFlower {
                 int count = rand.nextInt(5);
 
                 for (int n = 0; n < count; ++n) {
-                    int x = rand.nextInt(16) + 8;
-                    int y = rand.nextInt(16) + 8;
+                    int x = rand.nextInt(size.getX());
+                    int y = rand.nextInt(size.getZ());
                     int z = worldObj.getHeight(chunkPos.add(x, 0, y)).getY();
 
                     if (z > 0) {

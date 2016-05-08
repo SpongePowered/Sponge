@@ -33,8 +33,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.WorldGenBush;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.VariableAmount;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.api.world.gen.PopulatorTypes;
 import org.spongepowered.api.world.gen.populator.Mushroom;
@@ -63,7 +63,7 @@ public abstract class MixinWorldGenBush implements Mushroom {
     public abstract boolean generate(World worldIn, Random rand, BlockPos position);
 
     private ChanceTable<MushroomType> types;
-    private Function<Location<Chunk>, MushroomType> override = null;
+    private Function<Location<Extent>, MushroomType> override = null;
     private VariableAmount mushroomsPerChunk;
 
     @Inject(method = "<init>", at = @At("RETURN") )
@@ -78,9 +78,10 @@ public abstract class MixinWorldGenBush implements Mushroom {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World world = (World) chunk.getWorld();
-        Vector3i min = chunk.getBlockMin();
+    public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World world = (World) worldIn;
         BlockPos chunkPos = new BlockPos(min.getX(), min.getY(), min.getZ());
         int x, y, z;
         int n = this.mushroomsPerChunk.getFlooredAmount(random);
@@ -88,12 +89,12 @@ public abstract class MixinWorldGenBush implements Mushroom {
         MushroomType type = MushroomTypes.BROWN;
         List<MushroomType> result;
         for (int i = 0; i < n; ++i) {
-            x = random.nextInt(16) + 8;
-            z = random.nextInt(16) + 8;
+            x = random.nextInt(size.getX());
+            z = random.nextInt(size.getZ());
             y = nextInt(random, world.getHeight(chunkPos.add(x, 0, z)).getY() * 2);
             BlockPos height = chunkPos.add(x, y, z);
             if (this.override != null) {
-                Location<Chunk> pos2 = new Location<>(chunk, VecHelper.toVector3i(height));
+                Location<Extent> pos2 = new Location<>(extent, VecHelper.toVector3i(height));
                 type = this.override.apply(pos2);
             } else {
                 result = this.types.get(random);
@@ -134,12 +135,12 @@ public abstract class MixinWorldGenBush implements Mushroom {
     }
 
     @Override
-    public Optional<Function<Location<Chunk>, MushroomType>> getSupplierOverride() {
+    public Optional<Function<Location<Extent>, MushroomType>> getSupplierOverride() {
         return Optional.ofNullable(this.override);
     }
 
     @Override
-    public void setSupplierOverride(@Nullable Function<Location<Chunk>, MushroomType> override) {
+    public void setSupplierOverride(@Nullable Function<Location<Extent>, MushroomType> override) {
         this.override = override;
     }
 

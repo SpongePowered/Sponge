@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.world.gen.InternalPopulatorTypes;
@@ -42,12 +43,14 @@ public class SnowPopulator implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World worldObj = (World) chunk.getWorld();
-        BlockPos blockpos = new BlockPos(chunk.getBlockMin().getX() + 8, chunk.getBlockMin().getY(), chunk.getBlockMin().getZ() + 8);
-        for (int k1 = 0; k1 < 16; ++k1) {
-            for (int l1 = 0; l1 < 16; ++l1) {
-                BlockPos blockpos1 = worldObj.getPrecipitationHeight(blockpos.add(k1, 0, l1));
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World worldObj = (World) world;
+        BlockPos blockpos = new BlockPos(min.getX(), min.getY(), min.getZ());
+        for (int x = 0; x < size.getX(); ++x) {
+            for (int y = 0; y < size.getZ(); ++y) {
+                BlockPos blockpos1 = worldObj.getPrecipitationHeight(blockpos.add(x, 0, y));
                 BlockPos blockpos2 = blockpos1.down();
 
                 if (worldObj.canBlockFreezeWater(blockpos2)) {

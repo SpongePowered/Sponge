@@ -33,8 +33,8 @@ import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.util.weighted.WeightedObject;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.populator.Flower;
 import org.spongepowered.api.world.gen.populator.Flower.Builder;
 
@@ -45,7 +45,7 @@ import javax.annotation.Nullable;
 public class FlowerBuilder implements Flower.Builder {
 
     private WeightedTable<PlantType> flowers;
-    @Nullable private Function<Location<Chunk>, PlantType> override;
+    @Nullable private Function<Location<Extent>, PlantType> override;
     private VariableAmount count;
 
     public FlowerBuilder() {
@@ -74,7 +74,7 @@ public class FlowerBuilder implements Flower.Builder {
     }
 
     @Override
-    public Builder supplier(@Nullable Function<Location<Chunk>, PlantType> override) {
+    public Builder supplier(@Nullable Function<Location<Extent>, PlantType> override) {
         this.override = override;
         return this;
     }

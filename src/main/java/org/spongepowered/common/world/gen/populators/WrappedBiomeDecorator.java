@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.world.gen.populators;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
 import net.minecraft.world.biome.BiomeGenBase;
-import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
 import org.spongepowered.common.registry.type.world.gen.PopulatorTypeRegistryModule;
@@ -57,13 +58,15 @@ public class WrappedBiomeDecorator implements Populator {
     }
 
     @Override
-    public void populate(Chunk chunk, Random random) {
-        World worldIn = (World) chunk.getWorld();
+    public void populate(org.spongepowered.api.world.World world, Extent extent, Random random) {
+        Vector3i min = extent.getBlockMin();
+        Vector3i size = extent.getBlockSize();
+        World worldIn = (World) world;
         if (this.biome != null) {
-            this.biome.decorate(worldIn, random, VecHelper.toBlockPos(chunk.getBlockMin()));
+            this.biome.decorate(worldIn, random, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         } else {
-            BiomeGenBase biome = (BiomeGenBase) chunk.getBiome(chunk.getBiomeMin().add(16, 16));
-            this.wrapped.decorate(worldIn, random, biome, VecHelper.toBlockPos(chunk.getBlockMin()));
+            BiomeGenBase biome = (BiomeGenBase) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
+            this.wrapped.decorate(worldIn, random, biome, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         }
     }
 

@@ -29,13 +29,13 @@ import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.PlantType;
 import org.spongepowered.api.data.type.PlantTypes;
-import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.extent.Extent;
 
 import java.util.Random;
 import java.util.function.Function;
 
-public class FlowerForestSupplier implements Function<Location<Chunk>, PlantType> {
+public class FlowerForestSupplier implements Function<Location<Extent>, PlantType> {
 
     private static final NoiseGeneratorPerlin GRASS_COLOR_NOISE;
     private static PlantType[] options;
@@ -49,7 +49,7 @@ public class FlowerForestSupplier implements Function<Location<Chunk>, PlantType
     }
 
     @Override
-    public PlantType apply(Location<Chunk> pos) {
+    public PlantType apply(Location<Extent> pos) {
         double noise =
                 MathHelper.clamp_double((1.0D + GRASS_COLOR_NOISE.getValue(pos.getX() / 48.0D, pos.getZ() / 48.0D)) / 2.0D,
                         0.0D, 0.9999D);
