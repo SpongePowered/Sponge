@@ -53,13 +53,13 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     @Shadow @Final private ByteBuf buf;
 
     @Shadow protected abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
-    @Shadow protected abstract PacketBuffer writeNBTTagCompoundToBuffer(NBTTagCompound compound);
+    @Shadow protected abstract void writeNBTTagCompoundToBuffer(NBTTagCompound compound);
     @Shadow public abstract int readVarIntFromBuffer();
-    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
+    @Shadow public abstract void writeVarIntToBuffer(int input);
     @Shadow public abstract String readStringFromBuffer(int maxLength);
     @Shadow public abstract PacketBuffer writeString(String string);
     @Shadow public abstract byte[] readByteArray();
-    @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
+    @Shadow public abstract void writeByteArray(byte[] array);
 
     private ChannelBuf oppositeOrder;
 
