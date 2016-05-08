@@ -38,6 +38,7 @@ import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
@@ -182,6 +183,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.buf.getByte(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeByteArray(byte[] data) {
         writeByteArray(data);
         return (ChannelBuf) this;
@@ -210,6 +212,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public byte[] cbuf$readByteArray() {
         return readByteArray();
     }
