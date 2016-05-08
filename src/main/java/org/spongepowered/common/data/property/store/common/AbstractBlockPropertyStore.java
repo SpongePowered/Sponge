@@ -30,6 +30,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.EnumFacing;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Property;
 import org.spongepowered.api.data.property.PropertyHolder;
 import org.spongepowered.api.util.Direction;
@@ -74,27 +75,27 @@ public abstract class AbstractBlockPropertyStore<T extends Property<?, ?>> exten
     @Override
     public Optional<T> getFor(PropertyHolder propertyHolder) {
         if (propertyHolder instanceof Location) {
-            final Block block = (Block) ((Location<?>) propertyHolder).getBlockType();
+            final IBlockState block = (IBlockState) ((Location<?>) propertyHolder).getBlock();
             return getForBlock(block);
         } else if (this.checksItemStack && propertyHolder instanceof ItemStack) {
             final Item item = ((ItemStack) propertyHolder).getItem();
             if (item instanceof ItemBlock) {
                 final Block block = ((ItemBlock) item).getBlock();
                 if (block != null) {
-                    return getForBlock(block);
+                    return getForBlock(block.getDefaultState());
                 }
             }
         } else if (propertyHolder instanceof IBlockState) {
-            return getForBlock(((IBlockState) propertyHolder).getBlock());
+            return getForBlock(((IBlockState) propertyHolder));
         } else if (propertyHolder instanceof Block) {
-            return getForBlock((Block) propertyHolder);
+            return getForBlock(((Block) propertyHolder).getDefaultState());
         }
         return Optional.empty();
     }
 
     @Override
     public Optional<T> getFor(Location<World> location) {
-        return getForBlock((Block) location.getBlockType());
+        return getForBlock((IBlockState) location.getBlock());
     }
 
     @Override
