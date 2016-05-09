@@ -311,6 +311,7 @@ public class KeyRegistry {
         keyMap.put("armor_stand_has_gravity", makeSingleKey(Boolean.class, Value.class, of("HasGravity")));
         keyMap.put("armor_stand_marker", makeSingleKey(Boolean.class, Value.class, of("IsMarker")));
         keyMap.put("armor_stand_is_small", makeSingleKey(Boolean.class, Value.class, of("IsSmall")));
+        keyMap.put("invulnerability_ticks", makeSingleKey(Integer.class, MutableBoundedValue.class, of("HurtTime")));
     }
 
     @SuppressWarnings("unused") // Used in DataTestUtil.generateKeyMap
