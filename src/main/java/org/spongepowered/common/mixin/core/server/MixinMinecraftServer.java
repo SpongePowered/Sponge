@@ -77,6 +77,9 @@ import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -129,6 +132,7 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(MinecraftServer.class)
+@Implements(@Interface(iface = Server.class, prefix = "server$"))
 public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMixinSubject, IMixinCommandSource, IMixinCommandSender,
         IMixinMinecraftServer {
 
@@ -160,6 +164,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void convertMapIfNeeded(String worldNameIn);
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
+    @Shadow public abstract int getMaxPlayerIdleMinutes();
+    @Shadow public abstract void setPlayerIdleTimeout(int timeout);
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -1070,4 +1076,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         }
         StaticMixinHelper.lastAnimationPacketTick = 0;
     }
+
+    @Override
+    public int getPlayerIdleTimeout() {
+        return this.getMaxPlayerIdleMinutes();
+    }
+
+    @Intrinsic
+    public void server$setPlayerIdleTimeout(int timeout) {
+        this.setPlayerIdleTimeout(timeout);
+    }
+
 }
