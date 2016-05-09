@@ -87,6 +87,7 @@ import org.spongepowered.api.util.ban.BanType;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
@@ -331,6 +332,7 @@ public final class CommonModuleRegistry {
             .registerModule(SandstoneType.class, new SandstoneTypeRegistryModule())
             .registerModule(SandType.class, new SandTypeRegistryModule())
             .registerModule(SelectorType.class, new SelectorTypeRegistryModule())
+            .registerModule(SerializationBehavior.class, new SerializationBehaviorRegistryModule())
             .registerModule(ShrubType.class, new ShrubTypeRegistryModule())
             .registerModule(SkeletonType.class, new SkeletonTypeRegistryModule())
             .registerModule(SkullType.class, new SkullTypeRegistryModule())
@@ -353,6 +355,7 @@ public final class CommonModuleRegistry {
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
+            .registerModule(WorldCreationSettings.class, new WorldCreationSettingsRegistryModule())
             ;
     }
 
