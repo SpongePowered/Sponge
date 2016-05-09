@@ -192,7 +192,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     //     public WorldInfo(WorldInfo worldInformation)
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
-        // TODO Since we're making a WorldInfo from a WorldInfo, perhaps we should clone the Sponge data here?
+        // TODO Since we're making a WorldInfo from a WorldInfo, perhaps we should clone the Sponge data here? Currently this is done in WorldManager.
         onConstruction(ci);
     }
 

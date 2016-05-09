@@ -64,6 +64,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -641,10 +642,11 @@ public final class WorldManager {
 
         worldSettings.setGeneratorOptions(generatorOptions);
 
+        ((IMixinWorldSettings) (Object) worldSettings).setDimensionType(dimensionType);
+
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
-        ((IMixinWorldInfo) worldInfo).setDimensionType(dimensionType);
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)),
                 (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
 
