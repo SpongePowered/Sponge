@@ -153,8 +153,8 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
         return this.getHardcoreEnabled();
     }
 
-    @Override
-    public boolean areCommandsAllowed() {
+    @Intrinsic
+    public boolean creationSettings$areCommandsAllowed() {
         return this.settings$areCommandsAllowed();
     }
 
