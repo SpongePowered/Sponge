@@ -52,7 +52,8 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         return Holder.INSTANCE;
     }
 
-    @RegisterCatalog(WorldGeneratorModifiers.class) private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
+    @RegisterCatalog(WorldGeneratorModifiers.class)
+    private final Map<String, WorldGeneratorModifier> modifierMappings = new HashMap<>();
 
     @Override
     public Map<String, WorldGeneratorModifier> provideCatalogMap() {
