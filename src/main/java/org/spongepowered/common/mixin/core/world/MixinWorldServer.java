@@ -82,7 +82,6 @@ import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -163,7 +162,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
-    private Integer dimensionId = null;
     private SpongeConfig<?> activeConfig;
 
     @Shadow @Final private MinecraftServer mcServer;
@@ -221,22 +219,18 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Override
-    public int getDimensionId() {
-        return dimensionId;
-    }
-
-    @Override
     public boolean isLoaded() {
         return WorldManager.getWorldByDimensionId(getDimensionId()).isPresent();
     }
 
     @Override
-    public void setDimensionId(int dimensionId) {
-        if (this.dimensionId != null) {
-            throw new RuntimeException("Attempt was made to re-set dimension id on world!");
-        }
+    public Integer getDimensionId() {
+        return ((IMixinWorldInfo) this.getProperties()).getDimensionId();
+    }
 
-        this.dimensionId = dimensionId;
+    @Override
+    public void setDimensionId(int dimensionId) {
+        ((IMixinWorldInfo) this.getProperties()).setDimensionId(dimensionId);
     }
 
     @Override
@@ -260,11 +254,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             ((IPopulatorProvider) newGenerator.getBaseGenerationPopulator()).addPopulators(newGenerator);
         }
 
-        // Re-apply all world generator modifiers
-        WorldCreationSettings creationSettings = this.getCreationSettings();
-
         for (WorldGeneratorModifier modifier : this.getProperties().getGeneratorModifiers()) {
-            modifier.modifyWorldGenerator(creationSettings, generatorSettings, newGenerator);
+            modifier.modifyWorldGenerator(this.getProperties(), generatorSettings, newGenerator);
         }
 
         this.spongegen = createChunkGenerator(newGenerator);

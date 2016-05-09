@@ -30,8 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.base.Predicates;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
@@ -89,7 +87,6 @@ import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -99,9 +96,7 @@ import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.biome.BiomeType;
-import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
@@ -109,7 +104,6 @@ import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -119,15 +113,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -142,7 +132,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -168,7 +157,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             GET_ENTITIES_WITHIN_AABB =
             "Lnet/minecraft/world/World;getEntitiesWithinAABBExcludingEntity(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/AxisAlignedBB;)Ljava/util/List;";
     public SpongeBlockSnapshotBuilder builder = new SpongeBlockSnapshotBuilder();
-    private boolean keepSpawnLoaded;
     private Context worldContext;
     protected boolean processingExplosion = false;
 
@@ -249,16 +237,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             // Removing misbehaved living entities
             cir.setReturnValue(new ArrayList());
         }
-    }
-
-    @Override
-    public UUID getUniqueId() {
-        return ((WorldProperties) this.worldInfo).getUniqueId();
-    }
-
-    @Override
-    public String getName() {
-        return this.worldInfo.getWorldName();
     }
 
     @Override
@@ -440,16 +418,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public boolean doesKeepSpawnLoaded() {
-        return this.keepSpawnLoaded;
-    }
-
-    @Override
-    public void setKeepSpawnLoaded(boolean keepLoaded) {
-        this.keepSpawnLoaded = keepLoaded;
-    }
-
-    @Override
     public Optional<Entity> getEntity(UUID uuid) {
         // Note that MixinWorldServer is properly overriding this to use it's own mapping.
         for (net.minecraft.entity.Entity entity : this.loadedEntityList) {
@@ -473,30 +441,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public WorldCreationSettings getCreationSettings() {
-        WorldProperties properties = this.getProperties();
-
-        // Create based on WorldProperties
-        WorldSettings settings = new WorldSettings(this.worldInfo);
-        IMixinWorldSettings mixin = (IMixinWorldSettings) (Object) settings;
-        mixin.setDimensionType(properties.getDimensionType());
-        mixin.setGeneratorSettings(properties.getGeneratorSettings());
-        mixin.setGeneratorModifiers(properties.getGeneratorModifiers());
-        mixin.setEnabled(true);
-        mixin.setKeepSpawnLoaded(this.keepSpawnLoaded);
-        mixin.setLoadOnStartup(properties.loadOnStartup());
-
-        return (WorldCreationSettings) (Object) settings;
-    }
-
-    @Override
     public WorldProperties getProperties() {
         return (WorldProperties) this.worldInfo;
-    }
-
-    @Override
-    public Location<World> getSpawnLocation() {
-        return new Location<>(this, this.worldInfo.getSpawnX(), this.worldInfo.getSpawnY(), this.worldInfo.getSpawnZ());
     }
 
     @Override
@@ -567,16 +513,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public Difficulty getDifficulty() {
-        return (Difficulty) (Object) this.shadow$getDifficulty();
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private List<Player> getPlayers() {
-        return (List) ((net.minecraft.world.World) (Object) this).getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue());
-    }
-
-    @Override
     public void sendMessage(ChatType type, Text message) {
         checkNotNull(type, "type");
         checkNotNull(message, "message");
@@ -617,16 +553,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return ((List<TileEntity>) (Object) this.loadedTileEntityList).stream()
                 .filter(filter)
                 .collect(Collectors.toList());
-    }
-
-    @Override
-    public Optional<String> getGameRule(String gameRule) {
-        return this.getProperties().getGameRule(gameRule);
-    }
-
-    @Override
-    public Map<String, String> getGameRules() {
-        return this.getProperties().getGameRules();
     }
 
     @Override

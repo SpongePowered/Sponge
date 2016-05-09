@@ -48,7 +48,7 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     void setActiveConfig(SpongeConfig<?> config);
 
-    int getDimensionId();
+    Integer getDimensionId();
 
     void setDimensionId(int dimensionId);
 

@@ -24,43 +24,44 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-
-import java.util.Collection;
 
 public interface IMixinWorldSettings {
 
-    Integer getDimensionId();
+    void setId(String id);
 
-    boolean getIsMod();
+    void setName(String name);
 
-    void setDimensionType(DimensionType type);
+    boolean isFromBuilder();
+
+    void setDimensionType(DimensionType dimensionType);
+
+    void setDifficulty(Difficulty difficulty);
+
+    void setSerializationBehavior(SerializationBehavior behavior);
 
     void setGeneratorSettings(DataContainer generatorSettings);
 
-    void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers);
+    void setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers);
 
-    void setEnabled(boolean isWorldEnabled);
+    void setEnabled(boolean state);
 
-    void setLoadOnStartup(boolean loadOnStartup);
+    void setLoadOnStartup(boolean state);
 
-    void setKeepSpawnLoaded(boolean keepSpawnLoaded);
+    void setKeepSpawnLoaded(boolean state);
 
-    void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad);
+    void setGenerateSpawnOnLoad(boolean state);
 
-    void setDimensionId(int id);
+    void setPVPEnabled(boolean state);
 
-    void setIsMod(boolean isMod);
+    void setCommandsAllowed(boolean state);
 
-    void setPVPEnabled(boolean enabled);
+    void setGenerateBonusChest(boolean state);
 
-    void setActualWorldName(String name);
-
-    String getActualWorldName();
-
-    void fromBuilder(boolean builder);
-
-    boolean isFromBuilder();
+    void fromBuilder(boolean state);
 }

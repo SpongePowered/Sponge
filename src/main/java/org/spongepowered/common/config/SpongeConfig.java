@@ -1079,11 +1079,11 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = WORLD_LOAD_ON_STARTUP, comment = "Enable if this world should be loaded on startup.")
         protected boolean loadOnStartup = true;
 
-        @Setting(value = WORLD_GENERATE_SPAWN_ON_LOAD, comment = "Enable if you want the world to generate spawn the moment its loaded.")
-        protected boolean generateSpawnOnLoad = true;
-
         @Setting(value = WORLD_KEEP_SPAWN_LOADED, comment = "Enable if this world's spawn should remain loaded with no players.")
         protected boolean keepSpawnLoaded = true;
+
+        @Setting(value = WORLD_GENERATE_SPAWN_ON_LOAD, comment = "Enable if you want the world to generate spawn the moment its loaded.")
+        protected boolean generateSpawnOnLoad = true;
 
         @Setting(value = WORLD_PVP_ENABLED, comment = "Enable if this world allows PVP combat.")
         protected boolean pvpEnabled = true;
@@ -1128,20 +1128,20 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.keepSpawnLoaded = loaded;
         }
 
-        public boolean getPVPEnabled() {
-            return this.pvpEnabled;
-        }
-
-        public void setPVPEnabled(boolean allow) {
-            this.pvpEnabled = allow;
-        }
-
         public boolean getGenerateSpawnOnLoad() {
             return this.generateSpawnOnLoad;
         }
 
         public void setGenerateSpawnOnLoad(boolean allow) {
             this.generateSpawnOnLoad = allow;
+        }
+
+        public boolean getPVPEnabled() {
+            return this.pvpEnabled;
+        }
+
+        public void setPVPEnabled(boolean allow) {
+            this.pvpEnabled = allow;
         }
     }
 

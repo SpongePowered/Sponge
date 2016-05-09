@@ -50,6 +50,8 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -79,7 +81,6 @@ import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
@@ -104,7 +105,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow private long lastTimePlayed;
     @Shadow private long sizeOnDisk;
     @Shadow private NBTTagCompound playerTag;
-    @Shadow private int dimension;
     @Shadow private String levelName;
     @Shadow private int saveVersion;
     @Shadow private int cleanWeatherTime;
@@ -134,69 +134,26 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Shadow public abstract NBTTagCompound cloneNBTCompound(NBTTagCompound nbt);
 
     private UUID uuid;
-    private DimensionType dimensionType;
-    private boolean isMod;
-    private NBTTagCompound spongeRootLevelNbt;
-    private NBTTagCompound spongeNbt;
-    private NBTTagList playerUniqueIdNbt;
+    private Integer dimensionId;
+    private DimensionType dimensionType = DimensionTypes.OVERWORLD;
+    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
+    private boolean isMod, generateBonusChest, isValid = true;
+    private NBTTagCompound spongeRootLevelNbt = new NBTTagCompound(), spongeNbt = new NBTTagCompound();
+    private NBTTagList playerUniqueIdNbt = new NBTTagList();
     private BiMap<Integer, UUID> playerUniqueIdMap = HashBiMap.create();
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
     private ServerScoreboard scoreboard;
-    private boolean isValid = true;
 
+    //     protected WorldInfo()
     @Inject(method = "<init>", at = @At("RETURN") )
     public void onConstruction(CallbackInfo ci) {
-        this.spongeRootLevelNbt = new NBTTagCompound();
-        this.spongeNbt = new NBTTagCompound();
-        this.playerUniqueIdNbt = new NBTTagList();
         this.spongeNbt.setTag(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, this.playerUniqueIdNbt);
         this.spongeRootLevelNbt.setTag(NbtDataUtil.SPONGE_DATA, this.spongeNbt);
-
-        if (this.dimensionType == null) {
-            this.dimensionType = DimensionTypes.OVERWORLD;
-        }
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN") )
-    public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
-        if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
-            this.isValid = false;
-            return;
-        }
-
-        WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
-        setDimensionType(creationSettings.getDimensionType());
-        if (((IMixinWorldSettings) (Object) settings).getDimensionId() != null) {
-            this.dimension = ((IMixinWorldSettings) (Object) settings).getDimensionId();
-        }
-        // make sure to set dimensionType and dimension id before attempting to generate world config
-        setDimensionType(creationSettings.getDimensionType());
-        onConstruction(ci);
-        boolean configPreviouslyExisted = Files.exists(SpongeImpl.getSpongeConfigDir()
-                .resolve("worlds")
-                .resolve(this.dimensionType.getId())
-                .resolve(this.levelName)
-                .resolve("world.conf"));
-        createWorldConfig();
-        this.worldConfig.getConfig().getWorld().setWorldEnabled(creationSettings.isEnabled());
-        this.worldConfig.getConfig().getWorld().setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
-        this.worldConfig.getConfig().getWorld().setLoadOnStartup(creationSettings.loadOnStartup());
-        this.worldConfig.getConfig().getWorld().setGenerateSpawnOnLoad(creationSettings.doesGenerateSpawnOnLoad());
-        if (!creationSettings.getGeneratorModifiers().isEmpty()) {
-            this.worldConfig.getConfig().getWorldGenModifiers().clear();
-            this.worldConfig.getConfig().getWorldGenModifiers()
-                    .addAll(GeneratorModifierRegistryModule.getInstance().toIds(creationSettings.getGeneratorModifiers()));
-        }
-
-        // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
-        if (!configPreviouslyExisted && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
-            this.worldConfig.getConfig().setConfigEnabled(true);
-        }
-        this.worldConfig.save();
-    }
-
+    //     public WorldInfo(NBTTagCompound nbt)
     @Inject(method = "<init>*", at = @At("RETURN") )
     public void onConstruction(NBTTagCompound nbt, CallbackInfo ci) {
         if (!StaticMixinHelper.convertingMapFormat) {
@@ -204,19 +161,45 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         }
     }
 
-    @Inject(method = "<init>*", at = @At("RETURN") )
-    public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
+    //     public WorldInfo(WorldSettings settings, String name)
+    @Inject(method = "<init>*", at = @At("RETURN"))
+    public void onConstruction(WorldSettings settings, String name, CallbackInfo ci) {
+        if (name.equals("MpServer") || name.equals("sponge$dummy_world")) {
+            this.isValid = false;
+            return;
+        }
+
         onConstruction(ci);
 
-        MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
-        this.dimensionType = info.dimensionType;
-        this.isMod = info.isMod;
+        final WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
+        setDimensionType(creationSettings.getDimensionType());
+
+        boolean configPreviouslyExisted = createWorldConfig();
+        setEnabled(creationSettings.isEnabled());
+        setLoadOnStartup(creationSettings.loadOnStartup());
+        setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
+        setGenerateSpawnOnLoad(creationSettings.doesGenerateSpawnOnLoad());
+        setDifficulty(creationSettings.getDifficulty());
+        setGeneratorModifiers(creationSettings.getGeneratorModifiers());
+        setSerializationBehavior(creationSettings.getSerializationBehavior());
+        // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
+        if (!configPreviouslyExisted && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
+            this.worldConfig.getConfig().setConfigEnabled(true);
+        }
+        this.worldConfig.save();
+    }
+
+    //     public WorldInfo(WorldInfo worldInformation)
+    @Inject(method = "<init>*", at = @At("RETURN") )
+    public void onConstruction(WorldInfo worldInformation, CallbackInfo ci) {
+        // TODO Since we're making a WorldInfo from a WorldInfo, perhaps we should clone the Sponge data here?
+        onConstruction(ci);
     }
 
     @Override
-    public void createWorldConfig() {
+    public boolean createWorldConfig() {
         if (this.worldConfig != null) {
-            return;
+             return false;
         }
 
         this.worldConfig =
@@ -227,6 +210,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
                                 .resolve(this.levelName)
                                 .resolve("world.conf"),
                         SpongeImpl.ECOSYSTEM_ID);
+        return true;
     }
 
     @Override
@@ -398,6 +382,15 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public boolean doesGenerateBonusChest() {
+        return this.generateBonusChest;
+    }
+
+    public void setDoesGenerateBonusChest(boolean state) {
+        this.generateBonusChest = state;
+    }
+
+    @Override
     public Vector3d getWorldBorderCenter() {
         return new Vector3d(this.borderCenterX, 0, this.borderCenterZ);
     }
@@ -502,12 +495,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public void setDimensionId(int id) {
-        this.dimension = id;
+        this.dimensionId = id;
     }
 
     @Override
-    public int getDimensionId() {
-        return this.dimension;
+    public Integer getDimensionId() {
+        return this.dimensionId;
     }
 
     @Override
@@ -629,6 +622,21 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public SerializationBehavior getSerializationBehavior() {
+        return this.serializationBehavior;
+    }
+
+    @Override
+    public void setSerializationBehavior(SerializationBehavior behavior) {
+        this.serializationBehavior = behavior;
+    }
+
+    @Override
+    public WorldCreationSettings getCreationSettings() {
+        return (WorldCreationSettings) (Object) new WorldSettings((WorldInfo) (Object) this);
+    }
+
+    @Override
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
@@ -683,11 +691,12 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void readSpongeNbt(NBTTagCompound nbt) {
         this.uuid = nbt.getUniqueId(NbtDataUtil.UUID);
-        this.dimension = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
-        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
+        this.dimensionId = nbt.getInteger(NbtDataUtil.DIMENSION_ID);
         final String dimensionTypeId = nbt.getString(NbtDataUtil.DIMENSION_TYPE);
         this.dimensionType = DimensionTypeRegistryModule.getInstance().getById(dimensionTypeId)
                 .orElseThrow(FunctionalUtil.invalidArgument("Could not find a DimensionType by id: " + dimensionTypeId));
+        this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
+        this.generateBonusChest = nbt.getBoolean(NbtDataUtil.GENERATE_BONUS_CHEST);
         this.trackedUniqueIdCount = 0;
         if (nbt.hasKey(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_LIST)) {
             final NBTTagList playerIdList = nbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
@@ -703,10 +712,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private void writeSpongeNbt() {
         this.spongeNbt.setInteger(NbtDataUtil.DATA_VERSION, DataUtil.DATA_VERSION);
         this.spongeNbt.setUniqueId(NbtDataUtil.UUID, this.uuid);
-        this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimension);
+        this.spongeNbt.setInteger(NbtDataUtil.DIMENSION_ID, this.dimensionId);
         this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
         this.spongeNbt.setBoolean(NbtDataUtil.IS_MOD, this.isMod);
-
+        this.spongeNbt.setBoolean(NbtDataUtil.GENERATE_BONUS_CHEST, this.generateBonusChest);
         final Iterator<UUID> iterator = this.pendingUniqueIds.iterator();
         final NBTTagList playerIdList = this.spongeNbt.getTagList(NbtDataUtil.SPONGE_PLAYER_UUID_TABLE, NbtDataUtil.TAG_COMPOUND);
         while (iterator.hasNext()) {

@@ -24,19 +24,28 @@
  */
 package org.spongepowered.common.mixin.core.world;
 
-import com.google.common.collect.ImmutableCollection;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.api.world.SerializationBehaviors;
 import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.difficulty.Difficulties;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
-import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -45,108 +54,113 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.util.persistence.JsonTranslator;
 
 import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
-@Implements(@Interface(iface = WorldCreationSettings.class, prefix = "settings$"))
+@Implements(value = @Interface(iface = WorldCreationSettings.class, prefix = "creationSettings$"))
 public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
 
-    private DimensionType dimensionType;
-    private DataContainer generatorSettings;
-    private boolean worldEnabled = true;
+    @Shadow private boolean commandsAllowed;
+
+    @Shadow(prefix = "settings$") abstract long settings$getSeed();
+    @Shadow abstract boolean isBonusChestEnabled();
+    @Shadow abstract WorldSettings.GameType getGameType();
+    @Shadow abstract boolean getHardcoreEnabled();
+    @Shadow abstract boolean isMapFeaturesEnabled();
+    @Shadow abstract WorldType getTerrainType();
+    @Shadow(prefix = "settings$") abstract boolean settings$areCommandsAllowed();
+    @Shadow abstract String getGeneratorOptions();
+
+    private String id, name;
+    private DimensionType dimensionType = DimensionTypes.OVERWORLD;
+    private Difficulty difficulty = Difficulties.NORMAL;
+    private SerializationBehavior serializationBehavior = SerializationBehaviors.AUTOMATIC;
+    private DataContainer generatorSettings = new MemoryDataContainer();
+    private boolean isEnabled = true;
     private boolean loadOnStartup = true;
     private boolean keepSpawnLoaded = true;
     private boolean generateSpawnOnLoad = true;
     private boolean pvpEnabled = true;
-    private ImmutableCollection<WorldGeneratorModifier> generatorModifiers;
-    // MCP's worldName is actually the generatorOptions
-    private String actualWorldName;
-    // internal use only
-    private int dimId;
-    private boolean isMod;
-    private boolean fromBuilder;
+    private boolean generateBonusChest = false;
+    private boolean fromBuilder = false;
+    private Collection<WorldGeneratorModifier> generatorModifiers = ImmutableList.of();
 
-    @Shadow @Final private long seed;
-    @Shadow @Final private WorldSettings.GameType theGameType;
-    @Shadow @Final private boolean mapFeaturesEnabled;
-    @Shadow @Final private boolean hardcoreEnabled;
-    @Shadow @Final private WorldType terrainType;
-    @Shadow private boolean commandsAllowed;
-    @Shadow private boolean bonusChestEnabled;
+    @Inject(method = "<init>(Lnet/minecraft/world/storage/WorldInfo;)V", at = @At(value = "RETURN"))
+    public void onConstruct(WorldInfo info, CallbackInfo ci) {
+        //Set above: info.getSeed(), info.getGameType(),  info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType()
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstructed(long seedIn, WorldSettings.GameType gameType, boolean enableMapFeatures, boolean hardcoreMode, WorldType worldTypeIn,
-            CallbackInfo ci) {
-        this.actualWorldName = "";
-    }
+        final WorldProperties properties = (WorldProperties) info;
+        this.dimensionType = properties.getDimensionType();
+        this.difficulty = properties.getDifficulty();
+        this.serializationBehavior = properties.getSerializationBehavior();
+        this.generatorSettings = properties.getGeneratorSettings();
+        this.isEnabled = properties.isEnabled();
+        this.loadOnStartup = properties.loadOnStartup();
+        this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
+        this.pvpEnabled = properties.isPVPEnabled();
+        this.generateBonusChest = properties.doesGenerateBonusChest();
+        GeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
+        this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
 
-    @Inject(method = "<init>*", at = @At("RETURN"))
-    private void onConstructed(WorldInfo info, CallbackInfo ci) {
-        this.actualWorldName = info.getWorldName();
     }
 
     @Intrinsic
-    public String settings$getWorldName() {
-        return this.actualWorldName;
+    public long creationSettings$getSeed() {
+        return this.settings$getSeed();
     }
 
-    @Override
-    public void setActualWorldName(String name) {
-        this.actualWorldName = name;
-    }
-
-    @Override
-    public String getActualWorldName() {
-        return this.actualWorldName;
-    }
-
-    @Override
-    public void fromBuilder(boolean builder) {
-        this.fromBuilder = builder;
-    }
-
-    @Override
-    public boolean isFromBuilder() {
-        return this.fromBuilder;
-    }
-
-    @Override
-    public long getSeed() {
-        return this.seed;
+    @Inject(method = "setGeneratorOptions", at = @At(value = "RETURN"))
+    public void onSetGeneratorOptions(String generatorOptions, CallbackInfoReturnable<WorldSettings> cir) {
+        // Minecraft uses a String, we want to return a fancy DataContainer
+        // Parse the world generator settings as JSON
+        DataContainer settings = null;
+        try {
+            settings = JsonTranslator.translateFrom(new JsonParser().parse(generatorOptions).getAsJsonObject());
+        } catch (JsonParseException | IllegalStateException ignored) {
+        }
+        // If null, assume custom
+        if (settings == null) {
+            settings = new MemoryDataContainer().set(DataQueries.WORLD_CUSTOM_SETTINGS, generatorOptions);
+        }
+        this.generatorSettings = settings;
     }
 
     @Override
     public GameMode getGameMode() {
-        return (GameMode) (Object) this.theGameType;
+        return (GameMode) (Object) this.getGameType();
     }
 
     @Override
     public GeneratorType getGeneratorType() {
-        return (GeneratorType) this.terrainType;
+        return (GeneratorType) this.getTerrainType();
     }
 
     @Override
     public boolean usesMapFeatures() {
-        return this.mapFeaturesEnabled;
+        return this.isMapFeaturesEnabled();
     }
 
     @Override
     public boolean isHardcore() {
-        return this.hardcoreEnabled;
+        return this.getHardcoreEnabled();
     }
 
     @Override
-    public boolean commandsAllowed() {
-        return this.commandsAllowed;
+    public boolean areCommandsAllowed() {
+        return this.settings$areCommandsAllowed();
     }
 
     @Override
-    public boolean bonusChestEnabled() {
-        return this.bonusChestEnabled;
+    public boolean doesGenerateBonusChest() {
+        return this.generateBonusChest;
     }
 
     @Override
@@ -155,8 +169,8 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Override
-    public void setDimensionType(DimensionType type) {
-        this.dimensionType = type;
+    public Difficulty getDifficulty() {
+        return this.difficulty;
     }
 
     @Override
@@ -165,28 +179,18 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Override
-    public void setGeneratorSettings(DataContainer settings) {
-        this.generatorSettings = settings;
+    public SerializationBehavior getSerializationBehavior() {
+        return this.serializationBehavior;
     }
 
     @Override
     public boolean isEnabled() {
-        return this.worldEnabled;
-    }
-
-    @Override
-    public void setEnabled(boolean isWorldEnabled) {
-        this.worldEnabled = isWorldEnabled;
+        return this.isEnabled;
     }
 
     @Override
     public boolean loadOnStartup() {
         return this.loadOnStartup;
-    }
-
-    @Override
-    public void setLoadOnStartup(boolean loadOnStartup) {
-        this.loadOnStartup = loadOnStartup;
     }
 
     @Override
@@ -200,58 +204,112 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Override
-    public void setKeepSpawnLoaded(boolean keepSpawnLoaded) {
-        this.keepSpawnLoaded = keepSpawnLoaded;
-    }
-
-    @Override
-    public void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad) {
-        this.generateSpawnOnLoad = generateSpawnOnLoad;
-    }
-
-    @Override
     public boolean isPVPEnabled() {
         return this.pvpEnabled;
     }
 
     @Override
-    public void setPVPEnabled(boolean enabled) {
-        this.pvpEnabled = enabled;
-    }
-
-    @Override
-    public void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers) {
-        ImmutableList<WorldGeneratorModifier> defensiveCopy = ImmutableList.copyOf(modifiers);
-        GeneratorModifierRegistryModule.getInstance().checkAllRegistered(defensiveCopy);
-        this.generatorModifiers = defensiveCopy;
-    }
-
-    @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        if (this.generatorModifiers == null) {
-            return ImmutableList.of();
-        }
         return this.generatorModifiers;
     }
 
-    // Internal use only
     @Override
-    public void setDimensionId(int id) {
-        this.dimId = id;
+    public String getId() {
+        return this.id;
     }
 
     @Override
-    public Integer getDimensionId() {
-        return this.dimId;
+    public String getName() {
+        return this.name;
     }
 
     @Override
-    public void setIsMod(boolean flag) {
-        this.isMod = flag;
+    public void setId(String id) {
+        checkNotNull(id);
+        if (this.id != null) {
+            throw new IllegalStateException("Attempt made to set id twice!");
+        }
+
+        this.id = id;
     }
 
     @Override
-    public boolean getIsMod() {
-        return this.isMod;
+    public void setName(String name) {
+        checkNotNull(name);
+        if (this.name != null) {
+            throw new IllegalStateException("Attempt made to set name twice!");
+        }
+
+        this.name = name;
+    }
+
+    @Override
+    public boolean isFromBuilder() {
+        return this.fromBuilder;
+    }
+
+    @Override
+    public void setDimensionType(DimensionType dimensionType) {
+        this.dimensionType = dimensionType;
+    }
+
+    @Override
+    public void setDifficulty(Difficulty difficulty) {
+        this.difficulty = difficulty;
+    }
+
+    @Override
+    public void setSerializationBehavior(SerializationBehavior behavior) {
+        this.serializationBehavior = behavior;
+    }
+
+    @Override
+    public void setGeneratorSettings(DataContainer generatorSettings) {
+        this.generatorSettings = generatorSettings;
+    }
+
+    @Override
+    public void setGeneratorModifiers(ImmutableList<WorldGeneratorModifier> generatorModifiers) {
+        this.generatorModifiers = generatorModifiers;
+    }
+
+    @Override
+    public void setEnabled(boolean state) {
+        this.isEnabled = state;
+    }
+
+    @Override
+    public void setLoadOnStartup(boolean state) {
+        this.loadOnStartup = state;
+    }
+
+    @Override
+    public void setKeepSpawnLoaded(boolean state) {
+        this.keepSpawnLoaded = state;
+    }
+
+    @Override
+    public void setGenerateSpawnOnLoad(boolean state) {
+        this.generateSpawnOnLoad = state;
+    }
+
+    @Override
+    public void setPVPEnabled(boolean state) {
+        this.pvpEnabled = state;
+    }
+
+    @Override
+    public void setCommandsAllowed(boolean state) {
+        this.commandsAllowed = state;
+    }
+
+    @Override
+    public void setGenerateBonusChest(boolean state) {
+        this.generateBonusChest = state;
+    }
+
+    @Override
+    public void fromBuilder(boolean state) {
+        this.fromBuilder = state;
     }
 }

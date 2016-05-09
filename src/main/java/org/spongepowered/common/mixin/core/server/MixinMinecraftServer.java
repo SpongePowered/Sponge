@@ -389,8 +389,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public WorldProperties createWorldProperties(WorldCreationSettings settings) {
-        return WorldManager.createWorldProperties(settings);
+    public WorldProperties createWorldProperties(String folderName, WorldCreationSettings settings) {
+        return WorldManager.createWorldProperties(folderName, settings);
     }
 
     @Override

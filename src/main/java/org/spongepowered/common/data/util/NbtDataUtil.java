@@ -138,6 +138,7 @@ public final class NbtDataUtil {
     public static final String BOAT_OCCUPIED_DECELERATION_SPEED = "occupiedDecelerationSpeed";
     public static final String BOAT_UNOCCUPIED_DECELERATION_SPEED = "unoccupiedDecelerationSpeed";
     public static final String CAN_GRIEF = "CanGrief";
+    public static final String GENERATE_BONUS_CHEST = "GenerateBonusChest";
 
     // Compatibility tags for Forge
     public static final String FORGE_DATA = "ForgeData";

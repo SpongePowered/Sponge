@@ -64,7 +64,6 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.scheduler.SpongeScheduler;
 import org.spongepowered.common.util.SpongeHooks;
 
@@ -284,40 +283,34 @@ public final class WorldManager {
     }
 
     // TODO Some result mechanism
-    public static WorldProperties createWorldProperties(WorldCreationSettings settings) {
+    public static WorldProperties createWorldProperties(String folderName, WorldCreationSettings settings) {
         checkNotNull(settings);
-        final String worldName = ((IMixinWorldSettings) settings).getActualWorldName();
-        final Optional<WorldServer> optWorldServer = getWorld(worldName);
+        final Optional<WorldServer> optWorldServer = getWorld(folderName);
         if (optWorldServer.isPresent()) {
             return ((org.spongepowered.api.world.World) optWorldServer.get()).getProperties();
         }
 
-        final Optional<WorldProperties> optWorldProperties = WorldManager.getWorldProperties(worldName);
+        final Optional<WorldProperties> optWorldProperties = WorldManager.getWorldProperties(folderName);
 
         if (optWorldProperties.isPresent()) {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldName, true,
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true,
                 ((MinecraftServer) Sponge.getServer()).getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
-        if (worldInfo != null) {
-            final Optional<WorldProperties> optExistingWorldProperties = WorldManager.getWorldProperties(worldInfo.getWorldName());
-            if (!optExistingWorldProperties.isPresent()) {
-                WorldManager.registerWorldProperties((WorldProperties) worldInfo);
-            }
+        if (worldInfo == null) {
+            worldInfo = new WorldInfo((WorldSettings) (Object) settings, folderName);
         } else {
-            worldInfo = new WorldInfo((WorldSettings) (Object) settings, worldName);
+            ((IMixinWorldInfo) worldInfo).createWorldConfig();
+            ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
         }
 
-        ((IMixinWorldInfo) worldInfo).createWorldConfig();
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(Integer.MIN_VALUE);
         ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
-        ((IMixinWorldInfo) worldInfo).setIsMod(((IMixinWorldSettings)settings).getIsMod());
         ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
-        ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
         ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
@@ -603,7 +596,8 @@ public final class WorldManager {
             if (worldInfo == null) {
                 worldSettings = new WorldSettings(defaultSeed, server.getGameType(), server.canStructuresSpawn(), server.isHardcore(),
                         defaultWorldType);
-                worldInfo = createWorldInfoFromSettings(currentSavesDir, dimensionId, worldFolderName, worldSettings, generatorOptions);
+                worldInfo = createWorldInfoFromSettings(currentSavesDir, (org.spongepowered.api.world.DimensionType) (Object) dimensionType,
+                        dimensionId, worldFolderName, worldSettings, generatorOptions);
             } else {
                 // While we DO have the WorldInfo already from disk, still set the UUID in-case this is an old world.
                 // Also, we need to step up one level in folder structure so that DIM 0 will have a chance to read old UUID
@@ -641,19 +635,16 @@ public final class WorldManager {
         ((MinecraftServer) Sponge.getServer()).worldServers = reorderWorldsVanillaFirst();
     }
 
-    public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, int dimensionId, String worldFolderName, WorldSettings worldSettings,
-            String generatorOptions) {
+    public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
+            dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
         final MinecraftServer server = (MinecraftServer) Sponge.getServer();
-        final DimensionType dimensionType = dimensionTypeByDimensionId.get(dimensionId);
-
-        ((IMixinWorldSettings) (Object) worldSettings).setDimensionId(dimensionId);
-        ((IMixinWorldSettings) (Object) worldSettings).setDimensionType((org.spongepowered.api.world.DimensionType) (Object) dimensionType);
 
         worldSettings.setGeneratorOptions(generatorOptions);
 
         final WorldInfo worldInfo = new WorldInfo(worldSettings, worldFolderName);
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
-
+        ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
+        ((IMixinWorldInfo) worldInfo).setDimensionType(dimensionType);
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)),
                 (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
 

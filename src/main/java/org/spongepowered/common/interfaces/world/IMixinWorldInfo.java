@@ -37,21 +37,32 @@ public interface IMixinWorldInfo {
 
     NBTTagCompound getSpongeRootLevelNbt();
 
+    void setSpongeRootLevelNBT(NBTTagCompound nbt);
+
     NBTTagCompound getSpongeNbt();
+
+    void readSpongeNbt(NBTTagCompound spongeNbt);
 
     int getIndexForUniqueId(UUID uuid);
 
     Optional<UUID> getUniqueIdForIndex(int index);
 
-    int getDimensionId();
-
-    boolean getIsMod();
-
-    SpongeConfig<WorldConfig> getWorldConfig();
+    Integer getDimensionId();
 
     void setDimensionId(int id);
 
-    void setSpongeRootLevelNBT(NBTTagCompound nbt);
+    boolean getIsMod();
+
+    void setIsMod(boolean isMod);
+
+    SpongeConfig<WorldConfig> getWorldConfig();
+
+    /**
+     * Creates the world config.
+     *
+     * @return True if the config was wrote to disk, false otherwise
+     */
+    boolean createWorldConfig();
 
     void setUUID(UUID uuid);
 
@@ -60,12 +71,6 @@ public interface IMixinWorldInfo {
     void setSeed(long seed);
 
     void setWorldName(String name);
-
-    void readSpongeNbt(NBTTagCompound spongeNbt);
-
-    void setIsMod(boolean isMod);
-
-    void createWorldConfig();
 
     void setScoreboard(ServerScoreboard scoreboard);
 
