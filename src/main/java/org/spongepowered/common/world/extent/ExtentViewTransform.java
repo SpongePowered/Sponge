@@ -432,8 +432,18 @@ public class ExtentViewTransform implements DefaultedExtent {
         return this.extent.spawnEntity(entity, cause);
     }
 
+    @Override public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
+        // TODO 1.9 gabizou this is for you
+        return false;
+    }
+
     private Vector3d inverseTransform(Vector3d vector) {
         return this.inverseTransform.getMatrix().transform(vector.getX(), vector.getY(), vector.getZ(), 1).toVector3();
+    }
+
+    @Override public Optional<Entity> getEntity(UUID uuid) {
+        // TODO 1.9 gabizou this is for you
+        return null;
     }
 
     @Override

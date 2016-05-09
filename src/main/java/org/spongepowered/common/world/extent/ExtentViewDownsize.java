@@ -421,6 +421,17 @@ public class ExtentViewDownsize implements DefaultedExtent {
         return this.extent.spawnEntity(entity, cause);
     }
 
+    @Override public boolean spawnEntities(Iterable<? extends Entity> entities, Cause cause) {
+        // TODO 1.9 gabizou this is for you
+        return false;
+    }
+
+    @Override
+    public Optional<Entity> getEntity(UUID uuid) {
+        // TODO 1.9 gabizou this is for you
+        return null;
+    }
+
     @Override
     public Collection<Entity> getEntities() {
         final Collection<Entity> entities = this.extent.getEntities();
