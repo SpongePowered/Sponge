@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
 import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.registry.util.RegistrationDependency;
 import org.spongepowered.api.world.DimensionTypes;
@@ -48,8 +49,8 @@ import java.util.Map;
 import java.util.Optional;
 
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorRegistryModule.class, DifficultyRegistryModule.class,
-                         DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class})
-public class WorldCreationSettingsRegistryModule implements AdditionalCatalogRegistryModule<WorldCreationSettings> {
+        DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, GeneratorModifierRegistryModule.class})
+public class WorldCreationSettingsRegistryModule implements AdditionalCatalogRegistryModule<WorldCreationSettings>, AlternateCatalogRegistryModule<WorldCreationSettings> {
 
     @RegisterCatalog(WorldCreationSettingsTypes.class)
     private final Map<String, WorldCreationSettings> worldCreationSettingsMap = new HashMap<>();
@@ -85,10 +86,10 @@ public class WorldCreationSettingsRegistryModule implements AdditionalCatalogReg
                 .dimension(DimensionTypes.THE_END)
                 .build("minecraft:the_end", "The End")
         );
-        this.worldCreationSettingsMap.put("sponge:skylands", WorldCreationSettings.builder()
+        this.worldCreationSettingsMap.put("sponge:the_skylands", WorldCreationSettings.builder()
                 .from(overworld)
                 .generatorModifiers(WorldGeneratorModifiers.SKYLANDS)
-                .build("sponge:skylands", "Skylands")
+                .build("sponge:the_skylands", "The Skylands")
         );
     }
 
@@ -109,5 +110,14 @@ public class WorldCreationSettingsRegistryModule implements AdditionalCatalogReg
     @Override
     public Collection<WorldCreationSettings> getAll() {
         return Collections.unmodifiableCollection(this.worldCreationSettingsMap.values());
+    }
+
+    @Override
+    public Map<String, WorldCreationSettings> provideCatalogMap() {
+        Map<String, WorldCreationSettings> provided = new HashMap<>();
+        for (Map.Entry<String, WorldCreationSettings> entry : this.worldCreationSettingsMap.entrySet()) {
+            provided.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
+        }
+        return provided;
     }
 }
