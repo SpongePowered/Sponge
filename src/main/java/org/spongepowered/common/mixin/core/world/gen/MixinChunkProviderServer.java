@@ -31,19 +31,19 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 
 import javax.annotation.Nullable;
 
-@Mixin(ChunkProviderServer.class)
+@Mixin(value = ChunkProviderServer.class, priority = 1000)
 public abstract class MixinChunkProviderServer implements IMixinChunkProviderServer {
 
     @Shadow public WorldServer worldObj;
     @Shadow private LongHashMap<Chunk> id2ChunkMap;
+    @Shadow public IChunkProvider serverChunkGenerator;;
 
     @Shadow public abstract Chunk provideChunk(int x, int z);
 
@@ -53,16 +53,32 @@ public abstract class MixinChunkProviderServer implements IMixinChunkProviderSer
         return this.id2ChunkMap.getValueByKey(ChunkCoordIntPair.chunkXZ2Int(x, z));
     }
 
-    @Redirect(method = "populate",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/chunk/IChunkProvider;populate(Lnet/minecraft/world/chunk/IChunkProvider;II)V"))
-    public void onChunkPopulate(IChunkProvider serverChunkGenerator, IChunkProvider chunkProvider, int x, int z) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        boolean capturingTerrain = world.getCauseTracker().isCapturingTerrainGen();
-        boolean processingCapture = world.getCauseTracker().isProcessingCaptureCause();
-        world.getCauseTracker().setProcessingCaptureCause(true);
-        world.getCauseTracker().setCapturingTerrainGen(true);
-        serverChunkGenerator.populate(chunkProvider, x, z);
-        world.getCauseTracker().setCapturingTerrainGen(capturingTerrain);
-        world.getCauseTracker().setProcessingCaptureCause(processingCapture);
+    /**
+     * @author blood - May 9th, 2016
+     * @reason Control terrain gen flag here to avoid leaking block captures during populate.
+     *     
+     * @param chunkProvider The chunk provider
+     * @param x The x coordinate of chunk
+     * @param z The z coordinate of chunk
+     */
+    @Overwrite
+    public void populate(IChunkProvider chunkProvider, int x, int z) {
+        Chunk chunk = this.provideChunk(x, z);
+
+        if (!chunk.isTerrainPopulated()) {
+            chunk.func_150809_p();
+
+            if (this.serverChunkGenerator != null) {
+                IMixinWorld world = (IMixinWorld) this.worldObj;
+                boolean capturingTerrain = world.getCauseTracker().isCapturingTerrainGen();
+                boolean processingCapture = world.getCauseTracker().isProcessingCaptureCause();
+                world.getCauseTracker().setProcessingCaptureCause(true);
+                world.getCauseTracker().setCapturingTerrainGen(true);
+                this.serverChunkGenerator.populate(chunkProvider, x, z);
+                chunk.setChunkModified();
+                world.getCauseTracker().setCapturingTerrainGen(capturingTerrain);
+                world.getCauseTracker().setProcessingCaptureCause(processingCapture);
+            }
+        }
     }
 }
