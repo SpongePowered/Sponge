@@ -24,13 +24,9 @@
  */
 package org.spongepowered.common.util.gen;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
@@ -44,45 +40,49 @@ import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.util.Optional;
-
-/**
- * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
- */
 @NonnullByDefault
-public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+public class ByteArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
 
-    private final ChunkPrimer chunkPrimer;
+    @SuppressWarnings("ConstantConditions")
+    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
 
-    public ChunkPrimerBuffer(ChunkPrimer chunkPrimer, int chunkX, int chunkZ) {
-        super(getBlockStart(chunkX, chunkZ), SpongeChunkLayout.CHUNK_SIZE);
-        this.chunkPrimer = chunkPrimer;
+    private final Palette palette;
+    private final byte[] blocks;
+
+    public ByteArrayMutableBlockBuffer(Vector3i start, Vector3i size) {
+        this(GlobalPalette.instance, new byte[size.getX() * size.getY() * size.getZ()], start, size);
     }
 
-    private static Vector3i getBlockStart(int chunkX, int chunkZ) {
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        return worldCoords.get();
+    public ByteArrayMutableBlockBuffer(byte[] blocks, Vector3i start, Vector3i size) {
+        this(GlobalPalette.instance, blocks, start, size);
+    }
+
+    public ByteArrayMutableBlockBuffer(Palette palette, Vector3i start, Vector3i size) {
+        this(palette, new byte[size.getX() * size.getY() * size.getZ()], start, size);
+    }
+
+    public ByteArrayMutableBlockBuffer(Palette palette, byte[] blocks, Vector3i start, Vector3i size) {
+        super(start, size);
+        this.blocks = blocks;
+        this.palette = palette;
+    }
+
+    public Palette getPalette() {
+        return this.palette;
     }
 
     @Override
-    public Palette getPalette() {
-        return GlobalPalette.instance;
+    public void setBlock(int x, int y, int z, BlockState block) {
+        checkRange(x, y, z);
+        this.blocks[getIndex(x, y, z)] = (byte) this.palette.getOrAssign(block);
     }
 
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
-    }
-
-    @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
-        return true;
+        BlockState block = this.palette.get(this.blocks[getIndex(x, y, z)]).get();
+        return block == null ? AIR : block;
     }
 
     @Override
@@ -98,8 +98,8 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker() {
+        return new SpongeMutableBlockVolumeWorker<>(this);
     }
 
     @Override
@@ -110,17 +110,16 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
-            case STANDARD:
-                return new CharArrayMutableBlockBuffer(this.chunkPrimer.data.clone(), this.start, this.size);
-            case THREAD_SAFE:
-            default:
-                throw new UnsupportedOperationException(type.name());
+        case STANDARD:
+            return new ByteArrayMutableBlockBuffer(this.palette, this.blocks.clone(), this.start, this.size);
+        case THREAD_SAFE:
+        default:
+            throw new UnsupportedOperationException(type.name());
         }
     }
 
     @Override
     public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new CharArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
+        return new ByteArrayImmutableBlockBuffer(this.blocks, this.start, this.size);
     }
-
 }

@@ -30,6 +30,7 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.BlockVolume;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.util.VecHelper;
 
 /**
@@ -62,6 +63,8 @@ public abstract class AbstractBlockBuffer implements BlockVolume {
     protected int getIndex(int x, int y, int z) {
         return (x - this.start.getX()) * this.yzSlice + (z - this.start.getZ()) * this.yLine + (y - this.start.getY());
     }
+    
+    public abstract Palette getPalette();
 
     @Override
     public Vector3i getBlockMax() {

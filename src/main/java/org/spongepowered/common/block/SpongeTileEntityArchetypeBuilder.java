@@ -119,6 +119,8 @@ public class SpongeTileEntityArchetypeBuilder extends AbstractDataBuilder<TileEn
         nbttagcompound.removeTag("y");
         nbttagcompound.removeTag("z");
         this.tileData = NbtTranslator.getInstance().translate(nbttagcompound);
+        this.blockState = tileEntity.getBlock();
+        this.tileEntityType = tileEntity.getType();
         return this;
     }
 

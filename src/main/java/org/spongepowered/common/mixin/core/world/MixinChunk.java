@@ -418,12 +418,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public MutableBiomeAreaWorker<? extends Chunk> getBiomeWorker() {
+    public MutableBiomeAreaWorker<Chunk> getBiomeWorker() {
         return new SpongeMutableBiomeAreaWorker<>(this);
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends Chunk> getBlockWorker(Cause cause) {
+    public MutableBlockVolumeWorker<Chunk> getBlockWorker(Cause cause) {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 

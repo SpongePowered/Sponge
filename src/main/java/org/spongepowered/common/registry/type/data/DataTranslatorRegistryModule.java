@@ -30,7 +30,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataTranslators;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator;
+import org.spongepowered.common.data.persistence.LegacySchematicTranslator;
+import org.spongepowered.common.data.persistence.SchematicTranslator;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 
 import java.util.Collection;
@@ -39,35 +43,50 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class DataTranslatorRegistryModule implements SpongeAdditionalCatalogRegistryModule<DataTranslator<?>> {
+@SuppressWarnings("rawtypes")
+public class DataTranslatorRegistryModule implements AlternateCatalogRegistryModule<DataTranslator>, SpongeAdditionalCatalogRegistryModule<DataTranslator> {
 
     public static DataTranslatorRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
     @RegisterCatalog(DataTranslators.class)
-    private final Map<String, DataTranslator<?>> dataFormatMappings = new HashMap<>();
+    private final Map<String, DataTranslator> dataTranslatorMappings = new HashMap<>();
 
     @Override
-    public Optional<DataTranslator<?>> getById(String id) {
-        return Optional.ofNullable(this.dataFormatMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
+    public Map<String, DataTranslator> provideCatalogMap() {
+        final Map<String, DataTranslator> modifierMap = new HashMap<>();
+        for (Map.Entry<String, DataTranslator> entry : this.dataTranslatorMappings.entrySet()) {
+            modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
+        }
+        return modifierMap;
+    }
+
+    
+    @Override
+    public Optional<DataTranslator> getById(String id) {
+        return Optional.ofNullable(this.dataTranslatorMappings.get(checkNotNull(id).toLowerCase(Locale.ENGLISH)));
     }
 
     @Override
-    public Collection<DataTranslator<?>> getAll() {
-        return ImmutableList.copyOf(this.dataFormatMappings.values());
+    public Collection<DataTranslator> getAll() {
+        return ImmutableList.copyOf(this.dataTranslatorMappings.values());
     }
 
     @Override
-    public void registerAdditionalCatalog(DataTranslator<?> extraCatalog) {
+    public void registerAdditionalCatalog(DataTranslator extraCatalog) {
         checkNotNull(extraCatalog, "CatalogType cannot be null");
         checkArgument(!extraCatalog.getId().isEmpty(), "Id cannot be empty");
-        checkArgument(!this.dataFormatMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
-        this.dataFormatMappings.put(extraCatalog.getId(), extraCatalog);
+        checkArgument(!this.dataTranslatorMappings.containsKey(extraCatalog.getId()), "Duplicate Id");
+        this.dataTranslatorMappings.put(extraCatalog.getId(), extraCatalog);
     }
 
     @Override
     public void registerDefaults() {
+        // Others are registered in DataSerializers#registerSerializers
+        registerAdditionalCatalog(LegacySchematicTranslator.get());
+        registerAdditionalCatalog(SchematicTranslator.get());
+        registerAdditionalCatalog(ConfigurateTranslator.instance());
     }
 
     DataTranslatorRegistryModule() {

@@ -79,24 +79,6 @@ public final class BlockUtil {
         }
     }
 
-    public static BlockState fromNative(IBlockState state) {
-        if (state instanceof BlockState) {
-            return (BlockState) state;
-        }
-        throw new IllegalArgumentException("Native block state implementation not compatible with this implementation!");
-    }
-
-    public static BlockType toBlock(IBlockState state) {
-        return fromNative(state).getType();
-    }
-
-    public static Block toBlock(BlockState state) {
-        return toNative(state).getBlock();
-    }
-
-    private BlockUtil() {
-    }
-
     public static BlockState fromNative(IBlockState blockState) {
         if (blockState instanceof BlockState) {
             return (BlockState) blockState;
@@ -107,11 +89,22 @@ public final class BlockUtil {
         }
     }
 
+    public static BlockType toBlock(IBlockState state) {
+        return fromNative(state).getType();
+    }
+
+    public static Block toBlock(BlockState state) {
+        return toNative(state).getBlock();
+    }
+
     public static IBlockState getBlockState(org.spongepowered.api.world.World world, Vector3i blockPos) {
         if (!(world instanceof World)) {
             throw new IllegalArgumentException("World : " + world.getName() + " is not appropriate for this implementation!");
         }
         return ((World) world).getBlockState(VecHelper.toBlockPos(blockPos));
+    }
+
+    private BlockUtil() {
     }
 
     private static final class BlockStateComparator implements Comparator<BlockState> {

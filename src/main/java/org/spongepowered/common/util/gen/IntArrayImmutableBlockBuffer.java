@@ -24,47 +24,40 @@
  */
 package org.spongepowered.common.util.gen;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.chunk.ChunkPrimer;
+import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.extent.ImmutableBlockVolume;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
-import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
-import org.spongepowered.common.world.extent.MutableBlockViewTransform;
-import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
-import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
+import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
+import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
+import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.storage.SpongeChunkLayout;
 
-import java.util.Optional;
+import java.util.Arrays;
 
-/**
- * Makes a {@link ChunkPrimer} usable as a {@link MutableBlockVolume}.
- */
 @NonnullByDefault
-public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
+public class IntArrayImmutableBlockBuffer extends AbstractBlockBuffer implements ImmutableBlockVolume {
 
-    private final ChunkPrimer chunkPrimer;
+    @SuppressWarnings("ConstantConditions")
+    private static final BlockState AIR = BlockTypes.AIR.getDefaultState();
+    private final int[] blocks;
 
-    public ChunkPrimerBuffer(ChunkPrimer chunkPrimer, int chunkX, int chunkZ) {
-        super(getBlockStart(chunkX, chunkZ), SpongeChunkLayout.CHUNK_SIZE);
-        this.chunkPrimer = chunkPrimer;
+    private IntArrayImmutableBlockBuffer(Vector3i start, Vector3i size, int[] blocks) {
+        super(start, size);
+        this.blocks = blocks;
     }
 
-    private static Vector3i getBlockStart(int chunkX, int chunkZ) {
-        final Optional<Vector3i> worldCoords = SpongeChunkLayout.instance.toWorld(chunkX, 0, chunkZ);
-        checkArgument(worldCoords.isPresent(), "Chunk coordinates are not valid" + chunkX + ", " + chunkZ);
-        return worldCoords.get();
+    public IntArrayImmutableBlockBuffer(int[] blocks, Vector3i start, Vector3i size) {
+        super(start, size);
+        this.blocks = Arrays.copyOf(blocks, blocks.length);
     }
 
     @Override
@@ -75,52 +68,53 @@ public final class ChunkPrimerBuffer extends AbstractBlockBuffer implements Muta
     @Override
     public BlockState getBlock(int x, int y, int z) {
         checkRange(x, y, z);
-        return (BlockState) this.chunkPrimer.getBlockState(x & 0xf, y, z & 0xf);
+        BlockState block = (BlockState) Block.BLOCK_STATE_IDS.getByValue(this.blocks[getIndex(x, y, z)]);
+        return block == null ? AIR : block;
     }
 
     @Override
-    public boolean setBlock(int x, int y, int z, BlockState block, Cause cause) {
-        checkRange(x, y, z);
-        this.chunkPrimer.setBlockState(x & 0xf, y, z & 0xF, (IBlockState) block);
-        return true;
-    }
-
-    @Override
-    public MutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
+    public ImmutableBlockVolume getBlockView(Vector3i newMin, Vector3i newMax) {
         checkRange(newMin.getX(), newMin.getY(), newMin.getZ());
         checkRange(newMax.getX(), newMax.getY(), newMax.getZ());
-        return new MutableBlockViewDownsize(this, newMin, newMax);
+        return new ImmutableBlockViewDownsize(this, newMin, newMax);
     }
 
     @Override
-    public MutableBlockVolume getBlockView(DiscreteTransform3 transform) {
-        return new MutableBlockViewTransform(this, transform);
-    }
-
-    @Override
-    public MutableBlockVolumeWorker<? extends MutableBlockVolume> getBlockWorker(Cause cause) {
-        return new SpongeMutableBlockVolumeWorker<>(this, cause);
+    public ImmutableBlockVolume getBlockView(DiscreteTransform3 transform) {
+        return new ImmutableBlockViewTransform(this, transform);
     }
 
     @Override
     public UnmodifiableBlockVolume getUnmodifiableBlockView() {
-        return new UnmodifiableBlockVolumeWrapper(this);
+        return this;
+    }
+
+    @Override
+    public BlockVolumeWorker<? extends ImmutableBlockVolume> getBlockWorker() {
+        return new SpongeBlockVolumeWorker<>(this);
     }
 
     @Override
     public MutableBlockVolume getBlockCopy(StorageType type) {
         switch (type) {
             case STANDARD:
-                return new CharArrayMutableBlockBuffer(this.chunkPrimer.data.clone(), this.start, this.size);
+                return new IntArrayMutableBlockBuffer(this.blocks.clone(), this.start, this.size);
             case THREAD_SAFE:
             default:
                 throw new UnsupportedOperationException(type.name());
         }
     }
 
-    @Override
-    public ImmutableBlockVolume getImmutableBlockCopy() {
-        return new CharArrayImmutableBlockBuffer(this.chunkPrimer.data, this.start, this.size);
+    /**
+     * This method doesn't clone the array passed into it. INTERNAL USE ONLY.
+     * Make sure your code doesn't leak the reference if you're using it.
+     *
+     * @param blocks The blocks to store
+     * @param start The start of the volume
+     * @param size The size of the volume
+     * @return A new buffer using the same array reference
+     */
+    public static ImmutableBlockVolume newWithoutArrayClone(int[] blocks, Vector3i start, Vector3i size) {
+        return new IntArrayImmutableBlockBuffer(start, size, blocks);
     }
-
 }

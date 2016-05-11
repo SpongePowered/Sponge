@@ -31,6 +31,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -39,6 +40,9 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
@@ -59,6 +63,7 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -66,6 +71,7 @@ import org.spongepowered.common.event.tracking.phase.BlockPhase;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
@@ -521,6 +527,30 @@ public class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Collection<Property<?, ?>> getApplicableProperties() {
         return this.blockState.getApplicableProperties();
+    }
+
+    @Override
+    public Optional<TileEntityArchetype> createArchetype() {
+        final BlockType type = this.blockState.getType();
+        if (!(type instanceof ITileEntityProvider)) {
+            return Optional.empty();
+        }
+        if (this.compound == null) { // We can't retrieve the TileEntityType
+            return Optional.empty();
+        }
+        final String tileId = this.compound.getString(NbtDataUtil.BLOCK_ENTITY_ID);
+        final Class<? extends TileEntity> tileClass = TileEntity.nameToClassMap.get(tileId);
+        if (tileClass == null) {
+            return Optional.empty();
+        }
+        final TileEntityType tileType = TileEntityTypeRegistryModule.getInstance().getForClass(tileClass);
+
+        final TileEntityArchetype archetype = TileEntityArchetype.builder()
+                .tile(tileType)
+                .state(this.blockState)
+                .tileData(NbtTranslator.getInstance().translate(this.compound))
+                .build();
+        return Optional.of(archetype);
     }
 
     @Override

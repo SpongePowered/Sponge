@@ -25,7 +25,6 @@
 package org.spongepowered.common.entity;
 
 import com.flowpowered.math.vector.Vector3d;
-import com.google.common.collect.ImmutableList;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLiving;
@@ -87,8 +86,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final Entity entity = EntityList.createEntityFromNBT(data, worldServer);
 
         final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entity);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity),
-                ImmutableList.of(spongeEntity.createSnapshot()), world);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(spongeEntity), world);
         if (!event.isCancelled()) {
             final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
             entity.setPositionAndRotation(x, y, z, entity.rotationYaw, entity.rotationPitch);

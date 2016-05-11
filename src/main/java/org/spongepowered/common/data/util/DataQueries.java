@@ -205,4 +205,34 @@ public final class DataQueries {
         }
 
     }
+    
+    public static final class Schematic {
+        
+        public static final DataQuery VERSION = of("Version");
+        public static final DataQuery METADATA = of("Metadata");
+        
+        public static final DataQuery WIDTH = of("Width");
+        public static final DataQuery HEIGHT = of("Height");
+        public static final DataQuery LENGTH = of("Length");
+
+        public static final DataQuery OFFSET = of("Offset");
+        public static final DataQuery PALETTE = of("Palette");
+        public static final DataQuery PALETTE_MAX = of("PaletteMax");
+        public static final DataQuery BLOCK_DATA = of("BlockData");
+
+        public static final DataQuery LEGACY_MATERIALS = of("Materials");
+        
+        public static final DataQuery LEGACY_OFFSET_X = of("WEOffsetX");
+        public static final DataQuery LEGACY_OFFSET_Y = of("WEOffsetY");
+        public static final DataQuery LEGACY_OFFSET_Z = of("WEOffsetZ");
+
+        public static final DataQuery LEGACY_BLOCKS = of("Blocks");
+        public static final DataQuery LEGACY_BLOCK_DATA = of("Data");
+        public static final DataQuery LEGACY_ADD_BLOCKS = of("AddBlocks");
+
+        public static final DataQuery LEGACY_TILEDATA = of("TileEntities");
+        
+        private Schematic() {
+        }
+    }
 }

@@ -43,20 +43,16 @@ import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.nbt.NBTTagShort;
 import net.minecraft.nbt.NBTTagString;
-import org.apache.commons.lang3.ArrayUtils;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataQuery;
 import org.spongepowered.api.data.DataSerializable;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
 
@@ -118,8 +114,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
             return new NBTTagString((String) value);
         } else if (value.getClass().isArray()) {
             if (value instanceof byte[]) {
-                byte[] array = ArrayUtils.clone((byte[]) value);
-                return new NBTTagByteArray(array);
+                return new NBTTagByteArray((byte[]) value);
             } else if (value instanceof Byte[]) {
                 byte[] array = new byte[((Byte[]) value).length];
                 int counter = 0;
@@ -128,8 +123,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 return new NBTTagByteArray(array);
             } else if (value instanceof int[]) {
-                int[] array = ArrayUtils.clone((int[]) value);
-                return new NBTTagIntArray(array);
+                return new NBTTagIntArray((int[]) value);
             } else if (value instanceof Integer[]) {
                 int[] array = new int[((Integer[]) value).length];
                 int counter = 0;
@@ -170,10 +164,9 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         throw new IllegalArgumentException("Unable to translate object to NBTBase: " + value);
     }
 
-    @SuppressWarnings("unchecked")
     private static DataContainer getViewFromCompound(NBTTagCompound compound) {
         checkNotNull(compound);
-        DataContainer container = new MemoryDataContainer();
+        DataContainer container = new NonCloningDataContainer();
         for (String key : compound.getKeySet()) {
             NBTBase base = compound.getTag(key);
             byte type = base.getId();
@@ -304,8 +297,8 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
     }
 
     @Override
-    public Optional<NBTTagCompound> translate(DataView view) throws InvalidDataException {
-        return Optional.of(containerToCompound(view));
+    public NBTTagCompound translate(DataView view) throws InvalidDataException {
+        return containerToCompound(view);
     }
 
     @Override

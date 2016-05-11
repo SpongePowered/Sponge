@@ -45,6 +45,7 @@ import org.spongepowered.api.data.merge.MergeFunction;
 import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -463,6 +464,11 @@ public class SpongeEntitySnapshot implements EntitySnapshot {
     @Override
     public Collection<Property<?, ?>> getApplicableProperties() {
         return ImmutableList.of();
+    }
+
+    @Override
+    public EntityArchetype createArchetype() {
+        throw new UnsupportedOperationException();
     }
 
     @Override

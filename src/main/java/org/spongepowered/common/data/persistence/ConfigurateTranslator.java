@@ -32,19 +32,17 @@ import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.SimpleConfigurationNode;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataView;
-import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 /**
  * A translator for translating {@link DataView}s into {@link ConfigurationNode}
  * s.
  */
-final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
+public class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
     private static final ConfigurateTranslator instance = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.of(ConfigurationNode.class);
@@ -69,7 +67,7 @@ final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
     private static DataContainer translateFromNode(ConfigurationNode node) {
         checkNotNull(node, "node");
-        DataContainer dataContainer = new MemoryDataContainer();
+        DataContainer dataContainer = new NonCloningDataContainer();
         Object value = node.getValue();
         Object key = node.getKey();
         if (value != null) {
@@ -114,10 +112,10 @@ final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
     }
 
     @Override
-    public Optional<ConfigurationNode> translate(DataView view) throws InvalidDataException {
+    public ConfigurationNode translate(DataView view) throws InvalidDataException {
         final SimpleConfigurationNode node = SimpleConfigurationNode.root();
         populateNode(node, view);
-        return  Optional.of(node);
+        return node;
     }
 
     @Override
@@ -127,7 +125,7 @@ final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
     @Override
     public String getId() {
-        return "sponge:ConfigurationNode";
+        return "sponge:configuration_node";
     }
 
     @Override

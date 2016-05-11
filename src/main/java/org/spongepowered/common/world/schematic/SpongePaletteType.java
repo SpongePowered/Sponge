@@ -24,27 +24,24 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.flowpowered.math.vector.Vector3i;
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.data.MemoryDataContainer;
-import org.spongepowered.api.world.schematic.Schematic;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.common.SpongeCatalogType;
 
-public class CharArraySchematic extends CharArraySchematicVolume implements Schematic {
+import java.util.function.Supplier;
 
-    private DataContainer metadata;
+public class SpongePaletteType extends SpongeCatalogType implements PaletteType {
 
-    public CharArraySchematic(Vector3i start, Vector3i size) {
-        this(GlobalPalette.instance, start, size);
-    }
+    private final Supplier<Palette> builder;
 
-    public CharArraySchematic(Palette palette, Vector3i start, Vector3i size) {
-        super(palette, start, size);
-        this.metadata = new MemoryDataContainer();
+    public SpongePaletteType(String id, Supplier<Palette> builder) {
+        super(id);
+        this.builder = builder;
     }
 
     @Override
-    public DataContainer getMetadata() {
-        return this.metadata;
+    public Palette create() {
+        return this.builder.get();
     }
 
 }

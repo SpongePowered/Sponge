@@ -35,12 +35,12 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.world.extent.MutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.MutableBlockViewTransform;
 import org.spongepowered.common.world.extent.UnmodifiableBlockVolumeWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 import org.spongepowered.common.world.schematic.GlobalPalette;
-import org.spongepowered.common.world.schematic.Palette;
 
 @NonnullByDefault
 public class CharArrayMutableBlockBuffer extends AbstractBlockBuffer implements MutableBlockVolume {
@@ -67,6 +67,11 @@ public class CharArrayMutableBlockBuffer extends AbstractBlockBuffer implements 
         super(start, size);
         this.blocks = blocks;
         this.palette = palette;
+    }
+
+    @Override
+    public Palette getPalette() {
+        return this.palette;
     }
 
     @Override

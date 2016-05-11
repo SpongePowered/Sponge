@@ -36,9 +36,11 @@ import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.StorageType;
 import org.spongepowered.api.world.extent.UnmodifiableBlockVolume;
 import org.spongepowered.api.world.extent.worker.BlockVolumeWorker;
+import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.common.world.extent.ImmutableBlockViewDownsize;
 import org.spongepowered.common.world.extent.ImmutableBlockViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBlockVolumeWorker;
+import org.spongepowered.common.world.schematic.GlobalPalette;
 
 import java.util.Arrays;
 
@@ -57,6 +59,11 @@ public class CharArrayImmutableBlockBuffer extends AbstractBlockBuffer implement
     public CharArrayImmutableBlockBuffer(char[] blocks, Vector3i start, Vector3i size) {
         super(start, size);
         this.blocks = Arrays.copyOf(blocks, blocks.length);
+    }
+
+    @Override
+    public Palette getPalette() {
+        return GlobalPalette.instance;
     }
 
     @Override

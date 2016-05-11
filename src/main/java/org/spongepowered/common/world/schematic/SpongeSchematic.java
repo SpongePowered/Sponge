@@ -24,51 +24,47 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import com.flowpowered.math.vector.Vector3f;
 import com.flowpowered.math.vector.Vector3i;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import org.spongepowered.api.block.tileentity.TileEntityArchetype;
+import org.spongepowered.api.data.DataView;
+import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
-import org.spongepowered.api.world.extent.ArchetypeVolume;
+import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
-import org.spongepowered.common.util.gen.CharArrayMutableBlockBuffer;
+import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBlockVolumeWorker;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
-public class CharArraySchematicVolume extends CharArrayMutableBlockBuffer implements ArchetypeVolume {
+public class SpongeSchematic extends SpongeArchetypeVolume implements Schematic {
 
-    private final Map<Vector3i, TileEntityArchetype> tiles = Maps.newHashMap();
-    private final List<EntityArchetype> entities = Lists.newArrayList();
+    private DataView metadata;
 
-    public CharArraySchematicVolume(Vector3i start, Vector3i size) {
-        super(start, size);
+    public SpongeSchematic(SpongeArchetypeVolume volume,
+            DataView metadata) {
+        super(volume.getBacking(), volume.getTileEntityArchetypes(), volume.getEntityArchetypes());
+        this.metadata = metadata;
     }
 
-    public CharArraySchematicVolume(Palette palette, Vector3i start, Vector3i size) {
-        super(palette, start, size);
+    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Map<Vector3f, EntityArchetype> entities) {
+        super(backing, tiles, entities);
+        this.metadata = new MemoryDataContainer();
     }
 
-    @Override
-    public Optional<TileEntityArchetype> getBlockArchetype(int x, int y, int z) {
-        return Optional.ofNullable(this.tiles.get(getBlockMin().add(x, y, z)));
-    }
-
-    @Override
-    public Map<Vector3i, TileEntityArchetype> getBlockArchetypes() {
-        return this.tiles;
+    public SpongeSchematic(MutableBlockVolume backing, Map<Vector3i, TileEntityArchetype> tiles, Map<Vector3f, EntityArchetype> entities,
+            DataView metadata) {
+        super(backing, tiles, entities);
+        this.metadata = metadata;
     }
 
     @Override
-    public Collection<EntityArchetype> getEntityArchetypes() {
-        return this.entities;
+    public DataView getMetadata() {
+        return this.metadata;
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends ArchetypeVolume> getBlockWorker() {
+    public MutableBlockVolumeWorker<Schematic> getBlockWorker() {
         return new SpongeMutableBlockVolumeWorker<>(this);
     }
 

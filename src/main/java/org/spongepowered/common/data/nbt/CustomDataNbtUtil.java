@@ -50,10 +50,10 @@ public class CustomDataNbtUtil {
 
     @SuppressWarnings("unchecked")
     public static DataTransactionResult apply(NBTTagCompound compound, DataManipulator<?, ?> manipulator) {
-        if (!compound.hasKey(NbtDataUtil.FORGE_DATA_TAG, NbtDataUtil.TAG_COMPOUND)) {
-            compound.setTag(NbtDataUtil.FORGE_DATA_TAG, new NBTTagCompound());
+        if (!compound.hasKey(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
+            compound.setTag(NbtDataUtil.FORGE_DATA, new NBTTagCompound());
         }
-        final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA_TAG);
+        final NBTTagCompound forgeCompound = compound.getCompoundTag(NbtDataUtil.FORGE_DATA);
         if (!forgeCompound.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             forgeCompound.setTag(NbtDataUtil.SPONGE_DATA, new NBTTagCompound());
         }
@@ -154,10 +154,10 @@ public class CustomDataNbtUtil {
     }
 
     public static DataTransactionResult remove(NBTTagCompound data, Class<? extends DataManipulator<?, ?>> containerClass) {
-        if (!data.hasKey(NbtDataUtil.FORGE_DATA_TAG, NbtDataUtil.TAG_COMPOUND)) {
+        if (!data.hasKey(NbtDataUtil.FORGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             return DataTransactionResult.successNoData();
         }
-        final NBTTagCompound forgeTag = data.getCompoundTag(NbtDataUtil.FORGE_DATA_TAG);
+        final NBTTagCompound forgeTag = data.getCompoundTag(NbtDataUtil.FORGE_DATA);
         if (!forgeTag.hasKey(NbtDataUtil.SPONGE_DATA, NbtDataUtil.TAG_COMPOUND)) {
             return DataTransactionResult.successNoData();
         }

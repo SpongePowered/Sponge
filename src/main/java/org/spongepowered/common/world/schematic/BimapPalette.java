@@ -27,8 +27,12 @@ package org.spongepowered.common.world.schematic;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 
 import java.util.BitSet;
+import java.util.Collection;
 import java.util.Optional;
 
 public class BimapPalette implements Palette {
@@ -51,7 +55,12 @@ public class BimapPalette implements Palette {
     }
 
     @Override
-    public int getLength() {
+    public PaletteType getType() {
+        return PaletteTypes.LOCAL;
+    }
+
+    @Override
+    public int getHighestId() {
         return this.maxId;
     }
 
@@ -65,6 +74,9 @@ public class BimapPalette implements Palette {
         Integer id = this.idsr.get(state);
         if (id == null) {
             int next = this.allocation.nextClearBit(0);
+            if (this.maxId < next) {
+                this.maxId = next;
+            }
             this.allocation.set(next);
             this.ids.put(next, state);
             return next;
@@ -77,6 +89,14 @@ public class BimapPalette implements Palette {
         return Optional.ofNullable(this.ids.get(id));
     }
 
+    public void assign(BlockState state, int id) {
+        if (this.maxId < id) {
+            this.maxId = id;
+        }
+        this.allocation.set(id);
+        this.ids.put(id, state);
+    }
+
     @Override
     public boolean remove(BlockState state) {
         Integer id = this.idsr.get(state);
@@ -84,8 +104,16 @@ public class BimapPalette implements Palette {
             return false;
         }
         this.allocation.clear(id);
+        if (id == this.maxId) {
+            this.maxId = this.allocation.previousSetBit(this.maxId);
+        }
         this.ids.remove(id);
         return true;
+    }
+
+    @Override
+    public Collection<BlockState> getEntries() {
+        return this.idsr.keySet();
     }
 
 }

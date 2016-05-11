@@ -45,6 +45,7 @@ public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
     }
 
     @Override
+    @SuppressWarnings("resource")
     public DataContainer readFrom(InputStream input) throws InvalidDataFormatException, IOException {
         DataInputStream dis;
         if (input instanceof DataInputStream) {
@@ -52,11 +53,16 @@ public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
         } else {
             dis = new DataInputStream(input);
         }
-        NBTTagCompound tag = CompressedStreamTools.read(dis);
-        return NbtTranslator.getInstance().translateFrom(tag);
+        try {
+            NBTTagCompound tag = CompressedStreamTools.read(dis);
+            return NbtTranslator.getInstance().translateFrom(tag);
+        } finally {
+            dis.close();
+        }
     }
 
     @Override
+    @SuppressWarnings("resource")
     public void writeTo(OutputStream output, DataView data) throws IOException {
         NBTTagCompound tag = NbtTranslator.getInstance().translateData(data);
         DataOutputStream dos;
@@ -65,7 +71,11 @@ public class NbtDataFormat extends SpongeCatalogType implements DataFormat {
         } else {
             dos = new DataOutputStream(output);
         }
-        CompressedStreamTools.write(tag, dos);
+        try {
+            CompressedStreamTools.write(tag, dos);
+        } finally {
+            dos.close();
+        }
     }
 
 }

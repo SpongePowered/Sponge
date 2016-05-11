@@ -41,7 +41,6 @@ import com.flowpowered.math.vector.Vector4f;
 import com.flowpowered.math.vector.Vector4i;
 import com.flowpowered.math.vector.Vector4l;
 import com.google.common.reflect.TypeToken;
-import ninja.leaping.configurate.ConfigurationNode;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.data.DataQuery;
@@ -60,7 +59,6 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
 
@@ -91,6 +89,7 @@ public final class DataSerializers {
 
     static {
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
+
             final TypeToken<UUID> token = TypeToken.of(UUID.class);
 
             @Override
@@ -99,13 +98,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<UUID> translate(DataView view) throws InvalidDataException {
-                if (!view.contains(Queries.UUID_LEAST, Queries.UUID_MOST)) {
-                    return Optional.empty();
-                }
+            public UUID translate(DataView view) throws InvalidDataException {
                 final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
                 final long most = view.getLong(Queries.UUID_MOST).orElseThrow(invalidDataQuery(Queries.UUID_MOST));
-                return Optional.of(new UUID(least, most));
+                return new UUID(least, most);
             }
 
             @Override
@@ -126,6 +122,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataTranslator<Vector2d>() {
+
             final TypeToken<Vector2d> token = TypeToken.of(Vector2d.class);
 
             @Override
@@ -134,13 +131,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector2d> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final Double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Vector2d(x, y));
-                }
-                return Optional.empty();
+            public Vector2d translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Vector2d(x, y);
             }
 
             @Override
@@ -161,6 +155,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
+
             final TypeToken<Vector2f> token = TypeToken.of(Vector2f.class);
 
             @Override
@@ -169,13 +164,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector2f> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Vector2f(x, y));
-                }
-                return Optional.empty();
+            public Vector2f translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Vector2f(x, y);
             }
 
             @Override
@@ -196,6 +188,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
+
             final TypeToken<Vector2i> token = TypeToken.of(Vector2i.class);
 
             @Override
@@ -204,13 +197,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector2i> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS)) {
-                    final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Vector2i(x, y));
-                }
-                return Optional.empty();
+            public Vector2i translate(DataView view) throws InvalidDataException {
+                final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Vector2i(x, y);
             }
 
             @Override
@@ -231,6 +221,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_2_L_DATA_SERIALIZER = new DataTranslator<Vector2l>() {
+
             final TypeToken<Vector2l> token = TypeToken.of(Vector2l.class);
 
             @Override
@@ -239,13 +230,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector2l> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS)) {
-                    final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Vector2l(x, y));
-                }
-                return Optional.empty();
+            public Vector2l translate(DataView view) throws InvalidDataException {
+                final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Vector2l(x, y);
             }
 
             @Override
@@ -266,6 +254,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
+
             final TypeToken<Vector3d> token = TypeToken.of(Vector3d.class);
 
             @Override
@@ -274,14 +263,11 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector3d> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    return Optional.of(new Vector3d(x, y, z));
-                }
-                return Optional.empty();
+            public Vector3d translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                return new Vector3d(x, y, z);
             }
 
             @Override
@@ -303,6 +289,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_3_F_DATA_SERIALIZER = new DataTranslator<Vector3f>() {
+
             final TypeToken<Vector3f> token = TypeToken.of(Vector3f.class);
 
             @Override
@@ -311,14 +298,11 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector3f> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    return Optional.of(new Vector3f(x, y, z));
-                }
-                return Optional.empty();
+            public Vector3f translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                return new Vector3f(x, y, z);
             }
 
             @Override
@@ -340,6 +324,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_3_I_DATA_SERIALIZER = new DataTranslator<Vector3i>() {
+
             final TypeToken<Vector3i> token = TypeToken.of(Vector3i.class);
 
             @Override
@@ -348,14 +333,11 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector3i> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final int z = view.getInt(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    return Optional.of(new Vector3i(x, y, z));
-                }
-                return Optional.empty();
+            public Vector3i translate(DataView view) throws InvalidDataException {
+                final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final int z = view.getInt(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                return new Vector3i(x, y, z);
             }
 
             @Override
@@ -377,6 +359,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_3_L_DATA_SERIALIZER = new DataTranslator<Vector3l>() {
+
             final TypeToken<Vector3l> token = TypeToken.of(Vector3l.class);
 
             @Override
@@ -385,14 +368,11 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector3l> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final long z = view.getLong(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    return Optional.of(new Vector3l(x, y, z));
-                }
-                return Optional.empty();
+            public Vector3l translate(DataView view) throws InvalidDataException {
+                final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final long z = view.getLong(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                return new Vector3l(x, y, z);
             }
 
             @Override
@@ -414,6 +394,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_4_F_DATA_SERIALIZER = new DataTranslator<Vector4f>() {
+
             final TypeToken<Vector4f> token = TypeToken.of(Vector4f.class);
 
             @Override
@@ -422,15 +403,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector4f> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Vector4f(x, y, z, w));
-                }
-                return Optional.empty();
+            public Vector4f translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Vector4f(x, y, z, w);
             }
 
             @Override
@@ -453,6 +431,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_4_I_DATA_SERIALIZER = new DataTranslator<Vector4i>() {
+
             final TypeToken<Vector4i> token = TypeToken.of(Vector4i.class);
 
             @Override
@@ -461,15 +440,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector4i> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final int z = view.getInt(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final int w = view.getInt(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Vector4i(x, y, z, w));
-                }
-                return Optional.empty();
+            public Vector4i translate(DataView view) throws InvalidDataException {
+                final int x = view.getInt(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final int y = view.getInt(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final int z = view.getInt(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final int w = view.getInt(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Vector4i(x, y, z, w);
             }
 
             @Override
@@ -492,6 +468,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_4_L_DATA_SERIALIZER = new DataTranslator<Vector4l>() {
+
             final TypeToken<Vector4l> token = TypeToken.of(Vector4l.class);
 
             @Override
@@ -500,15 +477,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector4l> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final long z = view.getLong(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final long w = view.getLong(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Vector4l(x, y, z, w));
-                }
-                return Optional.empty();
+            public Vector4l translate(DataView view) throws InvalidDataException {
+                final long x = view.getLong(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final long y = view.getLong(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final long z = view.getLong(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final long w = view.getLong(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Vector4l(x, y, z, w);
             }
 
             @Override
@@ -531,6 +505,7 @@ public final class DataSerializers {
             }
         };
         VECTOR_4_D_DATA_SERIALIZER = new DataTranslator<Vector4d>() {
+
             final TypeToken<Vector4d> token = TypeToken.of(Vector4d.class);
 
             @Override
@@ -539,15 +514,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Vector4d> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Vector4d(x, y, z, w));
-                }
-                return Optional.empty();
+            public Vector4d translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Vector4d(x, y, z, w);
             }
 
             @Override
@@ -570,6 +542,7 @@ public final class DataSerializers {
             }
         };
         COMPLEXD_DATA_SERIALIZER = new DataTranslator<Complexd>() {
+
             final TypeToken<Complexd> token = TypeToken.of(Complexd.class);
 
             @Override
@@ -578,13 +551,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Complexd> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Complexd(x, y));
-                }
-                return Optional.empty();
+            public Complexd translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Complexd(x, y);
             }
 
             @Override
@@ -605,6 +575,7 @@ public final class DataSerializers {
             }
         };
         COMPLEXF_DATA_SERIALIZER = new DataTranslator<Complexf>() {
+
             final TypeToken<Complexf> token = TypeToken.of(Complexf.class);
 
             @Override
@@ -613,13 +584,10 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Complexf> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    return Optional.of(new Complexf(x, y));
-                }
-                return Optional.empty();
+            public Complexf translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                return new Complexf(x, y);
             }
 
             @Override
@@ -640,6 +608,7 @@ public final class DataSerializers {
             }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
+
             final TypeToken<Quaterniond> token = TypeToken.of(Quaterniond.class);
 
             @Override
@@ -648,15 +617,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Quaterniond> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Quaterniond(x, y, z, w));
-                }
-                return Optional.empty();
+            public Quaterniond translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Quaterniond(x, y, z, w);
             }
 
             @Override
@@ -679,6 +645,7 @@ public final class DataSerializers {
             }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
+
             final TypeToken<Quaternionf> token = TypeToken.of(Quaternionf.class);
 
             @Override
@@ -687,15 +654,12 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Quaternionf> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.X_POS, DataQueries.Y_POS, DataQueries.Z_POS)) {
-                    final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
-                    final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
-                    final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
-                    final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
-                    return Optional.of(new Quaternionf(x, y, z, w));
-                }
-                return Optional.empty();
+            public Quaternionf translate(DataView view) throws InvalidDataException {
+                final double x = view.getDouble(DataQueries.X_POS).orElseThrow(invalidDataQuery(DataQueries.X_POS));
+                final double y = view.getDouble(DataQueries.Y_POS).orElseThrow(invalidDataQuery(DataQueries.Y_POS));
+                final double z = view.getDouble(DataQueries.Z_POS).orElseThrow(invalidDataQuery(DataQueries.Z_POS));
+                final double w = view.getDouble(DataQueries.W_POS).orElseThrow(invalidDataQuery(DataQueries.W_POS));
+                return new Quaternionf(x, y, z, w);
             }
 
             @Override
@@ -718,6 +682,7 @@ public final class DataSerializers {
             }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {
+
             final TypeToken<LocalTime> token = TypeToken.of(LocalTime.class);
 
             @Override
@@ -726,27 +691,24 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<LocalTime> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.LOCAL_TIME_HOUR, DataQueries.LOCAL_TIME_MINUTE, DataQueries.LOCAL_TIME_NANO, DataQueries.LOCAL_TIME_SECOND)) {
-                    final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
-                    final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
-                    final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
-                    final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
-                    if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
-                        throw new InvalidDataException("Invalid hour of day: " + hour);
-                    }
-                    if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
-                        throw new InvalidDataException("Invalid minute of hour: " + minute);
-                    }
-                    if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
-                        throw new InvalidDataException("Invalid second of minute: " + second);
-                    }
-                    if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
-                        throw new InvalidDataException("Invalid nanosecond of second: " + nano);
-                    }
-                    return Optional.of(LocalTime.of(hour, minute, second, nano));
+            public LocalTime translate(DataView view) throws InvalidDataException {
+                final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
+                final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
+                final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
+                if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
+                    throw new InvalidDataException("Invalid hour of day: " + hour);
                 }
-                return Optional.empty();
+                if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
+                    throw new InvalidDataException("Invalid minute of hour: " + minute);
+                }
+                if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
+                    throw new InvalidDataException("Invalid second of minute: " + second);
+                }
+                if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
+                    throw new InvalidDataException("Invalid nanosecond of second: " + nano);
+                }
+                return LocalTime.of(hour, minute, second, nano);
             }
 
             @Override
@@ -769,6 +731,7 @@ public final class DataSerializers {
             }
         };
         LOCAL_DATE_DATA_SERIALIZER = new DataTranslator<LocalDate>() {
+
             final TypeToken<LocalDate> token = TypeToken.of(LocalDate.class);
 
             @Override
@@ -777,23 +740,20 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<LocalDate> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.LOCAL_DATE_YEAR, DataQueries.LOCAL_DATE_MONTH, DataQueries.LOCAL_DATE_DAY)) {
-                    final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
-                    final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
-                    final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
-                    if (!ChronoField.YEAR.range().isValidValue(year)) {
-                        throw new InvalidDataException("Invalid year: " + year);
-                    }
-                    if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
-                        throw new InvalidDataException("Invalid month of year: " + month);
-                    }
-                    if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
-                        throw new InvalidDataException("Invalid day of month: " + day);
-                    }
-                    return Optional.of(LocalDate.of(year, month, day));
+            public LocalDate translate(DataView view) throws InvalidDataException {
+                final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
+                final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
+                final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
+                if (!ChronoField.YEAR.range().isValidValue(year)) {
+                    throw new InvalidDataException("Invalid year: " + year);
                 }
-                return Optional.empty();
+                if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
+                    throw new InvalidDataException("Invalid month of year: " + month);
+                }
+                if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
+                    throw new InvalidDataException("Invalid day of month: " + day);
+                }
+                return LocalDate.of(year, month, day);
             }
 
             @Override
@@ -815,6 +775,7 @@ public final class DataSerializers {
             }
         };
         LOCAL_DATE_TIME_DATA_SERIALIZER = new DataTranslator<LocalDateTime>() {
+
             final TypeToken<LocalDateTime> token = TypeToken.of(LocalDateTime.class);
 
             @Override
@@ -823,40 +784,36 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<LocalDateTime> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.LOCAL_DATE_YEAR, DataQueries.LOCAL_DATE_MONTH, DataQueries.LOCAL_DATE_DAY, DataQueries.LOCAL_TIME_HOUR,
-                        DataQueries.LOCAL_TIME_MINUTE, DataQueries.LOCAL_TIME_NANO, DataQueries.LOCAL_TIME_SECOND)) {
-                    final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
-                    final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
-                    final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
-                    final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
-                    final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
-                    final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
-                    final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
-                    if (!ChronoField.YEAR.range().isValidValue(year)) {
-                        throw new InvalidDataException("Invalid year: " + year);
-                    }
-                    if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
-                        throw new InvalidDataException("Invalid month of year: " + month);
-                    }
-                    if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
-                        throw new InvalidDataException("Invalid day of month: " + day);
-                    }
-                    if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
-                        throw new InvalidDataException("Invalid hour of day: " + hour);
-                    }
-                    if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
-                        throw new InvalidDataException("Invalid minute of hour: " + minute);
-                    }
-                    if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
-                        throw new InvalidDataException("Invalid second of minute: " + second);
-                    }
-                    if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
-                        throw new InvalidDataException("Invalid nanosecond of second: " + nano);
-                    }
-                    return Optional.of(LocalDateTime.of(year, month, day, hour, minute, second, nano));
+            public LocalDateTime translate(DataView view) throws InvalidDataException {
+                final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
+                final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
+                final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
+                final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
+                final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
+                final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
+                if (!ChronoField.YEAR.range().isValidValue(year)) {
+                    throw new InvalidDataException("Invalid year: " + year);
                 }
-                return Optional.empty();
+                if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
+                    throw new InvalidDataException("Invalid month of year: " + month);
+                }
+                if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
+                    throw new InvalidDataException("Invalid day of month: " + day);
+                }
+                if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
+                    throw new InvalidDataException("Invalid hour of day: " + hour);
+                }
+                if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
+                    throw new InvalidDataException("Invalid minute of hour: " + minute);
+                }
+                if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
+                    throw new InvalidDataException("Invalid second of minute: " + second);
+                }
+                if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
+                    throw new InvalidDataException("Invalid nanosecond of second: " + nano);
+                }
+                return LocalDateTime.of(year, month, day, hour, minute, second, nano);
             }
 
             @Override
@@ -882,6 +839,7 @@ public final class DataSerializers {
             }
         };
         ZONED_DATE_TIME_DATA_SERIALIZER = new DataTranslator<ZonedDateTime>() {
+
             final TypeToken<ZonedDateTime> token = TypeToken.of(ZonedDateTime.class);
 
             @Override
@@ -890,44 +848,40 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<ZonedDateTime> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.LOCAL_DATE_YEAR, DataQueries.LOCAL_DATE_MONTH, DataQueries.LOCAL_DATE_DAY, DataQueries.LOCAL_TIME_HOUR,
-                        DataQueries.LOCAL_TIME_MINUTE, DataQueries.LOCAL_TIME_NANO, DataQueries.LOCAL_TIME_SECOND)) {
-                    final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
-                    final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
-                    final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
-                    final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
-                    final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
-                    final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
-                    final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
-                    final String zoneId = view.getString(DataQueries.ZONE_TIME_ID).orElseThrow(invalidDataQuery(DataQueries.ZONE_TIME_ID));
-                    if (!ChronoField.YEAR.range().isValidValue(year)) {
-                        throw new InvalidDataException("Invalid year: " + year);
-                    }
-                    if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
-                        throw new InvalidDataException("Invalid month of year: " + month);
-                    }
-                    if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
-                        throw new InvalidDataException("Invalid day of month: " + day);
-                    }
-                    if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
-                        throw new InvalidDataException("Invalid hour of day: " + hour);
-                    }
-                    if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
-                        throw new InvalidDataException("Invalid minute of hour: " + minute);
-                    }
-                    if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
-                        throw new InvalidDataException("Invalid second of minute: " + second);
-                    }
-                    if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
-                        throw new InvalidDataException("Invalid nanosecond of second: " + nano);
-                    }
-                    if (!ZoneId.getAvailableZoneIds().contains(zoneId)) {
-                        throw new InvalidDataException("Unrecognized ZoneId: " + zoneId);
-                    }
-                    return Optional.of(ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.of(hour, minute, second, nano), ZoneId.of(zoneId)));
+            public ZonedDateTime translate(DataView view) throws InvalidDataException {
+                final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
+                final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
+                final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
+                final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
+                final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
+                final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
+                final String zoneId = view.getString(DataQueries.ZONE_TIME_ID).orElseThrow(invalidDataQuery(DataQueries.ZONE_TIME_ID));
+                if (!ChronoField.YEAR.range().isValidValue(year)) {
+                    throw new InvalidDataException("Invalid year: " + year);
                 }
-                return Optional.empty();
+                if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
+                    throw new InvalidDataException("Invalid month of year: " + month);
+                }
+                if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
+                    throw new InvalidDataException("Invalid day of month: " + day);
+                }
+                if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
+                    throw new InvalidDataException("Invalid hour of day: " + hour);
+                }
+                if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
+                    throw new InvalidDataException("Invalid minute of hour: " + minute);
+                }
+                if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
+                    throw new InvalidDataException("Invalid second of minute: " + second);
+                }
+                if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
+                    throw new InvalidDataException("Invalid nanosecond of second: " + nano);
+                }
+                if (!ZoneId.getAvailableZoneIds().contains(zoneId)) {
+                    throw new InvalidDataException("Unrecognized ZoneId: " + zoneId);
+                }
+                return ZonedDateTime.of(LocalDate.of(year, month, day), LocalTime.of(hour, minute, second, nano), ZoneId.of(zoneId));
             }
 
             @Override
@@ -954,6 +908,7 @@ public final class DataSerializers {
             }
         };
         INSTANT_DATA_SERIALIZER = new DataTranslator<Instant>() {
+
             final TypeToken<Instant> token = TypeToken.of(Instant.class);
 
             @Override
@@ -962,40 +917,36 @@ public final class DataSerializers {
             }
 
             @Override
-            public Optional<Instant> translate(DataView view) throws InvalidDataException {
-                if (view.contains(DataQueries.LOCAL_DATE_YEAR, DataQueries.LOCAL_DATE_MONTH, DataQueries.LOCAL_DATE_DAY, DataQueries.LOCAL_TIME_HOUR,
-                        DataQueries.LOCAL_TIME_MINUTE, DataQueries.LOCAL_TIME_NANO, DataQueries.LOCAL_TIME_SECOND)) {
-                    final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
-                    final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
-                    final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
-                    final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
-                    final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
-                    final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
-                    final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
-                    if (!ChronoField.YEAR.range().isValidValue(year)) {
-                        throw new InvalidDataException("Invalid year: " + year);
-                    }
-                    if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
-                        throw new InvalidDataException("Invalid month of year: " + month);
-                    }
-                    if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
-                        throw new InvalidDataException("Invalid day of month: " + day);
-                    }
-                    if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
-                        throw new InvalidDataException("Invalid hour of day: " + hour);
-                    }
-                    if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
-                        throw new InvalidDataException("Invalid minute of hour: " + minute);
-                    }
-                    if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
-                        throw new InvalidDataException("Invalid second of minute: " + second);
-                    }
-                    if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
-                        throw new InvalidDataException("Invalid nanosecond of second: " + nano);
-                    }
-                    return Optional.of(LocalDateTime.of(year, month, day, hour, minute, second, nano).toInstant(ZoneOffset.UTC));
+            public Instant translate(DataView view) throws InvalidDataException {
+                final int year = view.getInt(DataQueries.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_YEAR));
+                final int month = view.getInt(DataQueries.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_MONTH));
+                final int day = view.getInt(DataQueries.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(DataQueries.LOCAL_DATE_DAY));
+                final int hour = view.getInt(DataQueries.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(DataQueries.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_MINUTE));
+                final int second = view.getInt(DataQueries.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_SECOND));
+                final int nano = view.getInt(DataQueries.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(DataQueries.LOCAL_TIME_NANO));
+                if (!ChronoField.YEAR.range().isValidValue(year)) {
+                    throw new InvalidDataException("Invalid year: " + year);
                 }
-                return Optional.empty();
+                if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
+                    throw new InvalidDataException("Invalid month of year: " + month);
+                }
+                if (!ChronoField.DAY_OF_MONTH.range().isValidValue(day)) {
+                    throw new InvalidDataException("Invalid day of month: " + day);
+                }
+                if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
+                    throw new InvalidDataException("Invalid hour of day: " + hour);
+                }
+                if (!ChronoField.MINUTE_OF_HOUR.range().isValidValue(minute)) {
+                    throw new InvalidDataException("Invalid minute of hour: " + minute);
+                }
+                if (!ChronoField.SECOND_OF_MINUTE.range().isValidValue(second)) {
+                    throw new InvalidDataException("Invalid second of minute: " + second);
+                }
+                if (!ChronoField.NANO_OF_SECOND.range().isValidValue(nano)) {
+                    throw new InvalidDataException("Invalid nanosecond of second: " + nano);
+                }
+                return LocalDateTime.of(year, month, day, hour, minute, second, nano).toInstant(ZoneOffset.UTC);
             }
 
             @Override
@@ -1052,7 +1003,6 @@ public final class DataSerializers {
         dataManager.registerTranslator(LocalDate.class, LOCAL_DATE_DATA_SERIALIZER);
         dataManager.registerTranslator(LocalDateTime.class, LOCAL_DATE_TIME_DATA_SERIALIZER);
         dataManager.registerTranslator(ZonedDateTime.class, ZONED_DATE_TIME_DATA_SERIALIZER);
-        dataManager.registerTranslator(ConfigurationNode.class, ConfigurateTranslator.instance());
     }
 
 }

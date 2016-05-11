@@ -637,12 +637,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     }
 
     @Override
-    public MutableBiomeAreaWorker<? extends World> getBiomeWorker() {
+    public MutableBiomeAreaWorker<World> getBiomeWorker() {
         return new SpongeMutableBiomeAreaWorker<>(this);
     }
 
     @Override
-    public MutableBlockVolumeWorker<? extends World> getBlockWorker(Cause cause) {
+    public MutableBlockVolumeWorker<World> getBlockWorker(Cause cause) {
         return new SpongeMutableBlockVolumeWorker<>(this, cause);
     }
 
