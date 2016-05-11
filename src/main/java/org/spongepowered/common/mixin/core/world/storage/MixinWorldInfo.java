@@ -632,11 +632,6 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
-    public WorldCreationSettings getCreationSettings() {
-        return (WorldCreationSettings) (Object) new WorldSettings((WorldInfo) (Object) this);
-    }
-
-    @Override
     public Optional<DataView> getPropertySection(DataQuery path) {
         if (this.spongeRootLevelNbt.hasKey(path.toString())) {
             return Optional
