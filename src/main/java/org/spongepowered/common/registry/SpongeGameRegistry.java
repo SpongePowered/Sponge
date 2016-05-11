@@ -249,7 +249,7 @@ public class SpongeGameRegistry implements GameRegistry {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends CatalogType> void register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
+    public <T extends CatalogType> T register(Class<T> type, T obj) throws IllegalArgumentException, UnsupportedOperationException {
         CatalogRegistryModule<T> registryModule = getRegistryModuleFor(type).orElse(null);
         if (registryModule == null) {
             throw new UnsupportedOperationException("Failed to find a RegistryModule for that type");
@@ -257,11 +257,11 @@ public class SpongeGameRegistry implements GameRegistry {
             if (registryModule instanceof SpongeAdditionalCatalogRegistryModule) {
                 if(((SpongeAdditionalCatalogRegistryModule<T>) registryModule).allowsApiRegistration()) {
                     ((SpongeAdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
-                    return;
+                    return obj;
                 }
             } else if (registryModule instanceof AdditionalCatalogRegistryModule) {
                 ((AdditionalCatalogRegistryModule<T>) registryModule).registerAdditionalCatalog(obj);
-                return;
+                return obj;
             }
             throw new UnsupportedOperationException("This catalog type does not support additional registration");
         }
