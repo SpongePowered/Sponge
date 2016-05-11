@@ -70,7 +70,7 @@ public final class TextColorRegistryModule implements CatalogRegistryModule<Text
         addTextColor(EnumChatFormatting.DARK_GRAY, Color.ofRgb(0x555555));
         addTextColor(EnumChatFormatting.BLUE, Color.ofRgb(0x5555FF));
         addTextColor(EnumChatFormatting.GREEN, Color.ofRgb(0x55FF55));
-        addTextColor(EnumChatFormatting.AQUA, Color.ofRgb(0x00FFFF));
+        addTextColor(EnumChatFormatting.AQUA, Color.ofRgb(0x55FFFF));
         addTextColor(EnumChatFormatting.RED, Color.ofRgb(0xFF5555));
         addTextColor(EnumChatFormatting.LIGHT_PURPLE, Color.ofRgb(0xFF55FF));
         addTextColor(EnumChatFormatting.YELLOW, Color.ofRgb(0xFFFF55));
