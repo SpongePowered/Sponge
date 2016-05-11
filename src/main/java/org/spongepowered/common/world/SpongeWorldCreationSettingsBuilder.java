@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.MemoryDataContainer;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -47,7 +48,9 @@ import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.registry.type.world.WorldCreationSettingsRegistryModule;
 
+import java.util.Optional;
 import java.util.Random;
 
 public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings.Builder {
@@ -226,6 +229,10 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
 
     @Override
     public WorldCreationSettings build(String id, String name) throws IllegalArgumentException, CatalogTypeAlreadyRegisteredException {
+        final Optional<WorldCreationSettings> optWorldCreationSettings = WorldCreationSettingsRegistryModule.getInstance().getById(id);
+        if (optWorldCreationSettings.isPresent()) {
+            throw new CatalogTypeAlreadyRegisteredException(id);
+        }
         final WorldSettings settings =
                 new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);
@@ -246,6 +253,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         spongeSettings.setCommandsAllowed(this.commandsAllowed);
         spongeSettings.setGenerateBonusChest(this.generateBonusChest);
         spongeSettings.fromBuilder(true);
+        Sponge.getRegistry().register(WorldCreationSettings.class, (WorldCreationSettings) (Object) settings);
         return (WorldCreationSettings) (Object) settings;
     }
 

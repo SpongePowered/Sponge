@@ -239,6 +239,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public Collection<Player> getPlayers() {
+        return (Collection<Player>) (Object) playerEntities;
+    }
+
     @Override
     public Optional<Chunk> getChunk(int x, int y, int z) {
         if (!SpongeChunkLayout.instance.isValidChunk(x, y, z)) {

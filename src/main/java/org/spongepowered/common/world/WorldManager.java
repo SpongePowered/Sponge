@@ -252,11 +252,14 @@ public final class WorldManager {
         worldUuidByFolderName.put(properties.getWorldName(), properties.getUniqueId());
     }
 
-    public static void unregisterWorldProperties(WorldProperties properties) {
+    public static void unregisterWorldProperties(WorldProperties properties, boolean freeDimensionId) {
         checkNotNull(properties);
         worldPropertiesByFolderName.remove(properties.getWorldName());
         worldPropertiesByWorldUuid.remove(properties.getUniqueId());
         worldUuidByFolderName.remove(properties.getWorldName());
+        if (((IMixinWorldInfo) properties).getDimensionId() != null && freeDimensionId) {
+            dimensionBits.clear(((IMixinWorldInfo) properties).getDimensionId());
+        }
     }
 
     public static Optional<WorldProperties> getWorldProperties(String folderName) {
@@ -372,6 +375,7 @@ public final class WorldManager {
                 worldByDimensionId.remove(dimensionId);
                 ((IMixinMinecraftServer) server).getWorldTickTimes().remove(dimensionId);
                 SpongeImpl.getLogger().info("Unloading dimension {} ({})", dimensionId, worldServer.getWorldInfo().getWorldName());
+                server.worldServers = reorderWorldsVanillaFirst();
             }
 
             SpongeImpl.postEvent(SpongeEventFactory.createUnloadWorldEvent(Cause.of(NamedCause.source(server)), (org.spongepowered.api.world.World)
@@ -857,7 +861,7 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        unregisterWorldProperties(worldProperties);
+        unregisterWorldProperties(worldProperties, false);
 
         final WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
@@ -926,13 +930,13 @@ public final class WorldManager {
         public Boolean call() throws Exception {
             final Path worldFolder = getCurrentSavesDirectory().get().resolve(props.getWorldName());
             if (!Files.exists(worldFolder)) {
-                unregisterWorldProperties(this.props);
+                unregisterWorldProperties(this.props, true);
                 return true;
             }
 
             try {
                 FileUtils.deleteDirectory(worldFolder.toFile());
-                unregisterWorldProperties(this.props);
+                unregisterWorldProperties(this.props, true);
                 return true;
             } catch (IOException e) {
                 return false;

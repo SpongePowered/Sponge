@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.registry.type.world;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.entity.living.player.gamemode.GameModes;
@@ -51,6 +50,10 @@ import java.util.Optional;
 @RegistrationDependency({GameModeRegistryModule.class, GeneratorRegistryModule.class, DifficultyRegistryModule.class,
         DimensionTypeRegistryModule.class, SerializationBehaviorRegistryModule.class, GeneratorModifierRegistryModule.class})
 public class WorldCreationSettingsRegistryModule implements AdditionalCatalogRegistryModule<WorldCreationSettings>, AlternateCatalogRegistryModule<WorldCreationSettings> {
+
+    public static WorldCreationSettingsRegistryModule getInstance() {
+        return Holder.INSTANCE;
+    }
 
     @RegisterCatalog(WorldCreationSettingsTypes.class)
     private final Map<String, WorldCreationSettings> worldCreationSettingsMap = new HashMap<>();
@@ -97,8 +100,8 @@ public class WorldCreationSettingsRegistryModule implements AdditionalCatalogReg
     public void registerAdditionalCatalog(WorldCreationSettings extraCatalog) {
         checkNotNull(extraCatalog, "WorldCreationSettings cannot be null!");
         final String id = extraCatalog.getId().toLowerCase(Locale.ENGLISH);
-        checkArgument(!id.startsWith("minecraft:"), "Plugin trying to register a fake minecraft generation settings!");
-        checkArgument(!id.startsWith("sponge:"), "Plugin trying to register a fake sponge generation settings!");
+        //checkArgument(!id.startsWith("minecraft:"), "Plugin trying to register a fake minecraft generation settings!");
+        //checkArgument(!id.startsWith("sponge:"), "Plugin trying to register a fake sponge generation settings!");
         this.worldCreationSettingsMap.put(id, extraCatalog);
     }
 
@@ -119,5 +122,12 @@ public class WorldCreationSettingsRegistryModule implements AdditionalCatalogReg
             provided.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
         }
         return provided;
+    }
+
+    WorldCreationSettingsRegistryModule() {}
+
+    private static final class Holder {
+
+        static final WorldCreationSettingsRegistryModule INSTANCE = new WorldCreationSettingsRegistryModule();
     }
 }

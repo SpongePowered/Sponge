@@ -355,7 +355,7 @@ public final class CommonModuleRegistry {
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
-            .registerModule(WorldCreationSettings.class, new WorldCreationSettingsRegistryModule())
+            .registerModule(WorldCreationSettings.class, WorldCreationSettingsRegistryModule.getInstance())
             ;
     }
 
