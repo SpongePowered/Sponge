@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -59,15 +58,13 @@ import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -77,7 +74,6 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
@@ -87,6 +83,7 @@ import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.function.PacketFunction;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
@@ -586,6 +583,28 @@ public final class PacketPhase extends TrackingPhase {
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
         return context;
+    }
+
+    @Nullable
+    @Override
+    public User attemptTrackingAndRetrieveTrackedUser(IPhaseState state, PhaseContext context, CauseTracker causeTracker, IMixinChunk spongeChunk,
+            BlockPos targetPos,
+            PlayerTracker.Type type) {
+        final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Tracking packets, but no player found!", context));
+        spongeChunk.addTrackedBlockPosition(causeTracker.getMinecraftWorld().getBlockState(targetPos).getBlock(), targetPos, player, type);
+        return player;
+    }
+
+    @Override
+    public boolean populateCauseForNotifyNeighborEvent(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker,
+            IMixinChunk mixinChunk, BlockPos pos) {
+        if (!super.populateCauseForNotifyNeighborEvent(state, context, builder, causeTracker, mixinChunk, pos)) {
+            final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                    .orElseThrow(PhaseUtil.throwWithContext("Processing a Player PAcket, expecting a player, but had none!", context));
+            builder.named(NamedCause.notifier(player));
+        }
+        return true;
     }
 
     @Override

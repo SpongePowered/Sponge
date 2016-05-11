@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.core.network;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.handler.codec.DecoderException;
+import io.netty.handler.codec.EncoderException;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.data.DataView;
@@ -36,10 +38,10 @@ import org.spongepowered.api.network.ChannelBuf;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.network.ByteBufUtils;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -52,6 +54,12 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     @Shadow @Final private ByteBuf buf;
 
     @Shadow protected abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
+    @Shadow public abstract int readVarIntFromBuffer();
+    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
+    @Shadow public abstract String readStringFromBuffer(int maxLength);
+    @Shadow public abstract PacketBuffer writeString(String string);
+    @Shadow public abstract byte[] readByteArray();
+    @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
     @Shadow protected abstract PacketBuffer writeNBTTagCompoundToBuffer(NBTTagCompound compound);
 
     private ChannelBuf oppositeOrder;
@@ -175,6 +183,89 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.buf.getByte(index);
     }
 
+    @Intrinsic
+    public ChannelBuf cbuf$writeByteArray(byte[] data) {
+        writeByteArray(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$writeByteArray(byte[] data, int start, int length) {
+        writeVarIntToBuffer(length);
+        writeBytes(data, start, length);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setByteArray(int index, byte[] data) {
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        writeByteArray(data);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setByteArray(int index, byte[] data, int start, int length) {
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        writeVarIntToBuffer(length);
+        writeBytes(data, start, length);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    @Intrinsic
+    public byte[] cbuf$readByteArray() {
+        return readByteArray();
+    }
+
+    public byte[] cbuf$readByteArray(int index) {
+        int oldIndex = this.buf.readerIndex();
+        this.buf.readerIndex(index);
+        byte[] data = readByteArray();
+        this.buf.readerIndex(oldIndex);
+        return data;
+    }
+
+    public ChannelBuf cbuf$writeBytes(byte[] data) {
+        this.buf.writeBytes(data);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$writeBytes(byte[] data, int start, int length) {
+        this.buf.writeBytes(data, start, length);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setBytes(int index, byte[] data) {
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        this.buf.writeBytes(data);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setBytes(int index, byte[] data, int start, int length) {
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        this.buf.writeBytes(data, start, length);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    public byte[] cbuf$readBytes(int length) {
+        byte[] data = new byte[length];
+        this.buf.readBytes(data);
+        return data;
+    }
+
+    public byte[] cbuf$readBytes(int index, int length) {
+        int oldIndex = this.buf.readerIndex();
+        this.buf.readerIndex(index);
+        byte[] data = new byte[length];
+        this.buf.readBytes(data);
+        this.buf.readerIndex(oldIndex);
+        return data;
+    }
+
     public ChannelBuf cbuf$writeShort(short data) {
         this.buf.writeShort(data);
         return (ChannelBuf) this;
@@ -284,7 +375,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     }
 
     public ChannelBuf cbuf$writeString(String data) {
-        ByteBufUtils.writeUTF8String(this.buf, checkNotNull(data, "data"));
+        writeString(checkNotNull(data, "data"));
         return (ChannelBuf) this;
     }
 
@@ -292,21 +383,79 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         checkNotNull(data, "data");
         int oldIndex = this.buf.writerIndex();
         this.buf.writerIndex(index);
-        ByteBufUtils.writeUTF8String(this.buf, data);
+        writeString(data);
         this.buf.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
     public String cbuf$readString() {
-        return ByteBufUtils.readUTF8String(this.buf);
+        return readStringFromBuffer(32768);
     }
 
     public String cbuf$getString(int index) {
         int oldIndex = this.buf.readerIndex();
         this.buf.readerIndex(index);
-        String data = ByteBufUtils.readUTF8String(this.buf);
+        String data = readStringFromBuffer(32768);
         this.buf.readerIndex(oldIndex);
         return data;
+    }
+
+    public ChannelBuf cbuf$writeUTF(String data) {
+        byte[] bytes = data.getBytes(Charsets.UTF_8);
+        if (bytes.length > 32767) {
+            throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max " + 32767 + ")");
+        }
+        this.writeShort(bytes.length);
+        this.writeBytes(bytes);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setUTF(int index, String data) {
+        checkNotNull(data, "data");
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        cbuf$writeUTF(data);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    public String cbuf$readUTF() {
+        int length = this.readShort();
+        return new String(this.readBytes(length).array(), Charsets.UTF_8);
+    }
+
+    public String cbuf$getUTF(int index) {
+        int oldIndex = this.buf.readerIndex();
+        this.buf.readerIndex(index);
+        int length = this.readShort();
+        String data = new String(this.readBytes(length).array(), Charsets.UTF_8);
+        this.buf.readerIndex(oldIndex);
+        return data;
+    }
+
+    public ChannelBuf cbuf$writeVarInt(int value) {
+        writeVarIntToBuffer(value);
+        return (ChannelBuf) this;
+    }
+
+    public ChannelBuf cbuf$setVarInt(int index, int value) {
+        int oldIndex = this.buf.writerIndex();
+        this.buf.writerIndex(index);
+        writeVarIntToBuffer(value);
+        this.buf.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    public int cbuf$readVarInt() {
+        return readVarIntFromBuffer();
+    }
+
+    public int cbuf$getVarInt(int index) {
+        int oldIndex = this.buf.readerIndex();
+        this.buf.readerIndex(index);
+        int value = readVarIntFromBuffer();
+        this.buf.readerIndex(oldIndex);
+        return value;
     }
 
     public ChannelBuf cbuf$writeUniqueId(UUID data) {

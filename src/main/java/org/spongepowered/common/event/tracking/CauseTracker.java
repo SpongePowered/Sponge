@@ -28,13 +28,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimings;
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ReportedException;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
@@ -59,13 +63,17 @@ import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.util.SpongeHooks;
+import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -81,6 +89,8 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
+
+    public IMixinNextTickListEntry currentPendingBlockUpdate;
 
     private static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> {
         context.forEach(namedCause -> {
@@ -270,52 +280,12 @@ public final class CauseTracker {
     public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
 
-        final PhaseData phaseContextTuple = this.getStack().peek(); // Sponge
+        final PhaseData peek = this.getStack().peek(); // Sponge
 
         try {
             // Sponge start - prepare notification
-            final Chunk chunkFromBlockCoords = this.getMinecraftWorld().getChunkFromBlockCoords(notifyPos);
-            final Optional<User> packetUser = phaseContextTuple.getContext().firstNamed(NamedCause.SOURCE, User.class);
-            if (packetUser.isPresent()) {
-                IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-                spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, packetUser.get(), PlayerTracker.Type.NOTIFIER);
-            } else {
-                final PhaseContext context = this.stack.peekContext();
-
-                final Pair<Object, BlockPos> pair = Stream.<Supplier<Optional<Pair<Object, BlockPos>>>>of(
-                        () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
-                                .map(block -> Pair.<Object, BlockPos>of(block, VecHelper.toBlockPos(block.getPosition()))),
-                        () -> context.firstNamed(NamedCause.SOURCE, net.minecraft.tileentity.TileEntity.class)
-                                .map(tile -> Pair.<Object, BlockPos>of(tile, tile.getPos())),
-                        () -> context.firstNamed(NamedCause.SOURCE, Entity.class).map(entity -> {
-                            final IMixinChunk spongeChunk = (IMixinChunk) chunkFromBlockCoords;
-                            final IMixinEntity mixinEntity = EntityUtil.toMixin(entity);
-                            Stream.<Supplier<Optional<User>>>of(
-                                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER),
-                                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR))
-                                    .map(Supplier::get)
-                                    .filter(Optional::isPresent)
-                                    .map(Optional::get)
-                                    .findFirst()
-                                    .ifPresent(tracked -> spongeChunk.addTrackedBlockPosition(iblockstate.getBlock(), notifyPos, tracked, PlayerTracker.Type.NOTIFIER));
-                            return Pair.of(null, EntityUtil.toNative(entity).getPosition());
-                        }),
-                        () -> context.firstNamed(NamedCause.SOURCE, Player.class)
-                                .map(player -> Pair.<Object, BlockPos>of(player, EntityUtil.toNative(player).getPosition()))
-                        )
-                        .map(Supplier::get)
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
-                        .findFirst()
-                        .orElse(Pair.of(null, sourcePos));
-                final Object source = pair.getKey();
-                final BlockPos predictedPos = pair.getValue();
-
-                if (source != null) {
-                    SpongeHooks.tryToTrackBlock(this.getMinecraftWorld(), source, predictedPos, iblockstate.getBlock(), notifyPos,
-                        PlayerTracker.Type.NOTIFIER);
-                }
-            }
+            final IPhaseState state = peek.getState();
+            state.getPhase().associateNeighborStateNotifier(state, peek.getContext(), sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
@@ -325,7 +295,7 @@ public final class CauseTracker {
             crashreportcategory.addCrashSectionCallable("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
-                        sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());
+                            sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());
                 } catch (Throwable var2) {
                     return "ID #" + Block.getIdFromBlock(sourceBlock);
                 }
@@ -484,12 +454,13 @@ public final class CauseTracker {
 
             // Sponge Start - throw an event
             EventConsumer.event(SpongeEventFactory.createSpawnEntityEventCustom(cause, Arrays.asList(entity), getWorld()))
-                .nonCancelled(event -> getMixinWorld().forceSpawnEntity(entity))
-                .process();
-                // Sponge end
+                    .nonCancelled(event -> getMixinWorld().forceSpawnEntity(entity))
+                    .process();
+            // Sponge end
 
             return true;
         }
     }
+
 
 }

@@ -56,7 +56,6 @@ import net.minecraft.world.gen.ChunkProviderServer;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
 import ninja.leaping.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -87,12 +86,14 @@ import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -111,15 +112,15 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
-import org.spongepowered.common.interfaces.IMixinBlockUpdate;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.interfaces.world.gen.IPopulatorProvider;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.WorldManager;
 import org.spongepowered.common.world.border.PlayerBorderListener;
@@ -135,6 +136,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -152,14 +154,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
-    private static final String BLOCK_UPDATE_TICK =
-            "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V";
-    private static final String
-            BLOCK_RANDOM_TICK =
-            "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V";
 
     private final CauseTracker causeTracker = new CauseTracker((WorldServer) (Object) this);
-    private Map<BlockPos, User> trackedBlockEvents = Maps.newHashMap();
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     private SpongeChunkGenerator spongegen;
     private SpongeConfig<?> activeConfig;
@@ -167,6 +163,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow @Final private MinecraftServer mcServer;
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
+    @Shadow private WorldServer.ServerBlockEventList[] blockEventQueue;
+    @Shadow private int blockEventCacheIndex;
+
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
 
@@ -350,11 +349,31 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false;
     }
 
+    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target = "Ljava/util/Set;add(Ljava/lang/Object;)Z"), remap = false)
+    public boolean onQueueScheduledBlockUpdate(Set<NextTickListEntry> pendingSet, Object obj) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        final PhaseData peek = causeTracker.getStack().peek();
+        peek.getState().getPhase().associateNotifier(peek.getState(), peek.getContext(), (IMixinNextTickListEntry) obj);
+        pendingSet.add((NextTickListEntry) obj);
+        return true;
+    }
+
+
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
     }
 
+    // Before ticking pending updates, we need to check if we have any tracking info and set it accordingly
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;"
+                                                                        + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
+    public void onUpdateTick(boolean p_72955_1_, CallbackInfoReturnable<Boolean> cir, int i, Iterator<NextTickListEntry> iterator, NextTickListEntry nextticklistentry1, int k, IBlockState iblockstate) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        IMixinNextTickListEntry nextTickListEntry = (IMixinNextTickListEntry) nextticklistentry1;
+        causeTracker.currentPendingBlockUpdate = nextTickListEntry;
+    }
+
+    // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
@@ -367,57 +386,32 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.updateTickBlock(causeTracker, block, pos, state, rand);
     }
 
-    @Inject(method = "addBlockEvent", at = @At(value = "HEAD"))
-    public void onAddBlockEvent(BlockPos pos, Block blockIn, int eventID, int eventParam, CallbackInfo ci) {
+    @Redirect(method = "addBlockEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer$ServerBlockEventList;add(Ljava/lang/Object;)Z", remap = false))
+    public boolean onAddBlockEvent(WorldServer.ServerBlockEventList list, Object obj, BlockPos pos, Block blockIn, int eventId, int eventParam) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentPhase = causeTracker.getStack().peek();
         final IPhaseState phaseState = currentPhase.getState();
-        final PhaseContext context = currentPhase.getContext();
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
-            return;
+            return list.add((BlockEventData) obj);
         }
+        final BlockEventData blockEventData = (BlockEventData) obj;
+        final PhaseContext context = currentPhase.getContext();
 
-        if (context.firstNamed(NamedCause.SOURCE, User.class).isPresent()) {
-            // Add player to block event position
-            markBlockEventUserNotification(pos, blockIn, pos);
-        } else {
-            Stream.<Supplier<Optional<BlockPos>>>of(
-                    () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class).map(ticking -> VecHelper.toBlockPos(ticking.getPosition())),
-                    () -> context.firstNamed(NamedCause.SOURCE, net.minecraft.tileentity.TileEntity.class).map(net.minecraft.tileentity.TileEntity::getPos))
-                    // We use suppliers because we can lazy evaluate: i.e. if there's a ticking block, we won't query for a ticking tile entity
-                    .map(Supplier::get)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst()
-                    .ifPresent(sourcePos -> markBlockEventUserNotification(pos, blockIn, sourcePos));
-        }
-    }
-
-    private void markBlockEventUserNotification(BlockPos pos, Block blockIn, BlockPos sourcePos) {
-        if (isBlockLoaded(sourcePos)) {
-            IMixinChunk spongeChunk = (IMixinChunk) getChunkFromBlockCoords(sourcePos);
-            Stream.<Supplier<Optional<User>>>of(() -> spongeChunk.getBlockOwner(sourcePos), () -> spongeChunk.getBlockNotifier(pos))
-                    .map(Supplier::get)
-                    .filter(Optional::isPresent)
-                    .map(Optional::get)
-                    .findFirst()
-                    .ifPresent(tracked -> {
-                        this.trackedBlockEvents.put(pos, tracked);
-                        spongeChunk.addTrackedBlockPosition(blockIn, pos, tracked, PlayerTracker.Type.NOTIFIER);
-                    });
-        }
+        IMixinBlockEventData blockEvent = (IMixinBlockEventData) blockEventData;
+        phaseState.getPhase().associateNotifier(phaseState, context, causeTracker, pos, blockEvent);
+        return list.add(blockEventData);
     }
 
     // special handling for Pistons since they use their own event system
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE",
-        target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
+            target = "Lnet/minecraft/world/WorldServer;fireBlockEvent(Lnet/minecraft/block/BlockEventData;)Z"))
     public boolean onFireBlockEvent(net.minecraft.world.WorldServer worldIn, BlockEventData event) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final IPhaseState phaseState = causeTracker.getStack().peekState();
         if (phaseState.getPhase().ignoresBlockEvent(phaseState)) {
             return fireBlockEvent(event);
         }
-        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event, this.trackedBlockEvents);
+        return TrackingUtil.fireMinecraftBlockEvent(causeTracker, worldIn, event);
     }
 
     @Redirect(method = "sendQueuedBlockEvents", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
@@ -458,23 +452,10 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         sbu.setPriority(priority);
-        ((IMixinBlockUpdate) sbu).setWorld((WorldServer) (Object) this);
+        ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
         if (!((net.minecraft.world.World)(Object) this).isBlockLoaded(sbu.position)) {
             this.tmpScheduledObj = sbu;
             return;
-        }
-
-        final PhaseContext context = causeTracker.getStack().peekContext();
-        if (context != null) {
-            Optional<BlockSnapshot> currentTickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
-
-            // Pistons, Beacons, Notes, Comparators etc. schedule block updates so we must track these positions
-            if (currentTickingBlock.isPresent()) {
-                BlockPos pos = VecHelper.toBlockPos(currentTickingBlock.get().getPosition());
-                SpongeHooks.tryToTrackBlock((net.minecraft.world.World) (Object) this, currentTickingBlock.get(), pos, sbu.getBlock(),
-                        sbu.position, PlayerTracker.Type.NOTIFIER);
-            }
-
         }
 
         this.tmpScheduledObj = sbu;
@@ -641,16 +622,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
-    }
-
-    /**
-     * @author gabizou - March 12th, 2016
-     *
-     * Technically an overwrite to properly track on *server* worlds.
-     */
-    @Override
-    public void updateComparatorOutputLevel(BlockPos pos, Block blockIn) {
-        SpongeImplHooks.updateComparatorOutputLevel((net.minecraft.world.World) (Object) this, pos, blockIn);
     }
 
     /**

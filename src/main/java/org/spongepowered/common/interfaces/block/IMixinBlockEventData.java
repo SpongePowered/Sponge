@@ -22,11 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.interfaces.block;
 
-import net.minecraft.world.World;
+import net.minecraft.block.Block;
+import net.minecraft.util.math.BlockPos;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.entity.living.player.User;
 
-public interface IMixinBlockUpdate {
+import java.util.Optional;
 
-    void setWorld(World world);
+import javax.annotation.Nullable;
+
+public interface IMixinBlockEventData {
+
+    Block getEventBlock();
+
+    BlockPos getEventBlockPosition();
+
+    int getEventBlockID();
+
+    int getEventBlockParameter();
+
+    boolean hasSourceUser();
+
+    boolean hasTickingBlock();
+
+    boolean hasTickingTileEntity();
+
+    Optional<BlockSnapshot> getCurrentTickBlock();
+
+    Optional<TileEntity> getCurrentTickTileEntity();
+
+    Optional<User> getSourceUser();
+
+    void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock);
+
+    void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity);
+
+    void setSourceUser(User user);
 }

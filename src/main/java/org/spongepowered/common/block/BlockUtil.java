@@ -51,7 +51,7 @@ public final class BlockUtil {
     }
 
     public static void setBlockState(World world, BlockPos position, BlockState state, boolean notifyNeighbors) {
-        world.setBlockState(position, toBlockState(state), notifyNeighbors ? 3 : 2);
+        world.setBlockState(position, toNative(state), notifyNeighbors ? 3 : 2);
     }
 
     public static void setBlockState(Chunk chunk, int x, int y, int z, BlockState state, boolean notifyNeighbors) {
@@ -63,10 +63,10 @@ public final class BlockUtil {
             setBlockState(chunk.getWorld(), position, state, true);
             return;
         }
-        chunk.setBlockState(position, toBlockState(state));
+        chunk.setBlockState(position, toNative(state));
     }
 
-    public static IBlockState toBlockState(BlockState state) {
+    public static IBlockState toNative(BlockState state) {
         if (state instanceof IBlockState) {
             return (IBlockState) state;
         } else {
@@ -77,6 +77,16 @@ public final class BlockUtil {
     }
 
     private BlockUtil() {
+    }
+
+    public static BlockState fromNative(IBlockState blockState) {
+        if (blockState instanceof BlockState) {
+            return (BlockState) blockState;
+        } else {
+            // TODO: Need to figure out what is sensible for other BlockState
+            // implementing classes.
+            throw new UnsupportedOperationException("Custom BlockState implementations are not supported");
+        }
     }
 
     private static final class BlockStateComparator implements Comparator<BlockState> {

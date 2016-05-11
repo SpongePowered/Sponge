@@ -36,6 +36,8 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -58,6 +60,7 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
@@ -82,7 +85,7 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("unchecked")
     @Nullable
     public static CollideEntityEvent callCollideEntityEvent(net.minecraft.world.World world, @Nullable net.minecraft.entity.Entity sourceEntity,
-                                                            List<net.minecraft.entity.Entity> entities) {
+            List<net.minecraft.entity.Entity> entities) {
         final Cause cause;
         if (sourceEntity != null) {
             cause = Cause.of(NamedCause.source(sourceEntity));
@@ -118,44 +121,29 @@ public class SpongeCommonEventFactory {
     @SuppressWarnings("rawtypes")
     public static NotifyNeighborBlockEvent callNotifyNeighborEvent(World world, BlockPos pos, EnumSet notifiedSides) {
         final CauseTracker causeTracker = ((IMixinWorldServer) world).getCauseTracker();
-        final PhaseData currentPhase = causeTracker.getStack().peek();
-        Optional<User> playerNotifier = currentPhase.getContext().firstNamed(NamedCause.SOURCE, User.class);
-        BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-        Map<Direction, BlockState> neighbors = new HashMap<>();
+        final PhaseData peek = causeTracker.getStack().peek();
+        final PhaseContext context = peek.getContext();
+        final BlockSnapshot snapshot = world.createSnapshot(pos.getX(), pos.getY(), pos.getZ());
+        final Map<Direction, BlockState> neighbors = new HashMap<>();
 
-        if (notifiedSides != null) {
-            for (Object obj : notifiedSides) {
-                EnumFacing notifiedSide = (EnumFacing) obj;
-                BlockPos offset = pos.offset(notifiedSide);
-                Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
-                Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
-                if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
-                    neighbors.put(direction, location.getBlock());
-                }
+        for (Object obj : notifiedSides) {
+            EnumFacing notifiedSide = (EnumFacing) obj;
+            BlockPos offset = pos.offset(notifiedSide);
+            Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
+            Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
+            if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
+                neighbors.put(direction, location.getBlock());
             }
         }
 
         ImmutableMap<Direction, BlockState> originalNeighbors = ImmutableMap.copyOf(neighbors);
         // Determine cause
-        Cause cause = Cause.of(NamedCause.source(snapshot));
-        net.minecraft.world.World nmsWorld = (net.minecraft.world.World) world;
-        IMixinChunk spongeChunk = (IMixinChunk) nmsWorld.getChunkFromBlockCoords(pos);
-        if (spongeChunk != null) {
-            if (playerNotifier.isPresent()) {
-                cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(playerNotifier.get()));
-            } else {
-                Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
-                if (notifier.isPresent()) {
-                    cause = Cause.of(NamedCause.source(snapshot)).with(NamedCause.notifier(notifier.get()));
-                }
-            }
-            Optional<User> owner = spongeChunk.getBlockOwner(pos);
-            if (owner.isPresent()) {
-                cause = cause.with(NamedCause.owner(owner.get()));
-            }
-        }
+        final Cause.Builder builder = Cause.source(snapshot);
+        final IMixinChunk mixinChunk = (IMixinChunk) causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
 
-        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(cause, originalNeighbors, neighbors);
+        peek.getState().getPhase().populateCauseForNotifyNeighborEvent(peek.getState(), context, builder, causeTracker, mixinChunk, pos);
+
+        NotifyNeighborBlockEvent event = SpongeEventFactory.createNotifyNeighborBlockEvent(builder.build(), originalNeighbors, neighbors);
         StaticMixinHelper.processingInternalForgeEvent = true;
         SpongeImpl.postEvent(event);
         StaticMixinHelper.processingInternalForgeEvent = false;
@@ -178,31 +166,55 @@ public class SpongeCommonEventFactory {
     }
 
     public static boolean handleCollideBlockEvent(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, net.minecraft.entity.Entity entity, Direction direction) {
-        Cause cause = Cause.of(NamedCause.of(NamedCause.PHYSICAL, entity));
+        final WorldServer worldServer = (WorldServer) world;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        final Cause.Builder builder = Cause.source(entity);
+        builder.named(NamedCause.of(NamedCause.PHYSICAL, entity));
+
         if (!(entity instanceof EntityPlayer)) {
             IMixinEntity spongeEntity = (IMixinEntity) entity;
             Optional<User> user = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
             if (user.isPresent()) {
-                cause = cause.with(NamedCause.owner(user.get()));
+                builder.named(NamedCause.owner(user.get()));
             }
         }
 
         // TODO: Add target side support
-        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(cause, (BlockState) state, new Location<World>((World) world, VecHelper.toVector3d(pos)), direction);
-        return SpongeImpl.postEvent(event);
+        CollideBlockEvent event = SpongeEventFactory.createCollideBlockEvent(builder.build(), (BlockState) state,
+                new Location<>((World) world, VecHelper.toVector3d(pos)), direction);
+        boolean cancelled = SpongeImpl.postEvent(event);
+        if (!cancelled) {
+            IMixinEntity spongeEntity = (IMixinEntity) entity;
+            if (!pos.equals(spongeEntity.getLastCollidedBlockPos())) {
+                final PhaseData peek = causeTracker.getStack().peek();
+                final Optional<User> notifier = peek.getContext().firstNamed(NamedCause.NOTIFIER, User.class);
+                if (notifier.isPresent()) {
+                    IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
+                    spongeChunk.addTrackedBlockPosition(block, pos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+                }
+            }
+        }
+
+        return cancelled;
     }
 
     public static boolean handleCollideImpactEvent(net.minecraft.entity.Entity projectile, @Nullable ProjectileSource projectileSource,
             RayTraceResult movingObjectPosition) {
+        final WorldServer worldServer = (WorldServer) projectile.worldObj;
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) worldServer;
+        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         RayTraceResult.Type movingObjectType = movingObjectPosition.typeOfHit;
-        Cause cause = Cause.source(projectile).named("ProjectileSource", projectileSource == null ? ProjectileSource.UNKNOWN : projectileSource).build();
-        IMixinEntity spongeEntity = (IMixinEntity) projectile;
-        Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-        if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-            cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
-        }
+        final Cause.Builder builder = Cause.source(projectile).named("ProjectileSource", projectileSource == null
+                                                                                         ? ProjectileSource.UNKNOWN
+                                                                                         : projectileSource);
+        final Optional<User> notifier = causeTracker.getStack().peek()
+                .getContext()
+                .firstNamed(NamedCause.NOTIFIER, User.class);
+        notifier.ifPresent(user -> builder.named(NamedCause.OWNER, user));
 
         Location<World> impactPoint = new Location<>((World) projectile.worldObj, VecHelper.toVector3d(movingObjectPosition.hitVec));
+        boolean cancelled = false;
 
         if (movingObjectType == RayTraceResult.Type.BLOCK) {
             BlockSnapshot targetBlock = ((World) projectile.worldObj).createSnapshot(VecHelper.toVector3i(movingObjectPosition.getBlockPos()));
@@ -211,18 +223,24 @@ public class SpongeCommonEventFactory {
                 side = DirectionFacingProvider.getInstance().getKey(movingObjectPosition.sideHit).get();
             }
 
-            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(cause, impactPoint, targetBlock.getState(),
+            CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(builder.build(), impactPoint, targetBlock.getState(),
                     targetBlock.getLocation().get(), side);
-            return SpongeImpl.postEvent(event);
+            cancelled = SpongeImpl.postEvent(event);
+            // Track impact block if event is not cancelled
+            if (!cancelled && notifier.isPresent()) {
+                BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
+                IMixinChunk spongeChunk = (IMixinChunk) projectile.worldObj.getChunkFromBlockCoords(targetPos);
+                spongeChunk.addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, notifier.get(), PlayerTracker.Type.NOTIFIER);
+            }
         } else if (movingObjectPosition.entityHit != null) { // entity
             ArrayList<Entity> entityList = new ArrayList<>();
             entityList.add((Entity) movingObjectPosition.entityHit);
-            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(cause, entityList, impactPoint,
+            CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(builder.build(), entityList, impactPoint,
                     (World) projectile.worldObj);
             return SpongeImpl.postEvent(event);
         }
 
-        return false;
+        return cancelled;
     }
 
 

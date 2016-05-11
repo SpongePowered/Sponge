@@ -153,6 +153,7 @@ public abstract class MixinEntity implements IMixinEntity {
     protected DamageSource lastDamageSource;
     private Cause destructCause;
     private BlockState currentCollidingBlock;
+    private BlockPos lastCollidedBlockPos;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -829,7 +830,7 @@ public abstract class MixinEntity implements IMixinEntity {
 
     @Override
     public Optional<UUID> getCreator() {
-       return Optional.empty();
+        return Optional.empty();
     }
 
     @Override
@@ -861,7 +862,7 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Redirect(method = "moveEntity",at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;"
-            + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
+                                                                        + "onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"))
     public void onEntityCollideWithBlock(Block block, net.minecraft.world.World world, BlockPos pos, net.minecraft.entity.Entity entity) {
         if (block == Blocks.AIR) {
             // ignore air blocks
@@ -877,6 +878,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityWalk(world, pos, entity);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -897,6 +899,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
             block.onEntityCollidedWithBlock(world, pos, state, entity);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -918,6 +921,7 @@ public abstract class MixinEntity implements IMixinEntity {
         this.setCurrentCollidingBlock((BlockState) state);
         if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
             block.onFallenUpon(world, pos, entity, fallDistance);
+            this.lastCollidedBlockPos = pos;
         }
 
         this.setCurrentCollidingBlock(null);
@@ -1099,5 +1103,10 @@ public abstract class MixinEntity implements IMixinEntity {
             return (BlockState) Blocks.AIR.getDefaultState();
         }
         return this.currentCollidingBlock;
+    }
+
+    @Override
+    public BlockPos getLastCollidedBlockPos() {
+        return this.lastCollidedBlockPos;
     }
 }

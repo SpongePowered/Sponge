@@ -22,114 +22,97 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world;
+package org.spongepowered.common.mixin.core.block;
 
-import static com.google.common.base.Preconditions.checkState;
-
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockEventData;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.World;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-@Mixin(NextTickListEntry.class)
-public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextTickListEntry {
+@Mixin(BlockEventData.class)
+public abstract class MixinBlockEventData implements IMixinBlockEventData {
 
-    private BlockSnapshot tickBlock = null;
-    private TileEntity tickTileEntity = null;
-    private User sourceUser = null;
+    @Nullable private BlockSnapshot tickBlock = null;
+    @Nullable private TileEntity tickTileEntity = null;
+    @Nullable private User sourceUser = null;
 
-    @Shadow @Final public BlockPos position;
-    @Shadow public int priority;
-    @Shadow public long scheduledTime;
-
-    private Location<org.spongepowered.api.world.World> location;
-    private World world;
+    @Shadow public abstract BlockPos getPosition();
+    @Shadow public abstract int getEventID();
+    @Shadow public abstract int getEventParameter();
+    @Shadow public abstract Block getBlock();
 
     @Override
-    public void setWorld(World world) {
-        checkState(this.location == null, "World already known");
-        this.location = new Location<>((org.spongepowered.api.world.World) world, VecHelper.toVector3i(this.position));
-        this.world = world;
+    public BlockPos getEventBlockPosition() {
+        return getPosition();
     }
 
     @Override
-    public Location<org.spongepowered.api.world.World> getLocation() {
-        checkState(this.location != null, "Unable to determine location at this time");
-        return this.location;
+    public int getEventBlockID() {
+        return getEventID();
     }
 
     @Override
-    public int getTicks() {
-        if (this.world == null) {
-            return Integer.MAX_VALUE;
-        }
-        return (int) (this.scheduledTime - this.world.getWorldInfo().getWorldTotalTime());
+    public int getEventBlockParameter() {
+        return getEventParameter();
     }
 
     @Override
-    public void setTicks(int ticks) {
-        if (this.world == null) {
-            return;
-        }
-        this.scheduledTime = this.world.getWorldInfo().getWorldTotalTime() + ticks;
+    public Block getEventBlock() {
+        return getBlock();
     }
 
     @Override
-    public int getPriority() {
-        return this.priority;
-    }
-
-    @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
-    }
-
     public boolean hasTickingBlock() {
         return this.tickBlock != null;
     }
 
+    @Override
     public Optional<BlockSnapshot> getCurrentTickBlock() {
         return Optional.ofNullable(this.tickBlock);
     }
 
+    @Override
     public void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock) {
         this.tickBlock = tickBlock;
     }
 
+    @Override
     public boolean hasTickingTileEntity() {
         return this.tickTileEntity != null;
     }
 
+    @Override
     public Optional<TileEntity> getCurrentTickTileEntity() {
         return Optional.ofNullable(this.tickTileEntity);
     }
 
+    @Override
     public void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity) {
         this.tickTileEntity = tickTileEntity;
     }
 
+    @Override
     public boolean hasSourceUser() {
         return this.sourceUser != null;
     }
 
+    @Override
     public Optional<User> getSourceUser() {
         return Optional.ofNullable(this.sourceUser);
     }
 
+    @Override
     public void setSourceUser(User user) {
         this.sourceUser = user;
     }
+
 }

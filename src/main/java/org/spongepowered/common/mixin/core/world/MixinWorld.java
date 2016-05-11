@@ -763,7 +763,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         checkNotNull(state, "state");
         SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = new BlockPos(x, y, z);
-        packet.blockState = BlockUtil.toBlockState(state);
+        packet.blockState = BlockUtil.toNative(state);
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {

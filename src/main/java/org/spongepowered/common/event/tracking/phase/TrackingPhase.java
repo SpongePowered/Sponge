@@ -25,16 +25,21 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import com.google.common.base.Objects;
+import net.minecraft.block.Block;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -43,13 +48,15 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
+import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -213,6 +220,28 @@ public abstract class TrackingPhase {
 
     }
 
+    public boolean associateNotifier(IPhaseState state, PhaseContext context, IMixinNextTickListEntry obj) {
+        return obj.hasSourceUser();
+    }
+
+
+    public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
+        final Chunk chunk = causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
+        final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+        if (chunk != null && !chunk.isEmpty()) {
+            Optional<User> owner = mixinChunk.getBlockOwner(pos);
+            Optional<User> notifier = mixinChunk.getBlockNotifier(pos);
+            if (notifier.isPresent()) {
+                User user = notifier.get();
+                newContext.add(NamedCause.notifier(user));
+            }
+            if (owner.isPresent()) {
+                User user = owner.get();
+                newContext.add(NamedCause.owner(user));
+            }
+        }
+    }
+
     // Actual capture methods
 
     /**
@@ -255,5 +284,37 @@ public abstract class TrackingPhase {
 
     public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext context, net.minecraft.entity.Entity entity) {
         return Optional.empty();
+    }
+
+    @Nullable
+    public User attemptTrackingAndRetrieveTrackedUser(IPhaseState state, PhaseContext context, CauseTracker causeTracker, IMixinChunk spongeChunk,
+            BlockPos targetPos,
+            PlayerTracker.Type type) {
+        final Optional<User> potentialUser = context.firstNamed(NamedCause.NOTIFIER, User.class);
+        potentialUser.ifPresent(user -> spongeChunk.addTrackedBlockPosition(causeTracker.getMinecraftWorld().getBlockState(targetPos).getBlock(), targetPos, user, type));
+        return potentialUser.orElse(null);
+    }
+
+    public void associateNotifier(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos,
+            IMixinBlockEventData blockEvent) {
+
+    }
+
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+            PlayerTracker.Type notifier) {
+
+    }
+
+    public boolean populateCauseForNotifyNeighborEvent(IPhaseState state, PhaseContext context, Cause.Builder builder, CauseTracker causeTracker,
+            IMixinChunk mixinChunk, BlockPos pos) {
+        final Optional<User> notifier = context.firstNamed(NamedCause.NOTIFIER, User.class);
+        if (notifier.isPresent()) {
+            builder.named(NamedCause.notifier(notifier.get()));
+            return true;
+        } else {
+            mixinChunk.getBlockNotifier(pos).ifPresent(user -> builder.named(NamedCause.notifier(user)));
+            mixinChunk.getBlockOwner(pos).ifPresent(owner -> builder.named(NamedCause.owner(owner)));
+        }
+        return true;
     }
 }

@@ -70,7 +70,6 @@ import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
 import javax.management.MBeanServer;
@@ -558,41 +557,6 @@ public class SpongeHooks {
             causedBy = rootCause.getClass().getName();
         }
         return causedBy;
-    }
-
-    public static Optional<User> tryToTrackBlock(World world, Object source, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
-        if (!world.isBlockLoaded(sourcePos) || !world.isBlockLoaded(targetPos)) {
-            return Optional.empty();
-        }
-
-        IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(sourcePos);
-        if (spongeChunk != null) {
-            Optional<User> owner = spongeChunk.getBlockOwner(sourcePos);
-            Optional<User> notifier = spongeChunk.getBlockNotifier(sourcePos);
-            if (notifier.isPresent()) {
-                spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
-                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, notifier.get(), type);
-                return notifier;
-            } else if (owner.isPresent()) {
-                spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, owner.get(), type);
-                return owner;
-            }
-        }
-        return Optional.empty();
-    }
-
-    public static void tryToTrackBlockAndEntity(World world, Object source, Entity entity, BlockPos sourcePos, Block targetBlock, BlockPos targetPos, PlayerTracker.Type type) {
-        Optional<User> user = tryToTrackBlock(world, source, sourcePos, targetBlock, targetPos, type);
-        if (user.isPresent()) {
-            ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.get().getUniqueId());
-        }
-    }
-
-    // Remove below after update to 1.8.8
-    private static final Pattern formattingCodePattern = Pattern.compile("(?i)" + String.valueOf('\u00a7') + "[0-9A-FK-OR]");
-
-    public static String getTextWithoutFormattingCodes(String text) {
-        return text == null ? null : formattingCodePattern.matcher(text).replaceAll("");
     }
 
 }
