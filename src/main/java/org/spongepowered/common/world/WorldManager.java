@@ -353,7 +353,6 @@ public final class WorldManager {
     public static void unloadQueuedWorlds() {
         while (unloadQueue.peek() != null) {
             final WorldServer worldServer = unloadQueue.poll();
-
             unloadWorld(worldServer);
         }
 
@@ -591,6 +590,7 @@ public final class WorldManager {
                 saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServer)
                         Sponge.getServer()).getDataFixer());
             }
+
 
             WorldInfo worldInfo;
 
