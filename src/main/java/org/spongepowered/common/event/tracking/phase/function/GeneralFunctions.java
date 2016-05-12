@@ -37,7 +37,6 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
@@ -67,7 +66,7 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -84,6 +83,23 @@ public class GeneralFunctions {
     public static final int MULTI_CHANGE_INDEX = 4;
 
     public static final int EVENT_COUNT = 5;
+
+    public static final BiFunction<WorldServer, BlockSnapshot, Transaction<BlockSnapshot>> TRANSACTION_CREATION = ((worldServer, blockSnapshot) -> {
+        final BlockPos blockPos = VecHelper.toBlockPos(blockSnapshot.getPosition());
+        final IBlockState newState = worldServer.getBlockState(blockPos);
+        final IBlockState newActualState = newState.getBlock().getActualState(newState, worldServer, blockPos);
+        final BlockSnapshot newSnapshot = ((IMixinWorldServer) worldServer).createSpongeBlockSnapshot(newState, newActualState, blockPos, 0);
+        return new Transaction<>(blockSnapshot, newSnapshot);
+    });
+
+    public static final Function<ImmutableList.Builder<Transaction<BlockSnapshot>>[], Consumer<Transaction<BlockSnapshot>>> TRANSACTION_PROCESSOR =
+            builders ->
+                    transaction -> {
+                        final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
+                        builders[blockChange.ordinal()].add(transaction);
+                        builders[GeneralFunctions.MULTI_CHANGE_INDEX].add(transaction);
+                    }
+            ;
 
     public static void processUserBreakage(@Nullable BlockChange change, net.minecraft.world.World minecraftWorld,
             Transaction<BlockSnapshot> transaction, @Nullable Entity tickingEntity) {
@@ -113,13 +129,9 @@ public class GeneralFunctions {
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
 
-        final Consumer<Transaction<BlockSnapshot>> transactionConsumer = getTransactionConsumer(transactionBuilders);
-        final Function<BlockSnapshot, Transaction<BlockSnapshot>> blockSnapshotTransactionFunction =
-                getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld);
         for (BlockSnapshot snapshot : snapshots) {
-            transactionConsumer.accept(blockSnapshotTransactionFunction.apply(snapshot));
+            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -189,21 +201,10 @@ public class GeneralFunctions {
                 final ChangeBlockEvent event = blockChange.createEvent(builder.build(), world, transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
                 if (event != null) {
-//                    event.setCancelled(builder.build().root() instanceof EntityPlayerMP);
                     blockEvents.add(event);
                 }
             }
         }
-    }
-
-    @Nonnull
-    private static Consumer<Transaction<BlockSnapshot>> getTransactionConsumer(
-            ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders) {
-        return transaction -> { // Assign the transactions as necessary
-            final BlockChange blockChange = ((SpongeBlockSnapshot) transaction.getOriginal()).blockChange;
-            transactionBuilders[blockChange.ordinal()].add(transaction);
-            transactionBuilders[GeneralFunctions.MULTI_CHANGE_INDEX].add(transaction);
-        };
     }
 
     private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
@@ -245,10 +246,12 @@ public class GeneralFunctions {
             proxyBlockAccess.proceed();
             causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
+            // Here is where we need to re-post process Depth First
+
         }
     }
 
-    private static void spawnItemStacksForBlockDrop(Collection<ItemStack> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
+    public static void spawnItemStacksForBlockDrop(Collection<ItemStack> itemStacks, SpongeBlockSnapshot oldBlockSnapshot, CauseTracker causeTracker,
             PhaseContext phaseContext, IPhaseState state) {
         final Vector3i position = oldBlockSnapshot.getPosition();
         final List<ItemStackSnapshot> itemSnapshots = itemStacks.stream().map(ItemStack::createSnapshot).collect(Collectors.toList());
@@ -306,13 +309,9 @@ public class GeneralFunctions {
         }
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final IMixinWorldServer mixinWorld = causeTracker.getMixinWorld();
 
-        final Consumer<Transaction<BlockSnapshot>> transactionConsumer = getTransactionConsumer(transactionBuilders);
-        final Function<BlockSnapshot, Transaction<BlockSnapshot>> blockSnapshotTransactionFunction =
-                getBlockSnapshotTransactionFunction(minecraftWorld, mixinWorld);
         for (BlockSnapshot snapshot : blockSnapshots) {
-            transactionConsumer.accept(blockSnapshotTransactionFunction.apply(snapshot));
+            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -365,7 +364,7 @@ public class GeneralFunctions {
 
     }
 
-    private static boolean processMultiEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
+    public static boolean processMultiEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
             ChangeBlockEvent[] mainEvents, Cause.Builder builder, World world) {
         if (blockEvents.size() > 1) {
             for (BlockChange blockChange : BlockChange.values()) {
@@ -392,14 +391,4 @@ public class GeneralFunctions {
         return false;
     }
 
-    private static Function<BlockSnapshot, Transaction<BlockSnapshot>> getBlockSnapshotTransactionFunction(WorldServer minecraftWorld,
-            IMixinWorldServer mixinWorld) {
-        return originalSnapshot -> { // Create the transactions
-            final BlockPos blockPos = VecHelper.toBlockPos(originalSnapshot.getPosition());
-            final IBlockState newState = minecraftWorld.getBlockState(blockPos);
-            final IBlockState newActualState = newState.getBlock().getActualState(newState, minecraftWorld, blockPos);
-            final BlockSnapshot newSnapshot = mixinWorld.createSpongeBlockSnapshot(newState, newActualState, blockPos, 0);
-            return new Transaction<>(originalSnapshot, newSnapshot);
-        };
-    }
 }

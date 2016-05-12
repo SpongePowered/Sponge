@@ -133,30 +133,9 @@ public abstract class TrackingPhase {
      *     extra captures that took place during the state's unwinding
      */
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks().get();
-        final List<Entity> contextEntities = postContext.getCapturedEntities().get();
-        final List<Entity> contextItems = postContext.getCapturedItems().get();
-        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions().get();
-        while (!contextBlocks.isEmpty() && !contextEntities.isEmpty() && !contextItems.isEmpty()) {
-            final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
-            contextBlocks.clear();
-            final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
-            contextEntities.clear();
-            final ArrayList<Entity> items = new ArrayList<>(contextItems);
-            contextItems.clear();
-            invalidTransactions.clear(); // We don't care about invalid transactions from the previous context.
-
-            // Now process the currently captured things.
-            GeneralFunctions.processPostBlockCaptures(blockSnapshots, causeTracker, unwindingState, unwindingContext);
-
-            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
-
-            unwindingState.getPhase().processPostItemSpawns(causeTracker, unwindingState, items);
-        }
-
     }
 
-    private void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
+    protected void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
         EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), items, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
