@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.phase;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -192,11 +193,19 @@ public final class WorldPhase extends TrackingPhase {
                     return; // this is handled elsewhere
                 }
                 final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(tickingEntity);
+
+                boolean livingRotate = false;
+                if (minecraftEntity instanceof EntityLivingBase) {
+                    EntityLivingBase living = (EntityLivingBase) minecraftEntity;
+                    livingRotate = living.rotationYawHead != living.prevRotationYawHead;
+                }
+
                 if (minecraftEntity.lastTickPosX != minecraftEntity.posX
                     || minecraftEntity.lastTickPosY != minecraftEntity.posY
                     || minecraftEntity.lastTickPosZ != minecraftEntity.posZ
                     || minecraftEntity.rotationPitch != minecraftEntity.prevRotationPitch
-                    || minecraftEntity.rotationYaw != minecraftEntity.prevRotationYaw) {
+                    || minecraftEntity.rotationYaw != minecraftEntity.prevRotationYaw
+                    || livingRotate) {
                     // yes we have a move event.
                     final double currentPosX = minecraftEntity.posX;
                     final double currentPosY = minecraftEntity.posY;
@@ -231,6 +240,9 @@ public final class WorldPhase extends TrackingPhase {
                         minecraftEntity.posZ = minecraftEntity.lastTickPosZ;
                         minecraftEntity.rotationPitch = minecraftEntity.prevRotationPitch;
                         minecraftEntity.rotationYaw = minecraftEntity.prevRotationYaw;
+                        if (minecraftEntity instanceof EntityLivingBase) {
+                            ((EntityLivingBase) minecraftEntity).rotationYawHead = ((EntityLivingBase) minecraftEntity).prevRotationYawHead;
+                        }
                     } else {
                         Transform<org.spongepowered.api.world.World> worldTransform = event.getToTransform();
                         Vector3d eventPosition = worldTransform.getPosition();
