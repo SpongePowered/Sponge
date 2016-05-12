@@ -56,6 +56,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
 import org.spongepowered.common.util.persistence.JsonTranslator;
@@ -97,19 +98,20 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
         //Set above: info.getSeed(), info.getGameType(),  info.isMapFeaturesEnabled(), info.isHardcoreModeEnabled(), info.getTerrainType()
 
         final WorldProperties properties = (WorldProperties) info;
-        this.dimensionType = properties.getDimensionType();
-        this.difficulty = properties.getDifficulty();
-        this.serializationBehavior = properties.getSerializationBehavior();
-        this.generatorSettings = properties.getGeneratorSettings();
-        this.isEnabled = properties.isEnabled();
-        this.loadOnStartup = properties.loadOnStartup();
-        this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
-        this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
-        this.pvpEnabled = properties.isPVPEnabled();
-        this.generateBonusChest = properties.doesGenerateBonusChest();
-        GeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
-        this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
-
+        if (((IMixinWorldInfo) properties).getWorldConfig() != null) {
+            this.dimensionType = properties.getDimensionType();
+            this.difficulty = properties.getDifficulty();
+            this.serializationBehavior = properties.getSerializationBehavior();
+            this.generatorSettings = properties.getGeneratorSettings();
+            this.isEnabled = properties.isEnabled();
+            this.loadOnStartup = properties.loadOnStartup();
+            this.keepSpawnLoaded = properties.doesKeepSpawnLoaded();
+            this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
+            this.pvpEnabled = properties.isPVPEnabled();
+            this.generateBonusChest = properties.doesGenerateBonusChest();
+            GeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
+            this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
+        }
     }
 
     @Intrinsic
