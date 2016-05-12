@@ -69,17 +69,17 @@ public abstract class MixinEntityMinecart extends MixinEntity implements Minecar
     // These next few are not valid in a forge environment since they overwrite the constants with
     // a method invocation, but for Vanilla, this should work perfectly fine.
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 0), require = 0)
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 0), require = 0, expect = 0)
     private double onAirX(double defaultValue) {
         return this.airborneMod.getX();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 1), require = 0)
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 1), require = 0, expect = 0)
     private double onAirY(double defaultValue) {
         return this.airborneMod.getY();
     }
 
-    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 2), require = 0)
+    @ModifyConstant(method = "moveDerailedMinecart", constant = @Constant(doubleValue = 0.949999988079071D, ordinal = 2), require = 0, expect = 0)
     private double onAirZ(double defaultValue) {
         return this.airborneMod.getZ();
     }
