@@ -100,9 +100,9 @@ public final class WorldManager {
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
     private static final TIntObjectHashMap<DimensionType> dimensionTypeByTypeId = new TIntObjectHashMap<>(3);
-    public static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
+    private static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
     private static final TIntObjectHashMap<Path> dimensionPathByDimensionId = new TIntObjectHashMap<>(3);
-    public static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
+    private static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
@@ -123,24 +123,21 @@ public final class WorldManager {
         registerDimension(1, DimensionType.THE_END);
     }
 
-    public static RegisterDimensionTypeResult registerDimensionType(DimensionType type) {
+    public static boolean registerDimensionType(DimensionType type) {
         checkNotNull(type);
         final Optional<Integer> optNextDimensionTypeId = getNextFreeDimensionTypeId();
-        if (!optNextDimensionTypeId.isPresent()) {
-            return RegisterDimensionTypeResult.DIMENSION_TYPE_LIMIT_EXCEEDED;
-        }
+        return optNextDimensionTypeId.isPresent() && registerDimensionType(optNextDimensionTypeId.get(), type);
 
-        return registerDimensionType(optNextDimensionTypeId.get(), type);
     }
 
-    public static RegisterDimensionTypeResult registerDimensionType(int dimensionTypeId, DimensionType type) {
+    public static boolean registerDimensionType(int dimensionTypeId, DimensionType type) {
         checkNotNull(type);
         if (dimensionTypeByTypeId.containsKey(dimensionTypeId)) {
-            return RegisterDimensionTypeResult.DIMENSION_TYPE_ALREADY_REGISTERED;
+            return false;
         }
 
         dimensionTypeByTypeId.put(dimensionTypeId, type);
-        return RegisterDimensionTypeResult.DIMENSION_TYPE_REGISTERED;
+        return true;
     }
 
     private static Optional<Integer> getNextFreeDimensionTypeId() {
@@ -162,20 +159,20 @@ public final class WorldManager {
         return dimensionBits.nextClearBit(0);
     }
 
-    public static RegisterDimensionResult registerDimension(int dimensionId, DimensionType type) {
+    public static boolean registerDimension(int dimensionId, DimensionType type) {
         checkNotNull(type);
         if (!dimensionTypeByTypeId.containsValue(type)) {
-            return RegisterDimensionResult.DIMENSION_TYPE_IS_NOT_REGISTERED;
+            return false;
         }
 
         if (dimensionTypeByDimensionId.containsKey(dimensionId)) {
-            return RegisterDimensionResult.DIMENSION_ALREADY_REGISTERED;
+            return false;
         }
         dimensionTypeByDimensionId.put(dimensionId, type);
         if (dimensionId >= 0) {
             dimensionBits.set(dimensionId);
         }
-        return RegisterDimensionResult.DIMENSION_REGISTERED;
+        return true;
     }
 
     public static void registerDimensionPath(int dimensionId, DimensionType type, Path dimensionDataRoot) {
@@ -293,8 +290,8 @@ public final class WorldManager {
         return Optional.ofNullable(worldUuidByFolderName.inverse().get(uuid));
     }
 
-    // TODO Some result mechanism
     public static WorldProperties createWorldProperties(String folderName, WorldCreationSettings settings) {
+        checkNotNull(folderName);
         checkNotNull(settings);
         final Optional<WorldServer> optWorldServer = getWorld(folderName);
         if (optWorldServer.isPresent()) {
@@ -307,8 +304,8 @@ public final class WorldManager {
             return optWorldProperties.get();
         }
 
-        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true,
-                ((MinecraftServer) Sponge.getServer()).getDataFixer());
+        final ISaveHandler saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), folderName, true, SpongeImpl
+                .getServer().getDataFixer());
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
@@ -328,7 +325,7 @@ public final class WorldManager {
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), settings,
                 (WorldProperties) worldInfo));
 
-        saveHandler.saveWorldInfoWithPlayer(worldInfo, ((MinecraftServer) Sponge.getServer()).getPlayerList().getHostPlayerData());
+        saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
 
         return (WorldProperties) worldInfo;
 
@@ -343,8 +340,8 @@ public final class WorldManager {
             worldServer.getSaveHandler().saveWorldInfo((WorldInfo) properties);
             worldServer.getSaveHandler().loadWorldInfo();
         } else {
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, ((MinecraftServer)
-                    Sponge.getServer()).getDataFixer()).saveWorldInfo((WorldInfo) properties);
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), properties.getWorldName(), true, SpongeImpl.getServer()
+                    .getDataFixer()).saveWorldInfo((WorldInfo) properties);
         }
         // No return values or exceptions so can only assume true.
         return true;
@@ -398,7 +395,7 @@ public final class WorldManager {
     }
 
     private static void saveWorld(WorldServer worldServer) throws MinecraftException {
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final MinecraftServer server = SpongeImpl.getServer();
         final org.spongepowered.api.world.World apiWorld = (org.spongepowered.api.world.World) worldServer;
 
         Sponge.getEventManager().post(SpongeEventFactory.createSaveWorldEventPre(Cause.of(NamedCause.source(server)), apiWorld));
@@ -418,7 +415,7 @@ public final class WorldManager {
             for (Path worldFolder : stream) {
                 final String worldFolderName = worldFolder.getFileName().toString();
                 final WorldInfo worldInfo = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true,
-                        ((MinecraftServer) Sponge.getServer()).getDataFixer()).loadWorldInfo();
+                        SpongeImpl.getServer().getDataFixer()).loadWorldInfo();
                 if (worldInfo != null) {
                     worlds.add((WorldProperties) worldInfo);
                 }
@@ -445,9 +442,9 @@ public final class WorldManager {
 
     private static Optional<WorldServer> loadWorld(String worldName, @Nullable ISaveHandler saveHandler, @Nullable WorldProperties properties) {
         checkNotNull(worldName);
-        final Optional<Path> optCurrentSavesDir = getCurrentSavesDirectory();
-        checkState(optCurrentSavesDir.isPresent(), "Attempt made to load world too early!");
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final Path currentSavesDir = WorldManager.getCurrentSavesDirectory().orElseThrow(() -> new IllegalStateException("Attempt "
+                + "made to load world too early!"));
+        final MinecraftServer server = SpongeImpl.getServer();
         final Optional<WorldServer> optExistingWorldServer = getWorld(worldName);
         if (optExistingWorldServer.isPresent()) {
             return optExistingWorldServer;
@@ -458,15 +455,15 @@ public final class WorldManager {
             return Optional.empty();
         }
 
-        final Path worldFolder = optCurrentSavesDir.get().resolve(worldName);
+        final Path worldFolder = currentSavesDir.resolve(worldName);
         if (!Files.isDirectory(worldFolder)) {
-            SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", optCurrentSavesDir.get(), worldFolder);
+            SpongeImpl.getLogger().error("Unable to load world [{}]. We cannot find its folder under [{}].", currentSavesDir, worldFolder);
             return Optional.empty();
         }
 
         if (saveHandler == null) {
-            saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldName, true, ((MinecraftServer)
-                    Sponge.getServer()).getDataFixer());
+            saveHandler = new AnvilSaveHandler(currentSavesDir.toFile(), worldName, true, SpongeImpl.getServer()
+                    .getDataFixer());
         }
 
         // We weren't given a properties, see if one is cached
@@ -518,14 +515,14 @@ public final class WorldManager {
         worldByDimensionId.put(dimensionId, worldServer);
         weakWorldByWorld.put(worldServer, worldServer);
 
-        ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+        ((IMixinMinecraftServer) SpongeImpl.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
 
         server.worldServers = reorderWorldsVanillaFirst();
         return Optional.of(worldServer);
     }
 
     public static void loadAllWorlds(String worldName, long defaultSeed, WorldType defaultWorldType, String generatorOptions) {
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final MinecraftServer server = SpongeImpl.getServer();
 
         // We cannot call getCurrentSavesDirectory here as that would generate a savehandler and trigger a session lock.
         // We'll go ahead and make the directories for the save name here so that the migrator won't fail
@@ -549,7 +546,7 @@ public final class WorldManager {
             final DimensionType dimensionType = entry.getValue();
 
             // Skip all worlds besides dimension 0 if multi-world is disabled
-            if (dimensionId != 0 && !((MinecraftServer) Sponge.getServer()).getAllowNether()) {
+            if (dimensionId != 0 && !server.getAllowNether()) {
                 continue;
             }
 
@@ -559,18 +556,17 @@ public final class WorldManager {
             }
 
             // Step 1 - Grab the world's data folder
-
             final Optional<Path> optWorldFolder = getWorldFolder(dimensionId);
             if (!optWorldFolder.isPresent()) {
-                SpongeImpl.getLogger().error("An attempt was made to load a World with dimension id [{}] that has no registered world folder!",
+                SpongeImpl.getLogger().error("An attempt was made to load a world with dimension id [{}] that has no registered world folder!",
                         dimensionId);
                 continue;
             }
 
             final Path worldFolder = optWorldFolder.get();
             final String worldFolderName = worldFolder.getFileName().toString();
-            // Step 2 - See if we are allowed to load it
 
+            // Step 2 - See if we are allowed to load it
             if (dimensionId != 0) {
                 final SpongeConfig<?> activeConfig = SpongeHooks.getActiveConfig(((org.spongepowered.api.world.DimensionType) (Object) dimensionType)
                         .getId(), worldFolderName);
@@ -581,22 +577,18 @@ public final class WorldManager {
             }
 
             // Step 3 - Get our world information from disk
-
             final ISaveHandler saveHandler;
             if (dimensionId == 0) {
-                saveHandler = ((MinecraftServer) Sponge.getServer()).getActiveAnvilConverter().getSaveLoader(((MinecraftServer)
-                        Sponge.getServer()).getFolderName(), true);
+                saveHandler = server.getActiveAnvilConverter().getSaveLoader(server.getFolderName(), true);
             } else {
-                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, ((MinecraftServer)
-                        Sponge.getServer()).getDataFixer());
+                saveHandler = new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), worldFolderName, true, server
+                        .getDataFixer());
             }
 
 
             WorldInfo worldInfo;
 
-            // If this is dimension 0 and we're on the client, we need to do special handling to get the world's info. This is due to the ability to
-            // copy a world.
-            // TODO Check this in SpongeForge...doesn't seem right
+            // On client, the world info is created early due to client GUI settings. We register it there and check for it here.
             if (dimensionId == 0 && Sponge.getPlatform().getType().isClient()) {
                 worldInfo = (WorldInfo) getWorldProperties(worldFolderName).orElse(null);
                 if (worldInfo == null) {
@@ -608,8 +600,8 @@ public final class WorldManager {
 
             WorldSettings worldSettings = null;
 
-            // Step 4 - At this point, we have either have the world's info or we have none. We'll construct it if needed and build our
-            //          WorldSettings
+            // Step 4 - At this point, we have either have the WorldInfo or we have none. If we have none, we'll build a WorldSettings and use
+            // that to make the WorldInfo.
             if (worldInfo == null) {
                 worldSettings = new WorldSettings(defaultSeed, server.getGameType(), server.canStructuresSpawn(), server.isHardcore(),
                         defaultWorldType);
@@ -643,18 +635,18 @@ public final class WorldManager {
             worldByDimensionId.put(dimensionId, worldServer);
             weakWorldByWorld.put(worldServer, worldServer);
 
-            ((IMixinMinecraftServer) Sponge.getServer()).getWorldTickTimes().put(dimensionId, new long[100]);
+            ((IMixinMinecraftServer) server).getWorldTickTimes().put(dimensionId, new long[100]);
 
             SpongeImpl.getLogger().info("Loading world [{}] ({})", ((org.spongepowered.api.world.World) worldServer).getName(), getDimensionType
                     (dimensionId).get().getName());
         }
 
-        ((MinecraftServer) Sponge.getServer()).worldServers = reorderWorldsVanillaFirst();
+        server.worldServers = reorderWorldsVanillaFirst();
     }
 
     public static WorldInfo createWorldInfoFromSettings(Path currentSaveRoot, org.spongepowered.api.world.DimensionType dimensionType, int
             dimensionId, String worldFolderName, WorldSettings worldSettings, String generatorOptions) {
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final MinecraftServer server = SpongeImpl.getServer();
 
         worldSettings.setGeneratorOptions(generatorOptions);
 
@@ -672,7 +664,7 @@ public final class WorldManager {
 
     public static WorldServer createWorldFromProperties(int dimensionId, ISaveHandler saveHandler, WorldInfo worldInfo, @Nullable WorldSettings
             worldSettings, boolean prepareSpawn) {
-        final MinecraftServer server = (MinecraftServer) Sponge.getServer();
+        final MinecraftServer server = SpongeImpl.getServer();
         final WorldServer worldServer = (WorldServer) new WorldServer(server, saveHandler, worldInfo, dimensionId, server.theProfiler)
                 .init();
 
@@ -693,6 +685,7 @@ public final class WorldManager {
         if (prepareSpawn) {
             ((IMixinMinecraftServer) server).prepareSpawnArea(worldServer);
         }
+
         return worldServer;
     }
 
@@ -719,9 +712,6 @@ public final class WorldManager {
         }
 
         sorted.subList(count, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
-
-        //System.err.println("World order: ");
-        //sorted.stream().forEach(w -> System.err.println("World id: " + w.getWorldInfo().getWorldName() + " " + ((IMixinWorld) w).getDimensionId()));
 
         return sorted.toArray(new WorldServer[sorted.size()]);
     }
@@ -847,12 +837,12 @@ public final class WorldManager {
                 Throwables.propagate(e);
             }
 
-            ((IMixinMinecraftServer) Sponge.getServer()).setSaveEnabled(false);
+            ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(false);
         }
 
         final CompletableFuture<Optional<WorldProperties>> future = SpongeScheduler.getInstance().submitAsyncTask(new CopyWorldTask(info, copyName));
         if (worldServer != null) { // World was loaded
-            future.thenRun(() -> ((IMixinMinecraftServer) Sponge.getServer()).setSaveEnabled(true));
+            future.thenRun(() -> ((IMixinMinecraftServer) SpongeImpl.getServer()).setSaveEnabled(true));
         }
         return future;
     }
@@ -879,8 +869,8 @@ public final class WorldManager {
         final WorldInfo info = new WorldInfo((WorldInfo) worldProperties);
         info.setWorldName(newName);
         ((IMixinWorldInfo) info).createWorldConfig();
-        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
-                Sponge.getServer()).getDataFixer()).saveWorldInfo(info);
+        new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getServer().getDataFixer())
+                .saveWorldInfo(info);
         registerWorldProperties((WorldProperties) info);
         return Optional.of((WorldProperties) info);
     }
@@ -925,8 +915,8 @@ public final class WorldManager {
             ((IMixinWorldInfo) info).setUUID(UUID.randomUUID());
             ((IMixinWorldInfo) info).createWorldConfig();
             registerWorldProperties((WorldProperties) info);
-            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, ((MinecraftServer)
-                    Sponge.getServer()).getDataFixer()).saveWorldInfo(info);
+            new AnvilSaveHandler(WorldManager.getCurrentSavesDirectory().get().toFile(), newName, true, SpongeImpl.getServer().getDataFixer())
+                    .saveWorldInfo(info);
             return Optional.of((WorldProperties) info);
         }
     }
@@ -1003,25 +993,6 @@ public final class WorldManager {
         }
         dimMap.setIntArray("DimensionArray", data);
         return dimMap;
-    }
-
-    public enum RegisterDimensionTypeResult {
-        DIMENSION_TYPE_ALREADY_REGISTERED,
-        DIMENSION_TYPE_LIMIT_EXCEEDED,
-        DIMENSION_TYPE_REGISTERED
-    }
-
-    public enum RegisterDimensionResult {
-        DIMENSION_TYPE_IS_NOT_REGISTERED,
-        DIMENSION_ALREADY_REGISTERED,
-        DIMENSION_REGISTERED
-    }
-
-    public enum QueueWorldToUnloadResult {
-        WORLD_IS_NOT_REGISTERED,
-        WORLD_STILL_HAS_PLAYERS,
-        WORLD_KEEPS_SPAWN_LOADED,
-        WORLD_IS_QUEUED
     }
 
     public static Optional<Path> getCurrentSavesDirectory() {
