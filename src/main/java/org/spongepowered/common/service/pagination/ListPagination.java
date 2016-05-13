@@ -26,6 +26,7 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -64,7 +65,9 @@ class ListPagination extends ActivePagination {
 
     @Override
     protected Iterable<Text> getLines(int page) throws CommandException {
-        if (page < 1) {
+        if (this.pages.size() == 0) {
+            return ImmutableList.of();
+        } else if (page < 1) {
             throw new CommandException(t("Page %s does not exist!", page));
         } else if (page > this.pages.size()) {
             throw new CommandException(t("Page %s is too high", page));
