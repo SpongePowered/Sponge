@@ -39,6 +39,7 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C15PacketClientSettings;
 import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
@@ -76,8 +77,10 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
+import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -154,6 +157,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
+    @Shadow private int currentWindowId = 0;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
@@ -161,11 +165,11 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
     private TabList tabList = new SpongeTabList((EntityPlayerMP) (Object) this);
-
     private WorldSettings.GameType pendingGameType;
 
     private Scoreboard spongeScoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
 
+    @Nullable private Inventory currentWindow = null;
     @Nullable private Vector3d velocityOverride = null;
 
     @Inject(method = "removeEntity", at = @At(value = "INVOKE",
@@ -370,6 +374,38 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
+    }
+
+    @Override
+    public Optional<Inventory> getOpenInventory() {
+        return Optional.ofNullable(this.currentWindow);
+    }
+
+    @Override
+    public void openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
+        checkNotNull(inventory, "inventory");
+        checkNotNull(cause, "cause");
+        checkArgument(cause.root() instanceof PluginContainer, "Root must be an instance of Plugin Container");
+
+        if (this.currentWindow == null) {
+            this.currentWindowId++;
+            this.currentWindow = inventory;
+            // todo send packet and cause
+        }
+    }
+
+    @Override
+    public void closeInventory(Cause cause) throws IllegalArgumentException {
+        checkNotNull(cause, "cause");
+        checkArgument(cause.root() instanceof PluginContainer, "Root must be an instance of Plugin Container");
+
+        if (this.currentWindow != null) {
+            // todo cause
+            C0DPacketCloseWindow packet = new C0DPacketCloseWindow();
+            packet.windowId = this.currentWindowId;
+            this.playerNetServerHandler.sendPacket(packet);
+            this.currentWindow = null;
+        }
     }
 
     @Override
