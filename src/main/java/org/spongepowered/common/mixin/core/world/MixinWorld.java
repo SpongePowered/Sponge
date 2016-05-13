@@ -87,6 +87,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.text.chat.ChatType;
 import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Direction;
@@ -181,6 +182,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     private SpongeChunkProvider spongegen;
     protected boolean processingExplosion = false;
     private SpongeConfig<?> activeConfig;
+    private MessageChannel channel = MessageChannel.world(this);
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -666,6 +668,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings({"unchecked", "rawtypes"})
     private List<Player> getPlayers() {
         return (List) ((net.minecraft.world.World) (Object) this).getPlayers(EntityPlayerMP.class, Predicates.alwaysTrue());
+    }
+
+    @Override
+    public void sendMessage(Text message) {
+        checkNotNull(message, "message");
+
+        for (Player player : this.getPlayers()) {
+            player.sendMessage(message);
+        }
+    }
+
+    @Override
+    public MessageChannel getMessageChannel() {
+        return this.channel;
+    }
+
+    @Override
+    public void setMessageChannel(MessageChannel channel) {
+        this.channel = checkNotNull(channel, "channel");
     }
 
     @Override
