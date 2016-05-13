@@ -112,7 +112,8 @@ public class SkullUtils {
                 }
             } else {
                 final NBTTagCompound nbt = new NBTTagCompound();
-                NBTUtil.writeGameProfile(nbt, (com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
+                final com.mojang.authlib.GameProfile profileTexture = TileEntitySkull.updateGameprofile((com.mojang.authlib.GameProfile) resolveProfileIfNecessary(profile));
+                NBTUtil.writeGameProfile(nbt, profileTexture);
                 skull.setTagInfo(NbtDataUtil.ITEM_SKULL_OWNER, nbt);
             }
             return true;
