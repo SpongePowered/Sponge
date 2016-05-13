@@ -83,6 +83,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -410,7 +411,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote) {
+        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isProcessingVanillaBlockEvent() || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+                || causeTracker.isCapturingTerrainGen()) {
             return;
         }
 
@@ -432,7 +435,9 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote) {
+        final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+        if (this.worldObj.isRemote || causeTracker.getCurrentCause() == null || causeTracker.isProcessingVanillaBlockEvent() || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+                || causeTracker.isCapturingTerrainGen()) {
             return;
         }
 

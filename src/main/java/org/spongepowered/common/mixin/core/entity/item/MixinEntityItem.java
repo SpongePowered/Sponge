@@ -34,7 +34,6 @@ import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;

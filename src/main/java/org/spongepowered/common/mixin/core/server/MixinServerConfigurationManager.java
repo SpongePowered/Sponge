@@ -70,6 +70,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -442,7 +445,12 @@ public abstract class MixinServerConfigurationManager {
                 playerIn.experienceLevel));
         this.updateTimeAndWeatherForPlayer(playerIn, targetWorld);
         targetWorld.getPlayerManager().addPlayer(playerIn);
-        targetWorld.spawnEntityInWorld(playerIn);
+        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) player;
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity(spongeEntity)
+                .type(SpawnTypes.PLACEMENT)
+                .build();
+        ((org.spongepowered.api.world.World) targetWorld).spawnEntity(spongeEntity, Cause.of(NamedCause.source(spawnCause)));
         this.playerEntityList.add(playerIn);
         playerIn.addSelfToInternalCraftingInventory();
 
@@ -546,7 +554,12 @@ public abstract class MixinServerConfigurationManager {
 
         // Spawn player into level
         WorldServer level = this.mcServer.worldServerForDimension(player.dimension);
-        level.spawnEntityInWorld(player);
+        org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) player;
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity(spongeEntity)
+                .type(SpawnTypes.PLACEMENT)
+                .build();
+        ((org.spongepowered.api.world.World) level).spawnEntity(spongeEntity, Cause.of(NamedCause.source(spawnCause)));
         this.preparePlayer(player, null);
 
         // We always want to cancel.

@@ -120,4 +120,5 @@ public interface IMixinBlock {
     // Automatically implemented by forge due to identical signature
     boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing);
 
+    boolean isVanilla();
 }

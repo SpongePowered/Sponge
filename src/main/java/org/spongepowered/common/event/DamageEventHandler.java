@@ -360,24 +360,28 @@ public class DamageEventHandler {
     public static Cause generateCauseFor(DamageSource damageSource) {
         if (damageSource instanceof EntityDamageSourceIndirect) {
             net.minecraft.entity.Entity source = damageSource.getEntity();
-            Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            if (owner.isPresent()) {
-                return Cause.of(NamedCause.source(damageSource),
-                                 NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
-            } else {
-                return Cause.of(NamedCause.source(damageSource));
-            }
-        } else if (damageSource instanceof EntityDamageSource) {
-            net.minecraft.entity.Entity source = damageSource.getEntity();
-            Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-            Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
             List<NamedCause> causeObjects = new ArrayList<>();
             causeObjects.add(NamedCause.source(damageSource));
-            if (notifier.isPresent()) {
-                causeObjects.add(NamedCause.notifier(notifier.get()));
+            if (!(source instanceof EntityPlayer)) {
+                Optional<User> owner = source == null ? Optional.empty() : ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                if (owner.isPresent()) {
+                    causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
+                }
             }
-            if (owner.isPresent()) {
-                causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
+            return Cause.builder().addAll(causeObjects).build();
+        } else if (damageSource instanceof EntityDamageSource) {
+            net.minecraft.entity.Entity source = damageSource.getEntity();
+            List<NamedCause> causeObjects = new ArrayList<>();
+            causeObjects.add(NamedCause.source(damageSource));
+            if (!(source instanceof EntityPlayer)) {
+                Optional<User> owner = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                Optional<User> notifier = ((IMixinEntity) source).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                if (notifier.isPresent()) {
+                    causeObjects.add(NamedCause.notifier(notifier.get()));
+                }
+                if (owner.isPresent() && !(source instanceof EntityPlayer)) {
+                    causeObjects.add(NamedCause.of(DamageEntityEvent.CREATOR, owner.get()));
+                }
             }
             return Cause.builder().addAll(causeObjects).build();
         } else if (damageSource instanceof BlockDamageSource) {

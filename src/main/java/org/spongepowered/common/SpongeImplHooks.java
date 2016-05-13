@@ -31,11 +31,13 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityCreature;
 import net.minecraft.entity.EnumCreatureType;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.monster.EntityMob;
 import net.minecraft.entity.monster.EntitySlime;
 import net.minecraft.entity.passive.EntityAmbientCreature;
 import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
@@ -46,11 +48,15 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 
 import java.util.Optional;
 
@@ -136,5 +142,33 @@ public final class SpongeImplHooks {
 
     public static boolean isFakePlayer(Entity entity) {
         return false;
+    }
+
+    public static boolean onDroppedByPlayer(Item item, ItemStack stack, EntityPlayer player) {
+        return true;
+    }
+
+    public static EntityItem onPlayerToss(EntityPlayer player, ItemStack item, boolean includeName)  {
+        IMixinEntity spongeEntity = (IMixinEntity) player;
+        spongeEntity.setCaptureItemDrops(true);
+        EntityItem ret = player.dropItem(item, false, includeName);
+        spongeEntity.getCapturedItemDrops().clear();
+        spongeEntity.setCaptureItemDrops(false);
+
+        if (ret == null) {
+            return null;
+        }
+
+        DropItemEvent.Dispense event = SpongeCommonEventFactory.callDropItemEventDispenseSingle(player, ret);
+        if (event.isCancelled()) {
+            return null;
+        }
+
+        EntityItem eventItem = (EntityItem) event.getEntities().get(0);
+        IMixinWorld spongeWorld = (IMixinWorld) player.worldObj;
+        spongeWorld.getCauseTracker().setIgnoreSpawnEvents(true);
+        player.worldObj.spawnEntityInWorld(eventItem);
+        spongeWorld.getCauseTracker().setIgnoreSpawnEvents(false);
+        return eventItem;
     }
 }

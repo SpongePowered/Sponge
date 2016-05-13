@@ -82,8 +82,9 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        causeTracker.setCurrentCause(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
         causeTracker.setWorldSpawnerRunning(true);
-        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setCaptureSpawnedEntities(true);
         spawnerStart = true;
     }
 
@@ -91,12 +92,10 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        if (causeTracker.getCapturedEntities().size() > 0) {
-            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
-        }
-
+        causeTracker.handleSpawnerEntities();
         causeTracker.setWorldSpawnerRunning(false);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.setCaptureSpawnedEntities(false);
+        causeTracker.setCurrentCause(null);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
@@ -108,8 +107,9 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        causeTracker.setCurrentCause(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.of("Biome", biome)));
         causeTracker.setChunkSpawnerRunning(true);
-        causeTracker.setProcessingCaptureCause(true);
+        causeTracker.setCaptureSpawnedEntities(true);
         spawnerStart = true;
     }
 
@@ -117,12 +117,10 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = (IMixinWorld) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        if (causeTracker.getCapturedEntities().size() > 0) {
-            causeTracker.handleEntitySpawns(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.of("Biome", biome)));
-        }
-
+        causeTracker.handleSpawnerEntities();
         causeTracker.setChunkSpawnerRunning(false);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.setCaptureSpawnedEntities(false);
+        causeTracker.setCurrentCause(null);
         if (spawnerStart) {
             spawnerStart = false;
             spawnerEntityClass = null;
@@ -149,7 +147,6 @@ public abstract class MixinSpawnerAnimals {
      * @param pos The position
      * @return True if the worldserver check was valid and if our event wasn't cancelled
      */
-    @SuppressWarnings("unchecked")
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_CAN_SPAWN_CREATURE))
     public boolean onCanSpawn(WorldServer worldServer, EnumCreatureType creatureType, BiomeGenBase.SpawnListEntry spawnListEntry, BlockPos pos) {
         setEntityType(spawnListEntry.entityClass);
@@ -219,14 +216,16 @@ public abstract class MixinSpawnerAnimals {
      */
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_SERVER_SPAWN_ENTITY))
     private boolean onSpawnEntityInWorld(WorldServer worldServer, net.minecraft.entity.Entity nmsEntity) {
+        final CauseTracker causeTracker = ((IMixinWorld) worldServer).getCauseTracker();
+        causeTracker.setCurrentCause(Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.owner(worldServer)));
         return ((org.spongepowered.api.world.World) worldServer).spawnEntity(((Entity) nmsEntity),
-                Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build()), NamedCause.owner(worldServer)));
+                ((IMixinWorld) worldServer).getCauseTracker().getCurrentCause());
     }
 
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
     private static boolean onSpawnEntityInWorldGen(World world, net.minecraft.entity.Entity entity) {
         return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity,
-                Cause.of(NamedCause.source(SpawnCause.builder().type(SpawnTypes.WORLD_SPAWNER).build())));
+                ((IMixinWorld) world).getCauseTracker().getCurrentCause());
     }
 
 }

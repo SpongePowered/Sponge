@@ -71,13 +71,11 @@ public abstract class MixinChunkProviderServer implements IMixinChunkProviderSer
             if (this.serverChunkGenerator != null) {
                 IMixinWorld world = (IMixinWorld) this.worldObj;
                 boolean capturingTerrain = world.getCauseTracker().isCapturingTerrainGen();
-                boolean processingCapture = world.getCauseTracker().isProcessingCaptureCause();
-                world.getCauseTracker().setProcessingCaptureCause(true);
+                boolean capturingEntities = world.getCauseTracker().isCapturingSpawnedEntities();
                 world.getCauseTracker().setCapturingTerrainGen(true);
                 this.serverChunkGenerator.populate(chunkProvider, x, z);
                 chunk.setChunkModified();
                 world.getCauseTracker().setCapturingTerrainGen(capturingTerrain);
-                world.getCauseTracker().setProcessingCaptureCause(processingCapture);
             }
         }
     }

@@ -41,17 +41,15 @@ import net.minecraft.entity.effect.EntityWeatherEffect;
 import net.minecraft.entity.item.EntityArmorStand;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.item.EntityItemFrame;
-import net.minecraft.entity.item.EntityTNTPrimed;
+import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityFishHook;
-import net.minecraft.entity.projectile.EntityThrowable;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.Slot;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C01PacketChatMessage;
-import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
 import net.minecraft.network.play.client.C0EPacketClickWindow;
@@ -83,7 +81,6 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnType;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -96,8 +93,8 @@ import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntityLightningBolt;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -111,7 +108,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 
@@ -120,30 +116,28 @@ import javax.annotation.Nullable;
 public final class CauseTracker {
 
     private final net.minecraft.world.World targetWorld;
-
-    private boolean processingCaptureCause = false;
     private boolean processingBlockRandomTicks = false;
     private boolean processingVanillaBlockEvent = false;
-    private boolean captureEntitySpawns = true;
+    private boolean captureSpawnedEntities = false;
     private boolean captureBlockDecay = false;
     private boolean captureTerrainGen = false;
     private boolean captureBlocks = false;
     private boolean captureCommand = false;
     private boolean restoringBlocks = false;
-    private boolean spawningDeathDrops = false;
-    private List<Entity> capturedEntities = new ArrayList<>();
-    private List<Entity> capturedEntityItems = new ArrayList<>();
+    private boolean ignoreSpawnEvents = false;
+    private List<Entity> capturedSpawnedEntities = new ArrayList<>();
+    private List<Entity> capturedSpawnedEntityItems = new ArrayList<>();
+    private List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
+    private List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
     @Nullable private User currentNotifier;
     @Nullable private BlockSnapshot currentTickBlock;
     @Nullable private Entity currentTickEntity;
     @Nullable private TileEntity currentTickTileEntity;
     @Nullable public IMixinNextTickListEntry currentPendingBlockUpdate;
     @Nullable private Cause pluginCause;
-    private List<BlockSnapshot> capturedSpongeBlockSnapshots = new ArrayList<>();
-    private List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
-    private Cause capturedSpawnCause;
+    private Cause currentCause;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         this.targetWorld = targetWorld;
@@ -161,12 +155,12 @@ public final class CauseTracker {
         return (IMixinWorld) this.targetWorld;
     }
 
-    public boolean isProcessingCaptureCause() {
-        return this.processingCaptureCause;
+    public boolean isIgnoringSpawnEvents() {
+        return this.ignoreSpawnEvents;
     }
 
-    public void setProcessingCaptureCause(boolean processingCaptureCause) {
-        this.processingCaptureCause = processingCaptureCause;
+    public void setIgnoreSpawnEvents(boolean ignoreSpawnEvents) {
+        this.ignoreSpawnEvents = ignoreSpawnEvents;
     }
 
     public boolean isProcessingBlockRandomTicks() {
@@ -185,12 +179,20 @@ public final class CauseTracker {
         this.processingVanillaBlockEvent = processingVanillaBlockEvent;
     }
 
-    public boolean isCaptureEntitySpawns() {
-        return this.captureEntitySpawns;
+    public boolean isCapturingSpawnedEntities() {
+        return this.captureSpawnedEntities;
     }
 
-    public void setCaptureEntitySpawns(boolean captureEntitySpawns) {
-        this.captureEntitySpawns = captureEntitySpawns;
+    public void setCaptureSpawnedEntities(boolean captureSpawnedEntities) {
+        this.captureSpawnedEntities = captureSpawnedEntities;
+    }
+
+    public List<Entity> getCapturedSpawnedEntities() {
+        return this.capturedSpawnedEntities;
+    }
+
+    public List<Entity> getCapturedSpawnedEntityItems() {
+        return this.capturedSpawnedEntityItems;
     }
 
     public boolean isCaptureBlockDecay() {
@@ -231,22 +233,6 @@ public final class CauseTracker {
 
     public void setRestoringBlocks(boolean restoringBlocks) {
         this.restoringBlocks = restoringBlocks;
-    }
-
-    public boolean isSpawningDeathDrops() {
-        return this.spawningDeathDrops;
-    }
-
-    public void setSpawningDeathDrops(boolean spawningDeathDrops) {
-        this.spawningDeathDrops = spawningDeathDrops;
-    }
-
-    public List<Entity> getCapturedEntities() {
-        return this.capturedEntities;
-    }
-
-    public List<Entity> getCapturedEntityItems() {
-        return this.capturedEntityItems;
     }
 
     public boolean hasNotifier() {
@@ -337,8 +323,64 @@ public final class CauseTracker {
         return this.pluginCause != null;
     }
 
-    public void handleEntitySpawns(Cause cause) {
-        Iterator<Entity> iter = this.capturedEntities.iterator();
+    public Cause getCurrentCause() {
+        return this.currentCause;
+    }
+
+    public void setCurrentCause(Cause cause) {
+        this.currentCause = cause;
+    }
+
+    public void preTrackEntity(Entity entity) {
+        this.currentTickEntity = entity;
+        this.currentCause = Cause.of(NamedCause.source(entity));
+        this.trackEntityCausePreTick((net.minecraft.entity.Entity) entity);
+    }
+
+    public void postTrackEntity() {
+        this.handlePostTickCaptures();
+        this.currentTickEntity = null;
+        this.currentCause = null;
+        this.currentNotifier = null;
+    }
+
+    public void preTrackTileEntity(TileEntity tile) {
+        this.currentTickTileEntity = tile;
+        this.currentCause = Cause.of(NamedCause.source(tile));
+        this.trackBlockPositionCausePreTick(((net.minecraft.tileentity.TileEntity) tile).getPos());
+    }
+
+    public void postTrackTileEntity() {
+        this.handlePostTickCaptures();
+        this.currentTickTileEntity = null;
+        this.currentCause = null;
+        this.currentNotifier = null;
+    }
+
+    public void preTrackBlock(IBlockState state, BlockPos pos) {
+        this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
+        if (currentCause != null) {
+            this.currentCause = this.currentCause.merge(Cause.of(NamedCause.source(this.currentTickBlock)));
+        } else {
+            this.currentCause = Cause.of(NamedCause.source(this.currentTickBlock));
+        }
+        this.trackBlockPositionCausePreTick(pos);
+    }
+
+    public void postTrackBlock() {
+        this.handlePostTickCaptures();
+        this.currentTickBlock = null;
+        this.currentCause = null;
+        this.currentNotifier = null;
+    }
+
+    public void handleSpawnerEntities() {
+        if (this.capturedSpawnedEntities.size() == 0 || (!this.worldSpawnerRunning && !this.chunkSpawnerRunning)) {
+            return;
+        }
+
+        Cause cause = this.currentCause;
+        Iterator<Entity> iter = this.capturedSpawnedEntities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
@@ -356,18 +398,7 @@ public final class CauseTracker {
                     continue;
                 }
             }
-            if (cause.first(User.class).isPresent()) {
-                // store user UUID with entity to track later
-                User user = cause.first(User.class).get();
-                ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId());
-            } else if (cause.first(Entity.class).isPresent()) {
-                IMixinEntity spongeEntity = (IMixinEntity) cause.first(Entity.class).get();
-                Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                if (owner.isPresent() && !cause.containsNamed(NamedCause.OWNER)) {
-                    cause = cause.with(NamedCause.of(NamedCause.OWNER, owner.get()));
-                    ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
-                }
-            }
+
             entitySnapshotBuilder.add(currentEntity.createSnapshot());
         }
 
@@ -375,31 +406,14 @@ public final class CauseTracker {
         if (entitySnapshots.isEmpty()) {
             return;
         }
-        SpawnEntityEvent event;
+        SpawnEntityEvent event = null;
 
         if (this.worldSpawnerRunning) {
-            event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedEntities, entitySnapshots, this.getWorld());
-        } else if (this.chunkSpawnerRunning) {
-            event = SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedEntities, entitySnapshots, this.getWorld());
+            event = SpongeEventFactory.createSpawnEntityEventSpawner(cause, this.capturedSpawnedEntities, entitySnapshots, this.getWorld());
         } else {
-            List<NamedCause> namedCauses = new ArrayList<>();
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
-                    if (!(entry.getValue() instanceof SpawnCause)) {
-                        namedCauses.add(NamedCause.source(SpawnCause.builder().type(SpawnTypes.CUSTOM).build()));
-                    } else {
-                        namedCauses.add(NamedCause.source(entry.getValue()));
-                    }
-                } else {
-                    namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-                }
-            }
-            cause = Cause.of(namedCauses);
-            event = SpongeEventFactory.createSpawnEntityEvent(cause, this.capturedEntities, entitySnapshotBuilder.build(), this.getWorld());
+            event = SpongeEventFactory.createSpawnEntityEventChunkLoad(cause, this.capturedSpawnedEntities, entitySnapshots, this.getWorld());
         }
 
-        boolean wasProcessing = this.processingCaptureCause;
-        this.processingCaptureCause = false;
         if (!(SpongeImpl.postEvent(event))) {
             Iterator<Entity> iterator = event.getEntities().iterator();
             while (iterator.hasNext()) {
@@ -422,32 +436,24 @@ public final class CauseTracker {
                 iterator.remove();
             }
         } else {
-            this.capturedEntities.clear();
+            this.capturedSpawnedEntities.clear();
         }
-        this.processingCaptureCause = wasProcessing;
     }
 
-    public void handlePostTickCaptures(Cause cause) {
-        if (this.getMinecraftWorld().isRemote || this.restoringBlocks || this.spawningDeathDrops || cause == null) {
+    public void handlePostTickCaptures() {
+        if (this.getMinecraftWorld().isRemote || this.restoringBlocks || this.currentCause == null) {
             return;
-        } else if (this.capturedEntities.size() == 0 && this.capturedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
+        } else if (this.capturedSpawnedEntities.size() == 0 && this.capturedSpawnedEntityItems.size() == 0 && this.capturedSpongeBlockSnapshots.size() == 0
                    && StaticMixinHelper.packetPlayer == null) {
             return; // nothing was captured, return
         }
 
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet<?> packetIn = StaticMixinHelper.processingPacket;
+        Cause cause = this.currentCause;
 
         // Handle Block Captures
-        handleBlockCaptures(cause);
-
-        // Handle Player Toss
-        if (player != null && packetIn instanceof C07PacketPlayerDigging) {
-            C07PacketPlayerDigging digPacket = (C07PacketPlayerDigging) packetIn;
-            if (digPacket.getStatus() == C07PacketPlayerDigging.Action.DROP_ITEM) {
-                StaticMixinHelper.destructItemDrop = false;
-            }
-        }
+        handleBlockCaptures();
 
         // Handle Player kill commands
         if (player != null && packetIn instanceof C01PacketChatMessage) {
@@ -456,7 +462,6 @@ public final class CauseTracker {
                 if (!cause.contains(player)) {
                     cause = cause.with(NamedCause.of("Player", player));
                 }
-                StaticMixinHelper.destructItemDrop = true;
             }
         }
 
@@ -474,83 +479,24 @@ public final class CauseTracker {
             }
         }
 
-        if (this.capturedSpawnCause != null) {
-            // The following is pretty messy, but essentially it tries to merge
-            // potentially two SOURCE causes into a single EntitySpawnCause.
-            // If one of the sources is a SpawnCause and the other is an Entity,
-            // it will convert that into an EntitySpawnCause.
-            // It prefers using the local 'cause' object when there's a clash
-            // with capturedSpawnCause
-            Map<String, Object> captureNamed = this.capturedSpawnCause.getNamedCauses();
-            Map<String, Object> currentNamed = cause.getNamedCauses();
-            SpawnCause spawnCause = null;
-            Entity causeEntity = null;
-            Cause.Builder builder = Cause.builder();
-            boolean isEmpty = true;
-            for (Map.Entry<String, Object> entry : captureNamed.entrySet()) {
-                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
-                    if (entry.getValue() instanceof SpawnCause) {
-                        spawnCause = (SpawnCause) entry.getValue();
-                        continue;
-                    } else if (entry.getValue() instanceof Entity) {
-                        causeEntity = (Entity) entry.getValue();
-                        continue;
-                    }
-                }
-                isEmpty = false;
-                builder.suggestNamed(entry.getKey(), entry.getValue());
-            }
-            for (Map.Entry<String, Object> entry : currentNamed.entrySet()) {
-                if (entry.getKey().equalsIgnoreCase(NamedCause.SOURCE)) {
-                    if (entry.getValue() instanceof SpawnCause) {
-                        if (spawnCause == null) {
-                            spawnCause = (SpawnCause) entry.getValue();
-                        } else {
-                            if (spawnCause.getType() == SpawnTypes.CUSTOM) {
-                                // Prefer non-custom types
-                                spawnCause = (SpawnCause) entry.getValue();
-                            }
-                        }
-                        continue;
-                    } else if (entry.getValue() instanceof Entity) {
-                        // Prefer this one
-                        causeEntity = (Entity) entry.getValue();
-                        continue;
-                    }
-                }
-                isEmpty = false;
-                builder.suggestNamed(entry.getKey(), entry.getValue());
-            }
-            if (spawnCause != null && causeEntity != null) {
-                spawnCause = EntitySpawnCause.builder().entity(causeEntity).type(spawnCause.getType()).build();
-            } else if (spawnCause == null) {
-                spawnCause = SpawnCause.builder().type(SpawnTypes.CUSTOM).build();
-            }
-            cause = Cause.of(NamedCause.source(spawnCause));
-            if (!isEmpty) {
-                cause = cause.merge(builder.build());
-            }
-        }
-        this.capturedSpawnCause = null;
         // Handle Entity captures
-        if (this.capturedEntityItems.size() > 0) {
-            if (StaticMixinHelper.dropCause != null) {
-                cause = StaticMixinHelper.dropCause;
-                StaticMixinHelper.destructItemDrop = true;
-            }
-            handleDroppedItems(cause);
+        if (this.capturedSpawnedEntityItems.size() > 0) {
+            handleDroppedItems();
         }
-        if (this.capturedEntities.size() > 0) {
-            handleEntitySpawns(cause);
+        if (this.capturedSpawnedEntities.size() > 0) {
+            handleSpawnerEntities();
         }
 
-        StaticMixinHelper.dropCause = null;
-        StaticMixinHelper.destructItemDrop = false;
         this.invalidTransactions.clear();
     }
 
-    public void handleDroppedItems(Cause cause) {
-        Iterator<Entity> iter = this.capturedEntityItems.iterator();
+    public void handleDroppedItems() {
+        if (this.capturedSpawnedEntityItems.size() == 0 || (!this.worldSpawnerRunning && !this.chunkSpawnerRunning)) {
+            return;
+        }
+
+        Cause cause = this.currentCause;
+        Iterator<Entity> iter = this.capturedSpawnedEntityItems.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
             Entity currentEntity = iter.next();
@@ -598,64 +544,26 @@ public final class CauseTracker {
         if (entitySnapshots.isEmpty()) {
             return;
         }
-        DropItemEvent event = null;
 
-        if (StaticMixinHelper.destructItemDrop) {
-            if (!(cause.root() instanceof SpawnCause)) {
-                // determine spawn cause
-                Cause.Builder builder = null;
-                if (cause.root() instanceof Entity) {
-                    DamageSource damageSource = SpongeHooks.getEntityDamageSource((net.minecraft.entity.Entity) cause.root());
-                    builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
-                    if (damageSource != null) {
-                        builder = builder.named(NamedCause.of("LastDamageSource", damageSource));
-                    }
-                } else {
-                    builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-                }
-
-                Cause spawnCause = builder.build();
-                if (cause.root() == StaticMixinHelper.packetPlayer) {
-                    cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
-                } else {
-                    cause = spawnCause.merge(cause);
-                }
-            }
-            event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
+        Cause.Builder builder = null;
+        if (cause.root() instanceof Entity) {
+            builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
         } else {
-            Cause.Builder builder = null;
-            if (cause.root() instanceof Entity) {
-                builder = Cause.source(EntitySpawnCause.builder().entity((Entity) cause.root()).type(SpawnTypes.DROPPED_ITEM).build());
-            } else {
-                builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            }
-
-            Cause spawnCause = builder.build();
-            if (cause.root() == StaticMixinHelper.packetPlayer) {
-                cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
-            } else {
-                cause = spawnCause.merge(cause);
-            }
-            event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedEntityItems, entitySnapshots, this.getWorld());
+            builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
         }
 
-        if (!(SpongeImpl.postEvent(event))) {
-            // Handle player deaths
-            for (Player causePlayer : cause.allOf(Player.class)) {
-                EntityPlayerMP playermp = (EntityPlayerMP) causePlayer;
-                if (playermp.getHealth() <= 0 || playermp.isDead) {
-                    if (!playermp.worldObj.getGameRules().getBoolean("keepInventory")) {
-                        playermp.inventory.clear();
-                    } else {
-                        // don't drop anything if keepInventory is enabled
-                        this.capturedEntityItems.clear();
-                    }
-                }
-            }
+        Cause spawnCause = builder.build();
+        if (cause.root() == StaticMixinHelper.packetPlayer) {
+            cause = spawnCause.merge(Cause.of(NamedCause.owner(StaticMixinHelper.packetPlayer)));
+        } else {
+            cause = spawnCause.merge(cause);
+        }
 
-            Iterator<Entity> iterator =
-                event instanceof DropItemEvent.Destruct ? ((DropItemEvent.Destruct) event).getEntities().iterator()
-                                                        : ((DropItemEvent.Dispense) event).getEntities().iterator();
+        DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedSpawnedEntityItems, entitySnapshots, this.getWorld());
+
+        if (!(SpongeImpl.postEvent(event))) {
+            Iterator<Entity> iterator = event.getEntities().iterator();
+
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
                 if (entity.isRemoved()) { // Entity removed in an event handler
@@ -674,7 +582,7 @@ public final class CauseTracker {
             }
         } else {
             sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
-            this.capturedEntityItems.clear();
+            this.capturedSpawnedEntityItems.clear();
         }
     }
 
@@ -691,7 +599,8 @@ public final class CauseTracker {
         return false;
     }
 
-    public void handleBlockCaptures(Cause cause) {
+    public void handleBlockCaptures() {
+        Cause cause = this.currentCause;
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
         Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
@@ -793,8 +702,8 @@ public final class CauseTracker {
                 }
 
                 // clear entity list and return to avoid spawning items
-                this.capturedEntities.clear();
-                this.capturedEntityItems.clear();
+                this.capturedSpawnedEntities.clear();
+                this.capturedSpawnedEntityItems.clear();
                 return;
             }
         }
@@ -833,8 +742,8 @@ public final class CauseTracker {
                 handlePostPlayerBlockEvent(captureType, blockEvent.getTransactions());
 
                 // clear entity list and return to avoid spawning items
-                this.capturedEntities.clear();
-                this.capturedEntityItems.clear();
+                this.capturedSpawnedEntities.clear();
+                this.capturedSpawnedEntityItems.clear();
                 return;
             } else {
                 for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
@@ -879,11 +788,7 @@ public final class CauseTracker {
                     handlePostPlayerBlockEvent(captureType, this.invalidTransactions);
                 }
 
-                if (this.capturedEntityItems.size() > 0 && blockEvents.get(0) == breakEvent) {
-                    StaticMixinHelper.destructItemDrop = true;
-                }
-
-                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType, cause);
+                this.markAndNotifyBlockPost(blockEvent.getTransactions(), captureType);
 
                 if (captureType == CaptureType.PLACE && player != null && packet != null && packet.getStack() != null) {
                     player.addStat(StatList.objectUseStats[net.minecraft.item.Item.getIdFromItem(packet.getStack().getItem())], 1);
@@ -978,10 +883,11 @@ public final class CauseTracker {
         }
     }
 
-    public boolean processSpawnEntity(Entity entity, Cause cause) {
+    public boolean processSpawnEntity(Entity entity, Cause spawnCause) {
         checkNotNull(entity, "Entity cannot be null!");
-        checkNotNull(cause, "Cause cannot be null!");
+        checkNotNull(spawnCause, "Cause cannot be null!");
 
+        this.trackEntityOwner(entity);
         // Very first thing - fire events that are from entity construction
         if (((IMixinEntity) entity).isInConstructPhase()) {
             ((IMixinEntity) entity).firePostConstructEvents();
@@ -997,43 +903,28 @@ public final class CauseTracker {
         int j = MathHelper.floor_double(entityIn.posZ / 16.0D);
         boolean flag = entityIn.forceSpawn;
 
-        List<NamedCause> namedCauses = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-            if (entry.getKey().equals(NamedCause.SOURCE)) {
-                if (!(entry.getValue() instanceof SpawnCause)) {
-                    SpawnType type;
-                    if (entity instanceof EntityItem) {
-                        type = SpawnTypes.DROPPED_ITEM;
-                    } else {
-                        type = SpawnTypes.CUSTOM;
-                    }
-                    namedCauses.add(NamedCause.source(SpawnCause.builder().type(type).build()));
-                } else {
-                    namedCauses.add(NamedCause.source(entry.getValue()));
-                }
-            } else {
-                namedCauses.add(NamedCause.of(entry.getKey(), entry.getValue()));
-            }
+        // This is usually null during world gen
+        if (this.currentCause != null && !this.currentCause.first(SpawnCause.class).isPresent()) {
+            this.currentCause =  spawnCause.merge(this.currentCause);
+        } else if (this.currentCause == null) {
+            this.currentCause = spawnCause;
         }
-        cause = Cause.of(namedCauses);
+
         if (entityIn instanceof EntityPlayer) {
             flag = true;
         } else if (entityIn instanceof EntityLightningBolt) {
-            ((IMixinEntityLightningBolt) entityIn).setCause(cause);
+            ((IMixinEntityLightningBolt) entityIn).setCause(this.currentCause);
         }
 
         if (!flag && !this.getMinecraftWorld().isChunkLoaded(i, j, true)) {
             return false;
         } else {
-            if (entityIn instanceof EntityPlayer) {
+            if (flag) {
                 EntityPlayer entityplayer = (EntityPlayer) entityIn;
                 net.minecraft.world.World world = this.targetWorld;
                 world.playerEntities.add(entityplayer);
                 world.updateAllPlayersSleepingFlag();
-            }
-
-            if (this.getMinecraftWorld().isRemote || flag || this.spawningDeathDrops) {
-                if (SpongeImpl.postEvent(SpongeEventFactory.createSpawnEntityEventCustom(cause, Lists.newArrayList(entity),
+                if (SpongeImpl.postEvent(SpongeEventFactory.createSpawnEntityEvent(this.currentCause, Lists.newArrayList(entity),
                         Lists.newArrayList(entity.createSnapshot()), getWorld())) && !flag) {
                     return false;
                 }
@@ -1043,24 +934,15 @@ public final class CauseTracker {
                 return true;
             }
 
-            if (!flag && this.processingCaptureCause && !this.captureTerrainGen) {
-                if (this.currentTickEntity != null) {
-                    Optional<User> creator = ((IMixinEntity) this.currentTickEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
-                    if (creator.isPresent()) { // transfer user to next entity. This occurs with falling blocks that change into items
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator.get().getUniqueId());
-                    }
-                }
-                if (StaticMixinHelper.packetPlayer != null) {
-                    ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, StaticMixinHelper.packetPlayer.getUniqueID());
-                }
+            if (!flag && this.captureSpawnedEntities && !this.captureTerrainGen) {
                 if (entityIn instanceof EntityItem) {
-                    this.capturedEntityItems.add((Item) entityIn);
+                    this.capturedSpawnedEntityItems.add((Item) entityIn);
                 } else {
-                    this.capturedEntities.add((Entity) entityIn);
+                    this.capturedSpawnedEntities.add((Entity) entityIn);
                 }
-                this.capturedSpawnCause = this.capturedSpawnCause == null ? cause : cause.merge(this.capturedSpawnCause);
+
                 return true;
-            } else { // Custom
+            } else {
 
                 if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
                     // TODO MixinEntityFishHook.setShooter makes angler null
@@ -1068,57 +950,25 @@ public final class CauseTracker {
                     return false;
                 }
 
-                EntityLivingBase specialCause = null;
-                String causeName = "";
-                // Special case for throwables
-                if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityThrowable) {
-                    EntityThrowable throwable = (EntityThrowable) entityIn;
-                    specialCause = throwable.getThrower();
-
-                    if (specialCause != null) {
-                        causeName = NamedCause.THROWER;
-                        if (specialCause instanceof Player) {
-                            Player player = (Player) specialCause;
-                            ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-                        }
-                    }
-                }
-                // Special case for TNT
-                else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTNTPrimed) {
-                    EntityTNTPrimed tntEntity = (EntityTNTPrimed) entityIn;
-                    specialCause = tntEntity.getTntPlacedBy();
-                    causeName = NamedCause.IGNITER;
-
-                    if (specialCause instanceof Player) {
-                        Player player = (Player) specialCause;
-                        ((IMixinEntity) entityIn).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
-                    }
-                }
-                // Special case for Tameables
-                else if (!(entityIn instanceof EntityPlayer) && entityIn instanceof EntityTameable) {
-                    EntityTameable tameable = (EntityTameable) entityIn;
-                    if (tameable.getOwner() != null) {
-                        specialCause = tameable.getOwner();
-                        causeName = NamedCause.OWNER;
-                    }
-                }
-
-                if (specialCause != null && !cause.containsNamed(causeName)) {
-                    cause = cause.with(NamedCause.of(causeName, specialCause));
-                }
-
                 org.spongepowered.api.event.Event event = null;
                 List<Entity> entitiesToSpawn = Lists.newArrayList(entity);
                 ImmutableList<EntitySnapshot> entitySnapshots = ImmutableList.of(entity.createSnapshot());
-                if (entityIn instanceof EntityItem) {
-                    event = SpongeEventFactory.createDropItemEventCustom(cause, entitiesToSpawn, entitySnapshots, this.getWorld());
-                } else {
-                    event = SpongeEventFactory.createSpawnEntityEventCustom(cause, entitiesToSpawn, entitySnapshots, this.getWorld());
+                EntityLivingBase entityLiving = null;
+                net.minecraft.entity.Entity nonLivingEntity = null;
+                if (this.currentTickEntity instanceof EntityLivingBase) {
+                    entityLiving = (EntityLivingBase) this.currentTickEntity;
+                } else if (this.currentTickEntity != null) {
+                    nonLivingEntity = (net.minecraft.entity.Entity) this.currentTickEntity;
                 }
-                boolean cancelled = SpongeImpl.postEvent(event);
-                if (!cancelled && !entity.isRemoved()) {
+                if ((nonLivingEntity != null && nonLivingEntity.isDead) || entityIn instanceof EntityXPOrb || (entityLiving != null && (entityLiving.getHealth() <= 0 || entityLiving.isDead))) {
+                    event = SpongeEventFactory.createDropItemEventDestruct(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
+                } else {
+                    event = SpongeEventFactory.createSpawnEntityEvent(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
+                }
+
+                if (!SpongeImpl.postEvent(event)) {
                     if (entityIn instanceof EntityWeatherEffect) {
-                        return addWeatherEffect(entityIn, cause);
+                        return addWeatherEffect(entityIn, this.currentCause);
                     }
                     this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
                     this.getMinecraftWorld().loadedEntityList.add(entityIn);
@@ -1132,62 +982,57 @@ public final class CauseTracker {
     }
 
     public void randomTickBlock(Block block, BlockPos pos, IBlockState state, Random random) {
-        this.processingCaptureCause = true;
         this.processingBlockRandomTicks = true;
-        this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
-        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
-        this.trackBlockPositionCausePreTick(pos, cause);
+        this.preTrackBlock(state, pos);
         block.randomTick(this.getMinecraftWorld(), pos, state, random);
-        this.handlePostTickCaptures(cause);
-        this.currentTickBlock = null;
-        this.currentNotifier = null;
-        this.processingCaptureCause = false;
+        this.postTrackBlock();
         this.processingBlockRandomTicks = false;
     }
 
     // By this point, currentPending(NextTickListEntry) should always be available
     public void updateTickBlock(Block block, BlockPos pos, IBlockState state, Random rand) {
-        this.processingCaptureCause = true;
         this.currentTickBlock = this.getMixinWorld().createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, this.getMinecraftWorld(), pos), pos, 0);
-        Cause cause = Cause.of(NamedCause.source(this.currentTickBlock));
+        List<NamedCause> namedCauses = new ArrayList<>();
+        namedCauses.add(NamedCause.source(this.currentTickBlock));
         if (this.currentPendingBlockUpdate.hasTickingBlock()) {
-            cause = cause.merge(Cause.of(NamedCause.of("SchedulerSource", this.currentPendingBlockUpdate.getCurrentTickBlock().get())));
-        }
-        if (this.currentPendingBlockUpdate.hasTickingTileEntity()) {
-            cause = cause.merge(Cause.of(NamedCause.source(this.currentPendingBlockUpdate.getCurrentTickTileEntity().get())));
-        }
-        if (!this.currentPendingBlockUpdate.hasSourceUser()) {
-            this.currentNotifier = this.trackBlockPositionCausePreTick(pos, cause).orElse(null);
-        } else {
-            this.currentNotifier = this.currentPendingBlockUpdate.getSourceUser().get();
-            cause = cause.merge(Cause.of(NamedCause.notifier(this.currentNotifier)));
+            namedCauses.add(NamedCause.of("SchedulerSource", this.currentPendingBlockUpdate.getCurrentTickBlock().get()));
+            if (this.currentPendingBlockUpdate.hasTickingTileEntity()) {
+                namedCauses.add(NamedCause.of("SchedulerParentSource", this.currentPendingBlockUpdate.getCurrentTickTileEntity().get()));
+            }
+        } else if (this.currentPendingBlockUpdate.hasTickingTileEntity()) {
+            namedCauses.add(NamedCause.of("SchedulerSource", this.currentPendingBlockUpdate.getCurrentTickTileEntity().get()));
         }
 
+        if (!this.currentPendingBlockUpdate.hasSourceUser()) {
+            this.currentNotifier = this.trackBlockPositionCausePreTick(pos).orElse(null);
+        } else {
+            this.currentNotifier = this.currentPendingBlockUpdate.getSourceUser().get();
+        }
+
+        if (this.currentNotifier != null) {
+            namedCauses.add(NamedCause.notifier(this.currentNotifier));
+        }
+        this.currentCause = Cause.of(namedCauses);
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
-        this.handlePostTickCaptures(cause);
-        this.currentTickBlock = null;
-        this.currentTickTileEntity = null;
+        this.postTrackBlock();
         this.currentPendingBlockUpdate = null;
-        this.currentNotifier = null;
-        this.processingCaptureCause = false;
+        this.currentTickTileEntity = null;
     }
 
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block sourceBlock, BlockPos sourcePos) {
         if (!this.getMinecraftWorld().isRemote) {
             IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
-            if (iblockstate == Blocks.air.getDefaultState()) {
+            if (iblockstate == Blocks.air.getDefaultState() || this.isRestoringBlocks() || this.isWorldSpawnerRunning() || this.isChunkSpawnerRunning()
+                    || this.isCapturingTerrainGen()) {
                 iblockstate.getBlock().onNeighborBlockChange(this.getMinecraftWorld(), notifyPos, iblockstate, sourceBlock);
                 return;
             }
 
             try {
-                if (!this.getMinecraftWorld().isRemote) {
-                    // determine user
-                    if (!this.tryAndTrackActiveUser(notifyPos, PlayerTracker.Type.NOTIFIER).isPresent()) {
-                        if (this.hasTickingBlock()) {
-                            this.trackTargetBlockFromSource(((SpongeBlockSnapshot) this.currentTickBlock).getBlockPos(), sourcePos, iblockstate.getBlock(), notifyPos,
-                                    PlayerTracker.Type.NOTIFIER);
-                        }
+                if (!this.tryAndTrackActiveUser(notifyPos, PlayerTracker.Type.NOTIFIER).isPresent()) {
+                    if (this.hasTickingBlock()) {
+                        this.trackTargetBlockFromSource(((SpongeBlockSnapshot) this.currentTickBlock).getBlockPos(), sourcePos, iblockstate.getBlock(), notifyPos,
+                                PlayerTracker.Type.NOTIFIER);
                     }
                 }
 
@@ -1212,7 +1057,7 @@ public final class CauseTracker {
         }
     }
 
-    public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type, Cause cause) {
+    public void markAndNotifyBlockPost(List<Transaction<BlockSnapshot>> transactions, CaptureType type) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(this.getMinecraftWorld(), transactions);
@@ -1229,7 +1074,7 @@ public final class CauseTracker {
 
             SpongeBlockSnapshot oldBlockSnapshot = (SpongeBlockSnapshot) transaction.getOriginal();
             SpongeBlockSnapshot newBlockSnapshot = (SpongeBlockSnapshot) transaction.getFinal();
-            SpongeHooks.logBlockAction(cause, this.getMinecraftWorld(), type, transaction);
+            SpongeHooks.logBlockAction(this.currentCause, this.getMinecraftWorld(), type, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
             BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -1239,31 +1084,42 @@ public final class CauseTracker {
             if (originalState.getBlock() != newState.getBlock() && !SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 this.setCurrentTickBlock(this.getMixinWorld().createSpongeBlockSnapshot(newState,
                         newState.getBlock().getActualState(newState, proxyBlockAccess, pos), pos, updateFlag));
-                newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
-                if (shouldChainCause(cause)) {
-                    cause = cause.merge(Cause.of(NamedCause.source(this.currentTickBlock)));
+                List<NamedCause> namedCauses = new ArrayList<>();
+                namedCauses.add(NamedCause.source(this.currentTickBlock));
+                namedCauses.add(NamedCause.of("ParentSource", this.currentCause.root()));
+                if (this.currentNotifier != null) {
+                    namedCauses.add(NamedCause.notifier(this.currentNotifier));
+                } else if (StaticMixinHelper.packetPlayer != null) {
+                    namedCauses.add(NamedCause.owner(StaticMixinHelper.packetPlayer));
                 }
+                Cause preCause = this.currentCause;
+                this.currentCause = Cause.of(namedCauses);
+                newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
+                // Handle any additional captures during onBlockAdded
+                // This is to ensure new captures do not leak into next tick with wrong cause
+                if (this.getCapturedSpongeBlockSnapshots().size() > 0) {
+                    this.handlePostTickCaptures();
+                }
+                this.currentCause = preCause;
             }
 
             proxyBlockAccess.proceed();
             this.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
-
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause
-            if (this.getCapturedSpongeBlockSnapshots().size() > 0 && this.pluginCause == null) {
-                this.handlePostTickCaptures(cause);
+            if (this.getCapturedSpongeBlockSnapshots().size() > 0) {
+                this.handlePostTickCaptures();
             }
-
             this.setCurrentTickBlock(currentTickingBlock);
         }
     }
 
-    private boolean shouldChainCause(Cause cause) {
+    /*private boolean shouldChainCause(Cause cause) {
         return !this.isCapturingTerrainGen() && !this.isWorldSpawnerRunning() && !this.isChunkSpawnerRunning()
                && !this.isProcessingBlockRandomTicks() && !this.isCaptureCommand() && this.hasTickingBlock() && this.pluginCause == null
                && !cause.contains(this.getCurrentTickBlock().get()) && !(StaticMixinHelper.processingPacket instanceof C03PacketPlayer);
 
-    }
+    }*/
 
     private Predicate<net.minecraft.entity.Entity> entityTrackerPredicate = new Predicate<net.minecraft.entity.Entity>() {
 
@@ -1350,8 +1206,8 @@ public final class CauseTracker {
         return Optional.empty();
     }
 
-    public Optional<User> trackBlockPositionCausePreTick(BlockPos pos, Cause cause) {
-        if (pos == null || cause == null) {
+    public Optional<User> trackBlockPositionCausePreTick(BlockPos pos) {
+        if (pos == null || this.currentCause == null) {
             return Optional.empty();
         }
 
@@ -1365,11 +1221,13 @@ public final class CauseTracker {
             if (notifier.isPresent()) {
                 User user = notifier.get();
                 causeTracker.setCurrentNotifier(user);
-                cause = cause.merge(Cause.of(NamedCause.notifier(user)));
-            }
-            if (owner.isPresent()) {
+                this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
+                return notifier;
+            } else if (owner.isPresent()) {
                 User user = owner.get();
-                cause = cause.merge(Cause.of(NamedCause.owner(user)));
+                this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
+                causeTracker.setCurrentNotifier(user);
+                return owner;
             }
             if (notifier.isPresent()) {
                 return notifier;
@@ -1381,8 +1239,8 @@ public final class CauseTracker {
         return Optional.empty();
     }
 
-    public void trackEntityCausePreTick(net.minecraft.entity.Entity entity, Cause cause) {
-        if (entity == null || cause == null) {
+    public void trackEntityCausePreTick(net.minecraft.entity.Entity entity) {
+        if (entity == null || this.currentCause == null) {
             return;
         }
 
@@ -1403,13 +1261,29 @@ public final class CauseTracker {
         if (notifier.isPresent()) {
             User user = notifier.get();
             causeTracker.setCurrentNotifier(user);
-            cause = cause.merge(Cause.of(NamedCause.notifier(user)));
-        }
-        if (owner.isPresent()) {
+            this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
+        } else if (owner.isPresent()) {
             User user = owner.get();
-            cause = cause.merge(Cause.of(NamedCause.owner(user)));
-            if (!notifier.isPresent()) {
-                causeTracker.setCurrentNotifier(user);
+            this.currentCause = this.currentCause.merge(Cause.of(NamedCause.owner(user)));
+            causeTracker.setCurrentNotifier(user);
+        }
+    }
+
+    // Handle entity ownership tracking
+    public void trackEntityOwner(Entity entity) {
+        User currentUser = StaticMixinHelper.packetPlayer != null ? (User) StaticMixinHelper.packetPlayer : this.currentNotifier;
+        if (currentUser != null) {
+            ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, currentUser.getUniqueId());
+        } else if (this.currentTickEntity != null) {
+            IMixinEntity spongeEntity = (IMixinEntity) this.currentTickEntity;
+            Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            if (owner.isPresent()) {
+                ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, owner.get().getUniqueId());
+            } else {
+                Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                if (notifier.isPresent()) {
+                    ((IMixinEntity) entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, notifier.get().getUniqueId());
+                }
             }
         }
     }

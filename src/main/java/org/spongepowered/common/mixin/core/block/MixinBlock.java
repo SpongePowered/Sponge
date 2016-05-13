@@ -74,6 +74,8 @@ import java.util.Random;
 @Mixin(value = Block.class, priority = 999)
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
+    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+
     @Shadow private boolean needsRandomTick;
 
     @Shadow public abstract boolean isBlockNormalCube();
@@ -207,5 +209,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 .type(SpawnTypes.EXPERIENCE)
                 .build();
         return ((World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
+    }
+
+    @Override
+    public boolean isVanilla() {
+        return this.isVanilla;
     }
 }

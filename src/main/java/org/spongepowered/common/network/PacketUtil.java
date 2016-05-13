@@ -40,11 +40,13 @@ import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -91,7 +93,6 @@ public class PacketUtil {
 
             }*/
 
-            //System.out.println("RECEIVED PACKET " + packetIn);
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
             ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                                                                                                        : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory
@@ -99,16 +100,18 @@ public class PacketUtil {
             StaticMixinHelper.lastCursor = cursor;
 
             IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
+            final CauseTracker causeTracker = world.getCauseTracker();
             if (StaticMixinHelper.packetPlayer.getHeldItem() != null
                 && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
-            world.getCauseTracker().setProcessingCaptureCause(true);
+            causeTracker.setCurrentCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
+            causeTracker.setCurrentNotifier((User) StaticMixinHelper.packetPlayer);
             packetIn.processPacket(netHandler);
-            ((IMixinWorld) StaticMixinHelper.packetPlayer.worldObj)
-                .getCauseTracker().handlePostTickCaptures(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
-            world.getCauseTracker().setProcessingCaptureCause(false);
+            causeTracker.handlePostTickCaptures();
+            causeTracker.setCurrentCause(null);
+            causeTracker.setCurrentNotifier(null);
             resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);

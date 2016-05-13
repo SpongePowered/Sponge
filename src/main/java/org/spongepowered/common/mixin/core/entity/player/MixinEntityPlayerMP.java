@@ -33,6 +33,8 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityList;
+import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -46,9 +48,13 @@ import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
+import net.minecraft.scoreboard.Score;
+import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.stats.StatBase;
+import net.minecraft.stats.StatList;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
@@ -92,6 +98,7 @@ import org.spongepowered.api.text.title.Title;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -108,6 +115,8 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.entity.player.PlayerKickHelper;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
@@ -122,7 +131,6 @@ import org.spongepowered.common.text.chat.SpongeChatType;
 import org.spongepowered.common.util.BookFaker;
 import org.spongepowered.common.util.LanguageUtil;
 import org.spongepowered.common.util.SkinUtil;
-import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongePlayerDataHandler;
 
@@ -157,6 +165,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
+    @Shadow public abstract void func_175145_a(StatBase p_175145_1_);
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -182,21 +191,71 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         return this.getWorldScoreboard().getObjectivesFromCriteria(criteria);
     }
 
-    @SuppressWarnings("unchecked")
-    @Inject(method = "onDeath", at = @At(value = "RETURN"))
-    public void onPlayerDeath(DamageSource damageSource, CallbackInfo ci) {
-        IMixinWorld world = (IMixinWorld) this.worldObj;
-        // Special case for players as sometimes tick capturing won't capture deaths
-        if (world.getCauseTracker().getCapturedEntityItems().size() > 0) {
-            StaticMixinHelper.destructItemDrop = true;
-            world.getCauseTracker().handleDroppedItems(Cause.of(NamedCause.source(this), NamedCause.of("Attacker", damageSource)));
-            StaticMixinHelper.destructItemDrop = false;
-        } else if (!this.worldObj.getGameRules().getBoolean("keepInventory")) {
-            // This is normally performed in CauseTracker#handleDroppedItems. However, if a mod removes
-            // all drops, then the player's inventory is not cleared as usual - despite it still containing items.
-            // TODO gabizou: Possibly find a better solution with the CauseTracking refactor
-            this.inventory.clear();
+    /**
+     * @author blood - May 12th, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
+     */
+    @Overwrite
+    public void onDeath(DamageSource cause) {
+        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase)(Object) this, cause) == null) {
+            return;
         }
+
+        if (this.worldObj.getGameRules().getBoolean("showDeathMessages")) {
+            Team team = this.getTeam();
+
+            if (team != null && team.getDeathMessageVisibility() != Team.EnumVisible.ALWAYS) {
+                if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OTHER_TEAMS) {
+                    this.mcServer.getConfigurationManager().sendMessageToAllTeamMembers((EntityPlayerMP)(Object) this, this.getCombatTracker().getDeathMessage());
+                } else if (team.getDeathMessageVisibility() == Team.EnumVisible.HIDE_FOR_OWN_TEAM) {
+                    this.mcServer.getConfigurationManager().sendMessageToTeamOrEvryPlayer((EntityPlayerMP)(Object) this, this.getCombatTracker().getDeathMessage());
+                }
+            } else {
+                this.mcServer.getConfigurationManager().sendChatMsg(this.getCombatTracker().getDeathMessage());
+            }
+        }
+
+        if (!this.worldObj.getGameRules().getBoolean("keepInventory")) {
+            this.captureItemDrops = true;
+            this.capturedItemDrops.clear();
+
+            this.inventory.dropAllItems();
+
+            this.captureItemDrops = false;
+            if (this.capturedItemDrops.size() > 0) {
+                IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+                final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+                causeTracker.setIgnoreSpawnEvents(true);;
+                if (!SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayerMP)(Object) this, cause, this.capturedItemDrops).isCancelled()) {
+                    for (net.minecraft.entity.item.EntityItem item : this.capturedItemDrops) {
+                        joinEntityItemWithWorld(item);
+                    }
+                }
+                causeTracker.setIgnoreSpawnEvents(false);
+            }
+        }
+
+        for (ScoreObjective scoreobjective : this.worldObj.getScoreboard().getObjectivesFromCriteria(IScoreObjectiveCriteria.deathCount)) {
+            Score score = this.getWorldScoreboard().getValueFromObjective(this.getName(), scoreobjective);
+            score.func_96648_a();
+        }
+
+        EntityLivingBase entitylivingbase = this.getAttackingEntity();
+
+        if (entitylivingbase != null) {
+            EntityList.EntityEggInfo entitylist$entityegginfo = (EntityList.EntityEggInfo)EntityList.entityEggs.get(Integer.valueOf(EntityList.getEntityID(entitylivingbase)));
+
+            if (entitylist$entityegginfo != null) {
+                this.triggerAchievement(entitylist$entityegginfo.field_151513_e);
+            }
+
+            entitylivingbase.addToPlayerScore((EntityPlayerMP)(Object) this, this.scoreValue);
+        }
+
+        this.triggerAchievement(StatList.deathsStat);
+        this.func_175145_a(StatList.timeSinceDeathStat);
+        this.getCombatTracker().reset();
     }
 
     @Override

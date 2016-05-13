@@ -38,10 +38,10 @@ import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.EntityTracker;
 import net.minecraft.entity.EntityTrackerEntry;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -98,10 +98,10 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
@@ -146,10 +146,6 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private static final String ATTACK_ENTITY_FROM_METHOD = "Lnet/minecraft/entity/Entity;attackEntityFrom(Lnet/minecraft/util/DamageSource;F)Z";
     private static final String FIRE_DAMAGESOURCE_FIELD = "Lnet/minecraft/util/DamageSource;inFire:Lnet/minecraft/util/DamageSource;";
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
-    private static final String
-            ENTITY_ITEM_INIT =
-            "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
@@ -163,7 +159,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
+    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
     private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
+    public boolean captureItemDrops = false;
+    public java.util.ArrayList<EntityItem> capturedItemDrops = new java.util.ArrayList<EntityItem>();
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -219,6 +218,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean isSprinting();
     @Shadow public abstract boolean isInWater();
     @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
+    @Shadow public abstract void addToPlayerScore(net.minecraft.entity.Entity entityIn, int amount);
 
 
     // @formatter:on
@@ -1238,20 +1238,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     /**
      * @author gabizou - January 30th, 2016
+     * @author blood - May 12th, 2016
      *
-     * This redirects the call to get the Item of an item stack so we can
-     * throw an event and short circuit with a ConstructEntityEvent.PRE.
-     *
-     * @param itemStack The item stack coming in
-     * @param itemStackIn The originally passed item stack
-     * @param offsetY The offset
-     * @return The item type, if no events cancelled
+     * @reason SpongeForge requires an overwrite so we do it here instead.
      */
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;"))
-    private Item onGetItem(ItemStack itemStack, ItemStack itemStackIn, float offsetY) {
-        if (itemStack.getItem() != null) {
+
+    @Overwrite
+    public EntityItem entityDropItem(ItemStack itemStackIn, float offsetY) {
+        if (itemStackIn.stackSize == 0) {
+            return null;
+        } else if (itemStackIn.getItem() != null) {
             // First we want to throw the DropItemEvent.PRE
-            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStack).createSnapshot();
+            ItemStackSnapshot snapshot = ((org.spongepowered.api.item.inventory.ItemStack) itemStackIn).createSnapshot();
             List<ItemStackSnapshot> original = new ArrayList<>();
             original.add(snapshot);
             DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(Cause.of(NamedCause.source(this)),
@@ -1267,34 +1265,27 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
             ConstructEntityEvent.Pre event = SpongeEventFactory
                     .createConstructEntityEventPre(Cause.of(NamedCause.source(cause)), EntityTypes.ITEM, suggested);
             SpongeImpl.postEvent(event);
-            return event.isCancelled() ? null : itemStack.getItem();
+            if (!event.isCancelled()) {
+                // Creates the argument where we can override the item stack being used to create
+                // the entity item. based on the previous event.
+                // --gabizou
+                ItemStack stack = this.custom == null ? itemStackIn : ((ItemStack) this.custom.createStack());
+                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double)offsetY, this.posZ, stack);
+                entityitem.setDefaultPickupDelay();
+                if (this.captureItemDrops) {
+                    this.capturedItemDrops.add(entityitem);
+                } else {
+                    cause = EntitySpawnCause.builder()
+                            .entity(this)
+                            .type(SpawnTypes.DROPPED_ITEM)
+                            .build();
+                    ((World) this.worldObj).spawnEntity(((Entity) entityitem), Cause.of(NamedCause.source(cause)));
+                }
+                return entityitem;
+            }
         }
+
         return null;
-    }
-
-    /**
-     * @author gabizou - January 30th, 2016
-     *
-     * Creates the argument where we can override the item stack being used to create
-     * the entity item. based on the previous event.
-     *
-     * @param itemStack The supposed item stack to drop, originally the original argument passed in
-     * @return The actual itemstack
-     */
-    @ModifyArg(method = "entityDropItem", at = @At(value = "INVOKE", target = ENTITY_ITEM_INIT))
-    private ItemStack onItemCreationFroDrop(ItemStack itemStack) {
-        ItemStack stack = this.custom == null ? itemStack : ((ItemStack) this.custom.createStack());
-        this.custom = null;
-        return stack;
-    }
-
-    @Redirect(method = "entityDropItem", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onSpawnEntityDrop(net.minecraft.world.World world, net.minecraft.entity.Entity entity, ItemStack itemStackIn, float offsetY) {
-        SpawnCause cause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((World) world).spawnEntity(((Entity) entity), Cause.of(NamedCause.source(cause)));
     }
 
     @Inject(method = "setDead", at = @At("HEAD"))
@@ -1330,6 +1321,18 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
             }
         }
+
+        if (this.destructCause != null) {
+            if (!this.destructCause.contains(User.class)) {
+                User owner = ((IMixinEntity) this.mcEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).orElse(null);
+                if (owner == null) {
+                    owner = ((IMixinEntity) this.mcEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).orElse(null);
+                }
+                if (owner != null) {
+                    this.destructCause = this.destructCause.merge(Cause.of(NamedCause.owner(owner)));
+                }
+            }
+        }
     }
 
     @Override
@@ -1358,5 +1361,20 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public BlockPos getLastCollidedBlockPos() {
         return this.lastCollidedBlockPos;
+    }
+
+    @Override
+    public boolean isVanilla() {
+        return this.isVanilla;
+    }
+
+    @Override
+    public void setCaptureItemDrops(boolean capture) {
+        this.captureItemDrops = capture;
+    }
+
+    @Override
+    public List<EntityItem> getCapturedItemDrops() {
+        return this.capturedItemDrops;
     }
 }

@@ -25,8 +25,6 @@
 package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
@@ -35,7 +33,6 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
-import net.minecraft.entity.item.EntityItem;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
@@ -50,7 +47,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.World;
@@ -108,7 +104,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         // Turn on capturing
         final CauseTracker causeTracker = this.getCauseTracker();
         causeTracker.setCaptureBlocks(true);
-        causeTracker.setCaptureEntitySpawns(true);
     }
 
     /**
@@ -177,7 +172,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
                 }
 
                 if (causeTracker.hasPluginCause()) {
-                    causeTracker.handleBlockCaptures(causeTracker.getPluginCause().get());
+                    causeTracker.setCurrentCause(causeTracker.getPluginCause().get());
+                    causeTracker.handleBlockCaptures();
+                    causeTracker.setCurrentCause(null);
                 } else {
                     // Don't notify clients or update physics while capturing blockstates
                     if (originalBlockSnapshot == null) {
@@ -230,17 +227,11 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCurrentTickEntity((Entity) entityIn);
-        Cause cause = Cause.of(NamedCause.source(entityIn));
-        causeTracker.trackEntityCausePreTick(entityIn, cause);
+        causeTracker.preTrackEntity((org.spongepowered.api.entity.Entity) entityIn); 
         entityIn.onUpdate();
         updateRotation(entityIn);
         SpongeCommonEventFactory.handleEntityMovement(entityIn);
-        causeTracker.handlePostTickCaptures(cause);
-        causeTracker.setCurrentTickEntity(null);
-        causeTracker.setCurrentNotifier(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.postTrackEntity();
     }
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/ITickable;update()V"))
@@ -251,15 +242,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCurrentTickTileEntity((TileEntity) tile);
-        Cause cause = Cause.of(NamedCause.source(tile));
-        causeTracker.trackBlockPositionCausePreTick(((net.minecraft.tileentity.TileEntity) tile).getPos(), cause);
+        causeTracker.preTrackTileEntity((TileEntity) tile);
         tile.update();
-        causeTracker.handlePostTickCaptures(cause);
-        causeTracker.setCurrentTickTileEntity(null);
-        causeTracker.setProcessingCaptureCause(false);
-        causeTracker.setCurrentNotifier(null);
+        causeTracker.postTrackTileEntity();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
@@ -270,17 +255,24 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             return;
         }
 
-        causeTracker.setProcessingCaptureCause(true);
-        causeTracker.setCurrentTickEntity((Entity) entity);
-        Cause cause = Cause.of(NamedCause.source(entity));
-        causeTracker.trackEntityCausePreTick(entity, cause);
+        causeTracker.preTrackEntity((org.spongepowered.api.entity.Entity) entity); 
         entity.onUpdate();
         updateRotation(entity);
         SpongeCommonEventFactory.handleEntityMovement(entity);
-        causeTracker.handlePostTickCaptures(cause);
-        causeTracker.setCurrentTickEntity(null);
-        causeTracker.setCurrentNotifier(null);
-        causeTracker.setProcessingCaptureCause(false);
+        causeTracker.postTrackEntity();
+    }
+
+    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
+    public void onUpdateRidden(net.minecraft.entity.Entity entity) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        if (this.isRemote || StaticMixinHelper.packetPlayer != null) {
+            entity.updateRidden();
+            return;
+        }
+
+        causeTracker.preTrackEntity((org.spongepowered.api.entity.Entity) entity); 
+        entity.updateRidden();
+        causeTracker.postTrackEntity();
     }
 
     @Inject(method = "onEntityRemoved", at = @At(value = "HEAD"))
@@ -290,28 +282,20 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
-    private Entity checkNotSpawned(net.minecraft.entity.Entity entity) {
-        if (this.isRemote) {
-            return (Entity) entity;
-        }
-
-        checkState(((net.minecraft.world.World) (Object) this).getEntityByID((checkNotNull(entity, "Entity cannot be null!")).getEntityId()) == null
-                && !getCauseTracker().getCapturedEntities().contains(entity)
-                && !(entity instanceof EntityItem && getCauseTracker().getCapturedEntityItems().contains(entity)),
-                "Entity %s already spawned in the world!", entity);
-        return (Entity) entity;
-    }
-
     @Inject(method = "spawnEntityInWorld", at = @At("HEAD"), cancellable = true)
     public void onSpawnEntityInWorld(net.minecraft.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (!this.isRemote) {
-            cir.setReturnValue(this.spawnEntity(checkNotSpawned(entity), Cause.of(NamedCause.source(this))));
+            if (!this.causeTracker.isIgnoringSpawnEvents()) {
+                cir.setReturnValue(SpongeCommonEventFactory.handleVanillaSpawnEntity(this.asMinecraftWorld(), entity));
+            } else {
+                this.causeTracker.trackEntityOwner((Entity) entity);
+            }
         }
     }
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
-        return this.getCauseTracker().processSpawnEntity(checkNotSpawned((net.minecraft.entity.Entity) entity), cause);
+        return this.getCauseTracker().processSpawnEntity(entity, cause);
     }
 
     /**
@@ -326,7 +310,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote) {
+        if (this.isRemote || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+                || causeTracker.isCapturingTerrainGen()) {
             for (EnumFacing facing : EnumFacing.values()) {
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
             }
@@ -363,7 +348,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         directions.remove(skipSide);
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote) {
+        if (this.isRemote || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+                || causeTracker.isCapturingTerrainGen()) {
             for (Object obj : directions) {
                 EnumFacing facing = (EnumFacing) obj;
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
@@ -424,7 +410,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
-    @SuppressWarnings("unused")
     private net.minecraft.world.World asMinecraftWorld() {
         return (net.minecraft.world.World) (Object) this;
     }

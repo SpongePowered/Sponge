@@ -61,12 +61,10 @@ public class StaticMixinHelper {
     public static Container lastOpenContainer = null;
     public static IInventory lastOpenInventory = null;
     public static EntityLivingBase currentTargetEntity = null;
-    public static Cause dropCause = null;
     public static PopulatorType runningGenerator = null;
     public static long lastInventoryOpenPacketTimeStamp = 0;
     public static boolean ignoreCreativeInventoryPacket = false;
     public static boolean convertingMapFormat = false;
-    public static boolean destructItemDrop = false;
     public static UUID INVALID_WORLD_UUID = UUID.fromString("00000000-0000-0000-0000-000000000000");
     public static boolean setCustomNameTagSkip = false;
 

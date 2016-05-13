@@ -37,11 +37,13 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.entity.player.PlayerCapabilities;
+import net.minecraft.init.Items;
 import net.minecraft.inventory.Container;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.server.S12PacketEntityVelocity;
 import net.minecraft.potion.Potion;
 import net.minecraft.scoreboard.Scoreboard;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
@@ -80,9 +82,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.DamageEventHandler;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.ITargetedLocation;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.core.entity.MixinEntityLivingBase;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.text.serializer.LegacyTexts;
@@ -101,7 +106,6 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
     private static final String WORLD_PLAY_SOUND_AT =
             "Lnet/minecraft/world/World;playSoundToNearExcept(Lnet/minecraft/entity/player/EntityPlayer;Ljava/lang/String;FF)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     private static final String PLAYER_COLLIDE_ENTITY = "Lnet/minecraft/entity/Entity;onCollideWithPlayer(Lnet/minecraft/entity/player/EntityPlayer;)V";
 
     @Shadow public Container inventoryContainer;
@@ -128,6 +132,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
     @Shadow public abstract void addExhaustion(float p_71020_1_);
     @Shadow public abstract void addStat(StatBase stat, int amount);
     @Shadow public abstract void destroyCurrentEquippedItem();
+    @Shadow public abstract Team getTeam();
+    @Shadow public abstract String getName();
+    @Shadow public abstract EntityItem dropItem(ItemStack droppedItem, boolean dropAround, boolean traceItem);
+    @Shadow public abstract void func_175145_a(StatBase p_175145_1_);
 
     private boolean affectsSpawning = true;
     private UUID collidingEntityUuid = null;
@@ -191,6 +199,56 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         this.capabilities.isFlying = flying;
     }
 
+    /**
+     * @author blood - May 12th, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead. This handles player death events.
+     */
+    @Overwrite
+    public void onDeath(DamageSource cause) {
+        if (SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase)(Object) this, cause) == null) {
+            return;
+        }
+
+        super.onDeath(cause);
+        this.setSize(0.2F, 0.2F);
+        this.setPosition(this.posX, this.posY, this.posZ);
+        this.motionY = 0.10000000149011612D;
+
+        this.captureItemDrops = true;
+        this.capturedItemDrops.clear();
+
+        if (this.getName().equals("Notch")) {
+            this.dropItem(new ItemStack(Items.apple, 1), true, false);
+        }
+
+        if (!this.worldObj.getGameRules().getBoolean("keepInventory")) {
+            this.inventory.dropAllItems();
+        }
+
+        this.captureItemDrops = false;
+        if (!worldObj.isRemote && this.capturedItemDrops.size() > 0) {
+            IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
+            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.setIgnoreSpawnEvents(true);
+            if (!SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayer)(Object) this, cause, this.capturedItemDrops).isCancelled()) {
+                for (net.minecraft.entity.item.EntityItem item : this.capturedItemDrops) {
+                    joinEntityItemWithWorld(item);
+                }
+            }
+            causeTracker.setIgnoreSpawnEvents(false);
+        }
+
+        if (cause != null) {
+            this.motionX = (double)(-MathHelper.cos((this.attackedAtYaw + this.rotationYaw) * (float)Math.PI / 180.0F) * 0.1F);
+            this.motionZ = (double)(-MathHelper.sin((this.attackedAtYaw + this.rotationYaw) * (float)Math.PI / 180.0F) * 0.1F);
+        } else {
+            this.motionX = this.motionZ = 0.0D;
+        }
+
+        this.triggerAchievement(StatList.deathsStat);
+    }
+
     @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayer;isPlayerSleeping()Z"))
     public boolean onIsPlayerSleeping(EntityPlayer self) {
         if (self.isPlayerSleeping()) {
@@ -251,6 +309,36 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
     }
 
+    /**
+     * @author blood - May 13th, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead.
+     */
+    @Overwrite
+    public EntityItem dropOneItem(boolean dropAll) {
+        ItemStack stack = inventory.getCurrentItem();
+
+        if (stack == null) {
+            return null;
+        }
+
+        if (SpongeImplHooks.onDroppedByPlayer(stack.getItem(), stack, (EntityPlayer)(Object) this)) {
+            int count = dropAll && this.inventory.getCurrentItem() != null ? this.inventory.getCurrentItem().stackSize : 1;
+            return SpongeImplHooks.onPlayerToss((EntityPlayer)(Object) this, inventory.decrStackSize(inventory.currentItem, count), true);
+        }
+
+        return null;
+    }
+
+    /**
+     * @author blood - May 13th, 2016
+     *
+     * @reason SpongeForge requires an overwrite so we do it here instead.
+     */
+    @Overwrite
+    public EntityItem dropPlayerItemWithRandomChoice(ItemStack itemStackIn, boolean unused) {
+        return SpongeImplHooks.onPlayerToss((EntityPlayer)(Object) this, itemStackIn, unused);
+    }
 
     @Inject(method = "dropItem", at = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/entity/player/EntityPlayer;posY:D"), cancellable = true)
     private void onDropTop(ItemStack itemStack, boolean a, boolean b, CallbackInfoReturnable<EntityItem> callbackInfoReturnable) {
@@ -269,20 +357,28 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
 
     /**
      * @author gabizou - January 30th, 2016
+     * @author blood - May 12th, 2016
      *
-     * Redirects the dropped item spawning to use our world spawning since we know the cause.
+     * @reason If capturing is enabled, captures the item and avoids spawn.
+     *         If capturing is not enabled, redirects the dropped item spawning to use our world spawning since we know the cause.
      *
-     * @param world The world
-     * @param entity The entity item
-     * @return True if the events and such succeeded
      */
-    @Redirect(method = "joinEntityItemWithWorld", at = @At(value = "INVOKE", target = WORLD_SPAWN_ENTITY))
-    private boolean onDropItem(World world, net.minecraft.entity.Entity entity) {
-        SpawnCause spawnCause = EntitySpawnCause.builder()
-                .entity(this)
-                .type(SpawnTypes.DROPPED_ITEM)
-                .build();
-        return ((org.spongepowered.api.world.World) world).spawnEntity((Entity) entity, Cause.of(NamedCause.source(spawnCause)));
+    @Overwrite
+    public void joinEntityItemWithWorld(EntityItem itemIn) {
+        if (this.captureItemDrops) {
+            this.capturedItemDrops.add(itemIn);
+            return;
+        }
+
+        if (this.worldObj.isRemote) {
+            SpawnCause spawnCause = EntitySpawnCause.builder()
+                    .entity(this)
+                    .type(SpawnTypes.DROPPED_ITEM)
+                    .build();
+            ((org.spongepowered.api.world.World) this.worldObj).spawnEntity((Entity) itemIn, Cause.of(NamedCause.source(spawnCause)));
+        }
+
+        this.worldObj.spawnEntityInWorld(itemIn);
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))
