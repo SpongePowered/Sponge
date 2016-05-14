@@ -100,9 +100,9 @@ public final class WorldManager {
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
     private static final TIntObjectHashMap<DimensionType> dimensionTypeByTypeId = new TIntObjectHashMap<>(3);
-    private static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
+    public static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
     private static final TIntObjectHashMap<Path> dimensionPathByDimensionId = new TIntObjectHashMap<>(3);
-    private static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
+    public static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);

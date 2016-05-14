@@ -196,11 +196,22 @@ public abstract class TrackingPhase {
 
     }
 
-    public boolean associateNotifier(IPhaseState state, PhaseContext context, IMixinNextTickListEntry obj) {
-        return obj.hasSourceUser();
-    }
 
-
+    /**
+     * Associates any notifiers and owners for tracking as to what caused
+     * the next {@link WorldPhase.Tick} to enter for a block to be updated.
+     * The interesting thing is that since the current state and context
+     * are already known, we can associate the notifiers/owners appropriately.
+     * This may have the side effect of a long winded "bubble down" from
+     * a single lever pull to blocks getting updated hundreds of blocks
+     * away.
+     *
+     * @param causeTracker
+     * @param pos
+     * @param currentState
+     * @param context
+     * @param newContext
+     */
     public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context, PhaseContext newContext) {
         final Chunk chunk = causeTracker.getMinecraftWorld().getChunkFromBlockCoords(pos);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;

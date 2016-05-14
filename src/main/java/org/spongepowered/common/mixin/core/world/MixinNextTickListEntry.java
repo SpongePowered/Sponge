@@ -97,39 +97,4 @@ public class MixinNextTickListEntry implements ScheduledBlockUpdate, IMixinNextT
         this.priority = priority;
     }
 
-    public boolean hasTickingBlock() {
-        return this.tickBlock != null;
-    }
-
-    public Optional<BlockSnapshot> getCurrentTickBlock() {
-        return Optional.ofNullable(this.tickBlock);
-    }
-
-    public void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock) {
-        this.tickBlock = tickBlock;
-    }
-
-    public boolean hasTickingTileEntity() {
-        return this.tickTileEntity != null;
-    }
-
-    public Optional<TileEntity> getCurrentTickTileEntity() {
-        return Optional.ofNullable(this.tickTileEntity);
-    }
-
-    public void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity) {
-        this.tickTileEntity = tickTileEntity;
-    }
-
-    public boolean hasSourceUser() {
-        return this.sourceUser != null;
-    }
-
-    public Optional<User> getSourceUser() {
-        return Optional.ofNullable(this.sourceUser);
-    }
-
-    public void setSourceUser(User user) {
-        this.sourceUser = user;
-    }
 }

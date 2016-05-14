@@ -55,6 +55,7 @@ import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -137,7 +138,7 @@ public final class TrackingUtil {
         final PhaseContext phaseContext = PhaseContext.start()
                 .addCaptures();
 
-        Stream.<Supplier<Optional<?>>>of(blockEvent::getCurrentTickBlock, blockEvent::getCurrentTickTileEntity)
+        Stream.<Supplier<Optional<?>>>of(blockEvent::getCurrentTickBlock, blockEvent::getCurrentTickTileEntity, () -> Optional.of(blockEvent))
                 .map(Supplier::get)
                 .filter(Optional::isPresent)
                 .findFirst()
@@ -187,8 +188,8 @@ public final class TrackingUtil {
 
         associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, (SpongeBlockSnapshot) originalBlockSnapshot, capturedSnapshots);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
-        final IBlockState changedBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
-        if (changedBlockState == null) {
+        final IBlockState originalBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
+        if (originalBlockState == null) {
             capturedSnapshots.remove(originalBlockSnapshot);
             return false;
         }
@@ -197,18 +198,6 @@ public final class TrackingUtil {
             minecraftWorld.theProfiler.startSection("checkLight");
             minecraftWorld.checkLight(pos);
             minecraftWorld.theProfiler.endSection();
-        }
-
-        if ((flags & 2) != 0 && (!minecraftWorld.isRemote || (flags & 4) == 0) && chunk.isPopulated()) {
-            minecraftWorld.notifyBlockUpdate(pos, changedBlockState, newState, flags);
-        }
-
-        if (!minecraftWorld.isRemote && (flags & 1) != 0) {
-            minecraftWorld.notifyNeighborsRespectDebug(pos, changedBlockState.getBlock());
-
-            if (newBlock.hasComparatorInputOverride(newState)) {
-                minecraftWorld.updateComparatorOutputLevel(pos, newBlock);
-            }
         }
 
         return true;

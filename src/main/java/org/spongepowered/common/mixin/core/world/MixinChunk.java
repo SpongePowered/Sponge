@@ -465,9 +465,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         return setBlockState(pos, state, iblockstate1, null);
     }
 
-    private long lastWorldTime;
-
-
     /**
      * @author blood - November 2015
      * @author gabizou - updated April 10th, 2016 - Add cause tracking refactor changes
@@ -483,18 +480,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
-        if (this.worldObj.getTotalWorldTime() > this.lastWorldTime) {
-            this.lastWorldTime = this.worldObj.getTotalWorldTime();
-            final PrettyPrinter printer = new PrettyPrinter(30);
-            printer.add("Traversing a World Tick!").centre().hr();
-            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
-        }
-
-        final PrettyPrinter printer = new PrettyPrinter(60);
-        printer.add("Block being Set").centre().hr();
-        printer.add("BlockPos: %s", pos);
-        printer.add("BlockState: %s", newState);
-        printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         int xPos = pos.getX() & 15;
         int yPos = pos.getY();
         int zPos = pos.getZ() & 15;
@@ -566,8 +551,8 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         if (extendedblockstorage.get(xPos, yPos & 15, zPos).getBlock() != newBlock) {
             return null;
         }
-        // Sponge Start - Slight modifiactions
-        // } else { // Sponge - remove unecessary else
+        // Sponge Start - Slight modifications
+        // } else { // Sponge - remove unnecessary else
         if (requiresNewLightCalculations) {
             this.generateSkylightMap();
         } else {
@@ -597,7 +582,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             final CauseTracker causeTracker = ((IMixinWorldServer) this.worldObj).getCauseTracker();
             final PhaseData peek = causeTracker.getStack().peek();
             final boolean requiresCapturing = peek.getState().getPhase().requiresBlockCapturing(peek.getState());
-            if (!requiresCapturing) {
+            if (!requiresCapturing || SpongeImplHooks.blockHasTileEntity(newBlock, newState)) {
                 // The new block state is null if called directly from Chunk#setBlockState(BlockPos, IBlockState)
                 // If it is null, then directly call the onBlockAdded logic.
                 if (newBlockSnapshot == null) {

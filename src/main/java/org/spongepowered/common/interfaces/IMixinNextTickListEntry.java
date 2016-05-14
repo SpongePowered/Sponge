@@ -37,21 +37,4 @@ public interface IMixinNextTickListEntry {
 
     void setWorld(World world);
 
-    boolean hasSourceUser();
-
-    boolean hasTickingBlock();
-
-    boolean hasTickingTileEntity();
-
-    Optional<BlockSnapshot> getCurrentTickBlock();
-
-    Optional<TileEntity> getCurrentTickTileEntity();
-
-    Optional<User> getSourceUser();
-
-    void setCurrentTickBlock(@Nullable BlockSnapshot tickBlock);
-
-    void setCurrentTickTileEntity(@Nullable TileEntity tickTileEntity);
-
-    void setSourceUser(User user);
 }

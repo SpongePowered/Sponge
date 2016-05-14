@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommand;
@@ -175,7 +176,8 @@ public final class GeneralPhase extends TrackingPhase {
         if (!contextBlocks.isEmpty()) {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
             contextBlocks.clear();
-            processBlockTransactionListsPost(contextBlocks, blockSnapshots, causeTracker, unwindingState, unwindingContext);
+            invalidTransactions.clear();
+            processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingContext);
         }
         if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
@@ -192,16 +194,15 @@ public final class GeneralPhase extends TrackingPhase {
 
     /**
      *
-     * @param postContextList This list should be empty on initial unwinding since the blocks haven't been called
-     * {@link Block#onBlockAdded(net.minecraft.world.World, BlockPos, IBlockState)}. However, after each time the
-     * block is changed, and notifications are sent out, the list should be populated.
-     * @param snapshots
+     * @param snapshotsToProcess
      * @param causeTracker
      * @param unwindingState
      * @param unwinding
      */
     @SuppressWarnings("unchecked")
-    public static void processBlockTransactionListsPost(List<BlockSnapshot> postContextList, List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
+    public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
+        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
+        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -210,65 +211,61 @@ public final class GeneralPhase extends TrackingPhase {
         final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
 
-        for (BlockSnapshot snapshot : snapshots) {
+        for (BlockSnapshot snapshot : snapshotsToProcess) {
             GeneralFunctions.TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(GeneralFunctions.TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
         }
 
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
             transactionArrays[i] = transactionBuilders[i].build();
         }
-        final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[4];
+        final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
         final Cause.Builder builder = Cause.source(unwinding.firstNamed(NamedCause.SOURCE, Object.class).get());
         final World world = causeTracker.getWorld();
         GeneralFunctions.iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
-        if (GeneralFunctions.processMultiEvents(transactionArrays, blockEvents, mainEvents, builder, world)) {
+        final ChangeBlockEvent.Post postEvent = GeneralFunctions.throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
+
+        if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
         }
 
-        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) {
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(builder.build(), world, transactionArrays[BlockChange.DECAY.ordinal()]);
-            mainEvents[BlockChange.DECAY.ordinal()] = event;
-            blockEvents.add(event);
-        }
-
-        for (ChangeBlockEvent blockEvent : blockEvents) {
-            final BlockChange blockChange = BlockChange.forEvent(blockEvent);
-
+        for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
-                // Restore original blocks
+                // Restore original blocks and add to invalid transactions
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                    transaction.getOriginal().restore(true, false);
+                    transaction.setValid(false);
                 }
-                return;
-            } else {
-                // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = unwinding.getInvalidTransactions();
-                for (Transaction<BlockSnapshot> snapshotTransaction : blockEvent.getTransactions()) {
-                    if (!snapshotTransaction.isValid()) {
-                        invalid.add(snapshotTransaction);
-                    } else {
-                        unwindingState.markPostNotificationChange(blockChange, minecraftWorld, unwinding, snapshotTransaction);
-                    }
-                }
-
-                if (invalid.size() > 0) {
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                        transaction.getOriginal().restore(true, false);
-                    }
-                }
-
-                performBlockAdditions(causeTracker, postContextList, blockEvent.getTransactions(), blockChange, builder, unwindingState, unwinding);
             }
         }
 
+        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                invalidTransactions.add(transaction);
+            }
+        }
+
+
+        if (!invalidTransactions.isEmpty()) {
+            for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalidTransactions)) {
+                transaction.getOriginal().restore(true, false);
+                if (unwindingState.tracksBlockSpecificDrops()) {
+                    final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    final Multimap<BlockPos, ItemStack> multiMap = postContext.getBlockDropSupplier().get();
+                    multiMap.get(position).clear();
+                }
+            }
+            invalidTransactions.clear();
+        }
+        performPostBlockAdditions(causeTracker, postContext, postEvent.getTransactions(), builder, unwindingState, unwinding);
+
+
     }
 
-    private static void performBlockAdditions(CauseTracker causeTracker, List<BlockSnapshot> postContext, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
+    private static void performPostBlockAdditions(CauseTracker causeTracker, PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
-        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier();
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = postContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -286,10 +283,10 @@ public final class GeneralPhase extends TrackingPhase {
             if (capturedBlockDrops != null) {
                 // These are not to be re-captured since we know the changes that took place
                 GeneralFunctions.spawnItemStacksForBlockDrop(capturedBlockDrops.get().get(VecHelper.toBlockPos(oldBlockSnapshot.getPosition())), newBlockSnapshot,
-                        causeTracker, phaseContext, phaseState);
+                        causeTracker, unwindingPhaseContext, unwindingState);
             }
 
-            SpongeHooks.logBlockAction(currentCause, minecraftWorld, type, transaction);
+            SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
             BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -297,18 +294,28 @@ public final class GeneralPhase extends TrackingPhase {
             // Containers get placed automatically
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
+                if (!postContext.getCapturedBlocks().isEmpty()) {
+                    final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
+                    final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
+                    contextBlocks.clear();
+                    postContext.getInvalidTransactions().clear();
+                    processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
+                }
             }
 
             proxyBlockAccess.proceed();
+
+            unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
+
             causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
-            if (!postContext.isEmpty()) {
-                final ArrayList<BlockSnapshot> snapshots = new ArrayList<>(postContext);
-                postContext.clear();
-                processBlockTransactionListsPost(postContext, snapshots, causeTracker, phaseState, phaseContext);
+            if (!postContext.getCapturedBlocks().isEmpty()) {
+                final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
+                final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
+                contextBlocks.clear();
+                postContext.getInvalidTransactions().clear();
+                processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
             }
-
-            // Here is where we need to re-post process Depth First
 
         }
     }
@@ -326,11 +333,6 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean ignoresBlockEvent(IPhaseState phaseState) {
         return phaseState == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean alreadyCapturingBlockTicks(IPhaseState state, PhaseContext context) {
-        return state == Post.UNWINDING;
     }
 
     @Override

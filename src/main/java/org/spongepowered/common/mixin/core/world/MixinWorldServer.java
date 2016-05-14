@@ -331,28 +331,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return false;
     }
 
-    @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target = "Ljava/util/Set;add(Ljava/lang/Object;)Z"), remap = false)
-    public boolean onQueueScheduledBlockUpdate(Set<NextTickListEntry> pendingSet, Object obj) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData peek = causeTracker.getStack().peek();
-        peek.getState().getPhase().associateNotifier(peek.getState(), peek.getContext(), (IMixinNextTickListEntry) obj);
-        pendingSet.add((NextTickListEntry) obj);
-        return true;
-    }
-
-
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         this.onUpdateTick(block, worldIn, pos, state, rand);
-    }
-
-    // Before ticking pending updates, we need to check if we have any tracking info and set it accordingly
-    @Inject(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;"
-                                                                        + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onUpdateTick(boolean p_72955_1_, CallbackInfoReturnable<Boolean> cir, int i, Iterator<NextTickListEntry> iterator, NextTickListEntry nextticklistentry1, int k, IBlockState iblockstate) {
-        final CauseTracker causeTracker = this.getCauseTracker();
-        IMixinNextTickListEntry nextTickListEntry = (IMixinNextTickListEntry) nextticklistentry1;
-        causeTracker.currentPendingBlockUpdate = nextTickListEntry;
     }
 
     // This ticks pending updates to blocks, Requires mixin for NextTickListEntry so we use the correct tracking
@@ -435,7 +416,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         sbu.setPriority(priority);
         ((IMixinNextTickListEntry) sbu).setWorld((WorldServer) (Object) this);
-        if (!((net.minecraft.world.World)(Object) this).isBlockLoaded(sbu.position)) {
+        if (!((WorldServer) (Object) this).isBlockLoaded(sbu.position)) {
             this.tmpScheduledObj = sbu;
             return;
         }
@@ -578,7 +559,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     public boolean setBlockState(BlockPos pos, IBlockState newState, int flags) {
         if (!this.isValid(pos)) {
             return false;
-        } else if (!this.isRemote && this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) {
+        } else if (this.worldInfo.getTerrainType() == WorldType.DEBUG_WORLD) { // isRemote is always false since this is WorldServer
             return false;
         } else {
             // Sponge - reroute to the CauseTracker

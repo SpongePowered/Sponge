@@ -65,6 +65,7 @@ import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
@@ -466,7 +467,79 @@ public final class WorldPhase extends TrackingPhase {
         },
         BLOCK_EVENT() {
             @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
+                final World world = causeTracker.getWorld();
+                phaseContext.getCapturedBlockSupplier()
+                        .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                phaseContext.getCapturedEntitySupplier()
+                        .ifPresentAndNotEmpty(entities -> {
+                            final Cause cause = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN)
+                                    .build();
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, world))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
+                                    .process();
+                        });
+                phaseContext.getCapturedItemsSupplier()
+                        .ifPresentAndNotEmpty(items -> {
+                            final Cause cause = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN)
+                                    .build();
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, items, world))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), minecraftWorld);
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
+                                    .process();
+                        });
+            }
+            @Override
+            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
+
+                Stream.<Supplier<Optional<Vector3d>>>of(
+                        () -> context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                                .map(blockSnapshot -> blockSnapshot.getLocation().get().getPosition()),
+                        () -> context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+                                .map(tileEntity -> tileEntity.getLocation().getPosition())
+                )
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .map(vector3d -> VecHelper.toBlockPos(vector3d))
+                        .ifPresent(blockPos -> {
+                            final IMixinChunk mixinChunk = (IMixinChunk) minecraftWorld.getChunkFromBlockCoords(blockPos);
+                            Stream.<Supplier<Optional<User>>>of(
+                                    () -> mixinChunk.getBlockNotifier(blockPos),
+                                    () -> mixinChunk.getBlockOwner(blockPos)
+                            )
+                                    .map(Supplier::get)
+                                    .filter(Optional::isPresent)
+                                    .map(Optional::get)
+                                    .findFirst()
+                                    .ifPresent(user -> {
+                                        final BlockPos notification = VecHelper.toBlockPos(transaction.getFinal().getPosition());
+                                        final Block notificationBlock = (Block) transaction.getFinal().getState().getType();
+                                        mixinChunk.addTrackedBlockPosition(notificationBlock, notification, user, PlayerTracker.Type.NOTIFIER);
+                                    });
+                        });
+            }
+
+            @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+                final Optional<BlockSnapshot> blockSnapshot = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class);
+                final Optional<TileEntity> tileEntity = context.firstNamed(NamedCause.SOURCE, TileEntity.class);
+                if (blockSnapshot.isPresent()) {
+                    builder.named(NamedCause.notifier(blockSnapshot.get()));
+                } else if (tileEntity.isPresent()) {
+                    builder.named(NamedCause.notifier(tileEntity.get()));
+                }
 
             }
         },
@@ -532,6 +605,11 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         PLAYER() {
+            @Override
+            public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+                blockEvent.setSourceUser(context.firstNamed(NamedCause.SOURCE, Player.class).get());
+            }
+
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
@@ -599,6 +677,10 @@ public final class WorldPhase extends TrackingPhase {
         }
 
         public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
+
+        }
+
+        public void associateTickNotifier(PhaseContext context, IMixinNextTickListEntry obj) {
 
         }
     }
@@ -676,7 +758,7 @@ public final class WorldPhase extends TrackingPhase {
 
     @Override
     public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState instanceof Tick;
+        return currentState instanceof Tick && currentState != Tick.BLOCK_EVENT;
     }
 
     @Override
@@ -695,6 +777,14 @@ public final class WorldPhase extends TrackingPhase {
     public void associateNotifier(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
         if (phaseState instanceof Tick) {
             ((Tick) phaseState).associateBlockEventNotifier(context, causeTracker, pos, blockEvent);
+        }
+    }
+
+    @Override
+    public void appendNotifierPreBlockTick(CauseTracker causeTracker, BlockPos pos, IPhaseState currentState, PhaseContext context,
+            PhaseContext newContext) {
+        if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
+
         }
     }
 

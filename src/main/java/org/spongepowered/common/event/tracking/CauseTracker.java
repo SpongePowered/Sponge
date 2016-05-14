@@ -90,9 +90,7 @@ public final class CauseTracker {
 
     public static final int DEFAULT_QUEUE_SIZE = 16;
 
-    public IMixinNextTickListEntry currentPendingBlockUpdate;
-
-    private static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> {
+    public static final BiConsumer<PrettyPrinter, PhaseContext> CONTEXT_PRINTER = (printer, context) -> {
         context.forEach(namedCause -> {
             printer.add("        - Name: %s", namedCause.getName());
             printer.addWrapped(100, "          Object: %s", namedCause.getCauseObject());

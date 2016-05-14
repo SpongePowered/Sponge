@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.util;
 
+import org.apache.logging.log4j.Level;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.function.Supplier;
@@ -31,7 +35,15 @@ import java.util.function.Supplier;
 public final class PhaseUtil {
 
     public static Supplier<IllegalStateException> throwWithContext(String s, PhaseContext phaseContext) {
-        return () -> new IllegalStateException(s + " Please analyze the current phase context. ");
+        return () -> {
+            final PrettyPrinter printer = new PrettyPrinter(60);
+            printer.add("Exception trying to process over a phase!").centre().hr();
+            printer.addWrapped(40, "%s :", "PhaseContext");
+            CauseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
+            printer.add("Stacktrace:");
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+            return new IllegalStateException(s + " Please analyze the current phase context. ");
+        };
     }
 
     private PhaseUtil() {

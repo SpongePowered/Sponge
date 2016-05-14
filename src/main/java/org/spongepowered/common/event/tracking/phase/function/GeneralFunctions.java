@@ -46,6 +46,7 @@ import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.entity.EntityUtil;
@@ -142,51 +143,42 @@ public class GeneralFunctions {
         final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).orElseThrow(PhaseUtil.throwWithContext("There was no root sEmerource object for this phase!", context)));
         state.getPhase().associateAdditionalCauses(state, context, builder, causeTracker);
         final World world = causeTracker.getWorld();
-        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
-        if (processMultiEvents(transactionArrays, blockEvents, mainEvents, builder, world)) {
+        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world); // Needs to throw events
+        final ChangeBlockEvent.Post postEvent = throwMultiEventsAndCreatePost(transactionArrays, blockEvents, mainEvents, builder, world);
+
+        if (postEvent == null) { // Means that we have had no actual block changes apparently?
             return;
         }
 
-        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) {
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(builder.build(), world, transactionArrays[BlockChange.DECAY.ordinal()]);
-            mainEvents[BlockChange.DECAY.ordinal()] = event;
-            blockEvents.add(event);
-        }
+        final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions();
 
-        for (ChangeBlockEvent blockEvent : blockEvents) {
-            final BlockChange blockChange = BlockChange.forEvent(blockEvent);
-
+        for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {
-                // Restore original blocks
+                // Restore original blocks and add to invalid transactions
                 for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                    transaction.getOriginal().restore(true, false);
+                    transaction.setValid(false);
                 }
-                return;
-            } else {
-                // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions();
-                for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
-                    if (!transaction.isValid()) {
-                        invalid.add(transaction);
-                    } else {
-                        state.handleBlockChangeWithUser(blockChange, minecraftWorld, transaction, context);
-                    }
-                }
-
-                if (!invalid.isEmpty()) {
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                        transaction.getOriginal().restore(true, false);
-                        if (state.tracksBlockSpecificDrops()) {
-                            final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                            final Multimap<BlockPos, ItemStack> multiMap = context.getBlockDropSupplier().get();
-                            multiMap.get(position).clear();
-                        }
-                    }
-                }
-
-                performBlockAdditions(causeTracker, blockEvent.getTransactions(), blockChange, builder, state, context);
             }
         }
+
+        for (Transaction<BlockSnapshot> transaction : postEvent.getTransactions()) {
+            if (!transaction.isValid()) {
+                invalid.add(transaction);
+            }
+        }
+
+        if (!invalid.isEmpty()) {
+            for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
+                transaction.getOriginal().restore(true, false);
+                if (state.tracksBlockSpecificDrops()) {
+                    final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
+                    final Multimap<BlockPos, ItemStack> multiMap = context.getBlockDropSupplier().get();
+                    multiMap.get(position).clear();
+                }
+            }
+        }
+        performBlockAdditions(causeTracker, postEvent.getTransactions(), builder, state, context);
+
     }
 
     public static void iterateChangeBlockEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
@@ -199,13 +191,22 @@ public class GeneralFunctions {
                 final ChangeBlockEvent event = blockChange.createEvent(builder.build(), world, transactionArrays[blockChange.ordinal()]);
                 mainEvents[blockChange.ordinal()] = event;
                 if (event != null) {
+                    SpongeImpl.postEvent(event);
                     blockEvents.add(event);
                 }
             }
         }
+        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
+            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(builder.build(), world, transactionArrays[BlockChange.DECAY.ordinal()]);
+            mainEvents[BlockChange.DECAY.ordinal()] = event;
+            if (event != null) {
+                SpongeImpl.postEvent(event);
+                blockEvents.add(event);
+            }
+        }
     }
 
-    private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, @Nullable BlockChange type, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
+    private static void performBlockAdditions(CauseTracker causeTracker, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState phaseState, PhaseContext phaseContext) {
         // We have to use a proxy so that our pending changes are notified such that any accessors from block
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
@@ -231,7 +232,7 @@ public class GeneralFunctions {
                         causeTracker, phaseContext, phaseState);
             }
 
-            SpongeHooks.logBlockAction(currentCause, minecraftWorld, type, transaction);
+            SpongeHooks.logBlockAction(currentCause, minecraftWorld, oldBlockSnapshot.blockChange, transaction);
             int updateFlag = oldBlockSnapshot.getUpdateFlag();
             BlockPos pos = VecHelper.toBlockPos(oldBlockSnapshot.getPosition());
             IBlockState originalState = (IBlockState) oldBlockSnapshot.getState();
@@ -239,18 +240,21 @@ public class GeneralFunctions {
             // Containers get placed automatically
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
+                final PhaseData peek = causeTracker.getStack().peek();
+                if (peek.getState() == GeneralPhase.Post.UNWINDING) {
+                    peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
+                }
             }
 
             proxyBlockAccess.proceed();
-            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
+            phaseState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, phaseContext);
 
+            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
             final PhaseData peek = causeTracker.getStack().peek();
             if (peek.getState() == GeneralPhase.Post.UNWINDING) {
                 peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
             }
-            // Here is where we need to re-post process Depth First
-
         }
     }
 
@@ -302,9 +306,9 @@ public class GeneralFunctions {
 
     }
 
-    public static boolean processMultiEvents(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
+    public static ChangeBlockEvent.Post throwMultiEventsAndCreatePost(ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays, List<ChangeBlockEvent> blockEvents,
             ChangeBlockEvent[] mainEvents, Cause.Builder builder, World world) {
-        if (blockEvents.size() > 1) {
+        if (!blockEvents.isEmpty()) {
             for (BlockChange blockChange : BlockChange.values()) {
                 final ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
                 if (mainEvent != null) {
@@ -312,21 +316,11 @@ public class GeneralFunctions {
                 }
             }
             final ImmutableList<Transaction<BlockSnapshot>> transactions = transactionArrays[GeneralFunctions.MULTI_CHANGE_INDEX];
-            final boolean cancelled = EventConsumer
-                    .event(SpongeEventFactory.createChangeBlockEventPost(builder.build(), world, transactions))
-                    .cancelled(event -> {
-                        // Transactions must be restored in reverse order.
-                        for (Transaction<BlockSnapshot> transaction : event.getTransactions()) {
-                            transaction.getOriginal().restore(true, false);
-                        }
-                    })
-                    .process()
-                    .isCancelled();
-            if (cancelled) {
-                return true;
-            }
+            final ChangeBlockEvent.Post post = SpongeEventFactory.createChangeBlockEventPost(builder.build(), world, transactions);
+            SpongeImpl.postEvent(post);
+            return post;
         }
-        return false;
+        return null;
     }
 
 }

@@ -160,10 +160,4 @@ public final class EntityPhase extends TrackingPhase {
         super(parent);
     }
 
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
-        // For now, short circuit and ignore block changes (they're passing right through currently)
-        return false;
-    }
-
 }
