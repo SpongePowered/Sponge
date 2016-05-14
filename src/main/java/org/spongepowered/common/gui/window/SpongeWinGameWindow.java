@@ -24,19 +24,25 @@
  */
 package org.spongepowered.common.gui.window;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import org.spongepowered.api.gui.window.WinGameWindow;
 
 public class SpongeWinGameWindow extends AbstractSpongeWindow implements WinGameWindow {
 
     @Override
-    protected boolean show() {
-        this.player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(4, 1));
+    protected boolean show(EntityPlayerMP player) {
+        player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(4, 1));
         return true;
     }
 
     @Override
     public boolean canDetectClientClose() {
+        return true;
+    }
+
+    public boolean onClientClose(EntityPlayerMP player) {
+        onClosed(player);
         return true;
     }
 

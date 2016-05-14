@@ -32,12 +32,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerRepair;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.World;
 import org.spongepowered.api.gui.window.AnvilWindow;
 
 public class SpongeAnvilWindow extends AbstractSpongeBlockContainerWindow implements AnvilWindow {
 
     @Override
-    protected IInteractionObject provideInteractionObject(net.minecraft.world.World world, BlockPos pos) {
+    protected IInteractionObject provideInteractionObject(World world, BlockPos pos) {
         return new BlockAnvil.Anvil(world, pos);
     }
 
@@ -47,7 +48,7 @@ public class SpongeAnvilWindow extends AbstractSpongeBlockContainerWindow implem
 
             @Override
             public boolean canInteractWith(EntityPlayer playerIn) {
-                return playerIn == SpongeAnvilWindow.this.player;
+                return SpongeAnvilWindow.this.players.contains(playerIn);
             }
         };
     }

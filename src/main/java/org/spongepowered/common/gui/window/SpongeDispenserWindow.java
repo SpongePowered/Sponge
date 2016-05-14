@@ -41,7 +41,7 @@ public class SpongeDispenserWindow extends AbstractSpongeTileContainerWindow<Til
 
             @Override
             public boolean isUseableByPlayer(EntityPlayer player) {
-                return player == SpongeDispenserWindow.this.player;
+                return SpongeDispenserWindow.this.players.contains(player);
             }
         };
     }

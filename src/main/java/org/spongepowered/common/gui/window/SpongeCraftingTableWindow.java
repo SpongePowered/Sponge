@@ -32,12 +32,13 @@ import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerWorkbench;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.World;
 import org.spongepowered.api.gui.window.CraftingTableWindow;
 
 public class SpongeCraftingTableWindow extends AbstractSpongeBlockContainerWindow implements CraftingTableWindow {
 
     @Override
-    protected IInteractionObject provideInteractionObject(net.minecraft.world.World world, BlockPos pos) {
+    protected IInteractionObject provideInteractionObject(World world, BlockPos pos) {
         return new BlockWorkbench.InterfaceCraftingTable(world, pos);
     }
 
@@ -47,7 +48,7 @@ public class SpongeCraftingTableWindow extends AbstractSpongeBlockContainerWindo
 
             @Override
             public boolean canInteractWith(EntityPlayer playerIn) {
-                return playerIn == SpongeCraftingTableWindow.this.player;
+                return SpongeCraftingTableWindow.this.players.contains(playerIn);
             }
         };
     }

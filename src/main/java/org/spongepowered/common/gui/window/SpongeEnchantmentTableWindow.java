@@ -57,7 +57,7 @@ public class SpongeEnchantmentTableWindow extends AbstractSpongeTileContainerWin
 
             @Override
             public boolean canInteractWith(EntityPlayer playerIn) {
-                return playerIn == SpongeEnchantmentTableWindow.this.player;
+                return SpongeEnchantmentTableWindow.this.players.contains(playerIn);
             }
         };
     }

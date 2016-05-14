@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.gui.window;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.gui.window.TileBackedWindow;
@@ -67,11 +66,12 @@ public abstract class AbstractSpongeTileContainerWindow<McTile extends TileEntit
     protected abstract McTile createVirtualTile();
 
     @Override
-    public void onClientClose(Packet<INetHandlerPlayServer> packet) {
+    protected void onClosed(EntityPlayerMP player) {
         this.virtualTile = null;
-        super.onClientClose(packet);
+        super.onClosed(player);
     }
 
+    @Override
     protected boolean isVirtual() {
         return this.tileEntity == null && this.loc == null;
     }
@@ -80,10 +80,12 @@ public abstract class AbstractSpongeTileContainerWindow<McTile extends TileEntit
         if (!isVirtual()) {
             return;
         }
-        if (this.player != null && this.virtualTile != null) {
+        if (!this.players.isEmpty() && this.virtualTile != null) {
             updateVirtual();
             if (this.virtualTile instanceof IInventory) {
-                this.player.sendAllWindowProperties(this.player.openContainer, (IInventory) this.virtualTile);
+                for (EntityPlayerMP player : this.players) {
+                    player.sendAllWindowProperties(player.openContainer, (IInventory) this.virtualTile);
+                }
             }
         }
     }

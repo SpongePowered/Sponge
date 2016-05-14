@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.gui.window;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.gui.window.CommandBlockWindow;
 
 public class SpongeCommandBlockWindow extends AbstractSpongeWindow implements CommandBlockWindow {
 
     @Override
-    protected boolean show() {
+    protected boolean show(EntityPlayerMP player) {
         // TODO Auto-generated method stub
         return false;
     }

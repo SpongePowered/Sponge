@@ -47,7 +47,7 @@ public class SpongeFurnaceWindow extends AbstractSpongeTileContainerWindow<TileE
 
             @Override
             public boolean isUseableByPlayer(EntityPlayer player) {
-                return player == SpongeFurnaceWindow.this.player;
+                return SpongeFurnaceWindow.this.players.contains(player);
             }
         };
     }

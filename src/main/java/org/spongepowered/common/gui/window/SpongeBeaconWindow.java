@@ -45,7 +45,7 @@ public class SpongeBeaconWindow extends AbstractSpongeTileContainerWindow<TileEn
 
             @Override
             public boolean isUseableByPlayer(EntityPlayer player) {
-                return player == SpongeBeaconWindow.this.player;
+                return SpongeBeaconWindow.this.players.contains(player);
             }
         };
     }

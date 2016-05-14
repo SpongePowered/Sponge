@@ -42,7 +42,7 @@ public class SpongeChestWindow extends AbstractSpongeTileContainerWindow<TileEnt
 
             @Override
             public boolean isUseableByPlayer(EntityPlayer player) {
-                return player == SpongeChestWindow.this.player;
+                return SpongeChestWindow.this.players.contains(player);
             }
 
             @Override
