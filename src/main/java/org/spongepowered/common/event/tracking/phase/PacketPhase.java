@@ -64,7 +64,6 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
@@ -583,17 +582,6 @@ public final class PacketPhase extends TrackingPhase {
         checkArgument(!context.isComplete(), "PhaseContext cannot be marked as completed!");
         ((IPacketState) state).populateContext(entityPlayerMP, packet, context);
         return context;
-    }
-
-    @Nullable
-    @Override
-    public User attemptTrackingAndRetrieveTrackedUser(IPhaseState state, PhaseContext context, CauseTracker causeTracker, IMixinChunk spongeChunk,
-            BlockPos targetPos,
-            PlayerTracker.Type type) {
-        final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Tracking packets, but no player found!", context));
-        spongeChunk.addTrackedBlockPosition(causeTracker.getMinecraftWorld().getBlockState(targetPos).getBlock(), targetPos, player, type);
-        return player;
     }
 
     @Override

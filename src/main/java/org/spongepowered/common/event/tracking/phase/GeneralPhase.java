@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -36,15 +37,12 @@ import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.api.util.GuavaCollectors;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -56,10 +54,8 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -68,8 +64,6 @@ import org.spongepowered.common.world.SpongeProxyBlockAccess;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
@@ -140,10 +134,8 @@ public final class GeneralPhase extends TrackingPhase {
             final ICommandSender sender = phaseContext.firstNamed(NamedCause.SOURCE, ICommandSender.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a Command Sender, but none found!", phaseContext));
             phaseContext.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not!", phaseContext))
                     .ifPresentAndNotEmpty(list -> GeneralFunctions.processBlockCaptures(list, causeTracker, state, phaseContext));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns, but we're not!", phaseContext))
                     .ifPresentAndNotEmpty(entities -> {
                         // TODO the entity spawn causes are not likely valid, need to investigate further.
                         final Cause cause = Cause.source(SpawnCause.builder()
@@ -173,36 +165,43 @@ public final class GeneralPhase extends TrackingPhase {
 
     @Override
     public void postDispatch(CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwindingContext, PhaseContext postContext) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks().get();
-        final List<Entity> contextEntities = postContext.getCapturedEntities().get();
-        final List<Entity> contextItems = postContext.getCapturedItems().get();
-        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions().get();
+        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
+        final List<Entity> contextEntities = postContext.getCapturedEntities();
+        final List<Entity> contextItems = postContext.getCapturedItems();
+        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions();
         if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty() && invalidTransactions.isEmpty()) {
             return;
         }
-        while (!contextBlocks.isEmpty() && !contextEntities.isEmpty() && !contextItems.isEmpty()) {
+        if (!contextBlocks.isEmpty()) {
             final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
             contextBlocks.clear();
+            processBlockTransactionListsPost(contextBlocks, blockSnapshots, causeTracker, unwindingState, unwindingContext);
+        }
+        if (!contextEntities.isEmpty()) {
             final ArrayList<Entity> entities = new ArrayList<>(contextEntities);
             contextEntities.clear();
+            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
+        }
+        if (!contextItems.isEmpty()) {
             final ArrayList<Entity> items = new ArrayList<>(contextItems);
             contextItems.clear();
-            invalidTransactions.clear(); // We don't care about invalid transactions from the previous context.
-
-            // Now process the currently captured things.
-            // This is different from GeneralFunctions because this NEEDS to process each block addition in DFS versus BFS
-            // Though the event creation is EXACTLY the same.
-            processBlockTransactionListsPost(contextBlocks, blockSnapshots, causeTracker, unwindingState, unwindingContext);
-
-            unwindingState.getPhase().processPostEntitySpawns(causeTracker, unwindingState, entities);
-
             unwindingState.getPhase().processPostItemSpawns(causeTracker, unwindingState, items);
         }
 
     }
 
+    /**
+     *
+     * @param postContextList This list should be empty on initial unwinding since the blocks haven't been called
+     * {@link Block#onBlockAdded(net.minecraft.world.World, BlockPos, IBlockState)}. However, after each time the
+     * block is changed, and notifications are sent out, the list should be populated.
+     * @param snapshots
+     * @param causeTracker
+     * @param unwindingState
+     * @param unwinding
+     */
     @SuppressWarnings("unchecked")
-    private static void processBlockTransactionListsPost(List<BlockSnapshot> postContextList, List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
+    public static void processBlockTransactionListsPost(List<BlockSnapshot> postContextList, List<BlockSnapshot> snapshots, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -243,8 +242,7 @@ public final class GeneralPhase extends TrackingPhase {
                 return;
             } else {
                 // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = unwinding.getInvalidTransactions()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to have invalid transactions on an event, but had none!", unwinding));
+                final List<Transaction<BlockSnapshot>> invalid = unwinding.getInvalidTransactions();
                 for (Transaction<BlockSnapshot> snapshotTransaction : blockEvent.getTransactions()) {
                     if (!snapshotTransaction.isValid()) {
                         invalid.add(snapshotTransaction);
@@ -270,7 +268,7 @@ public final class GeneralPhase extends TrackingPhase {
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
-        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier().orElse(null);
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -305,17 +303,14 @@ public final class GeneralPhase extends TrackingPhase {
             causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
             if (!postContext.isEmpty()) {
-                processBlockTransactionListsPost(postContext, new ArrayList<>(postContext), causeTracker, phaseState, phaseContext);
+                final ArrayList<BlockSnapshot> snapshots = new ArrayList<>(postContext);
+                postContext.clear();
+                processBlockTransactionListsPost(postContext, snapshots, causeTracker, phaseState, phaseContext);
             }
 
             // Here is where we need to re-post process Depth First
 
         }
-    }
-
-    @Override
-    public boolean requiresBlockCapturing(IPhaseState currentState) {
-        return currentState == Post.UNWINDING;
     }
 
     @Override

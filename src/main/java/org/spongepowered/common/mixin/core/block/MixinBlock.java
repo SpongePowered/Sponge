@@ -35,7 +35,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.GameRules;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -63,7 +62,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.event.EventConsumer;
@@ -247,7 +245,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 final IBlockState currentActualBlockState = currentBlockState.getBlock().getActualState(currentBlockState, worldIn, pos);
                 final BlockSnapshot blockSnapshot = mixin.createSpongeBlockSnapshot(currentBlockState, currentActualBlockState, pos, 3);
                 final Multimap<BlockPos, org.spongepowered.api.item.inventory.ItemStack> multimap =
-                        context.getBlockDropSupplier().get().get();
+                        context.getCapturedBlockDrops();
                 final Collection<org.spongepowered.api.item.inventory.ItemStack> itemStacks = multimap.get(pos);
                 SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(stack));
                 return false;

@@ -61,7 +61,7 @@ public class MixinInventoryHelper {
             final IPhaseState currentState = currentPhase.getState();
             if (currentState.tracksBlockSpecificDrops()) {
                 final PhaseContext context = currentPhase.getContext();
-                final Multimap<BlockPos, ItemStack> multimap = context.getBlockDropSupplier().get().get();
+                final Multimap<BlockPos, ItemStack> multimap = context.getBlockDropSupplier().get();
                 final Collection<ItemStack> itemStacks = multimap.get(new BlockPos(x, y, z));
                 for (int i = 0; i < inventory.getSizeInventory(); i++) {
                     final net.minecraft.item.ItemStack itemStack = inventory.getStackInSlot(i);

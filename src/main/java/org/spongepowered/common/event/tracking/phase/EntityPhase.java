@@ -80,12 +80,10 @@ public final class EntityPhase extends TrackingPhase {
                     phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                             .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities but we're not capturing!", phaseContext))
                     .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_DROPS.process(dyingEntity, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities but we're not capturing!", phaseContext))
                     .ifPresentAndNotEmpty(entities -> EntityFunction.Entities.DEATH_DROPS.process(dyingEntity, causeTracker, phaseContext, entities));
-            phaseContext.getCapturedEntityDrops().ifPresent(map -> {
+            phaseContext.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                 final Collection<ItemStack> itemStacks = map.get(dyingEntity.getUniqueId());
                 if (itemStacks.isEmpty()) {
                     return;
@@ -134,13 +132,11 @@ public final class EntityPhase extends TrackingPhase {
             final Entity dyingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Dying entity not found!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities from a dying entity!", phaseContext))
                     .ifPresentAndNotEmpty(items -> EntityFunction.Drops.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entities from a dying entity!", phaseContext))
                     .ifPresentAndNotEmpty(entities ->
                             EntityFunction.Entities.DEATH_UPDATES.process(dyingEntity, causeTracker, phaseContext, entities));
-            phaseContext.getCapturedEntityDrops().ifPresent(map -> {
+            phaseContext.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                 if (map.isEmpty()) {
                     return;
                 }

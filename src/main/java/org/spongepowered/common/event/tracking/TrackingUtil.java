@@ -182,29 +182,14 @@ public final class TrackingUtil {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final IBlockState actualState = currentState.getBlock().getActualState(currentState, minecraftWorld, pos);
         final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
-        final List<BlockSnapshot> capturedSpongeBlockSnapshots = phaseContext.getCapturedBlocks()
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block changes, but there is no list available!", phaseContext));
+        final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
         final Block newBlock = newState.getBlock();
 
-        if (phaseState == BlockPhase.State.BLOCK_DECAY) {
-            if (newBlock == Blocks.AIR) {
-                ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.DECAY;
-                capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-            }
-        } else if (newBlock == Blocks.AIR) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.BREAK;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        } else if (newBlock != currentState.getBlock()) {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.PLACE;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        } else {
-            ((SpongeBlockSnapshot) originalBlockSnapshot).blockChange = BlockChange.MODIFY;
-            capturedSpongeBlockSnapshots.add(originalBlockSnapshot);
-        }
+        associateBlockChangeWithSnapshot(phaseState, newBlock, currentState, (SpongeBlockSnapshot) originalBlockSnapshot, capturedSnapshots);
         final IMixinChunk mixinChunk = (IMixinChunk) chunk;
         final IBlockState changedBlockState = mixinChunk.setBlockState(pos, newState, currentState, originalBlockSnapshot);
         if (changedBlockState == null) {
-            capturedSpongeBlockSnapshots.remove(originalBlockSnapshot);
+            capturedSnapshots.remove(originalBlockSnapshot);
             return false;
         }
 
@@ -229,11 +214,25 @@ public final class TrackingUtil {
         return true;
     }
 
-    private TrackingUtil() {
+    private static void associateBlockChangeWithSnapshot(IPhaseState phaseState, Block newBlock, IBlockState currentState, SpongeBlockSnapshot snapshot, List<BlockSnapshot> capturedSnapshots) {
+        if (phaseState == BlockPhase.State.BLOCK_DECAY) {
+            if (newBlock == Blocks.AIR) {
+                snapshot.blockChange = BlockChange.DECAY;
+                capturedSnapshots.add(snapshot);
+            }
+        } else if (newBlock == Blocks.AIR) {
+            snapshot.blockChange = BlockChange.BREAK;
+            capturedSnapshots.add(snapshot);
+        } else if (newBlock != currentState.getBlock()) {
+            snapshot.blockChange = BlockChange.PLACE;
+            capturedSnapshots.add(snapshot);
+        } else {
+            snapshot.blockChange = BlockChange.MODIFY;
+            capturedSnapshots.add(snapshot);
+        }
     }
 
-    public static void handleEntityMovement(net.minecraft.entity.Entity entity) {
-
+    private TrackingUtil() {
     }
 
     public static Optional<User> tryAndTrackActiveUser(IMixinWorldServer mixinWorldServer, BlockPos pos, PlayerTracker.Type type) {

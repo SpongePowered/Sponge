@@ -73,10 +73,7 @@ public abstract class MixinEntity_Item_Pre_Merge {
                 final IPhaseState currentState = currentPhase.getState();
                 if (currentState.tracksEntitySpecificDrops()) {
                     final PhaseContext context = currentPhase.getContext();
-                    final Multimap<UUID, ItemStack> multimap = context.getCapturedEntityDropSupplier()
-                            .orElseThrow(PhaseUtil.throwWithContext("Was intending to capture entity item drops, but couldn't find multimap!",
-                                    currentPhase.getContext()))
-                            .get();
+                    final Multimap<UUID, ItemStack> multimap = context.getCapturedEntityDropSupplier().get();
                     final Collection<ItemStack> itemStacks = multimap.get(this.getUniqueID());
                     SpongeImplHooks.addItemStackToListForSpawning(itemStacks, ItemStackUtil.fromNative(itemStackIn));
                     return null;

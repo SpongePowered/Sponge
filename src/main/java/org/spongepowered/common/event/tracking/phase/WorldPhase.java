@@ -129,7 +129,6 @@ public final class WorldPhase extends TrackingPhase {
                 final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
                 phaseContext.getCapturedEntitySupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Not capturing entity spawns!", phaseContext))
                         .ifPresentAndNotEmpty(entities -> {
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                     .entity(tickingEntity)
@@ -165,7 +164,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
                 phaseContext.getCapturedItemsSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Not capturing item stack spawns!", phaseContext))
                         .ifPresentAndNotEmpty(entities -> {
                             final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                                     .entity(tickingEntity)
@@ -187,7 +185,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
                 phaseContext.getCapturedBlockSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Not capturing block changes!", phaseContext))
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
                 if (tickingEntity instanceof Player) {
                     return; // this is handled elsewhere
@@ -313,13 +310,11 @@ public final class WorldPhase extends TrackingPhase {
                 final TileEntity tickingTile = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
                 phaseContext.getCapturedBlockSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes for tile entity, but wasn't!", phaseContext))
                         .ifPresentAndNotEmpty(blockSnapshots -> {
                             GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                         });
 
                 phaseContext.getCapturedEntitySupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns for a tile entity, but wasn't!", phaseContext))
                         .ifPresentAndNotEmpty(entities -> {
                             // TODO the entity spawn causes are not likely valid, need to investigate further.
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
@@ -337,7 +332,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
                 phaseContext.getCapturedItemsSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops for a tile entity, but wasn't!", phaseContext))
                         .ifPresentAndNotEmpty(entities -> {
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
                                     .block(tickingTile.getLocation().createSnapshot())
@@ -400,10 +394,8 @@ public final class WorldPhase extends TrackingPhase {
                 final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
                 final World world = causeTracker.getWorld();
                 phaseContext.getCapturedBlockSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block changes but couldn't!", phaseContext))
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
                 phaseContext.getCapturedEntitySupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity spawns couldn't!", phaseContext))
                         .ifPresentAndNotEmpty(entities -> {
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
                                     .block(tickingBlock)
@@ -420,7 +412,6 @@ public final class WorldPhase extends TrackingPhase {
                                     .process();
                         });
                 phaseContext.getCapturedItemsSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Intended to capture items but couldn't!", phaseContext))
                         .ifPresentAndNotEmpty(items -> {
                             final Cause cause = Cause.source(BlockSpawnCause.builder()
                                     .block(tickingBlock)
@@ -484,20 +475,25 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final BlockSnapshot tickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
-                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
-                    GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
-                });
-                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
-                    final Cause cause = Cause.source(BlockSpawnCause.builder().block(tickingBlock).type(InternalSpawnTypes.PLACEMENT).build()).build();
-                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
-                            .nonCancelled(event -> {
-                                for (Entity entity : event.getEntities()) {
-                                    TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity), causeTracker.getMinecraftWorld());
-                                    causeTracker.getMixinWorld().forceSpawnEntity(entity);
-                                }
-                            })
-                            .process();
-                });
+                phaseContext.getCapturedBlockSupplier()
+                        .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
+                phaseContext.getCapturedEntitySupplier()
+                        .ifPresentAndNotEmpty(entities -> {
+                            final Cause cause = Cause.source(BlockSpawnCause.builder()
+                                        .block(tickingBlock)
+                                        .type(InternalSpawnTypes.PLACEMENT)
+                                        .build())
+                                    .build();
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            TrackingUtil.associateEntityCreator(phaseContext, EntityUtil.toNative(entity),
+                                                    causeTracker.getMinecraftWorld());
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
+                                    .process();
+                        });
             }
             @Override
             public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context, Transaction<BlockSnapshot> transaction) {
@@ -540,7 +536,7 @@ public final class WorldPhase extends TrackingPhase {
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final Entity tickingEntity = phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-                phaseContext.getCapturedEntitySupplier().get().ifPresentAndNotEmpty(entities -> {
+                phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                             .entity(tickingEntity)
                             .type(InternalSpawnTypes.PASSIVE)
@@ -549,7 +545,7 @@ public final class WorldPhase extends TrackingPhase {
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
-                phaseContext.getCapturedItemsSupplier().get().ifPresentAndNotEmpty(entities -> {
+                phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
                     final Cause.Builder builder = Cause.source(EntitySpawnCause.builder()
                             .entity(tickingEntity)
                             .type(InternalSpawnTypes.DROPPED_ITEM)
@@ -558,7 +554,7 @@ public final class WorldPhase extends TrackingPhase {
                             .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                             .process();
                 });
-                phaseContext.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
                     GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
                 });
             }
@@ -612,8 +608,8 @@ public final class WorldPhase extends TrackingPhase {
         if (state instanceof ITickingState) {
             ((ITickingState) state).processPostTick(causeTracker, context);
         } else if (state == State.TERRAIN_GENERATION) {
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().get().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().get().orEmptyList();
+            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }
@@ -629,8 +625,8 @@ public final class WorldPhase extends TrackingPhase {
             }
         } else if (state == State.POPULATOR_RUNNING) {
             final PopulatorType runningGenerator = context.firstNamed(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, PopulatorType.class).orElse(null);
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().get().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().get().orEmptyList();
+            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }
@@ -647,8 +643,8 @@ public final class WorldPhase extends TrackingPhase {
             }
             // Blocks do not matter one bit.
         } else if (state == State.WORLD_SPAWNER_SPAWNING) {
-            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().get().orEmptyList();
-            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().get().orEmptyList();
+            final List<Entity> spawnedEntities = context.getCapturedEntitySupplier().orEmptyList();
+            final List<Entity> spawnedItems = context.getCapturedItemsSupplier().orEmptyList();
             if (spawnedEntities.isEmpty() && spawnedItems.isEmpty()) {
                 return;
             }
@@ -662,9 +658,8 @@ public final class WorldPhase extends TrackingPhase {
                         .process();
             }
 
-            context.getCapturedBlockSupplier().get().ifPresentAndNotEmpty(blockSnapshots -> {
-                GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, state, context);
-            });
+            context.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, state, context));
         }
 
     }

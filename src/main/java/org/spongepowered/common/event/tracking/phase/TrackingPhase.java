@@ -31,8 +31,6 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,7 +45,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
-import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -136,13 +133,13 @@ public abstract class TrackingPhase {
     }
 
     protected void processPostItemSpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> items) {
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), items, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, items, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }
 
     protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
-        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(Cause.source(InternalSpawnTypes.UNKNOWN_CAUSE).build(), entities, causeTracker.getWorld()))
+        EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE, entities, causeTracker.getWorld()))
                 .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                 .process();
     }
@@ -245,13 +242,9 @@ public abstract class TrackingPhase {
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
         TrackingUtil.associateEntityCreator(context, minecraftEntity, minecraftWorld);
         if (minecraftEntity instanceof EntityItem) {
-            return context.getCapturedItemsSupplier()
-                    .map(supplier -> supplier.get().add(entity))
-                    .orElse(false);
+            return context.getCapturedItems().add(entity);
         } else {
-            return context.getCapturedEntitySupplier()
-                    .map(supplier -> supplier.get().add(entity))
-                    .orElse(false);
+            return context.getCapturedEntities().add(entity);
         }
     }
 
@@ -263,15 +256,6 @@ public abstract class TrackingPhase {
 
     public Optional<DamageSource> createDestructionDamageSource(IPhaseState state, PhaseContext context, net.minecraft.entity.Entity entity) {
         return Optional.empty();
-    }
-
-    @Nullable
-    public User attemptTrackingAndRetrieveTrackedUser(IPhaseState state, PhaseContext context, CauseTracker causeTracker, IMixinChunk spongeChunk,
-            BlockPos targetPos,
-            PlayerTracker.Type type) {
-        final Optional<User> potentialUser = context.firstNamed(NamedCause.NOTIFIER, User.class);
-        potentialUser.ifPresent(user -> spongeChunk.addTrackedBlockPosition(causeTracker.getMinecraftWorld().getBlockState(targetPos).getBlock(), targetPos, user, type));
-        return potentialUser.orElse(null);
     }
 
     public void associateNotifier(IPhaseState phaseState, PhaseContext context, CauseTracker causeTracker, BlockPos pos,

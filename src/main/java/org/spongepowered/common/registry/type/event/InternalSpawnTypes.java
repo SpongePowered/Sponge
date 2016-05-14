@@ -60,7 +60,7 @@ public final class InternalSpawnTypes {
     public static final SpawnCause STRUCTURE_SPAWNING = of(InternalSpawnTypes.STRUCTURE);
     public static final SpawnCause CUSTOM_SPAWN = of(InternalSpawnTypes.CUSTOM);
     public static final SpawnCause WORLD_SPAWNER_CAUSE = of(InternalSpawnTypes.WORLD_SPAWNER);
-    public static final Cause UNKNOWN_CAUSE = Cause.source(InternalSpawnTypes.CUSTOM).build();
+    public static final Cause UNKNOWN_CAUSE = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN).build();
 
     private static SpawnCause of(SpawnType spawnType) {
         return new SpongeSpawnCauseBuilder().type(spawnType).build();

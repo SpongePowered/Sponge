@@ -140,7 +140,6 @@ public interface PacketFunction {
                         })
                         .process();
                 context.getCapturedItemsSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing any!", context))
                         .ifPresentAndNotEmpty(items -> {
                             // For destruction, this should be empty, however, some times, it may not be?
                             final PrettyPrinter printer = new PrettyPrinter(60);
@@ -152,10 +151,9 @@ public interface PacketFunction {
                             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
                         });
                 context.getCapturedBlockSupplier()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing any!", context))
                         .ifPresentAndNotEmpty(blocks ->
                                 GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
-                context.getCapturedEntityDrops().ifPresent(map -> {
+                context.getCapturedEntityDropSupplier().ifPresentAndNotEmpty(map -> {
                     if (map.isEmpty()) {
                         return;
                     }
@@ -175,7 +173,6 @@ public interface PacketFunction {
             }
         } else if (state == PacketPhase.General.INTERACT_ENTITY) {
             context.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing any!", context))
                     .ifPresentAndNotEmpty(blocks -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact Entity").centre().hr();
@@ -186,7 +183,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns, but we're not capturing any!", context))
                     .ifPresentAndNotEmpty(entities -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact Entity").centre().hr();
@@ -197,7 +193,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing any!", context))
                     .ifPresentAndNotEmpty(entities -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact Entity").centre().hr();
@@ -208,7 +203,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntityDropSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(map -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact Entity").centre().hr();
@@ -225,7 +219,6 @@ public interface PacketFunction {
 
         } else if (state == PacketPhase.General.INTERACT_AT_ENTITY) {
             context.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(blocks -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact At Entity").centre().hr();
@@ -236,7 +229,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(entities -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact At Entity").centre().hr();
@@ -247,7 +239,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(entities -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact At Entity").centre().hr();
@@ -258,7 +249,6 @@ public interface PacketFunction {
                         printer.trace(System.err);
                     });
             context.getCapturedEntityDropSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity death drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(map -> {
                         final PrettyPrinter printer = new PrettyPrinter(80);
                         printer.add("Processing Interact At Entity").centre().hr();
@@ -274,7 +264,6 @@ public interface PacketFunction {
                     });
         }
         context.getCapturedBlockSupplier()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                 .ifPresentAndNotEmpty(snapshots ->
                         GeneralFunctions.processBlockCaptures(snapshots, mixinWorldServer.getCauseTracker(), state, context)
                 );
@@ -284,12 +273,10 @@ public interface PacketFunction {
         final CauseTracker causeTracker = ((IMixinWorldServer) player.worldObj).getCauseTracker();
         if (state == PacketPhase.Inventory.DROP_ITEM) {
             context.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(blocks ->
                             GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
                     );
             context.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
                                 .entity(EntityUtil.fromNative(player))
@@ -306,7 +293,6 @@ public interface PacketFunction {
                                 .process();
                     });
             context.getCapturedEntityDropSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(itemMapping -> {
 
 
@@ -314,11 +300,9 @@ public interface PacketFunction {
         } else if (state == PacketPhase.Inventory.DROP_INVENTORY) {
 
             context.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context));
 
             context.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(items -> {
                         final Cause cause = Cause.source(EntitySpawnCause.builder()
                                 .entity(EntityUtil.fromNative(player))
@@ -337,13 +321,11 @@ public interface PacketFunction {
 
         } else if (state == PacketPhase.General.INTERACTION) {
             context.getCapturedBlockSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(blocks ->
                             GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, context)
                     );
 
             context.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(items -> {
                         if (items.isEmpty()) {
                             return;
@@ -364,7 +346,6 @@ public interface PacketFunction {
                                 .process();
                     });
             context.getCapturedEntityDropSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but we're not capturing them...", context))
                     .ifPresentAndNotEmpty(map -> {
                         if (map.isEmpty()) {
                             return;
@@ -393,7 +374,7 @@ public interface PacketFunction {
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing the cursor item in use, but found none.", context));
             final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
             final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-            final List<Entity> capturedEntityItems = context.getCapturedItems().orElse(new ArrayList<>());
+            final List<Entity> capturedEntityItems = context.getCapturedItems();
             final Cause cause;
             final Container openContainer = player.openContainer;
             final List<SlotTransaction> capturedTransactions = ((IMixinContainer) openContainer).getCapturedTransactions();
@@ -462,8 +443,7 @@ public interface PacketFunction {
         final List<SlotTransaction> slotTransactions = ContainerUtil.toMixin(openContainer).getCapturedTransactions();
         PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotId(), openContainer, slotTransactions);
         final int usedButton = packetIn.getUsedButton();
-        final List<Entity> capturedItems = context.getCapturedItems()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing item drops, but found none", context));
+        final List<Entity> capturedItems = context.getCapturedItems();
         final Cause cause = Cause.of(NamedCause.source(player), NamedCause.of("Container", openContainer));
         final InteractInventoryEvent inventoryEvent;
         if (state instanceof PacketPhase.Inventory) {
@@ -525,7 +505,6 @@ public interface PacketFunction {
         final ItemStack itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class).orElse(null);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack);
         context.getCapturedEntitySupplier()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns, but we're not capturing them...", context))
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(EntitySpawnCause.builder()
                             .entity(EntityUtil.fromNative(player))
@@ -538,7 +517,6 @@ public interface PacketFunction {
                             .process();
                 });
         context.getCapturedBlockSupplier()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                 .ifPresentAndNotEmpty(
                         originalBlocks -> GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
 
@@ -551,7 +529,6 @@ public interface PacketFunction {
                 .orElseThrow(PhaseUtil.throwWithContext("Expected the used item stack to place a block, but got nothing!", context));
         final ItemStackSnapshot snapshot = itemStack.createSnapshot();
         context.getCapturedEntitySupplier()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing entity spawns, but we're not capturing them...", context))
                 .ifPresentAndNotEmpty(entities -> {
                     final Cause cause = Cause.source(EntitySpawnCause.builder()
                             .entity(EntityUtil.fromNative(player))
@@ -564,7 +541,6 @@ public interface PacketFunction {
                             .process();
                 });
         context.getCapturedBlockSupplier()
-                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block changes, but we're not capturing them...", context))
                 .ifPresentAndNotEmpty(
                         originalBlocks -> GeneralFunctions.processBlockCaptures(originalBlocks, mixinWorld.getCauseTracker(), state, context));
     };

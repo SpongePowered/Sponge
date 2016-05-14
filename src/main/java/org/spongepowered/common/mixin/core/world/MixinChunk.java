@@ -50,6 +50,7 @@ import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -79,6 +80,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -458,12 +461,12 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     public IBlockState setBlockState(BlockPos pos, IBlockState state) {
         IBlockState iblockstate1 = this.getBlockState(pos);
 
-        if (iblockstate1 == state) {
-            return null;
-        }
         // Sponge - reroute to new method that accepts snapshot to prevent a second snapshot from being created.
         return setBlockState(pos, state, iblockstate1, null);
     }
+
+    private long lastWorldTime;
+
 
     /**
      * @author blood - November 2015
@@ -480,6 +483,18 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Override
     @Nullable
     public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, @Nullable BlockSnapshot newBlockSnapshot) {
+        if (this.worldObj.getTotalWorldTime() > this.lastWorldTime) {
+            this.lastWorldTime = this.worldObj.getTotalWorldTime();
+            final PrettyPrinter printer = new PrettyPrinter(30);
+            printer.add("Traversing a World Tick!").centre().hr();
+            printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+        }
+
+        final PrettyPrinter printer = new PrettyPrinter(60);
+        printer.add("Block being Set").centre().hr();
+        printer.add("BlockPos: %s", pos);
+        printer.add("BlockState: %s", newState);
+        printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
         int xPos = pos.getX() & 15;
         int yPos = pos.getY();
         int zPos = pos.getZ() & 15;

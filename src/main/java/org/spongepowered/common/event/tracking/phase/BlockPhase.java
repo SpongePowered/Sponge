@@ -73,19 +73,15 @@ public final class BlockPhase extends TrackingPhase {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a decaying block snapshot!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dropping items from a decaying block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DECAY_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dropping items from a decaying block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.BLOCK_DROP_ITEMS) {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dropping items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dropping items from a block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DROP_ITEMS.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dropping items from a block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         } else if (state == State.RESTORING_BLOCKS) {
             // do nothing for now.
@@ -93,10 +89,8 @@ public final class BlockPhase extends TrackingPhase {
             final BlockSnapshot blockSnapshot = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Could not find a block dispensing items!", phaseContext));
             phaseContext.getCapturedItemsSupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dispensing items from a block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(items -> BlockFunction.Drops.DISPENSE.processItemSpawns(blockSnapshot, causeTracker, phaseContext, items));
             phaseContext.getCapturedEntitySupplier()
-                    .orElseThrow(PhaseUtil.throwWithContext("Expected to be dispensing items from a block, but none found", phaseContext))
                     .ifPresentAndNotEmpty(entities -> BlockFunction.Entities.DROP_ITEMS_RANDOM.processEntities(blockSnapshot, causeTracker, phaseContext, entities));
         }
 

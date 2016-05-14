@@ -38,6 +38,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -127,74 +128,99 @@ public class PhaseContext {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Optional<List<Entity>> getCapturedEntities() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class).map(CapturedEntitiesSupplier::get);
+    public List<Entity> getCapturedEntities() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, CapturedEntitiesSupplier.class)
+                .map(CapturedEntitiesSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity spawns!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<CapturedSupplier<Entity>> getCapturedEntitySupplier() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class);
+    public CapturedSupplier<Entity> getCapturedEntitySupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedEntitiesSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity spawns!", this));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Optional<List<Entity>> getCapturedItems() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, CapturedItemsSupplier.class).map(CapturedItemsSupplier::get);
+    public List<Entity> getCapturedItems() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, CapturedItemsSupplier.class)
+                .map(CapturedItemsSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<CapturedSupplier<Entity>> getCapturedItemsSupplier() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class);
+    public CapturedSupplier<Entity> getCapturedItemsSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ITEMS, (Class<CapturedSupplier<Entity>>) (Class<?>) CapturedItemsSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
     }
 
 
     @SuppressWarnings("unchecked")
-    public Optional<List<Transaction<BlockSnapshot>>> getInvalidTransactions() {
-        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class).map(InvalidTransactionSupplier::get);
+    public List<Transaction<BlockSnapshot>> getInvalidTransactions() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class)
+                .map(InvalidTransactionSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture invalid transactions!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<CapturedSupplier<Transaction<BlockSnapshot>>> getInvalidTransactionSupplier() {
-        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class);
+    public CapturedSupplier<Transaction<BlockSnapshot>> getInvalidTransactionSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS,
+                (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture invalid transactions!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<List<BlockSnapshot>> getCapturedBlocks() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class).map(CapturedBlocksSupplier::get);
+    public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class)
+                .map(CapturedBlocksSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block changes, but there is no list available!", this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<CapturedSupplier<BlockSnapshot>> getCapturedBlockSupplier() {
-        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class);
+    public CapturedSupplier<BlockSnapshot> getCapturedBlockSupplier() throws IllegalStateException {
+        return this.firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, (Class<CapturedSupplier<BlockSnapshot>>) (Class<?>) CapturedBlocksSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this));
     }
 
-    public Optional<Multimap<BlockPos, ItemStack>> getCapturedBlockDrops() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(BlockItemDropsSupplier::get);
+    public Multimap<BlockPos, ItemStack> getCapturedBlockDrops() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class)
+                .map(BlockItemDropsSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing block drops", this));
     }
 
-    public Optional<Collection<ItemStack>> getCapturedBlockDrops(BlockPos position) {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class).map(supplier -> supplier.get().get(position));
-    }
-
-    @SuppressWarnings("unchecked")
-    public Optional<CapturedMultiMapSupplier<BlockPos, ItemStack>> getBlockDropSupplier() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, (Class<CapturedMultiMapSupplier<BlockPos, ItemStack>>) (Class<?>) BlockItemDropsSupplier.class);
-    }
-
-    public Optional<Multimap<UUID, ItemStack>> getCapturedEntityDrops() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(EntityItemDropsSupplier::get);
-    }
-
-    public Optional<Collection<ItemStack>> getCapturedEntityDrops(UUID position) {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class).map(supplier -> supplier.get().get(position));
+    public Collection<ItemStack> getCapturedBlockDrops(BlockPos position) throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, BlockItemDropsSupplier.class)
+                .map(supplier -> supplier.get().get(position))
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture block drops for position: " + position, this));
     }
 
     @SuppressWarnings("unchecked")
-    public Optional<CapturedMultiMapSupplier<UUID, ItemStack>> getCapturedEntityDropSupplier() {
-        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, (Class<CapturedMultiMapSupplier<UUID, ItemStack>>) (Class<?>) EntityItemDropsSupplier.class);
+    public CapturedMultiMapSupplier<BlockPos, ItemStack> getBlockDropSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS,
+                (Class<CapturedMultiMapSupplier<BlockPos, ItemStack>>) (Class<?>) BlockItemDropsSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to track block item drops!", this));
+    }
+
+    public Multimap<UUID, ItemStack> getCapturedEntityDrops() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class)
+                .map(EntityItemDropsSupplier::get)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+    }
+
+    public Collection<ItemStack> getCapturedEntityDrops(UUID entityId) throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, EntityItemDropsSupplier.class)
+                .map(supplier -> supplier.get().get(entityId))
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
+    }
+
+    @SuppressWarnings("unchecked")
+    public CapturedMultiMapSupplier<UUID, ItemStack> getCapturedEntityDropSupplier() throws IllegalStateException {
+        return firstNamed(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS,
+                (Class<CapturedMultiMapSupplier<UUID, ItemStack>>) (Class<?>) EntityItemDropsSupplier.class)
+                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
     public Cause toCause() {
-        checkState(this.isCompleted, "Cannot get a cuase for an incomplete PhaseContext!");
+        checkState(this.isCompleted, "Cannot get a cause for an incomplete PhaseContext!");
         if (this.cause == null) {
             this.cause = Cause.of(this.contextObjects);
         }

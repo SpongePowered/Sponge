@@ -53,7 +53,9 @@ import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -71,7 +73,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 public class GeneralFunctions {
@@ -163,8 +164,7 @@ public class GeneralFunctions {
                 return;
             } else {
                 // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions()
-                        .orElseThrow(PhaseUtil.throwWithContext("Not capturing invalid transactions!", context));
+                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions();
                 for (Transaction<BlockSnapshot> transaction : blockEvent.getTransactions()) {
                     if (!transaction.isValid()) {
                         invalid.add(transaction);
@@ -178,9 +178,7 @@ public class GeneralFunctions {
                         transaction.getOriginal().restore(true, false);
                         if (state.tracksBlockSpecificDrops()) {
                             final BlockPos position = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-                            final Multimap<BlockPos, ItemStack> multiMap = context.getBlockDropSupplier()
-                                    .orElseThrow(PhaseUtil.throwWithContext("State is not allowing block specific item drop capturing!", context))
-                                    .get();
+                            final Multimap<BlockPos, ItemStack> multiMap = context.getBlockDropSupplier().get();
                             multiMap.get(position).clear();
                         }
                     }
@@ -212,7 +210,7 @@ public class GeneralFunctions {
         // classes do not fail on getting the incorrect block state from the IBlockAccess
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
         final SpongeProxyBlockAccess proxyBlockAccess = new SpongeProxyBlockAccess(minecraftWorld, transactions);
-        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier().orElse(null);
+        final PhaseContext.CapturedMultiMapSupplier<BlockPos, ItemStack> capturedBlockDrops = phaseContext.getBlockDropSupplier();
         for (Transaction<BlockSnapshot> transaction : transactions) {
             if (!transaction.isValid()) {
                 continue; // Don't use invalidated block transactions during notifications, these only need to be restored
@@ -246,6 +244,11 @@ public class GeneralFunctions {
             proxyBlockAccess.proceed();
             causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
 
+
+            final PhaseData peek = causeTracker.getStack().peek();
+            if (peek.getState() == GeneralPhase.Post.UNWINDING) {
+                peek.getState().getPhase().unwind(causeTracker, peek.getState(), peek.getContext());
+            }
             // Here is where we need to re-post process Depth First
 
         }
@@ -296,71 +299,6 @@ public class GeneralFunctions {
                         }
                 )
                 .process();
-
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void processPostBlockCaptures(List<BlockSnapshot> blockSnapshots, CauseTracker causeTracker, IPhaseState unwindingState,
-            PhaseContext context) {
-        ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
-        ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
-        for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
-            transactionBuilders[i] = new ImmutableList.Builder<>();
-        }
-        final List<ChangeBlockEvent> blockEvents = new ArrayList<>();
-        final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-
-        for (BlockSnapshot snapshot : blockSnapshots) {
-            TRANSACTION_PROCESSOR.apply(transactionBuilders).accept(TRANSACTION_CREATION.apply(minecraftWorld, snapshot));
-        }
-
-        for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
-            transactionArrays[i] = transactionBuilders[i].build();
-        }
-        final ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[4];
-        final Cause.Builder builder = Cause.source(context.firstNamed(NamedCause.SOURCE, Object.class).get());
-        final World world = causeTracker.getWorld();
-        iterateChangeBlockEvents(transactionArrays, blockEvents, mainEvents, builder, world);
-        if (processMultiEvents(transactionArrays, blockEvents, mainEvents, builder, world)) {
-            return;
-        }
-
-        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) {
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(builder.build(), world, transactionArrays[BlockChange.DECAY.ordinal()]);
-            mainEvents[BlockChange.DECAY.ordinal()] = event;
-            blockEvents.add(event);
-        }
-
-        for (ChangeBlockEvent blockEvent : blockEvents) {
-            final BlockChange blockChange = BlockChange.forEvent(blockEvent);
-
-            if (blockEvent.isCancelled()) {
-                // Restore original blocks
-                for (Transaction<BlockSnapshot> transaction : Lists.reverse(blockEvent.getTransactions())) {
-                    transaction.getOriginal().restore(true, false);
-                }
-                return;
-            } else {
-                // Need to undo any invalid changes
-                final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions()
-                        .orElseThrow(PhaseUtil.throwWithContext("Expected to have invalid transactions on an event, but had none!", context));
-                for (Transaction<BlockSnapshot> snapshotTransaction : blockEvent.getTransactions()) {
-                    if (!snapshotTransaction.isValid()) {
-                        invalid.add(snapshotTransaction);
-                    } else {
-                        unwindingState.markPostNotificationChange(blockChange, minecraftWorld, context, snapshotTransaction);
-                    }
-                }
-
-                if (invalid.size() > 0) {
-                    for (Transaction<BlockSnapshot> transaction : Lists.reverse(invalid)) {
-                        transaction.getOriginal().restore(true, false);
-                    }
-                }
-
-                performBlockAdditions(causeTracker, blockEvent.getTransactions(), blockChange, builder, unwindingState, context);
-            }
-        }
 
     }
 
