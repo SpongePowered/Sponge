@@ -137,7 +137,6 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
-import org.spongepowered.common.gui.window.AbstractSpongeWindow;
 import org.spongepowered.common.interfaces.IMixinCommandSender;
 import org.spongepowered.common.interfaces.IMixinCommandSource;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -202,7 +201,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public int newTotalExperience = 0;
     public boolean keepsLevel = false;
     private boolean sleepingIgnored;
-    private AbstractSpongeWindow openWindow;
+    private Window openWindow;
 
     private final User user = SpongeImpl.getGame().getServiceManager().provideUnchecked(UserStorageService.class).getOrCreate((GameProfile) getGameProfile());
 
@@ -833,37 +832,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     }
 
     @Override
-    public boolean showWindow(Window window) {
-        checkNotNull(window, "window");
-        if (this.openWindow != null && this.openWindow.canDetectClientClose()) {
-            return false; // A GUI is open and we know it's closable
-        }
-        if (window instanceof AbstractSpongeWindow) {
-            if (((AbstractSpongeWindow) window).bindAndShow((EntityPlayerMP) (Object) this)) {
-                this.openWindow = (AbstractSpongeWindow) window;
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Optional<Window> getActiveWindow() {
         return Optional.ofNullable(this.openWindow);
     }
 
     @Override
-    public boolean closeActiveWindow() {
-        if (this.openWindow == null || this.openWindow.unbindAndClose()) {
-            this.openWindow = null;
-            return true;
-        }
-        return false;
-    }
-
-    @Override
-    public void informWindowClosed() {
-        this.openWindow = null;
+    public void setWindow(Window window) {
+        this.openWindow = window;
     }
 
     @Override

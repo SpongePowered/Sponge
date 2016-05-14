@@ -26,12 +26,12 @@ package org.spongepowered.common.gui.window;
 
 import static io.netty.buffer.Unpooled.buffer;
 
+import com.google.common.collect.Maps;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.item.ItemStack;
-import net.minecraft.network.Packet;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.server.S3FPacketCustomPayload;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IChatComponent;
@@ -43,13 +43,16 @@ import org.spongepowered.api.gui.window.VillagerTradeWindow;
 import org.spongepowered.api.item.merchant.Merchant;
 import org.spongepowered.common.data.processor.data.entity.TradeOfferDataProcessor;
 
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow implements VillagerTradeWindow {
 
     private IMerchant merchant;
     private TradeOfferData tradeData;
-    private DummyMerchant dummyMerchant;
+    // private DummyMerchant dummyMerchant;
+    private final Map<EntityPlayerMP, DummyMerchant> dummyMerchants = Maps.newHashMap();
 
     @Override
     protected IInteractionObject provideInteractionObject() {
@@ -57,13 +60,21 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
     }
 
     @Override
-    protected boolean show() {
-        this.player.displayVillagerTradeGui(this.merchant != null ? this.merchant
-                : (this.dummyMerchant = new DummyMerchant(this.player, this.tradeData)));
-        if (this.merchant != null) {
-            this.merchant.setCustomer(this.player);
+    protected boolean isVirtual() {
+        return this.merchant == null;
+    }
+
+    @Override
+    protected boolean show(EntityPlayerMP player) {
+        IMerchant merchant = this.merchant;
+        if (merchant == null) {
+            this.dummyMerchants.put(player, (DummyMerchant) (merchant = new DummyMerchant(player, this.tradeData)));
         }
-        return this.player.openContainer != this.player.inventoryContainer;
+        player.displayVillagerTradeGui(merchant);
+        if (this.merchant != null) {
+            this.merchant.setCustomer(player);
+        }
+        return player.openContainer != player.inventoryContainer;
     }
 
     @Override
@@ -77,27 +88,31 @@ public class SpongeVillagerTradeWindow extends AbstractSpongeContainerWindow imp
     }
 
     @Override
-    public void onClientClose(Packet<INetHandlerPlayServer> packet) {
-        this.dummyMerchant = null;
-        super.onClientClose(packet);
+    protected void onClosed(EntityPlayerMP player) {
+        this.dummyMerchants.remove(player);
+        super.onClosed(player);
     }
 
     @Override
     public void setVirtualTradeData(TradeOfferData tradeOfferData) {
         this.tradeData = tradeOfferData;
-        if (this.dummyMerchant != null) {
-            this.dummyMerchant.setTradeData(tradeOfferData);
-            MerchantRecipeList recipes = this.dummyMerchant.getRecipes(this.player);
-            // See displayVillagerTradeGui
-            PacketBuffer buffer = new PacketBuffer(buffer());
-            buffer.writeInt(this.player.openContainer.windowId);
-            if (recipes != null) {
-                recipes.writeToBuf(buffer);
-            } else {
-                buffer.writeByte(0);
-            }
-            this.player.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", buffer));
+        for (Entry<EntityPlayerMP, DummyMerchant> entry : this.dummyMerchants.entrySet()) {
+            sendDummyData(entry.getKey(), entry.getValue(), tradeOfferData);
         }
+    }
+
+    private void sendDummyData(EntityPlayerMP player, DummyMerchant merchant, TradeOfferData tradeOfferData) {
+        merchant.setTradeData(tradeOfferData);
+        MerchantRecipeList recipes = merchant.getRecipes(player);
+        // See displayVillagerTradeGui
+        PacketBuffer buffer = new PacketBuffer(buffer());
+        buffer.writeInt(player.openContainer.windowId);
+        if (recipes != null) {
+            recipes.writeToBuf(buffer);
+        } else {
+            buffer.writeByte(0);
+        }
+        player.playerNetServerHandler.sendPacket(new S3FPacketCustomPayload("MC|TrList", buffer));
     }
 
     private static class DummyMerchant implements IMerchant {

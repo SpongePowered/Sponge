@@ -50,6 +50,11 @@ public abstract class AbstractSpongeBlockContainerWindow extends AbstractSpongeC
 
     @Override
     protected boolean shouldCreateVirtualContainer() {
+        return isVirtual();
+    }
+
+    @Override
+    protected boolean isVirtual() {
         return this.location == null;
     }
 

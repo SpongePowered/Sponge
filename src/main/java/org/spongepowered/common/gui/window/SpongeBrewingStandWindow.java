@@ -43,7 +43,7 @@ public class SpongeBrewingStandWindow extends AbstractSpongeTileContainerWindow<
 
             @Override
             public boolean isUseableByPlayer(EntityPlayer player) {
-                return player == SpongeBrewingStandWindow.this.player;
+                return SpongeBrewingStandWindow.this.players.contains(player);
             }
         };
     }

@@ -26,6 +26,7 @@ package org.spongepowered.common.gui.window;
 
 import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.inventory.AnimalChest;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.ContainerHorseInventory;
@@ -36,7 +37,7 @@ import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
 import org.spongepowered.api.entity.living.animal.Horse;
 import org.spongepowered.api.gui.window.HorseInventoryWindow;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
@@ -47,13 +48,18 @@ public class SpongeHorseInventoryWindow extends AbstractSpongeContainerWindow im
     private boolean hasChest;
 
     @Override
-    protected boolean show() {
+    protected boolean show(EntityPlayerMP player) {
         if (this.horse != null) {
-            this.horse.openGUI(this.player);
+            this.horse.openGUI(player);
         } else {
-            this.openVirtualGui();
+            this.openVirtualGui(player);
         }
-        return this.player.openContainer != this.player.inventoryContainer;
+        return player.openContainer != player.inventoryContainer;
+    }
+
+    @Override
+    protected boolean isVirtual() {
+        return this.horse == null;
     }
 
     @Override
@@ -61,9 +67,9 @@ public class SpongeHorseInventoryWindow extends AbstractSpongeContainerWindow im
         return null; // Unused
     }
 
-    private void openVirtualGui() {
+    private void openVirtualGui(EntityPlayerMP player) {
         // Create horse
-        EntityHorse horse = new EntityHorse(this.player.worldObj);
+        EntityHorse horse = new EntityHorse(player.worldObj);
         if (this.horseData != null) {
             ((Horse) horse).offer(this.horseData);
         }
@@ -71,26 +77,26 @@ public class SpongeHorseInventoryWindow extends AbstractSpongeContainerWindow im
         AnimalChest inventory = new AnimalChest(horse.getName(), horse.isChested() ? 17 : 2);
 
         // Spawn horse on client
-        this.player.playerNetServerHandler.sendPacket(new S0FPacketSpawnMob(horse));
+        player.playerNetServerHandler.sendPacket(new S0FPacketSpawnMob(horse));
 
         // Open window on client and configure container
-        int windowId = ((IMixinEntityPlayerMP) this.player).incrementAndGetWindowId();
-        this.player.playerNetServerHandler.sendPacket(
+        int windowId = ((IMixinEntityPlayerMP) player).incrementAndGetWindowId();
+        player.playerNetServerHandler.sendPacket(
                 new S2DPacketOpenWindow(windowId, "EntityHorse", horse.getDisplayName(), inventory.getSizeInventory(), horse.getEntityId()));
-        this.player.openContainer = createContainerHorse(horse, inventory);
-        this.player.openContainer.windowId = windowId;
-        this.player.openContainer.onCraftGuiOpened(this.player);
+        player.openContainer = createContainerHorse(player, horse, inventory);
+        player.openContainer.windowId = windowId;
+        player.openContainer.onCraftGuiOpened(player);
 
         // Despawn horse on client
-        this.player.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(horse.getEntityId()));
+        player.playerNetServerHandler.sendPacket(new S13PacketDestroyEntities(horse.getEntityId()));
     }
 
-    private Container createContainerHorse(EntityHorse horse, AnimalChest horseInventory) {
-        return new ContainerHorseInventory(this.player.inventory, horseInventory, horse, this.player) {
+    private Container createContainerHorse(EntityPlayerMP player, EntityHorse horse, AnimalChest horseInventory) {
+        return new ContainerHorseInventory(player.inventory, horseInventory, horse, player) {
 
             @Override
             public boolean canInteractWith(EntityPlayer playerIn) {
-                return playerIn == SpongeHorseInventoryWindow.this.player;
+                return SpongeHorseInventoryWindow.this.players.contains(playerIn);
             }
         };
     }

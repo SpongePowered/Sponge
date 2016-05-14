@@ -38,6 +38,8 @@ import net.minecraft.network.play.client.CPacketCloseWindow;
 import net.minecraft.network.play.client.CPacketCreativeInventoryAction;
 import net.minecraft.network.play.client.CPacketEntityAction;
 import net.minecraft.network.play.client.CPacketEntityAction.Action;
+import net.minecraft.network.play.client.CPacketInput;
+import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
@@ -64,7 +66,10 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
 import org.spongepowered.common.event.tracking.phase.packet.IPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.gui.window.AbstractSpongeWindow;
+import org.spongepowered.common.gui.window.AbstractSpongeContainerWindow;
+import org.spongepowered.common.gui.window.SpongeSignWindow;
+import org.spongepowered.common.gui.window.SpongeSleepingWindow;
+import org.spongepowered.common.gui.window.SpongeWinGameWindow;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 
@@ -173,26 +178,34 @@ public class PacketUtil {
     }
 
     private static boolean handleGuiClose(Packet<INetHandlerPlayServer> packet, EntityPlayerMP player) {
-        boolean hasClosedGui = false;
+        if (packet.getClass() != CPacketPlayer.class && packet.getClass() != CPacketPlayer.Rotation.class
+                && packet.getClass() != CPacketInput.class && packet.getClass() != CPacketPlayer.Position.class) {
+            if (!(packet instanceof CPacketPlayer)) {
+                System.out.println(packet);
+            }
+        }
+        Optional<Window> optWindow = ((Player) player).getActiveWindow();
+        if (!optWindow.isPresent()) {
+            return false;
+        }
+        Window window = optWindow.get();
         if (packet instanceof CPacketUpdateSign) {
-            hasClosedGui = true;
+            if (window instanceof SpongeSignWindow) {
+                return ((SpongeSignWindow) window).onClientClose(player, ((CPacketUpdateSign) packet).getPosition(),
+                        ((CPacketUpdateSign) packet).getLines());
+            }
         } else if (packet instanceof CPacketEntityAction) {
-            if (((CPacketEntityAction) packet).getAction() == Action.STOP_SLEEPING && player.playerLocation == null) {
-                hasClosedGui = true;
+            if (window instanceof SpongeSleepingWindow && ((CPacketEntityAction) packet).getAction() == Action.STOP_SLEEPING
+                    && player.playerLocation == null) {
+                return ((SpongeSleepingWindow) window).onClientClose(player);
             }
         } else if (packet instanceof CPacketClientStatus) {
-            if (((CPacketClientStatus) packet).getStatus() == State.PERFORM_RESPAWN) {
-                hasClosedGui = true;
+            if (window instanceof SpongeWinGameWindow && ((CPacketClientStatus) packet).getStatus() == State.PERFORM_RESPAWN) {
+                return ((SpongeWinGameWindow) window).onClientClose(player);
             }
         } else if (packet instanceof CPacketCloseWindow) {
-            // Note: The window ID is not used (assumed to be correct)
-            hasClosedGui = true;
-        }
-        if (hasClosedGui) {
-            Optional<Window> openGui = ((Player) player).getActiveWindow();
-            if (openGui.isPresent() && openGui.get() instanceof AbstractSpongeWindow) {
-                ((AbstractSpongeWindow) openGui.get()).onClientClose(packet);
-                return true; // Packet intercepted and handled
+            if (window instanceof AbstractSpongeContainerWindow) {
+                return ((AbstractSpongeContainerWindow) window).onClientClose(player);
             }
         }
         return false;

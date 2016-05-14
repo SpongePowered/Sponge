@@ -28,12 +28,10 @@ import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.player.InventoryPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.world.IInteractionObject;
 import org.spongepowered.api.gui.window.ContainerWindow;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
 import java.util.Optional;
 
@@ -43,47 +41,48 @@ public abstract class AbstractSpongeContainerWindow extends AbstractSpongeWindow
 
     @Override
     public Optional<org.spongepowered.api.item.inventory.Container> getContainer() {
-        if (this.player == null || this.player.openContainer == this.player.inventoryContainer) {
-            return Optional.empty();
-        }
-        return Optional.of((org.spongepowered.api.item.inventory.Container) this.player.openContainer);
+        return Optional.empty();// TODO
+                                // Optional.ofNullable((org.spongepowered.api.item.inventory.Container)
+                                // this.container);
     }
 
     @Override
-    protected boolean show() {
+    protected boolean show(EntityPlayerMP player) {
         IInteractionObject obj = provideInteractionObject();
         if (obj == null) {
             return false;
         }
         if (shouldCreateVirtualContainer()) {
-            displayVirtualGui(obj);
+            displayVirtualGui(player, obj);
         } else {
             if (obj instanceof IInventory) {
-                this.player.displayGUIChest((IInventory) obj);
+                player.displayGUIChest((IInventory) obj);
             } else {
-                this.player.displayGui(obj);
+                player.displayGui(obj);
             }
         }
-        return this.player.openContainer != this.player.inventoryContainer;
+        return player.openContainer != player.inventoryContainer;
     }
 
     protected boolean shouldCreateVirtualContainer() {
         return false;
     }
 
+    protected abstract boolean isVirtual();
+
     // Mostly copied from displayGUIChest, except use createVirtualContainer
-    private void displayVirtualGui(IInteractionObject obj) {
-        int windowId = ((IMixinEntityPlayerMP) this.player).incrementAndGetWindowId();
+    private void displayVirtualGui(EntityPlayerMP player, IInteractionObject obj) {
+        int windowId = ((IMixinEntityPlayerMP) player).incrementAndGetWindowId();
         S2DPacketOpenWindow packet;
         if (obj instanceof IInventory) {
             packet = new S2DPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName(), ((InventoryPlayer) obj).getSizeInventory());
         } else {
             packet = new S2DPacketOpenWindow(windowId, obj.getGuiID(), obj.getDisplayName());
         }
-        this.player.playerNetServerHandler.sendPacket(packet);
-        this.player.openContainer = createVirtualContainer(obj, this.player.inventory, this.player);
-        this.player.openContainer.windowId = windowId;
-        this.player.openContainer.onCraftGuiOpened(this.player);
+        player.playerNetServerHandler.sendPacket(packet);
+        player.openContainer = createVirtualContainer(obj, player.inventory, player);
+        player.openContainer.windowId = windowId;
+        player.openContainer.onCraftGuiOpened(player);
     }
 
     protected Container createVirtualContainer(IInteractionObject obj, InventoryPlayer inventory, EntityPlayerMP player) {
@@ -91,9 +90,8 @@ public abstract class AbstractSpongeContainerWindow extends AbstractSpongeWindow
     }
 
     @Override
-    protected boolean close() {
-        this.player.closeScreen();
-        return true;
+    protected void sendClose(EntityPlayerMP player) {
+        player.closeScreen();
     }
 
     @Override
@@ -101,10 +99,13 @@ public abstract class AbstractSpongeContainerWindow extends AbstractSpongeWindow
         return true;
     }
 
-    @Override
-    public void onClientClose(Packet<INetHandlerPlayServer> packet) {
-        this.player.closeContainer();
-        super.onClientClose(packet);
+    public boolean onClientClose(EntityPlayerMP player) {
+        if (!isVirtual()) {
+            return false;
+        }
+        player.closeContainer();
+        onClosed(player);
+        return true;
     }
 
 }

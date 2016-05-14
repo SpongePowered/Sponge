@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.gui.window;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.gui.window.BookWindow;
 import org.spongepowered.api.text.BookView;
@@ -36,8 +37,8 @@ public class SpongeBookWindow extends AbstractSpongeWindow implements BookWindow
     private BookView bookView;
 
     @Override
-    protected boolean show() {
-        BookFaker.fakeBookView(getBookView(), (Player) this.player);
+    protected boolean show(EntityPlayerMP player) {
+        BookFaker.fakeBookView(getBookView(), (Player) player);
         return true;
     }
 

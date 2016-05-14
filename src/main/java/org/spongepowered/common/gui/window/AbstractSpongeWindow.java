@@ -24,69 +24,70 @@
  */
 package org.spongepowered.common.gui.window;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import com.google.common.collect.Sets;
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.Packet;
-import net.minecraft.network.play.INetHandlerPlayServer;
 import net.minecraft.network.play.server.S2EPacketCloseWindow;
 import net.minecraft.util.BlockPos;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.gui.window.Window;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayerMP;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 public abstract class AbstractSpongeWindow implements Window {
 
     protected static final BlockPos VIRTUAL_POS = new BlockPos(-1, -1, -1);
 
-    protected EntityPlayerMP player;
+    protected final Set<EntityPlayerMP> players = Sets.newHashSet();
 
     @Override
-    public Optional<Player> getPlayerShown() {
-        return Optional.ofNullable((Player) this.player);
+    @SuppressWarnings("unchecked")
+    public Set<Player> getPlayersShowing() {
+        return Collections.unmodifiableSet((Set<Player>) (Object) this.players);
     }
 
-    public boolean bindAndShow(EntityPlayerMP player) {
-        this.player = player;
-        if (!this.show()) {
-            this.player = null;
+    @Override
+    public boolean show(Player player) {
+        Optional<Window> active = checkNotNull(player, "player").getActiveWindow();
+        if ((active.isPresent() && (active.get() instanceof AbstractSpongeWindow && ((AbstractSpongeWindow) active.get()).canDetectClientClose()))
+                || !this.show((EntityPlayerMP) player)) {
             return false;
         }
+        this.players.add((EntityPlayerMP) player);
+        ((IMixinEntityPlayerMP) player).setWindow(this);
         return true;
     }
 
-    public boolean unbindAndClose() {
-        if (this.close()) {
-            this.player = null;
-            return true;
-        }
-        return false;
+    protected abstract boolean show(EntityPlayerMP player);
+
+    @Override
+    public void close(Player player) {
+        this.sendClose((EntityPlayerMP) player);
+        this.onClosed((EntityPlayerMP) player);
+    }
+
+    protected void onClosed(EntityPlayerMP player) {
+        this.players.remove(player);
+        ((IMixinEntityPlayerMP) player).setWindow(null);
+    }
+
+    protected void sendClose(EntityPlayerMP player) {
+        // Calls displayGuiScreen(null) on the client
+        // May cause problems with containers, be sure to override if it will
+        player.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(-1));
     }
 
     protected void checkNotOpen() {
-        checkState(this.player == null, "Window is currently open");
-    }
-
-    protected abstract boolean show();
-
-    protected boolean close() {
-        // Calls displayGuiScreen(null) on the client
-        // May cause problems, be sure to override if it will
-        this.player.playerNetServerHandler.sendPacket(new S2EPacketCloseWindow(-1));
-        return true;
+        checkState(this.players.isEmpty(), "Window is currently shown to one or more players");
     }
 
     public boolean canDetectClientClose() {
         return false;
-    }
-
-    // Called when the client closes the GUI, as determined by the packet sent.
-    // see PacketUtil#handleGuiClose
-    public void onClientClose(Packet<INetHandlerPlayServer> packet) {
-        ((IMixinEntityPlayerMP) this.player).informWindowClosed();
-        this.player = null;
     }
 
 }

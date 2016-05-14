@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.gui.window;
 
+import net.minecraft.entity.player.EntityPlayerMP;
 import org.spongepowered.api.gui.window.PlayerInventoryWindow;
 import org.spongepowered.api.item.inventory.Container;
 
@@ -33,11 +34,11 @@ public class SpongePlayerInventoryWindow extends AbstractSpongeWindow implements
 
     @Override
     public Optional<Container> getContainer() {
-        return Optional.of((Container) this.player.inventoryContainer);
+        return Optional.empty();// TODO Optional.of((Container) this.player.inventoryContainer);
     }
 
     @Override
-    protected boolean show() {
+    protected boolean show(EntityPlayerMP player) {
         // TODO Auto-generated method stub
         return false;
     }

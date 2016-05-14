@@ -26,6 +26,7 @@ package org.spongepowered.common.interfaces.entity.player;
 
 import com.flowpowered.math.vector.Vector3d;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.gui.window.Window;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
@@ -56,7 +57,7 @@ public interface IMixinEntityPlayerMP extends IMixinEntityPlayer {
     // todo
     void restorePacketItem();
 
-    void informWindowClosed();
+    void setWindow(Window window);
 
     int incrementAndGetWindowId();
 
