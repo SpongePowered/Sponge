@@ -75,6 +75,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.gui.window.Window;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -154,9 +155,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
+    @Shadow private int currentWindowId;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
+    @Shadow protected abstract void getNextWindowId();
+
+    private Window openWindow;
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -613,6 +618,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void resetBlockChange(int x, int y, int z) {
         S23PacketBlockChange packet = new S23PacketBlockChange(this.worldObj, new BlockPos(x, y, z));
         this.playerNetServerHandler.sendPacket(packet);
+    }
+
+    @Override
+    public Optional<Window> getActiveWindow() {
+        return Optional.ofNullable(this.openWindow);
+    }
+
+    @Override
+    public void setWindow(Window window) {
+        this.openWindow = window;
+    }
+
+    @Override
+    public int incrementAndGetWindowId() {
+        getNextWindowId();
+        return this.currentWindowId;
     }
 
 }

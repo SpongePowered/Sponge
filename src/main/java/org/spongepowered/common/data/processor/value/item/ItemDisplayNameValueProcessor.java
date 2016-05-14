@@ -33,13 +33,12 @@ import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.text.Text;
-import org.spongepowered.api.text.serializer.TextSerializers;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.processor.common.AbstractSpongeValueProcessor;
-import org.spongepowered.common.data.util.DataConstants;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.text.SpongeTexts;
 
 import java.util.Optional;
@@ -60,7 +59,7 @@ public class ItemDisplayNameValueProcessor extends AbstractSpongeValueProcessor<
     protected boolean set(ItemStack container, Text value) {
         final String legacy = SpongeTexts.toLegacy(value);
         if (container.getItem() == Items.written_book) {
-            NBTTagCompound mainCompound = container.getTagCompound();
+            NBTTagCompound mainCompound = ItemStackUtil.getTagCompound(container);
             mainCompound.setString(NbtDataUtil.ITEM_BOOK_TITLE, legacy);
         } else {
             container.setStackDisplayName(legacy);

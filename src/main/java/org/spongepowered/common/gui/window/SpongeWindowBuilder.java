@@ -22,35 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.gui.window.Window;
-import org.spongepowered.api.text.channel.MessageChannel;
 
-import javax.annotation.Nullable;
+public abstract class SpongeWindowBuilder<W extends Window, B extends Window.Builder<W, B>> implements Window.Builder<W, B> {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    @Override
+    public B from(W value) {
+        return reset();
     }
 
-    User getUserObject();
-
-    void setVelocityOverride(@Nullable Vector3d velocity);
-
-    MessageChannel getDeathMessageChannel();
-
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void setWindow(Window window);
-
-    int incrementAndGetWindowId();
+    @SuppressWarnings("unchecked")
+    @Override
+    public B reset() {
+        return (B) this;
+    }
 
 }

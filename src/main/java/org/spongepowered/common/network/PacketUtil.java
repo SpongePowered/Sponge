@@ -30,29 +30,44 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.INetHandler;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
+import net.minecraft.network.play.INetHandlerPlayServer;
+import net.minecraft.network.play.client.C03PacketPlayer;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0BPacketEntityAction;
+import net.minecraft.network.play.client.C0BPacketEntityAction.Action;
+import net.minecraft.network.play.client.C0CPacketInput;
+import net.minecraft.network.play.client.C0DPacketCloseWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C16PacketClientStatus;
+import net.minecraft.network.play.client.C16PacketClientStatus.EnumState;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntitySign;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.ChatStyle;
 import net.minecraft.util.EnumChatFormatting;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.gui.window.Window;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.gui.window.AbstractSpongeContainerWindow;
+import org.spongepowered.common.gui.window.SpongeSignWindow;
+import org.spongepowered.common.gui.window.SpongeSleepingWindow;
+import org.spongepowered.common.gui.window.SpongeWinGameWindow;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 
+import java.util.Optional;
+
 public class PacketUtil {
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
+    @SuppressWarnings("unchecked")
+    public static <T extends INetHandler> void onProcessPacket(Packet<T> packetIn, T netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
             StaticMixinHelper.processingPacket = packetIn;
             StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
@@ -76,22 +91,12 @@ public class PacketUtil {
                 }
             }
 
-            // Fix invisibility respawn exploit
-            // Disabled until it can be tested further
-            /*if (packetIn instanceof C16PacketClientStatus) {
-                C16PacketClientStatus statusPacket = (C16PacketClientStatus) packetIn;
-                if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
-                    if (!StaticMixinHelper.packetPlayer.isDead) {
-                        SpongeHooks.logExploitRespawnInvisibility(StaticMixinHelper.packetPlayer);
-                        StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
-                        resetStaticData();
-                        return;
-                    }
-                }
+            if (interceptPacket((Packet<INetHandlerPlayServer>) packetIn, (NetHandlerPlayServer) netHandler,
+                    ((NetHandlerPlayServer) netHandler).playerEntity)) {
+                return; // Cancel normal processing
+            }
 
-            }*/
-
-            //System.out.println("RECEIVED PACKET " + packetIn);
+            // System.out.println("RECEIVED PACKET " + packetIn);
             StaticMixinHelper.lastOpenContainer = StaticMixinHelper.packetPlayer.openContainer;
             ItemStackSnapshot cursor = StaticMixinHelper.packetPlayer.inventory.getItemStack() == null ? ItemStackSnapshot.NONE
                                                                                                        : ((org.spongepowered.api.item.inventory.ItemStack) StaticMixinHelper.packetPlayer.inventory
@@ -113,6 +118,60 @@ public class PacketUtil {
         } else { // client
             packetIn.processPacket(netHandler);
         }
+    }
+
+    private static boolean interceptPacket(Packet<INetHandlerPlayServer> packet, NetHandlerPlayServer netHandler, EntityPlayerMP player) {
+        boolean ret = false;
+
+        // Fix invisibility respawn exploit
+        // Disabled until it can be tested further
+        /*
+         * if (packet instanceof C16PacketClientStatus) { C16PacketClientStatus
+         * statusPacket = (C16PacketClientStatus) packet; if
+         * (statusPacket.getStatus() ==
+         * C16PacketClientStatus.EnumState.PERFORM_RESPAWN) { if
+         * (!player.isDead) { SpongeHooks.logExploitRespawnInvisibility(player);
+         * netHandler.kickPlayerFromServer(
+         * "You have been kicked for attempting to perform an invisibility respawn exploit."
+         * ); resetStaticData(); ret = true; } } }
+         */
+
+        ret = ret || handleGuiClose(packet, player);
+        return ret;
+    }
+
+    private static boolean handleGuiClose(Packet<INetHandlerPlayServer> packet, EntityPlayerMP player) {
+        if (packet.getClass() != C03PacketPlayer.class && packet.getClass() != C03PacketPlayer.C05PacketPlayerLook.class
+                && packet.getClass() != C0CPacketInput.class && packet.getClass() != C03PacketPlayer.C04PacketPlayerPosition.class) {
+            if (!(packet instanceof C03PacketPlayer)) {
+                System.out.println(packet);
+            }
+        }
+        Optional<Window> optWindow = ((Player) player).getActiveWindow();
+        if (!optWindow.isPresent()) {
+            return false;
+        }
+        Window window = optWindow.get();
+        if (packet instanceof C12PacketUpdateSign) {
+            if (window instanceof SpongeSignWindow) {
+                return ((SpongeSignWindow) window).onClientClose(player, ((C12PacketUpdateSign) packet).getPosition(),
+                        ((C12PacketUpdateSign) packet).getLines());
+            }
+        } else if (packet instanceof C0BPacketEntityAction) {
+            if (window instanceof SpongeSleepingWindow && ((C0BPacketEntityAction) packet).getAction() == Action.STOP_SLEEPING
+                    && player.playerLocation == null) {
+                return ((SpongeSleepingWindow) window).onClientClose(player);
+            }
+        } else if (packet instanceof C16PacketClientStatus) {
+            if (window instanceof SpongeWinGameWindow && ((C16PacketClientStatus) packet).getStatus() == EnumState.PERFORM_RESPAWN) {
+                return ((SpongeWinGameWindow) window).onClientClose(player);
+            }
+        } else if (packet instanceof C0DPacketCloseWindow) {
+            if (window instanceof AbstractSpongeContainerWindow) {
+                return ((AbstractSpongeContainerWindow) window).onClientClose(player);
+            }
+        }
+        return false;
     }
 
     private static boolean creativeCheck(Packet<?> packet) {

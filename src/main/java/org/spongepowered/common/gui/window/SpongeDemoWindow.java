@@ -22,35 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.gui.window.Window;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import org.spongepowered.api.gui.window.DemoWindow;
 
-import javax.annotation.Nullable;
+public class SpongeDemoWindow extends AbstractSpongeWindow implements DemoWindow {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    @Override
+    protected boolean show(EntityPlayerMP player) {
+        player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(5, 0));
+        return true;
     }
 
-    User getUserObject();
+    public static class Builder extends SpongeWindowBuilder<DemoWindow, DemoWindow.Builder> implements DemoWindow.Builder {
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
-
-    MessageChannel getDeathMessageChannel();
-
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void setWindow(Window window);
-
-    int incrementAndGetWindowId();
+        @Override
+        public DemoWindow build() {
+            return new SpongeDemoWindow();
+        }
+    }
 
 }

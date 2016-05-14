@@ -22,35 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces;
+package org.spongepowered.common.gui.window;
 
-import com.flowpowered.math.vector.Vector3d;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.gui.window.Window;
-import org.spongepowered.api.text.channel.MessageChannel;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import org.spongepowered.api.gui.window.WinGameWindow;
 
-import javax.annotation.Nullable;
+public class SpongeWinGameWindow extends AbstractSpongeWindow implements WinGameWindow {
 
-public interface IMixinEntityPlayerMP {
-
-    void reset();
-
-    default boolean usesCustomClient() {
-        return false;
+    @Override
+    protected boolean show(EntityPlayerMP player) {
+        player.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(4, 1));
+        return true;
     }
 
-    User getUserObject();
+    @Override
+    public boolean canDetectClientClose() {
+        return true;
+    }
 
-    void setVelocityOverride(@Nullable Vector3d velocity);
+    public boolean onClientClose(EntityPlayerMP player) {
+        onClosed(player);
+        return true;
+    }
 
-    MessageChannel getDeathMessageChannel();
+    public static class Builder extends SpongeWindowBuilder<WinGameWindow, WinGameWindow.Builder> implements WinGameWindow.Builder {
 
-    void initScoreboard();
-
-    void resetAttributeMap();
-
-    void setWindow(Window window);
-
-    int incrementAndGetWindowId();
+        @Override
+        public WinGameWindow build() {
+            return new SpongeWinGameWindow();
+        }
+    }
 
 }
