@@ -55,7 +55,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.DimensionTypes;
-import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
@@ -290,9 +290,9 @@ public final class WorldManager {
         return Optional.ofNullable(worldUuidByFolderName.inverse().get(uuid));
     }
 
-    public static WorldProperties createWorldProperties(String folderName, WorldCreationSettings settings) {
+    public static WorldProperties createWorldProperties(String folderName, WorldArchetype archetype) {
         checkNotNull(folderName);
-        checkNotNull(settings);
+        checkNotNull(archetype);
         final Optional<WorldServer> optWorldServer = getWorld(folderName);
         if (optWorldServer.isPresent()) {
             return ((org.spongepowered.api.world.World) optWorldServer.get()).getProperties();
@@ -309,20 +309,20 @@ public final class WorldManager {
         WorldInfo worldInfo = saveHandler.loadWorldInfo();
 
         if (worldInfo == null) {
-            worldInfo = new WorldInfo((WorldSettings) (Object) settings, folderName);
+            worldInfo = new WorldInfo((WorldSettings) (Object) archetype, folderName);
         } else {
             ((IMixinWorldInfo) worldInfo).createWorldConfig();
-            ((WorldProperties) worldInfo).setGeneratorModifiers(settings.getGeneratorModifiers());
+            ((WorldProperties) worldInfo).setGeneratorModifiers(archetype.getGeneratorModifiers());
         }
 
         setUuidOnProperties(getCurrentSavesDirectory().get(), (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(Integer.MIN_VALUE);
-        ((IMixinWorldInfo) worldInfo).setDimensionType(settings.getDimensionType());
-        ((WorldProperties) worldInfo).setGeneratorType(settings.getGeneratorType());
+        ((IMixinWorldInfo) worldInfo).setDimensionType(archetype.getDimensionType());
+        ((WorldProperties) worldInfo).setGeneratorType(archetype.getGeneratorType());
         ((IMixinWorldInfo) worldInfo).getWorldConfig().save();
         registerWorldProperties((WorldProperties) worldInfo);
 
-        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), settings,
+        SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(Sponge.getServer())), archetype,
                 (WorldProperties) worldInfo));
 
         saveHandler.saveWorldInfoWithPlayer(worldInfo, SpongeImpl.getServer().getPlayerList().getHostPlayerData());
@@ -656,7 +656,7 @@ public final class WorldManager {
         setUuidOnProperties(dimensionId == 0 ? currentSaveRoot.getParent() : currentSaveRoot, (WorldProperties) worldInfo);
         ((IMixinWorldInfo) worldInfo).setDimensionId(dimensionId);
         SpongeImpl.postEvent(SpongeEventFactory.createConstructWorldPropertiesEvent(Cause.of(NamedCause.source(server)),
-                (WorldCreationSettings)(Object) worldSettings, (WorldProperties) worldInfo));
+                (WorldArchetype) (Object) worldSettings, (WorldProperties) worldInfo));
 
         return worldInfo;
 

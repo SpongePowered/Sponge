@@ -41,7 +41,7 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulties;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -58,15 +58,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.util.DataQueries;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
-import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.persistence.JsonTranslator;
 
 import java.util.Collection;
 
 @NonnullByDefault
 @Mixin(WorldSettings.class)
-@Implements(value = @Interface(iface = WorldCreationSettings.class, prefix = "creationSettings$"))
-public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
+@Implements(value = @Interface(iface = WorldArchetype.class, prefix = "archetype$"))
+public abstract class MixinWorldSettings implements WorldArchetype, IMixinWorldSettings {
 
     @Shadow private boolean commandsAllowed;
 
@@ -109,13 +109,13 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
             this.generateSpawnOnLoad = properties.doesGenerateSpawnOnLoad();
             this.pvpEnabled = properties.isPVPEnabled();
             this.generateBonusChest = properties.doesGenerateBonusChest();
-            GeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
+            WorldGeneratorModifierRegistryModule.getInstance().checkAllRegistered(properties.getGeneratorModifiers());
             this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
         }
     }
 
     @Intrinsic
-    public long creationSettings$getSeed() {
+    public long archetype$getSeed() {
         return this.settings$getSeed();
     }
 
@@ -156,7 +156,7 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     }
 
     @Intrinsic
-    public boolean creationSettings$areCommandsAllowed() {
+    public boolean archetype$areCommandsAllowed() {
         return this.settings$areCommandsAllowed();
     }
 

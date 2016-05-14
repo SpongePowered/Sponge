@@ -65,7 +65,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.ChunkTicketManager;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
@@ -389,8 +389,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     }
 
     @Override
-    public WorldProperties createWorldProperties(String folderName, WorldCreationSettings settings) {
-        return WorldManager.createWorldProperties(folderName, settings);
+    public WorldProperties createWorldProperties(String folderName, WorldArchetype archetype) {
+        return WorldManager.createWorldProperties(folderName, archetype);
     }
 
     @Override

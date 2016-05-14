@@ -42,9 +42,17 @@ import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
 import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataQuery;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.MemoryDataContainer;
+import org.spongepowered.api.data.key.Key;
+import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.data.merge.MergeFunction;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.value.BaseValue;
+import org.spongepowered.api.data.value.immutable.ImmutableValue;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
@@ -52,7 +60,7 @@ import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.SerializationBehaviors;
-import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -75,7 +83,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionTypeRegistryModule;
-import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.registry.type.world.WorldGeneratorModifierRegistryModule;
 import org.spongepowered.common.util.FunctionalUtil;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
@@ -87,7 +95,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(WorldInfo.class)
@@ -171,17 +183,17 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
         onConstruction(ci);
 
-        final WorldCreationSettings creationSettings = (WorldCreationSettings) (Object) settings;
-        setDimensionType(creationSettings.getDimensionType());
+        final WorldArchetype archetype = (WorldArchetype) (Object) settings;
+        setDimensionType(archetype.getDimensionType());
 
         boolean configPreviouslyExisted = createWorldConfig();
-        setEnabled(creationSettings.isEnabled());
-        setLoadOnStartup(creationSettings.loadOnStartup());
-        setKeepSpawnLoaded(creationSettings.doesKeepSpawnLoaded());
-        setGenerateSpawnOnLoad(creationSettings.doesGenerateSpawnOnLoad());
-        setDifficulty(creationSettings.getDifficulty());
-        setGeneratorModifiers(creationSettings.getGeneratorModifiers());
-        setSerializationBehavior(creationSettings.getSerializationBehavior());
+        setEnabled(archetype.isEnabled());
+        setLoadOnStartup(archetype.loadOnStartup());
+        setKeepSpawnLoaded(archetype.doesKeepSpawnLoaded());
+        setGenerateSpawnOnLoad(archetype.doesGenerateSpawnOnLoad());
+        setDifficulty(archetype.getDifficulty());
+        setGeneratorModifiers(archetype.getGeneratorModifiers());
+        setSerializationBehavior(archetype.getSerializationBehavior());
         // Mark configs enabled if coming from WorldCreationSettings builder and config didn't previously exist.
         if (!configPreviouslyExisted && ((IMixinWorldSettings) (Object) settings).isFromBuilder()) {
             this.worldConfig.getConfig().setConfigEnabled(true);
@@ -509,6 +521,11 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     }
 
     @Override
+    public int getContentVersion() {
+        return 0;
+    }
+
+    @Override
     public DataContainer toContainer() {
         return NbtTranslator.getInstance().translateFrom(cloneNBTCompound(null));
     }
@@ -599,7 +616,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public Collection<WorldGeneratorModifier> getGeneratorModifiers() {
-        return GeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
+        return WorldGeneratorModifierRegistryModule.getInstance().toModifiers(this.worldConfig.getConfig().getWorldGenModifiers());
     }
 
     @Override
@@ -607,7 +624,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         checkNotNull(modifiers, "modifiers");
 
         this.worldConfig.getConfig().getWorldGenModifiers().clear();
-        this.worldConfig.getConfig().getWorldGenModifiers().addAll(GeneratorModifierRegistryModule.getInstance().toIds(modifiers));
+        this.worldConfig.getConfig().getWorldGenModifiers().addAll(WorldGeneratorModifierRegistryModule.getInstance().toIds(modifiers));
     }
 
     @Override
@@ -726,5 +743,133 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         NBTTagCompound additionalProperties = (NBTTagCompound) this.spongeRootLevelNbt.copy();
         additionalProperties.removeTag(SpongeImpl.ECOSYSTEM_NAME);
         return NbtTranslator.getInstance().translateFrom(additionalProperties);
+    }
+
+    @Override public <T extends DataManipulator<?, ?>> Optional<T> get(Class<T> containerClass) {
+        return null;
+    }
+
+    @Override public <T extends DataManipulator<?, ?>> Optional<T> getOrCreate(Class<T> containerClass) {
+        return null;
+    }
+
+    @Override public boolean supports(Class<? extends DataManipulator<?, ?>> holderClass) {
+        return false;
+    }
+
+    @Override public <E> DataTransactionResult transform(Key<? extends BaseValue<E>> key, Function<E, E> function) {
+        return null;
+    }
+
+    @Override public <E> DataTransactionResult offer(Key<? extends BaseValue<E>> key, E value) {
+        return null;
+    }
+
+    @Override public <E> DataTransactionResult tryOffer(Key<? extends BaseValue<E>> key, E value) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override public <E> DataTransactionResult offer(BaseValue<E> value) {
+        return null;
+    }
+
+    @Override public <E> DataTransactionResult tryOffer(BaseValue<E> value) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override public DataTransactionResult offer(DataManipulator<?, ?> valueContainer) {
+        return null;
+    }
+
+    @Override public DataTransactionResult tryOffer(DataManipulator<?, ?> valueContainer) {
+        return null;
+    }
+
+    @Override public DataTransactionResult offer(DataManipulator<?, ?> valueContainer, MergeFunction function) {
+        return null;
+    }
+
+    @Override public DataTransactionResult tryOffer(DataManipulator<?, ?> valueContainer, MergeFunction function) throws IllegalArgumentException {
+        return null;
+    }
+
+    @Override public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers) {
+        return null;
+    }
+
+    @Override public DataTransactionResult offer(Iterable<DataManipulator<?, ?>> valueContainers, MergeFunction function) {
+        return null;
+    }
+
+    @Override public DataTransactionResult remove(Class<? extends DataManipulator<?, ?>> containerClass) {
+        return null;
+    }
+
+    @Override public DataTransactionResult remove(BaseValue<?> value) {
+        return null;
+    }
+
+    @Override public DataTransactionResult remove(Key<?> key) {
+        return null;
+    }
+
+    @Override public DataTransactionResult undo(DataTransactionResult result) {
+        return null;
+    }
+
+    @Override public DataTransactionResult copyFrom(DataHolder that) {
+        return null;
+    }
+
+    @Override public DataTransactionResult copyFrom(DataHolder that, MergeFunction function) {
+        return null;
+    }
+
+    @Override public Collection<DataManipulator<?, ?>> getContainers() {
+        return null;
+    }
+
+    @Override public <E> Optional<E> get(Key<? extends BaseValue<E>> key) {
+        return null;
+    }
+
+    @Nullable @Override public <E> E getOrNull(Key<? extends BaseValue<E>> key) {
+        return null;
+    }
+
+    @Override public <E> E getOrElse(Key<? extends BaseValue<E>> key, E defaultValue) {
+        return null;
+    }
+
+    @Override public <E, V extends BaseValue<E>> Optional<V> getValue(Key<V> key) {
+        return null;
+    }
+
+    @Override public boolean supports(Key<?> key) {
+        return false;
+    }
+
+    @Override public boolean supports(BaseValue<?> baseValue) {
+        return false;
+    }
+
+    @Override public DataHolder copy() {
+        return null;
+    }
+
+    @Override public Set<Key<?>> getKeys() {
+        return null;
+    }
+
+    @Override public Set<ImmutableValue<?>> getValues() {
+        return null;
+    }
+
+    @Override public boolean validateRawData(DataContainer container) {
+        return false;
+    }
+
+    @Override public void setRawData(DataContainer container) throws InvalidDataException {
+
     }
 }

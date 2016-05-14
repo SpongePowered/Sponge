@@ -45,10 +45,10 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public class GeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
+public class WorldGeneratorModifierRegistryModule implements AlternateCatalogRegistryModule<WorldGeneratorModifier>,
         SpongeAdditionalCatalogRegistryModule<WorldGeneratorModifier> {
 
-    public static GeneratorModifierRegistryModule getInstance() {
+    public static WorldGeneratorModifierRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
@@ -148,10 +148,10 @@ public class GeneratorModifierRegistryModule implements AlternateCatalogRegistry
         return modifiers;
     }
 
-    GeneratorModifierRegistryModule() {}
+    WorldGeneratorModifierRegistryModule() {}
 
     private static final class Holder {
 
-        static final GeneratorModifierRegistryModule INSTANCE = new GeneratorModifierRegistryModule();
+        static final WorldGeneratorModifierRegistryModule INSTANCE = new WorldGeneratorModifierRegistryModule();
     }
 }

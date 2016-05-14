@@ -88,7 +88,7 @@ import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.WorldCreationSettings;
+import org.spongepowered.api.world.WorldArchetype;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.explosion.Explosion;
@@ -151,7 +151,7 @@ import org.spongepowered.common.scoreboard.builder.SpongeObjectiveBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
-import org.spongepowered.common.world.SpongeWorldCreationSettingsBuilder;
+import org.spongepowered.common.world.SpongeWorldArchetypeBuilder;
 import org.spongepowered.common.world.gen.builders.*;
 
 import java.lang.reflect.Field;
@@ -201,7 +201,7 @@ public final class CommonModuleRegistry {
             .registerBuilderSupplier(IndirectEntityDamageSource.Builder.class, SpongeIndirectEntityDamageSourceBuilder::new)
             .registerBuilderSupplier(FallingBlockDamageSource.Builder.class, SpongeFallingBlockDamgeSourceBuilder::new)
             .registerBuilderSupplier(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
-            .registerBuilderSupplier(WorldCreationSettings.Builder.class, SpongeWorldCreationSettingsBuilder::new)
+            .registerBuilderSupplier(WorldArchetype.Builder.class, SpongeWorldArchetypeBuilder::new)
             .registerBuilderSupplier(Explosion.Builder.class, SpongeExplosionBuilder::new)
             .registerBuilderSupplier(BlockState.Builder.class, SpongeBlockStateBuilder::new)
             .registerBuilderSupplier(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::new)
@@ -304,7 +304,7 @@ public final class CommonModuleRegistry {
             .registerModule(Fish.class, new FishRegistryModule())
             .registerModule(FluidType.class, FluidTypeRegistryModule.getInstance())
             .registerModule(GameMode.class, new GameModeRegistryModule())
-            .registerModule(GeneratorType.class, new GeneratorRegistryModule())
+            .registerModule(GeneratorType.class, new GeneratorTypeRegistryModule())
             .registerModule(GoalType.class, GoalTypeModule.getInstance())
             .registerModule(GoldenApple.class, new GoldenAppleRegistryModule())
             .registerModule(Hinge.class, new HingeRegistryModule())
@@ -351,11 +351,11 @@ public final class CommonModuleRegistry {
             .registerModule(Visibility.class, new VisibilityRegistryModule())
             .registerModule(WallType.class, new WallTypeRegistryModule())
             .registerModule(Weather.class, new WeatherRegistryModule())
-            .registerModule(WorldGeneratorModifier.class, GeneratorModifierRegistryModule.getInstance())
+            .registerModule(WorldGeneratorModifier.class, WorldGeneratorModifierRegistryModule.getInstance())
             .registerModule(TransactionType.class, new TransactionTypeRegistryModule())
             .registerModule(ChatVisibility.class, new ChatVisibilityRegistryModule())
             .registerModule(SkinPart.class, new SkinPartRegistryModule())
-            .registerModule(WorldCreationSettings.class, WorldCreationSettingsRegistryModule.getInstance())
+            .registerModule(WorldArchetype.class, WorldArchetypeRegistryModule.getInstance())
             ;
     }
 
