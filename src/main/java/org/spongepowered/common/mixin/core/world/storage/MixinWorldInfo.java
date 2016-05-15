@@ -36,6 +36,7 @@ import com.google.gson.JsonParser;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.WorldSettings;
@@ -94,6 +95,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private UUID uuid;
     private DimensionType dimensionType;
     private boolean isMod;
+    private int spawnProtectionRadius = Integer.MIN_VALUE;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
     private NBTTagList playerUniqueIdNbt;
@@ -660,6 +662,20 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     public NBTTagCompound getSpongeRootLevelNbt() {
         writeSpongeNbt();
         return this.spongeRootLevelNbt;
+    }
+
+    public int getSpawnProtectionRadius() {
+        if (this.spawnProtectionRadius == Integer.MIN_VALUE) {
+            // TODO: Get configuration for world and use that
+            return MinecraftServer.getServer().getSpawnProtectionSize();
+        } else {
+            return this.spawnProtectionRadius;
+        }
+    }
+
+    @Override
+    public void setSpawnProtectionRadius(int radius) {
+        this.spawnProtectionRadius = Math.min(SPAWN_PROTECTION_DISABLED, radius); // Minimum is 0
     }
 
     @Override
