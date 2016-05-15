@@ -692,23 +692,22 @@ public final class WorldManager {
     private static WorldServer[] reorderWorldsVanillaFirst() {
         final List<WorldServer> sorted = new ArrayList<>(worldByDimensionId.valueCollection());
 
+        int count = 0;
+
         // Ensure that we'll load in Vanilla order then plugins
         WorldServer worldServer = worldByDimensionId.get(0);
         sorted.remove(worldServer);
-        sorted.add(0, worldServer);
+        sorted.add(count, worldServer);
 
-        int count = 1;
         worldServer = worldByDimensionId.get(-1);
         if (worldServer != null) {
             sorted.remove(worldServer);
-            sorted.add(1, worldServer);
-            count++;
+            sorted.add(++count, worldServer);
         }
         worldServer = worldByDimensionId.get(1);
         if (worldServer != null) {
             sorted.remove(worldServer);
-            sorted.add(2, worldServer);
-            count++;
+            sorted.add(++count, worldServer);
         }
 
         sorted.subList(count, sorted.size()).sort(WORLD_SERVER_COMPARATOR);
