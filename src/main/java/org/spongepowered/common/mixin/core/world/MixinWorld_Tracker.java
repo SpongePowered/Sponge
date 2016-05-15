@@ -33,6 +33,8 @@ import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityArmorStand;
+import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.util.BlockPos;
@@ -45,6 +47,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.plugin.PluginContainer;
@@ -188,7 +191,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
     }
 
-
     @Override
     public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
         this.rotationUpdates.put(entity, rotation);
@@ -285,7 +287,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @Inject(method = "spawnEntityInWorld", at = @At("HEAD"), cancellable = true)
     public void onSpawnEntityInWorld(net.minecraft.entity.Entity entity, CallbackInfoReturnable<Boolean> cir) {
         if (!this.isRemote) {
-            if (!this.causeTracker.isIgnoringSpawnEvents()) {
+            if (!canEntitySpawn(entity)) {
+                cir.setReturnValue(true);
+            } else if (!this.causeTracker.isIgnoringSpawnEvents()) {
                 cir.setReturnValue(SpongeCommonEventFactory.handleVanillaSpawnEntity(this.asMinecraftWorld(), entity));
             } else {
                 this.causeTracker.trackEntityOwner((Entity) entity);
@@ -295,7 +299,36 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
     @Override
     public boolean spawnEntity(Entity entity, Cause cause) {
-        return this.getCauseTracker().processSpawnEntity(entity, cause);
+        if (this.canEntitySpawn((net.minecraft.entity.Entity) entity)) {
+            return this.getCauseTracker().processSpawnEntity(entity, cause);
+        }
+        return false;
+    }
+
+    private boolean canEntitySpawn(net.minecraft.entity.Entity entity) {
+        // do not drop any items while restoring blocksnapshots. Prevents dupes
+        if (!this.isRemote && (entity == null || (entity instanceof net.minecraft.entity.item.EntityItem && this.causeTracker.isRestoringBlocks()))) {
+            return false;
+        } else if ((!(entity instanceof EntityPlayer) && causeTracker.isCapturingSpawnedEntities() && !causeTracker.isCapturingTerrainGen()) || isBlockBreak()) {
+            if (entity instanceof EntityItem) {
+                this.causeTracker.getCapturedSpawnedEntityItems().add((Item) entity);
+            } else {
+                this.causeTracker.getCapturedSpawnedEntities().add((Entity) entity);
+            }
+            return false;
+        }
+
+        return true;
+    }
+
+    private boolean isBlockBreak() {
+        if (this.causeTracker.getCapturedSpongeBlockSnapshots().size() > 0) {
+            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) this.causeTracker.getCapturedSpongeBlockSnapshots().get(0);
+            if (blockSnapshot.captureType == CaptureType.BREAK) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

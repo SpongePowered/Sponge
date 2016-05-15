@@ -456,6 +456,25 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
+    public EntityItem onPlayerDropItem(EntityPlayerMP player, boolean dropAll) {
+        EntityItem item = null;
+        ItemStack stack = this.playerEntity.inventory.getCurrentItem();
+        if (stack != null) {
+            int size = stack.stackSize;
+            item = this.playerEntity.dropOneItem(dropAll);
+            // force client itemstack update if drop event was cancelled
+            if (item == null) {
+                Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
+                int windowId = this.playerEntity.openContainer.windowId;
+                stack.stackSize = size;
+                this.sendPacket(new S2FPacketSetSlot(windowId, slot.slotNumber, stack));
+            }
+        }
+
+        return item;
+    }
+
     @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/ItemInWorldManager;onBlockClicked(Lnet/minecraft/util/BlockPos;Lnet/minecraft/util/EnumFacing;)V"))
     public void handleLeftBlockClick(ItemInWorldManager itemInWorldManager, BlockPos pos, EnumFacing side) {
         Location<World> location = new Location<>((World) this.playerEntity.worldObj, VecHelper.toVector(pos));

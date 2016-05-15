@@ -70,7 +70,6 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
-import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -947,50 +946,43 @@ public final class CauseTracker {
                 return true;
             }
 
-            if (!flag && this.captureSpawnedEntities && !this.captureTerrainGen) {
-                if (entityIn instanceof EntityItem) {
-                    this.capturedSpawnedEntityItems.add((Item) entityIn);
-                } else {
-                    this.capturedSpawnedEntities.add((Entity) entityIn);
-                }
+            if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
+                // TODO MixinEntityFishHook.setShooter makes angler null
+                // sometimes, but that will cause NPE when ticking
+                return false;
+            }
 
-                return true;
-            } else {
-
-                if (entityIn instanceof EntityFishHook && ((EntityFishHook) entityIn).angler == null) {
-                    // TODO MixinEntityFishHook.setShooter makes angler null
-                    // sometimes, but that will cause NPE when ticking
-                    return false;
-                }
-
-                org.spongepowered.api.event.Event event = null;
-                List<Entity> entitiesToSpawn = Lists.newArrayList(entity);
-                ImmutableList<EntitySnapshot> entitySnapshots = ImmutableList.of(entity.createSnapshot());
-                EntityLivingBase entityLiving = null;
-                net.minecraft.entity.Entity nonLivingEntity = null;
-                if (this.currentTickEntity instanceof EntityLivingBase) {
-                    entityLiving = (EntityLivingBase) this.currentTickEntity;
-                } else if (this.currentTickEntity != null) {
-                    nonLivingEntity = (net.minecraft.entity.Entity) this.currentTickEntity;
-                }
+            org.spongepowered.api.event.Event event = null;
+            List<Entity> entitiesToSpawn = Lists.newArrayList(entity);
+            ImmutableList<EntitySnapshot> entitySnapshots = ImmutableList.of(entity.createSnapshot());
+            EntityLivingBase entityLiving = null;
+            net.minecraft.entity.Entity nonLivingEntity = null;
+            if (this.currentTickEntity instanceof EntityLivingBase) {
+                entityLiving = (EntityLivingBase) this.currentTickEntity;
+            } else if (this.currentTickEntity != null) {
+                nonLivingEntity = (net.minecraft.entity.Entity) this.currentTickEntity;
+            }
+            if (entityIn instanceof EntityItem) {
                 if ((nonLivingEntity != null && nonLivingEntity.isDead) || entityIn instanceof EntityXPOrb || (entityLiving != null && (entityLiving.getHealth() <= 0 || entityLiving.isDead))) {
                     event = SpongeEventFactory.createDropItemEventDestruct(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
                 } else {
-                    event = SpongeEventFactory.createSpawnEntityEvent(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
+                    event = SpongeEventFactory.createDropItemEventDispense(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
                 }
-
-                if (!SpongeImpl.postEvent(event)) {
-                    if (entityIn instanceof EntityWeatherEffect) {
-                        return addWeatherEffect(entityIn, this.currentCause);
-                    }
-                    this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
-                    this.getMinecraftWorld().loadedEntityList.add(entityIn);
-                    this.getMixinWorld().onSpongeEntityAdded(entityIn);
-                    return true;
-                }
-
-                return false;
+            } else {
+                event = SpongeEventFactory.createSpawnEntityEvent(this.currentCause, entitiesToSpawn, entitySnapshots, this.getWorld());
             }
+
+            if (!SpongeImpl.postEvent(event)) {
+                if (entityIn instanceof EntityWeatherEffect) {
+                    return addWeatherEffect(entityIn, this.currentCause);
+                }
+                this.getMinecraftWorld().getChunkFromChunkCoords(i, j).addEntity(entityIn);
+                this.getMinecraftWorld().loadedEntityList.add(entityIn);
+                this.getMixinWorld().onSpongeEntityAdded(entityIn);
+                return true;
+            }
+
+            return false;
         }
     }
 
