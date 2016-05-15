@@ -56,6 +56,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -89,6 +90,9 @@ public final class SpongeImpl {
     private static SpongeImpl instance;
 
     @Nullable private static SpongeConfig<SpongeConfig.GlobalConfig> globalConfig;
+
+
+    public static final Random random = new Random();
 
     private final Injector injector;
     private final Game game;

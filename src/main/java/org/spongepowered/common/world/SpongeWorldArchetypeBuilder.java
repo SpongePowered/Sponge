@@ -260,7 +260,7 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
         this.gameMode = GameModes.SURVIVAL;
         this.difficulty = Difficulties.NORMAL;
         this.serializationBehavior = SerializationBehaviors.AUTOMATIC;
-        this.seed = SpongeImpl.getServer().random.nextLong();
+        this.seed = SpongeImpl.random.nextLong();
         this.mapFeaturesEnabled = true;
         this.hardcore = false;
         this.worldEnabled = true;
