@@ -29,6 +29,7 @@ import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
 import static org.spongepowered.api.command.args.GenericArguments.literal;
 import static org.spongepowered.api.command.args.GenericArguments.optional;
+import static org.spongepowered.api.command.args.GenericArguments.plugin;
 import static org.spongepowered.api.command.args.GenericArguments.seq;
 import static org.spongepowered.api.command.args.GenericArguments.string;
 import static org.spongepowered.api.command.args.GenericArguments.world;
@@ -37,16 +38,18 @@ import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.CommandSource;
 import org.spongepowered.api.command.args.ChildCommandElementExecutor;
 import org.spongepowered.api.command.args.CommandContext;
-import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -71,9 +74,6 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.annotation.Nullable;
 
 @NonnullByDefault
 public class SpongeCommand {
@@ -279,7 +279,7 @@ public class SpongeCommand {
 
     private static CommandSpec getReloadCommand() {
         return CommandSpec.builder()
-                .description(Text.of("Reload the Sponge configuration"))
+                .description(Text.of("Reload the Sponge game"))
                 .permission("sponge.command.reload")
                 .executor(new ConfigUsingExecutor() {
                     @Override
@@ -355,24 +355,6 @@ public class SpongeCommand {
                 .build();
     }
 
-    private static class PluginsCommandElement extends PatternMatchingCommandElement {
-
-        protected PluginsCommandElement(@Nullable Text key) {
-            super(key);
-        }
-
-        @Override
-        protected Iterable<String> getChoices(CommandSource source) {
-            return Sponge.getPluginManager().getPlugins().stream().map(PluginContainer::getId).collect(Collectors.toList());
-        }
-
-        @Override
-        protected Object getValue(String choice) throws IllegalArgumentException {
-            Optional<PluginContainer> plugin = Sponge.getPluginManager().getPlugin(choice);
-            return plugin.orElseThrow(() -> new IllegalArgumentException("Plugin " + choice + " was not found"));
-        }
-    }
-
     static Text title(String title) {
         return Text.of(TextColors.GREEN, title);
     }
@@ -381,9 +363,13 @@ public class SpongeCommand {
         return CommandSpec.builder()
                 .description(Text.of("List currently installed plugins"))
                 .permission("sponge.command.plugins")
-                .arguments(optional(new PluginsCommandElement(Text.of("plugin"))))
+                .arguments(optional(string(Text.of("reload"))), optional(plugin(Text.of("plugin"))))
                 .executor((src, args) -> {
-                    if (args.hasAny("plugin")) {
+                    if (args.hasAny("reload")) {
+                        src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
+                        SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Cause.of(NamedCause.source(src))));
+                        src.sendMessage(Text.of("Reload complete!"));
+                    } else if (args.hasAny("plugin")) {
                         for (PluginContainer container : args.<PluginContainer>getAll("plugin")) {
                             Text.Builder builder = Text.builder().append(title(container.getName()));
                             container.getVersion().ifPresent(version -> builder.append(Text.of((" v" + version))));
