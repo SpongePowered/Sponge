@@ -45,7 +45,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
-import org.spongepowered.api.event.entity.DisplaceEntityEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -187,72 +187,48 @@ public final class WorldPhase extends TrackingPhase {
                         });
                 phaseContext.getCapturedBlockSupplier()
                         .ifPresentAndNotEmpty(blockSnapshots -> GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext));
-                if (tickingEntity instanceof Player) {
+
+                this.fireMovementEvents(EntityUtil.toNative(tickingEntity));
+            }
+
+            private void fireMovementEvents(net.minecraft.entity.Entity entity) {
+                if (entity instanceof Player) {
                     return; // this is handled elsewhere
                 }
-                final net.minecraft.entity.Entity minecraftEntity = EntityUtil.toNative(tickingEntity);
+                Cause entityCause = Cause.of(NamedCause.source(entity));
 
-                boolean livingRotate = false;
-                if (minecraftEntity instanceof EntityLivingBase) {
-                    EntityLivingBase living = (EntityLivingBase) minecraftEntity;
-                    livingRotate = living.rotationYawHead != living.prevRotationYawHead;
-                }
+                this.firePositionEvent(entity, entityCause);
+                this.fireRotationEvent(entity, entityCause);
+                this.fireRotationHeadEvent(entity, entityCause);
+            }
 
-                if (minecraftEntity.lastTickPosX != minecraftEntity.posX
-                    || minecraftEntity.lastTickPosY != minecraftEntity.posY
-                    || minecraftEntity.lastTickPosZ != minecraftEntity.posZ
-                    || minecraftEntity.rotationPitch != minecraftEntity.prevRotationPitch
-                    || minecraftEntity.rotationYaw != minecraftEntity.prevRotationYaw
-                    || livingRotate) {
+            private void firePositionEvent(net.minecraft.entity.Entity entity, Cause cause) {
+                Entity spongeEntity = (Entity) entity;
+
+                if (entity.lastTickPosX != entity.posX
+                        || entity.lastTickPosY != entity.posY
+                        || entity.lastTickPosZ != entity.posZ) {
                     // yes we have a move event.
-                    final double currentPosX = minecraftEntity.posX;
-                    final double currentPosY = minecraftEntity.posY;
-                    final double currentPosZ = minecraftEntity.posZ;
-                    final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
-                    final double currentRotPitch = minecraftEntity.rotationPitch;
-                    final double currentRotYaw = minecraftEntity.rotationYaw;
-                    Vector3d currentRotationVector = new Vector3d(currentRotPitch, currentRotYaw, 0);
-                    DisplaceEntityEvent.Move event;
-                    Transform<World> previous = new Transform<>(tickingEntity.getWorld(),
-                            new Vector3d(minecraftEntity.prevPosX, minecraftEntity.prevPosY, minecraftEntity.prevPosZ),
-                            new Vector3d(minecraftEntity.prevRotationPitch, minecraftEntity.prevRotationYaw, 0)
-                    );
-                    Location<World>
-                            currentLocation = new Location<>(tickingEntity.getWorld(), currentPosX, currentPosY, currentPosZ);
-                    Transform<org.spongepowered.api.world.World> current = new Transform<>(currentLocation, currentRotationVector, tickingEntity.getScale());
+                    final double currentPosX = entity.posX;
+                    final double currentPosY = entity.posY;
+                    final double currentPosZ = entity.posZ;
 
-                    if (minecraftEntity instanceof Humanoid) {
-                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetHumanoid(Cause.of(NamedCause.source(tickingEntity)),
-                                previous, current, (Humanoid) minecraftEntity);
-                    } else if (minecraftEntity instanceof Living) {
-                        event = SpongeEventFactory.createDisplaceEntityEventMoveTargetLiving(Cause.of(NamedCause.source(tickingEntity)), previous,
-                                current, EntityUtil.fromNativeToLiving(minecraftEntity));
+                    final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
+                    final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
+
+                    MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(cause, oldPositionVector, currentPositionVector, spongeEntity);
+
+                    if (SpongeImpl.postEvent(event)) {
+                        entity.posX = entity.lastTickPosX;
+                        entity.posY = entity.lastTickPosY;
+                        entity.posZ = entity.lastTickPosZ;
+
                     } else {
-                        event = SpongeEventFactory.createDisplaceEntityEventMove(Cause.of(NamedCause.source(tickingEntity)), previous, current,
-                                tickingEntity);
-                    }
-                    SpongeImpl.postEvent(event);
-                    if (event.isCancelled()) {
-                        minecraftEntity.posX = minecraftEntity.lastTickPosX;
-                        minecraftEntity.posY = minecraftEntity.lastTickPosY;
-                        minecraftEntity.posZ = minecraftEntity.lastTickPosZ;
-                        minecraftEntity.rotationPitch = minecraftEntity.prevRotationPitch;
-                        minecraftEntity.rotationYaw = minecraftEntity.prevRotationYaw;
-                        if (minecraftEntity instanceof EntityLivingBase) {
-                            ((EntityLivingBase) minecraftEntity).rotationYawHead = ((EntityLivingBase) minecraftEntity).prevRotationYawHead;
-                        }
-                    } else {
-                        Transform<org.spongepowered.api.world.World> worldTransform = event.getToTransform();
-                        Vector3d eventPosition = worldTransform.getPosition();
-                        Vector3d eventRotation = worldTransform.getRotation();
-                        if (!eventPosition.equals(currentPositionVector)) {
-                            minecraftEntity.posX = eventPosition.getX();
-                            minecraftEntity.posY = eventPosition.getY();
-                            minecraftEntity.posZ = eventPosition.getZ();
-                        }
-                        if (!eventRotation.equals(currentRotationVector)) {
-                            minecraftEntity.rotationPitch = (float) currentRotationVector.getX();
-                            minecraftEntity.rotationYaw = (float) currentRotationVector.getY();
+                        Vector3d newPosition = event.getToPosition();
+                        if (!newPosition.equals(currentPositionVector)) {
+                            entity.posX = newPosition.getX();
+                            entity.posY = newPosition.getY();
+                            entity.posZ = newPosition.getZ();
                         }
                         //entity.setPositionAndRotation(position.getX(), position.getY(), position.getZ(), rotation.getFloorX(), rotation.getFloorY());
                         /*
@@ -266,6 +242,54 @@ public final class WorldPhase extends TrackingPhase {
                         logic.
                          */
                         //((Entity) entity).setTransform(event.getToTransform());
+                    }
+                }
+            }
+
+            private void fireRotationEvent(net.minecraft.entity.Entity entity, Cause cause) {
+                if (entity.rotationPitch != entity.prevRotationPitch
+                        || entity.rotationYaw != entity.prevRotationYaw) {
+
+                    Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
+                    Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
+                    MoveEntityEvent.Rotation event =
+                            SpongeEventFactory.createMoveEntityEventRotation(cause, oldRotationVector, currentRotationVector, (Entity) entity);
+
+                    if (SpongeImpl.postEvent(event)) {
+                        entity.rotationPitch = entity.prevRotationPitch;
+                        entity.rotationYaw = entity.prevRotationYaw;
+                    } else {
+                        Vector3d eventVector = event.getToRotation();
+                        if (!eventVector.equals(currentRotationVector)) {
+                            entity.rotationPitch = (float) currentRotationVector.getX();
+                            entity.rotationYaw = (float) currentRotationVector.getY();
+                        }
+                    }
+                }
+            }
+
+            private void fireRotationHeadEvent(net.minecraft.entity.Entity entity, Cause cause) {
+                boolean livingRotate = false;
+                if (entity instanceof EntityLivingBase) {
+                    EntityLivingBase living = (EntityLivingBase) entity;
+                    livingRotate = living.rotationYawHead != living.prevRotationYawHead;
+                }
+
+                if (livingRotate) {
+                    EntityLivingBase living = (EntityLivingBase) entity;
+
+                    Vector3d oldHeadRotation = new Vector3d(living.prevRotationPitch, living.prevRotationYawHead, 0);
+                    Vector3d currentHeadRotation = new Vector3d(living.rotationPitch, living.rotationYawHead, 0);
+                    MoveEntityEvent.Rotation.Head event = SpongeEventFactory.createMoveEntityEventRotationHead(cause, oldHeadRotation, currentHeadRotation, (Entity) entity);
+
+                    if (SpongeImpl.postEvent(event)) {
+                        ((EntityLivingBase) entity).rotationYawHead = ((EntityLivingBase) entity).prevRotationYawHead;
+                    } else {
+                        Vector3d eventVector = event.getToRotation();
+                        if (!eventVector.equals(currentHeadRotation)) {
+                            living.rotationPitch = (float) eventVector.getX();
+                            living.rotationYawHead = (float) eventVector.getY();
+                        }
                     }
                 }
             }
