@@ -129,6 +129,9 @@ public class SpongeCommonEventFactory {
         for (Object obj : notifiedSides) {
             EnumFacing notifiedSide = (EnumFacing) obj;
             BlockPos offset = pos.offset(notifiedSide);
+            if (!causeTracker.getMinecraftWorld().isBlockLoaded(offset)) {
+                continue;
+            }
             Direction direction = DirectionFacingProvider.getInstance().getKey(notifiedSide).get();
             Location<World> location = new Location<>(world, VecHelper.toVector3i(offset));
             if (location.getBlockY() >= 0 && location.getBlockY() <= 255) {
