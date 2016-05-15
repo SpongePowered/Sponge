@@ -30,7 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import org.spongepowered.api.extra.skylands.SkylandsWorldGeneratorModifier;
+import org.spongepowered.api.extra.modifier.empty.VoidWorldGeneratorModifier;
+import org.spongepowered.api.extra.modifier.skylands.SkylandsWorldGeneratorModifier;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -57,7 +58,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
 
     @Override
     public Map<String, WorldGeneratorModifier> provideCatalogMap() {
-        Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
+        final Map<String, WorldGeneratorModifier> modifierMap = new HashMap<>();
         for (Map.Entry<String, WorldGeneratorModifier> entry : this.modifierMappings.entrySet()) {
             modifierMap.put(entry.getKey().replace("sponge:", ""), entry.getValue());
         }
@@ -77,6 +78,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @Override
     public void registerDefaults() {
         registerAdditionalCatalog(new SkylandsWorldGeneratorModifier());
+        registerAdditionalCatalog(new VoidWorldGeneratorModifier());
     }
 
     @Override
@@ -87,7 +89,7 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
     @Override
     public void registerAdditionalCatalog(WorldGeneratorModifier modifier) {
         checkNotNull(modifier, "modifier");
-        String id = modifier.getId();
+        final String id = modifier.getId();
         checkId(id, "World generator ID");
 
         this.modifierMappings.put(id.toLowerCase(Locale.ENGLISH), modifier);
@@ -117,10 +119,10 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      *         registered
      */
     public ImmutableCollection<String> toIds(Collection<WorldGeneratorModifier> modifiers) {
-        ImmutableList.Builder<String> ids = ImmutableList.builder();
+        final ImmutableList.Builder<String> ids = ImmutableList.builder();
         for (WorldGeneratorModifier modifier : modifiers) {
             checkNotNull(modifier, "modifier (in collection)");
-            String id = modifier.getId();
+            final String id = modifier.getId();
             checkArgument(this.modifierMappings.containsKey(id.toLowerCase(Locale.ENGLISH)), "unregistered modifier in collection");
             ids.add(id);
         }
@@ -136,9 +138,9 @@ public class WorldGeneratorModifierRegistryModule implements AlternateCatalogReg
      * @return The modifiers
      */
     public Collection<WorldGeneratorModifier> toModifiers(Collection<String> ids) {
-        List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
+        final List<WorldGeneratorModifier> modifiers = Lists.newArrayList();
         for (String id : ids) {
-            WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
+            final WorldGeneratorModifier modifier = this.modifierMappings.get(id.toLowerCase(Locale.ENGLISH));
             if (modifier != null) {
                 modifiers.add(modifier);
             } else {

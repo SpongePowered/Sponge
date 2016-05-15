@@ -94,6 +94,10 @@ public class WorldArchetypeRegistryModule implements AdditionalCatalogRegistryMo
                 .generatorModifiers(WorldGeneratorModifiers.SKYLANDS)
                 .build("sponge:the_skylands", "The Skylands")
         );
+        this.worldCreationSettingsMap.put("sponge:the_void", WorldArchetype.builder()
+                .from(overworld)
+                .generatorModifiers(WorldGeneratorModifiers.VOID)
+                .build("sponge:the_void", "The Void"));
     }
 
     @Override
