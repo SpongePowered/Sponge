@@ -174,7 +174,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         return this.playerEntity.ping;
     }
 
-    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
+    @Redirect(method = "update", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
     private void onPlayerTick(EntityPlayerMP playerEntity) {
         if (playerEntity.worldObj.isRemote) {
             playerEntity.onUpdateEntity();
