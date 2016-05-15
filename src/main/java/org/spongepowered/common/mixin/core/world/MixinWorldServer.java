@@ -340,9 +340,9 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Redirect(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        final PhaseData currentTuple = causeTracker.getStack().peek();
-        final IPhaseState phaseState = currentTuple.getState();
-        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, currentTuple.getContext())) {
+        final PhaseData phaseData = causeTracker.getStack().peek();
+        final IPhaseState phaseState = phaseData.getState();
+        if (phaseState.getPhase().alreadyCapturingBlockTicks(phaseState, phaseData.getContext()) || phaseState.getPhase().ignoresBlockUpdateTick(phaseData)) {
             block.updateTick(worldIn, pos, state, rand);
             return;
         }

@@ -60,6 +60,7 @@ import org.spongepowered.common.event.InternalNamedCauses;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
@@ -788,6 +789,12 @@ public final class WorldPhase extends TrackingPhase {
     @Override
     public boolean ignoresBlockEvent(IPhaseState phaseState) {
         return phaseState instanceof State;
+    }
+
+
+    @Override
+    public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
+        return phaseData.getState() instanceof State && phaseData.getState() != State.WORLD_SPAWNER_SPAWNING;
     }
 
     @Override

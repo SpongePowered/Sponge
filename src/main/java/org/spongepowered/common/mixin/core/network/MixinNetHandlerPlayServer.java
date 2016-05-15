@@ -97,9 +97,14 @@ import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
+import org.spongepowered.common.event.tracking.CauseTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -167,6 +172,22 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     @Override
     public int getLatency() {
         return this.playerEntity.ping;
+    }
+
+    @Redirect(method = "onUpdate", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;onUpdateEntity()V"))
+    private void onPlayerTick(EntityPlayerMP playerEntity) {
+        if (playerEntity.worldObj.isRemote) {
+            playerEntity.onUpdateEntity();
+            return;
+        }
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.worldObj;
+        final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.PLAYER, PhaseContext.start()
+            .add(NamedCause.source(playerEntity))
+            .addCaptures()
+            .complete());
+        playerEntity.onUpdateEntity();
+        causeTracker.completePhase();
     }
 
     /**

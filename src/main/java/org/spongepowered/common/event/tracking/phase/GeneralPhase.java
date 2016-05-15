@@ -160,7 +160,7 @@ public final class GeneralPhase extends TrackingPhase {
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be unwinding a phase, but no phase found!", phaseContext));
             final PhaseContext unwindingContext = phaseContext.firstNamed(InternalNamedCauses.Tracker.UNWINDING_CONTEXT, PhaseContext.class)
                     .orElseThrow(PhaseUtil.throwWithContext("Expected to be unwinding a phase, but no context found!", phaseContext));
-            state.getPhase().postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
+            this.postDispatch(causeTracker, unwindingState, unwindingContext, phaseContext);
         }
     }
 
@@ -201,7 +201,6 @@ public final class GeneralPhase extends TrackingPhase {
      */
     @SuppressWarnings("unchecked")
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
-        final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
         final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
@@ -256,8 +255,6 @@ public final class GeneralPhase extends TrackingPhase {
             invalidTransactions.clear();
         }
         performPostBlockAdditions(causeTracker, postContext, postEvent.getTransactions(), builder, unwindingState, unwinding);
-
-
     }
 
     private static void performPostBlockAdditions(CauseTracker causeTracker, PhaseContext postContext, List<Transaction<BlockSnapshot>> transactions, Cause.Builder builder, IPhaseState unwindingState, PhaseContext unwindingPhaseContext) {
