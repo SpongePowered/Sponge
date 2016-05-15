@@ -128,7 +128,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
             Block block = newState.getBlock();
             BlockSnapshot originalBlockSnapshot = null;
-            BlockSnapshot newBlockSnapshot = null;
 
             // Don't capture if we are restoring blocks
             final CauseTracker causeTracker = this.getCauseTracker();
@@ -158,7 +157,8 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
 
             int oldLight = currentState.getBlock().getLightValue();
 
-            IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, newBlockSnapshot);
+            // We pass the originalBlockSnapshot for generating block spawn causes if items drop
+            IBlockState iblockstate1 = ((IMixinChunk) chunk).setBlockState(pos, newState, currentState, originalBlockSnapshot);
 
             if (iblockstate1 == null) {
                 if (originalBlockSnapshot != null) {
@@ -290,7 +290,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
             if (!canEntitySpawn(entity)) {
                 cir.setReturnValue(true);
             } else if (!this.causeTracker.isIgnoringSpawnEvents()) {
-                cir.setReturnValue(SpongeCommonEventFactory.handleVanillaSpawnEntity(this.asMinecraftWorld(), entity));
+                cir.setReturnValue(spawnEntity((Entity) entity, SpongeCommonEventFactory.getEntitySpawnCause(entity)));
             } else {
                 this.causeTracker.trackEntityOwner((Entity) entity);
             }
@@ -309,7 +309,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         // do not drop any items while restoring blocksnapshots. Prevents dupes
         if (!this.isRemote && (entity == null || (entity instanceof net.minecraft.entity.item.EntityItem && this.causeTracker.isRestoringBlocks()))) {
             return false;
-        } else if ((!(entity instanceof EntityPlayer) && causeTracker.isCapturingSpawnedEntities() && !causeTracker.isCapturingTerrainGen()) || isBlockBreak()) {
+        } else if (!(entity instanceof EntityPlayer) && ((this.causeTracker.isCapturingSpawnedEntities() && !this.causeTracker.isCapturingTerrainGen()))) {
             if (entity instanceof EntityItem) {
                 this.causeTracker.getCapturedSpawnedEntityItems().add((Item) entity);
             } else {
@@ -319,16 +319,6 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
         }
 
         return true;
-    }
-
-    private boolean isBlockBreak() {
-        if (this.causeTracker.getCapturedSpongeBlockSnapshots().size() > 0) {
-            SpongeBlockSnapshot blockSnapshot = (SpongeBlockSnapshot) this.causeTracker.getCapturedSpongeBlockSnapshots().get(0);
-            if (blockSnapshot.captureType == CaptureType.BREAK) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**

@@ -828,13 +828,13 @@ public class SpongeCommonEventFactory {
 
     }
 
-    public static boolean handleVanillaSpawnEntity(net.minecraft.world.World nmsWorld, net.minecraft.entity.Entity nmsEntity) {
-        World world = (World) nmsWorld;
+    public static Cause getEntitySpawnCause(net.minecraft.entity.Entity nmsEntity) {
+        World world = (World) nmsEntity.worldObj;
         Entity entity = (Entity) nmsEntity;
         List<NamedCause> list = new ArrayList<>();
-        final CauseTracker causeTracker = ((IMixinWorld) nmsWorld).getCauseTracker();
-        if (nmsWorld.isRemote || nmsEntity instanceof EntityPlayer || causeTracker.isWorldSpawnerRunning()) {
-            return world.spawnEntity(entity, Cause.of(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.CUSTOM).build())));
+        final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        if (nmsEntity.worldObj.isRemote || nmsEntity instanceof EntityPlayer || causeTracker.isWorldSpawnerRunning()) {
+            return Cause.of(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.CUSTOM).build()));
         }
         if (StaticMixinHelper.runningGenerator != null) {
             PopulatorType type = StaticMixinHelper.runningGenerator;
@@ -881,7 +881,7 @@ public class SpongeCommonEventFactory {
                 if (causeTracker.isCapturingTerrainGen()) {
                     // Just default to the structures placing it.
                     list.add(NamedCause.source(SpawnCause.builder().type(InternalSpawnTypes.STRUCTURE).build()));
-                    return world.spawnEntity(entity, Cause.of(list));
+                    return Cause.of(list);
                 }
                 if (currentTickBlock.isPresent()) {
                     BlockSpawnCause blockSpawnCause = BlockSpawnCause.builder()
@@ -908,6 +908,12 @@ public class SpongeCommonEventFactory {
                                 .build();
                         list.add(NamedCause.source(cause));
                     }
+                } else if (StaticMixinHelper.packetPlayer != null) {
+                    EntitySpawnCause cause = EntitySpawnCause.builder()
+                            .entity((Entity) StaticMixinHelper.packetPlayer)
+                            .type(InternalSpawnTypes.DISPENSE)
+                            .build();
+                    list.add(NamedCause.source(cause));
                 }
             } else if (nmsEntity instanceof EntityXPOrb) {
                 // This is almost always ALWAYS guaranteed to be experience, otherwise, someone
@@ -1013,7 +1019,7 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        return world.spawnEntity(entity, Cause.of(list));
+        return Cause.of(list);
     }
 
     public static Cause handleExtraCustomCauses(net.minecraft.entity.Entity spawning, Cause current) {

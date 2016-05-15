@@ -33,6 +33,7 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
@@ -43,13 +44,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
+import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
 
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements Item {
+public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
 
     private static final short MAGIC_INFINITE_PICKUP_DELAY = 32767;
     private static final short MAGIC_INFINITE_DESPAWN_TIME = -32768;
@@ -62,6 +64,8 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     public int lifespan;
     public float dropChance = 1.0f;
+    private boolean spawnedFromBlockBreak = false;
+    private SpawnCause spawnCause = null;
 
     //
     // In the case where a Forge mod sets the delay to MAGIC_INFINITE_PICKUP_DELAY, but a plugin has
@@ -203,5 +207,25 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getItemData());
+    }
+
+    @Override
+    public boolean spawnedFromBlockBreak() {
+        return this.spawnedFromBlockBreak;
+    }
+
+    @Override
+    public void setSpawnedFromBlockBreak(boolean flag) {
+        this.spawnedFromBlockBreak = flag;
+    }
+
+    @Override
+    public SpawnCause getSpawnCause() {
+        return this.spawnCause;
+    }
+
+    @Override
+    public void setSpawnCause(SpawnCause spawnCause) {
+        this.spawnCause = spawnCause;
     }
 }

@@ -92,7 +92,7 @@ public abstract class MixinSpawnerAnimals {
     public void onFindChunksForSpawningReturn(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorld spongeWorld = ((IMixinWorld) worldServer);
         CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.handleSpawnerEntities();
+        causeTracker.handleSpawnedEntities();
         causeTracker.setWorldSpawnerRunning(false);
         causeTracker.setCaptureSpawnedEntities(false);
         causeTracker.setCurrentCause(null);
@@ -117,7 +117,7 @@ public abstract class MixinSpawnerAnimals {
     private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorld spongeWorld = (IMixinWorld) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-        causeTracker.handleSpawnerEntities();
+        causeTracker.handleSpawnedEntities();
         causeTracker.setChunkSpawnerRunning(false);
         causeTracker.setCaptureSpawnedEntities(false);
         causeTracker.setCurrentCause(null);

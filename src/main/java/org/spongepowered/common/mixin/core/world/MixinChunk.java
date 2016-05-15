@@ -36,6 +36,7 @@ import com.google.common.collect.Sets;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.init.Blocks;
 import net.minecraft.tileentity.TileEntity;
@@ -60,6 +61,8 @@ import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.profile.GameProfile;
@@ -69,6 +72,7 @@ import org.spongepowered.api.util.DiscreteTransform3;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
+import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
@@ -86,6 +90,7 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
@@ -480,7 +485,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     }
 
     @Override
-    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot newBlockSnapshot) {
+    public IBlockState setBlockState(BlockPos pos, IBlockState newState, IBlockState currentState, BlockSnapshot originalBlockSnapshot) {
         int i = pos.getX() & 15;
         int j = pos.getY();
         int k = pos.getZ() & 15;
@@ -516,7 +521,35 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             if (!this.worldObj.isRemote) {
                 // Only fire block breaks when the block changes.
                 if (currentState.getBlock() != newState.getBlock()) {
-                    block1.breakBlock(this.worldObj, pos, currentState);
+                    final CauseTracker causeTracker = ((IMixinWorld) this.worldObj).getCauseTracker();
+                    if (causeTracker.isRestoringBlocks() || causeTracker.isCapturingTerrainGen()) {
+                        block1.breakBlock(this.worldObj, pos, currentState);
+                    } else {
+                        // Make sure to capture spawned items during block breaks so we can handle them properly after events
+                        int preSize = causeTracker.getCapturedSpawnedEntityItems().size();
+                        causeTracker.setCaptureSpawnedEntities(true);
+                        block1.breakBlock(this.worldObj, pos, currentState);
+                        int postSize = causeTracker.getCapturedSpawnedEntityItems().size();
+                        if (preSize != postSize && postSize > preSize) {
+                            // add spawn causes for newly captured items
+                            for (int x = preSize; x < postSize; x++) {
+                                EntityItem entityitem = (EntityItem) causeTracker.getCapturedSpawnedEntityItems().get(x);
+                                BlockSnapshot blockSnapshot = originalBlockSnapshot;
+                                if (blockSnapshot == null) {
+                                    Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) this.worldObj, VecHelper.toVector(pos));
+                                    blockSnapshot = BlockSnapshot.builder().from(location).blockState((BlockState) currentState).build();
+                                }
+                                BlockSpawnCause spawnCause = BlockSpawnCause.builder()
+                                        .block(blockSnapshot)
+                                        .type(SpawnTypes.DROPPED_ITEM)
+                                        .build();
+                                IMixinEntityItem spongeItem = (IMixinEntityItem) entityitem;
+                                spongeItem.setSpawnCause(spawnCause);
+                                spongeItem.setSpawnedFromBlockBreak(true);
+                            }
+                        }
+                        causeTracker.setCaptureSpawnedEntities(false);
+                    }
                 }
                 TileEntity te = this.getTileEntity(pos, EnumCreateEntityType.CHECK);
                 if (te != null && SpongeImplHooks.shouldRefresh(te, this.worldObj, pos, currentState, newState)) {
@@ -558,9 +591,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
                 // a BlockContainer. Prevents blocks such as TNT from activating when
                 // cancelled.
                 if (!((IMixinWorld) this.worldObj).getCauseTracker().isCapturingBlocks() || SpongeImplHooks.blockHasTileEntity(block, newState)) {
-                    if (newBlockSnapshot == null) {
-                        block.onBlockAdded(this.worldObj, pos, newState);
-                    }
+                    block.onBlockAdded(this.worldObj, pos, newState);
                 }
                 // Sponge end
             }

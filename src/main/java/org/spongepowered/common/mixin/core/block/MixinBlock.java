@@ -59,7 +59,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
+import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -188,10 +190,39 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     }
 
     @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
-    private static void onSpawnAsEntity(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
+    private static void onSpawnAsEntityHead(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
+        final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
+        if (causeTracker.isRestoringBlocks()) {
             return;
         }
+    }
+
+    @Redirect(method = "spawnAsEntity", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z"))
+    private static boolean onSpawnAsEntity(net.minecraft.world.World worldIn, Entity entityitem) {
+        final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
+        if (causeTracker.isRestoringBlocks() || causeTracker.isCapturingTerrainGen()) {
+            return worldIn.spawnEntityInWorld(entityitem);
+        }
+
+        // Grab the last block captured
+        BlockSnapshot blockSnapshot = null;
+        if (causeTracker.getCapturedSpongeBlockSnapshots().size() > 0) {
+            blockSnapshot = causeTracker.getCapturedSpongeBlockSnapshots().get(causeTracker.getCapturedSpongeBlockSnapshots().size() - 1);
+        }
+        if (blockSnapshot == null) {
+            blockSnapshot = BlockSnapshot.builder().from(new Location<>((World) worldIn, VecHelper.toVector(entityitem.getPosition()))).build();
+        }
+        BlockSpawnCause spawnCause = BlockSpawnCause.builder()
+                .block(blockSnapshot)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        IMixinEntityItem spongeItem = (IMixinEntityItem) entityitem;
+        spongeItem.setSpawnCause(spawnCause);
+        spongeItem.setSpawnedFromBlockBreak(true);
+        causeTracker.setCaptureSpawnedEntities(true);
+        boolean result = worldIn.spawnEntityInWorld(entityitem);
+        causeTracker.setCaptureSpawnedEntities(false);
+        return result;
     }
 
     /**
