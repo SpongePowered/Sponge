@@ -227,8 +227,9 @@ public class SpongeWorldArchetypeBuilder implements WorldArchetype.Builder {
 
     @Override
     public WorldArchetype build(String id, String name) throws IllegalArgumentException, CatalogTypeAlreadyRegisteredException {
-        WorldArchetypeRegistryModule.getInstance().getById(id).orElseThrow(() -> new
-                CatalogTypeAlreadyRegisteredException(id));
+        WorldArchetypeRegistryModule.getInstance().getById(id).ifPresent(w -> {
+            throw new CatalogTypeAlreadyRegisteredException(id);
+        });
         final WorldSettings settings =
                 new WorldSettings(this.seed, (WorldSettings.GameType) (Object) this.gameMode, this.mapFeaturesEnabled, this.hardcore,
                         (WorldType) this.generatorType);

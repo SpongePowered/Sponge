@@ -216,7 +216,7 @@ public final class WorldPhase extends TrackingPhase {
                     final Vector3d oldPositionVector = new Vector3d(entity.lastTickPosX, entity.lastTickPosY, entity.lastTickPosZ);
                     final Vector3d currentPositionVector = new Vector3d(currentPosX, currentPosY, currentPosZ);
 
-                    MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(cause, oldPositionVector, currentPositionVector, spongeEntity);
+                    MoveEntityEvent.Position event = SpongeEventFactory.createMoveEntityEventPosition(cause, currentPositionVector, currentPositionVector, oldPositionVector, spongeEntity);
 
                     if (SpongeImpl.postEvent(event)) {
                         entity.posX = entity.lastTickPosX;
@@ -253,7 +253,7 @@ public final class WorldPhase extends TrackingPhase {
                     Vector3d oldRotationVector = new Vector3d(entity.prevRotationPitch, entity.prevRotationYaw, 0);
                     Vector3d currentRotationVector = new Vector3d(entity.rotationPitch, entity.rotationYaw, 0);
                     MoveEntityEvent.Rotation event =
-                            SpongeEventFactory.createMoveEntityEventRotation(cause, oldRotationVector, currentRotationVector, (Entity) entity);
+                            SpongeEventFactory.createMoveEntityEventRotation(cause, currentRotationVector, currentRotationVector, oldRotationVector, (Entity) entity);
 
                     if (SpongeImpl.postEvent(event)) {
                         entity.rotationPitch = entity.prevRotationPitch;
@@ -280,7 +280,7 @@ public final class WorldPhase extends TrackingPhase {
 
                     Vector3d oldHeadRotation = new Vector3d(living.prevRotationPitch, living.prevRotationYawHead, 0);
                     Vector3d currentHeadRotation = new Vector3d(living.rotationPitch, living.rotationYawHead, 0);
-                    MoveEntityEvent.Rotation.Head event = SpongeEventFactory.createMoveEntityEventRotationHead(cause, oldHeadRotation, currentHeadRotation, (Entity) entity);
+                    MoveEntityEvent.Rotation.Head event = SpongeEventFactory.createMoveEntityEventRotationHead(cause, currentHeadRotation, currentHeadRotation, oldHeadRotation, (Entity) entity);
 
                     if (SpongeImpl.postEvent(event)) {
                         ((EntityLivingBase) entity).rotationYawHead = ((EntityLivingBase) entity).prevRotationYawHead;
