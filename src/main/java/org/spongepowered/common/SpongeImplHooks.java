@@ -39,6 +39,7 @@ import net.minecraft.entity.passive.EntityWaterMob;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.IBlockAccess;
@@ -54,6 +55,7 @@ import org.spongepowered.api.event.network.ClientConnectionEvent;
 import org.spongepowered.api.event.world.LoadWorldEvent;
 import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -159,16 +161,23 @@ public final class SpongeImplHooks {
             return null;
         }
 
-        DropItemEvent.Dispense event = SpongeCommonEventFactory.callDropItemEventDispenseSingle(player, ret);
-        if (event.isCancelled()) {
-            return null;
-        }
-
-        EntityItem eventItem = (EntityItem) event.getEntities().get(0);
         IMixinWorld spongeWorld = (IMixinWorld) player.worldObj;
-        spongeWorld.getCauseTracker().setIgnoreSpawnEvents(true);
-        player.worldObj.spawnEntityInWorld(eventItem);
-        spongeWorld.getCauseTracker().setIgnoreSpawnEvents(false);
-        return eventItem;
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        // We handle container drops in SpongeCommonEventFactory.handleClickInteractInventoryEvent
+        if (!(causeTracker.getCurrentPlayerPacket() instanceof C0EPacketClickWindow)) {
+            DropItemEvent.Dispense event = SpongeCommonEventFactory.callDropItemEventDispenseSingle(player, ret);
+            if (event.isCancelled()) {
+                return null;
+            }
+
+            EntityItem eventItem = (EntityItem) event.getEntities().get(0);
+            spongeWorld.getCauseTracker().setIgnoreSpawnEvents(true);
+            player.worldObj.spawnEntityInWorld(eventItem);
+            spongeWorld.getCauseTracker().setIgnoreSpawnEvents(false);
+            return eventItem;
+        } else {
+            player.worldObj.spawnEntityInWorld(ret);
+            return ret;
+        }
     }
 }

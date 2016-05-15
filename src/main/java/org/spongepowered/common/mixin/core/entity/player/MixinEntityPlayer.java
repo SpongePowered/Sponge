@@ -316,6 +316,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     public EntityItem dropOneItem(boolean dropAll) {
+        if (this.worldObj.isRemote) {
+            return this.dropItem(this.inventory.decrStackSize(this.inventory.currentItem, dropAll && this.inventory.getCurrentItem() != null ? this.inventory.getCurrentItem().stackSize : 1), false, true);
+        }
+
         ItemStack stack = inventory.getCurrentItem();
 
         if (stack == null) {
@@ -337,6 +341,10 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     public EntityItem dropPlayerItemWithRandomChoice(ItemStack itemStackIn, boolean unused) {
+        if (this.worldObj.isRemote) {
+            return this.dropItem(itemStackIn, false, false);
+        }
+
         return SpongeImplHooks.onPlayerToss((EntityPlayer)(Object) this, itemStackIn, unused);
     }
 
@@ -365,20 +373,21 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
      */
     @Overwrite
     public void joinEntityItemWithWorld(EntityItem itemIn) {
+        if (this.worldObj.isRemote) {
+            this.worldObj.spawnEntityInWorld(itemIn);
+            return;
+        }
+
         if (this.captureItemDrops) {
             this.capturedItemDrops.add(itemIn);
             return;
         }
 
-        if (this.worldObj.isRemote) {
-            SpawnCause spawnCause = EntitySpawnCause.builder()
-                    .entity(this)
-                    .type(SpawnTypes.DROPPED_ITEM)
-                    .build();
-            ((org.spongepowered.api.world.World) this.worldObj).spawnEntity((Entity) itemIn, Cause.of(NamedCause.source(spawnCause)));
-        }
-
-        this.worldObj.spawnEntityInWorld(itemIn);
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity(this)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        ((org.spongepowered.api.world.World) this.worldObj).spawnEntity((Entity) itemIn, Cause.of(NamedCause.source(spawnCause)));
     }
 
     @Redirect(method = "collideWithPlayer", at = @At(value = "INVOKE", target = PLAYER_COLLIDE_ENTITY))

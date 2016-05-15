@@ -138,6 +138,7 @@ public final class CauseTracker {
     private boolean worldSpawnerRunning;
     private boolean chunkSpawnerRunning;
     private Cause currentCause;
+    private Packet<?> currentPlayerPacket;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         this.targetWorld = targetWorld;
@@ -331,6 +332,14 @@ public final class CauseTracker {
         this.currentCause = cause;
     }
 
+    public Packet<?> getCurrentPlayerPacket() {
+        return this.currentPlayerPacket;
+    }
+
+    public void setCurrentPlayerPacket(@Nullable Packet<?> currentPlayerPacket) {
+        this.currentPlayerPacket = currentPlayerPacket;
+    }
+
     public void preTrackEntity(Entity entity) {
         this.currentTickEntity = entity;
         this.currentCause = Cause.of(NamedCause.source(entity));
@@ -449,15 +458,14 @@ public final class CauseTracker {
         }
 
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet<?> packetIn = StaticMixinHelper.processingPacket;
         Cause cause = this.currentCause;
 
         // Handle Block Captures
         handleBlockCaptures();
 
         // Handle Player kill commands
-        if (player != null && packetIn instanceof C01PacketChatMessage) {
-            C01PacketChatMessage chatPacket = (C01PacketChatMessage) packetIn;
+        if (player != null && this.currentPlayerPacket instanceof C01PacketChatMessage) {
+            C01PacketChatMessage chatPacket = (C01PacketChatMessage) this.currentPlayerPacket;
             if (chatPacket.getMessage().contains("kill")) {
                 if (!cause.contains(player)) {
                     cause = cause.with(NamedCause.of("Player", player));
@@ -467,14 +475,14 @@ public final class CauseTracker {
 
         // Inventory Events
         if (player != null && player.getHealth() > 0 && StaticMixinHelper.lastOpenContainer != null) {
-            if (packetIn instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
+            if (this.currentPlayerPacket instanceof C10PacketCreativeInventoryAction && !StaticMixinHelper.ignoreCreativeInventoryPacket) {
                 SpongeCommonEventFactory.handleCreativeClickInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                    (C10PacketCreativeInventoryAction) packetIn);
+                    (C10PacketCreativeInventoryAction) this.currentPlayerPacket);
             } else {
-                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, packetIn);
-                if (packetIn instanceof C0EPacketClickWindow) {
+                SpongeCommonEventFactory.handleInteractInventoryOpenCloseEvent(Cause.of(NamedCause.source(player)), player, this.currentPlayerPacket);
+                if (this.currentPlayerPacket instanceof C0EPacketClickWindow) {
                     SpongeCommonEventFactory.handleClickInteractInventoryEvent(Cause.of(NamedCause.source(player)), player,
-                        (C0EPacketClickWindow) packetIn);
+                        (C0EPacketClickWindow) this.currentPlayerPacket);
                 }
             }
         }
@@ -491,7 +499,7 @@ public final class CauseTracker {
     }
 
     public void handleDroppedItems() {
-        if (this.capturedSpawnedEntityItems.size() == 0 || (!this.worldSpawnerRunning && !this.chunkSpawnerRunning)) {
+        if (this.capturedSpawnedEntityItems.size() == 0 || !this.captureSpawnedEntities) {
             return;
         }
 
@@ -559,10 +567,16 @@ public final class CauseTracker {
             cause = spawnCause.merge(cause);
         }
 
-        DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedSpawnedEntityItems, entitySnapshots, this.getWorld());
+        DropItemEvent event = null;
+        if (this.currentPlayerPacket instanceof C0EPacketClickWindow) {
+            event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedSpawnedEntityItems, entitySnapshots, this.getWorld());
+        } else {
+            event = SpongeEventFactory.createDropItemEventDestruct(cause, this.capturedSpawnedEntityItems, entitySnapshots, this.getWorld());
+        }
 
         if (!(SpongeImpl.postEvent(event))) {
-            Iterator<Entity> iterator = event.getEntities().iterator();
+            Iterator<Entity> iterator = event instanceof DropItemEvent.Destruct ? ((DropItemEvent.Destruct) event).getEntities().iterator()
+                    : ((DropItemEvent.Dispense) event).getEntities().iterator();
 
             while (iterator.hasNext()) {
                 Entity entity = iterator.next();
@@ -602,7 +616,6 @@ public final class CauseTracker {
     public void handleBlockCaptures() {
         Cause cause = this.currentCause;
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
-        Packet<?> packetIn = StaticMixinHelper.processingPacket;
 
         ImmutableList<Transaction<BlockSnapshot>> blockBreakTransactions = null;
         ImmutableList<Transaction<BlockSnapshot>> blockModifyTransactions = null;
@@ -691,9 +704,9 @@ public final class CauseTracker {
 
                 if (player != null) {
                     CaptureType captureType = null;
-                    if (packetIn instanceof C08PacketPlayerBlockPlacement) {
+                    if (this.currentPlayerPacket instanceof C08PacketPlayerBlockPlacement) {
                         captureType = CaptureType.PLACE;
-                    } else if (packetIn instanceof C07PacketPlayerDigging) {
+                    } else if (this.currentPlayerPacket instanceof C07PacketPlayerDigging) {
                         captureType = CaptureType.BREAK;
                     }
                     if (captureType != null) {
@@ -728,8 +741,8 @@ public final class CauseTracker {
 
             C08PacketPlayerBlockPlacement packet = null;
 
-            if (packetIn instanceof C08PacketPlayerBlockPlacement) {
-                packet = (C08PacketPlayerBlockPlacement) packetIn;
+            if (this.currentPlayerPacket instanceof C08PacketPlayerBlockPlacement) {
+                packet = (C08PacketPlayerBlockPlacement) this.currentPlayerPacket;
             }
 
             if (blockEvent.isCancelled()) {
@@ -768,7 +781,7 @@ public final class CauseTracker {
                             }
                         }
 
-                        if (captureType == CaptureType.PLACE && player != null && packetIn instanceof C08PacketPlayerBlockPlacement) {
+                        if (captureType == CaptureType.PLACE && player != null && this.currentPlayerPacket instanceof C08PacketPlayerBlockPlacement) {
                             BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getPosition());
                             IMixinChunk spongeChunk = (IMixinChunk) this.getMinecraftWorld().getChunkFromBlockCoords(pos);
                             spongeChunk.addTrackedBlockPosition((net.minecraft.block.Block) transaction.getFinal().getState().getType(), pos,

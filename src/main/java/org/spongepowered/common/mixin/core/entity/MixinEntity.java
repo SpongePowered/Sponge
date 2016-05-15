@@ -1245,6 +1245,17 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
     @Overwrite
     public EntityItem entityDropItem(ItemStack itemStackIn, float offsetY) {
+        if (this.worldObj.isRemote) {
+            if (itemStackIn.stackSize != 0 && itemStackIn.getItem() != null) {
+                EntityItem entityitem = new EntityItem(this.worldObj, this.posX, this.posY + (double)offsetY, this.posZ, itemStackIn);
+                entityitem.setDefaultPickupDelay();
+                this.worldObj.spawnEntityInWorld(entityitem);
+                return entityitem;
+            } else {
+                return null;
+            }
+        }
+
         if (itemStackIn.stackSize == 0) {
             return null;
         } else if (itemStackIn.getItem() != null) {

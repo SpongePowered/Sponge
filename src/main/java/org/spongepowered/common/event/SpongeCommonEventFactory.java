@@ -347,7 +347,7 @@ public class SpongeCommonEventFactory {
                     }
                     clickEvent =
                             SpongeEventFactory.createClickInventoryEventDropFull(builder.build(), cursorTransaction,
-                                    causeTracker.getCapturedSpawnedEntities(), entitySnapshotBuilder.build(),
+                                    causeTracker.getCapturedSpawnedEntityItems(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 } else {
@@ -375,7 +375,7 @@ public class SpongeCommonEventFactory {
                     }
                     clickEvent =
                             SpongeEventFactory.createClickInventoryEventDropSingle(builder.build(), cursorTransaction,
-                                    causeTracker.getCapturedSpawnedEntities(), entitySnapshotBuilder.build(),
+                                    causeTracker.getCapturedSpawnedEntityItems(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
                 } else {

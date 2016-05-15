@@ -32,6 +32,7 @@ import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
 import net.minecraft.network.play.client.C07PacketPlayerDigging;
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement;
+import net.minecraft.network.play.client.C0EPacketClickWindow;
 import net.minecraft.network.play.client.C10PacketCreativeInventoryAction;
 import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C16PacketClientStatus;
@@ -56,8 +57,10 @@ public class PacketUtil {
     @SuppressWarnings({"rawtypes", "unchecked"})
     public static void onProcessPacket(Packet packetIn, INetHandler netHandler) {
         if (netHandler instanceof NetHandlerPlayServer) {
-            StaticMixinHelper.processingPacket = packetIn;
             StaticMixinHelper.packetPlayer = ((NetHandlerPlayServer) netHandler).playerEntity;
+            IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
+            final CauseTracker causeTracker = world.getCauseTracker();
+            causeTracker.setCurrentPlayerPacket(packetIn);
 
             // This is another horrible hack required since the client sends a C10 packet for every slot
             // containing an itemstack after a C16 packet in the following scenarios :
@@ -99,19 +102,24 @@ public class PacketUtil {
                                                                                                                .getItemStack()).createSnapshot();
             StaticMixinHelper.lastCursor = cursor;
 
-            IMixinWorld world = (IMixinWorld) StaticMixinHelper.packetPlayer.worldObj;
-            final CauseTracker causeTracker = world.getCauseTracker();
             if (StaticMixinHelper.packetPlayer.getHeldItem() != null
                 && (packetIn instanceof C07PacketPlayerDigging || packetIn instanceof C08PacketPlayerBlockPlacement)) {
                 StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
+            if (packetIn instanceof C0EPacketClickWindow) {
+                causeTracker.setCaptureSpawnedEntities(true);
+            }
             causeTracker.setCurrentCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
             causeTracker.setCurrentNotifier((User) StaticMixinHelper.packetPlayer);
             packetIn.processPacket(netHandler);
             causeTracker.handlePostTickCaptures();
             causeTracker.setCurrentCause(null);
             causeTracker.setCurrentNotifier(null);
+            causeTracker.setCurrentPlayerPacket(null);
+            if (packetIn instanceof C0EPacketClickWindow) {
+                causeTracker.setCaptureSpawnedEntities(false);
+            }
             resetStaticData();
         } else { // client
             packetIn.processPacket(netHandler);
@@ -124,7 +132,6 @@ public class PacketUtil {
 
     public static void resetStaticData() {
         StaticMixinHelper.packetPlayer = null;
-        StaticMixinHelper.processingPacket = null;
         StaticMixinHelper.lastCursor = null;
         StaticMixinHelper.lastOpenContainer = null;
         StaticMixinHelper.prePacketProcessItem = null;
