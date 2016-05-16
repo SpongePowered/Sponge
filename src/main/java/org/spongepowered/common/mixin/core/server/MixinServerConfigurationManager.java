@@ -93,7 +93,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
@@ -321,7 +320,7 @@ public abstract class MixinServerConfigurationManager {
         // Fire PlayerJoinEvent
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(
+        final ClientConnectionEvent.Join event = SpongeEventFactory.createClientConnectionEventJoin(
                 Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel),
                 new MessageEvent.MessageFormatter(originalMessage), player, false
         );
@@ -360,7 +359,6 @@ public abstract class MixinServerConfigurationManager {
      * @param conqueredEnd Whether the end was conquered
      * @return The new player
      */
-    @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP playerIn, int targetDimension, boolean conqueredEnd) {
 
@@ -406,7 +404,7 @@ public abstract class MixinServerConfigurationManager {
 
         // ### PHASE 4 ### Fire event and set new location on the player
         final RespawnPlayerEvent event =
-                SpongeImplHooks.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
+                SpongeEventFactory.createRespawnPlayerEvent(Cause.of(NamedCause.source(playerIn)), fromTransform, toTransform,
                     (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);

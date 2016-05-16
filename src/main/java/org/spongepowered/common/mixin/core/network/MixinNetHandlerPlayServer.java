@@ -411,7 +411,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(
+        final ClientConnectionEvent.Disconnect event = SpongeEventFactory.createClientConnectionEventDisconnect(
                 Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
                 player, false
         );
@@ -456,7 +456,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         }
     }
 
-    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", args = "log=true", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropOneItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
     public EntityItem onPlayerDropItem(EntityPlayerMP player, boolean dropAll) {
         EntityItem item = null;
         ItemStack stack = this.playerEntity.inventory.getCurrentItem();
