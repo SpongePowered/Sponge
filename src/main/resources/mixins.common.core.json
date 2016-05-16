@@ -111,6 +111,7 @@
         "block.MixinBlockWoodSlab",
         "block.MixinDyeableBlock",
         "block.MixinSoundType",
+        "block.material.MixinMapColor",
         "block.properties.MixinIProperty",
         "block.properties.MixinPropertyBoolean",
         "block.properties.MixinPropertyEnum",
@@ -528,6 +529,7 @@
         "world.storage.MixinSaveHandler",
         "world.storage.MixinThreadedFileIOBase",
         "world.storage.MixinWorldInfo"
+        "world.storage.MixinMapStorage"
     ],
     "server": [
         "network.rcon.MixinRConConsoleSource",
