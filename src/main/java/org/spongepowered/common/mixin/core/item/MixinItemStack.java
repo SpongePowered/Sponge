@@ -216,14 +216,6 @@ public abstract class MixinItemStack implements ItemStack, IMixinItemStack, IMix
     }
 
     @Override
-    public boolean equals(ItemStack that) {
-        return net.minecraft.item.ItemStack.areItemStacksEqual(
-                (net.minecraft.item.ItemStack) (Object) this,
-                (net.minecraft.item.ItemStack) that
-        );
-    }
-
-    @Override
     public Collection<DataManipulator<?, ?>> getContainers() {
         final List<DataManipulator<?, ?>> manipulators = Lists.newArrayList();
         final Item item = this.shadow$getItem();
