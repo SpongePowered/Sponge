@@ -53,7 +53,6 @@ import net.minecraft.network.play.server.S1DPacketEntityEffect;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
 import net.minecraft.potion.PotionEffect;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
@@ -104,6 +103,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -111,6 +111,7 @@ import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
+import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -118,7 +119,6 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
-import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.WorldPropertyRegistryModule;
@@ -156,7 +156,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
     protected DamageSource lastDamageSource;
-    private Cause destructCause;
+    protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
@@ -1299,6 +1299,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return null;
     }
 
+    // Whenever attackEntityFrom is called, the first check is usually always this
+    // so lets take advantage of it and store the last damage source =)
+    @Inject(method = "isEntityInvulnerable", at = @At("HEAD"))
+    public void onIsEntityInvulnerable(DamageSource source, CallbackInfoReturnable<Boolean> cir) {
+        this.lastDamageSource = source;
+    }
+
     @Inject(method = "setDead", at = @At("HEAD"))
     public void onSetDead(CallbackInfo ci) {
         if (this.worldObj.isRemote || (this.mcEntity instanceof EntityLivingBase && !(this.mcEntity instanceof EntityArmorStand))) {
@@ -1307,42 +1314,25 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
 
         EntityPlayer player = StaticMixinHelper.packetPlayer;
         IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
-        // Check if entity is killing self (ex. item despawning)
-        if (spongeWorld.getCauseTracker().hasTickingEntity()) {
-            Entity tickingEntity = ((IMixinWorld) this.worldObj).getCauseTracker().getCurrentTickEntity().get();
-            if (tickingEntity == this.mcEntity)  {
-                this.destructCause = Cause.of(NamedCause.source(tickingEntity));
-            }
-        // Check if a player is colliding with this entity (ex. item pickup)
-        } else if (player != null) {
-            if (this.mcEntity.getUniqueID().equals(((IMixinEntityPlayer) player).getCollidingEntityUuid())) {
-                this.destructCause = Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer));
-            }
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        List<NamedCause> namedCauses = new ArrayList<>();
+        if (this.lastDamageSource != null) {
+            namedCauses.add(NamedCause.source(this.lastDamageSource));
         }
-
-        // Check for a possible DamageSource
-        if (this.destructCause == null) {
-            this.lastDamageSource = SpongeHooks.getEntityDamageSource(this.mcEntity);
-            if (this.lastDamageSource != null) {
-                this.destructCause = Cause.of(NamedCause.source(this.lastDamageSource));
-            } else {
-                if (spongeWorld.getCauseTracker().hasTickingTileEntity()) {
-                    TileEntity te = (TileEntity) spongeWorld.getCauseTracker().getCurrentTickTileEntity().get();
-                    this.destructCause = Cause.of(NamedCause.source(te));
-                }
-            }
+        if (causeTracker.hasTickingBlock()) {
+            namedCauses.add(NamedCause.of("ParentSource", causeTracker.getCurrentTickBlock().get()));
+        } else if (causeTracker.hasTickingTileEntity()) {
+            namedCauses.add(NamedCause.of("ParentSource", causeTracker.getCurrentTickTileEntity().get()));
         }
-
-        if (this.destructCause != null) {
-            if (!this.destructCause.contains(User.class)) {
-                User owner = ((IMixinEntity) this.mcEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).orElse(null);
-                if (owner == null) {
-                    owner = ((IMixinEntity) this.mcEntity).getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).orElse(null);
-                }
-                if (owner != null) {
-                    this.destructCause = this.destructCause.merge(Cause.of(NamedCause.owner(owner)));
-                }
-            }
+        if (player != null) {
+            namedCauses.add(NamedCause.of("PlayerSource", player));
+        } else if (causeTracker.hasNotifier()) {
+            namedCauses.add(NamedCause.of("PlayerSource", causeTracker.getCurrentNotifier().get()));
+        }
+        if (this.destructCause == null && !namedCauses.isEmpty()) {
+            this.destructCause = Cause.of(namedCauses);
+        } else if (!namedCauses.isEmpty()){
+            this.destructCause = this.destructCause.merge(Cause.of(namedCauses));
         }
     }
 
@@ -1387,5 +1377,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public List<EntityItem> getCapturedItemDrops() {
         return this.capturedItemDrops;
+    }
+
+    @Override
+    public void setDestructCause(Cause cause) {
+        this.destructCause = cause;
     }
 }

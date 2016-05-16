@@ -33,6 +33,8 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -42,6 +44,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
@@ -94,6 +97,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         if (this.delayBeforeCanPickup == MAGIC_INFINITE_DESPAWN_TIME && !this.infiniteDespawnDelay && this.pluginDespawnSet) {
             this.delayBeforeCanPickup--;
         }
+    }
+
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
+    public void onEntityItemUpdate(CallbackInfo ci) {
+        this.destructCause = Cause.of(NamedCause.of("ExpiredItem", this));
     }
 
     public int getPickupDelay() {
@@ -191,22 +199,9 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
         return (ItemType) getEntityItem().getItem();
     }
 
-    // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
-
-    @Override
-    public RepresentedItemData getItemData() {
-        return new SpongeRepresentedItemData(ItemStackUtil.createSnapshot(getEntityItem()));
-    }
-
-    @Override
-    public Value<ItemStackSnapshot> item() {
-        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.createSnapshot(getEntityItem()));
-    }
-
-    @Override
-    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
-        super.supplyVanillaManipulators(manipulators);
-        manipulators.add(getItemData());
+    @Inject(method = "combineItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
+    public void onCombineItems(EntityItem other, CallbackInfoReturnable<Boolean> cir) {
+        this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
     }
 
     @Override
@@ -227,5 +222,23 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause;
+    }
+
+    // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data
+
+    @Override
+    public RepresentedItemData getItemData() {
+        return new SpongeRepresentedItemData(ItemStackUtil.createSnapshot(getEntityItem()));
+    }
+
+    @Override
+    public Value<ItemStackSnapshot> item() {
+        return new SpongeValue<>(Keys.REPRESENTED_ITEM, ItemStackSnapshot.NONE, ItemStackUtil.createSnapshot(getEntityItem()));
+    }
+
+    @Override
+    public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
+        super.supplyVanillaManipulators(manipulators);
+        manipulators.add(getItemData());
     }
 }

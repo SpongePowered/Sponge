@@ -121,4 +121,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     void setCaptureItemDrops(boolean capture);
 
     List<EntityItem> getCapturedItemDrops();
+
+    void setDestructCause(Cause cause);
 }
