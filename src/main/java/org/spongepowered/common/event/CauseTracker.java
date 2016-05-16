@@ -592,7 +592,9 @@ public final class CauseTracker {
             }
         } else {
             sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
-            this.capturedSpawnedEntityItems.clear();
+            if (event instanceof DropItemEvent.Dispense) {
+                this.capturedSpawnedEntityItems.clear();
+            }
         }
     }
 
