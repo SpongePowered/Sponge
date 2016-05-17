@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 
@@ -41,7 +41,7 @@ public abstract class MixinBiomeDecorator {
      *      are handled already by populators.
      */
     @Overwrite
-    protected void genDecorations(BiomeGenBase biomeGenBaseIn, World worldIn, Random random) {
+    protected void genDecorations(Biome biomeGenBaseIn, World worldIn, Random random) {
         // Cancel genDecorations just in case this does get called as all of these
         // are handled already by populators.
     }

@@ -29,7 +29,7 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.init.Biomes;
 import net.minecraft.init.Blocks;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkProvider;
@@ -89,7 +89,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
     @Shadow @Final private MapGenScatteredFeature scatteredFeatureGenerator;
     @Shadow @Final private MapGenBase ravineGenerator;
     @Shadow @Final private StructureOceanMonument oceanMonumentGenerator;
-    @Shadow private BiomeGenBase[] biomesForGeneration;
+    @Shadow private Biome[] biomesForGeneration;
 
     @Shadow public abstract void setBlocksInChunk(int p_180518_1_, int p_180518_2_, ChunkPrimer p_180518_3_);
 
@@ -152,7 +152,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
                     .height(VariableAmount.baseWithRandomAddition(0, 256))
                     .build();
             FilteredPopulator filtered = new FilteredPopulator(lake, (c) -> {
-                BiomeGenBase biomegenbase = this.worldObj.getBiomeGenForCoords(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
+                Biome biomegenbase = this.worldObj.getBiomeGenForCoords(VecHelper.toBlockPos(c.getBlockMin()).add(16, 0, 16));
                 return biomegenbase != Biomes.DESERT && biomegenbase != Biomes.DESERT_HILLS;
             });
             filtered.setRequiredFlags(WorldGenConstants.VILLAGE_FLAG);
@@ -211,7 +211,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         }
     }
 
-    private BiomeGenBase[] getBiomesFromGenerator(int x, int z) {
+    private Biome[] getBiomesFromGenerator(int x, int z) {
         if (this.biomegen instanceof BiomeProvider) {
             return ((BiomeProvider) this.biomegen).getBiomesForGeneration(this.biomesForGeneration, x * 4 - 2, z * 4 - 2, 10, 10);
         }
@@ -223,13 +223,13 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
         MutableBiomeArea buffer = new ByteArrayMutableBiomeBuffer(new Vector2i(x * 16 - 6, z * 16 - 6), new Vector2i(37, 37));
         this.biomegen.generateBiomes(buffer);
         if (this.biomesForGeneration == null || this.biomesForGeneration.length < 100) {
-            this.biomesForGeneration = new BiomeGenBase[100];
+            this.biomesForGeneration = new Biome[100];
         }
         for (int bx = 0; bx < 40; bx += 4) {
             int absX = bx + x * 16 - 6;
             for (int bz = 0; bz < 40; bz += 4) {
                 int absZ = bz + z * 16 - 6;
-                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = (BiomeGenBase) buffer.getBiome(absX, absZ);
+                this.biomesForGeneration[(bx / 4) + (bz / 4) * 10] = (Biome) buffer.getBiome(absX, absZ);
             }
         }
         return this.biomesForGeneration;
@@ -242,7 +242,7 @@ public abstract class MixinChunkProviderOverworld implements IChunkProvider, Gen
      * necessitated by @Deamon's changes. This avoids an overwrite entirely.
      */
     @Redirect(method = "setBlocksInChunk", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/biome/BiomeProvider;getBiomesForGeneration([Lnet/minecraft/world/biome/BiomeGenBase;IIII)[Lnet/minecraft/world/biome/BiomeGenBase;"))
-    private BiomeGenBase[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, BiomeGenBase[] biomes, int x, int z, int width, int height) {
+    private Biome[] onSetBlocksGetBiomesIgnore(BiomeProvider manager, Biome[] biomes, int x, int z, int width, int height) {
         return biomes;
     }
 

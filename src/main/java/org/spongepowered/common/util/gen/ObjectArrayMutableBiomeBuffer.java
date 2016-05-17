@@ -27,7 +27,7 @@ package org.spongepowered.common.util.gen;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -42,17 +42,17 @@ import org.spongepowered.common.world.extent.UnmodifiableBiomeAreaWrapper;
 import org.spongepowered.common.world.extent.worker.SpongeMutableBiomeAreaWorker;
 
 /**
- * Mutable view of a {@link BiomeGenBase} array.
+ * Mutable view of a {@link Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link BiomeGenBase} array is already created (for
+ * efficiently, but when the {@link Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
 @NonnullByDefault
 public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements MutableBiomeArea {
 
-    private final BiomeGenBase[] biomes;
+    private final Biome[] biomes;
 
     /**
      * Creates a new instance.
@@ -62,7 +62,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayMutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
+    public ObjectArrayMutableBiomeBuffer(Biome[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
         this.biomes = biomes;
     }
@@ -77,7 +77,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     public void setBiome(int x, int z, BiomeType biome) {
         checkNotNull(biome, "biome");
         checkRange(x, z);
-        this.biomes[getIndex(x, z)] = (BiomeGenBase) biome;
+        this.biomes[getIndex(x, z)] = (Biome) biome;
     }
 
     @Override

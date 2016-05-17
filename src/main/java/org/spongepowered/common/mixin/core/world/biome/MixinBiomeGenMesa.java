@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenMesa;
+import net.minecraft.world.biome.BiomeMesa;
 import net.minecraft.world.chunk.ChunkPrimer;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Cactus;
@@ -42,7 +42,7 @@ import org.spongepowered.common.world.gen.populators.MesaBiomeGenerationPopulato
 
 import java.util.Random;
 
-@Mixin(BiomeGenMesa.class)
+@Mixin(BiomeMesa.class)
 public abstract class MixinBiomeGenMesa extends MixinBiomeGenBase {
 
     @Shadow private boolean brycePillars;

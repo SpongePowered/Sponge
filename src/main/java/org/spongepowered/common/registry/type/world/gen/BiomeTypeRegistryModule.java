@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import net.minecraft.init.Biomes;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.AdditionalRegistration;
 import org.spongepowered.api.registry.util.RegisterCatalog;
@@ -63,7 +63,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
 
     @Override
     public void registerDefaults() {
-        for (BiomeGenBase biome : BiomeGenBase.REGISTRY) {
+        for (Biome biome : Biome.REGISTRY) {
             if (biome != null) {
                 this.biomeTypes.add((BiomeType) biome);
             }
@@ -134,7 +134,7 @@ public final class BiomeTypeRegistryModule implements CatalogRegistryModule<Biom
 
     @AdditionalRegistration
     public void registerAdditional() {
-        for (BiomeGenBase biome : BiomeGenBase.REGISTRY) {
+        for (Biome biome : Biome.REGISTRY) {
             if (biome != null && !this.biomeTypes.contains(biome)) {
                 this.biomeTypes.add((BiomeType) biome);
                 this.biomeTypeMappings.put(biome.getBiomeName().toLowerCase(Locale.ENGLISH), (BiomeType) biome);

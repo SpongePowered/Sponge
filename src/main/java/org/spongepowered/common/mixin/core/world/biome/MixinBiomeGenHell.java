@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenHell;
+import net.minecraft.world.biome.BiomeHell;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.weighted.ChanceTable;
@@ -44,7 +44,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.HellMushroomPopulator;
 
-@Mixin(BiomeGenHell.class)
+@Mixin(BiomeHell.class)
 public abstract class MixinBiomeGenHell extends MixinBiomeGenBase {
 
     @Override

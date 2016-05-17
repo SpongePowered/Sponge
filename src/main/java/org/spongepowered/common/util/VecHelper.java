@@ -28,10 +28,10 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.Rotations;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.ChunkCoordIntPair;
 import org.spongepowered.api.world.Location;
 
 public final class VecHelper {
@@ -92,14 +92,14 @@ public final class VecHelper {
 
     // === MC ChunkCoordIntPair ---> Flow Vector3i ===
 
-    public static Vector3i toVec3i(ChunkCoordIntPair chunk) {
+    public static Vector3i toVec3i(ChunkPos chunk) {
         return new Vector3i(chunk.chunkXPos, 0, chunk.chunkZPos);
     }
 
     // === Flow Vector3i --> MC ChunkCoordIntPair ===
 
-    public static ChunkCoordIntPair toChunkCoordIntPair(Vector3i vector) {
-        return new ChunkCoordIntPair(vector.getX(), vector.getZ());
+    public static ChunkPos toChunkCoordIntPair(Vector3i vector) {
+        return new ChunkPos(vector.getX(), vector.getZ());
     }
 
     // === MC Vec3 --> flow Vector3d ==

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenSavanna;
+import net.minecraft.world.biome.BiomeSavanna;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -35,7 +35,7 @@ import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeGenSavanna.class)
+@Mixin(BiomeSavanna.class)
 public abstract class MixinBiomeGenSavanna extends MixinBiomeGenBase {
 
     @Override

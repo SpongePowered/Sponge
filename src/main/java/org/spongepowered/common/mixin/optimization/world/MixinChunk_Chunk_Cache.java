@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.optimization.world;
 
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +37,7 @@ public class MixinChunk_Chunk_Cache implements IMixinCachable {
     @Shadow @Final public int xPosition;
     @Shadow @Final public int zPosition;
 
-    private long cacheKey = ChunkCoordIntPair.chunkXZ2Int(this.xPosition, this.zPosition);
+    private long cacheKey = ChunkPos.chunkXZ2Int(this.xPosition, this.zPosition);
 
     @Override
     public long getCacheKey() {

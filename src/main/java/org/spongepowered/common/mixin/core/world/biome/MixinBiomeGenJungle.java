@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenJungle;
+import net.minecraft.world.biome.BiomeJungle;
 import org.spongepowered.api.data.type.ShrubType;
 import org.spongepowered.api.data.type.ShrubTypes;
 import org.spongepowered.api.util.weighted.TableEntry;
@@ -44,7 +44,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
 import java.util.Iterator;
 
-@Mixin(BiomeGenJungle.class)
+@Mixin(BiomeJungle.class)
 public abstract class MixinBiomeGenJungle extends MixinBiomeGenBase {
 
     @Shadow private boolean isEdge;

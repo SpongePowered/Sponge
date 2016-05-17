@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.util.LongHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.spongepowered.common.interfaces.IMixinCachable;
 
-public class LongCachedHashMap<V extends IMixinCachable> extends LongHashMap<V> {
+public class CachedLong2ObjectMap<V extends IMixinCachable> extends Long2ObjectOpenHashMap<V> {
 
     private V lastRetrievedValue = null;
 
     @Override
-    public V getValueByKey(long key) {
+    public V get(long key) {
         if (this.lastRetrievedValue != null && key == this.lastRetrievedValue.getCacheKey()) {
             return this.lastRetrievedValue;
         }
-        return this.lastRetrievedValue = super.getValueByKey(key);
+        return this.lastRetrievedValue = super.get(key);
     }
-
 
     @Override
     public V remove(long key) {
@@ -47,4 +46,5 @@ public class LongCachedHashMap<V extends IMixinCachable> extends LongHashMap<V> 
         }
         return super.remove(key);
     }
+
 }

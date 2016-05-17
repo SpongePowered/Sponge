@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.MapGenVillage;
@@ -50,7 +50,7 @@ public abstract class MixinMapGenVillage extends MapGenStructure implements IFla
     public void populate(Extent extent, org.spongepowered.api.world.World worldIn, Random random, List<String> flags) {
         Vector3i min = extent.getBlockMin();
         World world = (World) worldIn;
-        boolean flag = generateStructure(world, random, new ChunkCoordIntPair((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+        boolean flag = generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
         if (flag) {
             flags.add(WorldGenConstants.VILLAGE_FLAG);
         }

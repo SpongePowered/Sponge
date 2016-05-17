@@ -28,7 +28,7 @@ import net.minecraft.block.BlockDirt;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenTaiga;
+import net.minecraft.world.biome.BiomeTaiga;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.data.type.ShrubType;
@@ -49,14 +49,14 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 
 import java.util.Iterator;
 
-@Mixin(BiomeGenTaiga.class)
+@Mixin(BiomeTaiga.class)
 public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
 
-    @Shadow private BiomeGenTaiga.Type type;
+    @Shadow private BiomeTaiga.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
-        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
+        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) {
             BlockBlob blob = BlockBlob.builder()
                     .blobCount(VariableAmount.baseWithRandomAddition(0, 3))
                     .block((BlockState) Blocks.MOSSY_COBBLESTONE.getDefaultState())
@@ -71,7 +71,7 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
                 .build();
         gensettings.getPopulators().add(fern);
         super.buildPopulators(world, gensettings);
-        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
+        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) {
             gensettings.getGroundCoverLayers().clear();
             gensettings.getGroundCoverLayers().add(new GroundCoverLayer((Double seed) -> {
                 if (seed > 1.75D) {
@@ -104,8 +104,8 @@ public abstract class MixinBiomeGenTaiga extends MixinBiomeGenBase {
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
         Forest.Builder forest = Forest.builder();
         forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-        if (this.type == BiomeGenTaiga.Type.MEGA || this.type == BiomeGenTaiga.Type.MEGA_SPRUCE) {
-            if (this.type == BiomeGenTaiga.Type.MEGA) {
+        if (this.type == BiomeTaiga.Type.MEGA || this.type == BiomeTaiga.Type.MEGA_SPRUCE) {
+            if (this.type == BiomeTaiga.Type.MEGA) {
                 forest.type(BiomeTreeTypes.POINTY_TAIGA.getLargePopulatorObject().get(), 1);
                 forest.type(BiomeTreeTypes.TALL_TAIGA.getLargePopulatorObject().get(), 12);
             } else {

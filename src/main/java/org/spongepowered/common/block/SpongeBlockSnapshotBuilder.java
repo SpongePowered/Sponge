@@ -117,7 +117,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<BlockSnapsho
         if (this.blockState.getType() instanceof ITileEntityProvider) {
             if (location.hasTileEntity()) {
                 this.compound = new NBTTagCompound();
-                ((TileEntity) location.getTileEntity().get()).writeToNBT(this.compound);
+                ((TileEntity) location.getTileEntity().get()).func_189515_b(this.compound);
                 this.manipulators = location.getContainers().stream().map(DataManipulator::asImmutable).collect(Collectors.toList());
             }
         }

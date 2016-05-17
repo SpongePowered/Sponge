@@ -25,7 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -60,7 +60,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public BiomeType getBiome(int x, int z) {
         checkRange(x, z);
-        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
+        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(this.biomes[getIndex(x, z)] & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 

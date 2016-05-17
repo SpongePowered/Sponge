@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.passive.HorseArmorType;
+import net.minecraft.entity.passive.HorseType;
 import org.spongepowered.api.data.type.HorseVariant;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -32,14 +32,14 @@ import org.spongepowered.common.text.translation.SpongeTranslation;
 public class SpongeHorseVariant extends SpongeEntityMeta implements HorseVariant {
 
     // This actually contains the horse variants, not armor types
-    private HorseArmorType horseType;
+    private HorseType horseType;
 
-    public SpongeHorseVariant(int variant, HorseArmorType type, String name) {
+    public SpongeHorseVariant(int variant, HorseType type, String name) {
         super(variant, name);
         this.horseType = type;
     }
 
-    public HorseArmorType getType() {
+    public HorseType getType() {
         return this.horseType;
     }
 

@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.flowpowered.math.vector.Vector2i;
 import net.minecraft.init.Biomes;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.gen.layer.IntCache;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
@@ -88,19 +88,19 @@ public final class CustomBiomeProvider extends BiomeProvider {
      *            BiomeCacheBlock
      */
     @Override
-    public BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
+    public Biome[] getBiomeGenAt(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag) {
         return this.loadBlockGeneratorData(listToReuse, x, z, width, length);
     }
 
     @Override
-    public BiomeGenBase[] getBiomesForGeneration(BiomeGenBase[] biomeArrayZoomedOut, int xStart, int zStart, int xSize, int zSize) {
+    public Biome[] getBiomesForGeneration(Biome[] biomeArrayZoomedOut, int xStart, int zStart, int xSize, int zSize) {
         // "Biomes for generation" are a 4x zoomed out (on both the x and z
         // axis) version of the normal biomes
         // The easiest way to obtain these biomes is to obtain the normal
         // scale biomes and then downscale them
 
         if (biomeArrayZoomedOut == null || biomeArrayZoomedOut.length < xSize * zSize) {
-            biomeArrayZoomedOut = new BiomeGenBase[xSize * zSize];
+            biomeArrayZoomedOut = new Biome[xSize * zSize];
         }
 
         // Transform to normal scale
@@ -116,7 +116,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         // Downscale
         byte[] biomesForBlocks = buffer.detach();
         for (int i = 0; i < biomeArrayZoomedOut.length; i++) {
-            biomeArrayZoomedOut[i] = BiomeGenBase.getBiome(biomesForBlocks[i * 4] & 0xff, Biomes.OCEAN);
+            biomeArrayZoomedOut[i] = Biome.getBiome(biomesForBlocks[i * 4] & 0xff, Biomes.OCEAN);
         }
 
         return biomeArrayZoomedOut;
@@ -146,9 +146,9 @@ public final class CustomBiomeProvider extends BiomeProvider {
         byte[] biomes = buffer.detach();
 
         for (int i = 0; i < xSizeSegments * zSizeSegments; ++i) {
-            BiomeGenBase biomegenbase = BiomeGenBase.getBiome(biomes[i << 2] & 0xff);
+            Biome biome = Biome.getBiome(biomes[i << 2] & 0xff);
 
-            if (!searchingForBiomes.contains(biomegenbase)) {
+            if (!searchingForBiomes.contains(biome)) {
                 return false;
             }
         }
@@ -157,7 +157,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public BlockPos findBiomePosition(int xCenter, int zCenter, int range, List<BiomeGenBase> biomes, Random random) {
+    public BlockPos findBiomePosition(int xCenter, int zCenter, int range, List<Biome> biomes, Random random) {
         IntCache.resetIntCache();
         int xStartSegment = xCenter - range >> 2;
         int zStartSegment = zCenter - range >> 2;
@@ -177,7 +177,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         {
             int i2 = xStartSegment + l1 % xSizeSegments << 2;
             int j2 = zStartSegment + l1 / xSizeSegments << 2;
-            BiomeGenBase biomegenbase = BiomeGenBase.getBiome(aint[l1]);
+            Biome biomegenbase = Biome.getBiome(aint[l1]);
 
             if (biomes.contains(biomegenbase) && (blockpos == null || random.nextInt(k1 + 1) == 0))
             {
@@ -190,9 +190,9 @@ public final class CustomBiomeProvider extends BiomeProvider {
     }
 
     @Override
-    public BiomeGenBase[] loadBlockGeneratorData(BiomeGenBase[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
+    public Biome[] loadBlockGeneratorData(Biome[] biomeArray, int startX, int startZ, int sizeX, int sizeZ) {
         if (biomeArray == null || biomeArray.length < sizeX * sizeZ) {
-            biomeArray = new BiomeGenBase[sizeX * sizeZ];
+            biomeArray = new Biome[sizeX * sizeZ];
         } else {
             // Biome generators don't have to set every position. If we set
             // all positions to ocean first, every position not set will be

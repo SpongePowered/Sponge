@@ -25,7 +25,7 @@
 package org.spongepowered.common.util.gen;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -38,17 +38,17 @@ import org.spongepowered.common.world.extent.ImmutableBiomeViewTransform;
 import org.spongepowered.common.world.extent.worker.SpongeBiomeAreaWorker;
 
 /**
- * Mutable view of a {@link BiomeGenBase} array.
+ * Mutable view of a {@link Biome} array.
  *
  * <p>Normally, the {@link ByteArrayMutableBiomeBuffer} class uses memory more
- * efficiently, but when the {@link BiomeGenBase} array is already created (for
+ * efficiently, but when the {@link Biome} array is already created (for
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
 @NonnullByDefault
 public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer implements ImmutableBiomeArea {
 
-    private final BiomeGenBase[] biomes;
+    private final Biome[] biomes;
 
     /**
      * Creates a new instance.
@@ -58,7 +58,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
      * @param start The start position
      * @param size The size
      */
-    public ObjectArrayImmutableBiomeBuffer(BiomeGenBase[] biomes, Vector2i start, Vector2i size) {
+    public ObjectArrayImmutableBiomeBuffer(Biome[] biomes, Vector2i start, Vector2i size) {
         super(start, size);
         this.biomes = biomes.clone();
     }

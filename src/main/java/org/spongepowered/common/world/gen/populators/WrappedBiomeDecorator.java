@@ -26,8 +26,8 @@ package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenBase;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.PopulatorType;
@@ -39,10 +39,10 @@ import java.util.Random;
 public class WrappedBiomeDecorator implements Populator {
 
     private BiomeDecorator wrapped;
-    private BiomeGenBase biome;
+    private Biome biome;
     private final PopulatorType type;
 
-    public WrappedBiomeDecorator(BiomeGenBase dec) {
+    public WrappedBiomeDecorator(Biome dec) {
         this.biome = dec;
         this.type = PopulatorTypeRegistryModule.getInstance().getOrCreateForType(this.biome.getClass());
     }
@@ -65,7 +65,7 @@ public class WrappedBiomeDecorator implements Populator {
         if (this.biome != null) {
             this.biome.decorate(worldIn, random, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         } else {
-            BiomeGenBase biome = (BiomeGenBase) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
+            Biome biome = (Biome) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
             this.wrapped.decorate(worldIn, random, biome, VecHelper.toBlockPos(min.sub(8, 0, 8)));
         }
     }

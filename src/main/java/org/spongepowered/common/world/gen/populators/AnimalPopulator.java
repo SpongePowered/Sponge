@@ -26,7 +26,7 @@ package org.spongepowered.common.world.gen.populators;
 
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.WorldEntitySpawner;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.gen.Populator;
@@ -46,7 +46,7 @@ public class AnimalPopulator implements Populator {
     public void populate(World world, Extent extent, Random random) {
         Vector3i min = extent.getBlockMin();
         Vector3i size = extent.getBlockSize();
-        BiomeGenBase biomegenbase = (BiomeGenBase) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
+        Biome biomegenbase = (Biome) extent.getBiome(size.getX() / 2 + min.getX(), size.getZ() / 2 + min.getZ());
 
         WorldEntitySpawner.performWorldGenSpawning((net.minecraft.world.World) world, biomegenbase, min.getX(), min.getZ(), size.getX(), size.getZ(),
                 random);

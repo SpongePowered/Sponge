@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.mixin.optimization.world.gen;
 
-import net.minecraft.util.LongHashMap;
+import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import net.minecraft.world.gen.ChunkProviderServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.LongCachedHashMap;
+import org.spongepowered.common.util.CachedLong2ObjectMap;
 
 @SuppressWarnings("rawtypes")
 @Mixin(ChunkProviderServer.class)
 public class MixinChunkProviderServer_Chunk_Cache {
 
-    @Shadow private LongHashMap id2ChunkMap = new LongCachedHashMap();
+    @Shadow private Long2ObjectMap id2ChunkMap = new CachedLong2ObjectMap();
 
 }

@@ -802,7 +802,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
-                te.writeToNBT(nbt);
+                te.func_189515_b(nbt);
                 this.builder.unsafeNbt(nbt);
             }
         }

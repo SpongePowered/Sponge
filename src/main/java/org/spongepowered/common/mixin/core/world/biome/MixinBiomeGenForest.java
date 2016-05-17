@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenForest;
+import net.minecraft.world.biome.BiomeForest;
 import org.spongepowered.api.data.type.DoublePlantTypes;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.DoublePlant;
@@ -39,16 +39,16 @@ import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.FlowerForestSupplier;
 import org.spongepowered.common.world.gen.populators.RoofedForestPopulator;
 
-@Mixin(BiomeGenForest.class)
+@Mixin(BiomeForest.class)
 public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
 
-    @Shadow private BiomeGenForest.Type type;
+    @Shadow private BiomeForest.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
         BiomeDecorator theBiomeDecorator = this.theBiomeDecorator;
         int base = -3;
-        if (this.type == BiomeGenForest.Type.FLOWER) {
+        if (this.type == BiomeForest.Type.FLOWER) {
             base = -1;
         }
         DoublePlant plant = DoublePlant.builder()
@@ -60,13 +60,13 @@ public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
         gensettings.getPopulators().add(plant);
         super.buildPopulators(world, gensettings);
         gensettings.getPopulators().removeAll(gensettings.getPopulators(Forest.class));
-        if (this.type == BiomeGenForest.Type.ROOFED) {
+        if (this.type == BiomeForest.Type.ROOFED) {
             RoofedForestPopulator forest = new RoofedForestPopulator();
             gensettings.getPopulators().add(0, forest);
         } else {
             Forest.Builder forest = Forest.builder();
             forest.perChunk(VariableAmount.baseWithOptionalAddition(theBiomeDecorator.treesPerChunk, 1, 0.1));
-            if (this.type == BiomeGenForest.Type.BIRCH) {
+            if (this.type == BiomeForest.Type.BIRCH) {
                 forest.type(BiomeTreeTypes.BIRCH.getPopulatorObject(), 1);
             } else {
                 forest.type(BiomeTreeTypes.OAK.getPopulatorObject(), 4);
@@ -74,7 +74,7 @@ public abstract class MixinBiomeGenForest extends MixinBiomeGenBase {
             }
             gensettings.getPopulators().add(0, forest.build());
         }
-        if (this.type == BiomeGenForest.Type.FLOWER) {
+        if (this.type == BiomeForest.Type.FLOWER) {
             gensettings.getPopulators().removeAll(gensettings.getPopulators(Flower.class));
             Flower flower = Flower.builder()
                     .perChunk(theBiomeDecorator.flowersPerChunk * 64)

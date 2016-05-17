@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.entity.passive;
 
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.HorseArmorType;
+import net.minecraft.entity.passive.HorseType;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.entity.HorseData;
@@ -47,7 +47,7 @@ import java.util.List;
 @Mixin(EntityHorse.class)
 public abstract class MixinEntityHorse extends MixinEntityAnimal implements Horse {
 
-    @Shadow public abstract HorseArmorType shadow$getType();
+    @Shadow public abstract HorseType shadow$getType();
 
     @Override
     public Translation getTranslation() {

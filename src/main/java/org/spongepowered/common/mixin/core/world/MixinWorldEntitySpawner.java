@@ -33,7 +33,7 @@ import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldEntitySpawner;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
@@ -104,7 +104,7 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))
-    private static void onPerformWorldGenSpawningHead(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
+    private static void onPerformWorldGenSpawningHead(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.ENTITY, WorldPhase.State.WORLD_SPAWNER_SPAWNING, PhaseContext.start()
@@ -114,7 +114,7 @@ public abstract class MixinWorldEntitySpawner {
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "RETURN"))
-    private static void onPerformWorldGenSpawningReturn(World worldServer, BiomeGenBase biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
+    private static void onPerformWorldGenSpawningReturn(World worldServer, Biome biome, int j, int k, int l, int m, Random rand, CallbackInfo ci) {
         IMixinWorldServer spongeWorld = (IMixinWorldServer) worldServer;
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         causeTracker.completePhase();
@@ -143,7 +143,7 @@ public abstract class MixinWorldEntitySpawner {
      */
     @SuppressWarnings("unchecked")
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_CAN_SPAWN_CREATURE))
-    public boolean onCanSpawn(WorldServer worldServer, EnumCreatureType creatureType, BiomeGenBase.SpawnListEntry spawnListEntry, BlockPos pos) {
+    public boolean onCanSpawn(WorldServer worldServer, EnumCreatureType creatureType, Biome.SpawnListEntry spawnListEntry, BlockPos pos) {
         setEntityType(spawnListEntry.entityClass);
         return worldServer.canCreatureTypeSpawnHere(creatureType, spawnListEntry, pos) && check(pos, worldServer);
     }
@@ -171,8 +171,8 @@ public abstract class MixinWorldEntitySpawner {
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Redirect(method = "performWorldGenSpawning", at = @At(value = "INVOKE", target = WEIGHTED_RANDOM_GET))
-    private static WeightedRandom.Item onGetRandom(Random random, List<BiomeGenBase.SpawnListEntry> collection) {
-        BiomeGenBase.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
+    private static WeightedRandom.Item onGetRandom(Random random, List<Biome.SpawnListEntry> collection) {
+        Biome.SpawnListEntry entry = WeightedRandom.getRandomItem(random, collection);
         setEntityType(entry.entityClass);
         return entry;
     }

@@ -37,10 +37,10 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.init.Blocks;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.Biome.SpawnListEntry;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.ChunkPrimer;
 import net.minecraft.world.chunk.IChunkGenerator;
@@ -335,7 +335,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
-                    flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkCoordIntPair(chunkX, chunkZ));
+                    flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
                 }
             }
         }
@@ -348,7 +348,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
             return ((IChunkGenerator) this.baseGenerator).getPossibleCreatures(creatureType, pos);
         }
 
-        BiomeGenBase biome = this.world.getBiomeGenForCoords(pos);
+        Biome biome = this.world.getBiomeGenForCoords(pos);
         List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
         return creatures;
     }

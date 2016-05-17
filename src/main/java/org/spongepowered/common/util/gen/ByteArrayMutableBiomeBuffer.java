@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.util.DiscreteTransform2;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.biome.BiomeType;
@@ -75,7 +75,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkOpen();
         checkRange(x, z);
 
-        this.biomes[getIndex(x, z)] = (byte) BiomeGenBase.getIdForBiome((BiomeGenBase) biome);
+        this.biomes[getIndex(x, z)] = (byte) Biome.getIdForBiome((Biome) biome);
     }
 
     @Override
@@ -84,7 +84,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         checkRange(x, z);
 
         byte biomeId = this.biomes[getIndex(x, z)];
-        BiomeType biomeType = (BiomeType) BiomeGenBase.getBiomeForId(biomeId & 255);
+        BiomeType biomeType = (BiomeType) Biome.getBiomeForId(biomeId & 255);
         return biomeType == null ? BiomeTypes.OCEAN : biomeType;
     }
 

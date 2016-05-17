@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.gen;
 
 import com.flowpowered.math.vector.Vector3i;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.structure.MapGenStructure;
 import org.spongepowered.api.world.extent.Extent;
@@ -46,7 +46,7 @@ import java.util.Random;
 public abstract class MixinMapGenStructure implements Populator {
 
     @Shadow
-    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkCoordIntPair p_175794_3_);
+    public abstract boolean generateStructure(World worldIn, Random p_175794_2_, ChunkPos p_175794_3_);
     
     @Override
     public PopulatorType getType() {
@@ -57,7 +57,7 @@ public abstract class MixinMapGenStructure implements Populator {
     public void populate(org.spongepowered.api.world.World worldIn, Extent extent, Random random) {
         Vector3i min = extent.getBlockMin();
         World world = (World) worldIn;
-        generateStructure(world, random, new ChunkCoordIntPair((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
+        generateStructure(world, random, new ChunkPos((min.getX() - 8) / 16, (min.getZ() - 8) / 16));
     }
 
 }

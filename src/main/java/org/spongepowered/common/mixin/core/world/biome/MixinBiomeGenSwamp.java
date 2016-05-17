@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenSwamp;
+import net.minecraft.world.biome.BiomeSwamp;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.type.BiomeTreeTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeGenSwamp.class)
+@Mixin(BiomeSwamp.class)
 public abstract class MixinBiomeGenSwamp extends MixinBiomeGenBase {
 
     @Override

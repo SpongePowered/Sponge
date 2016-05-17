@@ -26,14 +26,14 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenPlains;
+import net.minecraft.world.biome.BiomePlains;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenPlains;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.populators.PlainsGrassPopulator;
 
-@Mixin(BiomeGenPlains.class)
+@Mixin(BiomePlains.class)
 public abstract class MixinBiomeGenPlains extends MixinBiomeGenBase implements IBiomeGenPlains {
 
     @Shadow protected boolean sunflowers;

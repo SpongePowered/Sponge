@@ -30,12 +30,11 @@ import gnu.trove.map.hash.TObjectIntHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.storage.SaveHandler;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
 import java.io.File;
@@ -67,18 +66,18 @@ public class ChunkSaveHelper {
                 writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
                 writer.name("dimensionId").value(((IMixinWorldServer) spongeWorld).getDimensionId());
                 writer.name("players").value(world.playerEntities.size());
-                writer.name("loadedChunks").value(world.getChunkProvider().loadedChunks.size());
+                writer.name("loadedChunks").value(world.getChunkProvider().func_189548_a().size());
                 writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 
-                TObjectIntHashMap<ChunkCoordIntPair> chunkEntityCounts = new TObjectIntHashMap<>();
+                TObjectIntHashMap<ChunkPos> chunkEntityCounts = new TObjectIntHashMap<>();
                 TObjectIntHashMap<Class> classEntityCounts = new TObjectIntHashMap<>();
                 TObjectIntHashMap<Entity> entityCollisionCounts = new TObjectIntHashMap<>();
                 Set<BlockPos> collidingCoords = new HashSet<>();
                 for (int i = 0; i < world.loadedEntityList.size(); i++) {
                     Entity entity = world.loadedEntityList.get(i);
-                    ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair((int) entity.posX >> 4, (int) entity.posZ >> 4);
+                    ChunkPos chunkCoords = new ChunkPos((int) entity.posX >> 4, (int) entity.posZ >> 4);
                     chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
                     if ((entity.getCollisionBoundingBox() != null) && logAll) {
@@ -94,7 +93,7 @@ public class ChunkSaveHelper {
                     }
                 }
 
-                TObjectIntHashMap<ChunkCoordIntPair> chunkTileCounts = new TObjectIntHashMap<>();
+                TObjectIntHashMap<ChunkPos> chunkTileCounts = new TObjectIntHashMap<>();
                 TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<>();
                 writer.name("tiles").beginArray();
                 for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
@@ -110,7 +109,7 @@ public class ChunkSaveHelper {
                         writer.name("block").value("" + tile.getBlockType());
                         writer.endObject();
                     }
-                    ChunkCoordIntPair chunkCoords = new ChunkCoordIntPair(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
+                    ChunkPos chunkCoords = new ChunkPos(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
                     chunkTileCounts.adjustOrPutValue(chunkCoords, 1, 1);
                     classTileCounts.adjustOrPutValue(tile.getClass(), 1, 1);
                 }

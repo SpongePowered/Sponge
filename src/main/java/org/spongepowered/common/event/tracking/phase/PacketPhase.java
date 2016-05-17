@@ -48,9 +48,9 @@ import net.minecraft.network.play.client.CPacketInput;
 import net.minecraft.network.play.client.CPacketKeepAlive;
 import net.minecraft.network.play.client.CPacketPlayer;
 import net.minecraft.network.play.client.CPacketPlayerAbilities;
-import net.minecraft.network.play.client.CPacketPlayerBlockPlacement;
-import net.minecraft.network.play.client.CPacketPlayerDigging;
 import net.minecraft.network.play.client.CPacketPlayerTryUseItem;
+import net.minecraft.network.play.client.CPacketPlayerDigging;
+import net.minecraft.network.play.client.CPacketPlayerTryUseItemOnBlock;
 import net.minecraft.network.play.client.CPacketResourcePackStatus;
 import net.minecraft.network.play.client.CPacketSpectate;
 import net.minecraft.network.play.client.CPacketTabComplete;
@@ -484,7 +484,7 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-                final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
+                final CPacketPlayerTryUseItemOnBlock placeBlock = (CPacketPlayerTryUseItemOnBlock) packet;
                 final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
                 final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
                 if (itemstack != null) {
@@ -520,7 +520,7 @@ public final class PacketPhase extends TrackingPhase {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 // Note - CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-                final CPacketPlayerBlockPlacement placeBlock = (CPacketPlayerBlockPlacement) packet;
+                final CPacketPlayerTryUseItem placeBlock = (CPacketPlayerTryUseItem) packet;
                 final net.minecraft.item.ItemStack usedItem = playerMP.getHeldItem(placeBlock.getHand());
                 final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
                 if (itemstack != null) {
@@ -641,18 +641,18 @@ public final class PacketPhase extends TrackingPhase {
             }
         });
         this.packetTranslationMap.put(CPacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
-        this.packetTranslationMap.put(CPacketPlayer.C04PacketPlayerPosition.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketPlayer.C05PacketPlayerLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketPlayer.C06PacketPlayerPosLook.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.Position.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.Rotation.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.PositionRotation.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
             final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
             final CPacketPlayerDigging.Action action = playerDigging.getAction();
             final IPacketState state = INTERACTION_ACTION_MAPPINGS.get(action);
             return state == null ? PacketPhase.General.UNKNOWN : state;
         });
-        this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> {
+        this.packetTranslationMap.put(CPacketPlayerTryUseItemOnBlock.class, packet -> {
             // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-            final CPacketPlayerTryUseItem blockPlace = (CPacketPlayerTryUseItem) packet;
+            final CPacketPlayerTryUseItemOnBlock blockPlace = (CPacketPlayerTryUseItemOnBlock) packet;
             final BlockPos blockPos = blockPlace.getPos();
             final EnumFacing front = blockPlace.getDirection();
             final MinecraftServer server = SpongeImpl.getServer();
@@ -662,7 +662,7 @@ public final class PacketPhase extends TrackingPhase {
                 return PacketPhase.General.INVALID_PLACE;
             }
         });
-        this.packetTranslationMap.put(CPacketPlayerBlockPlacement.class, packet -> PacketPhase.General.USE_ITEM);
+        this.packetTranslationMap.put(CPacketPlayerTryUseItem.class, packet -> PacketPhase.General.USE_ITEM);
         this.packetTranslationMap.put(CPacketHeldItemChange.class, packet -> PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL);
         this.packetTranslationMap.put(CPacketAnimation.class, packet -> PacketPhase.General.ANIMATION);
         this.packetTranslationMap.put(CPacketEntityAction.class, packet -> {
@@ -698,14 +698,14 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
-        this.packetUnwindMap.put(CPacketPlayer.C04PacketPlayerPosition.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketPlayer.C05PacketPlayerLook.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketPlayer.C06PacketPlayerPosLook.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
         // Note that CPacketPlayerBlockPlacement is swapped with CPacketPlayerTryUseItem
-        this.packetUnwindMap.put(CPacketPlayerBlockPlacement.class, PacketFunction.USE_ITEM);
+        this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
         // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
-        this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.PLACE_BLOCK);
+        this.packetUnwindMap.put(CPacketPlayerTryUseItemOnBlock.class, PacketFunction.PLACE_BLOCK);
         this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
         this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketEntityAction.class, PacketFunction.IGNORED);

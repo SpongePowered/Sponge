@@ -136,7 +136,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator((ImmutableDataManipulator) manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
-        ((net.minecraft.entity.Entity) entity).writeToNBT(this.compound);
+        ((net.minecraft.entity.Entity) entity).func_189511_e(this.compound);
         return this;
     }
 
@@ -228,7 +228,7 @@ public class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnaps
             addManipulator(manipulator.asImmutable());
         }
         this.compound = new NBTTagCompound();
-        minecraftEntity.writeToNBT(this.compound);
+        minecraftEntity.func_189511_e(this.compound);
         return this;
     }
 

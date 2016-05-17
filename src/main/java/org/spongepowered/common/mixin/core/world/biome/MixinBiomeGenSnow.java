@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.core.world.biome;
 
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenSnow;
+import net.minecraft.world.biome.BiomeSnow;
 import org.spongepowered.api.util.weighted.VariableAmount;
 import org.spongepowered.api.world.gen.populator.Forest;
 import org.spongepowered.api.world.gen.populator.IcePath;
@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 
-@Mixin(BiomeGenSnow.class)
+@Mixin(BiomeSnow.class)
 public abstract class MixinBiomeGenSnow extends MixinBiomeGenBase {
 
     @Shadow private boolean superIcy;

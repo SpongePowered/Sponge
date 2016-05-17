@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world.biome;
 
 import com.flowpowered.math.vector.Vector2i;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import org.spongepowered.api.world.biome.BiomeType;
 import org.spongepowered.api.world.extent.MutableBiomeArea;
@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 public abstract class MixinBiomeProvider implements BiomeGenerator {
 
     @Shadow
-    public abstract BiomeGenBase[] getBiomeGenAt(BiomeGenBase[] listToReuse, int x, int z, int width, int length, boolean cacheFlag);
+    public abstract Biome[] getBiomeGenAt(Biome[] listToReuse, int x, int z, int width, int length, boolean cacheFlag);
 
     @Override
     public void generateBiomes(MutableBiomeArea buffer) {
@@ -48,7 +48,7 @@ public abstract class MixinBiomeProvider implements BiomeGenerator {
         int xSize = size.getX();
         int zSize = size.getY();
 
-        BiomeGenBase[] biomes = getBiomeGenAt(null, xStart, zStart, xSize, zSize, true);
+        Biome[] biomes = getBiomeGenAt(null, xStart, zStart, xSize, zSize, true);
 
         for (int i = 0; i < xSize; i++) {
             for (int j = 0; j < zSize; j++) {

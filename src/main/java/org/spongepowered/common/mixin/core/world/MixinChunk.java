@@ -45,12 +45,11 @@ import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.EnumSkyBlock;
 import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.Chunk.EnumCreateEntityType;
 import net.minecraft.world.chunk.IChunkGenerator;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -80,8 +79,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -161,7 +158,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Shadow protected abstract void propagateSkylightOcclusion(int x, int z);
     @Shadow public abstract IBlockState getBlockState(BlockPos pos);
     @Shadow public abstract IBlockState getBlockState(final int p_186032_1_, final int p_186032_2_, final int p_186032_3_);
-    @Shadow public abstract BiomeGenBase getBiome(BlockPos pos, BiomeProvider chunkManager);
+    @Shadow public abstract Biome getBiome(BlockPos pos, BiomeProvider chunkManager);
     @Shadow public abstract byte[] getBiomeArray();
     @Shadow public abstract void setBiomeArray(byte[] biomeArray);
     // @formatter:on
@@ -294,7 +291,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         byte[] biomeArray = getBiomeArray();
         int i = x & 15;
         int j = z & 15;
-        biomeArray[j << 4 | i] = (byte) (BiomeGenBase.getIdForBiome((BiomeGenBase) biome) & 255);
+        biomeArray[j << 4 | i] = (byte) (Biome.getIdForBiome((Biome) biome) & 255);
         setBiomeArray(biomeArray);
     }
 

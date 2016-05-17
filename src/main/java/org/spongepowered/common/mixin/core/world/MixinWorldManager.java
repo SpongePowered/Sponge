@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.world.DimensionType;
-import net.minecraft.world.WorldManager;
+import net.minecraft.world.ServerWorldEventHandler;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 
-@Mixin(WorldManager.class)
+@Mixin(ServerWorldEventHandler.class)
 public abstract class MixinWorldManager {
 
     @Shadow private WorldServer theWorldServer;

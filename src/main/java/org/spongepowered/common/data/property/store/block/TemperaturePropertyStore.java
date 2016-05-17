@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.property.store.block;
 
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.data.property.block.TemperatureProperty;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.Location;
@@ -39,8 +39,8 @@ public class TemperaturePropertyStore extends AbstractSpongePropertyStore<Temper
     @Override
     public Optional<TemperatureProperty> getFor(Location<World> location) {
         final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final BiomeGenBase biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location));
-        return Optional.of(new TemperatureProperty(biome.temperature));
+        final Biome biome = world.getBiomeGenForCoords(VecHelper.toBlockPos(location));
+        return Optional.of(new TemperatureProperty(biome.getTemperature()));
     }
 
     @Override

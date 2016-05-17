@@ -28,7 +28,7 @@ import com.flowpowered.math.vector.Vector2i;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import org.spongepowered.api.world.extent.BiomeArea;
 import org.spongepowered.api.world.extent.BlockVolume;
 
@@ -45,7 +45,7 @@ public class ExtentBufferUtil {
         int i = 0;
         for (int y = min.getY(); y <= max.getY(); y++) {
             for (int x = min.getX(); x <= max.getX(); x++) {
-                copy[i++] = (byte) BiomeGenBase.getIdForBiome((BiomeGenBase) area.getBiome(x, y));
+                copy[i++] = (byte) Biome.getIdForBiome((Biome) area.getBiome(x, y));
             }
         }
         return copy;

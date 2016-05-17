@@ -59,7 +59,7 @@ import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.WorldType;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeProvider;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderServer;
@@ -187,7 +187,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public boolean addWeatherEffect(net.minecraft.entity.Entity entityIn) {
         return false; // Note this is not actually going to return false, it's just a target
     };
-    @Shadow public abstract BiomeGenBase getBiomeGenForCoords(BlockPos pos);
+    @Shadow public abstract Biome getBiomeGenForCoords(BlockPos pos);
     @Shadow public abstract IChunkProvider getChunkProvider();
     @Shadow public abstract BiomeProvider getBiomeProvider();
     @Shadow @Nullable public abstract net.minecraft.tileentity.TileEntity getTileEntity(BlockPos pos);
@@ -440,7 +440,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (List<Chunk>) (List<?>) ((ChunkProviderServer) this.getChunkProvider()).loadedChunks;
+        return (List<Chunk>) (List<?>) ((ChunkProviderServer) this.getChunkProvider()).func_189548_a();
     }
 
     @Override
@@ -620,7 +620,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();

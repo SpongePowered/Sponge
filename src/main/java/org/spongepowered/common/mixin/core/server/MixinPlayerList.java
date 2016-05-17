@@ -510,7 +510,7 @@ public abstract class MixinPlayerList {
     private void onPlayerLogOut(EntityPlayerMP player, CallbackInfo ci) {
         // Synchronise with user object
         NBTTagCompound nbt = new NBTTagCompound();
-        player.writeToNBT(nbt);
+        player.func_189511_e(nbt);
         ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
     }
 

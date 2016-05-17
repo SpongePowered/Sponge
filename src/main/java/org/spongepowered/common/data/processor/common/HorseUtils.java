@@ -27,7 +27,7 @@ package org.spongepowered.common.data.processor.common;
 import static org.spongepowered.common.data.util.DataUtil.getData;
 
 import net.minecraft.entity.passive.EntityHorse;
-import net.minecraft.entity.passive.HorseArmorType;
+import net.minecraft.entity.passive.HorseType;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.data.key.Keys;
 import org.spongepowered.api.data.type.HorseColor;
@@ -61,7 +61,7 @@ public class HorseUtils {
         return SpongeImpl.getRegistry().getType(HorseStyle.class, getData(container, Keys.HORSE_STYLE, String.class)).get();
     }
 
-    public static HorseVariant getHorseVariant(HorseArmorType type) {
+    public static HorseVariant getHorseVariant(HorseType type) {
         return SpongeEntityConstants.HORSE_VARIANT_IDMAP.get(type);
     }
 

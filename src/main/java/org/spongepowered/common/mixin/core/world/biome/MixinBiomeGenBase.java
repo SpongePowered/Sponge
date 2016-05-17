@@ -29,7 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.gen.ChunkProviderSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.type.PlantTypes;
@@ -68,7 +68,7 @@ import org.spongepowered.common.world.gen.WorldGenConstants;
 import org.spongepowered.common.world.gen.populators.WrappedBiomeDecorator;
 
 @NonnullByDefault
-@Mixin(BiomeGenBase.class)
+@Mixin(Biome.class)
 public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
 
     @Shadow @Final public String biomeName;
@@ -86,7 +86,7 @@ public abstract class MixinBiomeGenBase implements BiomeType, IBiomeGenBase {
         gensettings.getGroundCoverLayers().clear();
         buildPopulators(world, gensettings);
         if (!getClass().getName().startsWith("net.minecraft")) {
-            gensettings.getPopulators().add(new WrappedBiomeDecorator((BiomeGenBase) (Object) this));
+            gensettings.getPopulators().add(new WrappedBiomeDecorator((Biome) (Object) this));
         } else if (!this.theBiomeDecorator.getClass().getName().startsWith("net.minecraft")) {
             gensettings.getPopulators().add(new WrappedBiomeDecorator(this.theBiomeDecorator));
         }

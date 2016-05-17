@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.item.inventory;
 
 import net.minecraft.inventory.Container;
-import net.minecraft.inventory.ICrafting;
+import net.minecraft.inventory.IContainerListener;
 import net.minecraft.inventory.Slot;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -53,7 +53,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
     @Shadow public List<Slot> inventorySlots;
     @Shadow public List<ItemStack> inventoryItemStacks;
     @Shadow public int windowId;
-    @Shadow protected List<ICrafting> listeners;
+    @Shadow protected List<IContainerListener> listeners;
 
     @SuppressWarnings("rawtypes")
     @Shadow
@@ -70,7 +70,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      */
     @SuppressWarnings("unchecked")
     @Overwrite
-    public void addListener(ICrafting listener) {
+    public void addListener(IContainerListener listener) {
         Container container = (Container) (Object) this;
         if (this.listeners.contains(listener)) {
             // Sponge start

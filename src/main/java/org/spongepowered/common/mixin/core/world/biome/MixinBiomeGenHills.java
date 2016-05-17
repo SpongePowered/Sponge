@@ -29,7 +29,7 @@ import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeDecorator;
-import net.minecraft.world.biome.BiomeGenHills;
+import net.minecraft.world.biome.BiomeHills;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.weighted.SeededVariableAmount;
 import org.spongepowered.api.util.weighted.VariableAmount;
@@ -43,10 +43,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.biome.SpongeBiomeGenerationSettings;
 import org.spongepowered.common.world.gen.WorldGenConstants;
 
-@Mixin(BiomeGenHills.class)
+@Mixin(BiomeHills.class)
 public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
 
-    @Shadow @Final private BiomeGenHills.Type type;
+    @Shadow @Final private BiomeHills.Type type;
 
     @Override
     public void buildPopulators(World world, SpongeBiomeGenerationSettings gensettings) {
@@ -54,18 +54,18 @@ public abstract class MixinBiomeGenHills extends MixinBiomeGenBase {
         gensettings.getGroundCoverLayers().clear();
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
             IBlockState result = Blocks.GRASS.getDefaultState();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeGenHills.Type.MUTATED) {
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeHills.Type.MUTATED) {
                 result = Blocks.GRAVEL.getDefaultState();
-            } else if (stoneNoise > 1.0D && this.type != BiomeGenHills.Type.EXTRA_TREES) {
+            } else if (stoneNoise > 1.0D && this.type != BiomeHills.Type.EXTRA_TREES) {
                 result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
         } , SeededVariableAmount.fixed(1)));
         gensettings.getGroundCoverLayers().add(new GroundCoverLayer((stoneNoise) -> {
             IBlockState result = Blocks.DIRT.getDefaultState();
-            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeGenHills.Type.MUTATED) {
+            if ((stoneNoise < -1.0D || stoneNoise > 2.0D) && this.type == BiomeHills.Type.MUTATED) {
                 result = Blocks.GRAVEL.getDefaultState();
-            } else if (stoneNoise > 1.0D && this.type != BiomeGenHills.Type.EXTRA_TREES) {
+            } else if (stoneNoise > 1.0D && this.type != BiomeHills.Type.EXTRA_TREES) {
                 result = Blocks.STONE.getDefaultState();
             }
             return (BlockState) result;
