@@ -38,7 +38,9 @@ import net.minecraft.util.ITickable;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -129,6 +131,16 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.RANDOM_BLOCK, phaseContext.complete());
         block.randomTick(minecraftWorld, pos, state, random);
+        causeTracker.completePhase();
+    }
+
+    public static void tickWorldProvider(WorldProvider worldProvider, WorldServer worldServer) {
+        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.DIMENSION, PhaseContext.start()
+                .add(NamedCause.source(worldProvider))
+                .addCaptures()
+                .complete());
+        worldProvider.onWorldUpdateEntities();
         causeTracker.completePhase();
     }
 

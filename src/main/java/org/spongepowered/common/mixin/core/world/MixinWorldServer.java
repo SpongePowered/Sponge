@@ -352,6 +352,11 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         return iceAndSnow;
     }
 
+    @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;onWorldUpdateEntities()V"))
+    private void onDimensionUpdateEntities(WorldProvider worldProvider) {
+        TrackingUtil.tickWorldProvider(worldProvider, (WorldServer) (Object) this);
+    }
+
     /**
      * @author gabizou - May 17th, 2016
      * @reason This isn't a modify constant at all, but it's the best injection point I can think of

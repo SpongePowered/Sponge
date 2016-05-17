@@ -331,6 +331,49 @@ public final class WorldPhase extends TrackingPhase {
                 mixinTickingEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).ifPresent(user -> builder.named(NamedCause.notifier(user)));
             }
         },
+        DIMENSION() {
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                phaseContext.getCapturedBlockSupplier()
+                        .ifPresentAndNotEmpty(blockSnapshots -> {
+                            GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                        });
+
+                phaseContext.getCapturedEntitySupplier()
+                        .ifPresentAndNotEmpty(entities -> {
+                            // TODO the entity spawn causes are not likely valid, need to investigate further.
+                            final Cause cause = Cause.source(SpawnCause.builder()
+                                    .type(InternalSpawnTypes.PLACEMENT)
+                                    .build())
+                                    .build();
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
+                                    .process();
+                        });
+                phaseContext.getCapturedItemsSupplier()
+                        .ifPresentAndNotEmpty(entities -> {
+                            final Cause cause = Cause.source(SpawnCause.builder()
+                                    .type(InternalSpawnTypes.PLACEMENT)
+                                    .build())
+                                    .build();
+                            EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, causeTracker.getWorld()))
+                                    .nonCancelled(event -> {
+                                        for (Entity entity : event.getEntities()) {
+                                            causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                                        }
+                                    })
+                                    .process();
+                        });
+            }
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+
+            }
+        },
         TILE_ENTITY() {
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
