@@ -48,7 +48,7 @@ public class EndSpikePopulator implements Populator {
 
     @Override
     public void populate(org.spongepowered.api.world.World world, Extent extent, Random rand) {
-        Vector3i min = extent.getBlockMin();
+        Vector3i min = extent.getBlockMin().sub(8,0,8);
         World worldIn = (World) world;
         WorldGenSpikes.EndSpike[] aworldgenspikes$endspike = BiomeEndDecorator.getSpikesForWorld(worldIn);
         BlockPos pos = VecHelper.toBlockPos(min);
