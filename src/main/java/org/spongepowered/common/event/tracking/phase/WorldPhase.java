@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.block.Block;
 import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
@@ -47,6 +48,7 @@ import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -70,10 +72,12 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -87,7 +91,9 @@ public final class WorldPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         CHUNK_LOADING,
-        WORLD_SPAWNER_SPAWNING,
+        WORLD_SPAWNER_SPAWNING() {
+
+        },
         POPULATOR_RUNNING(BlockPhase.State.BLOCK_DECAY, BlockPhase.State.BLOCK_DROP_ITEMS, BlockPhase.State.RESTORING_BLOCKS, State.WORLD_SPAWNER_SPAWNING, GeneralPhase.Post.UNWINDING) {
             @Override
             public boolean canSwitchTo(IPhaseState state) { // Because populators are possibly re-entrant due to mods
@@ -122,10 +128,35 @@ public final class WorldPhase extends TrackingPhase {
             return this.compatibleStates.contains(state);
         }
 
+        public boolean captureEntitySpawn(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+            final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
+            if (minecraftEntity instanceof EntityItem) {
+                return context.getCapturedItems().add(entity);
+            } else {
+                return context.getCapturedEntities().add(entity);
+            }
+        }
     }
 
     public enum Tick implements ITickingState {
         ENTITY() {
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final Entity tickingEntity = context.firstNamed(NamedCause.SOURCE, Entity.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking on an Entity!", context));
+                final IMixinEntity mixinEntity = EntityUtil.toMixin(tickingEntity);
+                Stream.<Supplier<Optional<UUID>>>of(
+                        () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(Identifiable::getUniqueId),
+                        () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(Identifiable::getUniqueId)
+                )
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(uuid -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, uuid));
+
+            }
+
             @SuppressWarnings("unchecked")
             @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
@@ -376,6 +407,22 @@ public final class WorldPhase extends TrackingPhase {
         },
         TILE_ENTITY() {
             @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final TileEntity tickingTile = context.firstNamed(NamedCause.SOURCE, TileEntity.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", context));
+                final Location<World> location = tickingTile.getLocation();
+                final Vector3d position = location.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(position);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
+            }
+
+            @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final TileEntity tickingTile = phaseContext.firstNamed(NamedCause.SOURCE, TileEntity.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a TileEntity!", phaseContext));
@@ -457,6 +504,22 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         BLOCK() {
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
+                final Location<World> location = tickingBlock.getLocation().get();
+                final Vector3d position = location.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(position);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
+            }
+
             @Override
             public boolean canSwitchTo(IPhaseState state) {
                 return super.canSwitchTo(state) || state == State.CHUNK_LOADING;
@@ -541,6 +604,22 @@ public final class WorldPhase extends TrackingPhase {
         },
         BLOCK_EVENT() {
             @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
+                final Location<World> location = tickingBlock.getLocation().get();
+                final Vector3d position = location.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(position);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
+            }
+
+            @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
                 final World world = causeTracker.getWorld();
@@ -619,6 +698,22 @@ public final class WorldPhase extends TrackingPhase {
         },
         RANDOM_BLOCK() {
             @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final BlockSnapshot tickingBlock = context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", context));
+                final Location<World> location = tickingBlock.getLocation().get();
+                final Vector3d position = location.getPosition();
+                final BlockPos blockPos = VecHelper.toBlockPos(position);
+                final IMixinChunk mixinChunk = (IMixinChunk) ((WorldServer) location.getExtent()).getChunkFromBlockCoords(blockPos);
+                Stream.<Supplier<Optional<User>>>of(() -> mixinChunk.getBlockNotifier(blockPos), () -> mixinChunk.getBlockOwner(blockPos))
+                        .map(Supplier::get)
+                        .filter(Optional::isPresent)
+                        .map(Optional::get)
+                        .findFirst()
+                        .ifPresent(user -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, user.getUniqueId()));
+            }
+
+            @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final BlockSnapshot tickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
@@ -679,6 +774,13 @@ public final class WorldPhase extends TrackingPhase {
             }
         },
         PLAYER() {
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Not ticking a player!", context));
+                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+            }
+
             @Override
             public void associateBlockEventNotifier(PhaseContext context, CauseTracker causeTracker, BlockPos pos, IMixinBlockEventData blockEvent) {
                 blockEvent.setSourceUser(context.firstNamed(NamedCause.SOURCE, Player.class).get());
@@ -895,6 +997,14 @@ public final class WorldPhase extends TrackingPhase {
         if (currentState == Tick.BLOCK || currentState == Tick.RANDOM_BLOCK) {
 
         }
+    }
+
+    @Override
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+        if (phaseState instanceof Tick) {
+            return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+        }
+        return ((State) phaseState).captureEntitySpawn(phaseState, context, entity, chunkX, chunkZ);
     }
 
     /**

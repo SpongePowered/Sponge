@@ -36,7 +36,10 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -52,6 +55,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -248,15 +252,18 @@ public abstract class TrackingPhase {
      * @param chunkZ The chunk z position
      * @return True if the entity was successfully captured
      */
-    public boolean attemptEntitySpawnCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
+    public boolean spawnEntityOrCapture(IPhaseState phaseState, PhaseContext context, Entity entity, int chunkX, int chunkZ) {
         final net.minecraft.entity.Entity minecraftEntity = (net.minecraft.entity.Entity) entity;
         final WorldServer minecraftWorld = (WorldServer) minecraftEntity.worldObj;
-        TrackingUtil.associateEntityCreator(context, minecraftEntity, minecraftWorld);
-        if (minecraftEntity instanceof EntityItem) {
-            return context.getCapturedItems().add(entity);
-        } else {
-            return context.getCapturedEntities().add(entity);
+        phaseState.assignEntityCreator(context, entity);
+        final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(InternalSpawnTypes.UNKNOWN_CAUSE,
+                Arrays.asList(entity), (World) minecraftWorld);
+        SpongeImpl.postEvent(event);
+        if (!event.isCancelled()) {
+            ((IMixinWorldServer) minecraftWorld).forceSpawnEntity(entity);
+            return true;
         }
+        return false;
     }
 
     @Override

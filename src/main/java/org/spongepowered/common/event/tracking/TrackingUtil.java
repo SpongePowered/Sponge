@@ -45,6 +45,7 @@ import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.util.Identifiable;
@@ -82,7 +83,8 @@ public final class TrackingUtil {
         checkNotNull(entityIn, "Cannot capture on a null ticking entity!");
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.ENTITY, PhaseContext.start()
                 .add(NamedCause.source(entityIn))
-                .addCaptures()
+                .addEntityCaptures()
+                .addBlockCaptures()
                 .complete());
         entityIn.onUpdate();
         causeTracker.completePhase();
@@ -91,7 +93,8 @@ public final class TrackingUtil {
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(tile))
-                .addCaptures()
+                .addEntityCaptures()
+                .addBlockCaptures()
                 .complete());
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
@@ -105,7 +108,8 @@ public final class TrackingUtil {
         BlockSnapshot snapshot = mixinWorld.createSpongeBlockSnapshot(state, state.getBlock().getActualState(state, minecraftWorld, pos), pos, 0);
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(snapshot))
-                .addCaptures();
+                .addBlockCaptures()
+                .addEntityCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getStack().peek();
         final IPhaseState currentState = current.getState();
@@ -123,7 +127,8 @@ public final class TrackingUtil {
                 minecraftWorld, pos), pos, 0);
         final PhaseContext phaseContext = PhaseContext.start()
                 .add(NamedCause.source(currentTickBlock))
-                .addCaptures();
+                .addEntityCaptures()
+                .addBlockCaptures();
         // We have to associate any notifiers in case of scheduled block updates from other sources
         final PhaseData current = causeTracker.getStack().peek();
         final IPhaseState currentState = current.getState();
@@ -138,7 +143,9 @@ public final class TrackingUtil {
         final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.DIMENSION, PhaseContext.start()
                 .add(NamedCause.source(worldProvider))
-                .addCaptures()
+                .addBlockCaptures()
+                .addEntityCaptures()
+                .addEntityDropCaptures()
                 .complete());
         worldProvider.onWorldUpdateEntities();
         causeTracker.completePhase();
@@ -148,7 +155,8 @@ public final class TrackingUtil {
         IBlockState currentState = worldIn.getBlockState(event.getPosition());
         final IMixinBlockEventData blockEvent = (IMixinBlockEventData) event;
         final PhaseContext phaseContext = PhaseContext.start()
-                .addCaptures();
+                .addBlockCaptures()
+                .addEntityCaptures();
 
         Stream.<Supplier<Optional<?>>>of(blockEvent::getCurrentTickBlock, blockEvent::getCurrentTickTileEntity, () -> Optional.of(blockEvent))
                 .map(Supplier::get)

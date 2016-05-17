@@ -386,7 +386,12 @@ public final class PacketPhase extends TrackingPhase {
 
     public enum General implements IPacketState, IPhaseState {
         UNKNOWN,
-        MOVEMENT,
+        MOVEMENT() {
+            @Override
+            public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
+                context.addBlockCaptures().addEntityCaptures();
+            }
+        },
         INTERACTION() {
             @Override
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
@@ -641,9 +646,9 @@ public final class PacketPhase extends TrackingPhase {
             }
         });
         this.packetTranslationMap.put(CPacketPlayer.class, packet -> PacketPhase.General.MOVEMENT);
-        this.packetTranslationMap.put(CPacketPlayer.Position.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketPlayer.Rotation.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
-        this.packetTranslationMap.put(CPacketPlayer.PositionRotation.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
+        this.packetTranslationMap.put(CPacketPlayer.Position.class, packet -> PacketPhase.General.MOVEMENT);
+        this.packetTranslationMap.put(CPacketPlayer.Rotation.class, packet -> PacketPhase.General.MOVEMENT);
+        this.packetTranslationMap.put(CPacketPlayer.PositionRotation.class, packet -> PacketPhase.General.MOVEMENT);
         this.packetTranslationMap.put(CPacketPlayerDigging.class, packet -> {
             final CPacketPlayerDigging playerDigging = (CPacketPlayerDigging) packet;
             final CPacketPlayerDigging.Action action = playerDigging.getAction();

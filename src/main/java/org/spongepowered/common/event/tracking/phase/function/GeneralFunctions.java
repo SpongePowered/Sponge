@@ -150,7 +150,7 @@ public class GeneralFunctions {
             return;
         }
 
-        final List<Transaction<BlockSnapshot>> invalid = context.getInvalidTransactions();
+        final List<Transaction<BlockSnapshot>> invalid = new ArrayList<>();
 
         for (ChangeBlockEvent blockEvent : blockEvents) { // Need to only check if the event is cancelled, If it is, restore
             if (blockEvent.isCancelled()) {

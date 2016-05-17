@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase;
 
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.common.event.tracking.CauseTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -44,6 +45,12 @@ public final class BlockPhase extends TrackingPhase {
         @Override
         public boolean canSwitchTo(IPhaseState state) {
             return false;
+        }
+
+        @Override
+        public void assignEntityCreator(PhaseContext context, Entity entity) {
+            context.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
+                    .orElseThrow(PhaseUtil.throwWithContext("Not processing over a block!", context));
         }
 
         @Override

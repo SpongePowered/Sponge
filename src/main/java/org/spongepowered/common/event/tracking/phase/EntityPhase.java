@@ -34,7 +34,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -44,6 +46,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 
@@ -51,14 +54,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class EntityPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
         DEATH_DROPS_SPAWNING,
-        DEATH_UPDATE,;
+        DEATH_UPDATE,
+        ;
 
         @Override
         public EntityPhase getPhase() {
@@ -68,6 +75,20 @@ public final class EntityPhase extends TrackingPhase {
         @Override
         public boolean tracksEntitySpecificDrops() {
             return true;
+        }
+
+        @Override
+        public void assignEntityCreator(PhaseContext context, Entity entity) {
+            final IMixinEntity mixinEntity = context.firstNamed(NamedCause.SOURCE, IMixinEntity.class)
+                            .orElseThrow(PhaseUtil.throwWithContext("Dying Entity not found!", context));
+            Stream.<Supplier<Optional<UUID>>>of(
+                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(Identifiable::getUniqueId),
+                    () -> mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(Identifiable::getUniqueId))
+                    .map(Supplier::get)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst()
+                    .ifPresent(creator -> EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, creator));
         }
 
     }

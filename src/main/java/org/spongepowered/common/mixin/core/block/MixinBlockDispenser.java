@@ -99,8 +99,9 @@ public abstract class MixinBlockDispenser extends MixinBlock {
     private void onDispenseHead(World worldIn, BlockPos pos, IBlockState state, Random rand, CallbackInfo callbackInfo) {
         ((IMixinWorldServer) worldIn).getCauseTracker().switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.DISPENSE, PhaseContext.start()
             .add(NamedCause.source(((IMixinWorldServer) worldIn).createSpongeBlockSnapshot(state, state, pos, 3)))
-            .addCaptures()
-            .complete());
+                .addBlockCaptures()
+                .addCaptures()
+                .complete());
     }
 
     @Inject(method = "updateTick", at = @At(value = "INVOKE", target = DISPENSE_ITEM, shift = At.Shift.AFTER))

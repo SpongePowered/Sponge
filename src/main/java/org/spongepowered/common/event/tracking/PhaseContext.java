@@ -80,14 +80,19 @@ public class PhaseContext {
         return this;
     }
 
+    public PhaseContext addBlockCaptures() {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
+        return this;
+    }
+
     public PhaseContext addCaptures() {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, new CapturedBlocksSupplier()));
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, new InvalidTransactionSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_BLOCK_DROPS, new BlockItemDropsSupplier()));
-        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, new EntityItemDropsSupplier()));
         return this;
     }
 
@@ -95,6 +100,12 @@ public class PhaseContext {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITIES, new CapturedEntitiesSupplier()));
         this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ITEMS, new CapturedItemsSupplier()));
+        return this;
+    }
+
+    public PhaseContext addEntityDropCaptures() {
+        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
+        this.contextObjects.add(NamedCause.of(InternalNamedCauses.Tracker.CAPTURED_ENTITY_DROPS, new EntityItemDropsSupplier()));
         return this;
     }
 
@@ -153,21 +164,6 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture dropped item entities!", this));
     }
 
-
-    @SuppressWarnings("unchecked")
-    public List<Transaction<BlockSnapshot>> getInvalidTransactions() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS, InvalidTransactionSupplier.class)
-                .map(InvalidTransactionSupplier::get)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture invalid transactions!", this));
-    }
-
-    @SuppressWarnings("unchecked")
-    public CapturedSupplier<Transaction<BlockSnapshot>> getInvalidTransactionSupplier() throws IllegalStateException {
-        return firstNamed(InternalNamedCauses.Tracker.INVALID_TRANSACTIONS,
-                (Class<CapturedSupplier<Transaction<BlockSnapshot>>>) (Class<?>) InvalidTransactionSupplier.class)
-                .orElseThrow(PhaseUtil.throwWithContext("Intended to capture invalid transactions!", this));
-    }
-
     @SuppressWarnings("unchecked")
     public List<BlockSnapshot> getCapturedBlocks() throws IllegalStateException {
         return firstNamed(InternalNamedCauses.Tracker.CAPTURED_BLOCKS, CapturedBlocksSupplier.class)
@@ -219,24 +215,8 @@ public class PhaseContext {
                 .orElseThrow(PhaseUtil.throwWithContext("Intended to capture entity drops!", this));
     }
 
-    public Cause toCause() {
-        checkState(this.isCompleted, "Cannot get a cause for an incomplete PhaseContext!");
-        if (this.cause == null) {
-            this.cause = Cause.of(this.contextObjects);
-        }
-        return this.cause;
-    }
-
     public void forEach(Consumer<NamedCause> consumer) {
         this.contextObjects.forEach(consumer);
-    }
-
-    public PrettyPrinter populatePrinter(PrettyPrinter printer) {
-        printer.table(" %s : %s%n");
-        for (NamedCause cause : this.contextObjects) {
-            printer.tr(cause.getName(), cause.getCauseObject());
-        }
-        return printer;
     }
 
     PhaseContext() {
@@ -407,12 +387,6 @@ public class PhaseContext {
             return com.google.common.base.Objects.toStringHelper(this)
                     .add("Captured", this.captured == null ? 0 : this.captured.size())
                     .toString();
-        }
-    }
-
-    static final class InvalidTransactionSupplier extends CapturedSupplier<Transaction<BlockSnapshot>> {
-
-        InvalidTransactionSupplier() {
         }
     }
 

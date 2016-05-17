@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.world.BlockChange;
@@ -75,5 +76,9 @@ public interface IPhaseState {
 
     default boolean tracksEntitySpecificDrops() {
         return false;
+    }
+
+    default void assignEntityCreator(PhaseContext context, Entity entity) {
+
     }
 }

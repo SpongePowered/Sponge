@@ -169,7 +169,7 @@ public final class GeneralPhase extends TrackingPhase {
         final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
         final List<Entity> contextEntities = postContext.getCapturedEntities();
         final List<Entity> contextItems = postContext.getCapturedItems();
-        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions();
+        final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         if (contextBlocks.isEmpty() && contextEntities.isEmpty() && contextItems.isEmpty() && invalidTransactions.isEmpty()) {
             return;
         }
@@ -201,7 +201,7 @@ public final class GeneralPhase extends TrackingPhase {
      */
     @SuppressWarnings("unchecked")
     public static void processBlockTransactionListsPost(PhaseContext postContext, List<BlockSnapshot> snapshotsToProcess, CauseTracker causeTracker, IPhaseState unwindingState, PhaseContext unwinding) {
-        final List<Transaction<BlockSnapshot>> invalidTransactions = postContext.getInvalidTransactions();
+        final List<Transaction<BlockSnapshot>> invalidTransactions = new ArrayList<>();
         ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[GeneralFunctions.EVENT_COUNT];
         ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[GeneralFunctions.EVENT_COUNT];
         for (int i = 0; i < GeneralFunctions.EVENT_COUNT; i++) {
@@ -295,7 +295,6 @@ public final class GeneralPhase extends TrackingPhase {
                     final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
                     contextBlocks.clear();
-                    postContext.getInvalidTransactions().clear();
                     processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
                 }
             }
@@ -310,7 +309,6 @@ public final class GeneralPhase extends TrackingPhase {
                 final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
                 final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
                 contextBlocks.clear();
-                postContext.getInvalidTransactions().clear();
                 processBlockTransactionListsPost(postContext, blockSnapshots, causeTracker, unwindingState, unwindingPhaseContext);
             }
 

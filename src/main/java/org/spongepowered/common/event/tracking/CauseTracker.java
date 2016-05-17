@@ -28,56 +28,35 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.SpongeTimings;
-import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.item.EntityItem;
-import net.minecraft.entity.passive.EntityTameable;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.ReportedException;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.world.World;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.tracking.phase.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
-import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
-import org.spongepowered.common.util.SpongeHooks;
-import org.spongepowered.common.util.StaticMixinHelper;
-import org.spongepowered.common.util.VecHelper;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -191,6 +170,7 @@ public final class CauseTracker {
                 // Note that UnwindingPhaseContext is required for something? I don't think it requires anything tbh.
                 switchToPhase(TrackingPhases.GENERAL, GeneralPhase.Post.UNWINDING, UnwindingPhaseContext.unwind(state, context)
                         .addCaptures()
+                        .addEntityDropCaptures()
                         .complete());
             }
             try { // Yes this is a nested try, but in the event the current phase cannot be unwound, at least unwind UNWINDING
@@ -212,7 +192,18 @@ public final class CauseTracker {
                 printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
             }
             if (state != GeneralPhase.Post.UNWINDING && phase.requiresPost(state)) {
-                completePhase();
+                try {
+                    completePhase();
+                } catch (Exception e) {
+                    final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
+                    printer.addWrapped(40, "%s :", "PhaseContext");
+                    CONTEXT_PRINTER.accept(printer, context);
+                    printer.addWrapped(60, "%s :", "Phases remaining");
+                    this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+                    printer.add("Stacktrace:");
+                    printer.add(e);
+                    printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                }
             }
         } catch (Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(40);
@@ -275,6 +266,7 @@ public final class CauseTracker {
      * @param sourceBlock The source block type
      * @param sourcePos The source block position
      */
+    @SuppressWarnings("deprecation")
     public void notifyBlockOfStateChange(final BlockPos notifyPos, final Block sourceBlock, @Nullable final BlockPos sourcePos) {
         final IBlockState iblockstate = this.getMinecraftWorld().getBlockState(notifyPos);
 
@@ -328,9 +320,21 @@ public final class CauseTracker {
         final PhaseData phaseData = this.getStack().peek();
         final IPhaseState phaseState = phaseData.getState();
         if (phaseState.getPhase().requiresBlockCapturing(phaseState)) {
-            return TrackingUtil.trackBlockChange(this, chunk, currentState, newState, pos, flags, phaseData.getContext(), phaseState);
-            // Default, this means we've captured the block. Keeping with the semantics
-            // of the original method where true means it successfully changed.
+            try {
+                // Default, this means we've captured the block. Keeping with the semantics
+                // of the original method where true means it successfully changed.
+                return TrackingUtil.trackBlockChange(this, chunk, currentState, newState, pos, flags, phaseData.getContext(), phaseState);
+            } catch (Exception e) {
+                final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture a block change!").centre().hr();
+                printer.addWrapped(40, "%s :", "PhaseContext");
+                CONTEXT_PRINTER.accept(printer, phaseData.getContext());
+                printer.addWrapped(60, "%s :", "Phases remaining");
+                this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+                printer.add("Stacktrace:");
+                printer.add(e);
+                printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                return false;
+            }
         }
         // Sponge End - continue with vanilla mechanics
         final IBlockState iblockstate = chunk.setBlockState(pos, newState);
@@ -383,15 +387,16 @@ public final class CauseTracker {
         final IPhaseState phaseState = phaseData.getState();
         final PhaseContext context = phaseData.getContext();
         final TrackingPhase phase = phaseState.getPhase();
+        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
+
         // Certain phases disallow entity spawns (such as block restoration)
-        if (!phase.allowEntitySpawns(phaseState)) {
+        if (!isForced && !phase.allowEntitySpawns(phaseState)) {
             return false;
         }
 
         // Sponge End - continue with vanilla mechanics
         final int chunkX = MathHelper.floor_double(minecraftEntity.posX / 16.0D);
         final int chunkZ = MathHelper.floor_double(minecraftEntity.posZ / 16.0D);
-        final boolean isForced = minecraftEntity.forceSpawn || minecraftEntity instanceof EntityPlayer;
 
         if (!isForced && !getMixinWorld().isMinecraftChunkLoaded(chunkX, chunkZ, true)) {
             return false;
@@ -402,10 +407,26 @@ public final class CauseTracker {
                 minecraftWorld.updateAllPlayersSleepingFlag();
             }
             // Sponge Start
-            // First, check if the owning world is a remote world. Then check if the spawn is forced. Then finally check
-            // that the phase does not need to actually capture the entity spawn (at which case
-            if (!isForced && phase.attemptEntitySpawnCapture(phaseState, context, entity, chunkX, chunkZ)) {
-                return true;
+            // First, check if the owning world is a remote world. Then check if the spawn is forced.
+            // Finally, if all checks are true, then let the phase process the entity spawn. Most phases
+            // will not actively capture entity spawns, but will still throw events for them. Some phases
+            // capture all entities until the phase is marked for completion.
+            if (!isForced) {
+                try {
+                    return phase.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
+                } catch (Exception e) {
+                    // Just in case something really happened, we should print a nice exception for people to
+                    // paste us
+                    final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
+                    printer.addWrapped(40, "%s :", "PhaseContext");
+                    CONTEXT_PRINTER.accept(printer, context);
+                    printer.addWrapped(60, "%s :", "Phases remaining");
+                    this.stack.forEach(data -> PHASE_PRINTER.accept(printer, data));
+                    printer.add("Stacktrace:");
+                    printer.add(e);
+                    printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
+                    return false;
+                }
             }
             // Sponge end - continue on with the checks.
             minecraftWorld.getChunkFromChunkCoords(chunkX, chunkZ).addEntity(minecraftEntity);

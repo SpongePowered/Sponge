@@ -181,33 +181,29 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return getDefaultBlockState().getTrait(blockTrait);
     }
 
-    @Inject(method = "dropBlockAsItem", at = @At("HEAD"))
-    private void preDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
-        if (worldIn instanceof IMixinWorldServer) {
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
+    @Redirect(method = "dropBlockAsItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;dropBlockAsItemWithChance(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;FI)V"))
+    private void onDropItemWithFortuneChances(Block block, net.minecraft.world.World world, BlockPos pos, IBlockState state, float chance, int fortune) {
+        if (world instanceof IMixinWorldServer) {
+            final IMixinWorldServer mixinWorld = (IMixinWorldServer) world;
             final CauseTracker causeTracker = mixinWorld.getCauseTracker();
             final IPhaseState currentState = causeTracker.getStack().peekState();
             if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
                 causeTracker.switchToPhase(TrackingPhases.BLOCK, BlockPhase.State.BLOCK_DROP_ITEMS, PhaseContext.start()
                         .add(NamedCause.source(mixinWorld.createSpongeBlockSnapshot(state, state, pos, 4)))
-                        .addCaptures()
+                        .addBlockCaptures()
+                        .addEntityCaptures()
                         .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_FORTUNE, fortune))
                         .add(NamedCause.of(InternalNamedCauses.General.BLOCK_BREAK_POSITION, pos))
                         .complete());
             }
-        }
-    }
-
-    @Inject(method = "dropBlockAsItem", at = @At("RETURN"))
-    private void postDropBlockAsItem(net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, int fortune, CallbackInfo callbackInfo) {
-        if (worldIn instanceof IMixinWorldServer) {
-            final IMixinWorldServer mixinWorld = (IMixinWorldServer) worldIn;
-            final CauseTracker causeTracker = mixinWorld.getCauseTracker();
-            final IPhaseState currentState = causeTracker.getStack().peekState();
+            block.dropBlockAsItemWithChance(world, pos, state, chance, fortune);
             if (!currentState.getPhase().alreadyCapturingItemSpawns(currentState)) {
                 causeTracker.completePhase();
             }
+            return;
         }
+        block.dropBlockAsItemWithChance(world, pos, state, chance, fortune);
+
     }
 
     @Inject(method = "spawnAsEntity", at = @At(value = "NEW", args = {"class=net/minecraft/entity/item/EntityItem"}), cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD)
