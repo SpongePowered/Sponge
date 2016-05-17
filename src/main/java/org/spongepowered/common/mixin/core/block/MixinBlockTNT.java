@@ -94,7 +94,7 @@ public abstract class MixinBlockTNT extends MixinBlock {
         return onRemove(world, pos);
     }
 
-    @Redirect(method = "onNeighborBlockChange", at = @At(value = "INVOKE", target = TARGET_REMOVE))
+    @Redirect(method = "func_189540_a", at = @At(value = "INVOKE", target = TARGET_REMOVE))
     public boolean onRemovePostCharge(World world, BlockPos pos) {
         // Called when TNT receives charge
         return onRemove(world, pos);

@@ -66,7 +66,7 @@ import javax.annotation.Nullable;
 public abstract class MixinWorldEntitySpawner {
 
     private static final String WORLD_CAN_SPAWN_CREATURE = "Lnet/minecraft/world/WorldServer;canCreatureTypeSpawnHere("
-        + "Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/BiomeGenBase$SpawnListEntry;Lnet/minecraft/util/math/BlockPos;)Z";
+        + "Lnet/minecraft/entity/EnumCreatureType;Lnet/minecraft/world/biome/Biome$SpawnListEntry;Lnet/minecraft/util/math/BlockPos;)Z";
 
     private static final String BIOME_CAN_SPAWN_ANIMAL =
         "Lnet/minecraft/world/WorldEntitySpawner;canCreatureTypeSpawnAtLocation(Lnet/minecraft/entity/EntityLiving$SpawnPlacementType;"

@@ -574,15 +574,15 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void forceBlockUpdateTick(Block blockType, BlockPos pos, Random random) {
+    public void func_189507_a(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = this.causeTracker.getStack().peek();
         if (this.isRemote || peek.getState().getPhase().ignoresBlockUpdateTick(peek)) {
-            blockType.updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
+            state.getBlock().updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
             return;
         }
-        TrackingUtil.updateTickBlock(this.causeTracker, blockType, pos, this.getBlockState(pos), random);
+        TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, this.getBlockState(pos), random);
         // Sponge end
         this.scheduledUpdatesAreImmediate = false;
     }

@@ -35,12 +35,13 @@ import java.util.UUID;
 @Mixin(targets = "net.minecraft.command.EntitySelector$6")
 public class MixinEntitySelectorScore {
 
-    @Redirect(method = "apply(Lnet/minecraft/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Ljava/util/UUID;toString()Ljava/lang/String;", remap = false))
-    public String onUUIDToString(UUID uuid, Entity entity) {
+    @Redirect(method = "apply(Lnet/minecraft/entity/Entity;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;func_189512_bd()"
+            + "Ljava/lang/String;"))
+    public String onGetUniqueIdString(Entity entity) {
         if (entity instanceof EntityHuman) {
             return entity.getCustomNameTag();
         }
-        return uuid.toString();
+        return entity.func_189512_bd();
     }
 
 }

@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.type.SpongeTileEntityType;
@@ -80,7 +81,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     @Shadow public abstract BlockPos getPos();
     @Shadow public abstract Block getBlockType();
-    @Shadow public abstract void writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract NBTTagCompound func_189515_b(NBTTagCompound compound);
     @Override @Shadow public abstract void markDirty();
 
     @Intrinsic
@@ -132,7 +133,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             .set(Queries.POSITION_Z, this.getPos().getZ())
             .set(DataQueries.BLOCK_ENTITY_TILE_TYPE, this.tileType.getId());
         final NBTTagCompound compound = new NBTTagCompound();
-        this.writeToNBT(compound);
+        this.func_189515_b(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         container.set(DataQueries.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(compound));
         final Collection<DataManipulator<?, ?>> manipulators = getContainers();
@@ -185,8 +186,8 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
      * @param compound The compound vanilla writes to (unused because we write to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"))
-    public void onWriteToNBT(NBTTagCompound compound, CallbackInfo ci) {
+    @Inject(method = "Lnet/minecraft/tileentity/TileEntity;func_189515_b(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
 

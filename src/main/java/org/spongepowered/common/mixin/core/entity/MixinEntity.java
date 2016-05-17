@@ -98,6 +98,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.data.persistence.NbtTranslator;
 import org.spongepowered.common.data.util.DataQueries;
@@ -197,7 +198,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract boolean getAlwaysRenderNameTag();
     @Shadow protected abstract void setAlwaysRenderNameTag(boolean visible);
     @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract void writeToNBT(NBTTagCompound compound);
+    @Shadow public abstract NBTTagCompound func_189511_e(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
@@ -647,8 +648,8 @@ public abstract class MixinEntity implements IMixinEntity {
      *        to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)V", at = @At("HEAD"))
-    public void onWriteToNBT(NBTTagCompound compound, CallbackInfo ci) {
+    @Inject(method = "Lnet/minecraft/entity/Entity;func_189511_e(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
 
@@ -744,7 +745,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public DataContainer toContainer() {
         final Transform<World> transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
-        writeToNBT(compound);
+        func_189511_e(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = new MemoryDataContainer()
@@ -792,7 +793,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         try {
             final NBTTagCompound compound = new NBTTagCompound();
-            writeToNBT(compound);
+            func_189511_e(compound);
             net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
