@@ -354,7 +354,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Redirect(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldProvider;onWorldUpdateEntities()V"))
     private void onDimensionUpdateEntities(WorldProvider worldProvider) {
-        TrackingUtil.tickWorldProvider(worldProvider, (WorldServer) (Object) this);
+        TrackingUtil.tickWorldProvider(this);
     }
 
     /**

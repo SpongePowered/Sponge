@@ -107,7 +107,7 @@ public final class GeneralPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state == WorldPhase.State.CHUNK_LOADING;
+            return state instanceof WorldPhase.State;
         }
 
         @Override

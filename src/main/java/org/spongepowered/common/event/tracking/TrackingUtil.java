@@ -139,8 +139,9 @@ public final class TrackingUtil {
         causeTracker.completePhase();
     }
 
-    public static void tickWorldProvider(WorldProvider worldProvider, WorldServer worldServer) {
-        final CauseTracker causeTracker = ((IMixinWorldServer) worldServer).getCauseTracker();
+    public static void tickWorldProvider(IMixinWorldServer worldServer) {
+        final CauseTracker causeTracker = worldServer.getCauseTracker();
+        final WorldProvider worldProvider = worldServer.getWorldProvider();
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.DIMENSION, PhaseContext.start()
                 .add(NamedCause.source(worldProvider))
                 .addBlockCaptures()
