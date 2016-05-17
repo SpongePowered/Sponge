@@ -468,7 +468,7 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
                         }
 
                         if (targetEntity instanceof EntityPlayerMP && targetEntity.velocityChanged) {
-                            ((EntityPlayerMP) targetEntity).playerNetServerHandler.sendPacket(new SPacketEntityVelocity(targetEntity));
+                            ((EntityPlayerMP) targetEntity).connection.sendPacket(new SPacketEntityVelocity(targetEntity));
                             targetEntity.velocityChanged = false;
                             targetEntity.motionX = targetMotionX;
                             targetEntity.motionY = targetMotionY;

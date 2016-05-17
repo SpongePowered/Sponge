@@ -48,11 +48,11 @@ public class PlayerKickHelper {
      * @param component The kick message
      */
     public static void kickPlayer(final EntityPlayerMP ply, final ITextComponent component) {
-        ply.playerNetServerHandler.getNetworkManager().sendPacket(new SPacketDisconnect(component),
-                                                                  future -> ply.playerNetServerHandler.getNetworkManager().closeChannel(component));
-        ply.playerNetServerHandler.getNetworkManager().disableAutoRead();
+        ply.connection.getNetworkManager().sendPacket(new SPacketDisconnect(component),
+                                                                  future -> ply.connection.getNetworkManager().closeChannel(component));
+        ply.connection.getNetworkManager().disableAutoRead();
         // fix this getServer.
-        Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.playerNetServerHandler.getNetworkManager().checkDisconnected()));
+        Futures.getUnchecked(ply.getServer().addScheduledTask(() -> ply.connection.getNetworkManager().checkDisconnected()));
 
     }
 

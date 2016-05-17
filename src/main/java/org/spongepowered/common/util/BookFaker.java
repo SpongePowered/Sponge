@@ -44,7 +44,7 @@ public class BookFaker {
 
     public static void fakeBookView(BookView bookView, Player player) {
         EntityPlayerMP mcPlayer = (EntityPlayerMP) player;
-        NetHandlerPlayServer receiver = mcPlayer.playerNetServerHandler;
+        NetHandlerPlayServer receiver = mcPlayer.connection;
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand

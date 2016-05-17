@@ -54,7 +54,7 @@ public abstract class MixinTitle implements IMixinTitle {
     @Override
     public void send(EntityPlayerMP player) {
         for (SPacketTitle packet : this.getPackets()) {
-            player.playerNetServerHandler.sendPacket(packet);
+            player.connection.sendPacket(packet);
         }
     }
 

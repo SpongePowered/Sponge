@@ -349,8 +349,8 @@ public abstract class MixinEntity implements IMixinEntity {
         if (!location.getExtent().getUniqueId().equals(((World) this.worldObj).getUniqueId())) {
             EntityUtil.changeWorld((net.minecraft.entity.Entity) (Object) this, getTransform().setLocation(location));
         } else {
-            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).playerNetServerHandler != null) {
-                ((EntityPlayerMP) thisEntity).playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
+            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).connection != null) {
+                ((EntityPlayerMP) thisEntity).connection.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
                         thisEntity.rotationYaw, thisEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
@@ -374,7 +374,7 @@ public abstract class MixinEntity implements IMixinEntity {
         if (relativePositions.isEmpty()) {
             setLocationAndRotation(location, rotation);
         } else {
-            if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
+            if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).connection != null) {
                 // Players use different logic, as they support real relative movement.
                 EnumSet<SPacketPlayerPosLook.EnumFlags> relativeFlags = EnumSet.noneOf(SPacketPlayerPosLook.EnumFlags.class);
 
@@ -398,7 +398,7 @@ public abstract class MixinEntity implements IMixinEntity {
                     relativeFlags.add(SPacketPlayerPosLook.EnumFlags.Y_ROT);
                 }
 
-                ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(location.getPosition().getX(), location.getPosition()
+                ((EntityPlayerMP) (Entity) this).connection.setPlayerLocation(location.getPosition().getX(), location.getPosition()
                         .getY(), location.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), relativeFlags);
             } else {
                 Location<World> resultantLocation = getLocation();
@@ -439,9 +439,9 @@ public abstract class MixinEntity implements IMixinEntity {
             if (this.visibilityTicks % 4 == 0) {
                 if (this.isVanished) {
                     for (EntityPlayerMP entityPlayerMP : lookup.trackingPlayers) {
-                        entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
+                        entityPlayerMP.connection.sendPacket(new SPacketDestroyEntities(this.getEntityId()));
                         if (((Object) this) instanceof EntityPlayerMP) {
-                            entityPlayerMP.playerNetServerHandler.sendPacket(
+                            entityPlayerMP.connection.sendPacket(
                                     new SPacketPlayerListItem(SPacketPlayerListItem.Action.REMOVE_PLAYER, (EntityPlayerMP) (Object) this));
                         }
                     }
@@ -454,10 +454,10 @@ public abstract class MixinEntity implements IMixinEntity {
                         }
                         if (((Object) this) instanceof EntityPlayerMP) {
                             Packet<?> packet = new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, (EntityPlayerMP) (Object) this);
-                            entityPlayerMP.playerNetServerHandler.sendPacket(packet);
+                            entityPlayerMP.connection.sendPacket(packet);
                         }
                         Packet<?> newPacket = lookup.createSpawnPacket(); // creates the spawn packet for us
-                        entityPlayerMP.playerNetServerHandler.sendPacket(newPacket);
+                        entityPlayerMP.connection.sendPacket(newPacket);
                     }
                 }
             }
@@ -511,9 +511,9 @@ public abstract class MixinEntity implements IMixinEntity {
         if (isRemoved()) {
             return;
         }
-        if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
+        if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((EntityPlayerMP) (Entity) this).playerNetServerHandler.setPlayerLocation(getPosition().getX(), getPosition().getY(),
+            ((EntityPlayerMP) (Entity) this).connection.setPlayerLocation(getPosition().getX(), getPosition().getY(),
                 getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), (Set) EnumSet.noneOf(RelativePositions.class));
         } else {
             if (!this.worldObj.isRemote) { // We can't set the rotation update on client worlds.

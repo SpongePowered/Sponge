@@ -770,7 +770,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+                ((EntityPlayerMP) player).connection.sendPacket(packet);
             }
         }
     }
@@ -781,7 +781,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
         for (EntityPlayer player : this.playerEntities) {
             if (player instanceof EntityPlayerMP) {
-                ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(packet);
+                ((EntityPlayerMP) player).connection.sendPacket(packet);
             }
         }
     }

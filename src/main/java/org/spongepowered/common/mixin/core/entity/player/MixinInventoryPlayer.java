@@ -115,7 +115,7 @@ public abstract class MixinInventoryPlayer implements IMixinInventoryPlayer, Hum
         itemIndex = itemIndex % 9;
         if (notify && this.player instanceof EntityPlayerMP) {
             SPacketHeldItemChange packet = new SPacketHeldItemChange(itemIndex);
-            ((EntityPlayerMP)this.player).playerNetServerHandler.sendPacket(packet);
+            ((EntityPlayerMP)this.player).connection.sendPacket(packet);
         }
         this.currentItem = itemIndex;
     }

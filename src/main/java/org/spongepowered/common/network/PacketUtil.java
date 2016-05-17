@@ -84,7 +84,7 @@ public class PacketUtil {
                 if (statusPacket.getStatus() == C16PacketClientStatus.EnumState.PERFORM_RESPAWN) {
                     if (!StaticMixinHelper.packetPlayer.isDead) {
                         SpongeHooks.logExploitRespawnInvisibility(StaticMixinHelper.packetPlayer);
-                        StaticMixinHelper.packetPlayer.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
+                        StaticMixinHelper.packetPlayer.connection.kickPlayerFromServer("You have been kicked for attempting to perform an invisibility respawn exploit.");
                         resetStaticData();
                         return;
                     }
@@ -143,7 +143,7 @@ public class PacketUtil {
 //                if (clickevent.getAction() == ClickEvent.Action.RUN_COMMAND) {
 //                    if (!MinecraftServer.getServer().getConfigurationManager().canSendCommands(playerEntity.getGameProfile())) {
 //                        SpongeHooks.logExploitSignCommandUpdates(playerEntity, tileentitysign, clickevent.getValue());
-//                        playerEntity.playerNetServerHandler.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
+//                        playerEntity.connection.kickPlayerFromServer("You have been kicked for attempting to perform a sign command exploit.");
 //                        ci.cancel();
 //                        return false;
 //                    }

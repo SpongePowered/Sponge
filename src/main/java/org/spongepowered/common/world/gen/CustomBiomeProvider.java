@@ -116,7 +116,7 @@ public final class CustomBiomeProvider extends BiomeProvider {
         // Downscale
         byte[] biomesForBlocks = buffer.detach();
         for (int i = 0; i < biomeArrayZoomedOut.length; i++) {
-            biomeArrayZoomedOut[i] = BiomeGenBase.getBiomeFromBiomeList(biomesForBlocks[i * 4] & 0xff, Biomes.OCEAN);
+            biomeArrayZoomedOut[i] = BiomeGenBase.getBiome(biomesForBlocks[i * 4] & 0xff, Biomes.OCEAN);
         }
 
         return biomeArrayZoomedOut;

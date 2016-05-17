@@ -43,7 +43,7 @@ public abstract class MixinWorldManager {
         return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
     }
 
-    @Redirect(method = "playAuxSFX", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
+    @Redirect(method = "playEvent", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/DimensionType;getId()I"))
     private int getDimensionForSoundEffects(DimensionType dimensionType) {
         return ((IMixinWorldServer) this.theWorldServer).getDimensionId();
     }

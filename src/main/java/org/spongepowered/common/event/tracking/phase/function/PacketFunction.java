@@ -565,7 +565,7 @@ public interface PacketFunction {
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
         EventConsumer.event(SpongeEventFactory
                 .createChangeInventoryEventHeld(Cause.of(NamedCause.source(player)), (Inventory) inventoryContainer, transactions))
-                .cancelled(event -> player.playerNetServerHandler.sendPacket(new SPacketHeldItemChange(previousSlot)))
+                .cancelled(event -> player.connection.sendPacket(new SPacketHeldItemChange(previousSlot)))
                 .nonCancelled(event -> {
                     PacketPhaseUtil.handleCustomSlot(player, event.getTransactions());
                     inventory.currentItem = itemChange.getSlotId();
@@ -594,7 +594,7 @@ public interface PacketFunction {
                             guiId = "unknown";
                         }
                         slotInventory.openInventory(player);
-                        player.playerNetServerHandler.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
+                        player.connection.sendPacket(new SPacketOpenWindow(container.windowId, guiId, slotInventory
                                 .getDisplayName(), slotInventory.getSizeInventory()));
                         // resync data to client
                         player.sendContainerToPlayer(container);
@@ -636,8 +636,8 @@ public interface PacketFunction {
         }
     });
     PacketFunction RESOURCE_PACKET = ((packet, state, player, context) -> {
-        final NetHandlerPlayServer playerNetServerHandler = player.playerNetServerHandler;
-        final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) playerNetServerHandler;
+        final NetHandlerPlayServer connection = player.connection;
+        final IMixinNetHandlerPlayServer mixinHandler = (IMixinNetHandlerPlayServer) connection;
         final CPacketResourcePackStatus resource = (CPacketResourcePackStatus) packet;
         final String hash = resource.hash;
         final ResourcePackStatusEvent.ResourcePackStatus status;

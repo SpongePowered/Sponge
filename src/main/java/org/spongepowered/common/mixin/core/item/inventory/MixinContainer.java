@@ -70,7 +70,7 @@ public abstract class MixinContainer implements org.spongepowered.api.item.inven
      */
     @SuppressWarnings("unchecked")
     @Overwrite
-    public void onCraftGuiOpened(ICrafting listener) {
+    public void addListener(ICrafting listener) {
         Container container = (Container) (Object) this;
         if (this.listeners.contains(listener)) {
             // Sponge start

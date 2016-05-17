@@ -12,7 +12,7 @@ evaluationDependsOn api.path
 apply plugin: 'org.spongepowered.mixin'
 
 minecraft {
-    mappings = 'snapshot_20160429'
+    mappings = 'stable_24'
 
     runDir = 'run'
     atSource sourceSets.main

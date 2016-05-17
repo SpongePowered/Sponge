@@ -149,8 +149,8 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Shadow @Final public MinecraftServer mcServer;
     @Shadow @Final public PlayerInteractionManager interactionManager;
-    @Shadow private String translator;
-    @Shadow public NetHandlerPlayServer playerNetServerHandler;
+    @Shadow private String language;
+    @Shadow public NetHandlerPlayServer connection;
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
@@ -209,7 +209,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Locale getLocale() {
-        return LanguageUtil.LOCALE_CACHE.getUnchecked(this.translator);
+        return LanguageUtil.LOCALE_CACHE.getUnchecked(this.language);
     }
 
     @Override
@@ -242,7 +242,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             component = SpongeTexts.fixActionBarFormatting(component);
         }
 
-        this.playerNetServerHandler.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
+        this.connection.sendPacket(new SPacketChat(component, ((SpongeChatType) type).getByteId()));
     }
 
     @Override
@@ -271,7 +271,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (!packets.isEmpty()) {
             if (position.sub(this.posX, this.posY, this.posZ).lengthSquared() < (long) radius * (long) radius) {
                 for (Packet<?> packet : packets) {
-                    this.playerNetServerHandler.sendPacket(packet);
+                    this.connection.sendPacket(packet);
                 }
             }
         }
@@ -279,7 +279,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public PlayerConnection getConnection() {
-        return (PlayerConnection) this.playerNetServerHandler;
+        return (PlayerConnection) this.connection;
     }
 
     // this needs to be overridden from EntityPlayer so we can force a resend of the experience level
@@ -418,7 +418,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
-        this.playerNetServerHandler.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, position.getX(), position.getY(), position.getZ(),
+        this.connection.sendPacket(new SPacketSoundEffect(SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, position.getX(), position.getY(), position.getZ(),
                 (float) Math.max(minVolume, volume), (float) pitch));
     }
 
@@ -426,7 +426,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     public void sendResourcePack(ResourcePack pack) {
         SPacketResourcePackSend packet = new SPacketResourcePackSend();
         ((IMixinPacketResourcePackSend) packet).setResourcePack(pack);
-        this.playerNetServerHandler.sendPacket(packet);
+        this.connection.sendPacket(packet);
     }
 
     @Override
@@ -519,7 +519,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public void setTargetedLocation(@Nullable Vector3d vec) {
         super.setTargetedLocation(vec);
-        this.playerNetServerHandler.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
+        this.connection.sendPacket(new SPacketSpawnPosition(VecHelper.toBlockPos(this.getTargetedLocation())));
     }
 
     @Override
@@ -578,13 +578,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         SPacketBlockChange packet = new SPacketBlockChange();
         packet.blockPosition = new BlockPos(x, y, z);
         packet.blockState = (IBlockState) state;
-        this.playerNetServerHandler.sendPacket(packet);
+        this.connection.sendPacket(packet);
     }
 
     @Override
     public void resetBlockChange(int x, int y, int z) {
         SPacketBlockChange packet = new SPacketBlockChange(this.worldObj, new BlockPos(x, y, z));
-        this.playerNetServerHandler.sendPacket(packet);
+        this.connection.sendPacket(packet);
     }
 
     /**

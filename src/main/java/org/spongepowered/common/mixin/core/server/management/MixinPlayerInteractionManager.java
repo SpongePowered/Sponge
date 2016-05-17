@@ -129,22 +129,22 @@ public abstract class MixinPlayerInteractionManager {
 
                 if (state.getBlock() == Blocks.COMMAND_BLOCK) {
                     // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
-                    ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketCloseWindow(0));
+                    ((EntityPlayerMP) player).connection.sendPacket(new SPacketCloseWindow(0));
 
                 } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
                     // Stopping a door from opening while interacting the top part will allow the door to open, we need to update the
                     // client to resolve this
                     if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
-                        ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
+                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
                     } else {
-                        ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
+                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
                     }
 
                 } else if (stack != null) {
                     // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
                     if (stack.getItem() instanceof ItemDoor || (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock()
                             .equals(Blocks.DOUBLE_PLANT))) {
-                        ((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
+                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
                     }
                 }
 
@@ -166,7 +166,7 @@ public abstract class MixinPlayerInteractionManager {
                     final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.theWorld;
                     TrackingUtil.tryAndTrackActiveUser(mixinWorldServer, pos, PlayerTracker.Type.NOTIFIER);
                 } else {
-                    thisPlayerMP.playerNetServerHandler.sendPacket(new SPacketBlockChange(theWorld, pos));
+                    thisPlayerMP.connection.sendPacket(new SPacketBlockChange(theWorld, pos));
                     result = TristateUtil.toActionResult(event.getUseItemResult());
                 }
             }
@@ -213,7 +213,7 @@ public abstract class MixinPlayerInteractionManager {
             if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
                 // TODO - maybe send just main/off hand?
                 player.openContainer.detectAndSendChanges();
-                /*((EntityPlayerMP) player).playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem),
+                /*((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem),
                         player.inventory.getCurrentItem());*/
             }
 

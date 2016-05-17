@@ -56,14 +56,14 @@ public final class PacketPhaseUtil {
                 nmsSlot.putStack(originalStack);
             }
 
-            player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
+            player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, originalStack));
         }
     }
 
     public static void handleCustomCursor(EntityPlayerMP player, ItemStackSnapshot customCursor) {
         ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.inventory.setItemStack(cursor);
-        player.playerNetServerHandler.sendPacket(new SPacketSetSlot(-1, -1, cursor));
+        player.connection.sendPacket(new SPacketSetSlot(-1, -1, cursor));
     }
 
     public static void handleCustomSlot(EntityPlayerMP player, List<SlotTransaction> slotTransactions) {
@@ -85,7 +85,7 @@ public final class PacketPhaseUtil {
                     nmsSlot.putStack(customStack);
                 }
 
-                player.playerNetServerHandler.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
+                player.connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, slotNumber, customStack));
             }
         }
     }

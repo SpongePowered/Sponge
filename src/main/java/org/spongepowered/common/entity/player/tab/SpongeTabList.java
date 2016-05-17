@@ -112,7 +112,7 @@ public final class SpongeTabList implements TabList {
         // MC-98180 - Sending null as header or footer will cause an exception on the client
         packet.header = this.header == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.header);
         packet.footer = this.footer == null ? EMPTY_COMPONENT : SpongeTexts.toComponent(this.footer);
-        this.player.playerNetServerHandler.sendPacket(packet);
+        this.player.connection.sendPacket(packet);
     }
 
     @Override
@@ -188,7 +188,7 @@ public final class SpongeTabList implements TabList {
         SPacketPlayerListItem packet = new SPacketPlayerListItem();
         packet.action = action;
         ((IMixinSPacketPlayerListItem) packet).addEntry(entry);
-        this.player.playerNetServerHandler.sendPacket(packet);
+        this.player.connection.sendPacket(packet);
     }
 
     /**

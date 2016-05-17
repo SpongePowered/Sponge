@@ -458,7 +458,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         InteractBlockEvent.Primary event = SpongeEventFactory.createInteractBlockEventPrimaryMainHand(Cause.of(NamedCause.source(this.playerEntity)),
                 Optional.empty(), location.createSnapshot(), DirectionFacingProvider.getInstance().getKey(side).get());
         if (SpongeImpl.postEvent(event)) {
-            this.playerEntity.playerNetServerHandler.sendPacket(new SPacketBlockChange(this.playerEntity.worldObj, pos));
+            this.playerEntity.connection.sendPacket(new SPacketBlockChange(this.playerEntity.worldObj, pos));
             return;
         }
 

@@ -63,7 +63,7 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     @Override
     public void sendToPlayers(Packet<?> packet) {
         for (EntityPlayerMP player: this.players) {
-            player.playerNetServerHandler.sendPacket(packet);
+            player.connection.sendPacket(packet);
         }
     }
 
@@ -75,18 +75,18 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
 
     void sendScoreboard(EntityPlayerMP player) {
         for (ScorePlayerTeam team: this.getTeams()) {
-            player.playerNetServerHandler.sendPacket(new SPacketTeams(team, 0));
+            player.connection.sendPacket(new SPacketTeams(team, 0));
         }
 
         for (ScoreObjective objective: this.getScoreObjectives()) {
-            player.playerNetServerHandler.sendPacket(new SPacketScoreboardObjective(objective, 0));
+            player.connection.sendPacket(new SPacketScoreboardObjective(objective, 0));
             for (Score score: this.getSortedScores(objective)) {
-                player.playerNetServerHandler.sendPacket(new SPacketUpdateScore(score));
+                player.connection.sendPacket(new SPacketUpdateScore(score));
             }
         }
 
         for (int i = 0; i < 19; ++i) {
-            player.playerNetServerHandler.sendPacket(new SPacketDisplayObjective(i, this.getObjectiveInDisplaySlot(i)));
+            player.connection.sendPacket(new SPacketDisplayObjective(i, this.getObjectiveInDisplaySlot(i)));
         }
     }
 
@@ -104,14 +104,14 @@ public abstract class MixinServerScoreboardPacketSending extends Scoreboard impl
     @SuppressWarnings("unchecked")
     void removeTeams(EntityPlayerMP player) {
         for (ScorePlayerTeam team: this.getTeams()) {
-            player.playerNetServerHandler.sendPacket(new SPacketTeams(team, 1));
+            player.connection.sendPacket(new SPacketTeams(team, 1));
         }
     }
 
     @SuppressWarnings("unchecked")
     void removeObjectives(EntityPlayerMP player) {
         for (ScoreObjective objective: this.getScoreObjectives()) {
-            player.playerNetServerHandler.sendPacket(new SPacketScoreboardObjective(objective, 1));
+            player.connection.sendPacket(new SPacketScoreboardObjective(objective, 1));
         }
     }
 

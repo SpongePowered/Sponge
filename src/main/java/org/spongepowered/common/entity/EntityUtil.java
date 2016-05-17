@@ -195,7 +195,7 @@ public final class EntityUtil {
         List<EntityPlayerMP> playerMPs = new ArrayList<>();
         for (EntityPlayerMP player : paintingEntry.trackingPlayers) {
             SPacketDestroyEntities packet = new SPacketDestroyEntities(painting.getEntityId());
-            player.playerNetServerHandler.sendPacket(packet);
+            player.connection.sendPacket(packet);
             playerMPs.add(player);
         }
         painting.art = art;
@@ -205,7 +205,7 @@ public final class EntityUtil {
                     .delayTicks(SpongeImpl.getGlobalConfig().getConfig().getEntity().getPaintingRespawnDelaly())
                     .execute(() -> {
                         final SPacketSpawnPainting packet = new SPacketSpawnPainting(painting);
-                        playerMP.playerNetServerHandler.sendPacket(packet);
+                        playerMP.connection.sendPacket(packet);
                     })
                     .submit(SpongeImpl.getPlugin());
         }
@@ -387,13 +387,13 @@ public final class EntityUtil {
                 final int toClientDimensionTypeId = toClientDimensionType.getId();
                 // Force vanilla client to refresh their chunk cache if same dimension
                 if (currentDim != targetDim && fromClientDimensionTypeId == toClientDimensionTypeId) {
-                    entityPlayerMP.playerNetServerHandler.sendPacket(
+                    entityPlayerMP.connection.sendPacket(
                             new SPacketRespawn(toClientDimensionTypeId >= 0 ? -1 : 0, toWorld.getDifficulty(), toWorld.getWorldInfo().
                                     getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
                 }
             }
 
-            entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
+            entityPlayerMP.connection.sendPacket(new SPacketRespawn(toClientDimensionType.getId(), toWorld.getDifficulty(), toWorld.
                     getWorldInfo().getTerrainType(), entityPlayerMP.interactionManager.getGameType()));
             entityPlayerMP.setLocationAndAngles(toTransform.getLocation().getX(), toTransform.getLocation().getY(), toTransform.getLocation().getZ(),
                     (int) toTransform.getRotation().getY(), (int) toTransform.getRotation().getX());
@@ -402,7 +402,7 @@ public final class EntityUtil {
             {
                 entityPlayerMP.setPosition(entityPlayerMP.posX, entityPlayerMP.posY + 1.0D, entityPlayerMP.posZ);
             }
-            entityPlayerMP.playerNetServerHandler.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
+            entityPlayerMP.connection.setPlayerLocation(entityPlayerMP.posX, entityPlayerMP.posY, entityPlayerMP.posZ,
                     entityPlayerMP.rotationYaw, entityPlayerMP.rotationPitch);
             entityPlayerMP.setSneaking(false);
             server.getPlayerList().updateTimeAndWeatherForPlayer(entityPlayerMP, toWorld);

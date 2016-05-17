@@ -91,13 +91,13 @@ public abstract class MixinEntityTrackerEntry {
         for (EntityPlayerMP player : this.trackingPlayers) {
             if (packets != null) {
                 for (Packet<?> packet : packets) {
-                    player.playerNetServerHandler.sendPacket(packet);
+                    player.connection.sendPacket(packet);
                 }
             }
             Packet<?>[] playerPackets = human.popQueuedPackets(player);
             if (playerPackets != null) {
                 for (Packet<?> packet : playerPackets) {
-                    player.playerNetServerHandler.sendPacket(packet);
+                    player.connection.sendPacket(packet);
                 }
             }
         }

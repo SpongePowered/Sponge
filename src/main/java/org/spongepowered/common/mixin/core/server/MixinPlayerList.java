@@ -257,7 +257,7 @@ public abstract class MixinPlayerList {
             // Create the handler here (so the player's gets set)
             handler = new NetHandlerPlayServer(this.mcServer, netManager, playerIn);
         }
-        playerIn.playerNetServerHandler = handler;
+        playerIn.connection = handler;
         // Sponge end
 
         // Support vanilla clients logging into custom dimensions
@@ -447,7 +447,7 @@ public abstract class MixinPlayerList {
 
         entityPlayerMP.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(1.0F);
         entityPlayerMP.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(maxHealth.get().floatValue());
-        entityPlayerMP.playerNetServerHandler.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
+        entityPlayerMP.connection.sendPacket(new SPacketUpdateHealth(maxHealth.get().floatValue(), food.get(), saturation.get().floatValue()));
 
         return entityPlayerMP;
     }
@@ -478,7 +478,7 @@ public abstract class MixinPlayerList {
                 this.tempIsBedSpawn = true;
                 targetSpawnVec = new Vector3d(bedSpawnLoc.getX() + 0.5D, bedSpawnLoc.getY() + 0.1D, bedSpawnLoc.getZ() + 0.5D);
             } else { // Bed invalid
-                playerIn.playerNetServerHandler.sendPacket(new SPacketChangeGameState(0, 0.0F));
+                playerIn.connection.sendPacket(new SPacketChangeGameState(0, 0.0F));
                 // Vanilla behaviour - Delete the known bed location if invalid
                 bedPos = null; // null = remove location
             }
@@ -528,11 +528,11 @@ public abstract class MixinPlayerList {
 
         for (EntityPlayerMP viewer : this.playerEntityList) {
             if (((Player) viewer).canSee((Player) player)) {
-                viewer.playerNetServerHandler.sendPacket(noSpecificViewerPacket);
+                viewer.connection.sendPacket(noSpecificViewerPacket);
             }
 
             if (((Player) player).canSee((Player) viewer)) {
-                player.playerNetServerHandler.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
+                player.connection.sendPacket(new SPacketPlayerListItem(SPacketPlayerListItem.Action.ADD_PLAYER, viewer));
             }
         }
 

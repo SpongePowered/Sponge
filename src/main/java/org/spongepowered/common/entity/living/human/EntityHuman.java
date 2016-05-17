@@ -396,7 +396,7 @@ public class EntityHuman extends EntityCreature implements TeamMember {
      */
     public void onRemovedFrom(EntityPlayerMP player) {
         this.playerPacketMap.remove(player.getUniqueID());
-        player.playerNetServerHandler.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
+        player.connection.sendPacket(this.createPlayerListPacket(SPacketPlayerListItem.Action.REMOVE_PLAYER));
     }
 
     /**
