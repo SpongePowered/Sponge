@@ -50,32 +50,6 @@ public abstract class MixinStateImplementation extends BlockStateBase {
      * unnecessary hash lookup. The same logic can be computed with 1 hash
      * lookup instead of 2.
      *
-     * <p>This is partially contributed code from Aikar in PaperSpigot.</p>
-     *
-     * @param property The property requested
-     * @param <T> The type of comparable
-     * @return The value for the property
-     */
-    @Overwrite
-    @Final
-    @Override
-    public <T extends Comparable<T>> T getValue(IProperty<T> property) {
-        // Sponge Rewrite this to ignore validation steps
-        final Comparable<?> value = this.properties.get(property);
-        if (value == null) {
-            // Still throws an exception if the property didn't have a mapping
-            throw new IllegalArgumentException("Cannot get property " + property + " as it does not exist in " + this.block.getBlockState());
-        }
-        return property.getValueClass().cast(value);
-    }
-
-    /**
-     * @author gabizou - April 8th, 2016
-     *
-     * @reason This is done to improve the performance of the method by removing an
-     * unnecessary hash lookup. The same logic can be computed with 1 hash
-     * lookup instead of 2.
-     *
      * <p>Normally, all lookups are with proper properties anyways, the only corner
      * cases that they fail will result in null block states. Throwing exceptions
      * is an option, however, for the sake of speed, these methods are otherwise

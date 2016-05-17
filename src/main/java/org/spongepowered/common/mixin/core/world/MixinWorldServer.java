@@ -86,7 +86,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -106,6 +108,7 @@ import org.spongepowered.common.event.tracking.PhaseData;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.TrackingPhases;
+import org.spongepowered.common.event.tracking.phase.WorldPhase;
 import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
@@ -329,6 +332,38 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             return !event.isCancelled();
         }
         return false;
+    }
+
+    /**
+     * @author gabizou - May 17th, 2016
+     * @reason This isn't a modify constant at all, but it's the best injection point I can think of
+     * to head before the World starts performing precipitation changes.
+     *
+     * @param iceAndSnow The "iceandsnow" value
+     * @return The same value, we are not actually modifying it
+     */
+    @ModifyConstant(method = "updateBlocks", constant = @Constant(stringValue = "iceandsnow"))
+    private String onStartIceAndSnow(String iceAndSnow) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.WEATHER, PhaseContext.start()
+                .addCaptures()
+                .add(NamedCause.source(this))
+                .complete());
+        return iceAndSnow;
+    }
+
+    /**
+     * @author gabizou - May 17th, 2016
+     * @reason This isn't a modify constant at all, but it's the best injection point I can think of
+     * to head after ice and snow are performed.
+     *
+     * @param tickBlocks The "tickBlocks" value
+     * @return The same value, we are not actually modifying it
+     */
+    @ModifyConstant(method = "updateBlocks", constant = @Constant(stringValue = "tickBlocks"))
+    private String onEndIceAndSnow(String tickBlocks) {
+        this.getCauseTracker().completePhase();
+        return tickBlocks;
     }
 
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))

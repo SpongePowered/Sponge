@@ -75,8 +75,6 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
 
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<SpongeConfig.OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<SpongeConfig.OptimizationCategory, Boolean >> builder()
-            .put("org.spongepowered.common.mixin.optimization.block.state.MixinStateImplementation",
-                    SpongeConfig.OptimizationCategory::useBlockStateLookupPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorld_Lighting",
                     SpongeConfig.OptimizationCategory::useIgnoreUloadedChunkLightingPatch)
             .put("org.spongepowered.common.mixin.optimization.world.MixinWorldServer_Lighting",

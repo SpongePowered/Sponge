@@ -45,6 +45,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.world.Location;
@@ -414,6 +415,11 @@ public final class WorldPhase extends TrackingPhase {
         },
         BLOCK() {
             @Override
+            public boolean canSwitchTo(IPhaseState state) {
+                return super.canSwitchTo(state) || state == State.CHUNK_LOADING;
+            }
+
+            @Override
             public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
                 final BlockSnapshot tickingBlock = phaseContext.firstNamed(NamedCause.SOURCE, BlockSnapshot.class)
                         .orElseThrow(PhaseUtil.throwWithContext("Not ticking on a Block!", phaseContext));
@@ -674,6 +680,35 @@ public final class WorldPhase extends TrackingPhase {
             @Override
             public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
                 builder.named(NamedCause.OWNER, context.firstNamed(NamedCause.SOURCE, Player.class).get());
+            }
+        },
+        WEATHER {
+
+            @Override
+            public void processPostTick(CauseTracker causeTracker, PhaseContext phaseContext) {
+                phaseContext.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder()
+                            .type(InternalSpawnTypes.WEATHER)
+                            .build());
+                    EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(builder.build(), entities, causeTracker.getWorld()))
+                            .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                            .process();
+                });
+                phaseContext.getCapturedItemsSupplier().ifPresentAndNotEmpty(entities -> {
+                    final Cause.Builder builder = Cause.source(SpawnCause.builder()
+                            .type(InternalSpawnTypes.WEATHER)
+                            .build());
+                    EventConsumer.event(SpongeEventFactory.createDropItemEventCustom(builder.build(), entities, causeTracker.getWorld()))
+                            .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
+                            .process();
+                });
+                phaseContext.getCapturedBlockSupplier().ifPresentAndNotEmpty(blockSnapshots -> {
+                    GeneralFunctions.processBlockCaptures(blockSnapshots, causeTracker, this, phaseContext);
+                });
+            }
+            @Override
+            public void associateAdditionalBlockChangeCauses(PhaseContext context, Cause.Builder builder, CauseTracker causeTracker) {
+
             }
         }
         ;

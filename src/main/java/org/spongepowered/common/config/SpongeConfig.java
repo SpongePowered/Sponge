@@ -754,18 +754,11 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     @ConfigSerializable
     public static class OptimizationCategory extends Category {
 
-        @Setting(value = "fast-blockstate-lookup", comment = "A simple patch to reduce a few sanity checks for the sake of speed when performing block state operations")
-        private boolean blockStateLookup = true;
-
         @Setting(value = "ignore-unloaded-chunks-on-get-light", comment = "This prevents chunks being loaded for getting light values at specific block positions. May have side effects.")
         private boolean ignoreUnloadedChunkLighting = true;
 
         @Setting(value = "chunk-map-caching", comment = "Caches chunks internally for faster returns when querying at various positions")
         private boolean useCachedChunkMap = true;
-
-        public boolean useBlockStateLookupPatch() {
-            return this.blockStateLookup;
-        }
 
         @Setting(value = "block-drops-pre-merge", comment = "If enabled, block item drops are pre-processed to avoid having to spawn extra entities that will be merged post spawning.")
         private boolean preBlockItemDropMerge = true;
