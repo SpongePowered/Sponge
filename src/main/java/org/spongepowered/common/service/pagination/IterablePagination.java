@@ -30,8 +30,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.ArrayList;
@@ -82,9 +82,11 @@ class IterablePagination extends ActivePagination {
         int addedLines = 0;
         while (addedLines <= getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
+                padPage(ret,addedLines, Text.EMPTY);
                 break;
             }
             if (addedLines + this.countIterator.peek().getValue() > getMaxContentLinesPerPage()) {
+                padPage(ret,addedLines, t("..."));
                 break;
             }
             Map.Entry<Text, Integer> ent = this.countIterator.next();
@@ -92,6 +94,17 @@ class IterablePagination extends ActivePagination {
             addedLines += ent.getValue();
         }
         return ret;
+    }
+
+    private void padPage(final List<Text> currentPage, final int currentPageLines, final Text continuation) {
+        final int maxContentLinesPerPage = getMaxContentLinesPerPage();
+        for (int i = currentPageLines; i< maxContentLinesPerPage; i++){
+            if (i == (maxContentLinesPerPage - 1)) {
+                currentPage.add(continuation);
+            } else {
+                currentPage.add(Text.EMPTY);
+            }
+        }
     }
 
     @Override
