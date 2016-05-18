@@ -59,6 +59,7 @@ public class TileEntitySuccessCountValueProcessor extends AbstractSpongeValuePro
     @Override
     protected boolean set(TileEntityCommandBlock container, Integer value) {
         container.getCommandBlockLogic().successCount = value;
+        container.markDirty();
         return true;
     }
 
