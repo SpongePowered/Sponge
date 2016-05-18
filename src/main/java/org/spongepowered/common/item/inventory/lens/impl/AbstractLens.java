@@ -28,9 +28,9 @@ import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableList.Builder;
-import gnu.trove.impl.unmodifiable.TUnmodifiableIntSet;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
 import org.spongepowered.api.text.translation.Translation;
@@ -64,7 +64,7 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     
     protected final int base;
     
-    protected final TIntSet availableSlots = new TIntHashSet();
+    protected final IntSet availableSlots = new IntOpenHashSet();
     
     protected Lens<TInventory, TStack> parent; 
     
@@ -173,8 +173,8 @@ public abstract class AbstractLens<TInventory, TStack> extends ObservableLens<TI
     }
     
     @Override
-    public TIntSet getSlots() {
-        return new TUnmodifiableIntSet(this.availableSlots);
+    public IntSet getSlots() {
+        return IntSets.unmodifiable(this.availableSlots);
     }
     
     @Override

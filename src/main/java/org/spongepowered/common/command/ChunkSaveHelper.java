@@ -26,7 +26,8 @@ package org.spongepowered.common.command;
 
 import com.flowpowered.math.GenericMath;
 import com.google.gson.stream.JsonWriter;
-import gnu.trove.map.hash.TObjectIntHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.entity.Entity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
@@ -71,15 +72,17 @@ public class ChunkSaveHelper {
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());
 
-                TObjectIntHashMap<ChunkPos> chunkEntityCounts = new TObjectIntHashMap<>();
-                TObjectIntHashMap<Class> classEntityCounts = new TObjectIntHashMap<>();
-                TObjectIntHashMap<Entity> entityCollisionCounts = new TObjectIntHashMap<>();
+                Object2IntMap<ChunkPos> chunkEntityCounts = new Object2IntOpenHashMap<>();
+                chunkEntityCounts.defaultReturnValue(0);
+                Object2IntMap<Class> classEntityCounts = new Object2IntOpenHashMap<>();
+                classEntityCounts.defaultReturnValue(0);
+                Object2IntMap<Entity> entityCollisionCounts = new Object2IntOpenHashMap<>();
                 Set<BlockPos> collidingCoords = new HashSet<>();
                 for (int i = 0; i < world.loadedEntityList.size(); i++) {
                     Entity entity = world.loadedEntityList.get(i);
                     ChunkPos chunkCoords = new ChunkPos((int) entity.posX >> 4, (int) entity.posZ >> 4);
-                    chunkEntityCounts.adjustOrPutValue(chunkCoords, 1, 1);
-                    classEntityCounts.adjustOrPutValue(entity.getClass(), 1, 1);
+                    chunkEntityCounts.put(chunkCoords, chunkEntityCounts.getInt(chunkCoords) + 1);
+                    classEntityCounts.put(entity.getClass(), classEntityCounts.getInt(entity.getClass()) + 1);
                     if ((entity.getCollisionBoundingBox() != null) && logAll) {
                         BlockPos coords = new BlockPos(GenericMath.floor(entity.posX), GenericMath.floor(entity.posY), GenericMath.floor(entity.posZ));
                         if (!collidingCoords.contains(coords)) {
@@ -93,8 +96,10 @@ public class ChunkSaveHelper {
                     }
                 }
 
-                TObjectIntHashMap<ChunkPos> chunkTileCounts = new TObjectIntHashMap<>();
-                TObjectIntHashMap<Class> classTileCounts = new TObjectIntHashMap<>();
+                Object2IntMap<ChunkPos> chunkTileCounts = new Object2IntOpenHashMap<>();
+                chunkTileCounts.defaultReturnValue(0);
+                Object2IntMap<Class> classTileCounts = new Object2IntOpenHashMap<>();
+                classTileCounts.defaultReturnValue(0);
                 writer.name("tiles").beginArray();
                 for (int i = 0; i < world.loadedTileEntityList.size(); i++) {
                     TileEntity tile = world.loadedTileEntityList.get(i);
@@ -110,8 +115,8 @@ public class ChunkSaveHelper {
                         writer.endObject();
                     }
                     ChunkPos chunkCoords = new ChunkPos(tile.getPos().getX() >> 4, tile.getPos().getZ() >> 4);
-                    chunkTileCounts.adjustOrPutValue(chunkCoords, 1, 1);
-                    classTileCounts.adjustOrPutValue(tile.getClass(), 1, 1);
+                    chunkTileCounts.put(chunkCoords, chunkTileCounts.getInt(chunkCoords) + 1);
+                    classTileCounts.put(tile.getClass(), classTileCounts.getInt(tile.getClass()) + 1);
                 }
                 writer.endArray();
 
@@ -135,11 +140,11 @@ public class ChunkSaveHelper {
         }
     }
 
-    private static <T> void writeChunkCounts(JsonWriter writer, String name, final TObjectIntHashMap<T> map) throws IOException {
+    private static <T> void writeChunkCounts(JsonWriter writer, String name, final Object2IntMap<T> map) throws IOException {
         writeChunkCounts(writer, name, map, 0);
     }
 
-    private static <T> void writeChunkCounts(JsonWriter writer, String name, final TObjectIntHashMap<T> map, int max) throws IOException {
+    private static <T> void writeChunkCounts(JsonWriter writer, String name, final Object2IntMap<T> map, int max) throws IOException {
         List<T> sortedCoords = new ArrayList<>(map.keySet());
         Collections.sort(sortedCoords, (s1, s2) -> map.get(s2) - map.get(s1));
 

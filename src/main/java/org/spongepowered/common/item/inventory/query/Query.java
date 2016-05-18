@@ -27,8 +27,8 @@ package org.spongepowered.common.item.inventory.query;
 import static com.google.common.base.Preconditions.*;
 
 import com.google.common.collect.Maps;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.InventoryProperty;
@@ -197,8 +197,8 @@ public class Query<TInventory, TStack> {
 //        return true;
 //    }
 
-    private TIntSet getSlots(Collection<Lens<TInventory, TStack>> lenses) {
-        TIntSet slots = new TIntHashSet();
+    private IntSet getSlots(Collection<Lens<TInventory, TStack>> lenses) {
+        IntSet slots = new IntOpenHashSet();
         for (Lens<TInventory, TStack> lens : lenses) {
             slots.addAll(lens.getSlots());
         }

@@ -24,7 +24,7 @@
  */
 package co.aikar.util;
 
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 
 import java.util.function.Function;
 
@@ -44,7 +44,7 @@ import java.util.function.Function;
  *
  * @param <V> Value
  */
-public class LoadingIntMap<V> extends TIntObjectHashMap<V> {
+public class LoadingIntMap<V> extends Int2ObjectOpenHashMap<V> {
 
     private static final long serialVersionUID = 4788110182547553543L;
     private final Function<Integer, V> loader;

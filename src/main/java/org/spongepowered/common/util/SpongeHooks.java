@@ -25,7 +25,8 @@
 package org.spongepowered.common.util;
 
 import com.flowpowered.math.vector.Vector3i;
-import gnu.trove.map.hash.TObjectLongHashMap;
+import it.unimi.dsi.fastutil.objects.Object2LongMap;
+import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
@@ -76,7 +77,7 @@ import javax.management.MBeanServer;
 
 public class SpongeHooks {
 
-    private static TObjectLongHashMap<CollisionWarning> recentWarnings = new TObjectLongHashMap<>();
+    private static Object2LongMap<CollisionWarning> recentWarnings = new Object2LongOpenHashMap<>();
 
     public static void logInfo(String msg, Object... args) {
         SpongeImpl.getLogger().info(MessageFormat.format(msg, args));
@@ -361,7 +362,7 @@ public class SpongeHooks {
 
         if (collisionWarnSize > 0 && (entity.getEntityWorld().getMinecraftServer().getTickCounter() % 10) == 0 && list.size() >= collisionWarnSize) {
             SpongeHooks.CollisionWarning warning = new SpongeHooks.CollisionWarning(entity.worldObj, entity);
-            if (SpongeHooks.recentWarnings.contains(warning)) {
+            if (SpongeHooks.recentWarnings.containsKey(warning)) {
                 long lastWarned = SpongeHooks.recentWarnings.get(warning);
                 if ((MinecraftServer.getCurrentTimeMillis() - lastWarned) < 30000) {
                     return;

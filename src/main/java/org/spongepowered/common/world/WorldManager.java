@@ -32,9 +32,10 @@ import com.google.common.base.Throwables;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.MapMaker;
-import gnu.trove.iterator.TIntObjectIterator;
-import gnu.trove.map.TIntObjectMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.ObjectIterator;
+import it.unimi.dsi.fastutil.objects.ObjectSet;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.nbt.CompressedStreamTools;
 import net.minecraft.nbt.NBTTagCompound;
@@ -100,10 +101,10 @@ public final class WorldManager {
     public static final DirectoryStream.Filter<Path> LEVEL_AND_SPONGE =
             entry -> Files.isDirectory(entry) && Files.exists(entry.resolve("level.dat")) && Files.exists(entry.resolve("level_sponge.dat"));
 
-    private static final TIntObjectHashMap<DimensionType> dimensionTypeByTypeId = new TIntObjectHashMap<>(3);
-    public static final TIntObjectHashMap<DimensionType> dimensionTypeByDimensionId = new TIntObjectHashMap<>(3);
-    private static final TIntObjectHashMap<Path> dimensionPathByDimensionId = new TIntObjectHashMap<>(3);
-    public static final TIntObjectHashMap<WorldServer> worldByDimensionId = new TIntObjectHashMap<>(3);
+    private static final Int2ObjectMap<DimensionType> dimensionTypeByTypeId = new Int2ObjectOpenHashMap<>(3);
+    public static final Int2ObjectMap<DimensionType> dimensionTypeByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    private static final Int2ObjectMap<Path> dimensionPathByDimensionId = new Int2ObjectOpenHashMap<>(3);
+    public static final Int2ObjectOpenHashMap<WorldServer> worldByDimensionId = new Int2ObjectOpenHashMap<>(3);
     private static final Map<String, WorldProperties> worldPropertiesByFolderName = new HashMap<>(3);
     private static final Map<UUID, WorldProperties> worldPropertiesByWorldUuid =  new HashMap<>(3);
     private static final BiMap<String, UUID> worldUuidByFolderName =  HashBiMap.create(3);
@@ -144,7 +145,7 @@ public final class WorldManager {
     private static Optional<Integer> getNextFreeDimensionTypeId() {
         Integer highestDimensionTypeId = null;
 
-        for (Integer dimensionTypeId : dimensionTypeByTypeId.keys()) {
+        for (Integer dimensionTypeId : dimensionTypeByTypeId.keySet()) {
             if (highestDimensionTypeId == null || highestDimensionTypeId < dimensionTypeId) {
                 highestDimensionTypeId = dimensionTypeId;
             }
@@ -198,7 +199,7 @@ public final class WorldManager {
     }
 
     public static Collection<DimensionType> getDimensionTypes() {
-        return dimensionTypeByTypeId.valueCollection();
+        return dimensionTypeByTypeId.values();
     }
 
     public static Optional<Path> getWorldFolder(int dimensionId) {
@@ -210,7 +211,7 @@ public final class WorldManager {
     }
 
     public static Map<Integer, DimensionType> sortedDimensionMap() {
-        TIntObjectMap<DimensionType> copy = new TIntObjectHashMap<>(dimensionTypeByDimensionId);
+        Int2ObjectMap<DimensionType> copy = new Int2ObjectOpenHashMap<>(dimensionTypeByDimensionId);
 
         HashMap<Integer, DimensionType> newMap = new LinkedHashMap<>();
 
@@ -218,22 +219,22 @@ public final class WorldManager {
         newMap.put(-1, copy.remove(-1));
         newMap.put(1, copy.remove(1));
 
-        int[] ids = copy.keys();
+        int[] ids = copy.keySet().toIntArray();
         Arrays.sort(ids);
 
-        for (int id: ids) {
+        for (int id : ids) {
             newMap.put(id, copy.get(id));
         }
 
         return newMap;
     }
 
-    public static TIntObjectIterator<WorldServer> worldsIterator() {
-        return worldByDimensionId.iterator();
+    public static ObjectIterator<Int2ObjectMap.Entry<WorldServer>> worldsIterator() {
+        return worldByDimensionId.int2ObjectEntrySet().fastIterator();
     }
 
     public static Collection<WorldServer> getWorlds() {
-        return worldByDimensionId.valueCollection();
+        return worldByDimensionId.values();
     }
 
     public static Optional<WorldServer> getWorldByDimensionId(int dimensionId) {
@@ -691,7 +692,7 @@ public final class WorldManager {
     }
 
     private static WorldServer[] reorderWorldsVanillaFirst() {
-        final List<WorldServer> sorted = new ArrayList<>(worldByDimensionId.valueCollection());
+        final List<WorldServer> sorted = new ArrayList<>(worldByDimensionId.values());
 
         int count = 0;
 
@@ -966,7 +967,7 @@ public final class WorldManager {
     public static void loadDimensionDataMap(@Nullable NBTTagCompound compound) {
         dimensionBits.clear();
         if (compound == null) {
-            for (int dimensionId : dimensionTypeByDimensionId.keys()) {
+            for (int dimensionId : dimensionTypeByDimensionId.keySet()) {
                 if (dimensionId >= 0) {
                     dimensionBits.set(dimensionId);
                 }
