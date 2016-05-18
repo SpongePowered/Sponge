@@ -57,7 +57,7 @@ public class MixinChunk_Collisions {
     public void onAddCollisionEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> predicate,
             CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+        if (entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
             return;
         }
 
