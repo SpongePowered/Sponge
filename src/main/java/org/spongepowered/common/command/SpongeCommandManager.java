@@ -137,14 +137,7 @@ public class SpongeCommandManager implements CommandManager {
                 }
 
                 aliasesWithPrefix.add(alias);
-
-                // Alias commands with unqualified ID and qualified ID
-                String unqualifiedId = container.getUnqualifiedId();
-                aliasesWithPrefix.add(unqualifiedId + ':' + alias);
-
-                if (!container.getId().equals(unqualifiedId)) {
-                    aliasesWithPrefix.add(container.getId() + ':' + alias);
-                }
+                aliasesWithPrefix.add(container.getId() + ':' + alias);
             }
 
             Optional<CommandMapping> mapping = this.dispatcher.register(callable, aliasesWithPrefix, callback);

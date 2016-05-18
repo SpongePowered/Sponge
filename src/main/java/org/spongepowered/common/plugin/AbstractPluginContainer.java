@@ -32,12 +32,6 @@ public abstract class AbstractPluginContainer implements PluginContainer {
     protected AbstractPluginContainer() {
     }
 
-    @Override
-    public String getUnqualifiedId() {
-        // @minecrell: is this supposed to call the static method below?
-        return getId();
-    }
-
     protected Objects.ToStringHelper toStringHelper() {
         return Objects.toStringHelper("Plugin")
                 .omitNullValues()
