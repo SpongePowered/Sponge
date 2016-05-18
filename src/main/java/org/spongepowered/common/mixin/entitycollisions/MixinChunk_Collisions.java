@@ -56,8 +56,8 @@ public class MixinChunk_Collisions {
             at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
     public void onAddCollisionEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> predicate,
             CallbackInfo ci) {
-        // ignore players
-        if (entityIn instanceof EntityPlayer) {
+        // ignore players and entities with parts (ex. EnderDragon)
+        if (entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
             return;
         }
 
