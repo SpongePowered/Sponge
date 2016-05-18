@@ -399,6 +399,7 @@ public final class PacketPhase extends TrackingPhase {
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
+                context.addEntityDropCaptures();
             }
 
             @Override
@@ -448,6 +449,7 @@ public final class PacketPhase extends TrackingPhase {
                 if (stack != null) {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, stack));
                 }
+                context.addEntityDropCaptures();
             }
 
             @Override
@@ -468,6 +470,7 @@ public final class PacketPhase extends TrackingPhase {
                     context.add(NamedCause.of(InternalNamedCauses.Packet.TARGETED_ENTITY, entity));
                     context.add(NamedCause.of(InternalNamedCauses.Packet.TRACKED_ENTITY_ID, entity.getEntityId()));
                 }
+                context.addEntityDropCaptures();
             }
         },
         CHAT() {

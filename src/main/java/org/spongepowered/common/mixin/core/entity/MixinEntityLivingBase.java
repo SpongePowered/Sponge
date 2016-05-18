@@ -389,6 +389,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                                 .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
                                 .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER).map(NamedCause::notifier).orElse(null))
                                 .addCaptures()
+                                .addEntityDropCaptures()
                                 .complete());
                     }
                     this.onDeath(source);
