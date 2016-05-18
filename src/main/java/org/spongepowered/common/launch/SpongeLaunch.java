@@ -76,7 +76,6 @@ public class SpongeLaunch {
                 .addConfiguration("mixins.common.exploit.json")
                 .addConfiguration("mixins.common.timings.json")
                 .addConfiguration("mixins.common.tracking.json")
-                .addConfiguration("mixins.common.gamefix.json")
                 .addConfiguration("mixins.common.tostring.json")
                 .addConfiguration("mixins.common.optimization.json")
                 .addConfiguration("mixins.common.realtime.json")

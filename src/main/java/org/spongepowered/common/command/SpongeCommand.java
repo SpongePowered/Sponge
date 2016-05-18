@@ -35,8 +35,14 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
+import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandCallable;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.command.CommandResult;
@@ -46,6 +52,7 @@ import org.spongepowered.api.command.args.CommandContext;
 import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -57,7 +64,12 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.data.util.NbtDataUtil;
+import org.spongepowered.common.entity.EntityUtil;
+import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinDimensionType;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -92,6 +104,8 @@ public class SpongeCommand {
         final ChildCommandElementExecutor flagChildren = new ChildCommandElementExecutor(null);
         final ChildCommandElementExecutor nonFlagChildren = new ChildCommandElementExecutor(flagChildren);
         nonFlagChildren.register(getVersionCommand(), "version");
+        nonFlagChildren.register(getBlockInfoCommand(), "blockInfo");
+        nonFlagChildren.register(getEntityInfoCommand(), "entityInfo");
         nonFlagChildren.register(getAuditCommand(), "audit");
         nonFlagChildren.register(getHeapCommand(), "heap");
         nonFlagChildren.register(getPluginsCommand(), "plugins");
@@ -342,6 +356,65 @@ public class SpongeCommand {
                 })
                 .build();
     }
+
+    private static CommandSpec getBlockInfoCommand() {
+        return CommandSpec.builder()
+                .description(Text.of("Display the tracked information of the Block you are looking at."))
+                .permission("sponge.command.blockinfo")
+                .executor((src, args) -> {
+                    if (!(src instanceof Player)) {
+                        src.sendMessage(Text.of(TextColors.RED, "Players must execute this command!"));
+                        return CommandResult.empty();
+                    }
+                    final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                    final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
+                    if (rayTraceResult.typeOfHit != RayTraceResult.Type.BLOCK) {
+                        src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
+                                "Failed to find an entity! Please execute the command when looking at an entity!"));
+                        return CommandResult.empty();
+                    }
+                    final WorldServer worldServer = (WorldServer) entityPlayerMP.worldObj;
+                    final Chunk chunk = worldServer.getChunkFromBlockCoords(rayTraceResult.getBlockPos());
+                    final IMixinChunk mixinChunk = (IMixinChunk) chunk;
+                    final IBlockState blockState = worldServer.getBlockState(rayTraceResult.getBlockPos());
+                    final BlockState spongeState = BlockUtil.fromNative(blockState);
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Type: ", TextColors.BLUE, TextStyles.RESET, spongeState.getId()));
+                    ((Player) src).sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Owner: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockOwner(rayTraceResult.getBlockPos())));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Block Notifier: ", TextColors.BLUE, TextStyles.RESET, mixinChunk.getBlockNotifier(rayTraceResult.getBlockPos())));
+                    return CommandResult.success();
+                })
+                .build();
+    }
+
+    private static CommandSpec getEntityInfoCommand() {
+        return CommandSpec.builder()
+                .description(Text.of("Display the tracked information of the Entity you are looking at."))
+                .permission("sponge.command.entityinfo")
+                .executor((src, args) -> {
+                    if (!(src instanceof Player)) {
+                        return CommandResult.empty();
+                    }
+                    final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
+                    final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
+                    if (rayTraceResult.typeOfHit != RayTraceResult.Type.ENTITY) {
+                        src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
+                                "Failed to find an entity! Please execute the command when looking at an entity!"));
+                        return CommandResult.empty();
+                    }
+                    final Entity entityHit = rayTraceResult.entityHit;
+                    final IMixinEntity mixinEntity = EntityUtil.toMixin(entityHit);
+                    final org.spongepowered.api.entity.Entity spongeEntity = EntityUtil.fromNative(entityHit);
+                    final Text.Builder builder = Text.builder();
+                    builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
+                            .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
+                    src.sendMessage(builder.build());
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET, mixinEntity.getTrackedPlayer(
+                            NbtDataUtil.SPONGE_ENTITY_CREATOR)));
+                    return CommandResult.success();
+                })
+                .build();
+    }
+
 
     private static CommandSpec getAuditCommand() {
         return CommandSpec.builder()
