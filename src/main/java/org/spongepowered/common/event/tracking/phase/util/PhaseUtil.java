@@ -41,8 +41,10 @@ public final class PhaseUtil {
             printer.addWrapped(40, "%s :", "PhaseContext");
             CauseTracker.CONTEXT_PRINTER.accept(printer, phaseContext);
             printer.add("Stacktrace:");
+            final IllegalStateException exception = new IllegalStateException(s + " Please analyze the current phase context. ");
+            printer.add(exception);
             printer.trace(System.err, SpongeImpl.getLogger(), Level.TRACE);
-            return new IllegalStateException(s + " Please analyze the current phase context. ");
+            return exception;
         };
     }
 
