@@ -100,7 +100,7 @@ public class SpongeContextCalculator implements ContextCalculator<Subject> {
         Optional<CommandSource> subjSource = subject.getCommandSource();
         if (subjSource.isPresent()) {
             CommandSource source = subjSource.get();
-            if (source instanceof LocatedSource && context.getType().equals(Context.WORLD_KEY)) {
+            if (source instanceof LocatedSource) {
                 LocatedSource located = (LocatedSource) source;
                 if (context.getType().equals(Context.WORLD_KEY)) {
                     return located.getWorld().getContext().equals(context);
