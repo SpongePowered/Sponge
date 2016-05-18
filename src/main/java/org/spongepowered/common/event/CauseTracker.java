@@ -1157,15 +1157,13 @@ public final class CauseTracker {
         }
 
         User user = null;
-        IMixinWorld spongeWorld = (IMixinWorld) world;
         IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(targetPos);
         if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
-            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
             if (StaticMixinHelper.packetPlayer != null) {
                 user = (User) StaticMixinHelper.packetPlayer;
                 spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, user, type);
-            } else if (causeTracker.hasNotifier()) {
-                user = causeTracker.getCurrentNotifier().get();
+            } else if (this.currentNotifier != null) {
+                user = this.currentNotifier;
                 spongeChunk.addTrackedBlockPosition(world.getBlockState(targetPos).getBlock(), targetPos, user, type);
             }
             // check if a non-living entity exists at target block position (ex. minecarts)
@@ -1216,21 +1214,19 @@ public final class CauseTracker {
         }
 
         net.minecraft.world.World world = this.getMinecraftWorld();
-        IMixinWorld spongeWorld = (IMixinWorld) world;
         IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
             Optional<User> owner = spongeChunk.getBlockOwner(pos);
             Optional<User> notifier = spongeChunk.getBlockNotifier(pos);
             if (notifier.isPresent()) {
                 User user = notifier.get();
-                causeTracker.setCurrentNotifier(user);
+                this.currentNotifier = user;
                 this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
                 return notifier;
             } else if (owner.isPresent()) {
                 User user = owner.get();
+                this.currentNotifier = user;
                 this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
-                causeTracker.setCurrentNotifier(user);
                 return owner;
             }
             if (notifier.isPresent()) {
@@ -1248,10 +1244,7 @@ public final class CauseTracker {
             return;
         }
 
-        net.minecraft.world.World world = this.getMinecraftWorld();
-        IMixinWorld spongeWorld = (IMixinWorld) world;
         IMixinEntity spongeEntity = (IMixinEntity) entity;
-        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         Optional<User> owner = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
         if (!owner.isPresent()) {
             if (entity instanceof EntityTameable) {
@@ -1264,12 +1257,12 @@ public final class CauseTracker {
         Optional<User> notifier = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
         if (notifier.isPresent()) {
             User user = notifier.get();
-            causeTracker.setCurrentNotifier(user);
+            this.currentNotifier = user;
             this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
         } else if (owner.isPresent()) {
             User user = owner.get();
+            this.currentNotifier = user;
             this.currentCause = this.currentCause.merge(Cause.of(NamedCause.owner(user)));
-            causeTracker.setCurrentNotifier(user);
         }
     }
 

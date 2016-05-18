@@ -1002,43 +1002,50 @@ public abstract class MixinWorld implements World, IMixinWorld {
      * @param allowEmpty Whether empty chunks should be accepted
      * @return If the chunks for the area are loaded
      */
-    @Overwrite
-    public boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty) {
-        if (yEnd < 0 || yStart > 255) {
-            return false;
-        }
-
-        xStart = xStart >> 4;
-        zStart = zStart >> 4;
-        xEnd = xEnd >> 4;
-        zEnd = zEnd >> 4;
-
-        Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
-        if (base == null) {
-            return false;
-        }
-
-        for (int i = xStart; i <= xEnd; i++) {
-            Optional<Chunk> column = base.getNeighbor(Direction.EAST);
-            if (!column.isPresent()) {
-                return false;
+    @Inject(method = "isAreaLoaded(IIIIIIZ)Z", at = @At("HEAD"), cancellable = true)
+    public void onIsAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isRemote) {
+            if (yEnd < 0 || yStart > 255) {
+                cir.setReturnValue(false);
+                return;
+            }
+    
+            xStart = xStart >> 4;
+            zStart = zStart >> 4;
+            xEnd = xEnd >> 4;
+            zEnd = zEnd >> 4;
+    
+            Chunk base = (Chunk) ((IMixinChunkProviderServer) this.getChunkProvider()).getChunkIfLoaded(xStart, zStart);
+            if (base == null) {
+                cir.setReturnValue(false);
+                return;
+            }
+    
+            for (int i = xStart; i <= xEnd; i++) {
+                Optional<Chunk> column = base.getNeighbor(Direction.EAST);
+                if (!column.isPresent()) {
+                    cir.setReturnValue(false);
+                    return;
+                }
+    
+                Chunk unwrapped = column.get();
+                for (int j = zStart; j <= zEnd; j++) {
+                    Optional<Chunk> row = unwrapped.getNeighbor(Direction.SOUTH);
+                    if (!row.isPresent()) {
+                        cir.setReturnValue(false);
+                        return;
+                    }
+    
+                    if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row.get()).isEmpty()) {
+                        cir.setReturnValue(false);
+                        return;
+                    }
+                }
             }
 
-            Chunk unwrapped = column.get();
-            for (int j = zStart; j <= zEnd; j++) {
-                Optional<Chunk> row = unwrapped.getNeighbor(Direction.SOUTH);
-                if (!row.isPresent()) {
-                    return false;
-                }
-
-                if (!allowEmpty && ((net.minecraft.world.chunk.Chunk) row.get()).isEmpty()) {
-                    return false;
-                }
-            }
+            cir.setReturnValue(true);
+            return;
         }
-
-        return true;
-
     }
 
     @Override

@@ -121,7 +121,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     private Cause populateCause;
     private org.spongepowered.api.world.World world;
     private UUID uuid;
-    private Chunk[] clientNeighbors = new Chunk[4];
     private Chunk[] neighbors = new Chunk[4];
 
     private static final int NUM_XZ_BITS = 4;
@@ -978,11 +977,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public void setNeighbor(Direction direction, @Nullable Chunk neighbor) {
-        if (this.worldObj.isRemote) {
-            this.clientNeighbors[directionToIndex(direction)] = neighbor;
-        } else {
-            this.neighbors[directionToIndex(direction)] = neighbor;
-        }
+        this.neighbors[directionToIndex(direction)] = neighbor;
     }
 
     @Override
@@ -997,11 +992,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
         int index = directionToIndex(direction);
         Direction secondary = getSecondaryDirection(direction);
         Chunk neighbor = null;
-        if (this.worldObj.isRemote) {
-            neighbor = this.clientNeighbors[index];
-        } else {
-            neighbor = this.neighbors[index];
-        }
+        neighbor = this.neighbors[index];
 
         if (neighbor == null && shouldLoad) {
             Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
