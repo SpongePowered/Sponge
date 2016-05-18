@@ -66,7 +66,7 @@ public class ChunkSaveHelper {
                 writer.name("name").value(((SaveHandler) ((WorldServer) spongeWorld).getSaveHandler()).saveDirectoryName);
                 writer.name("dimensionId").value(((IMixinWorldServer) spongeWorld).getDimensionId());
                 writer.name("players").value(world.playerEntities.size());
-                writer.name("loadedChunks").value(world.getChunkProvider().func_189548_a().size());
+                writer.name("loadedChunks").value(world.getChunkProvider().getLoadedChunks().size());
                 writer.name("activeChunks").value(world.getChunkProvider().getLoadedChunkCount());
                 writer.name("entities").value(world.loadedEntityList.size());
                 writer.name("tiles").value(world.loadedTileEntityList.size());

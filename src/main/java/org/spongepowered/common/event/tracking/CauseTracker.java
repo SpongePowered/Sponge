@@ -278,11 +278,11 @@ public final class CauseTracker {
             state.getPhase().associateNeighborStateNotifier(state, peek.getContext(), sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
-            iblockstate.getBlock().func_189540_a(iblockstate, this.getMinecraftWorld(), notifyPos, sourceBlock);
+            iblockstate.getBlock().neighborChanged(iblockstate, this.getMinecraftWorld(), notifyPos, sourceBlock);
         } catch (Throwable throwable) {
             CrashReport crashreport = CrashReport.makeCrashReport(throwable, "Exception while updating neighbours");
             CrashReportCategory crashreportcategory = crashreport.makeCategory("Block being updated");
-            crashreportcategory.func_189529_a("Source block type", () -> {
+            crashreportcategory.setDetail("Source block type", () -> {
                 try {
                     return String.format("ID #%d (%s // %s)", Block.getIdFromBlock(sourceBlock),
                             sourceBlock.getUnlocalizedName(), sourceBlock.getClass().getCanonicalName());

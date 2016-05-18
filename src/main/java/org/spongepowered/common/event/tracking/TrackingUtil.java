@@ -169,7 +169,7 @@ public final class TrackingUtil {
 
         phaseContext.complete();
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.BLOCK_EVENT, phaseContext);
-        boolean result = currentState.getBlock().func_189539_a(currentState, worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
+        boolean result = currentState.getBlock().eventReceived(currentState, worldIn, event.getPosition(), event.getEventID(), event.getEventParameter());
         causeTracker.completePhase();
         return result;
     }

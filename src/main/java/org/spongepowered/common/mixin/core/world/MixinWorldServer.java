@@ -614,7 +614,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
      * Technically an overwrite to properly track on *server* worlds.
      */
     @Override
-    public void func_189507_a(BlockPos pos, IBlockState state, Random random) {
+    public void immediateBlockTick(BlockPos pos, IBlockState state, Random random) {
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = this.causeTracker.getStack().peek();
@@ -842,7 +842,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
                     this.builder.add(manipulator);
                 }
                 NBTTagCompound nbt = new NBTTagCompound();
-                te.func_189515_b(nbt);
+                te.writeToNBT(nbt);
                 this.builder.unsafeNbt(nbt);
             }
         }

@@ -289,7 +289,7 @@ public class SpongeHooks {
             logWarning("Entity bounding box: {0}", entity.getCollisionBoundingBox());
             logWarning("Entity: {0}", entity);
             NBTTagCompound tag = new NBTTagCompound();
-            entity.func_189511_e(tag);
+            entity.writeToNBT(tag);
             logWarning("Entity NBT: {0}", tag);
             logStack(config);
             entity.setDead();
@@ -323,7 +323,7 @@ public class SpongeHooks {
                         logInfo("Motion: ({0}, {1}, {2})", entity.motionX, entity.motionY, entity.motionZ);
                         logInfo("Entity: {0}", entity);
                         NBTTagCompound tag = new NBTTagCompound();
-                        entity.func_189511_e(tag);
+                        entity.writeToNBT(tag);
                         logInfo("Entity NBT: {0}", tag);
                         logStack(config);
                     }

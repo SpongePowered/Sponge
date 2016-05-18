@@ -206,7 +206,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
     @Shadow protected abstract boolean isValid(BlockPos pos);
-    @Shadow public abstract void func_189507_a(BlockPos pos, IBlockState state, Random random);
+    @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);
     @Shadow public abstract void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide);
@@ -440,7 +440,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("unchecked")
     @Override
     public Iterable<Chunk> getLoadedChunks() {
-        return (Iterable) ((ChunkProviderServer) this.getChunkProvider()).func_189548_a();
+        return (Iterable) ((ChunkProviderServer) this.getChunkProvider()).getLoadedChunks();
     }
 
     @Override
@@ -620,7 +620,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();

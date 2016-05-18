@@ -117,7 +117,7 @@ public abstract class MixinStateImplementation extends BlockStateBase implements
                 builder.add(manipulator);
             }
             final NBTTagCompound compound = new NBTTagCompound();
-            ((net.minecraft.tileentity.TileEntity) tileEntity).func_189515_b(compound);
+            ((net.minecraft.tileentity.TileEntity) tileEntity).writeToNBT(compound);
             builder.unsafeNbt(compound);
         }
         return builder.build();

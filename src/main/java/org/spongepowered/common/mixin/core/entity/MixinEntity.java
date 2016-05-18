@@ -198,7 +198,7 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected abstract boolean getAlwaysRenderNameTag();
     @Shadow protected abstract void setAlwaysRenderNameTag(boolean visible);
     @Shadow public abstract void setFire(int seconds);
-    @Shadow public abstract NBTTagCompound func_189511_e(NBTTagCompound compound);
+    @Shadow public abstract NBTTagCompound writeToNBT(NBTTagCompound compound);
     @Shadow public abstract boolean attackEntityFrom(DamageSource source, float amount);
     @Shadow protected abstract void shadow$setRotation(float yaw, float pitch);
     @Shadow public abstract void setSize(float width, float height);
@@ -648,7 +648,7 @@ public abstract class MixinEntity implements IMixinEntity {
      *        to SpongeData)
      * @param ci (Unused) callback info
      */
-    @Inject(method = "Lnet/minecraft/entity/Entity;func_189511_e(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
+    @Inject(method = "Lnet/minecraft/entity/Entity;writeToNBT(Lnet/minecraft/nbt/NBTTagCompound;)Lnet/minecraft/nbt/NBTTagCompound;", at = @At("HEAD"))
     public void onWriteToNBT(NBTTagCompound compound, CallbackInfoReturnable<NBTTagCompound> ci) {
         this.writeToNbt(this.getSpongeData());
     }
@@ -745,7 +745,7 @@ public abstract class MixinEntity implements IMixinEntity {
     public DataContainer toContainer() {
         final Transform<World> transform = getTransform();
         final NBTTagCompound compound = new NBTTagCompound();
-        func_189511_e(compound);
+        writeToNBT(compound);
         NbtDataUtil.filterSpongeCustomData(compound); // We must filter the custom data so it isn't stored twice
         final DataContainer unsafeNbt = NbtTranslator.getInstance().translateFrom(compound);
         final DataContainer container = new MemoryDataContainer()
@@ -793,7 +793,7 @@ public abstract class MixinEntity implements IMixinEntity {
         }
         try {
             final NBTTagCompound compound = new NBTTagCompound();
-            func_189511_e(compound);
+            writeToNBT(compound);
             net.minecraft.entity.Entity entity = EntityList.createEntityByName(this.entityType.getId(), this.worldObj);
             compound.setUniqueId(NbtDataUtil.UUID, entity.getUniqueID());
             entity.readFromNBT(compound);
