@@ -262,15 +262,12 @@ public class SpongeCommonEventFactory {
                 ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                 entitySnapshotBuilder.add(currentEntity.createSnapshot());
             }
-            final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-            for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                if (entry.getKey().equals(NamedCause.SOURCE)) {
-                    builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
-                } else {
-                    builder.suggestNamed(entry.getKey(), entry.getValue());
-                }
-            }
-            event = SpongeEventFactory.createCreativeInventoryEventDrop(builder.build(), cursorTransaction, causeTracker.getCapturedSpawnedEntityItems(),
+
+            SpawnCause spawnCause = EntitySpawnCause.builder()
+                    .entity((Entity) player)
+                    .type(SpawnTypes.DROPPED_ITEM)
+                    .build();
+            event = SpongeEventFactory.createCreativeInventoryEventDrop(Cause.of(NamedCause.source(spawnCause)), cursorTransaction, causeTracker.getCapturedSpawnedEntityItems(),
                     entitySnapshotBuilder.build(), (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) player.worldObj,
                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
         } else {
@@ -337,16 +334,13 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
-                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
-                        } else {
-                            builder.suggestNamed(entry.getKey(), entry.getValue());
-                        }
-                    }
+
+                    SpawnCause spawnCause = EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(SpawnTypes.DROPPED_ITEM)
+                            .build();
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropFull(builder.build(), cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropFull(Cause.of(NamedCause.source(spawnCause)), cursorTransaction,
                                     causeTracker.getCapturedSpawnedEntityItems(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());
@@ -365,16 +359,13 @@ public class SpongeCommonEventFactory {
                         ((IMixinEntity) currentEntity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
                         entitySnapshotBuilder.add(currentEntity.createSnapshot());
                     }
-                    final Cause.Builder builder = Cause.source(SpawnCause.builder().type(SpawnTypes.DROPPED_ITEM).build());
-                    for (Map.Entry<String, Object> entry : cause.getNamedCauses().entrySet()) {
-                        if (entry.getKey().equals(NamedCause.SOURCE)) {
-                            builder.suggestNamed(NamedCause.SOURCE, entry.getValue());
-                        } else {
-                            builder.suggestNamed(entry.getKey(), entry.getValue());
-                        }
-                    }
+
+                    SpawnCause spawnCause = EntitySpawnCause.builder()
+                            .entity((Entity) player)
+                            .type(SpawnTypes.DROPPED_ITEM)
+                            .build();
                     clickEvent =
-                            SpongeEventFactory.createClickInventoryEventDropSingle(builder.build(), cursorTransaction,
+                            SpongeEventFactory.createClickInventoryEventDropSingle(Cause.of(NamedCause.source(spawnCause)), cursorTransaction,
                                     causeTracker.getCapturedSpawnedEntityItems(), entitySnapshotBuilder.build(),
                                     (org.spongepowered.api.item.inventory.Container) player.openContainer, (World) world,
                                     ((IMixinContainer) player.openContainer).getCapturedTransactions());

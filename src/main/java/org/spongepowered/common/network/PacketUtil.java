@@ -107,7 +107,7 @@ public class PacketUtil {
                 StaticMixinHelper.prePacketProcessItem = ItemStack.copyItemStack(StaticMixinHelper.packetPlayer.getHeldItem());
             }
 
-            if (packetIn instanceof C0EPacketClickWindow) {
+            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
                 causeTracker.setCaptureSpawnedEntities(true);
             }
             causeTracker.setCurrentCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
@@ -117,7 +117,7 @@ public class PacketUtil {
             causeTracker.setCurrentCause(null);
             causeTracker.setCurrentNotifier(null);
             causeTracker.setCurrentPlayerPacket(null);
-            if (packetIn instanceof C0EPacketClickWindow) {
+            if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
                 causeTracker.setCaptureSpawnedEntities(false);
             }
             resetStaticData();
