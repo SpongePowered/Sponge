@@ -303,7 +303,7 @@ public final class GeneralPhase extends TrackingPhase {
 
             unwindingState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, unwindingPhaseContext);
 
-            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
+            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
 
             if (!postContext.getCapturedBlocks().isEmpty()) {
                 final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();

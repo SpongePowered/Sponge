@@ -249,7 +249,7 @@ public class GeneralFunctions {
             proxyBlockAccess.proceed();
             phaseState.handleBlockChangeWithUser(oldBlockSnapshot.blockChange, minecraftWorld, transaction, phaseContext);
 
-            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
+            causeTracker.getMixinWorld().markAndNotifyNeighbors(pos, minecraftWorld.getChunkFromBlockCoords(pos), originalState, newState, updateFlag);
 
             final PhaseData peek = causeTracker.getStack().peek();
             if (peek.getState() == GeneralPhase.Post.UNWINDING) {

@@ -309,7 +309,7 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     }
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
-    public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
+    public void onRandomBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
         final PhaseData currentTuple = causeTracker.getStack().peek();
         final IPhaseState phaseState = currentTuple.getState();
@@ -735,14 +735,14 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     // IMixinWorld method
     @Override
     public void markAndNotifyNeighbors(BlockPos pos, @Nullable net.minecraft.world.chunk.Chunk chunk, IBlockState oldState, IBlockState newState, int flags) {
-        if ((flags & 2) != 0 && (!this.isRemote || (flags & 4) == 0) && (chunk == null || chunk.isPopulated())) {
+        if ((flags & 2) != 0 && (chunk == null || chunk.isPopulated())) {
             this.notifyBlockUpdate(pos, oldState, newState, flags);
         }
 
-        if (!this.isRemote && (flags & 1) != 0) {
+        if ((flags & 1) != 0) {
             this.notifyNeighborsRespectDebug(pos, newState.getBlock());
 
-            if (newState.getBlock().hasComparatorInputOverride(newState)) {
+            if (newState.hasComparatorInputOverride()) {
                 this.updateComparatorOutputLevel(pos, newState.getBlock());
             }
         }
