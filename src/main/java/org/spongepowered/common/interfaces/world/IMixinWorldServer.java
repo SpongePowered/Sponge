@@ -74,12 +74,6 @@ public interface IMixinWorldServer extends IMixinWorld {
 
     SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag);
 
-    SpongeChunkGenerator createChunkProvider(SpongeWorldGenerator newGenerator);
-
-    WorldProvider getWorldProvider();
-
-    SpongeWorldGenerator createWorldGenerator();
-
     SpongeWorldGenerator createWorldGenerator(DataContainer settings);
 
     SpongeWorldGenerator createWorldGenerator(String settings);
