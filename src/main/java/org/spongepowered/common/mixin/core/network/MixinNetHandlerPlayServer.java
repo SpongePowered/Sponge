@@ -183,9 +183,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) playerEntity.worldObj;
         final CauseTracker causeTracker = mixinWorldServer.getCauseTracker();
         causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.PLAYER, PhaseContext.start()
-            .add(NamedCause.source(playerEntity))
-            .addCaptures()
-            .complete());
+                .add(NamedCause.source(playerEntity))
+                .addCaptures()
+                .addEntityDropCaptures()
+                .addBlockCaptures()
+                .complete());
         playerEntity.onUpdateEntity();
         causeTracker.completePhase();
     }
