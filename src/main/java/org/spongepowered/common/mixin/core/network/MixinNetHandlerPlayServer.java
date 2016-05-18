@@ -64,6 +64,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextComponentString;
 import net.minecraft.util.text.TextComponentTranslation;
 import net.minecraft.world.WorldServer;
+import net.minecraft.world.WorldServerMulti;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.block.tileentity.Sign;
 import org.spongepowered.api.data.manipulator.mutable.tileentity.SignData;
@@ -110,6 +111,7 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.WorldManager;
 
 import java.net.InetSocketAddress;
 import java.util.HashMap;
@@ -188,8 +190,27 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                 .addEntityDropCaptures()
                 .addBlockCaptures()
                 .complete());
+        for (WorldServer worldServer : WorldManager.getWorlds()) {
+            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
+                continue;
+            }
+            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
+            otherMixinWorldServer.getCauseTracker().switchToPhase(TrackingPhases.WORLD, WorldPhase.Tick.PLAYER, PhaseContext.start()
+                    .add(NamedCause.source(playerEntity))
+                    .addCaptures()
+                    .addEntityDropCaptures()
+                    .addBlockCaptures()
+                    .complete());
+        }
         playerEntity.onUpdateEntity();
         causeTracker.completePhase();
+        for (WorldServer worldServer : WorldManager.getWorlds()) {
+            if (worldServer == mixinWorldServer) { // we don't care about entering the phase for this world server of which we already entered
+                continue;
+            }
+            final IMixinWorldServer otherMixinWorldServer = (IMixinWorldServer) worldServer;
+            otherMixinWorldServer.getCauseTracker().completePhase();
+        }
     }
 
     /**
