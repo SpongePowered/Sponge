@@ -81,6 +81,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
@@ -226,11 +227,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
             if (this.capturedItemDrops.size() > 0) {
                 IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
                 final CauseTracker causeTracker = spongeWorld.getCauseTracker();
-                causeTracker.setIgnoreSpawnEvents(true);;
-                if (!SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayerMP)(Object) this, cause, this.capturedItemDrops).isCancelled()) {
+                causeTracker.setIgnoreSpawnEvents(true);
+                DropItemEvent.Destruct event = SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayerMP)(Object) this, cause, this.capturedItemDrops);
+                if (!event.isCancelled()) {
                     for (net.minecraft.entity.item.EntityItem item : this.capturedItemDrops) {
-                        joinEntityItemWithWorld(item);
+                        this.worldObj.spawnEntityInWorld(item);
                     }
+                    this.inventory.clear();
                 }
                 causeTracker.setIgnoreSpawnEvents(false);
             }

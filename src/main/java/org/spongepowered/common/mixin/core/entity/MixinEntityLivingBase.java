@@ -263,7 +263,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                 causeTracker.setIgnoreSpawnEvents(true);
                 if (!SpongeCommonEventFactory.callDropItemEventDestruct(this.mcEntityLiving, cause, this.capturedItemDrops).isCancelled()) {
                     for (EntityItem item : this.capturedItemDrops) {
-                        worldObj.spawnEntityInWorld(item);
+                        this.worldObj.spawnEntityInWorld(item);
                     }
                 }
                 causeTracker.setIgnoreSpawnEvents(false);

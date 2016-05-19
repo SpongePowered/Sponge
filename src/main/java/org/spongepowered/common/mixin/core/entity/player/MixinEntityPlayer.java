@@ -68,6 +68,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.api.event.entity.DamageEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
@@ -227,14 +228,16 @@ public abstract class MixinEntityPlayer extends MixinEntityLivingBase implements
         }
 
         this.captureItemDrops = false;
-        if (!worldObj.isRemote && this.capturedItemDrops.size() > 0) {
+        if (this.capturedItemDrops.size() > 0) {
             IMixinWorld spongeWorld = (IMixinWorld) this.worldObj;
             final CauseTracker causeTracker = spongeWorld.getCauseTracker();
             causeTracker.setIgnoreSpawnEvents(true);
-            if (!SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayer)(Object) this, cause, this.capturedItemDrops).isCancelled()) {
+            DropItemEvent.Destruct event = SpongeCommonEventFactory.callDropItemEventDestruct((EntityPlayerMP)(Object) this, cause, this.capturedItemDrops);
+            if (!event.isCancelled()) {
                 for (net.minecraft.entity.item.EntityItem item : this.capturedItemDrops) {
-                    joinEntityItemWithWorld(item);
+                    this.worldObj.spawnEntityInWorld(item);
                 }
+                this.inventory.clear();
             }
             causeTracker.setIgnoreSpawnEvents(false);
         }
