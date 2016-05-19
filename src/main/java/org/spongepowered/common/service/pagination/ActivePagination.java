@@ -46,6 +46,7 @@ abstract class ActivePagination {
 
     private static final Text SLASH_TEXT = Text.of("/");
     private static final Text DIVIDER_TEXT = Text.of(" ");
+    private static final Text CONTINUATION_TEXT = t("...");
     private final WeakReference<MessageReceiver> src;
     private final UUID id = UUID.randomUUID();
     private final Text nextPageText;
@@ -185,5 +186,27 @@ abstract class ActivePagination {
             ret.style(this.title.getStyle());
         }
         return ret.build();
+    }
+
+    protected void padPage(final List<Text> currentPage, final int currentPageLines, final PadBehavior behavior) {
+        final int maxContentLinesPerPage = getMaxContentLinesPerPage();
+        for (int i = currentPageLines; i < maxContentLinesPerPage; i++) {
+            if (i == maxContentLinesPerPage - 1 && behavior != PadBehavior.NO_CONTINUATION) {
+                currentPage.add(CONTINUATION_TEXT);
+            } else if (behavior != PadBehavior.NO_PADDING) {
+                // We only want to perform padding if it has been asked for, AND there is another page to
+                // go to.
+                currentPage.add(Text.EMPTY);
+            } else {
+                // If no conditions are true, there is no need to continue on this loop.
+                break;
+            }
+        }
+    }
+
+    protected enum PadBehavior {
+        NO_CONTINUATION,
+        NO_PADDING,
+        STANDARD
     }
 }

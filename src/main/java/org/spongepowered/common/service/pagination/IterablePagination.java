@@ -82,11 +82,15 @@ class IterablePagination extends ActivePagination {
         int addedLines = 0;
         while (addedLines <= getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
-                padPage(ret,addedLines, Text.EMPTY);
+                // Pad the last page, but only if it isn't the first.
+                if (page > 1) {
+                    padPage(ret, addedLines, PadBehavior.NO_CONTINUATION);
+                }
                 break;
             }
             if (addedLines + this.countIterator.peek().getValue() > getMaxContentLinesPerPage()) {
-                padPage(ret,addedLines, t("..."));
+                // Add the continuation marker, pad if required
+                padPage(ret, addedLines, PadBehavior.STANDARD);
                 break;
             }
             Map.Entry<Text, Integer> ent = this.countIterator.next();
@@ -94,17 +98,6 @@ class IterablePagination extends ActivePagination {
             addedLines += ent.getValue();
         }
         return ret;
-    }
-
-    private void padPage(final List<Text> currentPage, final int currentPageLines, final Text continuation) {
-        final int maxContentLinesPerPage = getMaxContentLinesPerPage();
-        for (int i = currentPageLines; i< maxContentLinesPerPage; i++){
-            if (i == (maxContentLinesPerPage - 1)) {
-                currentPage.add(continuation);
-            } else {
-                currentPage.add(Text.EMPTY);
-            }
-        }
     }
 
     @Override
