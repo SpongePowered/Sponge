@@ -335,7 +335,14 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         if (chunk.getInhabitedTime() < 3600L) {
             for (Populator populator : this.pop) {
                 if (populator instanceof StructureOceanMonument) {
+                    IMixinWorldServer world = (IMixinWorldServer) this.world;
+                    final CauseTracker causeTracker = world.getCauseTracker();
+                    causeTracker.switchToPhase(TrackingPhases.WORLD, WorldPhase.State.POPULATOR_RUNNING, PhaseContext.start()
+                            .add(NamedCause.of(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, populator.getType()))
+                            .addEntityCaptures()
+                            .complete());
                     flag |= ((StructureOceanMonument) populator).generateStructure(this.world, this.rand, new ChunkPos(chunkX, chunkZ));
+                    causeTracker.completePhase();
                 }
             }
         }

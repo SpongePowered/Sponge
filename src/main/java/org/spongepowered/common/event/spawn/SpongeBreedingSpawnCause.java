@@ -25,15 +25,15 @@
 package org.spongepowered.common.event.spawn;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCause;
 
 public class SpongeBreedingSpawnCause extends AbstractEntitySpawnCause implements BreedingSpawnCause {
 
 
-    private final EntitySnapshot mate;
+    private final Entity mate;
 
     public SpongeBreedingSpawnCause(SpongeBreedingSpawnCauseBuilder builder) {
         super(builder);
@@ -41,7 +41,7 @@ public class SpongeBreedingSpawnCause extends AbstractEntitySpawnCause implement
     }
 
     @Override
-    public EntitySnapshot getMate() {
+    public Entity getMate() {
         return this.mate;
     }
 
@@ -54,21 +54,21 @@ public class SpongeBreedingSpawnCause extends AbstractEntitySpawnCause implement
             return false;
         }
         SpongeBreedingSpawnCause that = (SpongeBreedingSpawnCause) o;
-        return Objects.equal(this.entitySnapshot, that.entitySnapshot)
+        return Objects.equal(this.entity, that.entity)
                && Objects.equal(this.spawnType, that.spawnType)
                && Objects.equal(this.mate, that.mate);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.getType(), this.entitySnapshot);
+        return Objects.hashCode(this.getType(), this.entity);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper("BreedingSpawnCause")
                 .add("SpawnType", this.spawnType)
-                .add("EntitySnapshot", this.entitySnapshot)
+                .add("EntitySnapshot", this.entity)
                 .add("MateSnapshot", this.mate)
                 .toString();
     }

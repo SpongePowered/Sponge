@@ -921,10 +921,11 @@ public final class WorldPhase extends TrackingPhase {
                 if (!spawnedItems.isEmpty()) { // We shouldn't separate the entities whatsoever.
                     spawnedEntities.addAll(spawnedItems);
                 }
-                final Cause cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld())
-                        .named(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, runningGenerator)
-                        .build();
-                EventConsumer.event(SpongeEventFactory.createSpawnEntityEventSpawner(cause, spawnedEntities, causeTracker.getWorld()))
+                final Cause.Builder cause = Cause.source(InternalSpawnTypes.WORLD_SPAWNER_CAUSE).named("World",  causeTracker.getWorld());
+                if (runningGenerator != null) { // There are corner cases where a populator may not have a proper type.
+                    cause.named(InternalNamedCauses.WorldGeneration.CAPTURED_POPULATOR, runningGenerator);
+                }
+                EventConsumer.event(SpongeEventFactory.createSpawnEntityEventSpawner(cause.build(), spawnedEntities, causeTracker.getWorld()))
                         .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), causeTracker))
                         .process();
             }

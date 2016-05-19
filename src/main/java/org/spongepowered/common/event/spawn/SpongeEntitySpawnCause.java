@@ -43,19 +43,19 @@ public class SpongeEntitySpawnCause extends AbstractEntitySpawnCause implements 
             return false;
         }
         SpongeEntitySpawnCause that = (SpongeEntitySpawnCause) o;
-        return Objects.equal(this.entitySnapshot, that.entitySnapshot) && Objects.equal(this.getType(), that.getType());
+        return Objects.equal(this.entity, that.entity) && Objects.equal(this.getType(), that.getType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this.getType(), this.entitySnapshot);
+        return Objects.hashCode(this.getType(), this.entity);
     }
 
     @Override
     public String toString() {
         return Objects.toStringHelper("EntitySpawnCause")
                 .add("SpawnType", this.getType())
-                .add("EntitySnapshot", this.entitySnapshot)
+                .add("EntitySnapshot", this.entity)
                 .toString();
     }
 

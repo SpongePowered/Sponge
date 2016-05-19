@@ -54,6 +54,11 @@ public final class InternalSpawnTypes {
     public static final SpawnType FORCED = new SpongeSpawnType("FORCED");
     public static final SpawnType ENTITY_DEATH = new SpongeSpawnType("EntityDeath");
 
+    public static final class CauseImpl {
+        public static final Cause WORLD_SPAWNER = Cause.source(of(InternalSpawnTypes.WORLD_SPAWNER)).build();
+        public static final Cause CUSTOM = Cause.source(of(InternalSpawnTypes.CUSTOM)).build();
+    }
+
     // SpawnCauses used
     public static final SpawnCause FORCED_SPAWN = of(InternalSpawnTypes.FORCED);
     public static final SpawnCause UNKNOWN_DISPENSE_SPAWN_CAUSE = of(InternalSpawnTypes.DISPENSE);
@@ -62,7 +67,7 @@ public final class InternalSpawnTypes {
     public static final SpawnCause WORLD_SPAWNER_CAUSE = of(InternalSpawnTypes.WORLD_SPAWNER);
     public static final Cause UNKNOWN_CAUSE = Cause.source(InternalSpawnTypes.CUSTOM_SPAWN).build();
 
-    private static SpawnCause of(SpawnType spawnType) {
+    static SpawnCause of(SpawnType spawnType) {
         return new SpongeSpawnCauseBuilder().type(spawnType).build();
     }
 

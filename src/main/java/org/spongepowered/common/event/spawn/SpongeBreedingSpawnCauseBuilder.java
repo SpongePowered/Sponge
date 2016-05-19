@@ -30,31 +30,24 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.event.cause.entity.spawn.BreedingSpawnCause;
-import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.common.AbstractEntitySpawnCauseBuilder;
 
 public class SpongeBreedingSpawnCauseBuilder extends AbstractEntitySpawnCauseBuilder<BreedingSpawnCause, BreedingSpawnCause.Builder>
         implements BreedingSpawnCause.Builder {
 
-    protected EntitySnapshot mate;
+    protected Entity mate;
 
     @Override
     public BreedingSpawnCause build() {
         checkState(this.spawnType != null, "SpawnType cannot be null!");
-        checkState(this.entitySnapshot != null, "EntitySnapshot cannot be null!");
+        checkState(this.entity != null, "EntitySnapshot cannot be null!");
         checkState(this.mate != null, "The mate cannot be null!");
         return new SpongeBreedingSpawnCause(this);
     }
 
     @Override
     public BreedingSpawnCause.Builder mate(Entity entity) {
-        this.mate = checkNotNull(entity, "Entity cannot be null!").createSnapshot();
-        return this;
-    }
-
-    @Override
-    public BreedingSpawnCause.Builder mate(EntitySnapshot snapshot) {
-        this.mate = checkNotNull(snapshot, "Entity snapshot cannot be null!");
+        this.mate = checkNotNull(entity, "Entity cannot be null!");
         return this;
     }
 

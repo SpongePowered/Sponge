@@ -164,6 +164,7 @@ public final class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 super.populateContext(playerMP, packet, context);
                 context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, false));
+                context.addEntityDropCaptures();
             }
 
             @Override

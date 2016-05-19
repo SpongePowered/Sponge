@@ -107,7 +107,7 @@ public final class GeneralPhase extends TrackingPhase {
 
         @Override
         public boolean canSwitchTo(IPhaseState state) {
-            return state instanceof WorldPhase.State;
+            return state instanceof WorldPhase.State || state == BlockPhase.State.RESTORING_BLOCKS;
         }
 
         @Override
