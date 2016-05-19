@@ -1209,11 +1209,12 @@ public final class CauseTracker {
     }
 
     public Optional<User> trackBlockPositionCausePreTick(BlockPos pos) {
-        if (pos == null || this.currentCause == null) {
+        Cause cause = this.currentCause;
+        net.minecraft.world.World world = this.getMinecraftWorld();
+        if (pos == null || cause == null || !world.isBlockLoaded(pos)) {
             return Optional.empty();
         }
 
-        net.minecraft.world.World world = this.getMinecraftWorld();
         IMixinChunk spongeChunk = (IMixinChunk) world.getChunkFromBlockCoords(pos);
         if (spongeChunk != null && !(spongeChunk instanceof EmptyChunk)) {
             Optional<User> owner = spongeChunk.getBlockOwner(pos);
@@ -1221,12 +1222,12 @@ public final class CauseTracker {
             if (notifier.isPresent()) {
                 User user = notifier.get();
                 this.currentNotifier = user;
-                this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
+                this.currentCause = cause.merge(Cause.of(NamedCause.notifier(user)));
                 return notifier;
             } else if (owner.isPresent()) {
                 User user = owner.get();
                 this.currentNotifier = user;
-                this.currentCause = this.currentCause.merge(Cause.of(NamedCause.notifier(user)));
+                this.currentCause = cause.merge(Cause.of(NamedCause.notifier(user)));
                 return owner;
             }
             if (notifier.isPresent()) {
