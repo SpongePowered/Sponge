@@ -55,4 +55,12 @@ public class NBTTranslationTest {
         assertTrue(container.equals(translatedContainer));
     }
 
+    @Test
+    public void testDotContainerKeys() {
+        final DataContainer container = new MemoryDataContainer().set(DataQuery.of("my.key.to.data"), 1);
+        NBTTagCompound compound = NbtTranslator.getInstance().translateData(container);
+        DataView translatedContainer = NbtTranslator.getInstance().translateFrom(compound);
+        assertTrue(container.equals(translatedContainer));
+    }
+
 }
