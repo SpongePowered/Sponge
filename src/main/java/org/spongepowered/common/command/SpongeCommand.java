@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command;
 
+import static org.spongepowered.api.Sponge.getServer;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
@@ -36,6 +37,8 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
+import com.flowpowered.math.GenericMath;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.Sponge;
@@ -62,13 +65,16 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.config.SpongeConfig;
+import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
+import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -84,6 +90,7 @@ public class SpongeCommand {
     static final Text NEWLINE_TEXT = Text.NEW_LINE;
     static final Text SEPARATOR_TEXT = Text.of(", ");
 
+    private static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
     /**
      * Create a new instance of the Sponge command structure.
      *
@@ -101,6 +108,7 @@ public class SpongeCommand {
         flagChildren.register(getConfigCommand(), "config");
         flagChildren.register(getReloadCommand(), "reload"); // TODO: Should these two be subcommands of config, and what is now config be set?
         flagChildren.register(getSaveCommand(), "save");
+        flagChildren.register(getTpsCommand(), "tps");
         return CommandSpec.builder()
                 .description(Text.of("Text description"))
                 .extendedDescription(Text.of("commands:\n", // TODO: Automatically generate from child executors (wait for help system on this)
@@ -111,7 +119,8 @@ public class SpongeCommand {
                         INDENT, title("save"), LONG_INDENT, "Saves a global, dimension, or world config\n",
                         INDENT, title("version"), LONG_INDENT, "Prints current Sponge version\n",
                         INDENT, title("audit"), LONG_INDENT, "Audit mixin classes for implementation",
-                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins"))
+                        INDENT, title("plugins"), LONG_INDENT, "List currently installed plugins",
+                        INDENT, title("tps"), LONG_INDENT, "Provides TPS (ticks per second) data for loaded worlds"))
                 .arguments(firstParsing(nonFlagChildren, flags()
                         .flag("-global", "g")
                         .valueFlag(world(Text.of("world")), "-world", "w")
@@ -494,5 +503,57 @@ public class SpongeCommand {
                         })
                         .build(), "cost")
                 .build();
+    }
+
+    private static CommandSpec getTpsCommand() {
+        return CommandSpec.builder()
+                .permission("sponge.command.tps")
+                .description(Text.of("Provides TPS (ticks per second) data for loaded worlds."))
+                .arguments(optional(world(Text.of("world"))))
+                .executor((src, args) -> {
+                    if (args.hasAny("world")) {
+                        for (WorldProperties properties : args.<WorldProperties>getAll("world")) {
+                            final Optional<World> optWorld = Sponge.getServer().getWorld(properties.getWorldName());
+                            if (!optWorld.isPresent()) {
+                                src.sendMessage(Text.of(properties.getWorldName() + " has no TPS as it is offline!"));
+                            } else {
+                                printWorldTickTime(src, optWorld.get());
+                            }
+                        }
+                    } else {
+                        Sponge.getServer().getWorlds().forEach(world -> printWorldTickTime(src, world));
+                    }
+                    final double serverMeanTickTime = mean(MinecraftServer.getServer().tickTimeArray) * 1.0e-6d;
+                    src.sendMessage(Text.of("Overall TPS: ", TextColors.LIGHT_PURPLE,
+                            THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (serverMeanTickTime), 20)),
+                            TextColors.RESET, ", Mean: ", TextColors.RED, THREE_DECIMAL_DIGITS_FORMATTER.
+                                    format(serverMeanTickTime), "ms"));
+                    return CommandResult.success();
+                })
+                .build();
+    }
+
+    private static void printWorldTickTime(CommandSource src, World world) {
+        final long[] worldTickTimes = ((IMixinMinecraftServer) MinecraftServer.getServer()).
+                getWorldTickTimes().get(((WorldServer) world).provider.getDimensionId());
+        final double worldMeanTickTime = mean(worldTickTimes) * 1.0e-6d;
+        final double worldTps = Math.min(1000.0 / worldMeanTickTime, 20);
+        src.sendMessage(Text.of("World [", TextColors.DARK_GREEN, world.getName(), TextColors.RESET, "] (DIM",
+                ((WorldServer) world).provider.getDimensionId(), ") TPS: ", TextColors.LIGHT_PURPLE,
+                THREE_DECIMAL_DIGITS_FORMATTER.format(worldTps), TextColors.RESET,  ", Mean: ", TextColors.RED,
+                THREE_DECIMAL_DIGITS_FORMATTER.format(worldMeanTickTime), "ms"));
+    }
+
+    private static Long mean(long[] values) {
+        Long mean = 0L;
+        if (values.length > 0) {
+            for (long value : values) {
+                mean += value;
+            }
+
+            mean = mean / values.length;
+        }
+
+        return mean;
     }
 }
