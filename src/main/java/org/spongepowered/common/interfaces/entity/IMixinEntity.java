@@ -34,6 +34,7 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
@@ -123,4 +124,12 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     List<EntityItem> getCapturedItemDrops();
 
     void setDestructCause(Cause cause);
+
+    boolean spawnedFromBlockBreak();
+
+    void setSpawnedFromBlockBreak(boolean flag);
+
+    SpawnCause getSpawnCause();
+
+    void setSpawnCause(SpawnCause spawnCause);
 }

@@ -61,7 +61,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
-import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.registry.type.BlockTypeRegistryModule;
 import org.spongepowered.common.text.translation.SpongeTranslation;
@@ -216,12 +216,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 .block(blockSnapshot)
                 .type(SpawnTypes.DROPPED_ITEM)
                 .build();
-        IMixinEntityItem spongeItem = (IMixinEntityItem) entityitem;
-        spongeItem.setSpawnCause(spawnCause);
-        spongeItem.setSpawnedFromBlockBreak(true);
+        IMixinEntity spongeEntity = (IMixinEntity) entityitem;
+        spongeEntity.setSpawnCause(spawnCause);
+        spongeEntity.setSpawnedFromBlockBreak(true);
+        boolean preCaptureEntities = causeTracker.isCapturingSpawnedEntities();
         causeTracker.setCaptureSpawnedEntities(true);
         boolean result = worldIn.spawnEntityInWorld(entityitem);
-        causeTracker.setCaptureSpawnedEntities(false);
+        causeTracker.setCaptureSpawnedEntities(preCaptureEntities);
         return result;
     }
 
@@ -239,7 +240,15 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
                 .block(BlockSnapshot.builder().from(new Location<>((World) world, VecHelper.toVector(posIn))).build())
                 .type(SpawnTypes.EXPERIENCE)
                 .build();
-        return ((World) world).spawnEntity(((org.spongepowered.api.entity.Entity) entity), Cause.of(NamedCause.source(spawnCause)));
+        IMixinEntity spongeEntity = (IMixinEntity) entity;
+        spongeEntity.setSpawnCause(spawnCause);
+        spongeEntity.setSpawnedFromBlockBreak(true);
+        final CauseTracker causeTracker = ((IMixinWorld) world).getCauseTracker();
+        boolean preCaptureEntities = causeTracker.isCapturingSpawnedEntities();
+        causeTracker.setCaptureSpawnedEntities(true);
+        boolean result = world.spawnEntityInWorld(entity);
+        causeTracker.setCaptureSpawnedEntities(preCaptureEntities);
+        return result;
     }
 
     @Override

@@ -163,6 +163,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     private net.minecraft.entity.Entity mcEntity = (net.minecraft.entity.Entity)(Object) this;
     public boolean captureItemDrops = false;
     public java.util.ArrayList<EntityItem> capturedItemDrops = new java.util.ArrayList<EntityItem>();
+    private boolean spawnedFromBlockBreak = false;
+    private SpawnCause spawnCause = null;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -1382,5 +1384,25 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setDestructCause(Cause cause) {
         this.destructCause = cause;
+    }
+
+    @Override
+    public boolean spawnedFromBlockBreak() {
+        return this.spawnedFromBlockBreak;
+    }
+
+    @Override
+    public void setSpawnedFromBlockBreak(boolean flag) {
+        this.spawnedFromBlockBreak = flag;
+    }
+
+    @Override
+    public SpawnCause getSpawnCause() {
+        return this.spawnCause;
+    }
+
+    @Override
+    public void setSpawnCause(SpawnCause spawnCause) {
+        this.spawnCause = spawnCause;
     }
 }

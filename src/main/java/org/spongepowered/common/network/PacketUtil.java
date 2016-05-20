@@ -110,11 +110,11 @@ public class PacketUtil {
             if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {
                 causeTracker.setCaptureSpawnedEntities(true);
             }
-            causeTracker.setCurrentCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
+            causeTracker.addCause(Cause.of(NamedCause.source(StaticMixinHelper.packetPlayer)));
             causeTracker.setCurrentNotifier((User) StaticMixinHelper.packetPlayer);
             packetIn.processPacket(netHandler);
             causeTracker.handlePostTickCaptures();
-            causeTracker.setCurrentCause(null);
+            causeTracker.removeCurrentCause();
             causeTracker.setCurrentNotifier(null);
             causeTracker.setCurrentPlayerPacket(null);
             if (packetIn instanceof C0EPacketClickWindow || packetIn instanceof C10PacketCreativeInventoryAction) {

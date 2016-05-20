@@ -35,7 +35,6 @@ import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
-import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
@@ -47,14 +46,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
-import org.spongepowered.common.interfaces.entity.IMixinEntityItem;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.entity.MixinEntity;
 
 import java.util.List;
 
 @Mixin(EntityItem.class)
-public abstract class MixinEntityItem extends MixinEntity implements Item, IMixinEntityItem {
+public abstract class MixinEntityItem extends MixinEntity implements Item {
 
     private static final short MAGIC_INFINITE_PICKUP_DELAY = 32767;
     private static final short MAGIC_INFINITE_DESPAWN_TIME = -32768;
@@ -67,8 +65,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
 
     public int lifespan;
     public float dropChance = 1.0f;
-    private boolean spawnedFromBlockBreak = false;
-    private SpawnCause spawnCause = null;
 
     //
     // In the case where a Forge mod sets the delay to MAGIC_INFINITE_PICKUP_DELAY, but a plugin has
@@ -202,26 +198,6 @@ public abstract class MixinEntityItem extends MixinEntity implements Item, IMixi
     @Inject(method = "combineItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
     public void onCombineItems(EntityItem other, CallbackInfoReturnable<Boolean> cir) {
         this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
-    }
-
-    @Override
-    public boolean spawnedFromBlockBreak() {
-        return this.spawnedFromBlockBreak;
-    }
-
-    @Override
-    public void setSpawnedFromBlockBreak(boolean flag) {
-        this.spawnedFromBlockBreak = flag;
-    }
-
-    @Override
-    public SpawnCause getSpawnCause() {
-        return this.spawnCause;
-    }
-
-    @Override
-    public void setSpawnCause(SpawnCause spawnCause) {
-        this.spawnCause = spawnCause;
     }
 
     // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data

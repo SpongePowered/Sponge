@@ -175,9 +175,9 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
                 }
 
                 if (causeTracker.hasPluginCause()) {
-                    causeTracker.setCurrentCause(causeTracker.getPluginCause().get());
+                    causeTracker.addCause(causeTracker.getPluginCause().get());
                     causeTracker.handleBlockCaptures();
-                    causeTracker.setCurrentCause(null);
+                    causeTracker.removeCurrentCause();
                 } else {
                     // Don't notify clients or update physics while capturing blockstates
                     if (originalBlockSnapshot == null) {
