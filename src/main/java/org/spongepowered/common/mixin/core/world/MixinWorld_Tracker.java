@@ -87,7 +87,7 @@ public abstract class MixinWorld_Tracker implements World, IMixinWorld {
     @SuppressWarnings("unused")
     private static final Vector2i BIOME_MAX = BLOCK_MAX.toVector2(true);
 
-    private final CauseTracker causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
+    protected final CauseTracker causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
 
     @Shadow @Final public boolean isRemote;

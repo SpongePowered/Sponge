@@ -60,8 +60,8 @@ import java.util.Random;
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
-    private long weatherStartTime;
-    private Weather prevWeather;
+    protected long weatherStartTime;
+    protected Weather prevWeather;
 
     @Shadow @Final public Random rand;
     @Shadow @Final public WorldProvider provider;

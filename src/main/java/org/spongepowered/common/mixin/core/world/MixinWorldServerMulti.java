@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
@@ -52,12 +51,12 @@ public abstract class MixinWorldServerMulti extends WorldServer {
     }
 
 
-    private static WorldInfo worldInfo;
+    private static WorldInfo realWorldInfo;
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
     private static ISaveHandler unwrapSaveHandler(ISaveHandler wrappedSaveHandler) {
         if (wrappedSaveHandler instanceof WorldServerMultiAdapterWorldInfo) {
-            worldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
+            realWorldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
             return ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getProxySaveHandler();
         } else {
             return wrappedSaveHandler;
@@ -66,8 +65,8 @@ public abstract class MixinWorldServerMulti extends WorldServer {
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
     private static WorldInfo replaceWorldInfo(WorldInfo derivedInfo) {
-        if (worldInfo != null) {
-            return worldInfo;
+        if (realWorldInfo != null) {
+            return realWorldInfo;
         } else {
             return derivedInfo;
         }
