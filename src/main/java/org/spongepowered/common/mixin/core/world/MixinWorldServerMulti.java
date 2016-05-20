@@ -35,6 +35,13 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 @NonnullByDefault
 @Mixin(WorldServerMulti.class)
@@ -44,8 +51,22 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         super(server, saveHandlerIn, info, dimensionId, profilerIn);
     }
 
+
+    private static WorldInfo worldInfo;
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
+    private static ISaveHandler unwrapSaveHandler(ISaveHandler wrappedSaveHandler) {
+        worldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
+        return ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getProxySaveHandler();
+    }
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
+    private static WorldInfo replaceWorldInfo(WorldInfo derivedInfo) {
+        return worldInfo;
+    }
+
     /**
-     * @author unknown
+     * @author bloodmc
      * @reason Uses our own save handler instead of delegating to
      * the "parent" world since multi-world support changes the
      * structure.
@@ -63,12 +84,11 @@ public abstract class MixinWorldServerMulti extends WorldServer {
     }
 
     /**
-     * @author unknown
-     * @reason Simply re-delegates to the super class
+     * @author Zidane
+     * @reason Simply updates the generator.
      */
-    @Override
-    @Overwrite
-    public World init() {
-        return super.init();
+    @Inject(method = "init", at = @At("HEAD"))
+    public void onInit(CallbackInfoReturnable<World> cir) {
+        ((IMixinWorld) this).updateWorldGenerator();
     }
 }

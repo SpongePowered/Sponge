@@ -6,7 +6,8 @@
     "mixins": [
         "MixinMinecraftServer",
         "MixinWorld",
-        "MixinWorldServer"
+        "MixinWorldServer",
+        "MixinWorldServerMulti"
     ],
     "injectors": {
         "defaultRequire": 1

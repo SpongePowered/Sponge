@@ -39,13 +39,7 @@ import net.minecraft.server.management.ServerConfigurationManager;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.util.MathHelper;
-import net.minecraft.world.EnumDifficulty;
-import net.minecraft.world.MinecraftException;
-import net.minecraft.world.WorldManager;
-import net.minecraft.world.WorldProvider;
-import net.minecraft.world.WorldServer;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
+import net.minecraft.world.*;
 import net.minecraft.world.chunk.storage.AnvilSaveHandler;
 import net.minecraft.world.storage.ISaveHandler;
 import net.minecraft.world.storage.WorldInfo;
@@ -112,6 +106,7 @@ import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
 import org.spongepowered.common.world.WorldMigrator;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 import java.io.DataInputStream;
 import java.io.File;
@@ -448,8 +443,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
                 continue;
             }
 
-            final WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
-                    this.theProfiler).init();
+            final WorldServer worldServer;
+            if (dim == 0) {
+                worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, worldsavehandler, worldInfo, dim,
+                        this.theProfiler).init();
+            } else {
+                worldServer = (WorldServer) new WorldServerMulti((MinecraftServer) (Object) this, new WorldServerMultiAdapterWorldInfo(worldsavehandler, worldInfo), dim, DimensionManager.getWorldFromDimId(0), this.theProfiler).init();
+            }
 
             worldServer.initialize(worldSettings);
             worldServer.addWorldAccess(new WorldManager((MinecraftServer) (Object) this, worldServer));
