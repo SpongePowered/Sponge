@@ -56,13 +56,21 @@ public abstract class MixinWorldServerMulti extends WorldServer {
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
     private static ISaveHandler unwrapSaveHandler(ISaveHandler wrappedSaveHandler) {
-        worldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
-        return ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getProxySaveHandler();
+        if (wrappedSaveHandler instanceof WorldServerMultiAdapterWorldInfo) {
+            worldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
+            return ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getProxySaveHandler();
+        } else {
+            return wrappedSaveHandler;
+        }
     }
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
     private static WorldInfo replaceWorldInfo(WorldInfo derivedInfo) {
-        return worldInfo;
+        if (worldInfo != null) {
+            return worldInfo;
+        } else {
+            return derivedInfo;
+        }
     }
 
     /**
