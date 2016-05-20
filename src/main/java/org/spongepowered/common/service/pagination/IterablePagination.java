@@ -84,13 +84,13 @@ class IterablePagination extends ActivePagination {
             if (!this.countIterator.hasNext()) {
                 // Pad the last page, but only if it isn't the first.
                 if (page > 1) {
-                    padPage(ret, addedLines, PadBehavior.NO_CONTINUATION);
+                    padPage(ret, addedLines, false);
                 }
                 break;
             }
             if (addedLines + this.countIterator.peek().getValue() > getMaxContentLinesPerPage()) {
                 // Add the continuation marker, pad if required
-                padPage(ret, addedLines, PadBehavior.STANDARD);
+                padPage(ret, addedLines, true);
                 break;
             }
             Map.Entry<Text, Integer> ent = this.countIterator.next();

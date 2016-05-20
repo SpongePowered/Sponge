@@ -188,25 +188,14 @@ abstract class ActivePagination {
         return ret.build();
     }
 
-    protected void padPage(final List<Text> currentPage, final int currentPageLines, final PadBehavior behavior) {
+    protected void padPage(final List<Text> currentPage, final int currentPageLines, final boolean addContinuation) {
         final int maxContentLinesPerPage = getMaxContentLinesPerPage();
         for (int i = currentPageLines; i < maxContentLinesPerPage; i++) {
-            if (i == maxContentLinesPerPage - 1 && behavior != PadBehavior.NO_CONTINUATION) {
+            if (addContinuation && i == maxContentLinesPerPage - 1) {
                 currentPage.add(CONTINUATION_TEXT);
-            } else if (behavior != PadBehavior.NO_PADDING) {
-                // We only want to perform padding if it has been asked for, AND there is another page to
-                // go to.
-                currentPage.add(Text.EMPTY);
             } else {
-                // If no conditions are true, there is no need to continue on this loop.
-                break;
+                currentPage.add(Text.EMPTY);
             }
         }
-    }
-
-    protected enum PadBehavior {
-        NO_CONTINUATION,
-        NO_PADDING,
-        STANDARD
     }
 }
