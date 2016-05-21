@@ -708,7 +708,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             DimensionManager.registerDimension(dim, ((SpongeDimensionType) ((WorldProperties) worldInfo).getDimensionType()).getDimensionTypeId());
         }
 
-        WorldServer worldServer = (WorldServer) new WorldServer((MinecraftServer) (Object) this, savehandler, worldInfo, dim, this.theProfiler).init();
+        final WorldServer worldServer = (WorldServer) new WorldServerMulti((MinecraftServer) (Object) this, new WorldServerMultiAdapterWorldInfo
+                (savehandler, worldInfo), dim, DimensionManager.getWorldFromDimId(0), this.theProfiler).init();
 
         worldServer.initialize(settings);
         ((IMixinWorldProvider) worldServer.provider).setDimension(dim);
