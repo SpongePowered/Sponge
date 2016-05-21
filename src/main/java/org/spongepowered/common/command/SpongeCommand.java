@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command;
 
-import static org.spongepowered.api.Sponge.getServer;
 import static org.spongepowered.api.command.args.GenericArguments.dimension;
 import static org.spongepowered.api.command.args.GenericArguments.firstParsing;
 import static org.spongepowered.api.command.args.GenericArguments.flags;
@@ -37,7 +36,6 @@ import static org.spongepowered.api.command.args.GenericArguments.world;
 
 import co.aikar.timings.SpongeTimingsFactory;
 import co.aikar.timings.Timings;
-import com.flowpowered.math.GenericMath;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.WorldProvider;
 import net.minecraft.world.WorldServer;
@@ -68,7 +66,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.interfaces.IMixinMinecraftServer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
-import org.spongepowered.common.mixin.core.world.MixinWorld;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.world.DimensionManager;
 import org.spongepowered.common.world.SpongeDimensionType;
@@ -374,7 +371,7 @@ public class SpongeCommand {
                 .permission("sponge.command.plugins")
                 .arguments(optional(string(Text.of("reload"))), optional(plugin(Text.of("plugin"))))
                 .executor((src, args) -> {
-                    if (args.hasAny("reload")) {
+                    if (args.hasAny("reload") && src.hasPermission("sponge.command.plugins.reload")) {
                         src.sendMessage(Text.of("Sending reload event to all plugins. Please wait."));
                         SpongeImpl.postEvent(SpongeEventFactory.createGameReloadEvent(Cause.of(NamedCause.source(src))));
                         src.sendMessage(Text.of("Reload complete!"));
