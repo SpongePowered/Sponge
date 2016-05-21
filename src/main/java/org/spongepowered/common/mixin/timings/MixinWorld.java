@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(World.class)
-public class MixinWorld {
+public abstract class MixinWorld {
 
     // ESS - endStartSection
     private static final String ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";

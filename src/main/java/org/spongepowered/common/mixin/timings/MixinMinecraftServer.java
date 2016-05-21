@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MinecraftServer.class)
-public class MixinMinecraftServer {
+public abstract class MixinMinecraftServer {
 
     @Inject(method = "tick()V", at = @At("HEAD") )
     private void onTickBegin(CallbackInfo ci) {

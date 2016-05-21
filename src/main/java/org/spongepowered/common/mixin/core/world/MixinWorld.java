@@ -1173,8 +1173,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         }
     }
 
-    /**************************** TRACKER ****************************************/
-
     @Override
     public void addEntityRotationUpdate(net.minecraft.entity.Entity entity, Vector3d rotation) {
         this.rotationUpdates.put(entity, rotation);
