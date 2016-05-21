@@ -28,8 +28,12 @@ import co.aikar.timings.SpongeTimings;
 import co.aikar.timings.TimingHistory;
 import co.aikar.timings.WorldTimingsHandler;
 import net.minecraft.entity.Entity;
+import net.minecraft.profiler.Profiler;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,7 +41,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.List;
 
@@ -53,8 +56,9 @@ public class MixinWorld {
 
     protected WorldTimingsHandler timings;
 
-    @Inject(method = "init", at = @At("HEAD"))
-    private void initTimings(CallbackInfoReturnable<World> cir) {
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void onConstruct(ISaveHandler saveHandlerIn, WorldInfo info, WorldProvider providerIn, Profiler profilerIn, boolean client,
+            CallbackInfo ci) {
         this.timings = new WorldTimingsHandler((World) (Object) this);
     }
 
