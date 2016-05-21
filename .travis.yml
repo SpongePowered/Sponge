@@ -7,7 +7,7 @@ jdk:
   - oraclejdk8
 
 env: GRADLE_OPTS="-Xms1g -Xmx3g"
-install: ./gradlew setupCIWorkspace
+install: ./gradlew setupDecompWorkspace
 script: ./gradlew build
 
 notifications:
