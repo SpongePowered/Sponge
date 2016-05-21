@@ -47,6 +47,7 @@ import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.gen.ChunkProviderGenerate;
 import net.minecraft.world.gen.NoiseGeneratorPerlin;
 import net.minecraft.world.gen.structure.MapGenStronghold;
+import net.minecraft.world.gen.structure.MapGenStructure;
 import net.minecraft.world.gen.structure.StructureOceanMonument;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -183,16 +184,12 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public List<GenerationPopulator> getGenerationPopulators(Class<? extends GenerationPopulator> type) {
-        return this.genpop.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.genpop.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
     public List<Populator> getPopulators(Class<? extends Populator> type) {
-        return this.pop.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.pop.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -329,8 +326,7 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         }
 
         BiomeGenBase biome = this.world.getBiomeGenForCoords(pos);
-        List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
-        return creatures;
+        return biome.getSpawnableList(creatureType);
     }
 
     @Override
@@ -350,7 +346,13 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public void recreateStructures(Chunk chunk, int chunkX, int chunkZ) {
-        // TODO No structure support
+        if (this.baseGenerator instanceof IChunkProvider) {
+            ((IChunkProvider) this.baseGenerator).recreateStructures(chunk, chunkX, chunkZ);
+            return;
+        }
+        this.genpop.stream().filter(genpop -> genpop instanceof MapGenStructure).forEach(genpop -> {
+            ((MapGenStructure) genpop).generate(this, chunk.getWorld(), chunkX, chunkZ, (ChunkPrimer) null);
+        });
     }
 
     // Methods below are simply mirrors of the methods in ChunkProviderGenerate

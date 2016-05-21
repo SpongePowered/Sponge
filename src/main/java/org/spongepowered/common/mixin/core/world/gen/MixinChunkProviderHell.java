@@ -69,7 +69,6 @@ public abstract class MixinChunkProviderHell implements IChunkProvider, Generati
     public void addPopulators(WorldGenerator generator) {
         generator.getGenerationPopulators().add((GenerationPopulator) this.netherCaveGenerator);
 
-        this.genNetherBridge.worldObj = worldObj;
         if (this.field_177466_i) {
             generator.getGenerationPopulators().add((GenerationPopulator) this.genNetherBridge);
             generator.getPopulators().add((Populator) this.genNetherBridge);
