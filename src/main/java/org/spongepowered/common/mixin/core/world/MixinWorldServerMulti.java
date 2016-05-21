@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.storage.ISaveHandler;
@@ -36,10 +35,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 @NonnullByDefault
@@ -88,14 +84,5 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         // use a seperate save handler for each world. Each world folder needs to generate a corresponding
         // level.dat for plugins that require it such as MultiVerse.
         super.saveLevel();
-    }
-
-    /**
-     * @author Zidane
-     * @reason Simply updates the generator.
-     */
-    @Inject(method = "init", at = @At("HEAD"))
-    public void onInit(CallbackInfoReturnable<World> cir) {
-        ((IMixinWorld) this).updateWorldGenerator();
     }
 }
