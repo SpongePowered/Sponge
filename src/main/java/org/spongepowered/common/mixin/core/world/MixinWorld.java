@@ -515,8 +515,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         return ((IMixinWorldInfo) this.worldInfo).getWorldConfig();
     }
 
-
-
     @Override
     public Optional<Entity> getEntity(UUID uuid) {
         // Note that MixinWorldServer is properly overriding this to use it's own mapping.

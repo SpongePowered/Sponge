@@ -404,7 +404,14 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             }
 
             if (worldInfo == null) {
-                worldSettings = new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+                if (SpongeImpl.getGame().getPlatform().getType().isClient()) {
+                    final WorldServer overworld = worldServerForDimension(0);
+                    worldSettings =
+                            new WorldSettings(seed, this.getGameType(), overworld.getWorldInfo().isMapFeaturesEnabled(), this.isHardcore(), type);
+                } else {
+                    worldSettings =
+                            new WorldSettings(seed, this.getGameType(), this.canStructuresSpawn(), this.isHardcore(), type);
+                }
                 worldSettings.setWorldName(generatorOptions); // setGeneratorOptions
                 ((IMixinWorldSettings) (Object) worldSettings).setActualWorldName(worldFolder);
 
