@@ -238,11 +238,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.activeConfig = SpongeHooks.getActiveConfig((net.minecraft.world.World)(Object) this);
     }
 
-    @Inject(method = "init", at = @At("RETURN"))
-    public void onInit(CallbackInfoReturnable<World> cir) {
-        this.updateWorldGenerator();
-    }
-
     @Override
     public SpongeBlockSnapshot createSpongeBlockSnapshot(IBlockState state, IBlockState extended, BlockPos pos, int updateFlag) {
         this.builder.reset();

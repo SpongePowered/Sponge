@@ -32,7 +32,6 @@ import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServer.ServerBlockEventList;
 import net.minecraft.world.WorldSettings;
@@ -102,12 +101,6 @@ public abstract class MixinWorldServer extends MixinWorld {
             this.worldInfo.setSpawn(new BlockPos(55, 60, 0));
             ci.cancel();
         }
-    }
-
-    @Inject(method = "init", at = @At("HEAD"))
-    public void beforeInit(CallbackInfoReturnable<World> cir) {
-        super.init(); // Call the super (vanilla doesn't do this)
-        updateWorldGenerator();
     }
 
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))

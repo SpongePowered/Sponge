@@ -71,8 +71,7 @@ public abstract class MixinWorld_Effect implements World, IMixinWorld {
 
     @Inject(method = "init", at = @At("HEAD"))
     protected void onWorldEffectsInit(CallbackInfoReturnable<net.minecraft.world.World> cir) {
-        this.prevWeather = getWeather();
-        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+
     }
 
     @Override

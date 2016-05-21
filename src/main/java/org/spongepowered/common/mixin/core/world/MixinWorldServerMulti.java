@@ -46,7 +46,6 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         super(server, saveHandlerIn, info, dimensionId, profilerIn);
     }
 
-
     private static WorldInfo realWorldInfo;
 
     @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
