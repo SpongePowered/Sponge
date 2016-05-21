@@ -1077,15 +1077,14 @@ public final class CauseTracker {
         }
 
         if (!this.currentPendingBlockUpdate.hasSourceUser()) {
+            this.addCause(Cause.of(namedCauses));
             this.currentNotifier = this.trackBlockPositionCausePreTick(pos).orElse(null);
         } else {
             this.currentNotifier = this.currentPendingBlockUpdate.getSourceUser().get();
+            namedCauses.add(NamedCause.notifier(this.currentNotifier));
+            this.addCause(Cause.of(namedCauses));
         }
 
-        if (this.currentNotifier != null) {
-            namedCauses.add(NamedCause.notifier(this.currentNotifier));
-        }
-        this.addCause(Cause.of(namedCauses));
         block.updateTick(this.getMinecraftWorld(), pos, state, rand);
         this.postTrackBlock();
         this.currentPendingBlockUpdate = null;
