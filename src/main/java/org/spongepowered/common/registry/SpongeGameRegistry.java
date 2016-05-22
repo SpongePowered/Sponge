@@ -27,6 +27,7 @@ package org.spongepowered.common.registry;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.reflect.TypeToken;
 import com.google.inject.Singleton;
 import ninja.leaping.configurate.objectmapping.serialize.TypeSerializers;
@@ -239,6 +240,23 @@ public class SpongeGameRegistry implements GameRegistry {
         }
     }
 
+    @Override
+    public <T extends CatalogType> Collection<T> getAllFor(String pluginId, Class<T> typeClass) {
+        checkNotNull(pluginId);
+        final CatalogRegistryModule<T> registryModule = getRegistryModuleFor(typeClass).orElse(null);
+        if (registryModule == null) {
+            return Collections.emptyList();
+        } else {
+            ImmutableList.Builder<T> builder = ImmutableList.builder();
+            registryModule.getAll()
+                    .stream()
+                    .filter(type -> pluginId.equals(type.getId().split(":")[0]))
+                    .forEach(builder::add);
+
+            return builder.build();
+        }
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public <T extends ResettableBuilder<?, ? super T>> T createBuilder(Class<T> builderClass) {
