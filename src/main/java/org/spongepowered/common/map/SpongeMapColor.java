@@ -39,25 +39,31 @@ public class SpongeMapColor implements MapColor {
     private final Base baseColor;
     private final MapShade shade;
 
+    private Color shadedColor = null;
+
     public SpongeMapColor(Base baseColor, MapShade shade) {
         this.baseColor = baseColor;
         this.shade = shade;
     }
 
     @Override public Color getColor() {
-        return shadeColor(((net.minecraft.block.material.MapColor)baseColor).colorValue, shade);
+        // lazy initialize
+        if (this.shadedColor == null) {
+            this.shadedColor = shadeColor(((net.minecraft.block.material.MapColor)baseColor).colorValue, shade);
+        }
+        return this.shadedColor;
     }
 
     @Override public MapColor shade(MapShade newShading) {
-        return baseColor.shade(newShading);
+        return this.baseColor.shade(newShading);
     }
 
     @Override public MapShade getShade() {
-        return shade;
+        return this.shade;
     }
 
     @Override public Base base() {
-        return baseColor;
+        return this.baseColor;
     }
 
     @Override public int getContentVersion() {
@@ -66,9 +72,9 @@ public class SpongeMapColor implements MapColor {
 
     @Override public DataContainer toContainer() {
         final DataContainer container = new MemoryDataContainer();
-        container.set(Queries.CONTENT_VERSION, getContentVersion())
-                .set(DataQuery.of("BaseColor"), baseColor.toContainer())
-                .set(DataQuery.of("Shade"), shade.getId());
+        container.set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(DataQuery.of("BaseColor"), this.baseColor.toContainer())
+                .set(DataQuery.of("Shade"), this.shade.getId());
         return container;
     }
 
