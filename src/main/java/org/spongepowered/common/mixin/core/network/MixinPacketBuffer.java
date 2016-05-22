@@ -69,7 +69,7 @@ public abstract class MixinPacketBuffer extends ByteBuf {
 
     @Intrinsic
     public int cbuf$available() {
-        return this.readerIndex() - this.writerIndex();
+        return this.writerIndex() - this.readerIndex();
     }
 
     @Intrinsic
