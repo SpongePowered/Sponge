@@ -35,7 +35,6 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.PacketBuffer;
 import org.spongepowered.api.data.DataView;
 import org.spongepowered.api.network.ChannelBuf;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -47,359 +46,387 @@ import java.io.IOException;
 import java.nio.ByteOrder;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @Mixin(PacketBuffer.class)
 @Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$"))
 public abstract class MixinPacketBuffer extends ByteBuf {
 
-    @Shadow @Final private ByteBuf buf;
-
-    @Shadow protected abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
-    @Shadow public abstract int readVarIntFromBuffer();
-    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
-    @Shadow public abstract String readStringFromBuffer(int maxLength);
-    @Shadow public abstract PacketBuffer writeString(String string);
-    @Shadow public abstract byte[] readByteArray();
     @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
-    @Shadow protected abstract PacketBuffer writeNBTTagCompoundToBuffer(NBTTagCompound compound);
+    @Shadow public abstract byte[] readByteArray();
+    @Shadow public abstract byte[] readByteArray(int p_189425_1_);
+    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
+    @Shadow public abstract int readVarIntFromBuffer();
+    @Shadow public abstract PacketBuffer writeString(String string);
+    @Shadow public abstract String readStringFromBuffer(int maxLength);
+    @Shadow public abstract PacketBuffer writeNBTTagCompoundToBuffer(@Nullable NBTTagCompound nbt);
+    @Shadow public abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
 
-    private ChannelBuf oppositeOrder;
-
+    @Intrinsic
     public int cbuf$getCapacity() {
-        return this.buf.capacity();
+        return this.capacity();
     }
 
+    @Intrinsic
     public int cbuf$available() {
-        return this.buf.writerIndex() - this.buf.readerIndex();
+        return this.readerIndex() - this.writerIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$order(ByteOrder order) {
-        checkNotNull(order, "order");
-        if (this.buf.order().equals(order)) {
-            return (ChannelBuf) this;
-        }
-        if (this.oppositeOrder == null) {
-            this.oppositeOrder = (ChannelBuf) new PacketBuffer(this.buf.order(order));
-        }
-        return this.oppositeOrder;
+        return (ChannelBuf) this.order(order);
     }
 
+    @Intrinsic
     public ByteOrder cbuf$getByteOrder() {
-        return this.buf.order();
+        return this.order();
     }
 
+    @Intrinsic
     public int cbuf$readerIndex() {
-        return this.buf.readerIndex();
+        return this.readerIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setReadIndex(int index) {
-        this.buf.readerIndex(index);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.readerIndex(index);
     }
 
+    @Intrinsic
     public int cbuf$writerIndex() {
-        return this.buf.writerIndex();
+        return this.writerIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setWriteIndex(int index) {
-        this.buf.writerIndex(index);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writerIndex(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setIndex(int readIndex, int writeIndex) {
-        this.buf.setIndex(readIndex, writeIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setIndex(readIndex, writeIndex);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$clear() {
-        this.buf.clear();
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.clear();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$markRead() {
-        this.buf.markReaderIndex();
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.markReaderIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$markWrite() {
-        this.buf.markWriterIndex();
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.markWriterIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$resetRead() {
-        this.buf.resetReaderIndex();
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.resetReaderIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$resetWrite() {
-        this.buf.resetWriterIndex();
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.resetWriterIndex();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$slice() {
-        return (ChannelBuf) new PacketBuffer(this.buf.slice());
+        return (ChannelBuf) this.slice();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$slice(int index, int length) {
-        return (ChannelBuf) new PacketBuffer(this.buf.slice(index, length));
+        return (ChannelBuf) this.slice(index, length);
     }
 
+    @Intrinsic
     public byte[] cbuf$array() {
-        return this.buf.array();
+        return this.array();
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeBoolean(boolean data) {
-        this.buf.writeBoolean(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeBoolean(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setBoolean(int index, boolean data) {
-        this.buf.setBoolean(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setBoolean(index, data);
     }
 
+    @Intrinsic
     public boolean cbuf$readBoolean() {
-        return this.buf.readBoolean();
+        return this.readBoolean();
     }
 
+    @Intrinsic
     public boolean cbuf$getBoolean(int index) {
-        return this.buf.getBoolean(index);
+        return this.getBoolean(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeByte(byte data) {
-        this.buf.writeByte(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeByte(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setByte(int index, byte data) {
-        this.buf.setByte(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setByte(index, data);
     }
 
+    @Intrinsic
     public byte cbuf$readByte() {
-        return this.buf.readByte();
+        return this.readByte();
     }
 
+    @Intrinsic
     public byte cbuf$getByte(int index) {
-        return this.buf.getByte(index);
+        return this.getByte(index);
     }
 
     @Intrinsic
     public ChannelBuf cbuf$writeByteArray(byte[] data) {
-        writeByteArray(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeByteArray(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeByteArray(byte[] data, int start, int length) {
-        writeVarIntToBuffer(length);
-        writeBytes(data, start, length);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeBytes(data, start, length);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setByteArray(int index, byte[] data) {
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        writeByteArray(data);
-        this.buf.writerIndex(oldIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setBytes(index, data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setByteArray(int index, byte[] data, int start, int length) {
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        writeVarIntToBuffer(length);
-        writeBytes(data, start, length);
-        this.buf.writerIndex(oldIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setBytes(index, data, start, length);
     }
 
     @Intrinsic
     public byte[] cbuf$readByteArray() {
-        return readByteArray();
+        return this.readByteArray();
     }
 
+    @Intrinsic
     public byte[] cbuf$readByteArray(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        byte[] data = readByteArray();
-        this.buf.readerIndex(oldIndex);
-        return data;
+        return this.readByteArray(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeBytes(byte[] data) {
-        this.buf.writeBytes(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeBytes(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeBytes(byte[] data, int start, int length) {
-        this.buf.writeBytes(data, start, length);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeBytes(data, start, length);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setBytes(int index, byte[] data) {
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        this.buf.writeBytes(data);
-        this.buf.writerIndex(oldIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setBytes(index, data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setBytes(int index, byte[] data, int start, int length) {
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        this.buf.writeBytes(data, start, length);
-        this.buf.writerIndex(oldIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setBytes(index, data, start, length);
     }
 
+    @Intrinsic
     public byte[] cbuf$readBytes(int length) {
-        byte[] data = new byte[length];
-        this.buf.readBytes(data);
-        return data;
+        return this.readBytes(length).array();
     }
 
+    @Intrinsic
     public byte[] cbuf$readBytes(int index, int length) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        byte[] data = new byte[length];
-        this.buf.readBytes(data);
-        this.buf.readerIndex(oldIndex);
-        return data;
+        final byte[] dest = new byte[length];
+        this.readBytes(dest, index, length);
+        return dest;
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeShort(short data) {
-        this.buf.writeShort(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeShort(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setShort(int index, short data) {
-        this.buf.setShort(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setShort(index, data);
     }
 
+    @Intrinsic
     public short cbuf$readShort() {
-        return this.buf.readShort();
+        return this.readShort();
     }
 
+    @Intrinsic
     public short cbuf$getShort(int index) {
-        return this.buf.getShort(index);
+        return this.getShort(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeChar(char data) {
-        this.buf.writeChar(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeChar(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setChar(int index, char data) {
-        this.buf.setChar(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setChar(index, data);
     }
 
+    @Intrinsic
     public char cbuf$readChar() {
-        return this.buf.readChar();
+        return this.readChar();
     }
 
+    @Intrinsic
     public char cbuf$getChar(int index) {
-        return this.buf.getChar(index);
+        return this.getChar(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeInteger(int data) {
-        this.buf.writeInt(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeInt(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setInteger(int index, int data) {
-        this.buf.setInt(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setInt(index, data);
     }
 
+    @Intrinsic
     public int cbuf$readInteger() {
-        return this.buf.readInt();
+        return this.readInt();
     }
 
-    public int cbuf$getInteger(int index) {
-        return this.buf.getInt(index);
+    @Intrinsic
+    public int getInteger(int index) {
+        return this.getInt(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeLong(long data) {
-        this.buf.writeLong(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeLong(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setLong(int index, long data) {
-        this.buf.setLong(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setLong(index, data);
     }
 
+    @Intrinsic
     public long cbuf$readLong() {
-        return this.buf.readLong();
+        return this.readLong();
     }
 
+    @Intrinsic
     public long cbuf$getLong(int index) {
-        return this.buf.getLong(index);
+        return this.getLong(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeFloat(float data) {
-        this.buf.writeFloat(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeFloat(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setFloat(int index, float data) {
-        this.buf.setFloat(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setFloat(index, data);
     }
 
+    @Intrinsic
     public float cbuf$readFloat() {
-        return this.buf.readFloat();
+        return this.readFloat();
     }
 
+    @Intrinsic
     public float cbuf$getFloat(int index) {
-        return this.buf.getFloat(index);
+        return this.getFloat(index);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeDouble(double data) {
-        this.buf.writeDouble(data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeDouble(data);
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setDouble(int index, double data) {
-        this.buf.setDouble(index, data);
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.setDouble(index, data);
     }
 
+    @Intrinsic
     public double cbuf$readDouble() {
-        return this.buf.readDouble();
+        return this.readDouble();
     }
 
+    @Intrinsic
     public double cbuf$getDouble(int index) {
-        return this.buf.getDouble(index);
+        return this.getDouble(index);
     }
 
+    @Intrinsic
+    public ChannelBuf cbuf$writeVarInt(int value) {
+        return (ChannelBuf) this.writeVarIntToBuffer(value);
+    }
+
+    @Intrinsic
+    public ChannelBuf cbuf$setVarInt(int index, int value) {
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
+        this.writeVarIntToBuffer(value);
+        this.writerIndex(oldIndex);
+        return (ChannelBuf) this;
+    }
+
+    @Intrinsic
+    public int cbuf$readVarInt() {
+        return this.readVarIntFromBuffer();
+    }
+
+    @Intrinsic
+    public int cbuf$getVarInt(int index) {
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final int value = readVarIntFromBuffer();
+        this.readerIndex(oldIndex);
+        return value;
+    }
+
+    @Intrinsic
     public ChannelBuf cbuf$writeString(String data) {
-        writeString(checkNotNull(data, "data"));
-        return (ChannelBuf) this;
+        return (ChannelBuf) this.writeString(checkNotNull(data));
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setString(int index, String data) {
-        checkNotNull(data, "data");
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        writeString(data);
-        this.buf.writerIndex(oldIndex);
+        checkNotNull(data);
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
+        this.writeString(data);
+        this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public String cbuf$readString() {
-        return readStringFromBuffer(32768);
+        return this.readStringFromBuffer(32767);
     }
 
+    @Intrinsic
     public String cbuf$getString(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        String data = readStringFromBuffer(32768);
-        this.buf.readerIndex(oldIndex);
-        return data;
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final String value = this.readStringFromBuffer(32767);
+        this.readerIndex(oldIndex);
+        return value;
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeUTF(String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
         if (bytes.length > 32767) {
@@ -410,110 +437,94 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setUTF(int index, String data) {
         checkNotNull(data, "data");
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        cbuf$writeUTF(data);
-        this.buf.writerIndex(oldIndex);
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
+        this.cbuf$writeUTF(data);
+        this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public String cbuf$readUTF() {
-        int length = this.readShort();
+        final short length = this.readShort();
         return new String(this.readBytes(length).array(), Charsets.UTF_8);
     }
 
+    @Intrinsic
     public String cbuf$getUTF(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        int length = this.readShort();
-        String data = new String(this.readBytes(length).array(), Charsets.UTF_8);
-        this.buf.readerIndex(oldIndex);
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final short length = this.readShort();
+        final String data = new String(this.readBytes(length).array(), Charsets.UTF_8);
+        this.readerIndex(oldIndex);
         return data;
     }
 
-    public ChannelBuf cbuf$writeVarInt(int value) {
-        writeVarIntToBuffer(value);
-        return (ChannelBuf) this;
-    }
-
-    public ChannelBuf cbuf$setVarInt(int index, int value) {
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
-        writeVarIntToBuffer(value);
-        this.buf.writerIndex(oldIndex);
-        return (ChannelBuf) this;
-    }
-
-    public int cbuf$readVarInt() {
-        return readVarIntFromBuffer();
-    }
-
-    public int cbuf$getVarInt(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        int value = readVarIntFromBuffer();
-        this.buf.readerIndex(oldIndex);
-        return value;
-    }
-
+    @Intrinsic
     public ChannelBuf cbuf$writeUniqueId(UUID data) {
         checkNotNull(data, "data");
         return this.cbuf$writeLong(data.getMostSignificantBits()).writeLong(data.getLeastSignificantBits());
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setUniqueId(int index, UUID data) {
         checkNotNull(data, "data");
-        int oldIndex = this.buf.writerIndex();
-        this.buf.writerIndex(index);
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
         this.writeLong(data.getMostSignificantBits()).writeLong(data.getLeastSignificantBits());
-        this.buf.writerIndex(oldIndex);
+        this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public UUID cbuf$readUniqueId() {
         return new UUID(this.readLong(), this.readLong());
     }
 
-    public UUID cbuf$getUniqueId(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        UUID data = new UUID(this.readLong(), this.readLong());
-        this.buf.readerIndex(oldIndex);
+    @Intrinsic
+    public UUID getUniqueId(int index) {
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final UUID data = new UUID(this.readLong(), this.readLong());
+        this.readerIndex(oldIndex);
         return data;
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$writeDataView(DataView data) {
-        NBTTagCompound compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
+        final NBTTagCompound compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
         this.writeNBTTagCompoundToBuffer(compound);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public ChannelBuf cbuf$setDataView(int index, DataView data) {
         checkNotNull(data, "data");
-        int oldIndex = this.writerIndex();
-        this.cbuf$setWriteIndex(index);
+        final int oldIndex = this.writerIndex();
+        this.writerIndex(index);
         this.cbuf$writeDataView(data);
-        this.cbuf$setWriteIndex(oldIndex);
+        this.writerIndex(oldIndex);
         return (ChannelBuf) this;
     }
 
+    @Intrinsic
     public DataView cbuf$readDataView() {
         try {
-            NBTTagCompound compound = this.readNBTTagCompoundFromBuffer();
-            return NbtTranslator.getInstance().translateFrom(compound);
+            return NbtTranslator.getInstance().translateFrom(this.readNBTTagCompoundFromBuffer());
         } catch (IOException e) {
             throw new DecoderException(e);
         }
     }
 
+    @Intrinsic
     public DataView cbuf$getDataView(int index) {
-        int oldIndex = this.buf.readerIndex();
-        this.buf.readerIndex(index);
-        DataView data = this.cbuf$readDataView();
-        this.buf.readerIndex(oldIndex);
+        final int oldIndex = this.readerIndex();
+        this.readerIndex(index);
+        final DataView data = this.cbuf$readDataView();
+        this.readerIndex(oldIndex);
         return data;
     }
-
 }
