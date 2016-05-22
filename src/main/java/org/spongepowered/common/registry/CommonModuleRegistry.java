@@ -91,6 +91,7 @@ import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.smelting.SmeltingRecipe;
+import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.registry.FactoryRegistry;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.CollisionRule;
@@ -193,6 +194,7 @@ import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
+import org.spongepowered.common.registry.type.map.MapColorRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CollisionRuleRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
 import org.spongepowered.common.registry.type.scoreboard.DisplaySlotRegistryModule;
@@ -397,6 +399,7 @@ public final class CommonModuleRegistry {
             .registerModule(ItemType.class, ItemTypeRegistryModule.getInstance())
             .registerModule(new LocaleRegistryModule())
             .registerModule(LogAxis.class, new LogAxisRegistryModule())
+            .registerModule(MapColor.Base.class, MapColorRegistryModule.getInstance())
             .registerModule(MushroomType.class, new MushroomTypeRegistryModule())
             .registerModule(NotePitch.class, new NotePitchRegistryModule())
             .registerModule(ObjectiveDisplayMode.class, new ObjectiveDisplayModeRegistryModule())
