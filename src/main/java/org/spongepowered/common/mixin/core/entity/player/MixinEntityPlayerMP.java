@@ -273,7 +273,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
 
     @Override
     public Optional<Player> getPlayer() {
-        return this.user.getPlayer();
+        return Optional.of(this);
     }
 
     @Override
