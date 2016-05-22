@@ -28,6 +28,7 @@ import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.EntityLiving;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.WeightedRandom;
 import net.minecraft.world.SpawnerAnimals;
@@ -45,7 +46,9 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -77,6 +80,15 @@ public abstract class MixinSpawnerAnimals {
     private static boolean spawnerStart;
     private static EntityType spawnerEntityType;
     private static Class<? extends Entity> spawnerEntityClass;
+
+    @ModifyConstant(method = "findChunksForSpawning", constant = @Constant(intValue = 8))
+    public int adjustCheckRadiusForServerView(int originalValue, WorldServer worldServerIn, boolean spawnHostileMobs, boolean spawnPeacefulMobs,
+            boolean p_77192_4_) {
+        // TODO Adjust for when per-world view distances are a thing
+        return Math.min(((IMixinWorld) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(), MinecraftServer
+                .getServer()
+                .getConfigurationManager().getViewDistance());
+    }
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
     public void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
