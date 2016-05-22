@@ -113,9 +113,9 @@ public interface PacketFunction {
         final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.worldObj);
         final Optional<ItemStack> itemStack = context.firstNamed(InternalNamedCauses.Packet.ITEM_USED, ItemStack.class);
         final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_NOTIFIER, player.getUniqueID());
 
         if (state == PacketPhase.General.ATTACK_ENTITY) {
-
             if (entity.isDead) {
                 // We only have to throw the destruction event now. everything else should be already handled separately as they are processed.
                 MessageChannel originalChannel = MessageChannel.TO_NONE;
@@ -361,6 +361,22 @@ public interface PacketFunction {
                         }
                         printer.trace(System.err);
                     });
+            context.getCapturedEntitySupplier().ifPresentAndNotEmpty(entities -> {
+                final List<EntitySnapshot> snapshots = entities.stream().map(Entity::createSnapshot).collect(Collectors.toList());
+                final Cause cause = Cause.source(EntitySpawnCause.builder()
+                        .entity(EntityUtil.fromNative(player))
+                        .type(InternalSpawnTypes.PLACEMENT)
+                        .build())
+                        .build();
+                EventConsumer.event(SpongeEventFactory.createDropItemEventDispense(cause, entities, causeTracker.getWorld()))
+                        .nonCancelled(event -> {
+                            for (Entity entity : event.getEntities()) {
+                                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                causeTracker.getMixinWorld().forceSpawnEntity(entity);
+                            }
+                        })
+                        .process();
+            });
 
         }
     };
@@ -513,7 +529,12 @@ public interface PacketFunction {
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
                     EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
-                            .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
+                            .nonCancelled(event -> {
+                                for (Entity entity : entities) {
+                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                    mixinWorld.forceSpawnEntity(entity);
+                                }
+                            })
                             .process();
                 });
         context.getCapturedBlockSupplier()
@@ -537,7 +558,12 @@ public interface PacketFunction {
                             .named(NamedCause.of(InternalNamedCauses.Packet.ITEM_USED, snapshot))
                             .build();
                     EventConsumer.event(SpongeEventFactory.createSpawnEntityEvent(cause, entities, spongeWorld))
-                            .nonCancelled(event -> EntityListConsumer.FORCE_SPAWN.apply(event.getEntities(), mixinWorld.getCauseTracker()))
+                            .nonCancelled(event -> {
+                                for (Entity entity : entities) {
+                                    EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueID());
+                                    mixinWorld.forceSpawnEntity(entity);
+                                }
+                            })
                             .process();
                 });
         context.getCapturedBlockSupplier()
@@ -665,6 +691,11 @@ public interface PacketFunction {
         final ResourcePackStatusEvent event = SpongeEventFactory.createResourcePackStatusEvent(cause, pack, (Player) player, status);
         SpongeImpl.postEvent(event);
     });
+    PacketFunction MOVEMENT = (packet, state, player, context) -> {
+        final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) player.worldObj;
+        context.getCapturedBlockSupplier().ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, mixinWorldServer.getCauseTracker(), state, context));
+
+    };
 
     void unwind(Packet<?> packet, PacketPhase.IPacketState state, EntityPlayerMP player, PhaseContext context);
 

@@ -809,24 +809,7 @@ public abstract class MixinEntity implements IMixinEntity {
     }
 
     @Override
-    public void trackEntityUniqueId(String nbtKey, UUID uuid) {
-        final NBTTagCompound spongeData = getSpongeData();
-        if (!spongeData.hasKey(nbtKey)) {
-            if (uuid == null) {
-                return;
-            }
-
-            NBTTagCompound sourceNbt = new NBTTagCompound();
-            sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
-            spongeData.setTag(nbtKey, sourceNbt);
-        } else {
-            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
-            if (uuid == null) {
-                compoundTag.removeTag(NbtDataUtil.UUID);
-            } else {
-                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
-            }
-        }
+    public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {
     }
 
     @Override

@@ -202,7 +202,7 @@ public final class TrackingUtil {
     static boolean trackBlockChange(CauseTracker causeTracker, Chunk chunk, IBlockState currentState, IBlockState newState, BlockPos pos, int flags,
             PhaseContext phaseContext, IPhaseState phaseState) {
         final WorldServer minecraftWorld = causeTracker.getMinecraftWorld();
-        final IBlockState actualState = currentState.getBlock().getActualState(currentState, minecraftWorld, pos);
+        final IBlockState actualState = currentState.getActualState(minecraftWorld, pos);
         final BlockSnapshot originalBlockSnapshot = causeTracker.getMixinWorld().createSpongeBlockSnapshot(currentState, actualState, pos, flags);
         final List<BlockSnapshot> capturedSnapshots = phaseContext.getCapturedBlocks();
         final Block newBlock = newState.getBlock();

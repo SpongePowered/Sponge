@@ -618,8 +618,12 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         this.scheduledUpdatesAreImmediate = true;
         // Sponge start - Cause tracking
         final PhaseData peek = this.causeTracker.getStack().peek();
-        if (this.isRemote || peek.getState().getPhase().ignoresBlockUpdateTick(peek)) {
-            state.getBlock().updateTick((World) (Object) this, pos, this.getBlockState(pos), random);
+        if (peek.getState().getPhase().ignoresBlockUpdateTick(peek)) {
+            state.getBlock().updateTick((WorldServer) (Object) this, pos, this.getBlockState(pos), random);
+            // THIS NEEDS TO BE SET BACK TO FALSE OR ELSE ALL HELL BREAKS LOOSE!
+            // No seriously, if this is not set back to false, all future updates are processed immediately
+            // and various things get caught under the Unwinding Phase.
+            this.scheduledUpdatesAreImmediate = false;
             return;
         }
         TrackingUtil.updateTickBlock(this.causeTracker, state.getBlock(), pos, this.getBlockState(pos), random);

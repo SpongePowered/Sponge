@@ -77,6 +77,7 @@ import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -1006,6 +1007,11 @@ public final class WorldPhase extends TrackingPhase {
             return super.spawnEntityOrCapture(phaseState, context, entity, chunkX, chunkZ);
         }
         return ((State) phaseState).captureEntitySpawn(phaseState, context, entity, chunkX, chunkZ);
+    }
+
+    @Override
+    protected void processPostEntitySpawns(CauseTracker causeTracker, IPhaseState unwindingState, ArrayList<Entity> entities) {
+        super.processPostEntitySpawns(causeTracker, unwindingState, entities);
     }
 
     /**

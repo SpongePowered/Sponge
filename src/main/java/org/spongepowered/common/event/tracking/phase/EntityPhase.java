@@ -45,6 +45,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.function.EntityFunction;
+import org.spongepowered.common.event.tracking.phase.function.GeneralFunctions;
 import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -173,6 +174,8 @@ public final class EntityPhase extends TrackingPhase {
                 }
                 printer.trace(System.err);
             });
+            phaseContext.getCapturedBlockSupplier()
+                    .ifPresentAndNotEmpty(blocks -> GeneralFunctions.processBlockCaptures(blocks, causeTracker, state, phaseContext));
         }
 
     }

@@ -291,6 +291,9 @@ public final class GeneralPhase extends TrackingPhase {
             // Containers get placed automatically
             if (!SpongeImplHooks.blockHasTileEntity(newState.getBlock(), newState)) {
                 newState.getBlock().onBlockAdded(minecraftWorld, pos, newState);
+                if (!postContext.getCapturedEntities().isEmpty()) {
+
+                }
                 if (!postContext.getCapturedBlocks().isEmpty()) {
                     final List<BlockSnapshot> contextBlocks = postContext.getCapturedBlocks();
                     final List<BlockSnapshot> blockSnapshots = new ArrayList<>(contextBlocks);
@@ -318,11 +321,6 @@ public final class GeneralPhase extends TrackingPhase {
     @Override
     public boolean ignoresBlockUpdateTick(PhaseData phaseData) {
         return phaseData.getState() == Post.UNWINDING;
-    }
-
-    @Override
-    public boolean allowEntitySpawns(IPhaseState currentState) {
-        return currentState != Post.UNWINDING;
     }
 
     @Override

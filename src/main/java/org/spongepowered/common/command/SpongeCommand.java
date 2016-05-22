@@ -53,6 +53,7 @@ import org.spongepowered.api.command.args.PatternMatchingCommandElement;
 import org.spongepowered.api.command.spec.CommandExecutor;
 import org.spongepowered.api.command.spec.CommandSpec;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.action.TextActions;
@@ -395,7 +396,7 @@ public class SpongeCommand {
                         return CommandResult.empty();
                     }
                     final EntityPlayerMP entityPlayerMP = EntityUtil.toNative((Player) src);
-                    final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F);
+                    final RayTraceResult rayTraceResult = EntityUtil.rayTraceFromEntity(entityPlayerMP, 5, 1.0F, true);
                     if (rayTraceResult.typeOfHit != RayTraceResult.Type.ENTITY) {
                         src.sendMessage(Text.of(TextColors.RED, TextStyles.ITALIC,
                                 "Failed to find an entity! Please execute the command when looking at an entity!"));
@@ -408,8 +409,12 @@ public class SpongeCommand {
                     builder.append(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "EntityType: "))
                             .append(Text.of(TextColors.BLUE, TextStyles.RESET, spongeEntity.getType().getId()));
                     src.sendMessage(builder.build());
-                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET, mixinEntity.getTrackedPlayer(
-                            NbtDataUtil.SPONGE_ENTITY_CREATOR)));
+                    final Optional<User> owner = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+                    final Optional<User> notifier = mixinEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_NOTIFIER);
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Owner: ", TextColors.BLUE, TextStyles.RESET,
+                            owner));
+                    src.sendMessage(Text.of(TextColors.DARK_GREEN, TextStyles.BOLD, "Notifier: ", TextColors.BLUE, TextStyles.RESET,
+                            notifier));
                     return CommandResult.success();
                 })
                 .build();

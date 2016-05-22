@@ -38,10 +38,33 @@ import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import java.util.Optional;
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1111)
 public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
 
     @Shadow public net.minecraft.world.World worldObj;
+
+    @Override
+    public void trackEntityUniqueId(String nbtKey, @Nullable UUID uuid) {
+        final NBTTagCompound spongeData = getSpongeData();
+        if (!spongeData.hasKey(nbtKey)) {
+            if (uuid == null) {
+                return;
+            }
+
+            NBTTagCompound sourceNbt = new NBTTagCompound();
+            sourceNbt.setUniqueId(NbtDataUtil.UUID, uuid);
+            spongeData.setTag(nbtKey, sourceNbt);
+        } else {
+            final NBTTagCompound compoundTag = spongeData.getCompoundTag(nbtKey);
+            if (uuid == null) {
+                compoundTag.removeTag(NbtDataUtil.UUID);
+            } else {
+                compoundTag.setUniqueId(NbtDataUtil.UUID, uuid);
+            }
+        }
+    }
 
     @Override
     public Optional<UUID> getCreator() {
@@ -68,22 +91,22 @@ public abstract class MixinEntity_Tracker implements Entity, IMixinEntity {
         NBTTagCompound nbt = getSpongeData();
         if (!nbt.hasKey(nbtKey)) {
             return Optional.empty();
-        } else {
-            NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
-
-            if (!creatorNbt.hasKey(NbtDataUtil.UUID)) {
-                return Optional.empty();
-            }
-
-            UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
-            // get player if online
-            EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
-            if (player != null) {
-                return Optional.of((User)player);
-            }
-            // player is not online, get user from storage if one exists
-            return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
         }
+        NBTTagCompound creatorNbt = nbt.getCompoundTag(nbtKey);
+
+
+        if (!creatorNbt.hasKey(NbtDataUtil.UUID + "Most") && !creatorNbt.hasKey(NbtDataUtil.UUID + "Least")) {
+            return Optional.empty();
+        }
+
+        UUID uuid = creatorNbt.getUniqueId(NbtDataUtil.UUID);
+        // get player if online
+        EntityPlayer player = this.worldObj.getPlayerEntityByUUID(uuid);
+        if (player != null) {
+            return Optional.of((User)player);
+        }
+        // player is not online, get user from storage if one exists
+        return SpongeImpl.getGame().getServiceManager().provide(UserStorageService.class).get().get(uuid);
     }
 
 }

@@ -392,6 +392,12 @@ public final class PacketPhase extends TrackingPhase {
             public void populateContext(EntityPlayerMP playerMP, Packet<?> packet, PhaseContext context) {
                 context.addBlockCaptures().addEntityCaptures();
             }
+
+            @Override
+            public void markPostNotificationChange(@Nullable BlockChange blockChange, WorldServer minecraftWorld, PhaseContext context,
+                    Transaction<BlockSnapshot> snapshotTransaction) {
+
+            }
         },
         INTERACTION() {
             @Override
@@ -522,6 +528,13 @@ public final class PacketPhase extends TrackingPhase {
                 spongeChunk.addTrackedBlockPosition(((Block) transaction.getFinal().getState().getType()), pos, player, PlayerTracker.Type.NOTIFIER);
 
             }
+
+            @Override
+            public void assignEntityCreator(PhaseContext context, Entity entity) {
+                final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                                .orElseThrow(PhaseUtil.throwWithContext("Expected to be capturing a packet, but no player found!", context));
+                EntityUtil.toMixin(entity).trackEntityUniqueId(NbtDataUtil.SPONGE_ENTITY_CREATOR, player.getUniqueId());
+            }
         },
         OPEN_INVENTORY,
         REQUEST_RESPAWN,
@@ -602,6 +615,15 @@ public final class PacketPhase extends TrackingPhase {
             builder.named(NamedCause.notifier(player));
         }
         return true;
+    }
+
+    @Override
+    public void associateNeighborStateNotifier(IPhaseState state, PhaseContext context, @Nullable BlockPos sourcePos, Block block, BlockPos notifyPos,
+            WorldServer minecraftWorld, PlayerTracker.Type notifier) {
+        final Player player = context.firstNamed(NamedCause.SOURCE, Player.class)
+                        .orElseThrow(PhaseUtil.throwWithContext("Expected to be tracking a player, but not!", context));
+        ((IMixinChunk) minecraftWorld.getChunkFromBlockCoords(notifyPos)).setBlockNotifier(notifyPos, player.getUniqueId());
+
     }
 
     @Override
@@ -707,13 +729,11 @@ public final class PacketPhase extends TrackingPhase {
         this.packetUnwindMap.put(CPacketKeepAlive.class, PacketFunction.IGNORED);
         this.packetUnwindMap.put(CPacketChatMessage.class, PacketFunction.HANDLED_EXTERNALLY);
         this.packetUnwindMap.put(CPacketUseEntity.class, PacketFunction.USE_ENTITY);
-        this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.Position.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
         this.packetUnwindMap.put(CPacketPlayer.Rotation.class, PacketFunction.HANDLED_EXTERNALLY);
-        this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.HANDLED_EXTERNALLY);
+        this.packetUnwindMap.put(CPacketPlayer.PositionRotation.class, PacketFunction.MOVEMENT); // We only care when the player is moving blocks because of falling states
         this.packetUnwindMap.put(CPacketPlayerDigging.class, PacketFunction.ACTION);
-        // Note that CPacketPlayerBlockPlacement is swapped with CPacketPlayerTryUseItem
         this.packetUnwindMap.put(CPacketPlayerTryUseItem.class, PacketFunction.USE_ITEM);
-        // Note that CPacketPlayerTryUseItem is swapped with CPacketPlayerBlockPlacement
         this.packetUnwindMap.put(CPacketPlayerTryUseItemOnBlock.class, PacketFunction.PLACE_BLOCK);
         this.packetUnwindMap.put(CPacketHeldItemChange.class, PacketFunction.HELD_ITEM_CHANGE);
         this.packetUnwindMap.put(CPacketAnimation.class, PacketFunction.IGNORED);

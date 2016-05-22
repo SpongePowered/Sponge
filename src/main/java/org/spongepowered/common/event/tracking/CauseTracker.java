@@ -275,7 +275,7 @@ public final class CauseTracker {
         try {
             // Sponge start - prepare notification
             final IPhaseState state = peek.getState();
-            state.getPhase().associateNeighborStateNotifier(state, peek.getContext(), sourcePos, iblockstate.getBlock(), notifyPos, PlayerTracker.Type.NOTIFIER);
+            state.getPhase().associateNeighborStateNotifier(state, peek.getContext(), sourcePos, iblockstate.getBlock(), notifyPos, this.getMinecraftWorld(), PlayerTracker.Type.NOTIFIER);
             // Sponge End
 
             iblockstate.getBlock().neighborChanged(iblockstate, this.getMinecraftWorld(), notifyPos, sourceBlock);
