@@ -158,8 +158,6 @@ public class SpongeTeleportHelper implements TeleportHelper {
     }
 
     private boolean isBlockSafe(World world, Vector3i blockPos, boolean floorBlock) {
-        final BlockType block = world.getBlockType(blockPos);
-
         if (blockPos.getY() <= 0) {
             return false;
         }
@@ -167,6 +165,8 @@ public class SpongeTeleportHelper implements TeleportHelper {
         if (blockPos.getY() > world.getDimension().getHeight()) {
             return false;
         }
+
+        final BlockType block = world.getBlockType(blockPos);
 
         if (floorBlock) {
             // Floor is air so we'll fall, need to make sure we fall safely.
