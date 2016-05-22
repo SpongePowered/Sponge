@@ -22,48 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.interfaces;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import net.minecraft.entity.Entity;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.entity.Transform;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.world.World;
 
-import java.util.Collection;
+public interface IMixinServerConfigurationManager {
 
-public interface IMixinWorldSettings {
+    Transform<World> getTeleporterTransform(Entity entity, WorldServer oldWorldIn, WorldServer toWorldIn, net.minecraft.world.Teleporter teleporter);
 
-    Integer getDimensionId();
-
-    boolean getIsMod();
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setGeneratorSettings(DataContainer generatorSettings);
-
-    void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers);
-
-    void setEnabled(boolean isWorldEnabled);
-
-    void setLoadOnStartup(boolean loadOnStartup);
-
-    void setKeepSpawnLoaded(boolean keepSpawnLoaded);
-
-    void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad);
-
-    void setDimensionId(int id);
-
-    void setIsMod(boolean isMod);
-
-    void setPVPEnabled(boolean enabled);
-
-    void setActualWorldName(String name);
-
-    String getActualWorldName();
-
-    void fromBuilder(boolean builder);
-
-    boolean isFromBuilder();
+    void placeEntityInPortal(Entity entityIn, Transform<World> toTransform, Teleporter teleporter, Cause teleportCause);
 }

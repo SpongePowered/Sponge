@@ -50,6 +50,8 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
@@ -93,6 +95,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private UUID uuid;
     private DimensionType dimensionType;
+    private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
     private boolean isMod;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
@@ -286,6 +289,16 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     @Override
     public void setDimensionType(DimensionType type) {
         this.dimensionType = type;
+    }
+
+    @Override
+    public PortalAgentType getPortalAgentType() {
+        return this.portalAgentType;
+    }
+
+    @Override
+    public void setPortalAgentType(PortalAgentType type) {
+        this.portalAgentType = type;
     }
 
     @Intrinsic

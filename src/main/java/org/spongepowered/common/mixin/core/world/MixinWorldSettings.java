@@ -34,6 +34,8 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.GeneratorType;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.asm.mixin.Final;
@@ -56,6 +58,7 @@ import java.util.Collection;
 public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
 
     private DimensionType dimensionType;
+    private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
     private DataContainer generatorSettings;
     private boolean worldEnabled = true;
     private boolean loadOnStartup = true;
@@ -157,6 +160,16 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
     @Override
     public void setDimensionType(DimensionType type) {
         this.dimensionType = type;
+    }
+
+    @Override
+    public PortalAgentType getPortalAgentType() {
+        return this.portalAgentType;
+    }
+
+    @Override
+    public void setPortalAgentType(PortalAgentType type) {
+        this.portalAgentType = type;
     }
 
     @Override

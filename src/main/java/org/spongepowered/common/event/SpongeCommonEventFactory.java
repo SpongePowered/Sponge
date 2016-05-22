@@ -52,6 +52,7 @@ import net.minecraft.network.play.client.C16PacketClientStatus;
 import net.minecraft.network.play.server.S09PacketHeldItemChange;
 import net.minecraft.network.play.server.S2DPacketOpenWindow;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.CombatEntry;
 import net.minecraft.util.DamageSource;
@@ -60,6 +61,11 @@ import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
 import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderHell;
+import net.minecraft.world.WorldServer;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -103,15 +109,23 @@ import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.gen.PopulatorType;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCause;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
+import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.item.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -743,6 +757,84 @@ public class SpongeCommonEventFactory {
         }
 
         return cancelled;
+    }
+
+    public static DisplaceEntityEvent.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, Teleporter teleporter) {
+        SpongeImplHooks.registerPortalAgentType(teleporter);
+        MinecraftServer mcServer = MinecraftServer.getServer();
+        IMixinServerConfigurationManager scm = (IMixinServerConfigurationManager) mcServer.getConfigurationManager();
+        Entity spongeEntity = (Entity) entityIn;
+        Transform<World> fromTransform = spongeEntity.getTransform();
+        int fromDimensionId = entityIn.dimension;
+        WorldServer fromWorld = mcServer.worldServerForDimension(fromDimensionId);
+        WorldServer toWorld = mcServer.worldServerForDimension(targetDimensionId);
+        if (teleporter == null) {
+            teleporter = toWorld.getDefaultTeleporter();
+        }
+        SpongeConfig<?> activeConfig = ((IMixinWorld) fromWorld).getActiveConfig();
+        String worldName = "";
+        String teleporterClassName = teleporter.getClass().getName();
+
+        // check for new destination in config
+        if (teleporterClassName.equals("net.minecraft.world.Teleporter")) {
+            if (toWorld.provider instanceof WorldProviderHell) {
+                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_nether");
+            } else if (toWorld.provider instanceof WorldProviderEnd) {
+                worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:default_the_end");
+            }
+        } else { // custom
+            worldName = activeConfig.getConfig().getWorld().getPortalAgents().get("minecraft:" + teleporter.getClass().getSimpleName());
+        }
+
+        if (worldName != null && !worldName.equals("")) {
+            for (WorldProperties worldProperties : Sponge.getServer().getAllWorldProperties()) {
+                if (worldProperties.getWorldName().equalsIgnoreCase(worldName)) {
+                    Optional<World> spongeWorld = Sponge.getServer().loadWorld(worldProperties);
+                    if (spongeWorld.isPresent()) {
+                        toWorld = (WorldServer) spongeWorld.get();
+                        teleporter = toWorld.getDefaultTeleporter();
+                        ((IMixinTeleporter) teleporter).setPortalType(targetDimensionId);
+                    }
+                }
+            }
+        }
+
+        Transform<World> preTeleportTransform = scm.getTeleporterTransform(entityIn, fromWorld, toWorld, teleporter);
+        if (entityIn instanceof EntityPlayerMP) {
+            // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
+            ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(false);
+        }
+        spongeEntity.setTransform(preTeleportTransform);
+        // need to use placeInExistingPortal to support mods
+        teleporter.placeInExistingPortal(entityIn, entityIn.rotationYaw);
+        Transform<World> portalExitTransform = preTeleportTransform.setLocation(spongeEntity.getLocation()).setExtent((World) toWorld);
+        Cause teleportCause = Cause.of(NamedCause.source(new SpongePortalTeleportCause((PortalAgent) teleporter)));
+        Cause currentCause = ((IMixinWorld) fromWorld).getCauseTracker().getCurrentCause();
+        if (currentCause != null) {
+            teleportCause = teleportCause.merge(currentCause);
+        }
+        DisplaceEntityEvent.Portal event = SpongeEventFactory.createDisplaceEntityEventPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true, true);
+        SpongeImpl.postEvent(event);
+        if (entityIn instanceof EntityPlayerMP) {
+            ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(true);
+        }
+        if (event.isCancelled()) {
+            spongeEntity.setTransform(fromTransform);
+            return event;
+        }
+
+        if (!portalExitTransform.equals(event.getToTransform())) {
+            // if plugin set to same world, just set the transform
+            if (fromWorld == event.getToTransform().getExtent()) {
+                spongeEntity.setTransform(event.getToTransform());
+                // force cancel so we know to skip remaining logic
+                event.setCancelled(true);
+                return event;
+            }
+        }
+
+        spongeEntity.setTransform(preTeleportTransform);
+        return event;
     }
 
     public static void handleEntityMovement(net.minecraft.entity.Entity entity) {

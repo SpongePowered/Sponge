@@ -108,6 +108,7 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.Chunk;
 import org.spongepowered.api.world.Dimension;
 import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldCreationSettings;
@@ -203,6 +204,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected CauseTracker causeTracker;
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     protected WorldTimingsHandler timings;
+    protected PortalAgent portalAgent;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1094,6 +1096,11 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Override
     public void setActiveConfig(SpongeConfig<?> config) {
         this.activeConfig = config;
+    }
+
+    @Override
+    public PortalAgent getPortalAgent() {
+        return this.portalAgent;
     }
 
     /**************************** TRACKER AND TIMINGS ****************************************/

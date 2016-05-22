@@ -58,6 +58,11 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ChatComponentTranslation;
 import net.minecraft.util.EnumChatFormatting;
 import net.minecraft.util.IChatComponent;
+import net.minecraft.util.MathHelper;
+import net.minecraft.world.ChunkCoordIntPair;
+import net.minecraft.world.Teleporter;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.WorldProviderHell;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.border.WorldBorder;
 import net.minecraft.world.storage.IPlayerFileData;
@@ -73,6 +78,7 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.RespawnPlayerEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.event.network.ClientConnectionEvent;
@@ -94,9 +100,14 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.event.CauseTracker;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
+import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.VecHelper;
@@ -114,7 +125,7 @@ import javax.annotation.Nullable;
 
 @NonnullByDefault
 @Mixin(ServerConfigurationManager.class)
-public abstract class MixinServerConfigurationManager {
+public abstract class MixinServerConfigurationManager implements IMixinServerConfigurationManager {
 
     private static final String WRITE_PLAYER_DATA =
             "Lnet/minecraft/world/storage/IPlayerFileData;writePlayerData(Lnet/minecraft/entity/player/EntityPlayer;)V";
@@ -133,6 +144,7 @@ public abstract class MixinServerConfigurationManager {
     @Shadow public abstract void preparePlayer(EntityPlayerMP playerIn, @Nullable WorldServer worldIn);
     @Shadow public abstract void playerLoggedIn(EntityPlayerMP playerIn);
     @Shadow public abstract void updateTimeAndWeatherForPlayer(EntityPlayerMP playerIn, WorldServer worldIn);
+    @Shadow public abstract void syncPlayerInventory(EntityPlayerMP playerIn);
     @Nullable @Shadow public abstract String allowUserToConnect(SocketAddress address, GameProfile profile);
 
     /**
@@ -503,6 +515,259 @@ public abstract class MixinServerConfigurationManager {
             playerIn.dimension = prevDim;
         }
         return new Location<>((World) targetWorld, spawnPos);
+    }
+
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - adjusted to support {@link DisplaceEntityEvent.Teleport}
+     *
+     * @param playerIn The player teleporting to another dimension
+     * @param targetDimensionId The id of target dimension.
+     * @param teleporter The teleporter used to transport and create the portal
+     */
+    @Overwrite
+    public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
+        DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
+        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+        playerIn.dimension = toWorld.provider.getDimensionId();
+        // Support vanilla clients teleporting to custom dimensions
+        int dimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, playerIn);
+        if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
+            DimensionManager.sendDimensionRegistration(toWorld, playerIn, dimension);
+        }
+        playerIn.playerNetServerHandler.sendPacket(new S07PacketRespawn(playerIn.dimension, toWorld.getDifficulty(), toWorld.getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
+        fromWorld.removePlayerEntityDangerously(playerIn);
+        playerIn.isDead = false;
+        if (event.getUsePortalAgent() && event.getPortalAgent() != null) {
+            // we do not need to call transferEntityToWorld as we already have the correct transform before placing entity into portal
+            this.placeEntityInPortal(playerIn, event.getToTransform(), (Teleporter) event.getPortalAgent(), event.getCause());
+        }
+        this.preparePlayer(playerIn, fromWorld);
+        playerIn.playerNetServerHandler.setPlayerLocation(playerIn.posX, playerIn.posY, playerIn.posZ, playerIn.rotationYaw, playerIn.rotationPitch);
+        playerIn.theItemInWorldManager.setWorld(toWorld);
+        this.updateTimeAndWeatherForPlayer(playerIn, toWorld);
+        this.syncPlayerInventory(playerIn);
+
+        for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
+            playerIn.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
+        }
+    }
+
+    // copy of transferEntityToWorld but only contains code to generate the transform before being placed into a portal
+    @Override
+    public Transform<World> getTeleporterTransform(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn, net.minecraft.world.Teleporter teleporter) {
+        WorldProvider pOld = oldWorldIn.provider;
+        WorldProvider pNew = toWorldIn.provider;
+        int fromDimensionId = oldWorldIn.provider.getDimensionId();
+        int toDimensionId = toWorldIn.provider.getDimensionId();
+        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
+        double x = entityIn.posX * moveFactor;
+        double y = entityIn.posY;
+        double z = entityIn.posZ * moveFactor;
+
+        if (toDimensionId == 1) {
+            BlockPos blockpos;
+
+            if (fromDimensionId == 1) {
+                blockpos = toWorldIn.getSpawnPoint();
+            } else {
+                blockpos = toWorldIn.getSpawnCoordinate();
+            }
+
+            x = (double)blockpos.getX();
+            y = (double)blockpos.getY();
+            z = (double)blockpos.getZ();
+            Vector3d position = new Vector3d(x, y, z);
+            Vector3d rotation = new Vector3d(0.0D, 90.0D, 0.0D);
+            return new Transform<World>((World) oldWorldIn, position, rotation);
+        }
+
+        if (fromDimensionId != 1) {
+            x = (double)MathHelper.clamp_int((int)x, -29999872, 29999872);
+            z = (double)MathHelper.clamp_int((int)z, -29999872, 29999872);
+
+            Vector3d position = new Vector3d(x, y, z);
+            Vector3d rotation = new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0.0D);
+            return new Transform<World>((World) oldWorldIn, position, rotation);
+        }
+
+        return ((org.spongepowered.api.entity.Entity) entityIn).getTransform();
+    }
+
+    // second part of transferEntityToWorld which includes logic of placing the entity in teleporter and spawning into new world
+    @Override
+    public void placeEntityInPortal(Entity entityIn, Transform<World> toTransform, Teleporter teleporter, Cause teleportCause) {
+        net.minecraft.world.World world = (net.minecraft.world.World) toTransform.getExtent();
+        if (entityIn.isEntityAlive()) {
+            // Turn on capturing for destination world
+            IMixinWorld spongeWorld = (IMixinWorld) toTransform.getExtent();
+            final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+            causeTracker.addCause(teleportCause);
+            causeTracker.setSpecificCapture(true);
+            teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+            boolean portalResult = causeTracker.handleBlockCaptures();
+            // if portal ChangeBlockEvent was allowed, continue
+            if (portalResult) {
+                causeTracker.handleDroppedItems();
+                causeTracker.handleSpawnedEntities();
+            } else { // portal ChangeBlockEvent was cancelled
+                causeTracker.getCapturedSpawnedEntities().clear();
+                causeTracker.getCapturedSpawnedEntityItems().clear();
+                // update cache
+                ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkCoordIntPair.chunkXZ2Int(entityIn.getPosition().getX(), entityIn.getPosition().getZ()));
+            }
+            causeTracker.removeCurrentCause();
+            causeTracker.setSpecificCapture(false);
+            // Sponge end
+            world.spawnEntityInWorld(entityIn);
+            world.updateEntityWithOptionalForce(entityIn, false);
+        }
+        entityIn.setWorld(world);
+    }
+
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - overwritten to redirect to our method that accepts a teleporter
+     */
+    @Overwrite
+    public void transferEntityToWorld(Entity entityIn, int p_82448_2_, WorldServer oldWorldIn, WorldServer toWorldIn) {
+        transferEntityToWorld(entityIn, p_82448_2_, oldWorldIn, toWorldIn, toWorldIn.getDefaultTeleporter());
+    }
+
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - overwritten to capture a plugin or mod that attempts to call this method directly.
+     */
+    @Overwrite
+    public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
+        // Sponge start - This should never be called internally but if it does get called
+        // then a mod or plugin called it so we must handle the portal event here as well.
+        int targetDimensionId = entityIn.dimension;
+        DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, targetDimensionId, teleporter);
+        if (event.isCancelled()) {
+            return;
+        }
+
+        fromWorld = (WorldServer) event.getFromTransform().getExtent();
+        toWorld = (WorldServer) event.getToTransform().getExtent();
+        // Sponge end
+        net.minecraft.world.WorldProvider pOld = fromWorld.provider;
+        net.minecraft.world.WorldProvider pNew = toWorld.provider;
+        double moveFactor = getMovementFactor(pOld) / getMovementFactor(pNew);
+        double d0 = entityIn.posX * moveFactor;
+        double d1 = entityIn.posZ * moveFactor;
+        // double d2 = 8.0D; // Sponge - unused
+        float f = entityIn.rotationYaw;
+        fromWorld.theProfiler.startSection("moving");
+
+        // Sponge start - forge disables this section
+        /*if (false && entityIn.dimension == -1)
+        {
+            d0 = MathHelper.clamp_double(d0 / d2, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+            d1 = MathHelper.clamp_double(d1 / d2, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
+
+            if (entityIn.isEntityAlive())
+            {
+                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+            }
+        }
+        else if (false && entityIn.dimension == 0)
+        {
+            d0 = MathHelper.clamp_double(d0 * d2, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+            d1 = MathHelper.clamp_double(d1 * d2, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
+
+            if (entityIn.isEntityAlive())
+            {
+                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+            }
+        } */
+        // Sponge end
+
+        if (entityIn.dimension == 1)
+        {
+            BlockPos blockpos;
+
+            if (fromDimensionId == 1)
+            {
+                blockpos = toWorld.getSpawnPoint();
+            }
+            else
+            {
+                blockpos = toWorld.getSpawnCoordinate();
+            }
+
+            d0 = (double)blockpos.getX();
+            entityIn.posY = (double)blockpos.getY();
+            d1 = (double)blockpos.getZ();
+            entityIn.setLocationAndAngles(d0, entityIn.posY, d1, 90.0F, 0.0F);
+
+            if (entityIn.isEntityAlive())
+            {
+                fromWorld.updateEntityWithOptionalForce(entityIn, false);
+            }
+        }
+
+        fromWorld.theProfiler.endSection();
+
+        if (fromDimensionId != 1)
+        {
+            fromWorld.theProfiler.startSection("placing");
+            d0 = (double)MathHelper.clamp_int((int)d0, -29999872, 29999872);
+            d1 = (double)MathHelper.clamp_int((int)d1, -29999872, 29999872);
+
+            if (entityIn.isEntityAlive())
+            {
+                entityIn.setLocationAndAngles(d0, entityIn.posY, d1, entityIn.rotationYaw, entityIn.rotationPitch);
+                // Sponge start - capture portal creation
+                IMixinWorld spongeWorld = (IMixinWorld) fromWorld;
+                final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+                Cause teleportCause = Cause.of(NamedCause.source(teleporter));
+                if (causeTracker.getCurrentCause() != null) {
+                    teleportCause = teleportCause.merge(causeTracker.getCurrentCause());
+                }
+                causeTracker.addCause(teleportCause);
+                causeTracker.setSpecificCapture(true);
+                teleporter.placeInPortal(entityIn, f);
+                boolean portalResult = causeTracker.handleBlockCaptures();
+                // if portal ChangeBlockEvent was allowed, continue
+                if (portalResult) {
+                    causeTracker.handleDroppedItems();
+                    causeTracker.handleSpawnedEntities();
+                } else { // portal ChangeBlockEvent was cancelled
+                    causeTracker.getCapturedSpawnedEntities().clear();
+                    causeTracker.getCapturedSpawnedEntityItems().clear();
+                    // update cache
+                    ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkCoordIntPair.chunkXZ2Int(entityIn.getPosition().getX(), entityIn.getPosition().getZ()));
+                }
+                causeTracker.removeCurrentCause();
+                causeTracker.setSpecificCapture(false);
+                // Sponge end
+                toWorld.spawnEntityInWorld(entityIn);
+                toWorld.updateEntityWithOptionalForce(entityIn, false);
+                fromWorld.theProfiler.endSection();
+            }
+
+        }
+
+        entityIn.setWorld(toWorld);
+    }
+
+    // forge utility method
+    private double getMovementFactor(WorldProvider provider) {
+        if (provider instanceof WorldProviderHell) {
+            return 8.0;
+        }
+        return 1.0;
     }
 
     @Inject(method = "setPlayerManager", at = @At("HEAD"), cancellable = true)

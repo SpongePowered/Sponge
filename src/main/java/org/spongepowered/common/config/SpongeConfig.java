@@ -145,6 +145,9 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String WORLD_MOB_SPAWN_RANGE = "mob-spawn-range";
     public static final String WORLD_GEN_MODIFIERS = "world-generation-modifiers";
 
+    // PORTAL
+    public static final String PORTAL_AGENTS = "portal-agents";
+
     private static final String HEADER = "1.0\n"
             + "\n"
             + "# If you need help with the configuration or have any questions related to Sponge,\n"
@@ -1052,6 +1055,15 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = WORLD_PVP_ENABLED, comment = "Enable if this world allows PVP combat.")
         protected boolean pvpEnabled = true;
 
+        @SuppressWarnings("serial")
+        @Setting(value = PORTAL_AGENTS, comment = "A list of all detected portal agents used in this world. "
+                + "In order to override, change the target world name to any other valid world. "
+                + "Note: If world is not found, it will fallback to default.")
+        private Map<String, String> portalAgents = new HashMap<String, String>() {{
+            put("minecraft:default_nether", "DIM-1");
+            put("minecraft:default_the_end", "DIM1");
+        }};
+
         public boolean hasInfiniteWaterSource() {
             return this.infiniteWaterSource;
         }
@@ -1114,6 +1126,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setMobSpawnRange(int range) {
             this.mobSpawnRange = range;
+        }
+
+        public Map<String, String> getPortalAgents() {
+            return this.portalAgents;
         }
     }
 

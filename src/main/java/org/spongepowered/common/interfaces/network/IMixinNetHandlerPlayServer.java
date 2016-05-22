@@ -22,48 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.interfaces.network;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+public interface IMixinNetHandlerPlayServer {
 
-import java.util.Collection;
-
-public interface IMixinWorldSettings {
-
-    Integer getDimensionId();
-
-    boolean getIsMod();
-
-    void setDimensionType(DimensionType type);
-
-    void setPortalAgentType(PortalAgentType type);
-
-    void setGeneratorSettings(DataContainer generatorSettings);
-
-    void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers);
-
-    void setEnabled(boolean isWorldEnabled);
-
-    void setLoadOnStartup(boolean loadOnStartup);
-
-    void setKeepSpawnLoaded(boolean keepSpawnLoaded);
-
-    void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad);
-
-    void setDimensionId(int id);
-
-    void setIsMod(boolean isMod);
-
-    void setPVPEnabled(boolean enabled);
-
-    void setActualWorldName(String name);
-
-    String getActualWorldName();
-
-    void fromBuilder(boolean builder);
-
-    boolean isFromBuilder();
+    void setAllowClientLocationUpdate(boolean flag);
 }

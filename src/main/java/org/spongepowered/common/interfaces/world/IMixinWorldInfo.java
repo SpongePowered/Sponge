@@ -27,6 +27,7 @@ package org.spongepowered.common.interfaces.world;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.scoreboard.ServerScoreboard;
 import org.spongepowered.api.world.DimensionType;
+import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.config.SpongeConfig.WorldConfig;
 
@@ -56,6 +57,8 @@ public interface IMixinWorldInfo {
     void setUUID(UUID uuid);
 
     void setDimensionType(DimensionType type);
+
+    void setPortalAgentType(PortalAgentType type);
 
     void setSeed(long seed);
 

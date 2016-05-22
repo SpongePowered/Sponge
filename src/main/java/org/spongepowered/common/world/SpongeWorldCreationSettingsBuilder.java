@@ -37,7 +37,8 @@ import org.spongepowered.api.world.DimensionType;
 import org.spongepowered.api.world.DimensionTypes;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
-import org.spongepowered.api.world.TeleporterAgent;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.api.world.WorldCreationSettings;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
 import org.spongepowered.api.world.storage.WorldProperties;
@@ -53,6 +54,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     private GameMode gameMode;
     private GeneratorType generatorType;
     private DimensionType dimensionType;
+    private PortalAgentType portalAgentType;
     private boolean mapFeaturesEnabled;
     private boolean hardcore;
     private boolean worldEnabled;
@@ -76,6 +78,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.generatorType = settings.getGeneratorType();
         this.generatorModifiers = ImmutableList.copyOf(settings.getGeneratorModifiers());
         this.dimensionType = settings.getDimensionType();
+        this.portalAgentType = settings.getPortalAgentType();
         this.mapFeaturesEnabled = settings.usesMapFeatures();
         this.hardcore = settings.isHardcore();
         this.worldEnabled = settings.isEnabled();
@@ -92,6 +95,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.generatorType = properties.getGeneratorType();
         this.generatorModifiers = ImmutableList.copyOf(properties.getGeneratorModifiers());
         this.dimensionType = properties.getDimensionType();
+        this.portalAgentType = properties.getPortalAgentType();
         this.mapFeaturesEnabled = properties.usesMapFeatures();
         this.hardcore = properties.isHardcore();
         this.worldEnabled = properties.isEnabled();
@@ -109,6 +113,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.gameMode = settings.getGameMode();
         this.generatorType = settings.getGeneratorType();
         this.dimensionType = settings.getDimensionType();
+        this.portalAgentType = settings.getPortalAgentType();
         this.mapFeaturesEnabled = settings.usesMapFeatures();
         this.hardcore = settings.isHardcore();
         this.worldEnabled = settings.isEnabled();
@@ -228,9 +233,9 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
     }
 
     @Override
-    public SpongeWorldCreationSettingsBuilder teleporterAgent(TeleporterAgent agent) {
-        // TODO
-        return null;
+    public SpongeWorldCreationSettingsBuilder portalAgent(PortalAgentType type) {
+        this.portalAgentType = type;
+        return this;
     }
 
     @Override
@@ -267,6 +272,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
         this.gameMode = GameModes.SURVIVAL;
         this.generatorType = GeneratorTypes.DEFAULT;
         this.dimensionType = DimensionTypes.OVERWORLD;
+        this.portalAgentType = PortalAgentTypes.DEFAULT;
         this.mapFeaturesEnabled = true;
         this.hardcore = false;
         this.worldEnabled = true;
@@ -289,6 +295,7 @@ public class SpongeWorldCreationSettingsBuilder implements WorldCreationSettings
                         (WorldType) this.generatorType);
         ((IMixinWorldSettings) (Object) settings).setActualWorldName(this.name);
         ((IMixinWorldSettings) (Object) settings).setDimensionType(this.dimensionType);
+        ((IMixinWorldSettings) (Object) settings).setPortalAgentType(this.portalAgentType);
         ((IMixinWorldSettings) (Object) settings).setGeneratorSettings(this.generatorSettings);
         ((IMixinWorldSettings) (Object) settings).setGeneratorModifiers(this.generatorModifiers);
         ((IMixinWorldSettings) (Object) settings).setEnabled(this.worldEnabled);

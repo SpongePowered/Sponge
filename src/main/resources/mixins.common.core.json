@@ -373,6 +373,7 @@
         "world.MixinExplosion",
         "world.MixinNextTickListEntry",
         "world.MixinSpawnerAnimals",
+        "world.MixinTeleporter",
         "world.MixinWorld",
         "world.MixinWorld_Data",
         "world.MixinWorldBorder",

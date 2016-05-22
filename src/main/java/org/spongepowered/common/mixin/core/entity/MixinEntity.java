@@ -59,6 +59,7 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -85,6 +86,7 @@ import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.profile.GameProfile;
@@ -118,6 +120,7 @@ import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -808,6 +811,52 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         fromWorld.resetUpdateEntityTick();
         toWorld.resetUpdateEntityTick();
         return true;
+    }
+
+    @Overwrite
+    public void travelToDimension(int toDimensionId)
+    {
+        if (!this.worldObj.isRemote && !this.isDead)
+        {
+            int fromDimensionId = this.dimension;
+            DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(this.mcEntity, toDimensionId, null);
+            if (event.isCancelled()) {
+                return;
+            }
+
+            MinecraftServer mcServer = MinecraftServer.getServer();
+            this.worldObj.theProfiler.startSection("changeDimension");
+            WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
+            WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+            this.worldObj.removeEntity(this.mcEntity);
+            this.isDead = false;
+            this.worldObj.theProfiler.startSection("reposition");
+            if (event.getUsePortalAgent() && event.getPortalAgent() != null) {
+                // we do not need to call transferEntityToWorld as we already have the correct transform before placing entity into portal
+                ((IMixinServerConfigurationManager) mcServer.getConfigurationManager()).placeEntityInPortal(this.mcEntity, event.getToTransform(), (Teleporter) event.getPortalAgent(), event.getCause());
+            }
+            this.worldObj.theProfiler.endStartSection("reloading");
+            net.minecraft.entity.Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this.mcEntity), toWorld);
+
+            if (entity != null)
+            {
+                entity.copyDataFromOld(this.mcEntity);
+
+                if (fromDimensionId == 1 && toDimensionId == 1)
+                {
+                    BlockPos blockpos = this.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                    entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
+                }
+
+                toWorld.spawnEntityInWorld(entity);
+            }
+
+            this.isDead = true;
+            this.worldObj.theProfiler.endSection();
+            fromWorld.resetUpdateEntityTick();
+            toWorld.resetUpdateEntityTick();
+            this.worldObj.theProfiler.endSection();
+        }
     }
 
     /**

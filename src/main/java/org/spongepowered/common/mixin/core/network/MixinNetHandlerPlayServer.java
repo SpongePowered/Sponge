@@ -55,6 +55,7 @@ import net.minecraft.network.play.client.C12PacketUpdateSign;
 import net.minecraft.network.play.client.C17PacketCustomPayload;
 import net.minecraft.network.play.client.C19PacketResourcePackStatus;
 import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S08PacketPlayerPosLook;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S2FPacketSetSlot;
 import net.minecraft.network.play.server.S38PacketPlayerListItem;
@@ -106,7 +107,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinContainer;
@@ -114,6 +114,7 @@ import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
+import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -127,7 +128,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Mixin(NetHandlerPlayServer.class)
-public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
+public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMixinNetHandlerPlayServer {
 
     private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
 
@@ -147,6 +148,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
     private Long lastPacket;
     // Store the last block right-clicked
     private Item lastItem;
+    private boolean allowClientLocationUpdate = true;
 
     @Override
     public Player getPlayer() {
@@ -168,6 +170,11 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         return this.playerEntity.ping;
     }
 
+    @Override
+    public void setAllowClientLocationUpdate(boolean flag) {
+        this.allowClientLocationUpdate = flag;
+    }
+
     /**
      * @param manager The player network connection
      * @param packet The original packet to be sent
@@ -175,6 +182,9 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      */
     @Redirect(method = "sendPacket(Lnet/minecraft/network/Packet;)V", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetworkManager;sendPacket(Lnet/minecraft/network/Packet;)V"))
     public void onSendPacket(NetworkManager manager, Packet<?> packet) {
+        if (!this.allowClientLocationUpdate && packet instanceof S08PacketPlayerPosLook) {
+            return;
+        }
         manager.sendPacket(this.rewritePacket(packet));
     }
 

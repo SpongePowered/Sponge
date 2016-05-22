@@ -44,6 +44,7 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.ReportedException;
 import net.minecraft.world.NextTickListEntry;
+import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServer.ServerBlockEventList;
 import net.minecraft.world.WorldSettings;
@@ -69,6 +70,7 @@ import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -117,6 +119,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
+    @Shadow @Final private Teleporter worldTeleporter;
     @Shadow private ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;
@@ -130,6 +133,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     public void onConstruct(CallbackInfo ci) {
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+        this.portalAgent = (PortalAgent) this.worldTeleporter;
 
         // Turn on capturing
         this.timings = new WorldTimingsHandler((net.minecraft.world.World) (Object) this);

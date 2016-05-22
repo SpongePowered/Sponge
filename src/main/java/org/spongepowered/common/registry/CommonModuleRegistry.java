@@ -55,6 +55,7 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.*;
 import org.spongepowered.api.event.cause.entity.spawn.*;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.extra.fluid.FluidStack;
 import org.spongepowered.api.extra.fluid.FluidStackSnapshot;
 import org.spongepowered.api.extra.fluid.FluidType;
@@ -131,6 +132,7 @@ import org.spongepowered.common.registry.type.event.DamageModifierTypeRegistryMo
 import org.spongepowered.common.registry.type.event.DamageSourceRegistryModule;
 import org.spongepowered.common.registry.type.event.DamageTypeRegistryModule;
 import org.spongepowered.common.registry.type.event.SpawnTypeRegistryModule;
+import org.spongepowered.common.registry.type.event.TeleportTypeRegistryModule;
 import org.spongepowered.common.registry.type.extra.FluidTypeRegistryModule;
 import org.spongepowered.common.registry.type.item.*;
 import org.spongepowered.common.registry.type.scoreboard.CriteriaRegistryModule;
@@ -336,6 +338,7 @@ public final class CommonModuleRegistry {
             .registerModule(SpawnType.class, new SpawnTypeRegistryModule())
             .registerModule(StairShape.class, new StairShapeRegistryModule())
             .registerModule(StoneType.class, new StoneTypeRegistryModule())
+            .registerModule(TeleportType.class, TeleportTypeRegistryModule.getInstance())
             .registerModule(TextColor.class, new TextColorRegistryModule())
             .registerModule(new TextSerializerRegistryModule())
             .registerModule(TextStyle.Base.class, new TextStyleRegistryModule())

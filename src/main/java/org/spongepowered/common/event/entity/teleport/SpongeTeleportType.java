@@ -22,48 +22,55 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.interfaces.world;
+package org.spongepowered.common.event.entity.teleport;
 
-import org.spongepowered.api.data.DataContainer;
-import org.spongepowered.api.world.DimensionType;
-import org.spongepowered.api.world.PortalAgentType;
-import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import com.google.common.base.Objects;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 
-import java.util.Collection;
+import java.util.Locale;
 
-public interface IMixinWorldSettings {
+public class SpongeTeleportType implements TeleportType {
 
-    Integer getDimensionId();
+    private String name;
+    private String id;
 
-    boolean getIsMod();
+    public SpongeTeleportType(String name) {
+        this.name = name;
+        this.id = name.toLowerCase(Locale.ENGLISH);
+    }
 
-    void setDimensionType(DimensionType type);
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
-    void setPortalAgentType(PortalAgentType type);
+    @Override
+    public String getName() {
+        return this.name;
+    }
 
-    void setGeneratorSettings(DataContainer generatorSettings);
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final SpongeTeleportType other = (SpongeTeleportType) obj;
+        return this.id.equals(other.id);
+    }
 
-    void setGeneratorModifiers(Collection<WorldGeneratorModifier> modifiers);
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.id, this.name);
+    }
 
-    void setEnabled(boolean isWorldEnabled);
-
-    void setLoadOnStartup(boolean loadOnStartup);
-
-    void setKeepSpawnLoaded(boolean keepSpawnLoaded);
-
-    void setGenerateSpawnOnLoad(boolean generateSpawnOnLoad);
-
-    void setDimensionId(int id);
-
-    void setIsMod(boolean isMod);
-
-    void setPVPEnabled(boolean enabled);
-
-    void setActualWorldName(String name);
-
-    String getActualWorldName();
-
-    void fromBuilder(boolean builder);
-
-    boolean isFromBuilder();
+    @Override
+    public String toString() {
+        return Objects.toStringHelper(this)
+                .add("id", this.id)
+                .add("name", this.name)
+                .toString();
+    }
 }
