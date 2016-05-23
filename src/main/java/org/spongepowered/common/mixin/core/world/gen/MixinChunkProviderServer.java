@@ -24,26 +24,39 @@
  */
 package org.spongepowered.common.mixin.core.world.gen;
 
+import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.util.LongHashMap;
 import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
+import net.minecraft.world.chunk.storage.IChunkLoader;
 import net.minecraft.world.gen.ChunkProviderServer;
+import org.spongepowered.api.data.DataContainer;
+import org.spongepowered.api.world.storage.ChunkDataStream;
+import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
+import org.spongepowered.common.world.storage.SpongeChunkDataStream;
+import org.spongepowered.common.world.storage.WorldStorageUtil;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 import javax.annotation.Nullable;
 
 @Mixin(value = ChunkProviderServer.class, priority = 1000)
-public abstract class MixinChunkProviderServer implements IMixinChunkProviderServer {
+public abstract class MixinChunkProviderServer implements WorldStorage, IMixinChunkProviderServer {
 
     @Shadow public WorldServer worldObj;
+    @Shadow private IChunkLoader chunkLoader;
     @Shadow private LongHashMap<Chunk> id2ChunkMap;
-    @Shadow public IChunkProvider serverChunkGenerator;;
+    @Shadow public IChunkProvider serverChunkGenerator;
 
     @Shadow public abstract Chunk provideChunk(int x, int z);
 
@@ -56,7 +69,7 @@ public abstract class MixinChunkProviderServer implements IMixinChunkProviderSer
     /**
      * @author blood - May 9th, 2016
      * @reason Control terrain gen flag here to avoid leaking block captures during populate.
-     *     
+     *
      * @param chunkProvider The chunk provider
      * @param x The x coordinate of chunk
      * @param z The z coordinate of chunk
@@ -78,4 +91,28 @@ public abstract class MixinChunkProviderServer implements IMixinChunkProviderSer
             }
         }
     }
+
+    @Override
+    public ChunkDataStream getGeneratedChunks() {
+        if (!(this.chunkLoader instanceof IMixinAnvilChunkLoader)) {
+            throw new UnsupportedOperationException("unknown chunkLoader");
+        }
+        return new SpongeChunkDataStream(((IMixinAnvilChunkLoader) this.chunkLoader).getWorldDir());
+    }
+
+    @Override
+    public CompletableFuture<Boolean> doesChunkExist(Vector3i chunkCoords) {
+        return WorldStorageUtil.doesChunkExist(this.worldObj, this.chunkLoader, chunkCoords);
+    }
+
+    @Override
+    public CompletableFuture<Optional<DataContainer>> getChunkData(Vector3i chunkCoords) {
+        return WorldStorageUtil.getChunkData(this.worldObj, this.chunkLoader, chunkCoords);
+    }
+
+    @Override
+    public WorldProperties getWorldProperties() {
+        return (WorldProperties) this.worldObj.getWorldInfo();
+    }
+
 }

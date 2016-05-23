@@ -31,19 +31,24 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.item.EntityMinecart;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
-import net.minecraft.world.WorldServer;
 import net.minecraft.world.chunk.storage.AnvilChunkLoader;
+import net.minecraft.world.chunk.storage.RegionFileCache;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -53,15 +58,24 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.interfaces.IMixinChunk;
+import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.Map;
+import java.util.Set;
 
 @Mixin(AnvilChunkLoader.class)
-public class MixinAnvilChunkLoader {
+@Implements(@Interface(iface = IMixinAnvilChunkLoader.class, prefix = "loader$"))
+public abstract class MixinAnvilChunkLoader implements IMixinAnvilChunkLoader {
 
     private static final String ENTITY_LIST_CREATE_FROM_NBT =
             "Lnet/minecraft/entity/EntityList;createEntityFromNBT(Lnet/minecraft/nbt/NBTTagCompound;Lnet/minecraft/world/World;)Lnet/minecraft/entity/Entity;";
+
+    @Shadow private Set<ChunkCoordIntPair> pendingAnvilChunksCoordinates;
+    @Shadow private Map<ChunkCoordIntPair, NBTTagCompound> chunksToRemove;
+    @Shadow @Final private File chunkSaveLocation;
 
     @Inject(method = "writeChunkToNBT", at = @At(value = "RETURN"))
     public void onWriteChunkToNBT(net.minecraft.world.chunk.Chunk chunkIn, World worldIn, NBTTagCompound compound, CallbackInfo ci) {
@@ -169,4 +183,25 @@ public class MixinAnvilChunkLoader {
         }
         return EntityList.createEntityFromNBT(compound, world);
     }
+
+    @Intrinsic // Forge method
+    public boolean loader$chunkExists(World world, int x, int z) {
+        ChunkCoordIntPair chunkcoordintpair = new ChunkCoordIntPair(x, z);
+
+        if (this.pendingAnvilChunksCoordinates.contains(chunkcoordintpair)) {
+            for (ChunkCoordIntPair pendingChunkCoord : this.chunksToRemove.keySet()) {
+                if (pendingChunkCoord.equals(chunkcoordintpair)) {
+                    return true;
+                }
+            }
+        }
+
+        return RegionFileCache.getChunkInputStream(this.chunkSaveLocation, x, z) != null;
+    }
+
+    @Override
+    public Path getWorldDir() {
+        return this.chunkSaveLocation.toPath();
+    }
+
 }
