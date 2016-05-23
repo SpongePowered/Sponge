@@ -50,7 +50,7 @@ class ListPagination extends ActivePagination {
 
         for (Map.Entry<Text, Integer> ent : lines) {
             if (getMaxContentLinesPerPage() > 0 && ent.getValue() + currentPageLines > getMaxContentLinesPerPage() && currentPageLines != 0) {
-                padPage(currentPage, currentPageLines, t("..."));
+                padPage(currentPage, currentPageLines, true);
                 currentPageLines = 0;
                 pages.add(currentPage);
                 currentPage = new ArrayList<>();
@@ -59,21 +59,13 @@ class ListPagination extends ActivePagination {
             currentPage.add(ent.getKey());
         }
         if (currentPageLines > 0) {
-            padPage(currentPage, currentPageLines, Text.EMPTY);
+            if (!pages.isEmpty()) {
+                // Only pad if we have a previous page
+                padPage(currentPage, currentPageLines, false);
+            }
             pages.add(currentPage);
         }
         this.pages = pages;
-    }
-
-    private void padPage(final List<Text> currentPage, final int currentPageLines, final Text continuation) {
-        final int maxContentLinesPerPage = getMaxContentLinesPerPage();
-        for (int i = currentPageLines; i< maxContentLinesPerPage; i++){
-            if (i == maxContentLinesPerPage - 1) {
-                currentPage.add(continuation);
-            } else {
-                currentPage.add(Text.EMPTY);
-            }
-        }
     }
 
     @Override
