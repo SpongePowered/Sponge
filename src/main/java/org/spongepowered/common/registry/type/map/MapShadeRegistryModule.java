@@ -27,14 +27,11 @@ package org.spongepowered.common.registry.type.map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.common.map.SpongeMapScale;
 import org.spongepowered.common.map.SpongeMapShade;
 
 import java.util.Collection;
