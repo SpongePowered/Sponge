@@ -1108,7 +1108,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return false;
             }
 
-            Block block = newState.getBlock();
+            Block originalBlock = currentState.getBlock();
+            Block newBlock = newState.getBlock();
             BlockSnapshot originalBlockSnapshot = null;
 
             // Don't capture if we are restoring blocks
@@ -1121,14 +1122,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
                 if (causeTracker.isCaptureBlockDecay()) {
                     // Only capture final state of decay, ignore the rest
-                    if (block == Blocks.air) {
+                    if (newBlock == Blocks.air) {
                         ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.DECAY;
                         causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
                     }
-                } else if (block == Blocks.air) {
+                } else if (newBlock == Blocks.air) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
                     causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-                } else if (block != currentState.getBlock() && currentState.getBlock().getClass() != newState.getBlock().getClass()) {
+                } else if (newBlock != originalBlock && !forceModify(originalBlock, newBlock)) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
                     causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
                 } else {
@@ -1150,7 +1151,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
             } else {
                 Block block1 = iblockstate1.getBlock();
 
-                if (block.getLightOpacity() != block1.getLightOpacity() || block.getLightValue() != oldLight) {
+                if (newBlock.getLightOpacity() != block1.getLightOpacity() || newBlock.getLightValue() != oldLight) {
                     this.theProfiler.startSection("checkLight");
                     this.checkLight(pos);
                     this.theProfiler.endSection();
@@ -1171,6 +1172,17 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 return true;
             }
         }
+    }
+
+    private boolean forceModify(Block originalBlock, Block newBlock) {
+        if (originalBlock instanceof BlockRedstoneRepeater && newBlock instanceof BlockRedstoneRepeater) {
+            return true;
+        }
+        if (originalBlock instanceof BlockRedstoneTorch && newBlock instanceof BlockRedstoneTorch) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
