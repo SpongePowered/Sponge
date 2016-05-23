@@ -1128,7 +1128,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 } else if (block == Blocks.air) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.BREAK;
                     causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
-                } else if (block != currentState.getBlock()) {
+                } else if (block != currentState.getBlock() && currentState.getBlock().getClass() != newState.getBlock().getClass()) {
                     ((SpongeBlockSnapshot) originalBlockSnapshot).captureType = CaptureType.PLACE;
                     causeTracker.getCapturedSpongeBlockSnapshots().add(originalBlockSnapshot);
                 } else {
