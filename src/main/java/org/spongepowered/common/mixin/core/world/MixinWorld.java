@@ -51,6 +51,7 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -164,6 +165,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public boolean isRemote;
     @Shadow @Final public WorldProvider provider;
     @Shadow @Final public Random rand;
+    @Shadow @Final public Profiler theProfiler;
     @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow @Final public List<EntityPlayer> playerEntities;
@@ -178,6 +180,8 @@ public abstract class MixinWorld implements World, IMixinWorld {
         throw new RuntimeException("Bad things have happened");
     }
 
+    @Shadow public abstract boolean checkLight(BlockPos pos);
+    @Shadow public abstract boolean isValid(BlockPos pos);
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
@@ -205,7 +209,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow public abstract boolean spawnEntityInWorld(net.minecraft.entity.Entity entity); // This is overridden in MixinWorldServer
     @Shadow public abstract void updateAllPlayersSleepingFlag();
     @Shadow public abstract boolean setBlockState(BlockPos pos, IBlockState state, int flags);
-    @Shadow protected abstract boolean isValid(BlockPos pos);
     @Shadow public abstract void immediateBlockTick(BlockPos pos, IBlockState state, Random random);
     @Shadow public abstract void updateComparatorOutputLevel(BlockPos pos, Block blockIn);
     @Shadow public abstract void notifyBlockOfStateChange(BlockPos pos, final Block blockIn);

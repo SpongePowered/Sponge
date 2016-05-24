@@ -30,8 +30,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
-import org.spongepowered.api.text.Text;
 import org.spongepowered.api.command.CommandException;
+import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
 
 import java.util.ArrayList;
@@ -82,9 +82,15 @@ class IterablePagination extends ActivePagination {
         int addedLines = 0;
         while (addedLines <= getMaxContentLinesPerPage()) {
             if (!this.countIterator.hasNext()) {
+                // Pad the last page, but only if it isn't the first.
+                if (page > 1) {
+                    padPage(ret, addedLines, false);
+                }
                 break;
             }
             if (addedLines + this.countIterator.peek().getValue() > getMaxContentLinesPerPage()) {
+                // Add the continuation marker, pad if required
+                padPage(ret, addedLines, true);
                 break;
             }
             Map.Entry<Text, Integer> ent = this.countIterator.next();

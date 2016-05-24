@@ -188,31 +188,31 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
         switch (type) {
             case NbtDataUtil.TAG_BYTE:
                 if (key.contains(BOOLEAN_IDENTIFER)) {
-                    view.set(of('.', key.replace(BOOLEAN_IDENTIFER, "")), (((NBTBase.NBTPrimitive) base).getByte() == 1));
+                    view.set(of(key.replace(BOOLEAN_IDENTIFER, "")), (((NBTBase.NBTPrimitive) base).getByte() == 1));
                 } else {
-                    view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getByte());
+                    view.set(of(key), ((NBTBase.NBTPrimitive) base).getByte());
                 }
                 break;
             case NbtDataUtil.TAG_SHORT:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getShort());
+                view.set(of(key), ((NBTBase.NBTPrimitive) base).getShort());
                 break;
             case NbtDataUtil.TAG_INT:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getInt());
+                view.set(of(key), ((NBTBase.NBTPrimitive) base).getInt());
                 break;
             case NbtDataUtil.TAG_LONG:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getLong());
+                view.set(of(key), ((NBTBase.NBTPrimitive) base).getLong());
                 break;
             case NbtDataUtil.TAG_FLOAT:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getFloat());
+                view.set(of(key), ((NBTBase.NBTPrimitive) base).getFloat());
                 break;
             case NbtDataUtil.TAG_DOUBLE:
-                view.set(of('.', key), ((NBTBase.NBTPrimitive) base).getDouble());
+                view.set(of(key), ((NBTBase.NBTPrimitive) base).getDouble());
                 break;
             case NbtDataUtil.TAG_BYTE_ARRAY:
-                view.set(of('.', key), ((NBTTagByteArray) base).getByteArray());
+                view.set(of(key), ((NBTTagByteArray) base).getByteArray());
                 break;
             case NbtDataUtil.TAG_STRING:
-                view.set(of('.', key), ((NBTTagString) base).getString());
+                view.set(of(key), ((NBTTagString) base).getString());
                 break;
             case NbtDataUtil.TAG_LIST:
                 NBTTagList list = (NBTTagList) base;
@@ -222,10 +222,10 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 for (int i = 0; i < count; i++) {
                     objectList.add(fromTagBase(list.get(i), listType));
                 }
-                view.set(of('.', key), objectList);
+                view.set(of(key), objectList);
                 break;
             case NbtDataUtil.TAG_COMPOUND:
-                DataView internalView = view.createView(of('.', key));
+                DataView internalView = view.createView(of(key));
                 NBTTagCompound compound = (NBTTagCompound) base;
                 for (String internalKey : compound.getKeySet()) {
                     NBTBase internalBase = compound.getTag(internalKey);
@@ -238,7 +238,7 @@ public final class NbtTranslator implements DataTranslator<NBTTagCompound> {
                 }
                 break;
             case NbtDataUtil.TAG_INT_ARRAY:
-                view.set(of('.', key), ((NBTTagIntArray) base).getIntArray());
+                view.set(of(key), ((NBTTagIntArray) base).getIntArray());
                 break;
             default:
                 throw new IllegalArgumentException("Unknown NBT type " + type);

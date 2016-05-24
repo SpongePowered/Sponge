@@ -73,6 +73,8 @@ import java.util.List;
 public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
 
     private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
+    // uses different name to not clash with SpongeForge
+    private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -262,5 +264,10 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
             list.addAll(((IMixinCustomDataHolder) this).getCustomManipulators());
         }
         return list;
+    }
+
+    @Override
+    public boolean isVanilla() {
+        return this.isTileVanilla;
     }
 }

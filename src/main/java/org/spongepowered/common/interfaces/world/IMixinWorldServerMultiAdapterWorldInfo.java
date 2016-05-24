@@ -22,25 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.timings;
+package org.spongepowered.common.interfaces.world;
 
-import co.aikar.timings.TimingsManager;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import net.minecraft.world.storage.ISaveHandler;
+import net.minecraft.world.storage.WorldInfo;
 
-@Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer {
+/**
+ * Ignore this interface, its a nasty hack and you should just move on...
+ */
+public interface IMixinWorldServerMultiAdapterWorldInfo extends ISaveHandler {
+    ISaveHandler getProxySaveHandler();
 
-    @Inject(method = "tick()V", at = @At("HEAD") )
-    private void onTickBegin(CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.startTiming();
-    }
-
-    @Inject(method = "tick()V", at = @At("RETURN") )
-    private void onTickEnd(CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.stopTiming();
-    }
+    WorldInfo getRealWorldInfo();
 }

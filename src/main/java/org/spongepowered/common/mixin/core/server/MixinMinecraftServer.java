@@ -70,6 +70,7 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.lib.Opcodes;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -141,6 +142,8 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract DataFixer getDataFixer();
+    @Shadow public abstract int getMaxPlayerIdleMinutes();
+    @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -564,4 +567,15 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     private int onValueOfInteger(int dimensionId) {
         return this.dimensionId;
     }
+
+    @Override
+    public int getPlayerIdleTimeout() {
+        return this.getMaxPlayerIdleMinutes();
+    }
+
+    @Intrinsic
+    public void server$setPlayerIdleTimeout(int timeout) {
+        this.shadow$setPlayerIdleTimeout(timeout);
+    }
+
 }

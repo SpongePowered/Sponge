@@ -83,4 +83,5 @@ public interface IMixinTileEntity {
 
     void markDirty();
 
+    boolean isVanilla();
 }

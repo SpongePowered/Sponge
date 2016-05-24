@@ -43,7 +43,9 @@ import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -82,7 +84,15 @@ public abstract class MixinWorldEntitySpawner {
     @Nullable
     private static Class<? extends Entity> spawnerEntityClass;
 
-    @SuppressWarnings("unchecked")
+    @ModifyConstant(method = "findChunksForSpawning", constant = @Constant(intValue = 8))
+    public int adjustCheckRadiusForServerView(int originalValue, WorldServer worldServerIn, boolean spawnHostileMobs, boolean spawnPeacefulMobs,
+            boolean p_77192_4_) {
+        // TODO Adjust for when per-world view distances are a thing
+        return Math.min(((IMixinWorldServer) worldServerIn).getActiveConfig().getConfig().getWorld().getMobSpawnRange(), SpongeImpl
+                .getServer()
+                .getPlayerList().getViewDistance());
+    }
+
     @Inject(method = "findChunksForSpawning", at = @At(value = "HEAD"))
     private void onFindChunksForSpawningHead(WorldServer worldServer, boolean spawnHostileMobs, boolean spawnPeacefulMobs, boolean spawnedOnSetTickRate, CallbackInfoReturnable<Integer> ci) {
         IMixinWorldServer spongeWorld = ((IMixinWorldServer) worldServer);
@@ -141,7 +151,6 @@ public abstract class MixinWorldEntitySpawner {
      * @param pos The position
      * @return True if the worldserver check was valid and if our event wasn't cancelled
      */
-    @SuppressWarnings("unchecked")
     @Redirect(method = "findChunksForSpawning", at = @At(value = "INVOKE", target = WORLD_CAN_SPAWN_CREATURE))
     public boolean onCanSpawn(WorldServer worldServer, EnumCreatureType creatureType, Biome.SpawnListEntry spawnListEntry, BlockPos pos) {
         setEntityType(spawnListEntry.entityClass);

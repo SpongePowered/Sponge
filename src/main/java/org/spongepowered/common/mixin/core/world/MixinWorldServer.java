@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.flowpowered.math.vector.Vector3d;
 import com.flowpowered.math.vector.Vector3i;
@@ -36,9 +37,12 @@ import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.init.SoundEvents;
 import net.minecraft.nbt.NBTTagCompound;
+import net.minecraft.network.Packet;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.management.PlayerList;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
 import net.minecraft.util.math.BlockPos;
@@ -61,6 +65,9 @@ import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.translator.ConfigurateTranslator;
+import org.spongepowered.api.effect.particle.ParticleEffect;
+import org.spongepowered.api.effect.sound.SoundCategory;
+import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.Transform;
@@ -72,6 +79,7 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.cause.entity.spawn.WeatherSpawnCause;
 import org.spongepowered.api.event.entity.ConstructEntityEvent;
+import org.spongepowered.api.event.world.ChangeWorldWeatherEvent;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.PositionOutOfBoundsException;
@@ -82,6 +90,9 @@ import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.gen.BiomeGenerator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.api.world.gen.WorldGeneratorModifier;
+import org.spongepowered.api.world.storage.WorldStorage;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.Weathers;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -92,11 +103,12 @@ import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.DataQueries;
+import org.spongepowered.common.effect.particle.SpongeParticleEffect;
+import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.event.InternalNamedCauses;
@@ -133,7 +145,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,10 +175,16 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Shadow public abstract boolean fireBlockEvent(BlockEventData event);
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getEntityFromUuid(UUID uuid);
 
+    protected long weatherStartTime;
+    protected Weather prevWeather;
+
     @Inject(method = "<init>", at = @At("RETURN"))
-    public void onConstructed(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn,
-            CallbackInfo ci) {
+    public void onConstruct(MinecraftServer server, ISaveHandler saveHandlerIn, WorldInfo info, int dimensionId, Profiler profilerIn, CallbackInfo callbackInfo) {
+        this.prevWeather = getWeather();
+        this.weatherStartTime = this.worldInfo.getWorldTotalTime();
         ((World) (Object) this).getWorldBorder().addListener(new PlayerBorderListener(this.getMinecraftServer(), dimensionId));
+
+        updateWorldGenerator();
     }
 
     @Inject(method = "createSpawnPosition(Lnet/minecraft/world/WorldSettings;)V", at = @At("HEAD"), cancellable = true)
@@ -178,13 +195,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
             ci.cancel();
         }
     }
-
-    @Inject(method = "init", at = @At("HEAD"))
-    public void beforeInit(CallbackInfoReturnable<World> cir) {
-        super.init(); // Call the super (vanilla doesn't do this)
-        updateWorldGenerator();
-    }
-
 
     @Override
     public boolean isProcessingExplosion() {
@@ -915,5 +925,148 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
         return true;
 
+    }
+
+
+    @Override
+    public WorldStorage getWorldStorage() {
+        return (WorldStorage) ((WorldServer) (Object) this).getChunkProvider();
+    }
+
+    /**************************** EFFECT ****************************************/
+
+    @Override
+    public void playSound(SoundType sound, SoundCategory category, Vector3d position, double volume) {
+        this.playSound(sound, category, position, volume, 1);
+    }
+
+    @Override
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch) {
+        this.playSound(sound, category, position, volume, pitch, 0);
+    }
+
+    @Override
+    public void playSound(SoundType sound,  SoundCategory category, Vector3d position, double volume, double pitch, double minVolume) {
+        this.playSound(null, position.getX(), position.getY(), position.getZ(), SoundEvents.getRegisteredSoundEvent(sound.getId()), (net.minecraft.util.SoundCategory) (Object) category, (float) Math.max(minVolume, volume), (float) pitch);
+    }
+
+    @Override
+    public void spawnParticles(ParticleEffect particleEffect, Vector3d position) {
+        this.spawnParticles(particleEffect, position, Integer.MAX_VALUE);
+    }
+
+    @Override
+    public void spawnParticles(ParticleEffect particleEffect, Vector3d position, int radius) {
+        checkNotNull(particleEffect, "The particle effect cannot be null!");
+        checkNotNull(position, "The position cannot be null");
+        checkArgument(radius > 0, "The radius has to be greater then zero!");
+
+        List<Packet<?>> packets = SpongeParticleHelper.toPackets((SpongeParticleEffect) particleEffect, position);
+
+        if (!packets.isEmpty()) {
+            PlayerList playerList = this.mcServer.getPlayerList();
+
+            double x = position.getX();
+            double y = position.getY();
+            double z = position.getZ();
+
+            for (Packet<?> packet : packets) {
+                playerList.sendToAllNearExcept(null, x, y, z, radius, this.getDimensionId(), packet);
+            }
+        }
+    }
+
+
+    @Override
+    public Weather getWeather() {
+        if (this.worldInfo.isThundering()) {
+            return Weathers.THUNDER_STORM;
+        } else if (this.worldInfo.isRaining()) {
+            return Weathers.RAIN;
+        } else {
+            return Weathers.CLEAR;
+        }
+    }
+
+    @Override
+    public long getRemainingDuration() {
+        Weather weather = getWeather();
+        if (weather.equals(Weathers.CLEAR)) {
+            if (this.worldInfo.getCleanWeatherTime() > 0) {
+                return this.worldInfo.getCleanWeatherTime();
+            } else {
+                return Math.min(this.worldInfo.getThunderTime(), this.worldInfo.getRainTime());
+            }
+        } else if (weather.equals(Weathers.THUNDER_STORM)) {
+            return this.worldInfo.getThunderTime();
+        } else if (weather.equals(Weathers.RAIN)) {
+            return this.worldInfo.getRainTime();
+        }
+        return 0;
+    }
+
+    @Override
+    public long getRunningDuration() {
+        return this.worldInfo.getWorldTotalTime() - this.weatherStartTime;
+    }
+
+    @Override
+    public void setWeather(Weather weather) {
+        if (weather.equals(Weathers.CLEAR)) {
+            this.setWeather(weather, (300 + this.rand.nextInt(600)) * 20);
+        } else {
+            this.setWeather(weather, 0);
+        }
+    }
+
+    @Override
+    public void setWeather(Weather weather, long duration) {
+        if (weather.equals(Weathers.CLEAR)) {
+            this.worldInfo.setCleanWeatherTime((int) duration);
+            this.worldInfo.setRainTime(0);
+            this.worldInfo.setThunderTime(0);
+            this.worldInfo.setRaining(false);
+            this.worldInfo.setThundering(false);
+        } else if (weather.equals(Weathers.RAIN)) {
+            this.worldInfo.setCleanWeatherTime(0);
+            this.worldInfo.setRainTime((int) duration);
+            this.worldInfo.setThunderTime((int) duration);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(false);
+        } else if (weather.equals(Weathers.THUNDER_STORM)) {
+            this.worldInfo.setCleanWeatherTime(0);
+            this.worldInfo.setRainTime((int) duration);
+            this.worldInfo.setThunderTime((int) duration);
+            this.worldInfo.setRaining(true);
+            this.worldInfo.setThundering(true);
+        }
+    }
+
+    @Inject(method = "updateWeather", at = @At(value = "RETURN"))
+    public void onUpdateWeatherReturn(CallbackInfo ci) {
+        Weather weather = getWeather();
+        int duration = (int) getRemainingDuration();
+        if (this.prevWeather != weather && duration > 0) {
+            ChangeWorldWeatherEvent event = SpongeEventFactory.createChangeWorldWeatherEvent(Cause.of(NamedCause.source(this)), duration, duration,
+                    weather, weather, this.prevWeather, this);
+            SpongeImpl.postEvent(event);
+            if (event.isCancelled()) {
+                this.setWeather(this.prevWeather);
+            } else {
+                this.setWeather(event.getWeather(), event.getDuration());
+                this.prevWeather = event.getWeather();
+                this.weatherStartTime = this.worldInfo.getWorldTotalTime();
+            }
+        }
+    }
+
+    @Override
+    public long getWeatherStartTime() {
+        return this.weatherStartTime;
+    }
+
+    @Override
+    public void setWeatherStartTime(long weatherStartTime) {
+        this.weatherStartTime = weatherStartTime;
     }
 }

@@ -34,6 +34,7 @@ import net.minecraft.entity.item.EntityMinecartCommandBlock;
 import net.minecraft.entity.item.EntityXPOrb;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.entity.projectile.EntityArrow;
+import net.minecraft.inventory.Slot;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
@@ -48,6 +49,7 @@ import net.minecraft.network.play.client.CPacketUpdateSign;
 import net.minecraft.network.play.client.CPacketUseEntity;
 import net.minecraft.network.play.server.SPacketBlockChange;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
+import net.minecraft.network.play.server.SPacketSetSlot;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.PlayerInteractionManager;
 import net.minecraft.server.management.PlayerList;
@@ -95,7 +97,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -124,13 +125,7 @@ import javax.annotation.Nullable;
 @Mixin(NetHandlerPlayServer.class)
 public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMixinNetHandlerPlayServer {
 
-    private static final String CONTAINER_SLOT_CLICK = "Lnet/minecraft/inventory/Container;slotClick(IIILnet/minecraft/entity/player/EntityPlayer;)Lnet/minecraft/item/ItemStack;";
-    private static final String PLAYER_UPDATE_CRAFTING_INVENTORY = "Lnet/minecraft/entity/player/EntityPlayerMP;updateCraftingInventory(Lnet/minecraft/inventory/Container;Ljava/util/List;)V";
-    private static final String PLAYER_IS_CHANGING_QUANTITY_FIELD = "Lnet/minecraft/entity/player/EntityPlayerMP;isChangingQuantityOnly:Z";
     private static final String UPDATE_SIGN = "Lnet/minecraft/network/play/client/CPacketUpdateSign;getLines()[Ljava/lang/String;";
-    private static final String HANDLE_CUSTOM_PAYLOAD = "net/minecraft/network/PacketThreadUtil.checkThreadAndEnqueue(Lnet/minecraft/network/Packet;Lnet/minecraft/network/INetHandler;Lnet/minecraft/util/IThreadListener;)V";
-    private static final String PLAYER_ATTACK_TARGET_ENTITY = "Lnet/minecraft/entity/player/EntityPlayerMP;attackTargetEntityWithCurrentItem(Lnet/minecraft/entity/Entity;)V";
-    private NetHandlerPlayServer netHandlerPlayServer = (NetHandlerPlayServer)(Object) this;
 
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public NetworkManager netManager;
@@ -457,7 +452,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         final Player player = ((Player) this.playerEntity);
         final Text message = SpongeTexts.toText(component);
         final MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Disconnect event = SpongeImplHooks.createClientConnectionEventDisconnect(
+        final ClientConnectionEvent.Disconnect event = SpongeEventFactory.createClientConnectionEventDisconnect(
                 Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel), new MessageEvent.MessageFormatter(message),
                 player, false
         );
@@ -473,6 +468,26 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
         if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             StaticMixinHelper.lastPrimaryPacketTick = SpongeImpl.getServer().getTickCounter();
         }
+    }
+
+    @Nullable
+    @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/EntityPlayerMP;dropItem(Z)Lnet/minecraft/entity/item/EntityItem;"))
+    public EntityItem onPlayerDropItem(EntityPlayerMP player, boolean dropAll) {
+        EntityItem item = null;
+        ItemStack stack = this.playerEntity.inventory.getCurrentItem();
+        if (stack != null) {
+            int size = stack.stackSize;
+            item = this.playerEntity.dropItem(dropAll);
+            // force client itemstack update if drop event was cancelled
+            if (item == null) {
+                Slot slot = this.playerEntity.openContainer.getSlotFromInventory(this.playerEntity.inventory, this.playerEntity.inventory.currentItem);
+                int windowId = this.playerEntity.openContainer.windowId;
+                stack.stackSize = size;
+                this.sendPacket(new SPacketSetSlot(windowId, slot.slotNumber, stack));
+            }
+        }
+
+        return item;
     }
 
     @Redirect(method = "processPlayerDigging", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/management/PlayerInteractionManager;onBlockClicked(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/EnumFacing;)V"))

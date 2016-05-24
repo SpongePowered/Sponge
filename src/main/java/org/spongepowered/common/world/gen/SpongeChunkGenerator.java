@@ -87,6 +87,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 /**
  * Similar class to {@link ChunkProviderOverworld}, but instead gets its blocks
  * from a custom chunk generator.
@@ -192,16 +194,12 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public List<GenerationPopulator> getGenerationPopulators(Class<? extends GenerationPopulator> type) {
-        return this.genpop.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.genpop.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
     public List<Populator> getPopulators(Class<? extends Populator> type) {
-        return this.pop.stream().filter((p) -> {
-            return type.isAssignableFrom(p.getClass());
-        }).collect(Collectors.toList());
+        return this.pop.stream().filter((p) -> type.isAssignableFrom(p.getClass())).collect(Collectors.toList());
     }
 
     @Override
@@ -356,10 +354,10 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         }
 
         Biome biome = this.world.getBiomeGenForCoords(pos);
-        List<SpawnListEntry> creatures = biome.getSpawnableList(creatureType);
-        return creatures;
+        return biome.getSpawnableList(creatureType);
     }
 
+    @Nullable
     @Override
     public BlockPos getStrongholdGen(World worldIn, String structureName, BlockPos position) {
         if ("Stronghold".equals(structureName)) {
@@ -377,9 +375,15 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
 
     @Override
     public void recreateStructures(Chunk chunkIn, int x, int z) {
-        this.genpop.stream().filter(genpop -> genpop instanceof MapGenStructure).forEach(genpop -> {
-            ((MapGenStructure) genpop).generate(chunkIn.getWorld(), x, z, (ChunkPrimer) null);
-        });
+        if (this.baseGenerator instanceof IChunkGenerator) {
+            ((IChunkGenerator) this.baseGenerator).recreateStructures(chunkIn, x, z);
+            return;
+        }
+        for (GenerationPopulator populator : this.genpop) {
+            if (populator instanceof MapGenStructure) {
+                ((MapGenStructure) populator).generate(chunkIn.getWorld(), x, z, null);
+            }
+        }
     }
 
     public void replaceBiomeBlocks(World world, Random rand, int x, int z, ChunkPrimer chunk, ImmutableBiomeArea biomes) {

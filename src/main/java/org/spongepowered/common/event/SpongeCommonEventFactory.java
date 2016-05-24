@@ -31,7 +31,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.entity.EntityLivingBase;
+import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.entity.player.EntityPlayerMP;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.EnumHand;
 import net.minecraft.util.math.BlockPos;
@@ -43,6 +48,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.projectile.source.ProjectileSource;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -51,8 +58,15 @@ import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
+import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
+import org.spongepowered.api.event.entity.DestructEntityEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
+import org.spongepowered.api.event.message.MessageEvent;
+import org.spongepowered.api.text.Text;
+import org.spongepowered.api.text.channel.MessageChannel;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.GuavaCollectors;
@@ -68,12 +82,14 @@ import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
+import org.spongepowered.common.text.SpongeTexts;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -164,6 +180,89 @@ public class SpongeCommonEventFactory {
         } else {
             event = SpongeEventFactory.createInteractBlockEventSecondaryOffHand(cause, originalUseBlockResult, useBlockResult, originalUseItemResult, useItemResult, interactionPoint, targetBlock, targetSide);
         }
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
+        final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
+        MessageChannel originalChannel;
+        MessageChannel channel;
+        Text originalMessage;
+        Optional<User> sourceCreator = Optional.empty();
+        boolean messageCancelled = false;
+
+        if (entity instanceof EntityPlayerMP) {
+            Player player = (Player) entity;
+            originalChannel = player.getMessageChannel();
+            channel = player.getMessageChannel();
+        } else {
+            originalChannel = MessageChannel.TO_NONE;
+            channel = MessageChannel.TO_NONE;
+        }
+        if (source instanceof EntityDamageSource) {
+            EntityDamageSource damageSource = (EntityDamageSource) source;
+            IMixinEntity spongeEntity = (IMixinEntity) damageSource.getSourceOfDamage();
+            if (spongeEntity != null) {
+                sourceCreator = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            }
+        }
+
+        originalMessage = SpongeTexts.toText(entity.getCombatTracker().getDeathMessage());
+        formatter.getBody().add(new MessageEvent.DefaultBodyApplier(originalMessage));
+        List<NamedCause> causes = new ArrayList<>();
+        causes.add(NamedCause.of("Attacker", source));
+        if (sourceCreator.isPresent()) {
+            causes.add(NamedCause.owner(sourceCreator.get()));
+        }
+
+        Cause cause = Cause.of(causes);
+        DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(cause, originalChannel, Optional.of(channel), formatter, (Living) entity, messageCancelled);
+        SpongeImpl.postEvent(event);
+        Text message = event.getMessage();
+        if (!event.isMessageCancelled() && !message.isEmpty()) {
+            event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
+        }
+        return event;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static DropItemEvent.Destruct callDropItemEventDestruct(net.minecraft.entity.Entity entity, DamageSource source, List<EntityItem> itemDrops) {
+        Optional<User> sourceCreator = Optional.empty();
+
+        if (source instanceof EntityDamageSource) {
+            EntityDamageSource damageSource = (EntityDamageSource) source;
+            IMixinEntity spongeEntity = (IMixinEntity) damageSource.getSourceOfDamage();
+            if (spongeEntity != null) {
+                sourceCreator = spongeEntity.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR);
+            }
+        }
+
+        List<NamedCause> causes = new ArrayList<>();
+        causes.add(NamedCause.source(EntitySpawnCause.builder()
+                .entity((Entity) entity)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build()));
+        causes.add(NamedCause.of("Attacker", source));
+        causes.add(NamedCause.of("Victim", entity));
+        if (sourceCreator.isPresent()) {
+            causes.add(NamedCause.owner(sourceCreator.get()));
+        }
+        DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(Cause.of(causes), (List<org.spongepowered.api.entity.Entity>)(List<?>) itemDrops, (World) entity.worldObj);
+        SpongeImpl.postEvent(event);
+        return event;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static DropItemEvent.Dispense callDropItemEventDispenseSingle(net.minecraft.entity.Entity entity, EntityItem droppedItem) {
+        List<EntityItem> droppedItems = new ArrayList<>();
+        droppedItems.add(droppedItem);
+
+        SpawnCause spawnCause = EntitySpawnCause.builder()
+                .entity((Entity) entity)
+                .type(SpawnTypes.DROPPED_ITEM)
+                .build();
+        DropItemEvent.Dispense event = SpongeEventFactory.createDropItemEventDispense(Cause.of(NamedCause.source(spawnCause)), (List<org.spongepowered.api.entity.Entity>)(List<?>) droppedItems, (World) entity.worldObj);
         SpongeImpl.postEvent(event);
         return event;
     }

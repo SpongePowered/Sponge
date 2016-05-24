@@ -69,7 +69,7 @@ public abstract class Query<V> implements Callable<V> {
     protected GameProfile fillProfile(GameProfile profile, boolean signed) throws ProfileNotFoundException {
         if (this.useCache) {
             Optional<GameProfile> result = this.cache.getById(profile.getUniqueId());
-            if (result.isPresent() && result.get().isFilled()) {
+            if (result.isPresent() && result.get().isFilled() && !result.get().getPropertyMap().isEmpty()) {
                 return result.get();
             }
         }
@@ -78,7 +78,7 @@ public abstract class Query<V> implements Callable<V> {
         if (result.isPresent() && result.get().isFilled()) {
             GameProfile t = result.get();
 
-            this.cache.add(t);
+            this.cache.add(t, true, null);
 
             return t;
         } else {

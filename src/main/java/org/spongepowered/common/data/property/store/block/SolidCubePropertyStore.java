@@ -26,34 +26,32 @@ package org.spongepowered.common.data.property.store.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.EnumFacing;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 import org.spongepowered.api.data.property.block.SolidCubeProperty;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.data.property.store.common.AbstractSpongePropertyStore;
-import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.data.property.store.common.AbstractBlockPropertyStore;
 
 import java.util.Optional;
 
-public class SolidCubePropertyStore extends AbstractSpongePropertyStore<SolidCubeProperty> {
+public class SolidCubePropertyStore extends AbstractBlockPropertyStore<SolidCubeProperty> {
 
     protected static final SolidCubeProperty TRUE = new SolidCubeProperty(true);
     protected static final SolidCubeProperty FALSE = new SolidCubeProperty(false);
 
-    @Override
-    public Optional<SolidCubeProperty> getFor(Location<World> location) {
-        final Block block = (Block) location.getBlockType();
-        return Optional.of(block.getMaterial((IBlockState) location.getBlock()).isSolid() ? TRUE : FALSE);
+    public SolidCubePropertyStore() {
+        super(true);
     }
 
     @Override
-    public Optional<SolidCubeProperty> getFor(Location<World> location, Direction direction) {
-        final net.minecraft.world.World world = (net.minecraft.world.World) location.getExtent();
-        final Block block = (Block) location.getBlockType();
-        final BlockPos pos = VecHelper.toBlockPos(location);
-        final EnumFacing facing = toEnumFacing(direction);
+    protected Optional<SolidCubeProperty> getForBlock(IBlockState block) {
+        return Optional.of(block.getMaterial().isSolid() ? TRUE : FALSE);
+    }
+
+    @Override
+    protected Optional<SolidCubeProperty> getForDirection(World world, int x, int y, int z, EnumFacing facing) {
+        BlockPos pos = new BlockPos(x, y, z);
+        Block block = world.getBlockState(pos).getBlock();
         return Optional.of(block.isBlockSolid(world, pos, facing) ? TRUE : FALSE);
     }
 

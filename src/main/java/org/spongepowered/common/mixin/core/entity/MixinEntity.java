@@ -44,6 +44,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.network.Packet;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPacketDestroyEntities;
 import net.minecraft.network.play.server.SPacketPlayerListItem;
 import net.minecraft.network.play.server.SPacketPlayerPosLook;
@@ -141,7 +142,6 @@ public abstract class MixinEntity implements IMixinEntity {
     private static final String
             ENTITY_ITEM_INIT =
             "Lnet/minecraft/entity/item/EntityItem;<init>(Lnet/minecraft/world/World;DDDLnet/minecraft/item/ItemStack;)V";
-    private static final String WORLD_SPAWN_ENTITY = "Lnet/minecraft/world/World;spawnEntityInWorld(Lnet/minecraft/entity/Entity;)Z";
     // @formatter:off
     private EntityType entityType = SpongeImpl.getRegistry().getTranslated(this.getClass(), EntityType.class);
     private boolean teleporting;
@@ -152,9 +152,10 @@ public abstract class MixinEntity implements IMixinEntity {
     protected boolean isConstructing = true;
     @Nullable private Text displayName;
     protected DamageSource lastDamageSource;
-    private Cause destructCause;
+    protected Cause destructCause;
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
+    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -184,6 +185,8 @@ public abstract class MixinEntity implements IMixinEntity {
     @Shadow protected Random rand;
     @Shadow public float prevDistanceWalkedModified;
     @Shadow public float distanceWalkedModified;
+    @Shadow protected EntityDataManager dataManager;
+
     @Shadow public abstract void setPosition(double x, double y, double z);
     @Shadow public abstract void setDead();
     @Shadow public abstract void setFlag(int flag, boolean data);
@@ -1092,5 +1095,10 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public BlockPos getLastCollidedBlockPos() {
         return this.lastCollidedBlockPos;
+    }
+
+    @Override
+    public boolean isVanilla() {
+        return this.isVanilla;
     }
 }

@@ -146,6 +146,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static final String WORLD_KEEP_SPAWN_LOADED = "keep-spawn-loaded";
     public static final String WORLD_LOAD_ON_STARTUP = "load-on-startup";
     public static final String WORLD_GENERATE_SPAWN_ON_LOAD = "generate-spawn-on-load";
+    public static final String WORLD_MOB_SPAWN_RANGE = "mob-spawn-range";
     public static final String WORLD_GEN_MODIFIERS = "world-generation-modifiers";
 
     private static final String HEADER = "1.0\n"
@@ -1066,6 +1067,10 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = WORLD_FLOWING_LAVA_DECAY, comment = "Lava behaves like vanilla water when source block is removed")
         private boolean flowingLavaDecay = false;
 
+        @Setting(value = WORLD_MOB_SPAWN_RANGE, comment = "Specifies the radius (in chunks) of where creatures will spawn. This value is capped to "
+                + "the current view distance setting in server.properties")
+        protected int mobSpawnRange = 8;
+
         @Setting(value = WORLD_ENABLED, comment = "Enable if this world should be registered.")
         protected boolean worldEnabled = true;
 
@@ -1135,6 +1140,14 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
 
         public void setPVPEnabled(boolean allow) {
             this.pvpEnabled = allow;
+        }
+
+        public int getMobSpawnRange() {
+            return mobSpawnRange;
+        }
+
+        public void setMobSpawnRange(int range) {
+            this.mobSpawnRange = range;
         }
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.world;
 import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.MinecraftException;
-import net.minecraft.world.World;
 import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServerMulti;
 import net.minecraft.world.storage.ISaveHandler;
@@ -35,6 +34,9 @@ import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.world.storage.WorldServerMultiAdapterWorldInfo;
 
 @NonnullByDefault
 @Mixin(WorldServerMulti.class)
@@ -44,8 +46,29 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         super(server, saveHandlerIn, info, dimensionId, profilerIn);
     }
 
+    private static WorldInfo realWorldInfo;
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
+    private static ISaveHandler unwrapSaveHandler(ISaveHandler wrappedSaveHandler) {
+        if (wrappedSaveHandler instanceof WorldServerMultiAdapterWorldInfo) {
+            realWorldInfo = ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getRealWorldInfo();
+            return ((WorldServerMultiAdapterWorldInfo) wrappedSaveHandler).getProxySaveHandler();
+        } else {
+            return wrappedSaveHandler;
+        }
+    }
+
+    @ModifyArg(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/WorldServer;<init>(Lnet/minecraft/server/MinecraftServer;Lnet/minecraft/world/storage/ISaveHandler;Lnet/minecraft/world/storage/WorldInfo;ILnet/minecraft/profiler/Profiler;)V"))
+    private static WorldInfo replaceWorldInfo(WorldInfo derivedInfo) {
+        if (realWorldInfo != null) {
+            return realWorldInfo;
+        } else {
+            return derivedInfo;
+        }
+    }
+
     /**
-     * @author unknown
+     * @author bloodmc
      * @reason Uses our own save handler instead of delegating to
      * the "parent" world since multi-world support changes the
      * structure.
@@ -60,15 +83,5 @@ public abstract class MixinWorldServerMulti extends WorldServer {
         // use a seperate save handler for each world. Each world folder needs to generate a corresponding
         // level.dat for plugins that require it such as MultiVerse.
         super.saveLevel();
-    }
-
-    /**
-     * @author unknown
-     * @reason Simply re-delegates to the super class
-     */
-    @Override
-    @Overwrite
-    public World init() {
-        return super.init();
     }
 }

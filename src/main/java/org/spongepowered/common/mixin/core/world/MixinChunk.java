@@ -117,7 +117,6 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     private org.spongepowered.api.world.World world;
     private UUID uuid;
-    private Chunk[] clientNeighbors = new Chunk[4];
     private Chunk[] neighbors = new Chunk[4];
 
     private static final int NUM_XZ_BITS = 4;
@@ -412,7 +411,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesWithinAABBForEntity", at = @At(value = "RETURN"))
     public void onGetEntitiesWithinAABBForEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<Entity> p_177414_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote) {
+        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().getState().ignoresEntityCollisions())) {
             return;
         }
 
@@ -430,7 +429,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
     @Inject(method = "getEntitiesOfTypeWithinAAAB", at = @At(value = "RETURN"))
     public void onGetEntitiesOfTypeWithinAAAB(Class<? extends Entity> entityClass, AxisAlignedBB aabb, List listToFill, Predicate<Entity> p_177430_4_,
             CallbackInfo ci) {
-        if (this.worldObj.isRemote) {
+        if (this.worldObj.isRemote || (this.worldObj instanceof IMixinWorldServer && ((IMixinWorldServer) this.worldObj).getCauseTracker().getStack().peek().getState().ignoresEntityCollisions())) {
             return;
         }
 
@@ -526,6 +525,7 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
             if (!this.worldObj.isRemote) {
                 // Sponge - Forge adds this change for block changes to only fire events when necessary
                 if (currentState.getBlock() != newState.getBlock()) {
+                    // TODO - delegate entity spawns to the per block entity captures
                     currentBlock.breakBlock(this.worldObj, pos, currentState);
                 }
                 // Sponge - Add several tile entity hook checks. Mainly for forge added hooks, but these
@@ -800,49 +800,41 @@ public abstract class MixinChunk implements Chunk, IMixinChunk {
 
     @Override
     public void setNeighbor(Direction direction, @Nullable Chunk neighbor) {
-        if (this.worldObj.isRemote) {
-            this.clientNeighbors[directionToIndex(direction)] = neighbor;
-        } else {
-            this.neighbors[directionToIndex(direction)] = neighbor;
-        }
+        this.neighbors[directionToIndex(direction)] = neighbor;
     }
 
-//    @Override
-//    public Optional<Chunk> getNeighbor(Direction direction, boolean shouldLoad) {
-//        checkNotNull(direction, "direction");
-//        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
-//
-//        if (direction.isUpright() || direction == Direction.NONE) {
-//            return Optional.of(this);
-//        }
-//
-//        int index = directionToIndex(direction);
-//        Direction secondary = getSecondaryDirection(direction);
-//        Chunk neighbor = null;
-//        if (this.worldObj.isRemote) {
-//            neighbor = this.clientNeighbors[index];
-//        } else {
-//            neighbor = this.neighbors[index];
-//        }
-//
-//        if (neighbor == null && shouldLoad) {
-//            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
-//            Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
-//            if (cardinal.isPresent()) {
-//                neighbor = cardinal.get();
-//            }
-//        }
-//
-//        if (neighbor != null) {
-//            if (secondary != Direction.NONE) {
-//                return neighbor.getNeighbor(secondary, shouldLoad);
-//            } else {
-//                return Optional.of(neighbor);
-//            }
-//        }
-//
-//        return Optional.empty();
-//    }
+    @Override
+    public Optional<Chunk> getNeighbor(Direction direction, boolean shouldLoad) {
+        checkNotNull(direction, "direction");
+        checkArgument(!direction.isSecondaryOrdinal(), "Secondary cardinal directions can't be used here");
+
+        if (direction.isUpright() || direction == Direction.NONE) {
+            return Optional.of(this);
+        }
+
+        int index = directionToIndex(direction);
+        Direction secondary = getSecondaryDirection(direction);
+        Chunk neighbor = null;
+        neighbor = this.neighbors[index];
+
+        if (neighbor == null && shouldLoad) {
+            Vector3i neighborPosition = this.getPosition().add(getCardinalDirection(direction).toVector3d().toInt());
+            Optional<Chunk> cardinal = this.getWorld().loadChunk(neighborPosition, true);
+            if (cardinal.isPresent()) {
+                neighbor = cardinal.get();
+            }
+        }
+
+        if (neighbor != null) {
+            if (secondary != Direction.NONE) {
+                return neighbor.getNeighbor(secondary, shouldLoad);
+            } else {
+                return Optional.of(neighbor);
+            }
+        }
+
+        return Optional.empty();
+    }
 
     private static int directionToIndex(Direction direction) {
         switch (direction) {

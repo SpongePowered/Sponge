@@ -33,8 +33,9 @@ import org.spongepowered.api.data.manipulator.DataManipulator;
 import org.spongepowered.api.data.manipulator.mutable.RepresentedItemData;
 import org.spongepowered.api.data.value.mutable.Value;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.cause.Cause;
+import org.spongepowered.api.event.cause.NamedCause;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.asm.mixin.Mixin;
@@ -42,6 +43,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.data.manipulator.mutable.SpongeRepresentedItemData;
 import org.spongepowered.common.data.value.mutable.SpongeValue;
 import org.spongepowered.common.item.inventory.util.ItemStackUtil;
@@ -91,6 +93,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
         if (this.delayBeforeCanPickup == MAGIC_INFINITE_DESPAWN_TIME && !this.infiniteDespawnDelay && this.pluginDespawnSet) {
             this.delayBeforeCanPickup--;
         }
+    }
+
+    @Inject(method = "onUpdate()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
+    public void onEntityItemUpdate(CallbackInfo ci) {
+        this.destructCause = Cause.of(NamedCause.of("ExpiredItem", this));
     }
 
     public int getPickupDelay() {
@@ -186,6 +193,11 @@ public abstract class MixinEntityItem extends MixinEntity implements Item {
     @Override
     public ItemType getItemType() {
         return (ItemType) getEntityItem().getItem();
+    }
+
+    @Inject(method = "combineItems", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/item/EntityItem;setDead()V"))
+    public void onCombineItems(EntityItem other, CallbackInfoReturnable<Boolean> cir) {
+        this.destructCause = Cause.of(NamedCause.of("CombinedItem", other));
     }
 
     // Data delegated methods - Reduces potentially expensive lookups for accessing guaranteed data

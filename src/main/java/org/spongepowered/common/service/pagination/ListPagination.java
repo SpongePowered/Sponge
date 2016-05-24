@@ -26,6 +26,7 @@ package org.spongepowered.common.service.pagination;
 
 import static org.spongepowered.common.util.SpongeCommonTranslationHelper.t;
 
+import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.command.CommandException;
 import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.channel.MessageReceiver;
@@ -49,6 +50,7 @@ class ListPagination extends ActivePagination {
 
         for (Map.Entry<Text, Integer> ent : lines) {
             if (getMaxContentLinesPerPage() > 0 && ent.getValue() + currentPageLines > getMaxContentLinesPerPage() && currentPageLines != 0) {
+                padPage(currentPage, currentPageLines, true);
                 currentPageLines = 0;
                 pages.add(currentPage);
                 currentPage = new ArrayList<>();
@@ -57,6 +59,10 @@ class ListPagination extends ActivePagination {
             currentPage.add(ent.getKey());
         }
         if (currentPageLines > 0) {
+            if (!pages.isEmpty()) {
+                // Only pad if we have a previous page
+                padPage(currentPage, currentPageLines, false);
+            }
             pages.add(currentPage);
         }
         this.pages = pages;
@@ -64,7 +70,9 @@ class ListPagination extends ActivePagination {
 
     @Override
     protected Iterable<Text> getLines(int page) throws CommandException {
-        if (page < 1) {
+        if (this.pages.size() == 0) {
+            return ImmutableList.of();
+        } else if (page < 1) {
             throw new CommandException(t("Page %s does not exist!", page));
         } else if (page > this.pages.size()) {
             throw new CommandException(t("Page %s is too high", page));

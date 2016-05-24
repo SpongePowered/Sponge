@@ -56,10 +56,6 @@ public abstract class MixinTileEntitySkull extends MixinTileEntity implements Sk
     public void supplyVanillaManipulators(List<DataManipulator<?, ?>> manipulators) {
         super.supplyVanillaManipulators(manipulators);
         manipulators.add(getSkullData());
-        Optional<DirectionalData> directionaData = get(DirectionalData.class);
-        if (directionaData.isPresent()) {
-            manipulators.add(directionaData.get());
-        }
         Optional<RepresentedPlayerData> profileData = get(RepresentedPlayerData.class);
         if (profileData.isPresent()) {
             manipulators.add(profileData.get());

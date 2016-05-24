@@ -89,6 +89,8 @@ import java.util.Random;
 @Implements(@Interface(iface = BlockType.class, prefix = "block$"))
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
+    private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+
     @Shadow private boolean needsRandomTick;
 
     @Shadow public abstract String getUnlocalizedName();
@@ -250,4 +252,8 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
         return allowTileDrops;
     }
 
+    @Override
+    public boolean isVanilla() {
+        return this.isVanilla;
+    }
 }

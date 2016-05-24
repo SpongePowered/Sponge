@@ -81,4 +81,7 @@ public interface IPhaseState {
     default void assignEntityCreator(PhaseContext context, Entity entity) {
 
     }
+    default boolean ignoresEntityCollisions() {
+        return false;
+    }
 }

@@ -22,25 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.timings;
+package org.spongepowered.common.mixin.core.block;
 
-import co.aikar.timings.TimingsManager;
-import net.minecraft.server.MinecraftServer;
+import net.minecraft.block.BlockHorizontal;
+import net.minecraft.block.BlockPumpkin;
+import net.minecraft.block.material.Material;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(MinecraftServer.class)
-public abstract class MixinMinecraftServer {
+@Mixin(BlockPumpkin.class)
+public abstract class MixinBlockPumpkin extends BlockHorizontal {
 
-    @Inject(method = "tick()V", at = @At("HEAD") )
-    private void onTickBegin(CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.startTiming();
+    public MixinBlockPumpkin(Material materialIn) {
+        super(materialIn);
     }
 
-    @Inject(method = "tick()V", at = @At("RETURN") )
-    private void onTickEnd(CallbackInfo ci) {
-        TimingsManager.FULL_SERVER_TICK.stopTiming();
+    @Inject(method = "trySpawnGolem", at = @At("HEAD"), cancellable = true)
+    private void checkChunkBeforeTrySpawnGolem(World world, BlockPos pos, CallbackInfo callbackInfo) {
+        final Chunk chunk = world.getChunkFromBlockCoords(pos);
+        if (chunk == null || chunk.isEmpty() || !chunk.isTerrainPopulated()) {
+            callbackInfo.cancel();
+        }
     }
+
 }

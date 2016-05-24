@@ -183,7 +183,7 @@ public abstract class MixinPlayerList {
         // Sponge end
 
         NBTTagCompound nbttagcompound = this.readPlayerDataFromFile(playerIn);
-        WorldServer worldServer = WorldManager.getWorldByDimensionId(playerIn.dimension).orElse(null);
+        WorldServer worldServer = this.mcServer.worldServerForDimension(playerIn.dimension);
         BlockPos randomizedSpawnPos = null;
 
         if (worldServer == null) {
@@ -367,7 +367,7 @@ public abstract class MixinPlayerList {
         // Fire PlayerJoinEvent
         Text originalMessage = SpongeTexts.toText(chatcomponenttranslation);
         MessageChannel originalChannel = player.getMessageChannel();
-        final ClientConnectionEvent.Join event = SpongeImplHooks.createClientConnectionEventJoin(
+        final ClientConnectionEvent.Join event = SpongeEventFactory.createClientConnectionEventJoin(
                 Cause.of(NamedCause.source(player)), originalChannel, Optional.of(originalChannel),
                 new MessageEvent.MessageFormatter(originalMessage), player, false
         );
@@ -396,7 +396,6 @@ public abstract class MixinPlayerList {
      * @param conqueredEnd Whether the end was conquered
      * @return The new player
      */
-    @SuppressWarnings("unchecked")
     @Overwrite
     public EntityPlayerMP recreatePlayerEntity(EntityPlayerMP entityPlayerMP, int targetDimension, boolean conqueredEnd) {
 
