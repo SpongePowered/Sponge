@@ -160,7 +160,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
     @Shadow protected abstract void setResourcePackFromWorld(String worldNameIn, ISaveHandler saveHandlerIn);
     @Shadow public abstract boolean getAllowNether();
     @Shadow public abstract int getMaxPlayerIdleMinutes();
-    @Shadow @Override public abstract void setPlayerIdleTimeout(int timeout);
+    @Shadow public abstract void shadow$setPlayerIdleTimeout(int timeout);
 
     private ResourcePack resourcePack;
     private boolean enableSaving = true;
@@ -1092,7 +1092,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
 
     @Intrinsic
     public void server$setPlayerIdleTimeout(int timeout) {
-        this.setPlayerIdleTimeout(timeout);
+        this.shadow$setPlayerIdleTimeout(timeout);
     }
 
 }

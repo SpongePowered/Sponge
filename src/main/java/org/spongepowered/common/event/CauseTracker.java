@@ -1000,10 +1000,12 @@ public final class CauseTracker {
             return false;
         } else {
             if (flag) {
-                EntityPlayer entityplayer = (EntityPlayer) entityIn;
-                net.minecraft.world.World world = this.targetWorld;
-                world.playerEntities.add(entityplayer);
-                world.updateAllPlayersSleepingFlag();
+                if (entityIn instanceof EntityPlayer) {
+                    EntityPlayer entityplayer = (EntityPlayer) entityIn;
+                    net.minecraft.world.World world = this.targetWorld;
+                    world.playerEntities.add(entityplayer);
+                    world.updateAllPlayersSleepingFlag();
+                }
                 if (SpongeImpl.postEvent(SpongeEventFactory.createSpawnEntityEvent(cause, Lists.newArrayList(entity),
                         Lists.newArrayList(entity.createSnapshot()), getWorld())) && !flag) {
                     return false;
