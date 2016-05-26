@@ -24,38 +24,20 @@
  */
 package org.spongepowered.common.event.entity.teleport;
 
-import com.google.common.base.Objects;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.common.AbstractPortalTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.common.AbstractPortalTeleportCauseBuilder;
 
-public class SpongePortalTeleportCause extends AbstractPortalTeleportCause implements PortalTeleportCause {
+public class SpongePortalTeleportCauseBuilder extends AbstractPortalTeleportCauseBuilder<PortalTeleportCause, PortalTeleportCause.Builder> implements PortalTeleportCause.Builder {
 
-    public SpongePortalTeleportCause(SpongePortalTeleportCauseBuilder builder) {
-        super(builder);
+    public SpongePortalTeleportCauseBuilder() {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        SpongePortalTeleportCause that = (SpongePortalTeleportCause) o;
-        return Objects.equal(this.teleportType, that.teleportType);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(this.teleportType);
-    }
-
-    @Override
-    public String toString() {
-        return Objects.toStringHelper("PortalTeleportCause")
-                .add("TeleportType", this.teleportType)
-                .add("PortalAgent", this.agent)
-                .toString();
+    public PortalTeleportCause build() {
+        checkNotNull(this.teleportType, "TeleportType must not be null!");
+        checkNotNull(this.agent, "PortalAgent cannot be null!");
+        return new SpongePortalTeleportCause(this);
     }
 }

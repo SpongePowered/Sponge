@@ -25,28 +25,13 @@
 package org.spongepowered.common.event.entity.teleport;
 
 import com.google.common.base.Objects;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.teleport.EntityTeleportCause;
-import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
+import org.spongepowered.api.event.cause.entity.teleport.common.AbstractEntityTeleportCause;
 
-public class SpongeEntityTeleportCause implements EntityTeleportCause {
+public class SpongeEntityTeleportCause extends AbstractEntityTeleportCause implements EntityTeleportCause {
 
-    private TeleportType teleportType;
-    private Entity entity;
-
-    public SpongeEntityTeleportCause(TeleportType type, Entity entity) {
-        this.teleportType = type;
-        this.entity = entity;
-    }
-
-    @Override
-    public TeleportType getTeleportType() {
-        return this.teleportType;
-    }
-
-    @Override
-    public Entity getTeleporter() {
-        return this.entity;
+    public SpongeEntityTeleportCause(SpongeEntityTeleportCauseBuilder builder) {
+        super(builder);
     }
 
     @Override
