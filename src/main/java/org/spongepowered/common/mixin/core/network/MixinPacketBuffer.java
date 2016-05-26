@@ -107,8 +107,8 @@ public abstract class MixinPacketBuffer extends ByteBuf {
     }
 
     public ChannelBuf cbuf$setIndex(int readIndex, int writeIndex) {
-        return (ChannelBuf)
-                this.setIndex(readIndex, writeIndex);
+        this.setIndex(readIndex, writeIndex);
+        return (ChannelBuf) this;
     }
 
     public ChannelBuf cbuf$clear() {
