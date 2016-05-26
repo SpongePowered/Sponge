@@ -41,7 +41,6 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.data.persistence.NbtTranslator;
-import org.spongepowered.common.network.SpongeNetworkManager;
 
 import java.io.IOException;
 import java.nio.ByteOrder;
@@ -53,33 +52,36 @@ import javax.annotation.Nullable;
 @Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$"))
 public abstract class MixinPacketBuffer extends ByteBuf {
 
-    @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
-    @Shadow public abstract byte[] readByteArray();
-    @Shadow public abstract byte[] readByteArray(int p_189425_1_);
-    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
-    @Shadow public abstract int readVarIntFromBuffer();
-    @Shadow public abstract PacketBuffer writeString(String string);
-    @Shadow public abstract String readStringFromBuffer(int maxLength);
-    @Shadow public abstract PacketBuffer writeNBTTagCompoundToBuffer(@Nullable NBTTagCompound nbt);
-    @Shadow public abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
+    private static final int MAX_STRING_LENGTH_BYTES = Short.MAX_VALUE;
+    private static final int MAX_STRING_LENGTH = MixinPacketBuffer.MAX_STRING_LENGTH_BYTES >> 2;
 
-    @Intrinsic
+    // mojang methods, fluent in target
+    @Shadow public abstract PacketBuffer writeByteArray(byte[] array);
+    @Shadow public abstract PacketBuffer writeVarIntToBuffer(int input);
+    @Shadow public abstract PacketBuffer writeString(String string);
+    @Shadow public abstract PacketBuffer writeNBTTagCompoundToBuffer(@Nullable NBTTagCompound nbt);
+    
+    // mojang methods, non-fluent
+    @Shadow public abstract byte[] readByteArray();
+    @Shadow public abstract byte[] readByteArray(int limit);
+    @Shadow public abstract int readVarIntFromBuffer();
+    @Shadow public abstract String readStringFromBuffer(int maxLength);
+    @Shadow public abstract NBTTagCompound readNBTTagCompoundFromBuffer() throws IOException;
+    @Shadow public abstract UUID readUuid();
+
     public int cbuf$getCapacity() {
         return this.capacity();
     }
 
-    @Intrinsic
     public int cbuf$available() {
         return this.writerIndex() - this.readerIndex();
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$order(ByteOrder order) {
         this.order(order);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ByteOrder cbuf$getByteOrder() {
         return this.order();
     }
@@ -89,7 +91,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.readerIndex();
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setReadIndex(int index) {
         this.readerIndex(index);
         return (ChannelBuf) this;
@@ -100,56 +101,49 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.writerIndex();
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setWriteIndex(int index) {
         this.writerIndex(index);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setIndex(int readIndex, int writeIndex) {
-        this.setIndex(readIndex, writeIndex);
-        return (ChannelBuf) this;
+        return (ChannelBuf)
+                this.setIndex(readIndex, writeIndex);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$clear() {
         this.clear();
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$markRead() {
         this.markReaderIndex();
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$markWrite() {
         this.markWriterIndex();
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$resetRead() {
         this.resetReaderIndex();
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$resetWrite() {
         this.resetWriterIndex();
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$slice() {
-        return SpongeNetworkManager.toChannelBuf(this.slice());
+        this.slice();
+        return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$slice(int index, int length) {
-        return SpongeNetworkManager.toChannelBuf(this.slice(index, length));
+        this.slice(index, length);
+        return (ChannelBuf) this;
     }
 
     @Intrinsic
@@ -157,13 +151,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.array();
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeBoolean(boolean data) {
         this.writeBoolean(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setBoolean(int index, boolean data) {
         this.setBoolean(index, data);
         return (ChannelBuf) this;
@@ -179,13 +171,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getBoolean(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeByte(byte data) {
         this.writeByte(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setByte(int index, byte data) {
         this.setByte(index, data);
         return (ChannelBuf) this;
@@ -201,24 +191,20 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getByte(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeByteArray(byte[] data) {
-        return (ChannelBuf) this.writeByteArray(data);
+        return (ChannelBuf) this.writeByteArray(data); // fluent in target
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeByteArray(byte[] data, int start, int length) {
         this.writeBytes(data, start, length);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setByteArray(int index, byte[] data) {
         this.setBytes(index, data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setByteArray(int index, byte[] data, int start, int length) {
         this.setBytes(index, data, start, length);
         return (ChannelBuf) this;
@@ -234,25 +220,21 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.readByteArray(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeBytes(byte[] data) {
         this.writeBytes(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeBytes(byte[] data, int start, int length) {
         this.writeBytes(data, start, length);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setBytes(int index, byte[] data) {
         this.setBytes(index, data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setBytes(int index, byte[] data, int start, int length) {
         this.setBytes(index, data, start, length);
         return (ChannelBuf) this;
@@ -263,20 +245,17 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.readBytes(length).array();
     }
 
-    @Intrinsic
     public byte[] cbuf$readBytes(int index, int length) {
         final byte[] dest = new byte[length];
         this.readBytes(dest, index, length);
         return dest;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeShort(short data) {
         this.writeShort(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setShort(int index, short data) {
         this.setShort(index, data);
         return (ChannelBuf) this;
@@ -292,13 +271,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getShort(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeChar(char data) {
         this.writeChar(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setChar(int index, char data) {
         this.setChar(index, data);
         return (ChannelBuf) this;
@@ -314,35 +291,29 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getChar(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeInteger(int data) {
         this.writeInt(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setInteger(int index, int data) {
         this.setInt(index, data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public int cbuf$readInteger() {
         return this.readInt();
     }
 
-    @Intrinsic
     public int getInteger(int index) {
         return this.getInt(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeLong(long data) {
         this.writeLong(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setLong(int index, long data) {
         this.setLong(index, data);
         return (ChannelBuf) this;
@@ -358,13 +329,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getLong(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeFloat(float data) {
         this.writeFloat(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setFloat(int index, float data) {
         this.setFloat(index, data);
         return (ChannelBuf) this;
@@ -380,13 +349,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getFloat(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeDouble(double data) {
         this.writeDouble(data);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setDouble(int index, double data) {
         this.setDouble(index, data);
         return (ChannelBuf) this;
@@ -402,12 +369,10 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return this.getDouble(index);
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeVarInt(int value) {
-        return (ChannelBuf) this.writeVarIntToBuffer(value);
+        return (ChannelBuf) this.writeVarIntToBuffer(value); // fluent in target
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setVarInt(int index, int value) {
         final int oldIndex = this.writerIndex();
         this.writerIndex(index);
@@ -416,12 +381,10 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public int cbuf$readVarInt() {
         return this.readVarIntFromBuffer();
     }
 
-    @Intrinsic
     public int cbuf$getVarInt(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
@@ -430,12 +393,10 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return value;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeString(String data) {
-        return (ChannelBuf) this.writeString(checkNotNull(data));
+        return (ChannelBuf) this.writeString(checkNotNull(data)); // fluent in target
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setString(int index, String data) {
         checkNotNull(data);
         final int oldIndex = this.writerIndex();
@@ -445,32 +406,29 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public String cbuf$readString() {
-        return this.readStringFromBuffer(32767);
+        return this.readStringFromBuffer(MixinPacketBuffer.MAX_STRING_LENGTH);
     }
 
-    @Intrinsic
     public String cbuf$getString(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final String value = this.readStringFromBuffer(32767);
+        final String value = this.readStringFromBuffer(MixinPacketBuffer.MAX_STRING_LENGTH);
         this.readerIndex(oldIndex);
         return value;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeUTF(String data) {
         byte[] bytes = data.getBytes(Charsets.UTF_8);
-        if (bytes.length > 32767) {
-            throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max " + 32767 + ")");
+        if (bytes.length > MixinPacketBuffer.MAX_STRING_LENGTH_BYTES) {
+            throw new EncoderException("String too big (was " + data.length() + " bytes encoded, max "
+                    + MixinPacketBuffer.MAX_STRING_LENGTH_BYTES + ")");
         }
         this.writeShort(bytes.length);
         this.writeBytes(bytes);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setUTF(int index, String data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
@@ -480,13 +438,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public String cbuf$readUTF() {
         final short length = this.readShort();
         return new String(this.readBytes(length).array(), Charsets.UTF_8);
     }
 
-    @Intrinsic
     public String cbuf$getUTF(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
@@ -496,13 +452,11 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return data;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeUniqueId(UUID data) {
         checkNotNull(data, "data");
         return this.cbuf$writeLong(data.getMostSignificantBits()).writeLong(data.getLeastSignificantBits());
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setUniqueId(int index, UUID data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
@@ -512,28 +466,24 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public UUID cbuf$readUniqueId() {
-        return new UUID(this.readLong(), this.readLong());
+        return this.readUuid();
     }
 
-    @Intrinsic
     public UUID getUniqueId(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
-        final UUID data = new UUID(this.readLong(), this.readLong());
+        final UUID data = this.readUuid();
         this.readerIndex(oldIndex);
         return data;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$writeDataView(DataView data) {
         final NBTTagCompound compound = NbtTranslator.getInstance().translateData(checkNotNull(data, "data"));
         this.writeNBTTagCompoundToBuffer(compound);
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public ChannelBuf cbuf$setDataView(int index, DataView data) {
         checkNotNull(data, "data");
         final int oldIndex = this.writerIndex();
@@ -543,7 +493,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         return (ChannelBuf) this;
     }
 
-    @Intrinsic
     public DataView cbuf$readDataView() {
         try {
             return NbtTranslator.getInstance().translateFrom(this.readNBTTagCompoundFromBuffer());
@@ -552,7 +501,6 @@ public abstract class MixinPacketBuffer extends ByteBuf {
         }
     }
 
-    @Intrinsic
     public DataView cbuf$getDataView(int index) {
         final int oldIndex = this.readerIndex();
         this.readerIndex(index);
