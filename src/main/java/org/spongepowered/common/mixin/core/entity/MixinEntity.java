@@ -27,6 +27,8 @@ package org.spongepowered.common.mixin.core.entity;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import co.aikar.timings.SpongeTimings;
+import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -156,6 +158,7 @@ public abstract class MixinEntity implements IMixinEntity {
     private BlockState currentCollidingBlock;
     private BlockPos lastCollidedBlockPos;
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private Timing timing;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -1100,5 +1103,13 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public boolean isVanilla() {
         return this.isVanilla;
+    }
+
+    @Override
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            this.timing = SpongeTimings.getEntityTiming(this);
+        }
+        return this.timing;
     }
 }

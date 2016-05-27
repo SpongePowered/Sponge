@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.Entity;
@@ -83,5 +84,7 @@ public interface IMixinWorldServer extends IMixinWorld {
     boolean isProcessingExplosion();
 
     boolean isMinecraftChunkLoaded(int x, int z, boolean allowEmpty);
+
+    WorldTimingsHandler getTimingsHandler();
 
 }

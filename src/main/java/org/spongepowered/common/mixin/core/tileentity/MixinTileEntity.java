@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.tileentity;
 
+import co.aikar.timings.SpongeTimings;
+import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
@@ -75,6 +77,7 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     private final TileEntityType tileType = SpongeImpl.getRegistry().getTranslated(this.getClass(), TileEntityType.class);
     // uses different name to not clash with SpongeForge
     private final boolean isTileVanilla = getClass().getName().startsWith("net.minecraft.");
+    private Timing timing;
 
     @Shadow protected boolean tileEntityInvalid;
     @Shadow protected net.minecraft.world.World worldObj;
@@ -269,5 +272,13 @@ public abstract class MixinTileEntity implements TileEntity, IMixinTileEntity {
     @Override
     public boolean isVanilla() {
         return this.isTileVanilla;
+    }
+
+    @Override
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            this.timing = SpongeTimings.getTileEntityTiming((org.spongepowered.api.block.tileentity.TileEntity) (Object) this);
+        }
+        return this.timing;
     }
 }

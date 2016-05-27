@@ -51,7 +51,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -103,6 +102,8 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.asm.lib.Opcodes;
+import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -111,6 +112,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -119,6 +121,7 @@ import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -144,6 +147,10 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(net.minecraft.world.World.class)
 public abstract class MixinWorld implements World, IMixinWorld {
+
+    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
+    private static final String PROFILER_ES = "Lnet/minecraft/profiler/Profiler;endSection()V";
+    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     private static final Vector3i BLOCK_MIN = new Vector3i(-30000000, 0, -30000000);
     private static final Vector3i BLOCK_MAX = new Vector3i(30000000, 256, 30000000).sub(1, 1, 1);
@@ -182,9 +189,10 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Shadow public abstract boolean checkLight(BlockPos pos);
     @Shadow public abstract boolean isValid(BlockPos pos);
+    @Shadow public abstract boolean addTileEntity(net.minecraft.tileentity.TileEntity tile);
     @Shadow public abstract void onEntityAdded(net.minecraft.entity.Entity entityIn);
-    @Shadow public abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract boolean isAreaLoaded(int xStart, int yStart, int zStart, int xEnd, int yEnd, int zEnd, boolean allowEmpty);
+    @Shadow protected abstract void onEntityRemoved(net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void updateEntity(net.minecraft.entity.Entity ent);
     @Shadow public abstract net.minecraft.world.chunk.Chunk getChunkFromBlockCoords(BlockPos pos);
     @Shadow public abstract boolean isBlockLoaded(BlockPos pos);
@@ -807,6 +815,116 @@ public abstract class MixinWorld implements World, IMixinWorld {
         entity.onUpdate();
     }
 
+    // TIMINGS All these methods are overriden in MixinWorldServer
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", shift = At.Shift.AFTER, args = "ldc=global"))
+    protected void startEntityGlobalTimings(CallbackInfo callbackInfo) {
+        if (!this.isRemote && this instanceof IMixinWorldServer) {
+            ((IMixinWorldServer) this).getTimingsHandler().entityTick.startTiming();
+            co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
+        }
+    }
+    // Note that the entity timing if it hasn't crashed is already stopped in TrackingUtil
 
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
+    protected void stopTimingForWeatherEntityTickCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity updatingEntity) {
+        if (!this.isRemote) {
+            EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+        }
+    }
+
+    // Inject before this.theProfiler.endStartSection("remove");
+
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=remove"))
+    protected void stopEntityTickTimingStartEntityRemovalTiming(CallbackInfo callbackInfo) {
+    }
+
+    // Inject after this.theProfiler.endStartSection("regular");
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=regular", shift = At.Shift.AFTER))
+    protected void stopEntityRemovalTiming(CallbackInfo callbackInfo) {
+    }
+
+    // Inject inside  if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP))
+    // Which has the following bytecode:
+    //     LINENUMBER 1528 L52
+    //     ALOAD 2
+    //     GETFIELD net/minecraft/entity/Entity.isDead : Z <--- Where we want to inject before
+    //     IFNE L53
+    //     ALOAD 2
+    //     INSTANCEOF net/minecraft/entity/player/EntityPlayerMP
+    //     IFNE L53
+
+
+    @Inject(method = "updateEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;isDead:Z"))
+    protected void startEntityTickTiming(CallbackInfo callbackInfo) {
+    }
+
+    // Inject at the head of the catch statement for a crash report generation
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
+    protected void stopTimingTickEntityCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity entity, net.minecraft.entity.Entity updatingEntity) {
+        if (!this.isRemote) {
+            EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+        }
+    }
+
+
+    // Inject before
+    // this.theProfiler.endSection();
+    // this.theProfiler.startSection("remove");
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 0, shift = At.Shift.AFTER))
+    protected void stopEntityTickSectionBeforeRemove(CallbackInfo callbackInfo) {
+    }
+
+    // Inject after
+    // this.theProfiler.startSection("remove");
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=remove", shift = At.Shift.AFTER))
+    protected void startEntityRemovalTick(CallbackInfo callbackInfo) {
+    }
+
+    // Inject before
+    // this.theProfiler.endSection();
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 1))
+    protected void stopEntityTickRemoval(CallbackInfo callbackInfo) {
+    }
+
+    // Inject before
+    // TileEntity tileentity = (TileEntity)iterator.next();
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"))
+    protected void startTileTickTimer(CallbackInfo callbackInfo) {
+    }
+
+    // We add the manual timings management for tile entity ticks in TrackingUtil.
+
+    // Inject at the head of the catch statement for a crash report generation
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 2), locals = LocalCapture.CAPTURE_FAILHARD)
+    protected void stopTimingTickTileEntityCrash(CallbackInfo ci, Iterator iterator, net.minecraft.tileentity.TileEntity updatingTileEntity, BlockPos blockpos, Throwable throwable) {
+    }
+
+    // Inject before
+    //             if (tileentity.isInvalid())
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
+    protected void stopTileEntityAndStartRemoval(CallbackInfo callbackInfo) {
+    }
+
+    // Inject at the end of the while loop
+
+    @Inject(method = "updateEntities", at = @At(value = "JUMP", opcode = Opcodes.GOTO))
+    protected void stopTileEntityRemovelInWhile(CallbackInfo callbackInfo) {
+    }
+
+    // Inject before
+    // this.theProfiler.endStartSection("pendingBlockEntities");
+
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=pendingBlockEntities"))
+    protected void startPendingTileEntityTimings(CallbackInfo callbackInfo) {
+    }
+
+    // Inject at the bottom, before ending the two profilers
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES))
+    protected void endPendingTileEntities(CallbackInfo callbackInfo) {
+    }
 
 }

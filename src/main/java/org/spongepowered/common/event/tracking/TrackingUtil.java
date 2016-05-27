@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.Timing;
 import com.google.common.base.Predicate;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockEventData;
@@ -60,6 +61,7 @@ import org.spongepowered.common.event.tracking.phase.util.PhaseUtil;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.world.BlockChange;
@@ -86,7 +88,10 @@ public final class TrackingUtil {
                 .addEntityCaptures()
                 .addBlockCaptures()
                 .complete());
+        final Timing entityTiming = EntityUtil.toMixin(entityIn).getTimingsHandler();
+        entityTiming.startTiming();
         entityIn.onUpdate();
+        entityTiming.stopTiming();
         causeTracker.completePhase();
     }
 
@@ -98,8 +103,12 @@ public final class TrackingUtil {
                 .complete());
         checkArgument(tile instanceof TileEntity, "ITickable %s is not a TileEntity!", tile);
         checkNotNull(tile, "Cannot capture on a null ticking tile entity!");
+        final IMixinTileEntity mixinTileEntity = (IMixinTileEntity) tile;
+        mixinTileEntity.getTimingsHandler().startTiming();
         tile.update();
         causeTracker.completePhase();
+        mixinTileEntity.getTimingsHandler().stopTiming();
+
     }
 
     public static void updateTickBlock(CauseTracker causeTracker, Block block, BlockPos pos, IBlockState state, Random random) {

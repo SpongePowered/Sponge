@@ -101,6 +101,8 @@ public abstract class MixinWorldEntitySpawner {
             .add(NamedCause.source(worldServer))
             .addCaptures()
             .complete());
+        spongeWorld.getTimingsHandler().mobSpawn.startTiming();
+
     }
 
     @SuppressWarnings("unchecked")
@@ -111,6 +113,8 @@ public abstract class MixinWorldEntitySpawner {
         causeTracker.completePhase();
         spawnerEntityClass = null;
         spawnerEntityType = null;
+        spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
+
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))

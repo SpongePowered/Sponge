@@ -83,6 +83,10 @@ class TimingHandler implements Timing {
 
     @Override
     public void startTimingIfSync() {
+        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+            return;
+        }
+
         if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             startTiming();
         }
@@ -90,6 +94,10 @@ class TimingHandler implements Timing {
 
     @Override
     public void stopTimingIfSync() {
+        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+            return;
+        }
+
         if (SpongeImpl.getServer().isCallingFromMinecraftThread()) {
             stopTiming();
         }
@@ -97,7 +105,11 @@ class TimingHandler implements Timing {
 
     @Override
     public TimingHandler startTiming() {
-        if (this.enabled && ++this.timingDepth == 1) {
+        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+            return this;
+        }
+
+        if (++this.timingDepth == 1) {
             this.start = System.nanoTime();
             this.parent = TimingsManager.CURRENT;
             TimingsManager.CURRENT = this;
@@ -107,7 +119,11 @@ class TimingHandler implements Timing {
 
     @Override
     public void stopTiming() {
-        if (this.enabled && --this.timingDepth == 0 && this.start != 0) {
+        if (!this.enabled || SpongeImpl.getGame().getPlatform().getExecutionType().isClient()) {
+            return;
+        }
+
+        if (--this.timingDepth == 0 && this.start != 0) {
             if (!SpongeImpl.getServer().isCallingFromMinecraftThread()) {
                 SpongeImpl.getLogger().fatal("stopTiming called async for " + this.name);
                 new Throwable().printStackTrace();

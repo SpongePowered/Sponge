@@ -139,4 +139,9 @@ public final class SpongeImplHooks {
     public static boolean isFakePlayer(Entity entity) {
         return false;
     }
+
+    public static String getModIdFromClass(Class<?> clazz) {
+        return "";
+    }
+
 }

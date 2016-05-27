@@ -38,7 +38,11 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.interfaces.world.IMixinAnvilChunkLoader;
+import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.interfaces.world.gen.IMixinChunkProviderServer;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
@@ -87,5 +91,14 @@ public abstract class MixinChunkProviderServer implements WorldStorage, IMixinCh
         return (WorldProperties) this.worldObj.getWorldInfo();
     }
 
+    @Inject(method = "unloadQueuedChunks", at = @At("HEAD"))
+    public void onUnloadQueuedChunksStart(CallbackInfoReturnable<Boolean> ci) {
+        ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.startTiming();
+    }
+
+    @Inject(method = "unloadQueuedChunks", at = @At("RETURN"))
+    public void onUnloadQueuedChunksEnd(CallbackInfoReturnable<Boolean> ci) {
+        ((IMixinWorldServer) this.worldObj).getTimingsHandler().doChunkUnload.stopTiming();
+    }
 
 }

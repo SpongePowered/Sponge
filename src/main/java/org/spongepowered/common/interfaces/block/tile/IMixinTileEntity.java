@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.block.tile;
 
+import co.aikar.timings.Timing;
 import net.minecraft.nbt.NBTTagCompound;
 import org.spongepowered.api.block.tileentity.TileEntity;
 import org.spongepowered.api.data.DataQuery;
@@ -84,4 +85,7 @@ public interface IMixinTileEntity {
     void markDirty();
 
     boolean isVanilla();
+
+    // Timings
+    Timing getTimingsHandler();
 }

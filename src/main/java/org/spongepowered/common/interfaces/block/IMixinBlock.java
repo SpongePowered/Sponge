@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.block;
 
+import co.aikar.timings.Timing;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.util.EnumFacing;
@@ -121,4 +122,7 @@ public interface IMixinBlock {
     boolean isFlammable(IBlockAccess blockAccess, BlockPos pos, EnumFacing facing);
 
     boolean isVanilla();
+
+    // Timings
+    Timing getTimingsHandler();
 }

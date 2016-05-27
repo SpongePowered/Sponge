@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import co.aikar.timings.TimingsManager;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.command.ICommandSender;
 import net.minecraft.entity.player.EntityPlayerMP;
@@ -538,8 +539,13 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
         return getClass().getSimpleName();
     }
 
+    @Inject(method = "tick", at = @At(value = "HEAD"))
+    public void onServerTickStart(CallbackInfo ci) {
+        TimingsManager.FULL_SERVER_TICK.startTiming();
+    }
+
     @Inject(method = "tick", at = @At(value = "RETURN"))
-    public void onServerTick(CallbackInfo ci) {
+    public void onServerTickEnd(CallbackInfo ci) {
         int lastAnimTick = StaticMixinHelper.lastAnimationPacketTick;
         int lastPrimaryTick = StaticMixinHelper.lastPrimaryPacketTick;
         int lastSecondaryTick = StaticMixinHelper.lastSecondaryPacketTick;
@@ -549,6 +555,7 @@ public abstract class MixinMinecraftServer implements Server, ConsoleSource, IMi
             Sponge.getEventManager().post(event);
         }
         StaticMixinHelper.lastAnimationPacketTick = 0;
+        TimingsManager.FULL_SERVER_TICK.stopTiming();
     }
 
     private int dimensionId;
