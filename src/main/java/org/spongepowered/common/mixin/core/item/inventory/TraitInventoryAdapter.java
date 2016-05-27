@@ -35,6 +35,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.item.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.item.inventory.adapter.impl.MinecraftInventoryAdapter;
+import org.spongepowered.common.item.inventory.custom.CustomContainer;
+import org.spongepowered.common.item.inventory.custom.CustomInventory;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.impl.collections.SlotCollection;
 
@@ -43,7 +45,9 @@ import java.util.List;
 
 @Mixin({
     net.minecraft.inventory.Slot.class,
-    InventoryPlayer.class
+    InventoryPlayer.class,
+    CustomInventory.class,
+    CustomContainer.class
 })
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
 public abstract class TraitInventoryAdapter implements MinecraftInventoryAdapter {

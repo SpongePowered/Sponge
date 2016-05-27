@@ -37,10 +37,13 @@ import net.minecraft.entity.EntityList;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.ai.attributes.AttributeMap;
 import net.minecraft.entity.item.EntityItem;
+import net.minecraft.entity.ai.attributes.ServersideAttributeMap;
+import net.minecraft.entity.passive.EntityHorse;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.SoundEvents;
 import net.minecraft.inventory.Slot;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.NetHandlerPlayServer;
 import net.minecraft.network.Packet;
@@ -51,6 +54,16 @@ import net.minecraft.network.play.server.SPacketResourcePackSend;
 import net.minecraft.network.play.server.SPacketSoundEffect;
 import net.minecraft.network.play.server.SPacketSpawnPosition;
 import net.minecraft.scoreboard.IScoreCriteria;
+import net.minecraft.network.play.client.C15PacketClientSettings;
+import net.minecraft.network.play.server.S02PacketChat;
+import net.minecraft.network.play.server.S05PacketSpawnPosition;
+import net.minecraft.network.play.server.S23PacketBlockChange;
+import net.minecraft.network.play.server.S29PacketSoundEffect;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
+import net.minecraft.network.play.server.S2FPacketSetSlot;
+import net.minecraft.network.play.server.S2DPacketOpenWindow;
+import net.minecraft.network.play.server.S48PacketResourcePackSend;
+import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Score;
 import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
@@ -66,6 +79,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderSurface;
+import net.minecraft.world.IInteractionObject;
+import net.minecraft.world.WorldSettings;
+import org.apache.commons.lang3.NotImplementedException;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.CommandSource;
@@ -89,6 +107,8 @@ import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.network.PlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
@@ -179,12 +199,17 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public boolean playerConqueredTheEnd;
     @Shadow private float lastHealth;
     @Shadow private int lastFoodLevel;
+    @Shadow private int currentWindowId;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow @Override public abstract void takeStat(StatBase stat);
     @Shadow public abstract StatisticsManagerServer getStatFile();
     @Shadow public abstract boolean hasAchievement(Achievement achievementIn);
+    @Shadow public abstract void displayGUIChest(IInventory chestInventory);
+    @Shadow public abstract void displayGui(IInteractionObject guiOwner);
+    @Shadow public abstract void displayGUIHorse(EntityHorse horse, IInventory horseInventory);
+    @Shadow public abstract void getNextWindowId();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -486,6 +511,22 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public boolean isViewingInventory() {
         return this.openContainer != null;
+    }
+
+    @Override
+    public void openInventory(Inventory inventory, Cause cause) throws IllegalArgumentException {
+        if (inventory instanceof IInteractionObject) {
+            String guid = ((IInteractionObject) inventory).getGuiID();
+            if ("EntityHorse".equals(guid)) {
+                //displayGUIHorse(new EntityHorse(null), (IInventory) inventory);
+                // TODO horseID needed here for mc return;
+            }
+            if ("minecraft:crafting_table".equals(guid) || "minecraft:anvil".equals(guid) || "minecraft:enchanting_table".equals(guid)) {
+                displayGui(((IInteractionObject) inventory));
+                return;
+            }
+        }
+        displayGUIChest(((IInventory) inventory));
     }
 
     @Override
