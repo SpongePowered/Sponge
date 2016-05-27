@@ -53,6 +53,7 @@ public class WorldTimingsHandler {
     public final Timing doTick;
     public final Timing tickEntities;
 
+    // Chunk Load
     public final Timing syncChunkLoadTimer;
     public final Timing syncChunkLoadDataTimer;
     public final Timing syncChunkLoadStructuresTimer;
@@ -61,10 +62,14 @@ public class WorldTimingsHandler {
     public final Timing syncChunkLoadTileTicksTimer;
     public final Timing syncChunkLoadPostTimer;
 
+    // Tracking
     public final Timing causeTrackerBlockTimer;
     public final Timing causeTrackerBlockBreakTimer;
     public final Timing causeTrackerEntityTimer;
     public final Timing causeTrackerEntityItemTimer;
+
+    // Chunk population
+    public final Timing chunkPopulate;
 
     public WorldTimingsHandler(World world) {
         String name = world.getWorldInfo().getWorldName() + " - ";
@@ -100,9 +105,11 @@ public class WorldTimingsHandler {
         this.doTick = SpongeTimingsFactory.ofSafe(name + "doTick");
         this.tickEntities = SpongeTimingsFactory.ofSafe(name + "tickEntities");
 
-        this.causeTrackerBlockTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Block captures");
-        this.causeTrackerBlockBreakTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Block Break captures");
-        this.causeTrackerEntityTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Entity captures");
-        this.causeTrackerEntityItemTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - EntityItem captures");
+        this.causeTrackerBlockTimer = SpongeTimingsFactory.ofSafe(name + "causeTracker - BlockCaptures");
+        this.causeTrackerBlockBreakTimer = SpongeTimingsFactory.ofSafe(name + "causeTracker - BlockBreakCaptures");
+        this.causeTrackerEntityTimer = SpongeTimingsFactory.ofSafe(name + "causeTracker - EntityCaptures");
+        this.causeTrackerEntityItemTimer = SpongeTimingsFactory.ofSafe(name + "causeTracker - EntityItemCaptures");
+
+        this.chunkPopulate = SpongeTimingsFactory.ofSafe(name + "chunkPopulate");
     }
 }

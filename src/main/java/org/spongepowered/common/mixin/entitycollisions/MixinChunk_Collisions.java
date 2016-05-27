@@ -57,7 +57,7 @@ public class MixinChunk_Collisions {
     public void onAddCollisionEntity(Entity entityIn, AxisAlignedBB aabb, List<Entity> listToFill, Predicate<? super Entity> predicate,
             CallbackInfo ci) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
+        if (this.worldObj.isRemote || entityIn == null || entityIn instanceof EntityPlayer || entityIn.getParts() != null) {
             return;
         }
 
@@ -72,7 +72,7 @@ public class MixinChunk_Collisions {
             Predicate<? super T> p_177430_4_, CallbackInfo ci) {
         // ignore player checks
         // ignore item check (ex. Hoppers)
-        if (EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass) {
+        if (this.worldObj.isRemote || EntityPlayer.class.isAssignableFrom(entityClass) || EntityItem.class == entityClass) {
             return;
         }
 

@@ -39,8 +39,6 @@ import net.minecraft.block.BlockRedstoneRepeater;
 import net.minecraft.block.BlockRedstoneTorch;
 import net.minecraft.block.ITileEntityProvider;
 import net.minecraft.block.state.IBlockState;
-import net.minecraft.crash.CrashReport;
-import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
@@ -61,8 +59,6 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.EnumFacing;
-import net.minecraft.util.ITickable;
-import net.minecraft.util.ReportedException;
 import net.minecraft.world.EnumDifficulty;
 import net.minecraft.world.IBlockAccess;
 import net.minecraft.world.WorldProvider;
@@ -140,7 +136,6 @@ import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinChunk;
-import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
@@ -218,12 +213,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public List<net.minecraft.entity.Entity> unloadedEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
-    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
     @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
     @Shadow @Final public List<EntityPlayer> playerEntities;
     @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
-    @Shadow private boolean processingLoadedTiles;
-    @Shadow @Final private net.minecraft.world.border.WorldBorder worldBorder;
+    @Shadow public boolean processingLoadedTiles;
+    @Shadow @Final public net.minecraft.world.border.WorldBorder worldBorder;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
 
@@ -277,11 +272,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
             this.worldBorder.addListener(new PlayerBorderListener(providerIn.getDimensionId()));
         }
         this.activeConfig = SpongeHooks.getActiveConfig((net.minecraft.world.World)(Object) this);
-
-        // Turn on capturing
-        this.timings = new WorldTimingsHandler((net.minecraft.world.World) (Object) this);
-        this.causeTracker = new CauseTracker((net.minecraft.world.World) (Object) this);
-        this.causeTracker.setCaptureBlocks(true);
     }
 
     @Override
@@ -1174,7 +1164,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
                     this.theProfiler.endSection();
                 }
 
-                if (causeTracker.hasPluginCause()) {
+                if (!this.isRemote && causeTracker.hasPluginCause()) {
                     causeTracker.addCause(causeTracker.getPluginCause().get());
                     causeTracker.handleBlockCaptures();
                     causeTracker.removeCurrentCause();
@@ -1207,7 +1197,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         this.rotationUpdates.put(entity, rotation);
     }
 
-    private void updateRotation(net.minecraft.entity.Entity entityIn) {
+    protected void updateRotation(net.minecraft.entity.Entity entityIn) {
         Vector3d rotationUpdate = this.rotationUpdates.get(entityIn);
         if (rotationUpdate != null) {
             entityIn.rotationPitch = (float) rotationUpdate.getX();
@@ -1230,249 +1220,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
                 this.updateComparatorOutputLevel(pos, new_.getBlock());
             }
         }
-    }
-
-    /**
-     * @author blood - May 26th, 2016
-     * 
-     * @reason Rewritten due to the amount of injections required for both
-     *     timing and capturing.
-     */
-    @Overwrite
-    public void updateEntities()
-    {
-        this.theProfiler.startSection("entities");
-        this.theProfiler.startSection("global");
-        // Sponge start
-        this.timings.entityTick.startTiming();
-        co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
-        // Sponge end
-        for (int i = 0; i < this.weatherEffects.size(); ++i)
-        {
-            net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)this.weatherEffects.get(i);
-            IMixinEntity spongeEntity = (IMixinEntity) entity; // Sponge
-            try
-            {
-                ++entity.ticksExisted;
-                // Sponge start - handle tracking and timings
-                if (this.isRemote) {
-                    entity.onUpdate();
-                } else {
-                    causeTracker.preTrackEntity(spongeEntity);
-                    spongeEntity.getTimingsHandler().startTiming();
-                    entity.onUpdate();
-                    spongeEntity.getTimingsHandler().stopTiming();
-                    updateRotation(entity);
-                    SpongeCommonEventFactory.handleEntityMovement(entity);
-                    causeTracker.postTrackEntity();
-                }
-                // Sponge end
-            }
-            catch (Throwable throwable2)
-            {
-                spongeEntity.getTimingsHandler().stopTiming(); // Sponge
-                CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
-                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
-
-                if (entity == null)
-                {
-                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
-                }
-                else
-                {
-                    entity.addEntityCrashInfo(crashreportcategory);
-                }
-
-                throw new ReportedException(crashreport);
-            }
-
-            if (entity.isDead)
-            {
-                this.weatherEffects.remove(i--);
-            }
-        }
-        // Sponge start
-        this.timings.entityTick.stopTiming();
-        this.timings.entityRemoval.startTiming();
-        // Sponge end
-        this.theProfiler.endStartSection("remove");
-        this.loadedEntityList.removeAll(this.unloadedEntityList);
-
-        for (int k = 0; k < this.unloadedEntityList.size(); ++k)
-        {
-            net.minecraft.entity.Entity entity1 = (net.minecraft.entity.Entity)this.unloadedEntityList.get(k);
-            int j = entity1.chunkCoordX;
-            int l1 = entity1.chunkCoordZ;
-
-            if (entity1.addedToChunk && this.isChunkLoaded(j, l1, true))
-            {
-                this.getChunkFromChunkCoords(j, l1).removeEntity(entity1);
-            }
-        }
-
-        for (int l = 0; l < this.unloadedEntityList.size(); ++l)
-        {
-            this.onEntityRemoved((net.minecraft.entity.Entity)this.unloadedEntityList.get(l));
-        }
-
-        this.unloadedEntityList.clear();
-        this.theProfiler.endStartSection("regular");
-        this.timings.entityRemoval.stopTiming(); // Sponge
-
-        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1)
-        {
-            net.minecraft.entity.Entity entity2 = (net.minecraft.entity.Entity)this.loadedEntityList.get(i1);
-            IMixinEntity spongeEntity = (IMixinEntity) entity2; // Sponge
-            if (entity2.ridingEntity != null)
-            {
-                if (!entity2.ridingEntity.isDead && entity2.ridingEntity.riddenByEntity == entity2)
-                {
-                    continue;
-                }
-
-                entity2.ridingEntity.riddenByEntity = null;
-                entity2.ridingEntity = null;
-            }
-
-            this.theProfiler.startSection("tick");
-            this.timings.entityTick.startTiming();
-            if (!entity2.isDead)
-            {
-                try
-                {
-                    spongeEntity.getTimingsHandler().startTiming(); // Sponge
-                    this.updateEntity(entity2);
-                    spongeEntity.getTimingsHandler().stopTiming(); // Sponge
-                }
-                catch (Throwable throwable1)
-                {
-                    spongeEntity.getTimingsHandler().stopTiming(); // Sponge
-                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
-                    CrashReportCategory crashreportcategory2 = crashreport1.makeCategory("Entity being ticked");
-                    entity2.addEntityCrashInfo(crashreportcategory2);
-                    throw new ReportedException(crashreport1);
-                }
-            }
-            this.timings.entityTick.stopTiming(); // Sponge
-            this.theProfiler.endSection();
-            this.theProfiler.startSection("remove");
-            this.timings.entityRemoval.startTiming(); // Sponge
-            if (entity2.isDead)
-            {
-                int k1 = entity2.chunkCoordX;
-                int i2 = entity2.chunkCoordZ;
-
-                if (entity2.addedToChunk && this.isChunkLoaded(k1, i2, true))
-                {
-                    this.getChunkFromChunkCoords(k1, i2).removeEntity(entity2);
-                }
-
-                this.loadedEntityList.remove(i1--);
-                this.onEntityRemoved(entity2);
-            }
-
-            this.timings.entityRemoval.stopTiming();
-            this.theProfiler.endSection();
-        }
-
-        this.theProfiler.endStartSection("blockEntities");
-        // Sponge start - moved up to clean up tile entities before ticking
-        this.timings.tileEntityRemoval.startTiming();
-        if (!this.tileEntitiesToBeRemoved.isEmpty())
-        {
-            this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
-            this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
-            this.tileEntitiesToBeRemoved.clear();
-        }
-        this.timings.tileEntityRemoval.stopTiming();
-        // Sponge end
-
-        this.processingLoadedTiles = true;
-        Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
-
-        while (iterator.hasNext())
-        {
-            this.timings.tileEntityTick.startTiming(); // Sponge
-            net.minecraft.tileentity.TileEntity tileentity = (net.minecraft.tileentity.TileEntity)iterator.next();
-            IMixinTileEntity spongeTile = (IMixinTileEntity) tileentity;
-            if (!tileentity.isInvalid() && tileentity.hasWorldObj())
-            {
-                BlockPos blockpos = tileentity.getPos();
-
-                if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos))
-                {
-                    try
-                    {
-                        // Sponge start - handle captures and timings
-                        if (this.isRemote) {
-                            ((ITickable)tileentity).update();
-                        } else {
-                            spongeTile.getTimingsHandler().startTiming(); 
-                            causeTracker.preTrackTileEntity((TileEntity) tileentity);
-                            ((ITickable)tileentity).update();
-                            causeTracker.postTrackTileEntity();
-                            spongeTile.getTimingsHandler().stopTiming();
-                        }
-                        // Sponge end
-                    }
-                    catch (Throwable throwable)
-                    {
-                        spongeTile.getTimingsHandler().stopTiming(); // Sponge
-                        CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
-                        CrashReportCategory crashreportcategory1 = crashreport2.makeCategory("Block entity being ticked");
-                        tileentity.addInfoToCrashReport(crashreportcategory1);
-                        throw new ReportedException(crashreport2);
-                    }
-                }
-            }
-            // Sponge start
-            this.timings.tileEntityTick.stopTiming();
-            this.timings.tileEntityRemoval.startTiming();
-            // Sponge end
-            if (tileentity.isInvalid())
-            {
-                iterator.remove();
-                this.loadedTileEntityList.remove(tileentity);
-
-                if (this.isBlockLoaded(tileentity.getPos()))
-                {
-                    this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
-                }
-            }
-            this.timings.tileEntityRemoval.stopTiming(); // Sponge
-        }
-
-        this.processingLoadedTiles = false;
-        this.timings.tileEntityPending.startTiming(); // Sponge
-        this.theProfiler.endStartSection("pendingBlockEntities");
-
-        if (!this.addedTileEntityList.isEmpty())
-        {
-            for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1)
-            {
-                net.minecraft.tileentity.TileEntity tileentity1 = (net.minecraft.tileentity.TileEntity)this.addedTileEntityList.get(j1);
-
-                if (!tileentity1.isInvalid())
-                {
-                    if (!this.loadedTileEntityList.contains(tileentity1))
-                    {
-                        this.addTileEntity(tileentity1);
-                    }
-
-                    if (this.isBlockLoaded(tileentity1.getPos()))
-                    {
-                        this.getChunkFromBlockCoords(tileentity1.getPos()).addTileEntity(tileentity1.getPos(), tileentity1);
-                    }
-
-                    this.markBlockForUpdate(tileentity1.getPos());
-                }
-            }
-
-            this.addedTileEntityList.clear();
-        }
-        this.timings.tileEntityPending.stopTiming(); // Sponge
-        this.theProfiler.endSection();
-        this.theProfiler.endSection();
     }
 
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))

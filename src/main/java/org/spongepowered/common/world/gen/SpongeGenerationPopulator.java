@@ -26,28 +26,29 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimingsFactory;
+import co.aikar.timings.Timing;
 import com.flowpowered.math.GenericMath;
 import com.flowpowered.math.vector.Vector3i;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunkProvider;
 import net.minecraft.world.chunk.storage.ExtendedBlockStorage;
-import net.minecraft.world.gen.ChunkProviderEnd;
-import net.minecraft.world.gen.ChunkProviderFlat;
-import net.minecraft.world.gen.ChunkProviderGenerate;
-import net.minecraft.world.gen.ChunkProviderHell;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.extent.ImmutableBiomeArea;
 import org.spongepowered.api.world.extent.MutableBlockVolume;
 import org.spongepowered.api.world.gen.GenerationPopulator;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 
 /**
  * Generator populator that wraps a Minecraft {@link IChunkProvider}.
  */
-public final class SpongeGenerationPopulator implements GenerationPopulator {
+public class SpongeGenerationPopulator implements GenerationPopulator, IGenerationPopulator {
 
     private final IChunkProvider chunkGenerator;
     private final World world;
+    private Timing timing;
 
     /**
      * Gets the {@link GenerationPopulator} from the given
@@ -76,7 +77,7 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
 
     @Override
     public void populate(org.spongepowered.api.world.World world, MutableBlockVolume buffer, ImmutableBiomeArea biomes) {
-
+        this.getTimingsHandler().startTimingIfSync();
         Vector3i min = buffer.getBlockMin();
         Vector3i max = buffer.getBlockMax();
 
@@ -93,10 +94,10 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
                 placeChunkInBuffer(generated, buffer, chunkX, chunkZ);
             }
         }
+        this.getTimingsHandler().stopTimingIfSync();
     }
 
     private void placeChunkInBuffer(Chunk chunk, MutableBlockVolume buffer, int chunkX, int chunkZ) {
-
         // Calculate bounds
         int xOffset = chunkX * 16;
         int zOffset = chunkZ * 16;
@@ -151,4 +152,15 @@ public final class SpongeGenerationPopulator implements GenerationPopulator {
         return ((org.spongepowered.api.world.World) world).getName();
     }
 
+    @Override
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            String modId = SpongeImplHooks.getModIdFromClass(this.chunkGenerator.getClass());
+            if (!modId.equals("")) {
+                modId = modId + ":";
+            }
+            this.timing = SpongeTimingsFactory.ofSafe("chunkGenerator - " + modId + this.chunkGenerator.getClass().getName());
+        }
+        return this.timing;
+    }
 }

@@ -26,6 +26,9 @@ package org.spongepowered.common.world.gen;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimingsFactory;
+import co.aikar.timings.Timing;
+import co.aikar.timings.Timings;
 import com.flowpowered.math.vector.Vector2i;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -64,9 +67,11 @@ import org.spongepowered.api.world.gen.GenerationPopulator;
 import org.spongepowered.api.world.gen.Populator;
 import org.spongepowered.api.world.gen.WorldGenerator;
 import org.spongepowered.common.SpongeImpl;
+import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.interfaces.world.biome.IBiomeGenBase;
 import org.spongepowered.common.interfaces.world.gen.IChunkProviderGenerate;
 import org.spongepowered.common.interfaces.world.gen.IFlaggedPopulator;
+import org.spongepowered.common.interfaces.world.gen.IGenerationPopulator;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.gen.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.util.gen.ChunkPrimerBuffer;
@@ -99,6 +104,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
     private NoiseGeneratorPerlin noise4;
     private double[] stoneNoise;
 
+    protected Map<String, Timing> populatorTimings = Maps.newHashMap();
+    protected Timing chunkGeneratorTiming;
+
     public SpongeChunkProvider(World world, GenerationPopulator base, BiomeGenerator biomegen) {
         this.world = checkNotNull(world, "world");
         this.baseGenerator = checkNotNull(base, "baseGenerator");
@@ -119,6 +127,17 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         if (this.baseGenerator instanceof IChunkProviderGenerate) {
             ((IChunkProviderGenerate) this.baseGenerator).setBiomeGenerator(this.biomeGenerator);
         }
+
+        if (!this.getClass().getSimpleName().equalsIgnoreCase("SpongeChunkProviderForge")) {
+            String chunkGeneratorName = "";
+            if (base instanceof SpongeGenerationPopulator) {
+                chunkGeneratorName = "chunkGenerator (" + ((SpongeGenerationPopulator) base).getHandle(world).getClass().getSimpleName() + ")";
+            } else {
+                chunkGeneratorName = "chunkGenerator (" + base.getClass().getName() + ")";
+            }
+            this.chunkGeneratorTiming = SpongeTimingsFactory.ofSafe(chunkGeneratorName, ((IMixinWorld) world).getTimingsHandler().chunkPopulate);
+        }
+
     }
 
     @Override
@@ -243,6 +262,9 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
 
     @Override
     public void populate(IChunkProvider chunkProvider, int chunkX, int chunkZ) {
+        IMixinWorld spongeWorld = (IMixinWorld) this.world;
+        spongeWorld.getTimingsHandler().chunkPopulate.startTimingIfSync();
+        this.chunkGeneratorTiming.startTimingIfSync();
         Cause populateCause = Cause.of(NamedCause.source(this), NamedCause.of("ChunkProvider", chunkProvider));
         this.rand.setSeed(this.world.getSeed());
         long i1 = this.rand.nextLong() / 2L * 2L + 1L;
@@ -278,17 +300,28 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         }
 
         Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPre(populateCause, populators, chunk));
-
         List<String> flags = Lists.newArrayList();
         for (Populator populator : populators) {
             StaticMixinHelper.runningGenerator = populator.getType();
             if(Sponge.getGame().getEventManager().post(SpongeEventFactory.createPopulateChunkEventPopulate(populateCause, populator, chunk))) {
                 continue;
             }
+            Timing timing = null;
+            if (Timings.isTimingsEnabled()) {
+                timing = this.populatorTimings.get(populator.getType().getId());
+                if (timing == null) {
+                    timing = SpongeTimingsFactory.ofSafe("populate - " + populator.getType().getId());//, this.chunkGeneratorTiming);
+                    this.populatorTimings.put(populator.getType().getId(), timing);
+                }
+                timing.startTimingIfSync();
+            }
             if (populator instanceof IFlaggedPopulator) {
                 ((IFlaggedPopulator) populator).populate(chunkProvider, chunk, this.rand, flags);
             } else {
                 populator.populate(chunk, this.rand);
+            }
+            if (Timings.isTimingsEnabled()) {
+                timing.stopTimingIfSync();
             }
         }
         StaticMixinHelper.runningGenerator = null;
@@ -296,7 +329,16 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         // If we wrapped a custom chunk provider then we should call its
         // populate method so that its particular changes are used.
         if (this.baseGenerator instanceof SpongeGenerationPopulator) {
+            Timing timing = null;
+            if (Timings.isTimingsEnabled()) {
+                IGenerationPopulator spongePopulator = (IGenerationPopulator) this.baseGenerator;
+                timing = spongePopulator.getTimingsHandler();
+                timing.startTimingIfSync();
+            }
             ((SpongeGenerationPopulator) this.baseGenerator).getHandle(this.world).populate(chunkProvider, chunkX, chunkZ);
+            if (Timings.isTimingsEnabled()) {
+                timing.stopTimingIfSync();
+            }
         }
 
         PopulateChunkEvent.Post event =
@@ -304,6 +346,8 @@ public class SpongeChunkProvider implements WorldGenerator, IChunkProvider {
         SpongeImpl.postEvent(event);
 
         BlockFalling.fallInstantly = false;
+        this.chunkGeneratorTiming.stopTimingIfSync();
+        spongeWorld.getTimingsHandler().chunkPopulate.stopTimingIfSync();
     }
 
     @Override

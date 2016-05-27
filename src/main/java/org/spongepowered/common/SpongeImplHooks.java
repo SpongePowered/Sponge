@@ -157,4 +157,8 @@ public final class SpongeImplHooks {
             return ret;
         }
     }
+
+    public static String getModIdFromClass(Class<?> clazz) {
+        return "";
+    }
 }
