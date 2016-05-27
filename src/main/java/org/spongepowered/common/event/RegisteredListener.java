@@ -56,7 +56,6 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
         this.order = checkNotNull(order, "order");
         this.listener = checkNotNull(listener, "listener");
         this.beforeModifications = beforeModifications;
-        this.listenerTimer = SpongeTimings.getPluginTimings(plugin, getHandle().getClass().getSimpleName());
     }
 
     public PluginContainer getPlugin() {
@@ -76,6 +75,9 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     }
 
     public Timing getTimingsHandler() {
+        if (this.listenerTimer == null) {
+            this.listenerTimer = SpongeTimings.getPluginTimings(plugin, getHandle().getClass().getSimpleName());
+        }
         return this.listenerTimer;
     }
 
