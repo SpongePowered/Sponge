@@ -34,9 +34,9 @@ public class SpongeTeleportType implements TeleportType {
     private String name;
     private String id;
 
-    public SpongeTeleportType(String name) {
+    public SpongeTeleportType(String id, String name) {
         this.name = name;
-        this.id = name.toLowerCase(Locale.ENGLISH);
+        this.id = id.toLowerCase(Locale.ENGLISH);
     }
 
     @Override

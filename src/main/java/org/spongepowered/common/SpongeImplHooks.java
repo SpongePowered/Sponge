@@ -55,6 +55,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
 
+import javax.annotation.Nullable;
+
 /**
  * Utility that fires events that normally Forge fires at (in spots). Typically
  * our penultimate goal is to not remove spots where events occur but sometimes
@@ -163,7 +165,7 @@ public final class SpongeImplHooks {
         return "";
     }
 
-    public static void registerPortalAgentType(Teleporter teleporter) {
+    public static void registerPortalAgentType(@Nullable Teleporter teleporter) {
         // plugins are required to register types
     }
 }

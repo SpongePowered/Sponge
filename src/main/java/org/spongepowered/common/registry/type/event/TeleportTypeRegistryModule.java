@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.registry.type.event;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportType;
 import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
+import org.spongepowered.api.registry.AdditionalCatalogRegistryModule;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.CatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
 import org.spongepowered.common.event.entity.teleport.SpongeTeleportType;
@@ -39,21 +42,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class TeleportTypeRegistryModule implements CatalogRegistryModule<TeleportType> {
+public final class TeleportTypeRegistryModule implements AlternateCatalogRegistryModule<TeleportType>, AdditionalCatalogRegistryModule<TeleportType> {
 
     public static TeleportTypeRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @SuppressWarnings("serial")
     @RegisterCatalog(TeleportTypes.class)
-    private final Map<String, TeleportType> teleportTypeMappings = new HashMap<String, TeleportType>() {{
-        put("minecraft:command", TeleportTypes.COMMAND);
-        put("minecraft:entity_teleport", TeleportTypes.ENTITY_TELEPORT);
-        put("minecraft:portal", TeleportTypes.PORTAL);
-        put("sponge:plugin", TeleportTypes.PLUGIN);
-        put("sponge:unknown", TeleportTypes.UNKNOWN);
-    }};
+    private final Map<String, TeleportType> teleportTypeMappings = new HashMap<>();
 
     @Override
     public Optional<TeleportType> getById(String id) {
@@ -63,6 +59,38 @@ public final class TeleportTypeRegistryModule implements CatalogRegistryModule<T
     @Override
     public Collection<TeleportType> getAll() {
         return ImmutableList.copyOf(this.teleportTypeMappings.values());
+    }
+
+    @Override
+    public void registerAdditionalCatalog(TeleportType extraCatalog) {
+        final String id = checkNotNull(extraCatalog).getId();
+        final String key = id.toLowerCase(Locale.ENGLISH);
+        checkArgument(!key.contains("sponge:"), "Cannot register spoofed teleport type!");
+        checkArgument(!key.contains("minecraft:"), "Cannot register spoofed teleport type!");
+        checkArgument(!this.teleportTypeMappings.containsKey(key), "Cannot register an already registered TeleportType: %s", key);
+        this.teleportTypeMappings.put(key, extraCatalog);
+
+    }
+
+    @Override
+    public void registerDefaults() {
+        this.teleportTypeMappings.put("minecraft:command", new SpongeTeleportType("minecraft:command", "Command"));
+        this.teleportTypeMappings.put("minecraft:entity_teleport", new SpongeTeleportType("minecraft:entity_teleport", "Entity Teleport"));
+        this.teleportTypeMappings.put("minecraft:portal", new SpongeTeleportType("minecraft:portal", "Portal"));
+        this.teleportTypeMappings.put("sponge:plugin", new SpongeTeleportType("sponge:plugin", "Plugin"));
+        this.teleportTypeMappings.put("sponge:unknown", new SpongeTeleportType("sponge:unknown", "Unknown"));
+    }
+
+    @Override
+    public Map<String, TeleportType> provideCatalogMap() {
+        final HashMap<String, TeleportType> map = new HashMap<>();
+        for (Map.Entry<String, TeleportType> entry : this.teleportTypeMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", "").replace("sponge:", ""), entry.getValue());
+        }
+        return map;
+    }
+
+    TeleportTypeRegistryModule() {
     }
 
     private static final class Holder {

@@ -91,6 +91,8 @@ import org.spongepowered.api.event.cause.entity.spawn.BlockSpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.EntitySpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnTypes;
+import org.spongepowered.api.event.cause.entity.teleport.PortalTeleportCause;
+import org.spongepowered.api.event.cause.entity.teleport.TeleportTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
@@ -759,7 +761,7 @@ public class SpongeCommonEventFactory {
         return cancelled;
     }
 
-    public static DisplaceEntityEvent.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, Teleporter teleporter) {
+    public static DisplaceEntityEvent.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         MinecraftServer mcServer = MinecraftServer.getServer();
         IMixinServerConfigurationManager scm = (IMixinServerConfigurationManager) mcServer.getConfigurationManager();
@@ -808,7 +810,7 @@ public class SpongeCommonEventFactory {
         // need to use placeInExistingPortal to support mods
         teleporter.placeInExistingPortal(entityIn, entityIn.rotationYaw);
         Transform<World> portalExitTransform = preTeleportTransform.setLocation(spongeEntity.getLocation()).setExtent((World) toWorld);
-        Cause teleportCause = Cause.of(NamedCause.source(new SpongePortalTeleportCause((PortalAgent) teleporter)));
+        Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder().agent((PortalAgent) teleporter).type(TeleportTypes.PORTAL).build()));
         Cause currentCause = ((IMixinWorld) fromWorld).getCauseTracker().getCurrentCause();
         if (currentCause != null) {
             teleportCause = teleportCause.merge(currentCause);
