@@ -27,6 +27,7 @@ package org.spongepowered.common.item.inventory.lens.impl.comp;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.property.InventorySize;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.inventory.adapter.impl.comp.CraftingInventoryAdapter;
@@ -35,16 +36,17 @@ import org.spongepowered.common.item.inventory.lens.Fabric;
 import org.spongepowered.common.item.inventory.lens.SlotProvider;
 import org.spongepowered.common.item.inventory.lens.comp.CraftingInventoryLens;
 import org.spongepowered.common.item.inventory.lens.comp.GridInventoryLens;
+import org.spongepowered.common.item.inventory.lens.impl.slots.CraftingOutputSlotLensImpl;
 import org.spongepowered.common.item.inventory.lens.slots.CraftingOutputSlotLens;
 
 
 public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements CraftingInventoryLens<IInventory, ItemStack> {
 
     private final int outputSlotIndex;
-    
-    private final CraftingOutputSlotLens<IInventory, ItemStack> outputSlot;
-    
-    private final GridInventoryLens<IInventory, ItemStack> craftingGrid;
+
+    private final CraftingOutputSlotLensImpl outputSlot;
+
+    private final GridInventoryLensImpl craftingGrid;
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, SlotProvider<IInventory, ItemStack> slots) {
         this(outputSlotIndex, gridBase, width, height, width, GridInventoryAdapter.class, slots);
@@ -68,23 +70,27 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
 
     public CraftingInventoryLensImpl(int outputSlotIndex, int gridBase, int width, int height, int rowStride, int xBase, int yBase, Class<? extends Inventory> adapterType, SlotProvider<IInventory, ItemStack> slots) {
         super(gridBase, width, height, rowStride, xBase, yBase, adapterType, slots);
-        this.outputSlotIndex = outputSlotIndex; 
-        this.outputSlot = (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
-        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, slots);
+        this.outputSlotIndex = outputSlotIndex;
+        this.outputSlot = new CraftingOutputSlotLensImpl(0, CraftingInventory.class, (i) -> true, (i) -> true); // TODO
+                // this won't work, its always a SlotLensImpl (CraftingOutputSlotLens<IInventory, ItemStack>)slots.getSlot(this.outputSlotIndex);
+        this.craftingGrid = new GridInventoryLensImpl(this.base, this.width, this.height, rowStride, slots);
         this.size += 1; // output slot
-    }
-    
-    @Override
-    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+
+        // In init() the craftingGrid & outputSlot is still null
         this.addSpanningChild(this.craftingGrid, new InventorySize(this.width, this.height));
         this.addSpanningChild(this.outputSlot);
     }
-    
+
+    @Override
+    protected void init(SlotProvider<IInventory, ItemStack> slots) {
+
+    }
+
     @Override
     public GridInventoryLens<IInventory, ItemStack> getCraftingGrid() {
         return this.craftingGrid;
     }
-    
+
     @Override
     public CraftingOutputSlotLens<IInventory, ItemStack> getOutputSlot() {
         return this.outputSlot;
@@ -99,7 +105,7 @@ public class CraftingInventoryLensImpl extends GridInventoryLensImpl implements 
     public boolean setOutputStack(Fabric<IInventory> inv, ItemStack stack) {
         return this.outputSlot.setStack(inv, stack);
     }
-    
+
     @Override
     public int getRealIndex(Fabric<IInventory> inv, int ordinal) {
         if (!this.checkOrdinal(ordinal)) {

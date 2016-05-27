@@ -321,6 +321,8 @@
         "item.inventory.MixinSlot",
         "item.inventory.TraitInventoryAdapter",
         "item.inventory.TraitInventoryObservable",
+        "item.inventory.MixinCustomInventory",
+        "item.inventory.MixinCustomContainer",
         "item.merchant.MixinMerchantRecipe",
         "nbt.MixinNBTTagCompound",
         "network.MixinNetHandlerPlayServer",
