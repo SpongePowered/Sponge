@@ -47,7 +47,9 @@ public class WorldTimingsHandler {
     public final Timing entityTick;
     public final Timing tileEntityTick;
     public final Timing tileEntityPending;
-    public final Timing tracker;
+    public final Timing tileEntityRemoval;
+    public final Timing tracker1;
+    public final Timing tracker2;
     public final Timing doTick;
     public final Timing tickEntities;
 
@@ -58,6 +60,11 @@ public class WorldTimingsHandler {
     public final Timing syncChunkLoadTileEntitiesTimer;
     public final Timing syncChunkLoadTileTicksTimer;
     public final Timing syncChunkLoadPostTimer;
+
+    public final Timing causeTrackerBlockTimer;
+    public final Timing causeTrackerBlockBreakTimer;
+    public final Timing causeTrackerEntityTimer;
+    public final Timing causeTrackerEntityItemTimer;
 
     public WorldTimingsHandler(World world) {
         String name = world.getWorldInfo().getWorldName() + " - ";
@@ -78,6 +85,7 @@ public class WorldTimingsHandler {
         this.entityRemoval = SpongeTimingsFactory.ofSafe(name + "entityRemoval");
         this.tileEntityTick = SpongeTimingsFactory.ofSafe(name + "tileEntityTick");
         this.tileEntityPending = SpongeTimingsFactory.ofSafe(name + "tileEntityPending");
+        this.tileEntityRemoval = SpongeTimingsFactory.ofSafe(name + "tileEntityRemoval");
 
         this.syncChunkLoadTimer = SpongeTimingsFactory.ofSafe(name + "syncChunkLoad");
         this.syncChunkLoadDataTimer = SpongeTimingsFactory.ofSafe(name + "syncChunkLoad - Data");
@@ -87,8 +95,14 @@ public class WorldTimingsHandler {
         this.syncChunkLoadTileTicksTimer = SpongeTimingsFactory.ofSafe(name + "chunkLoad - TileTicks");
         this.syncChunkLoadPostTimer = SpongeTimingsFactory.ofSafe(name + "chunkLoad - Post");
 
-        this.tracker = SpongeTimingsFactory.ofSafe(name + "tracker");
+        this.tracker1 = SpongeTimingsFactory.ofSafe(name + "tracker stage 1");
+        this.tracker2 = SpongeTimingsFactory.ofSafe(name + "tracker stage 2");
         this.doTick = SpongeTimingsFactory.ofSafe(name + "doTick");
         this.tickEntities = SpongeTimingsFactory.ofSafe(name + "tickEntities");
+
+        this.causeTrackerBlockTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Block captures");
+        this.causeTrackerBlockBreakTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Block Break captures");
+        this.causeTrackerEntityTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - Entity captures");
+        this.causeTrackerEntityItemTimer = SpongeTimingsFactory.ofSafe(name + "Cause Tracker - EntityItem captures");
     }
 }

@@ -84,6 +84,7 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
+import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.VecHelper;
@@ -102,6 +103,9 @@ import javax.annotation.Nullable;
 @NonnullByDefault
 @Mixin(WorldServer.class)
 public abstract class MixinWorldServer extends MixinWorld {
+
+    private static final String PROFILER_SS = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V";
+    private static final String PROFILER_ESS = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V";
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
@@ -190,6 +194,28 @@ public abstract class MixinWorldServer extends MixinWorld {
         causeTracker.updateTickBlock(block, pos, state, rand);
     }
 
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
+    private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isRemote) {
+            this.timings.scheduledBlocksCleanup.startTiming();
+        }
+    }
+
+    @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))
+    private void onTickUpdatesTickingStart(boolean flag, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isRemote) {
+            this.timings.scheduledBlocksCleanup.stopTiming();
+            this.timings.scheduledBlocksTicking.startTiming();
+        }
+    }
+
+    @Inject(method = "tickUpdates", at = @At("RETURN"))
+    private void onTickUpdatesTickingEnd(CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isRemote) {
+            this.timings.scheduledBlocksTicking.stopTiming();
+        }
+    }
+
     // Before ticking pending updates, we need to check if we have any tracking info and set it accordingly
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;"
             + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"), locals = LocalCapture.CAPTURE_FAILHARD)
@@ -210,7 +236,10 @@ public abstract class MixinWorldServer extends MixinWorld {
             return;
         }
 
+        IMixinBlock spongeBlock = (IMixinBlock) block;
+        spongeBlock.getTimingsHandler().startTiming();
         causeTracker.updateTickBlock(block, pos, state, rand);
+        spongeBlock.getTimingsHandler().stopTiming();
     }
 
     /**
@@ -294,6 +323,52 @@ public abstract class MixinWorldServer extends MixinWorld {
             causeTracker.setCurrentNotifier(null);
         }
         return result;
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
+    private void onBeginTickBlockUpdate(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.scheduledBlocks.startTiming();
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
+    private void onAfterTickBlockUpdate(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.scheduledBlocks.stopTiming();
+            this.timings.chunkTicks.startTiming();
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
+    private void onBeginUpdateBlocks(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.chunkTicks.stopTiming();
+            this.timings.doChunkMap.startTiming();
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=village") )
+    private void onBeginUpdateVillage(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.doChunkMap.stopTiming();
+            this.timings.doVillages.startTiming();
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer") )
+    private void onBeginUpdatePortal(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.doVillages.stopTiming();
+            this.timings.doPortalForcer.startTiming();
+        }
+    }
+
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V") )
+    private void onEndUpdatePortal(CallbackInfo ci) {
+        if (!this.isRemote) {
+            this.timings.doPortalForcer.stopTiming();
+        }
     }
 
     @Inject(method = "tick", at = @At("RETURN"))

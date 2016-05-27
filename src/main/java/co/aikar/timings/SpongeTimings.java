@@ -25,8 +25,11 @@
 package co.aikar.timings;
 
 import net.minecraft.block.Block;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.tileentity.TileEntity;
+import org.spongepowered.api.block.tileentity.TileEntityType;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.plugin.PluginContainer;
 import org.spongepowered.api.scheduler.Task;
 
@@ -54,17 +57,17 @@ public final class SpongeTimings {
     public static final Timing antiXrayUpdateTimer = SpongeTimingsFactory.ofSafe("anti-xray - update");
     public static final Timing antiXrayObfuscateTimer = SpongeTimingsFactory.ofSafe("anti-xray - obfuscate");
 
-    public static final Timing dataGetManipulator = SpongeTimingsFactory.ofSafe("## getManipulator");
-    public static final Timing dataGetOrCreateManipulator = SpongeTimingsFactory.ofSafe("## getOrCreateManipulator");
-    public static final Timing dataOfferManipulator = SpongeTimingsFactory.ofSafe("## offerData");
-    public static final Timing dataOfferMultiManipulators = SpongeTimingsFactory.ofSafe("## offerManipulators");
-    public static final Timing dataRemoveManipulator = SpongeTimingsFactory.ofSafe("## removeManipulator");
-    public static final Timing dataSupportsManipulator = SpongeTimingsFactory.ofSafe("## supportsManipulator");
-    public static final Timing dataOfferKey = SpongeTimingsFactory.ofSafe("## offerKey");
-    public static final Timing dataGetByKey = SpongeTimingsFactory.ofSafe("## getKey");
-    public static final Timing dataGetValue = SpongeTimingsFactory.ofSafe("## getValue");
-    public static final Timing dataSupportsKey = SpongeTimingsFactory.ofSafe("## supportsKey");
-    public static final Timing dataRemoveKey = SpongeTimingsFactory.ofSafe("## removeKey");
+    public static final Timing dataGetManipulator = SpongeTimingsFactory.ofSafe("## getManipulator", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataGetOrCreateManipulator = SpongeTimingsFactory.ofSafe("## getOrCreateManipulator", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataOfferManipulator = SpongeTimingsFactory.ofSafe("## offerData", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataOfferMultiManipulators = SpongeTimingsFactory.ofSafe("## offerManipulators", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataRemoveManipulator = SpongeTimingsFactory.ofSafe("## removeManipulator", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataSupportsManipulator = SpongeTimingsFactory.ofSafe("## supportsManipulator", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataOfferKey = SpongeTimingsFactory.ofSafe("## offerKey", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataGetByKey = SpongeTimingsFactory.ofSafe("## getKey", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataGetValue = SpongeTimingsFactory.ofSafe("## getValue", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataSupportsKey = SpongeTimingsFactory.ofSafe("## supportsKey", TimingsManager.DATA_GROUP_HANDLER);
+    public static final Timing dataRemoveKey = SpongeTimingsFactory.ofSafe("## removeKey", TimingsManager.DATA_GROUP_HANDLER);
 
 
 
@@ -74,7 +77,7 @@ public final class SpongeTimings {
     /**
      * Gets a timer associated with a plugins tasks.
      *
-     * @param bukkitTask
+     * @param task
      * @param period
      * @return
      */
@@ -105,8 +108,9 @@ public final class SpongeTimings {
      * @param entity
      * @return
      */
-    public static Timing getEntityTimings(Entity entity) {
-        String entityType = entity.getClass().getName();
+    public static Timing getEntityTiming(Entity entity) {
+        EntityType type = entity.getType();
+        String entityType = type != null ? type.getId() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickEntity - " + entityType, tickEntityTimer);
     }
 
@@ -115,9 +119,18 @@ public final class SpongeTimings {
      * @param entity
      * @return
      */
-    public static Timing getTileEntityTimings(TileEntity entity) {
-        String entityType = entity.getClass().getName();
+    public static Timing getTileEntityTiming(TileEntity entity) {
+        TileEntityType type = entity.getType();
+        String entityType = type != null ? type.getId() : entity.getClass().getName();
         return SpongeTimingsFactory.ofSafe("Minecraft", "## tickTileEntity - " + entityType, tickTileEntityTimer);
+    }
+
+    public static Timing getModTimings(PluginContainer plugin, String context) {
+        return SpongeTimingsFactory.ofSafe(plugin, context, true);
+    }
+
+    public static Timing getPluginTimings(PluginContainer plugin, String context) {
+        return SpongeTimingsFactory.ofSafe(plugin, context, false);
     }
 
     public static Timing getCancelTasksTimer() {
@@ -133,6 +146,7 @@ public final class SpongeTimings {
     }
 
     public static Timing getBlockTiming(Block block) {
-        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + block.getUnlocalizedName());
+        BlockType type = (BlockType) block;
+        return SpongeTimingsFactory.ofSafe("## Scheduled Block: " + type != null ? type.getId() : block.getUnlocalizedName());
     }
 }

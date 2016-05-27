@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.Timing;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -142,9 +143,17 @@ public final class CauseTracker {
     private boolean chunkSpawnerRunning;
     private Deque<Cause> causeStack = new ArrayDeque<>();
     private Packet<?> currentPlayerPacket;
+    public final Timing causeTrackerBlockTimer;
+    public final Timing causeTrackerBlockBreakTimer;
+    public final Timing causeTrackerEntityTimer;
+    public final Timing causeTrackerEntityItemTimer;
 
     public CauseTracker(net.minecraft.world.World targetWorld) {
         this.targetWorld = targetWorld;
+        this.causeTrackerBlockTimer = this.getMixinWorld().getTimingsHandler().causeTrackerBlockTimer;
+        this.causeTrackerBlockBreakTimer = this.getMixinWorld().getTimingsHandler().causeTrackerBlockBreakTimer;
+        this.causeTrackerEntityTimer = this.getMixinWorld().getTimingsHandler().causeTrackerEntityTimer;
+        this.causeTrackerEntityItemTimer = this.getMixinWorld().getTimingsHandler().causeTrackerEntityItemTimer;
     }
 
     public World getWorld() {
@@ -443,6 +452,7 @@ public final class CauseTracker {
             return;
         }
 
+        this.causeTrackerEntityTimer.startTiming();
         Iterator<Entity> iter = this.capturedSpawnedEntities.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
@@ -478,8 +488,10 @@ public final class CauseTracker {
                 }
 
                 Cause cause = Cause.of(namedCauses);
+                causeTrackerEntityTimer.stopTiming();
                 SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(cause, entityList, entitySingleSnapshotBuilder.build(), this.getWorld());
                 handlePostEntityEvent(cause, event);
+                causeTrackerEntityTimer.startTiming();
                 iter.remove();
                 continue;
             }
@@ -487,6 +499,7 @@ public final class CauseTracker {
         }
 
         if (this.capturedSpawnedEntities.isEmpty()) {
+            this.causeTrackerEntityTimer.stopTiming();
             return;
         }
 
@@ -500,8 +513,11 @@ public final class CauseTracker {
 
         List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
         if (entitySnapshots.isEmpty()) {
+            this.causeTrackerEntityTimer.stopTiming();
             return;
         }
+
+        this.causeTrackerEntityTimer.stopTiming();
         SpawnEntityEvent event = null;
 
         if (this.worldSpawnerRunning) {
@@ -522,6 +538,7 @@ public final class CauseTracker {
             return;
         }
 
+        this.causeTrackerEntityItemTimer.startTiming();
         Iterator<Entity> iter = this.capturedSpawnedEntityItems.iterator();
         ImmutableList.Builder<EntitySnapshot> entitySnapshotBuilder = new ImmutableList.Builder<>();
         while (iter.hasNext()) {
@@ -557,10 +574,12 @@ public final class CauseTracker {
                 }
 
                 Cause cause = Cause.of(namedCauses);
+                this.causeTrackerEntityItemTimer.stopTiming();
                 DropItemEvent.Destruct event = SpongeEventFactory.createDropItemEventDestruct(cause, entityItemList, entityItemSnapshotBuilder.build(), this.getWorld());
                 if (handlePostEntityEvent(cause, event)) {
                     sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
                 }
+                this.causeTrackerEntityItemTimer.startTiming();
                 iter.remove();
                 continue;
             }
@@ -568,6 +587,7 @@ public final class CauseTracker {
         }
 
         if (this.capturedSpawnedEntityItems.isEmpty()) {
+            this.causeTrackerEntityItemTimer.stopTiming();
             return;
         }
 
@@ -581,9 +601,11 @@ public final class CauseTracker {
 
         List<EntitySnapshot> entitySnapshots = entitySnapshotBuilder.build();
         if (entitySnapshots.isEmpty()) {
+            this.causeTrackerEntityItemTimer.stopTiming();
             return;
         }
 
+        this.causeTrackerEntityItemTimer.stopTiming();
         DropItemEvent event = SpongeEventFactory.createDropItemEventDispense(cause, this.capturedSpawnedEntityItems, entitySnapshots, this.getWorld());
         if (handlePostEntityEvent(cause, event)) {
             sendItemChangeToPlayer(StaticMixinHelper.packetPlayer);
@@ -636,6 +658,7 @@ public final class CauseTracker {
 
     // Special handling for single block breaks in order to allow plugins to modify entity captures per block break
     public void handleBlockBreak(int preEntitySize, int preEntityItemSize, BlockPos pos, IBlockState currentState, BlockSnapshot originalBlockSnapshot) {
+        this.causeTrackerBlockBreakTimer.startTiming();
         int postEntitySize = this.capturedSpawnedEntities.size();
         int postEntityItemSize = this.capturedSpawnedEntityItems.size();
         // handle captured entities
@@ -677,9 +700,11 @@ public final class CauseTracker {
                 spongeEntity.setSpawnedFromBlockBreak(true);
             }
         }
+        this.causeTrackerBlockBreakTimer.stopTiming();
     }
 
     public void handleBlockCaptures() {
+        this.causeTrackerBlockTimer.startTiming();
         Cause cause = this.getCurrentCause();
         EntityPlayerMP player = StaticMixinHelper.packetPlayer;
 
@@ -724,6 +749,7 @@ public final class CauseTracker {
         blockModifyTransactions = modifyBuilder.build();
         blockPlaceTransactions = placeBuilder.build();
         blockMultiTransactions = multiBuilder.build();
+        this.causeTrackerBlockTimer.stopTiming();
         ChangeBlockEvent changeBlockEvent;
         if (blockBreakTransactions.size() > 0) {
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventBreak(cause, this.getWorld(), blockBreakTransactions);
@@ -743,6 +769,7 @@ public final class CauseTracker {
             placeEvent = (ChangeBlockEvent.Place) changeBlockEvent;
             blockEvents.add(changeBlockEvent);
         }
+        this.causeTrackerBlockTimer.startTiming();
         if (blockEvents.size() > 1) {
             if (breakEvent != null) {
                 int count = cause.allOf(ChangeBlockEvent.Break.class).size();
@@ -759,8 +786,10 @@ public final class CauseTracker {
                 String namedCause = "PlaceEvent" + (count != 0 ? count : "");
                 cause = cause.with(NamedCause.of(namedCause, placeEvent));
             }
+            this.causeTrackerBlockTimer.stopTiming();
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventPost(cause, this.getWorld(), blockMultiTransactions);
             SpongeImpl.postEvent(changeBlockEvent);
+            this.causeTrackerBlockTimer.startTiming();
             if (changeBlockEvent.isCancelled()) {
                 // Restore original blocks
                 ListIterator<Transaction<BlockSnapshot>>
@@ -787,11 +816,13 @@ public final class CauseTracker {
             }
         }
 
+        this.causeTrackerBlockTimer.stopTiming();
         if (blockDecayTransactions.size() > 0) {
             changeBlockEvent = SpongeEventFactory.createChangeBlockEventDecay(cause, this.getWorld(), blockDecayTransactions);
             SpongeImpl.postEvent(changeBlockEvent);
             blockEvents.add(changeBlockEvent);
         }
+        this.causeTrackerBlockTimer.startTiming();
 
         for (ChangeBlockEvent blockEvent : blockEvents) {
             CaptureType captureType = null;
@@ -874,6 +905,7 @@ public final class CauseTracker {
                 }
             }
         }
+        this.causeTrackerBlockTimer.stopTiming();
     }
 
     private void handlePostPlayerBlockEvent(CaptureType captureType, List<Transaction<BlockSnapshot>> transactions) {
@@ -1169,16 +1201,19 @@ public final class CauseTracker {
                 }
 
                 this.addCause(Cause.of(namedCauses));
+                this.causeTrackerBlockTimer.stopTiming();
                 newState.getBlock().onBlockAdded(this.getMinecraftWorld(), pos, newState);
                 // Handle any additional captures during onBlockAdded
                 // This is to ensure new captures do not leak into next tick with wrong cause
                 if (this.getCapturedSpongeBlockSnapshots().size() > 0) {
                     this.handlePostTickCaptures();
                 }
+                this.causeTrackerBlockTimer.startTiming();
                 this.removeCurrentCause();
             }
 
             proxyBlockAccess.proceed();
+            this.causeTrackerBlockTimer.stopTiming();
             this.getMixinWorld().markAndNotifyNeighbors(pos, null, originalState, newState, updateFlag);
             // Handle any additional captures during notify
             // This is to ensure new captures do not leak into next tick with wrong cause

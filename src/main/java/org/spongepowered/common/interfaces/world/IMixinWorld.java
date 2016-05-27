@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import co.aikar.timings.Timing;
+import co.aikar.timings.WorldTimingsHandler;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.entity.player.EntityPlayer;
@@ -76,5 +78,7 @@ public interface IMixinWorld {
     SpongeConfig<?> getActiveConfig();
 
     void setActiveConfig(SpongeConfig<?> config);
+
+    WorldTimingsHandler getTimingsHandler();
 
 }

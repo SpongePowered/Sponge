@@ -26,6 +26,8 @@ package org.spongepowered.common.mixin.core.entity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.SpongeTimings;
+import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
@@ -165,6 +167,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     public java.util.ArrayList<EntityItem> capturedItemDrops = new java.util.ArrayList<EntityItem>();
     private boolean spawnedFromBlockBreak = false;
     private SpawnCause spawnCause = null;
+    private Timing timing;
 
     @Shadow private UUID entityUniqueID;
     @Shadow public net.minecraft.world.World worldObj;
@@ -1404,5 +1407,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Override
     public void setSpawnCause(SpawnCause spawnCause) {
         this.spawnCause = spawnCause;
+    }
+
+    @Override
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            this.timing = SpongeTimings.getEntityTiming(this);
+        }
+        return this.timing;
     }
 }

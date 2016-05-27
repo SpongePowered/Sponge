@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.command;
 
+import co.aikar.timings.SpongeTimings;
 import net.minecraft.command.CommandHandler;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -48,6 +49,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
 
     @Inject(method = "tryExecute", at = @At(value = "HEAD"))
     public void onExecuteCommandHead(ICommandSender sender, String[] args, ICommand command, String input, CallbackInfoReturnable<Boolean> ci) {
+        SpongeTimings.playerCommandTimer.startTiming();
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             world.getCauseTracker().setCapturingCommand(true);
@@ -70,6 +72,7 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(false);
         }
+        SpongeTimings.playerCommandTimer.stopTiming();
     }
 
     @Inject(method = "tryExecute", at = @At(value = "INVOKE", target = "Lnet/minecraft/command/ICommandSender;addChatMessage"

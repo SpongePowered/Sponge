@@ -98,6 +98,7 @@ public abstract class MixinSpawnerAnimals {
         causeTracker.setWorldSpawnerRunning(true);
         causeTracker.setCaptureSpawnedEntities(true);
         spawnerStart = true;
+        spongeWorld.getTimingsHandler().mobSpawn.startTiming();
     }
 
     @Inject(method = "findChunksForSpawning", at = @At(value = "RETURN"))
@@ -113,6 +114,7 @@ public abstract class MixinSpawnerAnimals {
             spawnerEntityClass = null;
             spawnerEntityType = null;
         }
+        spongeWorld.getTimingsHandler().mobSpawn.stopTiming();
     }
 
     @Inject(method = "performWorldGenSpawning", at = @At(value = "HEAD"))

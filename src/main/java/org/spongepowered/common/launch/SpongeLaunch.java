@@ -74,7 +74,6 @@ public class SpongeLaunch {
                 .addConfiguration("mixins.common.entityactivation.json")
                 .addConfiguration("mixins.common.entitycollisions.json")
                 .addConfiguration("mixins.common.exploit.json")
-                .addConfiguration("mixins.common.timings.json")
                 .addConfiguration("mixins.common.optimization.json")
                 ;
     }

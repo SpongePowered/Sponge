@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.interfaces.entity;
 
+import co.aikar.timings.Timing;
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.EntityItem;
@@ -132,4 +133,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     SpawnCause getSpawnCause();
 
     void setSpawnCause(SpawnCause spawnCause);
+
+    // Timings
+    Timing getTimingsHandler();
 }

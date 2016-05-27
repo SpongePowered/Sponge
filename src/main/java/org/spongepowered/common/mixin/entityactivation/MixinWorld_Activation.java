@@ -33,7 +33,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorld;
 import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
 
 @NonnullByDefault
-@Mixin(net.minecraft.world.World.class)
+@Mixin(value = net.minecraft.world.World.class, priority = 1005)
 public abstract class MixinWorld_Activation implements IMixinWorld {
 
     @Inject(method = "updateEntities()V", at = @At(value = "INVOKE_STRING",

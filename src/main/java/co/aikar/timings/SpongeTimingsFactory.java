@@ -43,7 +43,7 @@ public class SpongeTimingsFactory implements TimingsFactory {
     private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();
     private boolean timingsEnabled = false;
-    private boolean verboseEnabled = false;
+    private boolean verboseEnabled = true;
     private int historyInterval = -1;
     private int historyLength = -1;
     private final boolean moduleEnabled;
@@ -188,9 +188,19 @@ public class SpongeTimingsFactory implements TimingsFactory {
     public static Timing ofSafe(PluginContainer plugin, String name) {
         Timing pluginHandler = null;
         if (plugin != null) {
-            pluginHandler = ofSafe(plugin.getId(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
+            pluginHandler = ofSafe(plugin.getName(), "Combined Total", TimingsManager.PLUGIN_GROUP_HANDLER);
         }
-        return ofSafe(plugin != null ? plugin.getId() : "Minecraft - Invalid Plugin", name, pluginHandler);
+        return ofSafe(plugin != null ? plugin.getName() : "Minecraft - Invalid Plugin", name, pluginHandler);
+    }
+
+    // used for events
+    public static Timing ofSafe(PluginContainer plugin, String name, boolean isMod) {
+        Timing pluginHandler = null;
+        if (plugin != null) {
+            pluginHandler = ofSafe(plugin.getName(), "Combined Total", isMod ? TimingsManager.MOD_EVENT_HANDLER : TimingsManager.PLUGIN_EVENT_HANDLER);
+        }
+
+        return ofSafe(plugin.getName(), name, pluginHandler);
     }
 
     public static TimingHandler ofSafe(String name, Timing groupHandler) {

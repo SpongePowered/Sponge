@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.block;
 
+import co.aikar.timings.SpongeTimings;
+import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.block.Block;
 import net.minecraft.block.material.Material;
@@ -77,6 +79,7 @@ import java.util.Random;
 public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     private final boolean isVanilla = getClass().getName().startsWith("net.minecraft.");
+    private Timing timing;
 
     @Shadow private boolean needsRandomTick;
 
@@ -254,5 +257,13 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
     @Override
     public boolean isVanilla() {
         return this.isVanilla;
+    }
+
+    @Override
+    public Timing getTimingsHandler() {
+        if (this.timing == null) {
+            this.timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block)(Object) this);
+        }
+        return this.timing;
     }
 }

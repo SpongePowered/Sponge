@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import co.aikar.timings.TimingsManager;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
@@ -253,14 +254,18 @@ public class SpongeEventManager implements EventManager {
 
     @SuppressWarnings("unchecked")
     protected static boolean post(Event event, List<RegisteredListener<?>> handlers) {
+        TimingsManager.PLUGIN_EVENT_HANDLER.startTiming();
         for (@SuppressWarnings("rawtypes") RegisteredListener handler : handlers) {
             try {
+                handler.getTimingsHandler().startTimingIfSync();
                 handler.handle(event);
+                handler.getTimingsHandler().stopTimingIfSync();
             } catch (Throwable e) {
+                handler.getTimingsHandler().stopTimingIfSync();
                 SpongeImpl.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
             }
         }
-
+        TimingsManager.PLUGIN_EVENT_HANDLER.stopTiming();
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
