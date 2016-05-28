@@ -74,6 +74,7 @@ import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.living.human.EntityHuman;
 import org.spongepowered.common.event.InternalNamedCauses;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.damage.DamageEventHandler;
 import org.spongepowered.common.event.damage.DamageObject;
 import org.spongepowered.common.event.tracking.CauseTracker;
@@ -98,7 +99,6 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
     private static final String WORLD_SPAWN_PARTICLE = "Lnet/minecraft/world/World;spawnParticle(Lnet/minecraft/util/EnumParticleTypes;DDDDDD[I)V";
 
-    private EntityLivingBase nmsEntityLiving = (EntityLivingBase) (Object) this;
     private int maxAir = 300;
 
     @Shadow public int maxHurtResistantTime;
@@ -136,7 +136,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Shadow public abstract Collection getActivePotionEffects();
     @Shadow @Nullable public abstract EntityLivingBase getLastAttacker();
     @Shadow public abstract IAttributeInstance getEntityAttribute(IAttribute attribute);
-    @Shadow public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
+    @Shadow @Nullable public abstract ItemStack getItemStackFromSlot(EntityEquipmentSlot slotIn);
     @Shadow protected abstract void applyEntityAttributes();
     @Shadow protected abstract void playHurtSound(net.minecraft.util.DamageSource p_184581_1_);
     @Shadow protected abstract boolean canBlockDamageSource(DamageSource p_184583_1_);
@@ -207,9 +207,18 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
         return Text.of(this.getUniqueID().toString());
     }
 
+    @Inject(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At("HEAD"), cancellable = true)
+    private void enterDeathState(DamageSource source, CallbackInfo callbackInfo) {
+        if (!this.worldObj.isRemote) {
+            if (!SpongeCommonEventFactory.callDestructEntityEventDeath((EntityLivingBase) (Object) this, source)) {
+                callbackInfo.cancel();
+            }
+        }
+    }
+
     @Redirect(method = "onDeath(Lnet/minecraft/util/DamageSource;)V", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/world/World;setEntityState(Lnet/minecraft/entity/Entity;B)V"))
-    public void onDeathSendEntityState(World world, net.minecraft.entity.Entity self, byte state) {
+    private void onDeathSendEntityState(World world, net.minecraft.entity.Entity self, byte state) {
         // Don't send the state if this is a human. Fixes ghost items on client.
         if (!((net.minecraft.entity.Entity) (Object) this instanceof EntityHuman)) {
             world.setEntityState(self, state);
@@ -217,7 +226,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     }
 
     @Redirect(method = "applyPotionDamageCalculations", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/EntityLivingBase;isPotionActive(Lnet/minecraft/potion/Potion;)Z") )
-    public boolean onIsPotionActive(EntityLivingBase entityIn, Potion potion) {
+    private boolean onIsPotionActive(EntityLivingBase entityIn, Potion potion) {
         return false; // handled in our damageEntityHook
     }
 
@@ -286,7 +295,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
 
                         if (source.getSourceOfDamage() instanceof EntityLivingBase) {
                             ((EntityLivingBase) source.getSourceOfDamage())
-                                    .knockBack(this.nmsEntityLiving, 0.5F, this.posX - source.getSourceOfDamage().posX, this
+                                    .knockBack((EntityLivingBase) (Object) this, 0.5F, this.posX - source.getSourceOfDamage().posX, this
                                             .posZ - source.getSourceOfDamage().posZ);
                         }
                     }
@@ -382,7 +391,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
                     final CauseTracker causeTracker = ((IMixinWorldServer) this.getWorld()).getCauseTracker();
                     final boolean tracksEntitySpecificDrops = causeTracker.getStack().peekState().tracksEntitySpecificDrops();
                     if (tracksEntitySpecificDrops) {
-                        causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH_DROPS_SPAWNING, PhaseContext.start()
+                        causeTracker.switchToPhase(TrackingPhases.ENTITY, EntityPhase.State.DEATH, PhaseContext.start()
                                 .add(NamedCause.source(this))
                                 .add(NamedCause.of(InternalNamedCauses.General.DAMAGE_SOURCE, source))
                                 .add(this.getTrackedPlayer(NbtDataUtil.SPONGE_ENTITY_CREATOR).map(NamedCause::owner).orElse(null))
@@ -470,9 +479,9 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
             damage = (float) event.getFinalDamage();
 
             // Helmet
-            if ((damageSource instanceof FallingBlockDamageSource) && this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND) != null) {
-                this.nmsEntityLiving.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND).damageItem(
-                    (int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), this.nmsEntityLiving);
+            final ItemStack mainHandItem = this.getItemStackFromSlot(EntityEquipmentSlot.MAINHAND);
+            if ((damageSource instanceof FallingBlockDamageSource) && mainHandItem != null) {
+                mainHandItem.damageItem((int) (event.getBaseDamage() * 4.0F + this.rand.nextFloat() * event.getBaseDamage() * 2.0F), (EntityLivingBase) (Object) this);
             }
 
             // Armor
@@ -578,7 +587,7 @@ public abstract class MixinEntityLivingBase extends MixinEntity implements Livin
     @Inject(method = "onItemPickup", at = @At("HEAD"))
     public void onEntityItemPickup(net.minecraft.entity.Entity entityItem, int unused, CallbackInfo ci) {
         if (!this.worldObj.isRemote) {
-            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
+//            EntityUtil.toMixin(entityItem).setDestructCause(Cause.of(NamedCause.of("PickedUp", this)));
         }
     }
 

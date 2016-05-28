@@ -815,27 +815,22 @@ public abstract class MixinWorld implements World, IMixinWorld {
         entity.onUpdate();
     }
 
+    /*********************** TIMINGS ***********************/
+
     // TIMINGS All these methods are overriden in MixinWorldServer
     @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", shift = At.Shift.AFTER, args = "ldc=global"))
     protected void startEntityGlobalTimings(CallbackInfo callbackInfo) {
-        if (!this.isRemote && this instanceof IMixinWorldServer) {
-            ((IMixinWorldServer) this).getTimingsHandler().entityTick.startTiming();
-            co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
-        }
     }
     // Note that the entity timing if it hasn't crashed is already stopped in TrackingUtil
 
     @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
     protected void stopTimingForWeatherEntityTickCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity updatingEntity) {
-        if (!this.isRemote) {
-            EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
-        }
     }
 
     // Inject before this.theProfiler.endStartSection("remove");
 
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=remove"))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=remove", shift = At.Shift.BY, by = -2))
     protected void stopEntityTickTimingStartEntityRemovalTiming(CallbackInfo callbackInfo) {
     }
 
@@ -856,16 +851,13 @@ public abstract class MixinWorld implements World, IMixinWorld {
     //     IFNE L53
 
 
-    @Inject(method = "updateEntities", at = @At(value = "FIELD", target = "Lnet/minecraft/entity/Entity;isDead:Z"))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=tick", shift = At.Shift.AFTER))
     protected void startEntityTickTiming(CallbackInfo callbackInfo) {
     }
 
     // Inject at the head of the catch statement for a crash report generation
     @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
     protected void stopTimingTickEntityCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity entity, net.minecraft.entity.Entity updatingEntity) {
-        if (!this.isRemote) {
-            EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
-        }
     }
 
 
@@ -885,7 +877,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     // Inject before
     // this.theProfiler.endSection();
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 1))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 1, shift = At.Shift.BY, by = -2))
     protected void stopEntityTickRemoval(CallbackInfo callbackInfo) {
     }
 
@@ -905,25 +897,25 @@ public abstract class MixinWorld implements World, IMixinWorld {
     // Inject before
     //             if (tileentity.isInvalid())
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z"))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z", ordinal = 1))
     protected void stopTileEntityAndStartRemoval(CallbackInfo callbackInfo) {
     }
 
     // Inject at the end of the while loop
 
-    @Inject(method = "updateEntities", at = @At(value = "JUMP", opcode = Opcodes.GOTO))
+    @Inject(method = "updateEntities", at = @At(value = "JUMP", opcode = Opcodes.GOTO, ordinal = 9))
     protected void stopTileEntityRemovelInWhile(CallbackInfo callbackInfo) {
     }
 
     // Inject before
     // this.theProfiler.endStartSection("pendingBlockEntities");
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=pendingBlockEntities"))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=pendingBlockEntities", shift = At.Shift.BY, by = -2))
     protected void startPendingTileEntityTimings(CallbackInfo callbackInfo) {
     }
 
     // Inject at the bottom, before ending the two profilers
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES))
+    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 3, shift = At.Shift.BY, by = -2))
     protected void endPendingTileEntities(CallbackInfo callbackInfo) {
     }
 

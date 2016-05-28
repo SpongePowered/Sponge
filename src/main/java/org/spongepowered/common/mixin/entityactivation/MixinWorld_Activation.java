@@ -37,7 +37,7 @@ import org.spongepowered.common.mixin.plugin.entityactivation.ActivationRange;
 public abstract class MixinWorld_Activation implements IMixinWorld {
 
     @Inject(method = "updateEntities()V", at = @At(value = "INVOKE_STRING",
-            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}))
+            target = "Lnet/minecraft/profiler/Profiler;endStartSection(Ljava/lang/String;)V", args = {"ldc=regular"}, shift = At.Shift.BY, by = -2))
     private void onInvokeProfiler(CallbackInfo ci) {
         if (!((net.minecraft.world.World) (Object) this).isRemote) {
             ActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));

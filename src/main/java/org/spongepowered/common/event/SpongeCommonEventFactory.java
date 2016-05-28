@@ -184,7 +184,7 @@ public class SpongeCommonEventFactory {
         return event;
     }
 
-    public static DestructEntityEvent.Death callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
+    public static boolean callDestructEntityEventDeath(EntityLivingBase entity, DamageSource source) {
         final MessageEvent.MessageFormatter formatter = new MessageEvent.MessageFormatter();
         MessageChannel originalChannel;
         MessageChannel channel;
@@ -223,7 +223,7 @@ public class SpongeCommonEventFactory {
         if (!event.isMessageCancelled() && !message.isEmpty()) {
             event.getChannel().ifPresent(eventChannel -> eventChannel.send(entity, event.getMessage()));
         }
-        return event;
+        return true;
     }
 
     @SuppressWarnings("unchecked")

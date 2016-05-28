@@ -126,6 +126,7 @@ import org.spongepowered.common.event.tracking.phase.function.EntityListConsumer
 import org.spongepowered.common.interfaces.IMixinNextTickListEntry;
 import org.spongepowered.common.interfaces.block.IMixinBlock;
 import org.spongepowered.common.interfaces.block.IMixinBlockEventData;
+import org.spongepowered.common.interfaces.block.tile.IMixinTileEntity;
 import org.spongepowered.common.interfaces.world.IMixinWorldInfo;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
@@ -147,6 +148,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -941,6 +943,96 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
     @Override
     public WorldStorage getWorldStorage() {
         return (WorldStorage) ((WorldServer) (Object) this).getChunkProvider();
+    }
+
+    /**************************** TIMINGS ***************************************/
+    /*
+    The remaining of these overridden methods are all injectors into World#updateEntities() to where
+    the exact fine tuning of where the methods are invoked, the call stack is precisely emulated as
+    if this were an overwrite. The injections themselves are sensitive in some regards, but mostly
+    will remain just fine.
+     */
+
+
+    @Override
+    protected void startEntityGlobalTimings(CallbackInfo callbackInfo) {
+        this.timings.entityTick.startTiming();
+        co.aikar.timings.TimingHistory.entityTicks += this.loadedEntityList.size();
+    }
+
+    @Override
+    protected void stopTimingForWeatherEntityTickCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity updatingEntity) {
+        EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+    }
+
+    @Override
+    protected void stopEntityTickTimingStartEntityRemovalTiming(CallbackInfo callbackInfo) {
+        this.timings.entityTick.stopTiming();
+        this.timings.entityRemoval.startTiming();
+    }
+
+    @Override
+    protected void stopEntityRemovalTiming(CallbackInfo callbackInfo) {
+        this.timings.entityRemoval.stopTiming();
+    }
+
+    @Override
+    protected void startEntityTickTiming(CallbackInfo callbackInfo) {
+        this.timings.entityTick.startTiming();
+    }
+
+    @Override
+    protected void stopTimingTickEntityCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity entity,
+            net.minecraft.entity.Entity updatingEntity) {
+        EntityUtil.toMixin(updatingEntity).getTimingsHandler().stopTiming();
+    }
+
+    @Override
+    protected void stopEntityTickSectionBeforeRemove(CallbackInfo callbackInfo) {
+       this.timings.entityTick.stopTiming();
+    }
+
+    @Override
+    protected void startEntityRemovalTick(CallbackInfo callbackInfo) {
+        this.timings.entityRemoval.startTiming();
+    }
+
+    @Override
+    protected void stopEntityTickRemoval(CallbackInfo callbackInfo) {
+        this.timings.entityRemoval.stopTiming();
+    }
+
+    @Override
+    protected void startTileTickTimer(CallbackInfo callbackInfo) {
+        this.timings.tileEntityTick.startTiming();
+    }
+
+    @Override
+    protected void stopTimingTickTileEntityCrash(CallbackInfo ci, Iterator iterator, net.minecraft.tileentity.TileEntity updatingTileEntity,
+            BlockPos blockpos,
+            Throwable throwable) {
+        ((IMixinTileEntity) updatingTileEntity).getTimingsHandler().stopTiming();
+    }
+
+    @Override
+    protected void stopTileEntityAndStartRemoval(CallbackInfo callbackInfo) {
+        this.timings.tileEntityTick.stopTiming();
+        this.timings.tileEntityRemoval.startTiming();
+    }
+
+    @Override
+    protected void stopTileEntityRemovelInWhile(CallbackInfo callbackInfo) {
+        this.timings.tileEntityRemoval.stopTiming();
+    }
+
+    @Override
+    protected void startPendingTileEntityTimings(CallbackInfo callbackInfo) {
+        this.timings.tileEntityPending.startTiming();
+    }
+
+    @Override
+    protected void endPendingTileEntities(CallbackInfo callbackInfo) {
+        this.timings.tileEntityPending.stopTiming();
     }
 
     /**************************** EFFECT ****************************************/

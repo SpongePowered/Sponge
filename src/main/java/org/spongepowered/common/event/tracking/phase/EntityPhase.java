@@ -64,7 +64,7 @@ import java.util.stream.Stream;
 public final class EntityPhase extends TrackingPhase {
 
     public enum State implements IPhaseState {
-        DEATH_DROPS_SPAWNING,
+        DEATH,
         DEATH_UPDATE,
         ;
 
@@ -96,7 +96,7 @@ public final class EntityPhase extends TrackingPhase {
 
     @Override
     public void unwind(CauseTracker causeTracker, IPhaseState state, PhaseContext phaseContext) {
-        if (state == State.DEATH_DROPS_SPAWNING) {
+        if (state == State.DEATH) {
             final Entity
                     dyingEntity =
                     phaseContext.firstNamed(NamedCause.SOURCE, Entity.class)

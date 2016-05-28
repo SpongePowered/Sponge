@@ -108,10 +108,6 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     void setDisplayName(@Nullable Text displayName);
 
-    DamageSource getLastDamageSource();
-
-    Cause getNonLivingDestructCause();
-
     void setCurrentCollidingBlock(BlockState state);
 
     BlockState getCurrentCollidingBlock();
@@ -120,15 +116,7 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
 
     boolean isVanilla();
 
-    void setCaptureItemDrops(boolean capture);
-
-    List<EntityItem> getCapturedItemDrops();
-
     void setDestructCause(Cause cause);
-
-    boolean spawnedFromBlockBreak();
-
-    void setSpawnedFromBlockBreak(boolean flag);
 
     SpawnCause getSpawnCause();
 
