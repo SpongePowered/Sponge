@@ -275,6 +275,7 @@ public class KeyRegistry {
         keyMap.put("critical_hit", makeSingleKey(Boolean.class, Value.class, of("CriticalHit")));
         keyMap.put("generation", makeSingleKey(Integer.class, MutableBoundedValue.class, of("Generation")));
         keyMap.put("passenger", makeSingleKey(EntitySnapshot.class, Value.class, of("PassengerSnapshot")));
+        keyMap.put("passengers", makeListKey(EntitySnapshot.class, of("Passengers")));
         keyMap.put("knockback_strength", makeSingleKey(Integer.class, MutableBoundedValue.class, of("KnockbackStrength")));
         keyMap.put("persists", makeSingleKey(Boolean.class, Value.class, of("Persists")));
         keyMap.put("stored_enchantments", makeListKey(ItemEnchantment.class, of("StoredEnchantments")));
