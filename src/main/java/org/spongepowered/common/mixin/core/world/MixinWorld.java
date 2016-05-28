@@ -33,6 +33,8 @@ import com.flowpowered.math.vector.Vector3i;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.state.IBlockState;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.entity.boss.EntityDragonPart;
 import net.minecraft.entity.effect.EntityLightningBolt;
 import net.minecraft.entity.item.EntityArmorStand;
@@ -51,6 +53,7 @@ import net.minecraft.profiler.Profiler;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.ITickable;
+import net.minecraft.util.ReportedException;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -102,17 +105,15 @@ import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.api.world.extent.worker.MutableBiomeAreaWorker;
 import org.spongepowered.api.world.extent.worker.MutableBlockVolumeWorker;
 import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.asm.lib.Opcodes;
-import org.spongepowered.asm.mixin.Debug;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.block.BlockUtil;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -121,7 +122,6 @@ import org.spongepowered.common.event.EventConsumer;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
-import org.spongepowered.common.interfaces.world.IMixinWorldServer;
 import org.spongepowered.common.registry.type.event.InternalSpawnTypes;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.VecHelper;
@@ -173,14 +173,23 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @Shadow @Final public WorldProvider provider;
     @Shadow @Final public Random rand;
     @Shadow @Final public Profiler theProfiler;
-    @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
-    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
     @Shadow @Final public List<EntityPlayer> playerEntities;
+    @Shadow @Final public List<net.minecraft.entity.Entity> loadedEntityList;
+    @Shadow @Final public List<net.minecraft.entity.Entity> weatherEffects;
+    @Shadow @Final public List<net.minecraft.entity.Entity> unloadedEntityList;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> loadedTileEntityList;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tickableTileEntities;
+    @Shadow @Final public List<net.minecraft.tileentity.TileEntity> tileEntitiesToBeRemoved;
+    @Shadow @Final private List<net.minecraft.tileentity.TileEntity> addedTileEntityList;
+
+    @Shadow private boolean processingLoadedTiles;
     @Shadow protected boolean scheduledUpdatesAreImmediate;
     @Shadow protected WorldInfo worldInfo;
+    @Shadow @Final net.minecraft.world.border.WorldBorder worldBorder;
 
     @Shadow public abstract net.minecraft.world.border.WorldBorder shadow$getWorldBorder();
     @Shadow public abstract EnumDifficulty shadow$getDifficulty();
+    @Shadow protected abstract void tickPlayers();
 
     @Shadow public net.minecraft.world.World init() {
         // Should never be overwritten because this is @Shadow'ed
@@ -817,106 +826,218 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     /*********************** TIMINGS ***********************/
 
-    // TIMINGS All these methods are overriden in MixinWorldServer
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = "Lnet/minecraft/profiler/Profiler;startSection(Ljava/lang/String;)V", shift = At.Shift.AFTER, args = "ldc=global"))
-    protected void startEntityGlobalTimings(CallbackInfo callbackInfo) {
+    /**
+     * @author blood
+     * @author gabizou - Ported to 1.9.4 - replace direct field calls to overriden methods in MixinWorldServer
+     *
+     * @reason Add timing hooks in various areas. This method shouldn't be touched by mods/forge alike
+     */
+    @Overwrite
+    public void updateEntities() {
+        this.theProfiler.startSection("entities");
+        this.theProfiler.startSection("global");
+        this.startEntityGlobalTimings(); // Sponge
+
+
+        for (int i = 0; i < this.weatherEffects.size(); ++i) {
+            net.minecraft.entity.Entity entity = this.weatherEffects.get(i);
+
+            try {
+                ++entity.ticksExisted;
+                entity.onUpdate();
+            } catch (Throwable throwable2) {
+                this.stopTimingForWeatherEntityTickCrash(entity); // Sponge - end the entity timing
+                CrashReport crashreport = CrashReport.makeCrashReport(throwable2, "Ticking entity");
+                CrashReportCategory crashreportcategory = crashreport.makeCategory("Entity being ticked");
+
+                if (entity == null) {
+                    crashreportcategory.addCrashSection("Entity", "~~NULL~~");
+                } else {
+                    entity.addEntityCrashInfo(crashreportcategory);
+                }
+
+                throw new ReportedException(crashreport);
+            }
+
+            if (entity.isDead) {
+                this.weatherEffects.remove(i--);
+            }
+        }
+
+        this.stopEntityTickTimingStartEntityRemovalTiming(); // Sponge
+        this.theProfiler.endStartSection("remove");
+        this.loadedEntityList.removeAll(this.unloadedEntityList);
+
+        for (int k = 0; k < this.unloadedEntityList.size(); ++k) {
+            net.minecraft.entity.Entity entity1 = this.unloadedEntityList.get(k);
+            int j = entity1.chunkCoordX;
+            int k1 = entity1.chunkCoordZ;
+
+            if (entity1.addedToChunk && this.isChunkLoaded(j, k1, true)) {
+                this.getChunkFromChunkCoords(j, k1).removeEntity(entity1);
+            }
+        }
+
+        for (int l = 0; l < this.unloadedEntityList.size(); ++l) {
+            this.onEntityRemoved(this.unloadedEntityList.get(l));
+        }
+
+        this.unloadedEntityList.clear();
+        this.stopEntityRemovalTiming(); // Sponge
+        this.tickPlayers();
+        this.theProfiler.endStartSection("regular");
+
+        for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1) {
+            net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
+            net.minecraft.entity.Entity entity3 = entity2.getRidingEntity();
+
+            if (entity3 != null) {
+                if (!entity3.isDead && entity3.isPassenger(entity2)) {
+                    continue;
+                }
+
+                entity2.dismountRidingEntity();
+            }
+
+            this.theProfiler.startSection("tick");
+            this.startEntityTickTiming(); // Sponge
+
+            if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP)) {
+                try {
+                    this.updateEntity(entity2);
+                } catch (Throwable throwable1) {
+                    this.stopTimingTickEntityCrash(entity2); // Sponge
+                    CrashReport crashreport1 = CrashReport.makeCrashReport(throwable1, "Ticking entity");
+                    CrashReportCategory crashreportcategory1 = crashreport1.makeCategory("Entity being ticked");
+                    entity2.addEntityCrashInfo(crashreportcategory1);
+                    throw new ReportedException(crashreport1);
+                }
+            }
+
+            this.stopEntityTickSectionBeforeRemove(); // Sponge
+            this.theProfiler.endSection();
+            this.theProfiler.startSection("remove");
+            this.startEntityRemovalTick(); // Sponge
+
+            if (entity2.isDead) {
+                int l1 = entity2.chunkCoordX;
+                int i2 = entity2.chunkCoordZ;
+
+                if (entity2.addedToChunk && this.isChunkLoaded(l1, i2, true)) {
+                    this.getChunkFromChunkCoords(l1, i2).removeEntity(entity2);
+                }
+
+                this.loadedEntityList.remove(i1--);
+                this.onEntityRemoved(entity2);
+            }
+
+            this.stopEntityRemovalTiming(); // Sponge
+            this.theProfiler.endSection();
+        }
+
+        this.theProfiler.endStartSection("blockEntities");
+        this.processingLoadedTiles = true;
+        Iterator<net.minecraft.tileentity.TileEntity> iterator = this.tickableTileEntities.iterator();
+
+        while (iterator.hasNext()) {
+            this.startTileTickTimer(); // Sponge
+            net.minecraft.tileentity.TileEntity tileentity = iterator.next();
+
+            if (!tileentity.isInvalid() && tileentity.hasWorldObj()) {
+                BlockPos blockpos = tileentity.getPos();
+
+                if (this.isBlockLoaded(blockpos) && this.worldBorder.contains(blockpos)) {
+                    try {
+                        this.theProfiler.startSection(tileentity.getClass().getSimpleName());
+                        ((ITickable) tileentity).update();
+                        this.theProfiler.endSection();
+                    } catch (Throwable throwable) {
+                        this.stopTimingTickTileEntityCrash(tileentity); // Sponge
+                        CrashReport crashreport2 = CrashReport.makeCrashReport(throwable, "Ticking block entity");
+                        CrashReportCategory crashreportcategory2 = crashreport2.makeCategory("Block entity being ticked");
+                        tileentity.addInfoToCrashReport(crashreportcategory2);
+                        throw new ReportedException(crashreport2);
+                    }
+                }
+            }
+
+            this.stopTileEntityAndStartRemoval(); // Sponge
+
+            if (tileentity.isInvalid()) {
+                iterator.remove();
+                this.loadedTileEntityList.remove(tileentity);
+
+                if (this.isBlockLoaded(tileentity.getPos())) {
+                    this.getChunkFromBlockCoords(tileentity.getPos()).removeTileEntity(tileentity.getPos());
+                }
+            }
+
+            this.stopTileEntityRemovelInWhile(); // Sponge
+        }
+
+        this.processingLoadedTiles = false;
+        this.startPendingTileEntityTimings(); // Sponge
+
+        if (!this.tileEntitiesToBeRemoved.isEmpty()) {
+            this.tickableTileEntities.removeAll(this.tileEntitiesToBeRemoved);
+            this.loadedTileEntityList.removeAll(this.tileEntitiesToBeRemoved);
+            this.tileEntitiesToBeRemoved.clear();
+        }
+
+        this.theProfiler.endStartSection("pendingBlockEntities");
+
+        if (!this.addedTileEntityList.isEmpty()) {
+            for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1) {
+                net.minecraft.tileentity.TileEntity tileentity1 = this.addedTileEntityList.get(j1);
+
+                if (!tileentity1.isInvalid()) {
+                    if (!this.loadedTileEntityList.contains(tileentity1)) {
+                        this.addTileEntity(tileentity1);
+                    }
+
+                    if (this.isBlockLoaded(tileentity1.getPos())) {
+                        net.minecraft.world.chunk.Chunk chunk = this.getChunkFromBlockCoords(tileentity1.getPos());
+                        IBlockState iblockstate = chunk.getBlockState(tileentity1.getPos());
+                        chunk.addTileEntity(tileentity1.getPos(), tileentity1);
+                        this.notifyBlockUpdate(tileentity1.getPos(), iblockstate, iblockstate, 3);
+                    }
+                }
+            }
+
+            this.addedTileEntityList.clear();
+        }
+
+        this.endPendingTileEntities(); // Sponge
+        this.theProfiler.endSection();
+        this.theProfiler.endSection();
     }
-    // Note that the entity timing if it hasn't crashed is already stopped in TrackingUtil
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 0), locals = LocalCapture.CAPTURE_FAILHARD)
-    protected void stopTimingForWeatherEntityTickCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity updatingEntity) {
-    }
+    protected void startEntityGlobalTimings() { }
 
-    // Inject before this.theProfiler.endStartSection("remove");
+    protected void stopTimingForWeatherEntityTickCrash(net.minecraft.entity.Entity updatingEntity) { }
 
+    protected void stopEntityTickTimingStartEntityRemovalTiming() { }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=remove", shift = At.Shift.BY, by = -2))
-    protected void stopEntityTickTimingStartEntityRemovalTiming(CallbackInfo callbackInfo) {
-    }
+    protected void stopEntityRemovalTiming() { }
 
-    // Inject after this.theProfiler.endStartSection("regular");
+    protected void startEntityTickTiming() { }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=regular", shift = At.Shift.AFTER))
-    protected void stopEntityRemovalTiming(CallbackInfo callbackInfo) {
-    }
+    protected void stopTimingTickEntityCrash(net.minecraft.entity.Entity updatingEntity) { }
 
-    // Inject inside  if (!entity2.isDead && !(entity2 instanceof EntityPlayerMP))
-    // Which has the following bytecode:
-    //     LINENUMBER 1528 L52
-    //     ALOAD 2
-    //     GETFIELD net/minecraft/entity/Entity.isDead : Z <--- Where we want to inject before
-    //     IFNE L53
-    //     ALOAD 2
-    //     INSTANCEOF net/minecraft/entity/player/EntityPlayerMP
-    //     IFNE L53
+    protected void stopEntityTickSectionBeforeRemove() { }
 
+    protected void startEntityRemovalTick() { }
 
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=tick", shift = At.Shift.AFTER))
-    protected void startEntityTickTiming(CallbackInfo callbackInfo) {
-    }
+    protected void startTileTickTimer() { }
 
-    // Inject at the head of the catch statement for a crash report generation
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 1), locals = LocalCapture.CAPTURE_FAILHARD)
-    protected void stopTimingTickEntityCrash(CallbackInfo callbackInfo, int i1, net.minecraft.entity.Entity entity, net.minecraft.entity.Entity updatingEntity) {
-    }
+    protected void stopTimingTickTileEntityCrash(net.minecraft.tileentity.TileEntity updatingTileEntity) { }
 
+    protected void stopTileEntityAndStartRemoval() { }
 
-    // Inject before
-    // this.theProfiler.endSection();
-    // this.theProfiler.startSection("remove");
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 0, shift = At.Shift.AFTER))
-    protected void stopEntityTickSectionBeforeRemove(CallbackInfo callbackInfo) {
-    }
+    protected void stopTileEntityRemovelInWhile() { }
 
-    // Inject after
-    // this.theProfiler.startSection("remove");
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=remove", shift = At.Shift.AFTER))
-    protected void startEntityRemovalTick(CallbackInfo callbackInfo) {
-    }
+    protected void startPendingTileEntityTimings() {}
 
-    // Inject before
-    // this.theProfiler.endSection();
-
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 1, shift = At.Shift.BY, by = -2))
-    protected void stopEntityTickRemoval(CallbackInfo callbackInfo) {
-    }
-
-    // Inject before
-    // TileEntity tileentity = (TileEntity)iterator.next();
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Ljava/util/Iterator;next()Ljava/lang/Object;"))
-    protected void startTileTickTimer(CallbackInfo callbackInfo) {
-    }
-
-    // We add the manual timings management for tile entity ticks in TrackingUtil.
-
-    // Inject at the head of the catch statement for a crash report generation
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/crash/CrashReport;makeCrashReport(Ljava/lang/Throwable;Ljava/lang/String;)Lnet/minecraft/crash/CrashReport;", ordinal = 2), locals = LocalCapture.CAPTURE_FAILHARD)
-    protected void stopTimingTickTileEntityCrash(CallbackInfo ci, Iterator iterator, net.minecraft.tileentity.TileEntity updatingTileEntity, BlockPos blockpos, Throwable throwable) {
-    }
-
-    // Inject before
-    //             if (tileentity.isInvalid())
-
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = "Lnet/minecraft/tileentity/TileEntity;isInvalid()Z", ordinal = 1))
-    protected void stopTileEntityAndStartRemoval(CallbackInfo callbackInfo) {
-    }
-
-    // Inject at the end of the while loop
-
-    @Inject(method = "updateEntities", at = @At(value = "JUMP", opcode = Opcodes.GOTO, ordinal = 9))
-    protected void stopTileEntityRemovelInWhile(CallbackInfo callbackInfo) {
-    }
-
-    // Inject before
-    // this.theProfiler.endStartSection("pendingBlockEntities");
-
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=pendingBlockEntities", shift = At.Shift.BY, by = -2))
-    protected void startPendingTileEntityTimings(CallbackInfo callbackInfo) {
-    }
-
-    // Inject at the bottom, before ending the two profilers
-    @Inject(method = "updateEntities", at = @At(value = "INVOKE", target = PROFILER_ES, ordinal = 3, shift = At.Shift.BY, by = -2))
-    protected void endPendingTileEntities(CallbackInfo callbackInfo) {
-    }
+    protected void endPendingTileEntities() { }
 
 }
