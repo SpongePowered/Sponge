@@ -60,6 +60,7 @@ import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.EnumFacing;
 import net.minecraft.util.MovingObjectPosition;
 import net.minecraft.util.MovingObjectPosition.MovingObjectType;
+import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.IInteractionObject;
 import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldProviderEnd;
@@ -121,7 +122,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.config.SpongeConfig;
 import org.spongepowered.common.data.util.NbtDataUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.entity.teleport.SpongePortalTeleportCause;
 import org.spongepowered.common.interfaces.IMixinChunk;
 import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
@@ -769,6 +769,10 @@ public class SpongeCommonEventFactory {
         Transform<World> fromTransform = spongeEntity.getTransform();
         int fromDimensionId = entityIn.dimension;
         WorldServer fromWorld = mcServer.worldServerForDimension(fromDimensionId);
+        // handle the end
+        if (targetDimensionId == 1 && fromWorld.provider instanceof WorldProviderEnd) {
+            targetDimensionId = 0;
+        }
         WorldServer toWorld = mcServer.worldServerForDimension(targetDimensionId);
         if (teleporter == null) {
             teleporter = toWorld.getDefaultTeleporter();
@@ -801,26 +805,39 @@ public class SpongeCommonEventFactory {
             }
         }
 
-        Transform<World> preTeleportTransform = scm.getTeleporterTransform(entityIn, fromWorld, toWorld, teleporter);
+        scm.prepareEntityForPortal(entityIn, fromWorld, toWorld);
         if (entityIn instanceof EntityPlayerMP) {
             // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(false);
         }
-        spongeEntity.setTransform(preTeleportTransform);
-        // need to use placeInExistingPortal to support mods
-        teleporter.placeInExistingPortal(entityIn, entityIn.rotationYaw);
-        Transform<World> portalExitTransform = preTeleportTransform.setLocation(spongeEntity.getLocation()).setExtent((World) toWorld);
+
         Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder().agent((PortalAgent) teleporter).type(TeleportTypes.PORTAL).build()));
         Cause currentCause = ((IMixinWorld) fromWorld).getCauseTracker().getCurrentCause();
         if (currentCause != null) {
             teleportCause = teleportCause.merge(currentCause);
         }
+        // Turn on capturing for destination world
+        IMixinWorld spongeWorld = (IMixinWorld) toWorld;
+        final CauseTracker causeTracker = spongeWorld.getCauseTracker();
+        if (entityIn.isEntityAlive() && !(fromWorld.provider instanceof WorldProviderEnd)) {
+            fromWorld.theProfiler.startSection("placing");
+            causeTracker.addCause(teleportCause);
+            causeTracker.setSpecificCapture(true);
+            // need to use placeInPortal to support mods
+            teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
+            fromWorld.theProfiler.endSection();
+        }
+        Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
         DisplaceEntityEvent.Portal event = SpongeEventFactory.createDisplaceEntityEventPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true, true);
         SpongeImpl.postEvent(event);
         if (entityIn instanceof EntityPlayerMP) {
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(true);
         }
         if (event.isCancelled()) {
+            causeTracker.getCapturedSpawnedEntities().clear();
+            causeTracker.getCapturedSpawnedEntityItems().clear();
+            // update cache
+            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkCoordIntPair.chunkXZ2Int(spongeEntity.getLocation().getChunkPosition().getX(), spongeEntity.getLocation().getChunkPosition().getZ()));
             spongeEntity.setTransform(fromTransform);
             return event;
         }
@@ -828,14 +845,30 @@ public class SpongeCommonEventFactory {
         if (!portalExitTransform.equals(event.getToTransform())) {
             // if plugin set to same world, just set the transform
             if (fromWorld == event.getToTransform().getExtent()) {
-                spongeEntity.setTransform(event.getToTransform());
                 // force cancel so we know to skip remaining logic
                 event.setCancelled(true);
                 return event;
             }
+        } else {
+            if (toWorld.provider instanceof WorldProviderEnd) {
+                BlockPos blockpos = entityIn.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
+                entityIn.moveToBlockPosAndAngles(blockpos, entityIn.rotationYaw, entityIn.rotationPitch);
+            }
         }
 
-        spongeEntity.setTransform(preTeleportTransform);
+        // Attempt to create the portal
+        boolean portalResult = causeTracker.handleBlockCaptures();
+        // if portal ChangeBlockEvent was allowed, continue
+        if (portalResult && event.getUsePortalAgent()) {
+            causeTracker.handleDroppedItems();
+            causeTracker.handleSpawnedEntities();
+        } else { // portal ChangeBlockEvent was cancelled or portal agent cannot be used
+            causeTracker.getCapturedSpawnedEntities().clear();
+            causeTracker.getCapturedSpawnedEntityItems().clear();
+            // update cache
+            ((IMixinTeleporter) teleporter).removePortalPositionFromCache(ChunkCoordIntPair.chunkXZ2Int(entityIn.getPosition().getX(), entityIn.getPosition().getZ()));
+        }
+
         return event;
     }
 

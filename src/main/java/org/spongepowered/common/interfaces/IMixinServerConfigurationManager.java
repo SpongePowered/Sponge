@@ -25,15 +25,9 @@
 package org.spongepowered.common.interfaces;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
-import org.spongepowered.api.entity.Transform;
-import org.spongepowered.api.event.cause.Cause;
-import org.spongepowered.api.world.World;
 
 public interface IMixinServerConfigurationManager {
 
-    Transform<World> getTeleporterTransform(Entity entity, WorldServer oldWorldIn, WorldServer toWorldIn, net.minecraft.world.Teleporter teleporter);
-
-    void placeEntityInPortal(Entity entityIn, Transform<World> toTransform, Teleporter teleporter, Cause teleportCause);
+    void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn);
 }

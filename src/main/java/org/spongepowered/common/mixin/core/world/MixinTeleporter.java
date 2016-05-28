@@ -166,7 +166,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double closest = -1.0D;
         boolean addToCache = true;
         BlockPos portalPosition = BlockPos.ORIGIN;
-        long targetPosition = ChunkCoordIntPair.chunkXZ2Int(searchLocation.getBlockX(), searchLocation.getBlockZ());
+        long targetPosition = ChunkCoordIntPair.chunkXZ2Int(searchLocation.getChunkPosition().getX(), searchLocation.getChunkPosition().getZ());
 
         if (this.destinationCoordinateCache.containsItem(targetPosition)) {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.getValueByKey(targetPosition);

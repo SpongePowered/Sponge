@@ -59,7 +59,6 @@ import net.minecraft.util.AxisAlignedBB;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EnumParticleTypes;
-import net.minecraft.world.Teleporter;
 import net.minecraft.world.WorldServer;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataContainer;
@@ -120,7 +119,6 @@ import org.spongepowered.common.event.DamageEventHandler;
 import org.spongepowered.common.event.MinecraftBlockDamageSource;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
-import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
 import org.spongepowered.common.interfaces.data.IMixinCustomDataHolder;
 import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.IMixinGriefer;
@@ -227,6 +225,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     @Shadow public abstract boolean isInWater();
     @Shadow public abstract void applyEnchantments(EntityLivingBase entityLivingBaseIn, net.minecraft.entity.Entity entityIn);
     @Shadow public abstract void addToPlayerScore(net.minecraft.entity.Entity entityIn, int amount);
+    @Shadow public abstract void setLocationAndAngles(double x, double y, double z, float yaw, float pitch);
 
 
     // @formatter:on
@@ -813,36 +812,51 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return true;
     }
 
+    /**
+     * @author blood - May 28th, 2016
+     *
+     * @reason - rewritten to support {@link DisplaceEntityEvent.Portal}
+     *
+     * @param toDimensionId The id of target dimension.
+     */
     @Overwrite
     public void travelToDimension(int toDimensionId)
     {
         if (!this.worldObj.isRemote && !this.isDead)
         {
-            int fromDimensionId = this.dimension;
+            // handle portal event
             DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(this.mcEntity, toDimensionId, null);
             if (event.isCancelled()) {
                 return;
             }
 
-            MinecraftServer mcServer = MinecraftServer.getServer();
             this.worldObj.theProfiler.startSection("changeDimension");
-            WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
+            // use the worlds from event
             WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
+            // Don't allow entities to load chunks in worlds with no players
+            if (!(this.mcEntity instanceof EntityPlayerMP) && !toWorld.isChunkLoaded((int) this.posX >> 4, (int) this.posZ >> 4, false) && toWorld.playerEntities.size() == 0) {
+                return;
+            }
+
             this.worldObj.removeEntity(this.mcEntity);
             this.isDead = false;
             this.worldObj.theProfiler.startSection("reposition");
-            if (event.getUsePortalAgent() && event.getPortalAgent() != null) {
-                // we do not need to call transferEntityToWorld as we already have the correct transform before placing entity into portal
-                ((IMixinServerConfigurationManager) mcServer.getConfigurationManager()).placeEntityInPortal(this.mcEntity, event.getToTransform(), (Teleporter) event.getPortalAgent(), event.getCause());
-            }
-            this.worldObj.theProfiler.endStartSection("reloading");
+            // Only need to update the entity location here as the portal is handled in SpongeCommonEventFactory
+            this.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+            toWorld.spawnEntityInWorld(this.mcEntity);
+            toWorld.updateEntityWithOptionalForce(this.mcEntity, false);
+            this.worldObj.theProfiler.endSection();
+            this.worldObj = toWorld;
+
+            // Disable recreation of entities when traveling through portals
+            /*this.worldObj.theProfiler.endStartSection("reloading");
             net.minecraft.entity.Entity entity = EntityList.createEntityByName(EntityList.getEntityString(this.mcEntity), toWorld);
 
             if (entity != null)
             {
                 entity.copyDataFromOld(this.mcEntity);
 
-                if (fromDimensionId == 1 && toDimensionId == 1)
+                if (toWorld.provider instanceof WorldProviderEnd)
                 {
                     BlockPos blockpos = this.worldObj.getTopSolidOrLiquidBlock(toWorld.getSpawnPoint());
                     entity.moveToBlockPosAndAngles(blockpos, entity.rotationYaw, entity.rotationPitch);
@@ -851,10 +865,10 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 toWorld.spawnEntityInWorld(entity);
             }
 
-            this.isDead = true;
+            this.isDead = true;*/
             this.worldObj.theProfiler.endSection();
-            fromWorld.resetUpdateEntityTick();
-            toWorld.resetUpdateEntityTick();
+            //fromWorld.resetUpdateEntityTick();
+            //toWorld.resetUpdateEntityTick();
             this.worldObj.theProfiler.endSection();
         }
     }
