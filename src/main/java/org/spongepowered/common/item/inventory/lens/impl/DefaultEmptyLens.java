@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.lens.impl;
 
-import gnu.trove.impl.unmodifiable.TUnmodifiableIntSet;
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
+import it.unimi.dsi.fastutil.ints.IntSets;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -43,7 +42,7 @@ import java.util.List;
 
 public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
 
-    private static final TIntSet EMPTY_SLOT_SET = new TUnmodifiableIntSet(new TIntHashSet());
+    private static final IntSet EMPTY_SLOT_SET = IntSets.EMPTY_SET;
     
     protected final InventoryAdapter<IInventory, ItemStack> adapter;
     
@@ -131,7 +130,7 @@ public class DefaultEmptyLens extends ObservableLens<IInventory, ItemStack> {
     }
     
     @Override
-    public TIntSet getSlots() {
+    public IntSet getSlots() {
         return DefaultEmptyLens.EMPTY_SLOT_SET;
     }
     

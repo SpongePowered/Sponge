@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.item.inventory.query.result;
 
-import gnu.trove.set.TIntSet;
-import gnu.trove.set.hash.TIntHashSet;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -97,7 +97,7 @@ public class MinecraftResultAdapterProvider implements ResultAdapterProvider<IIn
     }
 
     protected int getResultSize() {
-        TIntSet slots = new TIntHashSet();
+        IntSet slots = new IntOpenHashSet();
         
         for (Lens<IInventory, ItemStack> lens : this.getResultSet()) {
             slots.addAll(lens.getSlots());

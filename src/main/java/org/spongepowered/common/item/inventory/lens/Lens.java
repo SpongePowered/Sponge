@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.item.inventory.lens;
 
-import gnu.trove.set.TIntSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.text.translation.Translation;
 import org.spongepowered.common.item.inventory.adapter.InventoryAdapter;
@@ -93,7 +93,7 @@ public interface Lens<TInventory, TStack> extends LensCollection<TInventory, TSt
     public abstract boolean hasSlot(int index); //TInventory inv, int index);
     
 //    @Deprecated // TODO deprecate
-    public abstract TIntSet getSlots(); //TInventory inv);
+    public abstract IntSet getSlots(); //TInventory inv);
     
     /**
      * Returns the "real" underlying slot index in the target inventory for the

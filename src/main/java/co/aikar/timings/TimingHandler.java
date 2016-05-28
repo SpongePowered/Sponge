@@ -25,7 +25,7 @@
 package co.aikar.timings;
 
 import co.aikar.util.LoadingIntMap;
-import gnu.trove.map.hash.TIntObjectHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import org.spongepowered.common.SpongeImpl;
 
 class TimingHandler implements Timing {
@@ -36,7 +36,7 @@ class TimingHandler implements Timing {
     final String name;
     private final boolean verbose;
 
-    final TIntObjectHashMap<TimingData> children = new LoadingIntMap<>(TimingData.LOADER);
+    final Int2ObjectMap<TimingData> children = new LoadingIntMap<>(TimingData.LOADER);
 
     final TimingData record;
     private final TimingHandler groupHandler;
@@ -76,7 +76,7 @@ class TimingHandler implements Timing {
         }
 
         this.record.processTick(violated);
-        for (TimingData handler : this.children.valueCollection()) {
+        for (TimingData handler : this.children.values()) {
             handler.processTick(violated);
         }
     }

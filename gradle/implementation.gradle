@@ -89,6 +89,43 @@ shadowJar {
 
     // Prevent other dependencies replacing our license file
     exclude 'LICENSE', 'NOTICE'
+
+    from(zipTree(common.configurations.fastutil.first())) {
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByte2ObjectFunction.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByte2ObjectMap.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteBidirectionalIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteCollection.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteList.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteListIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/AbstractByteSet.class'
+        include 'it/unimi/dsi/fastutil/bytes/Byte2ObjectFunction.class'
+        include 'it/unimi/dsi/fastutil/bytes/Byte2ObjectMap.class'
+        include 'it/unimi/dsi/fastutil/bytes/Byte2ObjectOpenHashMap.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteArrayList.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteArrays.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteBidirectionalIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteCollection.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteComparator.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteIterable.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteIterators.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteList.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteListIterator.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteSet.class'
+        include 'it/unimi/dsi/fastutil/bytes/ByteStack.class'
+        include 'it/unimi/dsi/fastutil/ints/IntOpenHashSet.class'
+        include 'it/unimi/dsi/fastutil/objects/AbstractObject2IntFunction.class'
+        include 'it/unimi/dsi/fastutil/objects/AbstractObject2IntMap.class'
+        include 'it/unimi/dsi/fastutil/objects/AbstractObject2LongFunction.class'
+        include 'it/unimi/dsi/fastutil/objects/AbstractObject2LongMap.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2IntFunction.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2IntMap.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2IntOpenHashMap.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2LongFunction.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2LongMap.class'
+        include 'it/unimi/dsi/fastutil/objects/Object2LongOpenHashMap.class'
+    }
 }
 
 artifacts {
