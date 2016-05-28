@@ -142,6 +142,10 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "randomTick", at = @At(value = "HEAD"), locals = LocalCapture.CAPTURE_FAILEXCEPTION, cancellable = true)
     public void callRandomTickEvent(net.minecraft.world.World world, BlockPos pos, IBlockState state, Random rand, CallbackInfo ci) {
+        if (world.isRemote) {
+            return;
+        }
+
         BlockSnapshot blockSnapshot = ((World) world).createSnapshot(VecHelper.toVector(pos));
         final TickBlockEvent event = SpongeEventFactory.createTickBlockEvent(Cause.of(NamedCause.source(world)), blockSnapshot);
         SpongeImpl.postEvent(event);
@@ -194,8 +198,7 @@ public abstract class MixinBlock implements BlockType, IMixinBlock {
 
     @Inject(method = "spawnAsEntity", at = @At(value = "HEAD"))
     private static void onSpawnAsEntityHead(net.minecraft.world.World worldIn, BlockPos pos, net.minecraft.item.ItemStack stack, CallbackInfo ci) {
-        final CauseTracker causeTracker = ((IMixinWorld) worldIn).getCauseTracker();
-        if (causeTracker.isRestoringBlocks()) {
+        if (((IMixinWorld) worldIn).getCauseTracker().isRestoringBlocks()) {
             return;
         }
     }
