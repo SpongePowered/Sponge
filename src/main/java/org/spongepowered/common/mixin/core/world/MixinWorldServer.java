@@ -536,8 +536,8 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
 
     @Override
     public void setBlock(int x, int y, int z, BlockState block, boolean notifyNeighbors) {
-        checkBlockBounds(x, y, z);
-        setBlockState(new BlockPos(x, y, z), (IBlockState) block, notifyNeighbors ? 3 : 2);
+        // TODO this is a dummy workaround fix until we decide on the setblock methods that don't take a cause.
+        setBlock(x, y, z, block, notifyNeighbors, Cause.source(SpongeImpl.getPlugin()).build());
     }
 
     @Override
