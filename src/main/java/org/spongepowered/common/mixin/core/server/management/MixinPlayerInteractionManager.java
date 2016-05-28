@@ -80,9 +80,11 @@ public abstract class MixinPlayerInteractionManager {
     @Shadow public abstract boolean isCreative();
     @Shadow public abstract EnumActionResult processRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand);
 
-    @Inject(method = "processRightClick", at = @At("HEAD"))
-    public void onProcessrightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, CallbackInfoReturnable<EnumActionResult> cir) {
-        if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(), BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
+    @Inject(method = "processRightClick", at = @At("HEAD"), cancellable = true)
+    private void onProcessRightClick(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand,
+            CallbackInfoReturnable<EnumActionResult> cir) {
+        if (SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)), Optional.empty(),
+                BlockSnapshot.NONE, Direction.NONE, hand).isCancelled()) {
             cir.setReturnValue(EnumActionResult.FAIL);
         }
     }
