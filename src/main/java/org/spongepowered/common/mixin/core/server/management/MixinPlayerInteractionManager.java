@@ -34,6 +34,7 @@ import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemDoor;
 import net.minecraft.item.ItemStack;
@@ -65,12 +66,15 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.interfaces.world.IMixinWorldServer;
+import org.spongepowered.common.mixin.core.block.state.MixinStateImplementation;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.TristateUtil;
 
 import java.util.Optional;
 
-@Mixin(value = PlayerInteractionManager.class, priority = 1000)
+import javax.annotation.Nullable;
+
+@Mixin(value = PlayerInteractionManager.class)
 public abstract class MixinPlayerInteractionManager {
 
     @Shadow public EntityPlayerMP thisPlayerMP;
@@ -91,10 +95,12 @@ public abstract class MixinPlayerInteractionManager {
 
     /**
      * @author Aaron1011
+     * @author gabizou - May 28th, 2016 - Rewritten for 1.9.4
+     *
      * @reason Fire interact block event.
      */
     @Overwrite
-    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
+    public EnumActionResult processRightClickBlock(EntityPlayer player, net.minecraft.world.World worldIn, @Nullable ItemStack stack, EnumHand hand, BlockPos pos, EnumFacing facing, float offsetX, float offsetY, float offsetZ) {
         if (this.gameType == WorldSettings.GameType.SPECTATOR) {
             TileEntity tileentity = worldIn.getTileEntity(pos);
 
@@ -116,110 +122,101 @@ public abstract class MixinPlayerInteractionManager {
             }
 
             return EnumActionResult.PASS;
-        } else {
-            // Sponge Start - fire event, and revert the client if cancelled
 
-            ItemStack oldStack = ItemStack.copyItemStack(stack);
+        } // else { // Sponge - Remove unecessary else
+        // Sponge Start - Create an interact block event before something happens.
+        @Nullable final ItemStack oldStack = ItemStack.copyItemStack(stack);
 
-            BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
-            InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
-                        Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
-                        DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
+        final BlockSnapshot currentSnapshot = ((World) worldIn).createSnapshot(pos.getX(), pos.getY(), pos.getZ());
+        final InteractBlockEvent.Secondary event = SpongeCommonEventFactory.callInteractBlockEventSecondary(Cause.of(NamedCause.source(player)),
+                Optional.of(new Vector3d(offsetX, offsetY, offsetZ)), currentSnapshot,
+                DirectionFacingProvider.getInstance().getKey(facing).get(), hand);
 
-            if (event.isCancelled()) {
-                final IBlockState state = worldIn.getBlockState(pos);
+        final EntityPlayerMP playerMP = (EntityPlayerMP) player;
+        if (event.isCancelled()) {
+            final IBlockState state = (IBlockState) currentSnapshot.getState();
 
-                if (state.getBlock() == Blocks.COMMAND_BLOCK) {
-                    // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
-                    ((EntityPlayerMP) player).connection.sendPacket(new SPacketCloseWindow(0));
+            if (state.getBlock() == Blocks.COMMAND_BLOCK) {
+                // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
+                playerMP.connection.sendPacket(new SPacketCloseWindow(0));
 
-                } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
-                    // Stopping a door from opening while interacting the top part will allow the door to open, we need to update the
-                    // client to resolve this
-                    if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
-                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
-                    } else {
-                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
-                    }
-
-                } else if (stack != null) {
-                    // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
-                    if (stack.getItem() instanceof ItemDoor || (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock()
-                            .equals(Blocks.DOUBLE_PLANT))) {
-                        ((EntityPlayerMP) player).connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
-                    }
+            } else if (state.getProperties().containsKey(BlockDoor.HALF)) {
+                // Stopping a door from opening while interacting the top part will allow the door to open, we need to update the
+                // client to resolve this
+                if (state.getValue(BlockDoor.HALF) == BlockDoor.EnumDoorHalf.LOWER) {
+                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up()));
+                } else {
+                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.down()));
                 }
 
+            } else if (oldStack != null) {
+                // Stopping the placement of a door or double plant causes artifacts (ghosts) on the top-side of the block. We need to remove it
+                final Item item = oldStack.getItem();
+                if (item instanceof ItemDoor || (item instanceof ItemBlock && ((ItemBlock) item).getBlock().equals(Blocks.DOUBLE_PLANT))) {
+                    playerMP.connection.sendPacket(new SPacketBlockChange(worldIn, pos.up(2)));
+                }
+            }
+
+            return EnumActionResult.FAIL;
+        }
+        // Sponge End
+
+        if (!player.isSneaking() || player.getHeldItemMainhand() == null && player.getHeldItemOffhand() == null) {
+            // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
+            // Also, store the result instead of returning immediately
+            if (event.getUseBlockResult() != Tristate.FALSE) {
+                IBlockState iblockstate = (IBlockState) currentSnapshot.getState();
+                final EnumActionResult result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
+                         ? EnumActionResult.SUCCESS
+                         : EnumActionResult.PASS;
+                if (result != EnumActionResult.PASS) {
+                    // Only set the tracked active user if the activated block was successful,
+                    // right clicking a block that fails to do anything will not mark as notified
+                    // for the player. If mods do logic regardless and still return false,
+                    // that is their fault.
+                    TrackingUtil.tryAndTrackActiveUser((IMixinWorldServer) worldIn, pos, PlayerTracker.Type.NOTIFIER);
+                    return result;
+                }
+            } else {
+                // Need to send a block change to the client, because otherwise, they are not
+                // going to be told about the block change.
+                playerMP.connection.sendPacket(new SPacketBlockChange(theWorld, pos));
+                // Since the event was explicitly set to fail, we need to respect it and treat it as if
+                // it wasn't cancelled, but perform no further processing.
                 return EnumActionResult.FAIL;
             }
-            // Sponge end
-
-            EnumActionResult result = EnumActionResult.PASS; // Sponge - Add local variable for handling with events
-
-            if (!player.isSneaking() || player.getHeldItemMainhand() == null && player.getHeldItemOffhand() == null) {
-                // Sponge start - check event useBlockResult, and revert the client if it's FALSE.
-                // Also, store the result instead of returning immediately
-                if (event.getUseBlockResult() != Tristate.FALSE) {
-                    IBlockState iblockstate = worldIn.getBlockState(pos);
-                    // TODO - should this always be called if event.getUseBlockResult() is Tristate.TRUE?
-                    result = iblockstate.getBlock().onBlockActivated(worldIn, pos, iblockstate, player, hand, stack, facing, offsetX, offsetY, offsetZ)
-                             ? EnumActionResult.SUCCESS
-                             : EnumActionResult.FAIL;
-                    final IMixinWorldServer mixinWorldServer = (IMixinWorldServer) this.theWorld;
-                    TrackingUtil.tryAndTrackActiveUser(mixinWorldServer, pos, PlayerTracker.Type.NOTIFIER);
-                } else {
-                    thisPlayerMP.connection.sendPacket(new SPacketBlockChange(theWorld, pos));
-                    result = TristateUtil.toActionResult(event.getUseItemResult());
-                }
-            }
-            // Sponge end
-
-
-            // Sponge start - store result instead of returning
-            if (stack == null) {
-                // return EnumActionResult.PASS; // Sponge
-                result = EnumActionResult.PASS;
-            } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
-                // return EnumActionResult.PASS; // Sponge
-                result = EnumActionResult.PASS;
-            } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player.canCommandSenderUseCommand(2, "")) {
-                // return EnumActionResult.FAIL; // Sponge
-                result = EnumActionResult.FAIL;
-            // Sponge start - nest isCreative check instead of calling the method twice.
-                // } else if (this.isCreative()) {
-            } else {
-                // Run if useItemResult is true, or if useItemResult is undefined and the block interaction failed
-                if (stack != null && (event.getUseItemResult() == Tristate.TRUE || (event.getUseItemResult() == Tristate.UNDEFINED && result == EnumActionResult.FAIL))) {
-                    int meta = stack.getMetadata(); // meta == j
-                    int size = stack.stackSize; // size == i
-                    // EnumActionResult enumactionresult = stack.onItemUse(player, worldIn, pos, hand, facing, hitX, hitY, hitZ); // Sponge
-                    result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
-                    if (isCreative()) {
-                        stack.setItemDamage(meta);
-                        stack.stackSize = size;
-                        // return enumactionresult; // Sponge
-                    }
-                }
-            }
-
-            // Since we cancel the second packet received while looking at a block with
-            // item in hand, we need to make sure to make an attempt to run the 'tryUseItem'
-            // method during the first packet.
-
-            // TODO - should this even be a thing? Do we really want to manually trigger right click air, when it didn't happen?
-            if (stack != null && result != EnumActionResult.FAIL && !event.isCancelled() && event.getUseItemResult() != Tristate.FALSE) {
-                this.processRightClick(player, worldIn, stack, hand);
-            }
-
-            // if cancelled, force client itemstack update
-            if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
-                // TODO - maybe send just main/off hand?
-                player.openContainer.detectAndSendChanges();
-                /*((EntityPlayerMP) player).connection.sendPacket(new SPacketSetSlot(player.openContainer.windowId, player.openContainer.getSlotFromInventory(player.inventory, player.inventory.currentItem),
-                        player.inventory.getCurrentItem());*/
-            }
-
-            return result;
+            // Sponge End
         }
+
+        if (stack == null) {
+            return EnumActionResult.PASS;
+        } else if (player.getCooldownTracker().hasCooldown(stack.getItem())) {
+            return EnumActionResult.PASS;
+        } else if (stack.getItem() instanceof ItemBlock && ((ItemBlock) stack.getItem()).getBlock() instanceof BlockCommandBlock && !player.canCommandSenderUseCommand(2, "")) {
+            return EnumActionResult.FAIL;
+        } // else if (this.isCreative()) { // Sponge - Rewrite this to handle an isCreative check after the result, since we have a copied stack at the top of this method.
+        //    int j = stack.getMetadata();
+        //    int i = stack.stackSize;
+        //    EnumActionResult enumactionresult = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
+        //    stack.setItemDamage(j);
+        //    stack.stackSize = i;
+        //    return enumactionresult;
+        // } else {
+        //    return stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
+        // }
+        // } // Sponge - Remove unecessary else bracket
+        // Sponge Start - complete the method with the micro change of resetting item damage and quantity from the copied stack.
+        final EnumActionResult result = stack.onItemUse(player, worldIn, pos, hand, facing, offsetX, offsetY, offsetZ);
+        if (this.isCreative()) {
+            stack.setItemDamage(oldStack.getItemDamage());
+            stack.stackSize = oldStack.stackSize;
+        }
+
+        if (!ItemStack.areItemStacksEqual(player.getHeldItem(hand), oldStack) || result != EnumActionResult.SUCCESS) {
+            player.openContainer.detectAndSendChanges();
+        }
+        return result;
+        // Sponge end
+        // } // Sponge - Remove unecessary else bracket
     }
 }
