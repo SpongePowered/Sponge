@@ -1092,7 +1092,7 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
     public static class TimingsCategory extends Category {
 
         @Setting
-        private boolean verbose = false;
+        private boolean verbose = true;
 
         @Setting
         private boolean enabled = true;
