@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.minecraft.entity.player.EntityPlayerMP;
-import net.minecraft.network.play.server.SPacketUpdateEntityNBT;
+import net.minecraft.network.play.server.SPacketUpdateBossInfo;
 import net.minecraft.world.BossInfo;
 import net.minecraft.world.BossInfoServer;
 import org.spongepowered.api.boss.BossBarColor;
@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 
 import java.util.Collection;
 
@@ -52,7 +51,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     @Shadow public abstract BossInfo setDarkenSky(boolean darkenSky);
     @Shadow public abstract BossInfo setPlayEndBossMusic(boolean playEndBossMusic);
     @Shadow public abstract BossInfo setCreateFog(boolean createFog);
-    @Shadow abstract void sendUpdate(SPacketUpdateEntityNBT.Operation operation);
+    @Shadow abstract void sendUpdate(SPacketUpdateBossInfo.Operation operation);
     @Shadow public abstract void addPlayer(EntityPlayerMP player);
     @Shadow public abstract void removePlayer(EntityPlayerMP player);
     @Shadow public abstract void setVisible(boolean visibleIn);
@@ -61,7 +60,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     public ServerBossBar sbar$setName(Text name) {
         if (this.name != name) {
             super.bar$setName(name);
-            this.sendUpdate(SPacketUpdateEntityNBT.Operation.UPDATE_NAME);
+            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_NAME);
         }
 
         return (ServerBossBar) this;
@@ -70,7 +69,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     public ServerBossBar sbar$setPercent(float percent) {
         if (this.percent != percent) {
             super.bar$setPercent(percent);
-            this.sendUpdate(SPacketUpdateEntityNBT.Operation.UPDATE_PCT);
+            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_PCT);
         }
 
         return (ServerBossBar) this;
@@ -80,7 +79,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     public ServerBossBar sbar$setColor(BossBarColor color) {
         if ((Object) this.color != color) {
             super.bar$setColor(color);
-            this.sendUpdate(SPacketUpdateEntityNBT.Operation.UPDATE_STYLE);
+            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -90,7 +89,7 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
     public ServerBossBar sbar$setOverlay(BossBarOverlay overlay) {
         if ((Object) this.overlay != overlay) {
             super.bar$setOverlay(overlay);
-            this.sendUpdate(SPacketUpdateEntityNBT.Operation.UPDATE_STYLE);
+            this.sendUpdate(SPacketUpdateBossInfo.Operation.UPDATE_STYLE);
         }
 
         return (ServerBossBar) this;
@@ -119,13 +118,11 @@ public abstract class MixinBossInfoServer extends MixinBossInfo {
 
     public ServerBossBar sbar$addPlayer(Player player) {
         this.addPlayer((EntityPlayerMP) player);
-        ((IMixinEntityPlayerMP) player).addBossBar((ServerBossBar) this);
         return (ServerBossBar) this;
     }
 
     public ServerBossBar sbar$removePlayer(Player player) {
         this.removePlayer((EntityPlayerMP) player);
-        ((IMixinEntityPlayerMP) player).removeBossBar((ServerBossBar) this);
         return (ServerBossBar) this;
     }
 
