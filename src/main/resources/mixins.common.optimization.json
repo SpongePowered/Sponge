@@ -10,7 +10,9 @@
         "world.gen.MixinChunkProviderServer_Chunk_Cache",
         "MixinEntity_Item_Pre_Merge",
         "MixinSpongeImplHooks_Item_Pre_Merge",
-        "MixinInventoryHelper"
+        "MixinInventoryHelper",
+        "MixinWorldServer_Explosion",
+        "MixinExplosion_Explosion"
     ],
     "injectors": {
         "defaultRequire": 1
