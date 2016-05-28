@@ -517,6 +517,12 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
         @Setting(value = ENTITY_PAINTING_RESPAWN_DELAY,
                 comment = "Number of ticks before a painting is respawned on clients when their art is changed")
         private int paintingRespawnDelaly = 2;
+        @Setting(value = "living-soft-despawn-range", comment = "The lower bounded range where living entities near a player may potentially despawn")
+        private int softDespawnRange = 32;
+        @Setting(value = "living-hard-despawn-range", comment = "The upper bounded range where living entities farther from a player will likely despawn")
+        private int hardDespawnRange = 128;
+        @Setting(value = "living-soft-despawn-minimum-life", comment = "The amount of seconds before a living entity between the soft and hard despawn ranges from a player to be considered for despawning")
+        private int minimumLife = 30;
 
         public int getMaxSpeed() {
             return this.maxSpeed;
@@ -574,6 +580,29 @@ public class SpongeConfig<T extends SpongeConfig.ConfigBase> {
             this.paintingRespawnDelaly = Math.min(paintingRespawnDelaly, 1);
         }
 
+        public int getSoftDespawnRange() {
+            return this.softDespawnRange;
+        }
+
+        public void setSoftDespawnRange(int softDespawnRange) {
+            this.softDespawnRange = Math.min(softDespawnRange, 10);
+        }
+
+        public int getHardDespawnRange() {
+            return this.hardDespawnRange;
+        }
+
+        public void setHardDespawnRange(int hardDespawnRange) {
+            this.hardDespawnRange = Math.min(hardDespawnRange, 10);
+        }
+
+        public int getMinimumLife() {
+            return this.minimumLife;
+        }
+
+        public void setMinimumLife(int minimumLife) {
+            this.minimumLife = Math.min(minimumLife, 20);
+        }
     }
 
     @ConfigSerializable

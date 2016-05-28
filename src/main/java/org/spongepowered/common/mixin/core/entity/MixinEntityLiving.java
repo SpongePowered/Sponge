@@ -54,7 +54,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -77,6 +79,7 @@ import javax.annotation.Nullable;
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
+    private static final String WORLD_FIELD = "Lnet/minecraft/entity/EntityLiving;worldObj:Lnet/minecraft/world/World;";
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
@@ -87,6 +90,7 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
     @Shadow @Nullable public abstract net.minecraft.entity.Entity getLeashedToEntity();
     @Shadow public abstract void setLeashedToEntity(net.minecraft.entity.Entity entityIn, boolean sendAttachNotification);
     @Shadow public abstract ItemStack getHeldItem();
+    @Shadow protected abstract boolean canDespawn();
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     public void onConstruct(CallbackInfo ci) {
@@ -152,6 +156,38 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             return Optional.of((Goal<T>) this.targetTasks);
         }
         return Optional.empty();
+    }
+
+    @Inject(method = "despawnEntity", at = @At(value = "FIELD", target = WORLD_FIELD, ordinal = 0), cancellable = true)
+    private void checkCanDespawnBeforeGettingPlayer(CallbackInfo callbackInfo) {
+        if (!this.canDespawn()) {
+            callbackInfo.cancel();
+        }
+    }
+
+    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
+    private double getHardDespawnRange(double value) {
+        if (!this.worldObj.isRemote) {
+            return Math.pow(((IMixinWorld) this.worldObj).getWorldConfig().getConfig().getEntity().getHardDespawnRange(), 2);
+        }
+        return value;
+    }
+
+    // Note that this should inject twice.
+    @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 1024.0D), expect = 2)
+    private double getSoftDespawnRange(double value) {
+        if (!this.worldObj.isRemote) {
+            return Math.pow(((IMixinWorld) this.worldObj).getWorldConfig().getConfig().getEntity().getSoftDespawnRange(), 2);
+        }
+        return value;
+    }
+
+    @ModifyConstant(method = "despawnEntity", constant = @Constant(intValue = 600))
+    private int getMinimumLifetime(int value) {
+        if (!this.worldObj.isRemote) {
+            return ((IMixinWorld) this.worldObj).getWorldConfig().getConfig().getEntity().getMinimumLife() * 20;
+        }
+        return value;
     }
 
     @Nullable
