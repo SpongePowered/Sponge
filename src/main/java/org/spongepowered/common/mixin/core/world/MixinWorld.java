@@ -619,6 +619,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public BlockSnapshot createSnapshot(int x, int y, int z) {
+        if (!this.isValid(new BlockPos(x, y, z))) {
+            return BlockSnapshot.NONE;
+        }
         World world = this;
         BlockState state = world.getBlock(x, y, z);
         Optional<TileEntity> te = world.getTileEntity(x, y, z);
