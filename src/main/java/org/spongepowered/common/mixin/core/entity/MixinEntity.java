@@ -612,6 +612,10 @@ public abstract class MixinEntity implements IMixinEntity {
     @Override
     public DataTransactionResult addPassenger(Entity entity) {
         checkNotNull(entity);
+        if (entity.getPassengers().contains(this)) {
+            throw new IllegalArgumentException(String.format("Cannot add entity %s as a passenger of %s, because the former already has the latter as a passenger!", entity, this));
+        }
+
         final ImmutableList.Builder<EntitySnapshot> passengerSnapshotsBuilder = ImmutableList.builder();
         passengerSnapshotsBuilder.addAll(getPassengers().stream().map(Entity::createSnapshot).collect(Collectors.toList()));
 
