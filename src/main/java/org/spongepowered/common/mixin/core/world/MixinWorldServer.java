@@ -150,7 +150,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Redirect(method = "updateBlocks", at = @At(value = "INVOKE", target = "Lnet/minecraft/block/Block;randomTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlocks(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+        if (causeTracker.hasTickingBlock() || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
                 .isChunkSpawnerRunning()) {
             block.randomTick(worldIn, pos, state, rand);
             return;
@@ -200,7 +200,7 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Redirect(method = "updateBlockTick", at = @At(value = "INVOKE", target="Lnet/minecraft/block/Block;updateTick(Lnet/minecraft/world/World;Lnet/minecraft/util/BlockPos;Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateBlockTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
                 .isChunkSpawnerRunning()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
@@ -210,24 +210,18 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=cleaning"))
     private void onTickUpdatesCleanup(boolean flag, CallbackInfoReturnable<Boolean> cir) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocksCleanup.startTiming();
-        }
+        this.timings.scheduledBlocksCleanup.startTiming();
     }
 
     @Inject(method = "tickUpdates", at = @At(value = "INVOKE_STRING", target = PROFILER_SS, args = "ldc=ticking"))
     private void onTickUpdatesTickingStart(boolean flag, CallbackInfoReturnable<Boolean> cir) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocksCleanup.stopTiming();
-            this.timings.scheduledBlocksTicking.startTiming();
-        }
+        this.timings.scheduledBlocksCleanup.stopTiming();
+        this.timings.scheduledBlocksTicking.startTiming();
     }
 
     @Inject(method = "tickUpdates", at = @At("RETURN"))
     private void onTickUpdatesTickingEnd(CallbackInfoReturnable<Boolean> cir) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocksTicking.stopTiming();
-        }
+        this.timings.scheduledBlocksTicking.stopTiming();
     }
 
     // Before ticking pending updates, we need to check if we have any tracking info and set it accordingly
@@ -244,7 +238,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             + "Lnet/minecraft/block/state/IBlockState;Ljava/util/Random;)V"))
     public void onUpdateTick(Block block, net.minecraft.world.World worldIn, BlockPos pos, IBlockState state, Random rand) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker
                 .isChunkSpawnerRunning()) {
             block.updateTick(worldIn, pos, state, rand);
             return;
@@ -272,7 +266,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
             this.blockEventQueue[this.blockEventCacheIndex].add(blockeventdata);
             return;
         }
@@ -315,7 +309,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         IBlockState currentState = ((WorldServer)(Object)this).getBlockState(event.getPosition());
         boolean result = false;
         if (currentState.getBlock() == event.getBlock()) {
-            if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+            if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
                 return currentState.getBlock().onBlockEventReceived(((WorldServer)(Object) this), event.getPosition(), currentState, event.getEventID(), event.getEventParameter());
             }
 
@@ -341,48 +335,36 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickPending") )
     private void onBeginTickBlockUpdate(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocks.startTiming();
-        }
+        this.timings.scheduledBlocks.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=tickBlocks") )
     private void onAfterTickBlockUpdate(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.scheduledBlocks.stopTiming();
-            this.timings.chunkTicks.startTiming();
-        }
+        this.timings.scheduledBlocks.stopTiming();
+        this.timings.chunkTicks.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=chunkMap") )
     private void onBeginUpdateBlocks(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.chunkTicks.stopTiming();
-            this.timings.doChunkMap.startTiming();
-        }
+        this.timings.chunkTicks.stopTiming();
+        this.timings.doChunkMap.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=village") )
     private void onBeginUpdateVillage(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.doChunkMap.stopTiming();
-            this.timings.doVillages.startTiming();
-        }
+        this.timings.doChunkMap.stopTiming();
+        this.timings.doVillages.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE_STRING", target = PROFILER_ESS, args = "ldc=portalForcer") )
     private void onBeginUpdatePortal(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.doVillages.stopTiming();
-            this.timings.doPortalForcer.startTiming();
-        }
+        this.timings.doVillages.stopTiming();
+        this.timings.doPortalForcer.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/profiler/Profiler;endSection()V") )
     private void onEndUpdatePortal(CallbackInfo ci) {
-        if (!this.isRemote) {
-            this.timings.doPortalForcer.stopTiming();
-        }
+        this.timings.doPortalForcer.stopTiming();
     }
 
     @Inject(method = "tick", at = @At("RETURN"))
@@ -422,17 +404,13 @@ public abstract class MixinWorldServer extends MixinWorld {
             {
                 ++entity.ticksExisted;
                 // Sponge start - handle tracking and timings
-                if (this.isRemote) {
-                    entity.onUpdate();
-                } else {
-                    causeTracker.preTrackEntity(spongeEntity);
-                    spongeEntity.getTimingsHandler().startTiming();
-                    entity.onUpdate();
-                    spongeEntity.getTimingsHandler().stopTiming();
-                    updateRotation(entity);
-                    SpongeCommonEventFactory.handleEntityMovement(entity);
-                    causeTracker.postTrackEntity();
-                }
+                this.causeTracker.preTrackEntity(spongeEntity);
+                spongeEntity.getTimingsHandler().startTiming();
+                entity.onUpdate();
+                spongeEntity.getTimingsHandler().stopTiming();
+                updateRotation(entity);
+                SpongeCommonEventFactory.handleEntityMovement(entity);
+                this.causeTracker.postTrackEntity();
                 // Sponge end
             }
             catch (Throwable throwable2)
@@ -571,15 +549,11 @@ public abstract class MixinWorldServer extends MixinWorld {
                     try
                     {
                         // Sponge start - handle captures and timings
-                        if (this.isRemote) {
-                            ((ITickable)tileentity).update();
-                        } else {
-                            spongeTile.getTimingsHandler().startTiming(); 
-                            causeTracker.preTrackTileEntity((TileEntity) tileentity);
-                            ((ITickable)tileentity).update();
-                            causeTracker.postTrackTileEntity();
-                            spongeTile.getTimingsHandler().stopTiming();
-                        }
+                        spongeTile.getTimingsHandler().startTiming();
+                        this.causeTracker.preTrackTileEntity((TileEntity) tileentity);
+                        ((ITickable)tileentity).update();
+                        this.causeTracker.postTrackTileEntity();
+                        spongeTile.getTimingsHandler().stopTiming();
                         // Sponge end
                     }
                     catch (Throwable throwable)
@@ -666,7 +640,7 @@ public abstract class MixinWorldServer extends MixinWorld {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/NextTickListEntry;setPriority(I)V"))
     private void onCreateScheduledBlockUpdate(NextTickListEntry sbu, int priority) {
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
+        if (causeTracker.isCapturingTerrainGen() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()) {
             this.tmpScheduledObj = sbu;
             return;
         }
