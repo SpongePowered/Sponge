@@ -32,6 +32,7 @@ import org.spongepowered.api.profile.GameProfileCache;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
 
 public abstract class UniqueIdQuery<T> extends Query<T> {
@@ -51,7 +52,8 @@ public abstract class UniqueIdQuery<T> extends Query<T> {
 
         @Override
         public GameProfile call() throws Exception {
-            return this.fromUniqueIds(Collections.singleton(this.uniqueId)).get(0);
+            final List<GameProfile> gameProfiles = this.fromUniqueIds(Collections.singleton(this.uniqueId));
+            return gameProfiles.isEmpty() ? GameProfile.of(this.uniqueId, null) : gameProfiles.get(0);
         }
     }
 
