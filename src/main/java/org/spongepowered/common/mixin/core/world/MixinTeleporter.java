@@ -51,6 +51,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.event.CauseTracker;
 import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.interfaces.world.IMixinWorld;
+import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.util.VecHelper;
 
 import java.util.List;
@@ -64,7 +65,7 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     private int searchRadius = 128;
     private int creationRadius = 16;
     private boolean createNetherPortal = true;
-    private PortalAgentType portalAgentType;
+    private PortalAgentType portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent((Teleporter) (Object) this);
 
     @Shadow @Final private WorldServer worldServerInstance;
     @Shadow @Final private Random random;

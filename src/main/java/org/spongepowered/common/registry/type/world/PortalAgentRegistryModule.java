@@ -24,13 +24,20 @@
  */
 package org.spongepowered.common.registry.type.world;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.Teleporter;
+import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
+import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
+import org.spongepowered.common.world.SpongePortalAgentType;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -38,17 +45,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
-public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogRegistryModule<PortalAgentType> {
+public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogRegistryModule<PortalAgentType>, AlternateCatalogRegistryModule<PortalAgentType> {
 
     public static PortalAgentRegistryModule getInstance() {
         return Holder.INSTANCE;
     }
 
-    @SuppressWarnings("serial")
     @RegisterCatalog(PortalAgentTypes.class)
-    private final Map<String, PortalAgentType> portalAgentTypeMappings = new HashMap<String, PortalAgentType>() {{
-        put("minecraft:default", PortalAgentTypes.DEFAULT);
-    }};
+    private final Map<String, PortalAgentType> portalAgentTypeMappings = new HashMap<>();
 
     @Override
     public Optional<PortalAgentType> getById(String id) {
@@ -62,14 +66,44 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @Override
     public void registerAdditionalCatalog(PortalAgentType portalAgentType) {
-        if (this.portalAgentTypeMappings.get(portalAgentType.getId()) == null) {
-            this.portalAgentTypeMappings.put(portalAgentType.getId(), portalAgentType);
-        }
+        checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
+        this.portalAgentTypeMappings.put(portalAgentType.getId().toLowerCase(Locale.ENGLISH), portalAgentType);
     }
 
     @Override
     public boolean allowsApiRegistration() {
         return false;
+    }
+
+    @Override
+    public void registerDefaults() {
+        this.portalAgentTypeMappings.put("minecraft:default", new SpongePortalAgentType("Default", "minecraft:default", Teleporter.class));
+    }
+
+    @Override
+    public Map<String, PortalAgentType> provideCatalogMap() {
+        final HashMap<String, PortalAgentType> map = new HashMap<>();
+        for (Map.Entry<String, PortalAgentType> entry : this.portalAgentTypeMappings.entrySet()) {
+            map.put(entry.getKey().replace("minecraft:", ""), entry.getValue());
+        }
+        return map;
+    }
+
+    PortalAgentRegistryModule() {
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public PortalAgentType validatePortalAgent(Teleporter teleporter) {
+
+        String modId = SpongeImplHooks.getModIdFromClass(teleporter.getClass());
+        String teleporterName = teleporter.getClass().getSimpleName().toLowerCase(Locale.ENGLISH);
+        String id = modId.toLowerCase(Locale.ENGLISH) + ":" + teleporterName;
+        if (this.portalAgentTypeMappings.get(id) == null) {
+            SpongePortalAgentType portalAgentType = new SpongePortalAgentType(teleporterName, id, teleporter.getClass());
+            this.portalAgentTypeMappings.put(id, portalAgentType);
+        }
+        return this.portalAgentTypeMappings.get(id);
+
     }
 
     private static final class Holder {

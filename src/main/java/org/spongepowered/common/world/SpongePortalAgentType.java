@@ -34,16 +34,18 @@ import org.spongepowered.api.world.PortalAgentType;
 public class SpongePortalAgentType implements PortalAgentType {
 
     private String name;
+    private String id;
     private Class<? extends Teleporter> portalAgentClass;
 
-    public SpongePortalAgentType(String name, Class<? extends Teleporter> portalAgentClass) {
+    public SpongePortalAgentType(String name, String id, Class<? extends Teleporter> portalAgentClass) {
         this.name = checkNotNull(name);
+        this.id = checkNotNull(id);
         this.portalAgentClass = checkNotNull(portalAgentClass, "The portalAgent class was null! The name was: " + name);
     }
 
     @Override
     public String getId() {
-        return this.name;
+        return this.id;
     }
 
     @Override
