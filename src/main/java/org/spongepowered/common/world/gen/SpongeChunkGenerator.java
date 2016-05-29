@@ -313,7 +313,7 @@ public class SpongeChunkGenerator implements WorldGenerator, IChunkGenerator {
         List<String> flags = Lists.newArrayList();
         Vector3i min = new Vector3i(chunkX * 16 + 8, 0, chunkZ * 16 + 8);
         org.spongepowered.api.world.World spongeWorld = (org.spongepowered.api.world.World) this.world;
-        Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 0, 15), min.sub(8, 0, 8), min.add(23, 0, 23));
+        Extent volume = new SoftBufferExtentViewDownsize(chunk.getWorld(), min, min.add(15, 255, 15), min.sub(8, 0, 8), min.add(23, 255, 23));
         for (Populator populator : populators) {
             final PopulatorType type = populator.getType();
             if (type == null) {
