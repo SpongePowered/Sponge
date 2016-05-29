@@ -75,6 +75,7 @@ import org.spongepowered.common.interfaces.world.IMixinWorldSettings;
 import org.spongepowered.common.registry.type.entity.GameModeRegistryModule;
 import org.spongepowered.common.registry.type.world.DimensionRegistryModule;
 import org.spongepowered.common.registry.type.world.GeneratorModifierRegistryModule;
+import org.spongepowered.common.registry.type.world.PortalAgentRegistryModule;
 import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.common.util.StaticMixinHelper;
 import org.spongepowered.common.util.persistence.JsonTranslator;
@@ -95,7 +96,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     private UUID uuid;
     private DimensionType dimensionType;
-    private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
+    private PortalAgentType portalAgentType;
     private boolean isMod;
     private NBTTagCompound spongeRootLevelNbt;
     private NBTTagCompound spongeNbt;
@@ -104,6 +105,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
     private List<UUID> pendingUniqueIds = new ArrayList<>();
     private int trackedUniqueIdCount = 0;
     private SpongeConfig<SpongeConfig.WorldConfig> worldConfig;
+    @SuppressWarnings("unused")
     private ServerScoreboard scoreboard;
     private boolean isValid = true;
 
@@ -209,6 +211,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
         MixinWorldInfo info = (MixinWorldInfo) (Object) worldInformation;
         this.dimensionType = info.dimensionType;
+        this.portalAgentType = info.portalAgentType;
         this.isMod = info.isMod;
     }
 
@@ -293,6 +296,9 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
 
     @Override
     public PortalAgentType getPortalAgentType() {
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
         return this.portalAgentType;
     }
 
@@ -708,6 +714,7 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         this.isMod = nbt.getBoolean(NbtDataUtil.IS_MOD);
         DimensionRegistryModule.getInstance().getAll().stream().filter(type -> type.getId().equalsIgnoreCase(nbt.getString(NbtDataUtil.DIMENSION_TYPE)))
                 .forEach(type -> this.dimensionType = type);
+        this.portalAgentType = PortalAgentRegistryModule.getInstance().validatePortalAgent(nbt.getString(NbtDataUtil.PORTAL_AGENT_TYPE), this.levelName);
         this.trackedUniqueIdCount = 0;
         for (int i = 0; i < this.playerUniqueIdNbt.tagCount(); i++) {
             NBTTagCompound valueNbt = this.playerUniqueIdNbt.getCompoundTagAt(i);
@@ -722,6 +729,10 @@ public abstract class MixinWorldInfo implements WorldProperties, IMixinWorldInfo
         if (this.dimensionType != null) {
             this.spongeNbt.setString(NbtDataUtil.DIMENSION_TYPE, this.dimensionType.getId());
         }
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
+        this.spongeNbt.setString(NbtDataUtil.PORTAL_AGENT_TYPE, this.portalAgentType.getPortalAgentClass().getName());
         if (this.uuid != null) {
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_MOST, this.uuid.getMostSignificantBits());
             this.spongeNbt.setLong(NbtDataUtil.WORLD_UUID_LEAST, this.uuid.getLeastSignificantBits());

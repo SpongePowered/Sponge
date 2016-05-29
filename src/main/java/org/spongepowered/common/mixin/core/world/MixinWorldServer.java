@@ -49,6 +49,7 @@ import net.minecraft.world.WorldServer;
 import net.minecraft.world.WorldServer.ServerBlockEventList;
 import net.minecraft.world.WorldSettings;
 import net.minecraft.world.biome.BiomeGenBase;
+import org.apache.logging.log4j.Level;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.ScheduledBlockUpdate;
 import org.spongepowered.api.block.tileentity.TileEntity;
@@ -71,6 +72,9 @@ import org.spongepowered.api.util.annotation.NonnullByDefault;
 import org.spongepowered.api.world.GeneratorType;
 import org.spongepowered.api.world.GeneratorTypes;
 import org.spongepowered.api.world.PortalAgent;
+import org.spongepowered.api.world.PortalAgentType;
+import org.spongepowered.api.world.PortalAgentTypes;
+import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.Weathers;
@@ -133,7 +137,16 @@ public abstract class MixinWorldServer extends MixinWorld {
     public void onConstruct(CallbackInfo ci) {
         this.prevWeather = getWeather();
         this.weatherStartTime = this.worldInfo.getWorldTotalTime();
-        this.portalAgent = (PortalAgent) this.worldTeleporter;
+        PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
+        if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
+            try {
+                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class[] {WorldServer.class})
+                        .newInstance(new Object[] {this});
+            } catch (Exception e) {
+                SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
+                        + " for world " + this.getName() + ": " + e.getMessage() + ". Falling back to default...");
+            }
+        }
 
         // Turn on capturing
         this.timings = new WorldTimingsHandler((net.minecraft.world.World) (Object) this);
@@ -725,6 +738,11 @@ public abstract class MixinWorldServer extends MixinWorld {
     @Override
     public WorldStorage getWorldStorage() {
         return (WorldStorage) ((WorldServer) (Object) this).theChunkProviderServer;
+    }
+
+    @Override
+    public PortalAgent getPortalAgent() {
+        return (PortalAgent) this.worldTeleporter;
     }
 
     /**************************** EFFECT ****************************************/

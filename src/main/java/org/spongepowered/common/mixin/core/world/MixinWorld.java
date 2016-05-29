@@ -204,7 +204,6 @@ public abstract class MixinWorld implements World, IMixinWorld {
     protected CauseTracker causeTracker;
     private final Map<net.minecraft.entity.Entity, Vector3d> rotationUpdates = new HashMap<>();
     protected WorldTimingsHandler timings;
-    protected PortalAgent portalAgent;
 
     // @formatter:off
     @Shadow @Final public boolean isRemote;
@@ -1100,7 +1099,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
 
     @Override
     public PortalAgent getPortalAgent() {
-        return this.portalAgent;
+        return null;
     }
 
     /**************************** TRACKER AND TIMINGS ****************************************/

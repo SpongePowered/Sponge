@@ -31,11 +31,10 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.Teleporter;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
-import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
+import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.interfaces.world.IMixinTeleporter;
 import org.spongepowered.common.registry.SpongeAdditionalCatalogRegistryModule;
 import org.spongepowered.common.world.SpongePortalAgentType;
 
@@ -92,14 +91,34 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
     PortalAgentRegistryModule() {
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public PortalAgentType validatePortalAgent(Teleporter teleporter) {
+    @SuppressWarnings("unchecked")
+    public PortalAgentType validatePortalAgent(String portalAgentTypeClass, String worldName) {
+        if (portalAgentTypeClass != null) {
+            try {
+                Class<?> clazz = Class.forName(portalAgentTypeClass);
+                if (Teleporter.class.isAssignableFrom(clazz)) {
+                    return this.validatePortalAgent((Class<? extends Teleporter>) clazz);
+                } else {
+                    SpongeImpl.getLogger().error("Class " + portalAgentTypeClass + " is not a valid PortalAgentType class for world " + worldName +". Falling back to default type...");
+                }
+            } catch (ClassNotFoundException e) {
+                SpongeImpl.getLogger().error("Could not locate PortalAgentType class " + portalAgentTypeClass + " for world " + worldName +". Falling back to default type...");
+            }
+        }
 
-        String modId = SpongeImplHooks.getModIdFromClass(teleporter.getClass());
-        String teleporterName = teleporter.getClass().getSimpleName().toLowerCase(Locale.ENGLISH);
+        return PortalAgentTypes.DEFAULT;
+    }
+
+    public PortalAgentType validatePortalAgent(Teleporter teleporter) {
+        return this.validatePortalAgent(teleporter.getClass());
+    }
+
+    public PortalAgentType validatePortalAgent(Class<? extends Teleporter> clazz) {
+        String modId = SpongeImplHooks.getModIdFromClass(clazz);
+        String teleporterName = clazz.getSimpleName().toLowerCase(Locale.ENGLISH);
         String id = modId.toLowerCase(Locale.ENGLISH) + ":" + teleporterName;
         if (this.portalAgentTypeMappings.get(id) == null) {
-            SpongePortalAgentType portalAgentType = new SpongePortalAgentType(teleporterName, id, teleporter.getClass());
+            SpongePortalAgentType portalAgentType = new SpongePortalAgentType(teleporterName, id, clazz);
             this.portalAgentTypeMappings.put(id, portalAgentType);
         }
         return this.portalAgentTypeMappings.get(id);

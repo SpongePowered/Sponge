@@ -761,7 +761,7 @@ public class SpongeCommonEventFactory {
         return cancelled;
     }
 
-    public static DisplaceEntityEvent.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
+    public static DisplaceEntityEvent.Teleport.Portal handleDisplaceEntityPortalEvent(net.minecraft.entity.Entity entityIn, int targetDimensionId, @Nullable Teleporter teleporter) {
         SpongeImplHooks.registerPortalAgentType(teleporter);
         MinecraftServer mcServer = MinecraftServer.getServer();
         IMixinServerConfigurationManager scm = (IMixinServerConfigurationManager) mcServer.getConfigurationManager();
@@ -828,7 +828,7 @@ public class SpongeCommonEventFactory {
             fromWorld.theProfiler.endSection();
         }
         Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
-        DisplaceEntityEvent.Portal event = SpongeEventFactory.createDisplaceEntityEventPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true, true);
+        DisplaceEntityEvent.Teleport.Portal event = SpongeEventFactory.createDisplaceEntityEventPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true, true);
         SpongeImpl.postEvent(event);
         if (entityIn instanceof EntityPlayerMP) {
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(true);

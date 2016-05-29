@@ -825,7 +825,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         if (!this.worldObj.isRemote && !this.isDead)
         {
             // handle portal event
-            DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(this.mcEntity, toDimensionId, null);
+            DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(this.mcEntity, toDimensionId, null);
             if (event.isCancelled()) {
                 return;
             }

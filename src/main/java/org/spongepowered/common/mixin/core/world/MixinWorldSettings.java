@@ -58,7 +58,7 @@ import java.util.Collection;
 public abstract class MixinWorldSettings implements WorldCreationSettings, IMixinWorldSettings {
 
     private DimensionType dimensionType;
-    private PortalAgentType portalAgentType = PortalAgentTypes.DEFAULT;
+    private PortalAgentType portalAgentType;
     private DataContainer generatorSettings;
     private boolean worldEnabled = true;
     private boolean loadOnStartup = true;
@@ -164,6 +164,9 @@ public abstract class MixinWorldSettings implements WorldCreationSettings, IMixi
 
     @Override
     public PortalAgentType getPortalAgentType() {
+        if (this.portalAgentType == null) {
+            this.portalAgentType = PortalAgentTypes.DEFAULT;
+        }
         return this.portalAgentType;
     }
 

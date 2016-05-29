@@ -167,7 +167,9 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         double closest = -1.0D;
         boolean addToCache = true;
         BlockPos portalPosition = BlockPos.ORIGIN;
-        long targetPosition = ChunkCoordIntPair.chunkXZ2Int(searchLocation.getChunkPosition().getX(), searchLocation.getChunkPosition().getZ());
+        // Sponge - use the chunk coords instead of block coords
+        Vector3i chunkPosition = searchLocation.getChunkPosition();
+        long targetPosition = ChunkCoordIntPair.chunkXZ2Int(chunkPosition.getX(), chunkPosition.getZ());
 
         if (this.destinationCoordinateCache.containsItem(targetPosition)) {
             Teleporter.PortalPosition teleporter$portalposition = this.destinationCoordinateCache.getValueByKey(targetPosition);
@@ -489,6 +491,11 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
     public void removePortalPositionFromCache(Long portalPosition) {
         this.destinationCoordinateCache.remove(portalPosition);
         this.destinationCoordinateKeys.remove(portalPosition);
+    }
+
+    @Override
+    public void setPortalAgentType(PortalAgentType type) {
+        this.portalAgentType = type;
     }
 
     @Override

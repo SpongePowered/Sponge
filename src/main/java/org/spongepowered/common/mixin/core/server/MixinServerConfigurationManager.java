@@ -515,7 +515,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
     /**
      * @author blood - May 21st, 2016
      *
-     * @reason - adjusted to support {@link DisplaceEntityEvent.Portal}
+     * @reason - adjusted to support {@link DisplaceEntityEvent.Teleport.Portal}
      *
      * @param playerIn The player teleporting to another dimension
      * @param targetDimensionId The id of target dimension.
@@ -523,7 +523,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
      */
     @Overwrite
     public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
-        DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
+        DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
         if (event.isCancelled()) {
             return;
         }
@@ -557,7 +557,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         }
     }
 
-    // copy of transferEntityToWorld but only contains code to generate the transform before being placed into a portal
+    // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
     @Override
     public void prepareEntityForPortal(Entity entityIn, WorldServer oldWorldIn, WorldServer toWorldIn) {
         oldWorldIn.theProfiler.startSection("moving");
@@ -569,8 +569,8 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         double z = entityIn.posZ * moveFactor;
 
         if (!(pNew instanceof WorldProviderEnd)) {
-            x = MathHelper.clamp_double(x * moveFactor, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
-            z = MathHelper.clamp_double(z * moveFactor, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
+            x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
+            z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
             entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
 
             if (entityIn.isEntityAlive()) {
@@ -625,17 +625,14 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
     @Overwrite
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
-        DisplaceEntityEvent.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionId(), teleporter);
+        DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionId(), teleporter);
         if (event.isCancelled()) {
-            fromWorld.theProfiler.endSection();
             return;
         }
 
         entityIn.setLocationAndAngles(event.getToTransform().getPosition().getX(), event.getToTransform().getPosition().getY(), event.getToTransform().getPosition().getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
         toWorld.spawnEntityInWorld(entityIn);
         toWorld.updateEntityWithOptionalForce(entityIn, false);
-        fromWorld.theProfiler.endSection();
-
         entityIn.setWorld(toWorld);
     }
 

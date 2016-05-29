@@ -24,9 +24,13 @@
  */
 package org.spongepowered.common.interfaces.world;
 
+import org.spongepowered.api.world.PortalAgentType;
+
 public interface IMixinTeleporter {
 
     void removePortalPositionFromCache(Long portalLocation);
+
+    void setPortalAgentType(PortalAgentType type);
 
     void setPortalType(int dimensionId);
 }
