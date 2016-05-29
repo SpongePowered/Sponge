@@ -95,6 +95,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
+import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -525,6 +526,9 @@ public abstract class MixinServerConfigurationManager {
         NBTTagCompound nbt = new NBTTagCompound();
         player.writeToNBT(nbt);
         ((SpongeUser) ((IMixinEntityPlayerMP) player).getUserObject()).readFromNbt(nbt);
+
+        // Remove player reference from scoreboard
+        ((IMixinServerScoreboard) ((Player) player).getScoreboard()).removePlayer(player, false);
     }
 
     @Inject(method = "saveAllPlayerData()V", at = @At("RETURN"))

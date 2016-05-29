@@ -493,7 +493,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @reason Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
      * was made can be found in comments below.
-     * 
+     *
      * @param packetIn The block placement packet
      */
     @Overwrite
@@ -625,7 +625,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
      * @reason Due to all the changes we now do for this packet, it is much easier
      * to read it all with an overwrite. Information detailing on why each change
      * was made can be found in comments below.
-     * 
+     *
      * @param packetIn The entity use packet
      */
     @Overwrite
@@ -634,7 +634,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
         if (!MinecraftServer.getServer().isCallingFromMinecraftThread()) {
             if (packetIn.getAction() == Action.INTERACT) {
                 // This is a horrible hack needed because the client sends 2 packets on 'right mouse click'
-                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the 
+                // aimed at any entity that is not an armor stand. We shouldn't need the INTERACT packet as the
                 // INTERACT_AT packet contains the same data but also includes a hitVec.
                 return;
             } else { // queue packet for main thread
@@ -659,7 +659,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection {
                 // Since we ignore any packet that has hitVec set to null, we can safely ignore this check
                 // if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT) {
                 //    this.playerEntity.interactWith(entity);
-                // } else 
+                // } else
                 if (packetIn.getAction() == C02PacketUseEntity.Action.INTERACT_AT) {
                     InteractEntityEvent.Secondary event = SpongeEventFactory.createInteractEntityEventSecondary(
                             Cause.of(NamedCause.source(this.playerEntity)), Optional.of(VecHelper.toVector(packetIn.getHitVec())), (org.spongepowered.api.entity.Entity) entity);

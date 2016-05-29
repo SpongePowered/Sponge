@@ -439,7 +439,7 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         if (scoreboard == null) {
             scoreboard = Sponge.getGame().getServer().getServerScoreboard().get();
         }
-        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this);
+        ((IMixinServerScoreboard) this.spongeScoreboard).removePlayer((EntityPlayerMP) (Object) this, true);
         this.spongeScoreboard = scoreboard;
         ((IMixinServerScoreboard) this.spongeScoreboard).addPlayer((EntityPlayerMP) (Object) this);
     }
