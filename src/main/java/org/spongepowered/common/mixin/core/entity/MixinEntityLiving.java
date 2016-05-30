@@ -79,7 +79,6 @@ import javax.annotation.Nullable;
 @Mixin(EntityLiving.class)
 public abstract class MixinEntityLiving extends MixinEntityLivingBase implements Agent {
 
-    private static final String WORLD_FIELD = "Lnet/minecraft/entity/EntityLiving;worldObj:Lnet/minecraft/world/World;";
     @Shadow @Final private EntityAITasks tasks;
     @Shadow @Final private EntityAITasks targetTasks;
     @Shadow private boolean canPickUpLoot;
@@ -156,13 +155,6 @@ public abstract class MixinEntityLiving extends MixinEntityLivingBase implements
             return Optional.of((Goal<T>) this.targetTasks);
         }
         return Optional.empty();
-    }
-
-    @Inject(method = "despawnEntity", at = @At(value = "FIELD", target = WORLD_FIELD, ordinal = 0), cancellable = true)
-    private void checkCanDespawnBeforeGettingPlayer(CallbackInfo callbackInfo) {
-        if (!this.canDespawn()) {
-            callbackInfo.cancel();
-        }
     }
 
     @ModifyConstant(method = "despawnEntity", constant = @Constant(doubleValue = 16384.0D))
