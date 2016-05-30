@@ -33,10 +33,13 @@ import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.manipulator.DataManipulator;
+import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.entity.spawn.SpawnCause;
 import org.spongepowered.api.text.Text;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.data.util.NbtDataUtil;
 
 import java.util.List;
@@ -133,6 +136,10 @@ public interface IMixinEntity extends org.spongepowered.api.entity.Entity {
     SpawnCause getSpawnCause();
 
     void setSpawnCause(SpawnCause spawnCause);
+
+    void setLocationAndAngles(Location<World> location);
+
+    void setLocationAndAngles(Transform<World> transform);
 
     // Timings
     Timing getTimingsHandler();

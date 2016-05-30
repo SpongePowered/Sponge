@@ -103,6 +103,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinServerScoreboard;
 import org.spongepowered.common.interfaces.IMixinServerConfigurationManager;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.entity.player.IMixinEntityPlayer;
 import org.spongepowered.common.interfaces.world.IMixinWorldProvider;
 import org.spongepowered.common.text.SpongeTexts;
@@ -416,7 +417,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
                     (Player) playerIn, this.tempIsBedSpawn);
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
-        player.setTransform(event.getToTransform());
+        ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
         location = event.getToTransform().getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
@@ -529,10 +530,8 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         }
 
         WorldServer fromWorld = (WorldServer) event.getFromTransform().getExtent();
-        Transform<World> toTransform = event.getToTransform();
-        WorldServer toWorld = (WorldServer) toTransform.getExtent();
+        WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
         playerIn.dimension = toWorld.provider.getDimensionId();
-        Vector3d position = toTransform.getPosition();
         // Support vanilla clients teleporting to custom dimensions
         int dimension = DimensionManager.getClientDimensionToSend(toWorld.provider.getDimensionId(), toWorld, playerIn);
         if (((IMixinEntityPlayerMP) playerIn).usesCustomClient()) {
@@ -542,7 +541,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         fromWorld.removePlayerEntityDangerously(playerIn);
         playerIn.isDead = false;
         // we do not need to call transferEntityToWorld as we already have the correct transform and created the portal in handleDisplaceEntityPortalEvent
-        playerIn.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) toTransform.getYaw(), (float) toTransform.getPitch());
+        ((IMixinEntity) playerIn).setLocationAndAngles(event.getToTransform());
         toWorld.spawnEntityInWorld(playerIn);
         toWorld.updateEntityWithOptionalForce(playerIn, false);
         playerIn.setWorld(toWorld);

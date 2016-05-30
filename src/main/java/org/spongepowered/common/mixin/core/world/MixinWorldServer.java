@@ -123,7 +123,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
     @Shadow @Final private Set<NextTickListEntry> pendingTickListEntriesHashSet;
     @Shadow @Final private TreeSet<NextTickListEntry> pendingTickListEntriesTreeSet;
-    @Shadow @Final private Teleporter worldTeleporter;
+    @Shadow private Teleporter worldTeleporter;
     @Shadow private ServerBlockEventList[] blockEventQueue;
     @Shadow private int blockEventCacheIndex;
     @Shadow private int updateEntityTick;

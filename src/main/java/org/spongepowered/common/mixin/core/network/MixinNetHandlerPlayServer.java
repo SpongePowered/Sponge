@@ -113,6 +113,7 @@ import org.spongepowered.common.interfaces.IMixinContainer;
 import org.spongepowered.common.interfaces.IMixinEntityPlayerMP;
 import org.spongepowered.common.interfaces.IMixinNetworkManager;
 import org.spongepowered.common.interfaces.IMixinPacketResourcePackSend;
+import org.spongepowered.common.interfaces.entity.IMixinEntity;
 import org.spongepowered.common.interfaces.network.IMixinC08PacketPlayerBlockPlacement;
 import org.spongepowered.common.interfaces.network.IMixinNetHandlerPlayServer;
 import org.spongepowered.common.network.PacketUtil;
@@ -352,6 +353,7 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
     public void proccesPlayerMoved(C03PacketPlayer packetIn, CallbackInfo ci){
         if (packetIn.isMoving() || packetIn.getRotating() && !this.playerEntity.isDead) {
             Player player = (Player) this.playerEntity;
+            IMixinEntity spongeEntity = (IMixinEntity) this.playerEntity;
             Vector3d fromrot = player.getRotation();
 
             // If Sponge used the player's current location, the delta might never be triggered which could be exploited
@@ -393,12 +395,12 @@ public abstract class MixinNetHandlerPlayServer implements PlayerConnection, IMi
                         SpongeEventFactory.createDisplaceEntityEventMoveTargetPlayer(Cause.of(NamedCause.source(player)), fromTransform, toTransform, player);
                 SpongeImpl.postEvent(event);
                 if (event.isCancelled()) {
-                    player.setTransform(fromTransform);
+                    spongeEntity.setLocationAndAngles(fromTransform);
                     this.lastMoveLocation = from;
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();
                 } else if (!event.getToTransform().equals(toTransform)) {
-                    player.setTransform(event.getToTransform());
+                    spongeEntity.setLocationAndAngles(event.getToTransform());
                     this.lastMoveLocation = event.getToTransform().getLocation();
                     ((IMixinEntityPlayerMP) this.playerEntity).setVelocityOverride(null);
                     ci.cancel();

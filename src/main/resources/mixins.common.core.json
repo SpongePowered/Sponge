@@ -158,6 +158,7 @@
         "command.MixinPlayerSelector",
         "command.MixinPlayerSelectorScore",
         "command.server.MixinCommandSummon",
+        "command.server.MixinCommandTeleport",
         "entity.MixinArmorEquipable",
         "entity.MixinEntity",
         "entity.MixinEntityAgeable",

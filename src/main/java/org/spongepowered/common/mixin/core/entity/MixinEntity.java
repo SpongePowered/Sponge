@@ -339,54 +339,66 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public void setLocation(Location<World> location) {
-        setLocation(location, true);
-    }
-
-    @Override
     public boolean setLocationSafely(Location<World> location) {
-        return setLocation(location, false);
+        TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
+        Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
+        if (!safeLocation.isPresent()) {
+            return false;
+        }
+
+        return setLocation(safeLocation.get());
     }
 
     @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation) {
-        setLocation(location);
-        setRotation(rotation);
+    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation) {
+        boolean result = setLocation(location);
+        if (result) {
+            setRotation(rotation);
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation) {
-        boolean relocated = setLocation(location, false);
+        TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
+        Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
+        if (!safeLocation.isPresent()) {
+            return false;
+        }
+
+        boolean relocated = setLocation(safeLocation.get());
         setRotation(rotation);
         return relocated;
     }
 
     @Override
     public boolean setLocationAndRotationSafely(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        return setLocationAndRotation(location, rotation, relativePositions, true);
+        TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
+        Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
+        if (!safeLocation.isPresent()) {
+            return false;
+        }
+
+        return setLocationAndRotation(safeLocation.get(), rotation, relativePositions);
     }
 
-    public boolean setLocation(Location<World> location, boolean forced) {
+    public boolean setLocation(Location<World> location) {
         checkNotNull(location, "The location was null!");
         if (isRemoved()) {
             return false;
         }
 
-        Entity spongeEntity = this;
-        net.minecraft.entity.Entity thisEntity = (net.minecraft.entity.Entity) spongeEntity;
-
-        if (!forced) {
-            // Validate
-            TeleportHelper teleportHelper = SpongeImpl.getGame().getTeleportHelper();
-            Optional<Location<World>> safeLocation = teleportHelper.getSafeLocation(location);
-            if (!safeLocation.isPresent()) {
-                return false;
-            } else {
-                location = safeLocation.get();
-            }
+        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(this.mcEntity, location);
+        if (event.isCancelled()) {
+            return false;
+        } else {
+            this.setLocationAndAngles(event.getToTransform());
         }
+
         // detach passengers
-        net.minecraft.entity.Entity passenger = thisEntity.riddenByEntity;
+        net.minecraft.entity.Entity passenger = this.mcEntity.riddenByEntity;
         ArrayDeque<net.minecraft.entity.Entity> passengers = new ArrayDeque<>();
         while (passenger != null) {
             if (passenger instanceof EntityPlayerMP && !this.worldObj.isRemote) {
@@ -404,29 +416,29 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         net.minecraft.world.World nmsWorld = null;
         if (location.getExtent().getUniqueId() != ((World) this.worldObj).getUniqueId()) {
             nmsWorld = (net.minecraft.world.World) location.getExtent();
-            if (thisEntity instanceof EntityPlayerMP) {
+            if (this.mcEntity instanceof EntityPlayerMP) {
                 // Close open containers
-                if (((EntityPlayerMP) thisEntity).openContainer != ((EntityPlayerMP) thisEntity).inventoryContainer) {
-                    ((EntityPlayerMP) thisEntity).closeContainer();
+                if (((EntityPlayerMP) this.mcEntity).openContainer != ((EntityPlayerMP) this.mcEntity).inventoryContainer) {
+                    ((EntityPlayerMP) this.mcEntity).closeContainer();
                 }
             }
-            teleportEntity(thisEntity, location, thisEntity.dimension, nmsWorld.provider.getDimensionId(), forced);
+            teleportEntity(this.mcEntity, location, this.mcEntity.dimension, nmsWorld.provider.getDimensionId());
         } else {
-            if (thisEntity instanceof EntityPlayerMP && ((EntityPlayerMP) thisEntity).playerNetServerHandler != null) {
-                ((EntityPlayerMP) thisEntity).playerNetServerHandler
+            if (this.mcEntity instanceof EntityPlayerMP && ((EntityPlayerMP) this.mcEntity).playerNetServerHandler != null) {
+                ((EntityPlayerMP) this.mcEntity).playerNetServerHandler
                     .setPlayerLocation(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ(),
-                        thisEntity.rotationYaw, thisEntity.rotationPitch);
+                            this.mcEntity.rotationYaw, this.mcEntity.rotationPitch);
             } else {
                 setPosition(location.getPosition().getX(), location.getPosition().getY(), location.getPosition().getZ());
             }
         }
 
         // re-attach passengers
-        net.minecraft.entity.Entity lastPassenger = thisEntity;
+        net.minecraft.entity.Entity lastPassenger = this.mcEntity;
         while (!passengers.isEmpty()) {
             net.minecraft.entity.Entity passengerEntity = passengers.remove();
             if (nmsWorld != null) {
-                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.getDimensionId(), true);
+                teleportEntity(passengerEntity, location, passengerEntity.dimension, nmsWorld.provider.getDimensionId());
             }
 
             if (passengerEntity instanceof EntityPlayerMP && !this.worldObj.isRemote) {
@@ -442,9 +454,23 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         return true;
     }
 
+    // always use these methods internally when setting locations from a transform or location
+    // to avoid firing a DisplaceEntityEvent.Teleport
     @Override
-    public void setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
-        setLocationAndRotation(location, rotation, relativePositions, false);
+    public void setLocationAndAngles(Location<World> location) {
+        this.setPosition(location.getX(), location.getY(), location.getZ());
+        if (this.worldObj != location.getExtent()) {
+            this.worldObj = (net.minecraft.world.World) location.getExtent();
+        }
+    }
+
+    @Override
+    public void setLocationAndAngles(Transform<World> transform) {
+        Vector3d position = transform.getPosition();
+        this.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) transform.getYaw(), (float) transform.getPitch());
+        if (this.worldObj != transform.getExtent()) {
+            this.worldObj = (net.minecraft.world.World) transform.getExtent();
+        }
     }
 
     @Inject(method = "onUpdate", at = @At("RETURN"))
@@ -486,12 +512,12 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions, boolean forced) {
+    public boolean setLocationAndRotation(Location<World> location, Vector3d rotation, EnumSet<RelativePositions> relativePositions) {
         boolean relocated = true;
 
         if (relativePositions.isEmpty()) {
             // This is just a normal teleport that happens to set both.
-            relocated = setLocation(location, forced);
+            relocated = setLocation(location);
             setRotation(rotation);
         } else {
             if (((Entity) this) instanceof EntityPlayerMP && ((EntityPlayerMP) (Entity) this).playerNetServerHandler != null) {
@@ -545,7 +571,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
                 }
 
                 // From here just a normal teleport is needed.
-                relocated = setLocation(resultantLocation, forced);
+                relocated = setLocation(resultantLocation);
                 setRotation(resultantRotation);
             }
         }
@@ -569,11 +595,16 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     @Override
-    public void setTransform(Transform<World> transform) {
+    public boolean setTransform(Transform<World> transform) {
         checkNotNull(transform, "The transform cannot be null!");
-        setLocation(transform.getLocation());
-        setRotation(transform.getRotation());
-        setScale(transform.getScale());
+        boolean result = setLocation(transform.getLocation());
+        if (result) {
+            setRotation(transform.getRotation());
+            setScale(transform.getScale());
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -745,7 +776,7 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
     }
 
     // for sponge internal use only
-    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim, boolean forced) {
+    public boolean teleportEntity(net.minecraft.entity.Entity entity, Location<World> location, int currentDim, int targetDim) {
         MinecraftServer mcServer = MinecraftServer.getServer();
         final WorldServer fromWorld = mcServer.worldServerForDimension(currentDim);
         final WorldServer toWorld = mcServer.worldServerForDimension(targetDim);
@@ -761,10 +792,8 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         entity.isDead = false;
         entity.dimension = targetDim;
         entity.setPositionAndRotation(location.getX(), location.getY(), location.getZ(), 0, 0);
-        if (forced) {
-            while (!toWorld.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
-                entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
-            }
+        while (!toWorld.getCollidingBoundingBoxes(entity, entity.getEntityBoundingBox()).isEmpty() && entity.posY < 256.0D) {
+            entity.setPosition(entity.posX, entity.posY + 1.0D, entity.posZ);
         }
 
         toWorld.theChunkProviderServer.loadChunk((int) entity.posX >> 4, (int) entity.posZ >> 4);
