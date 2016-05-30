@@ -52,7 +52,9 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         SpongeTimings.playerCommandTimer.startTiming();
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
-            world.getCauseTracker().setCapturingCommand(true);
+            final CauseTracker causeTracker = world.getCauseTracker();
+            causeTracker.setCapturingCommand(true);
+            causeTracker.addCause(Cause.source(sender).named("Command", command).build());
         }
         if (command instanceof IMixinCommandBase) {
             ((IMixinCommandBase) command).setExpandedSelector(this.isExpandedSelector());
@@ -64,7 +66,6 @@ public abstract class MixinCommandHandler implements IMixinCommandHandler {
         if (sender.getEntityWorld() != null) {
             IMixinWorld world = (IMixinWorld) sender.getEntityWorld();
             final CauseTracker causeTracker = world.getCauseTracker();
-            causeTracker.addCause(Cause.source(sender).named("Command", command).build());
             causeTracker.handlePostTickCaptures();
             causeTracker.removeCurrentCause();
             causeTracker.setCapturingCommand(false);
