@@ -1301,12 +1301,12 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void notifyNeighborsOfStateChange(BlockPos pos, Block blockType) {
-        if (!isValid(pos)) {
+        if (this.isRemote || !isValid(pos)) {
             return;
         }
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+        if (causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
                 || causeTracker.isCapturingTerrainGen()) {
             for (EnumFacing facing : EnumFacing.values()) {
                 causeTracker.notifyBlockOfStateChange(pos.offset(facing), blockType, pos);
@@ -1336,7 +1336,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
     @SuppressWarnings("rawtypes")
     @Overwrite
     public void notifyNeighborsOfStateExcept(BlockPos pos, Block blockType, EnumFacing skipSide) {
-        if (!isValid(pos)) {
+        if (this.isRemote || !isValid(pos)) {
             return;
         }
 
@@ -1344,7 +1344,7 @@ public abstract class MixinWorld implements World, IMixinWorld {
         directions.remove(skipSide);
 
         final CauseTracker causeTracker = this.getCauseTracker();
-        if (this.isRemote || causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
+        if (causeTracker.isRestoringBlocks() || causeTracker.isWorldSpawnerRunning() || causeTracker.isChunkSpawnerRunning()
                 || causeTracker.isCapturingTerrainGen()) {
             for (Object obj : directions) {
                 EnumFacing facing = (EnumFacing) obj;
@@ -1373,7 +1373,9 @@ public abstract class MixinWorld implements World, IMixinWorld {
      */
     @Overwrite
     public void notifyBlockOfStateChange(BlockPos notifyPos, final Block blockIn) {
-        this.getCauseTracker().notifyBlockOfStateChange(notifyPos, blockIn, null);
+        if (!this.isRemote) {
+            this.getCauseTracker().notifyBlockOfStateChange(notifyPos, blockIn, null);
+        }
     }
 
     @Override
