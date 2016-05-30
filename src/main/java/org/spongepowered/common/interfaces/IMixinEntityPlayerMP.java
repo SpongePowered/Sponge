@@ -48,4 +48,6 @@ public interface IMixinEntityPlayerMP {
 
     void resetAttributeMap();
 
+    void refreshXpHealthAndFood();
+
 }

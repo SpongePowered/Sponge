@@ -385,6 +385,18 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         Transform<World> toTransform = new Transform<>(this.getPlayerRespawnLocation(playerIn, targetDimension), Vector3d.ZERO, Vector3d.ZERO);
         Location<World> location = toTransform.getLocation();
 
+        // If coming from end, fire a teleport event for plugins
+        if (conqueredEnd) {
+            // When leaving the end, players are never placed inside the teleporter but instead "respawned" in the target world
+            DisplaceEntityEvent.Teleport teleportEvent = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(playerIn, location);
+            if (teleportEvent.isCancelled()) {
+                playerIn.playerConqueredTheEnd = false;
+                return playerIn;
+            }
+
+            toTransform = teleportEvent.getToTransform();
+            location = toTransform.getLocation();
+        }
         // Keep players out of blocks
         Vector3d tempPos = player.getLocation().getPosition();
         playerIn.setPosition(location.getX(), location.getY(), location.getZ());
@@ -418,7 +430,8 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         this.tempIsBedSpawn = false;
         SpongeImpl.postEvent(event);
         ((IMixinEntity) player).setLocationAndAngles(event.getToTransform());
-        location = event.getToTransform().getLocation();
+        toTransform = event.getToTransform();
+        location = toTransform.getLocation();
 
         if (!(location.getExtent() instanceof WorldServer)) {
             SpongeImpl.getLogger().warn("Location set in PlayerRespawnEvent was invalid, using original location instead");
@@ -444,7 +457,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
                 .getWorldInfo().getTerrainType(), playerIn.theItemInWorldManager.getGameType()));
         playerIn.isDead = false;
         playerIn.playerNetServerHandler.setPlayerLocation(location.getX(), location.getY(), location.getZ(),
-                playerIn.rotationYaw, playerIn.rotationPitch);
+                (float) toTransform.getYaw(), (float) toTransform.getPitch());
 
         final BlockPos spawnLocation = targetWorld.getSpawnPoint();
         playerIn.playerNetServerHandler.sendPacket(new S05PacketSpawnPosition(spawnLocation));
@@ -554,6 +567,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
         for (PotionEffect potioneffect : playerIn.getActivePotionEffects()) {
             playerIn.playerNetServerHandler.sendPacket(new S1DPacketEntityEffect(playerIn.getEntityId(), potioneffect));
         }
+        ((IMixinEntityPlayerMP) playerIn).refreshXpHealthAndFood();
     }
 
     // copy of transferEntityToWorld but only contains code to apply the location on entity before being placed into a portal
@@ -571,10 +585,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
             x = MathHelper.clamp_double(x, toWorldIn.getWorldBorder().minX() + 16.0D, toWorldIn.getWorldBorder().maxX() - 16.0D);
             z = MathHelper.clamp_double(z, toWorldIn.getWorldBorder().minZ() + 16.0D, toWorldIn.getWorldBorder().maxZ() - 16.0D);
             entityIn.setLocationAndAngles(x, entityIn.posY, z, entityIn.rotationYaw, entityIn.rotationPitch);
-
-            if (entityIn.isEntityAlive()) {
-                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
-            }
         }
 
         if (pNew instanceof WorldProviderEnd) {
@@ -590,9 +600,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
             y = (double)blockpos.getY();
             z = (double)blockpos.getZ();
             entityIn.setLocationAndAngles(x, y, z, 90.0F, 0.0F);
-            if (entityIn.isEntityAlive()) {
-                oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
-            }
         }
 
         if (!(pOld instanceof WorldProviderEnd)) {
@@ -603,6 +610,11 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
                 entityIn.setLocationAndAngles(x, y, z, entityIn.rotationYaw, entityIn.rotationPitch);
             }
         }
+
+        if (entityIn.isEntityAlive()) {
+            oldWorldIn.updateEntityWithOptionalForce(entityIn, false);
+        }
+
         oldWorldIn.theProfiler.endSection();
     }
 

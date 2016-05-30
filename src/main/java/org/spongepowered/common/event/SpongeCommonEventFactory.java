@@ -766,18 +766,19 @@ public class SpongeCommonEventFactory {
     }
 
     public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Location<World> location) {
-        return handleDisplaceEntityTeleportEvent(entityIn, location.getX(), location.getY(), location.getZ(), entityIn.rotationYaw, entityIn.rotationPitch, false);
+        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> toTransform = fromTransform.setLocation(location).setRotation(new Vector3d(entityIn.rotationPitch, entityIn.rotationYaw, 0));
+        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
     }
 
     public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch) {
-        return handleDisplaceEntityTeleportEvent(entityIn, posX, posY, posZ, yaw, pitch, false);
+        Transform<World> fromTransform = ((IMixinEntity) entityIn).getTransform();
+        Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
+        return handleDisplaceEntityTeleportEvent(entityIn, fromTransform, toTransform, false);
     }
 
-    public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, double posX, double posY, double posZ, float yaw, float pitch, boolean apiCall) {
-        IMixinEntity spongeEntity = (IMixinEntity) entityIn;
+    public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
         IMixinWorld spongeWorld = (IMixinWorld) entityIn.worldObj;
-        Transform<World> fromTransform = spongeEntity.getTransform();
-        Transform<World> toTransform = fromTransform.setPosition(new Vector3d(posX, posY, posZ)).setRotation(new Vector3d(pitch, yaw, 0));
 
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         Cause teleportCause = null;
@@ -898,6 +899,8 @@ public class SpongeCommonEventFactory {
                 spongeEntity.setLocationAndAngles(event.getToTransform());
                 if (entityIn instanceof EntityPlayerMP) {
                     EntityPlayerMP player = (EntityPlayerMP) entityIn;
+                    // close any open inventory
+                    player.closeScreen();
                     // notify client
                     player.playerNetServerHandler.setPlayerLocation(player.posX, player.posY, player.posZ, player.rotationYaw, player.rotationPitch);
                 }

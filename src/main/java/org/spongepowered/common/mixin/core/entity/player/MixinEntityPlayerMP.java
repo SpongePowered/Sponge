@@ -46,6 +46,7 @@ import net.minecraft.network.play.server.S02PacketChat;
 import net.minecraft.network.play.server.S05PacketSpawnPosition;
 import net.minecraft.network.play.server.S23PacketBlockChange;
 import net.minecraft.network.play.server.S29PacketSoundEffect;
+import net.minecraft.network.play.server.S2BPacketChangeGameState;
 import net.minecraft.network.play.server.S48PacketResourcePackSend;
 import net.minecraft.scoreboard.IScoreObjectiveCriteria;
 import net.minecraft.scoreboard.Score;
@@ -53,13 +54,17 @@ import net.minecraft.scoreboard.ScoreObjective;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.management.ItemInWorldManager;
+import net.minecraft.stats.AchievementList;
 import net.minecraft.stats.StatBase;
 import net.minecraft.stats.StatList;
+import net.minecraft.stats.StatisticsFile;
 import net.minecraft.util.BlockPos;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.FoodStats;
 import net.minecraft.util.IChatComponent;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.WorldProviderEnd;
+import net.minecraft.world.WorldProviderSurface;
 import net.minecraft.world.WorldSettings;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -79,6 +84,7 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.NamedCause;
+import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.api.event.entity.living.humanoid.ChangeGameModeEvent;
 import org.spongepowered.api.event.entity.living.humanoid.player.PlayerChangeClientSettingsEvent;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -148,6 +154,7 @@ import javax.annotation.Nullable;
 public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements Player, IMixinSubject, IMixinEntityPlayerMP, IMixinCommandSender,
         IMixinCommandSource {
 
+    private EntityPlayerMP mcPlayer = (EntityPlayerMP)(Object) this;
     public int newExperience = 0;
     public int newLevel = 0;
     public int newTotalExperience = 0;
@@ -163,10 +170,14 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Shadow public int lastExperience;
     @Shadow private EntityPlayer.EnumChatVisibility chatVisibility = EntityPlayer.EnumChatVisibility.FULL;
     @Shadow private boolean chatColours;
+    @Shadow public boolean playerConqueredTheEnd;
+    @Shadow private float lastHealth;
+    @Shadow private int lastFoodLevel;
 
     @Shadow public abstract void setSpectatingEntity(Entity entityToSpectate);
     @Shadow public abstract void sendPlayerAbilities();
     @Shadow public abstract void func_175145_a(StatBase p_175145_1_);
+    @Shadow public abstract StatisticsFile getStatFile();
 
     private Set<SkinPart> skinParts = Sets.newHashSet();
     private int viewDistance;
@@ -259,6 +270,52 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
         this.triggerAchievement(StatList.deathsStat);
         this.func_175145_a(StatList.timeSinceDeathStat);
         this.getCombatTracker().reset();
+    }
+
+    /**
+     * @author blood - May 30th, 2016
+     *
+     * @reason - adjusted to support {@link DisplaceEntityEvent.Teleport}
+     *
+     * @param dimensionId The id of target dimension.
+     */
+    @Overwrite
+    public void travelToDimension(int dimensionId) {
+        // If leaving The End via End's Portal
+        if (this.worldObj.provider instanceof WorldProviderEnd && dimensionId == 1) {
+            this.worldObj.removeEntity(this.mcPlayer);
+            // this will trigger respawn logic in NetHandlerPlayServer.processPlayer
+            this.playerConqueredTheEnd = true;
+            this.triggerAchievement(AchievementList.theEnd2);
+            this.playerNetServerHandler.sendPacket(new S2BPacketChangeGameState(4, 0.0F));
+            return;
+        }
+
+        // If going to The End from an overworld type dimension
+        if (this.worldObj.provider instanceof WorldProviderSurface && dimensionId == 1) {
+            this.triggerAchievement(AchievementList.theEnd);
+            // This is already handled in ServerConfigurationManager transferEntityToWorld
+            /*
+            BlockPos blockpos = this.mcServer.worldServerForDimension(dimensionId).getSpawnCoordinate();
+
+            if (blockpos != null) {
+                this.playerNetServerHandler.setPlayerLocation((double)blockpos.getX(), (double)blockpos.getY(), (double)blockpos.getZ(), 0.0F, 0.0F);
+            }
+            */
+
+            dimensionId = 1;
+        } else {
+            this.triggerAchievement(AchievementList.portal);
+        }
+
+        this.mcServer.getConfigurationManager().transferPlayerToDimension(this.mcPlayer, dimensionId);
+
+        // This has been moved below to refreshXpHealthAndFood
+        /*
+        this.lastExperience = -1;
+        this.lastHealth = -1.0F;
+        this.lastFoodLevel = -1;
+        */
     }
 
     @Override
@@ -391,6 +448,13 @@ public abstract class MixinEntityPlayerMP extends MixinEntityPlayer implements P
     @Override
     public Tristate permDefault(String permission) {
         return ((IMixinSubject) this.user).permDefault(permission);
+    }
+
+    @Override
+    public void refreshXpHealthAndFood() {
+        this.lastExperience = -1;
+        this.lastHealth = -1.0F;
+        this.lastFoodLevel = -1;
     }
 
     @Override
