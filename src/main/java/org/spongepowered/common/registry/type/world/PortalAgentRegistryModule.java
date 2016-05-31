@@ -31,6 +31,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.Teleporter;
 import org.spongepowered.api.registry.AlternateCatalogRegistryModule;
 import org.spongepowered.api.registry.util.RegisterCatalog;
+import org.spongepowered.api.world.PortalAgent;
 import org.spongepowered.api.world.PortalAgentType;
 import org.spongepowered.api.world.PortalAgentTypes;
 import org.spongepowered.common.SpongeImpl;
@@ -52,6 +53,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @RegisterCatalog(PortalAgentTypes.class)
     private final Map<String, PortalAgentType> portalAgentTypeMappings = new HashMap<>();
+    private Map<Class<? extends PortalAgent>, PortalAgentType> portalAgentClassToTypeMappings = new HashMap<>();
 
     @Override
     public Optional<PortalAgentType> getById(String id) {
@@ -67,6 +69,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
     public void registerAdditionalCatalog(PortalAgentType portalAgentType) {
         checkArgument(this.portalAgentTypeMappings.get(portalAgentType.getId()) == null, "Cannot re-register a PortalAgent with the same id: " + portalAgentType.getId());
         this.portalAgentTypeMappings.put(portalAgentType.getId().toLowerCase(Locale.ENGLISH), portalAgentType);
+        this.portalAgentClassToTypeMappings.put(portalAgentType.getPortalAgentClass(), portalAgentType);
     }
 
     @Override
@@ -93,7 +96,7 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
 
     @SuppressWarnings("unchecked")
     public PortalAgentType validatePortalAgent(String portalAgentTypeClass, String worldName) {
-        if (portalAgentTypeClass != null) {
+        if (portalAgentTypeClass != null && !portalAgentTypeClass.isEmpty()) {
             try {
                 Class<?> clazz = Class.forName(portalAgentTypeClass);
                 if (Teleporter.class.isAssignableFrom(clazz)) {
@@ -113,13 +116,25 @@ public final class PortalAgentRegistryModule implements SpongeAdditionalCatalogR
         return this.validatePortalAgent(teleporter.getClass());
     }
 
+    @SuppressWarnings("unchecked")
     public PortalAgentType validatePortalAgent(Class<? extends Teleporter> clazz) {
+        PortalAgentType portalAgentType = this.portalAgentClassToTypeMappings.get(clazz);
+        if (portalAgentType != null) {
+            return portalAgentType;
+        }
+
         String modId = SpongeImplHooks.getModIdFromClass(clazz);
+        if (modId.isEmpty()) {
+            return PortalAgentTypes.DEFAULT;
+        }
+
+        // used for mods only as plugins register in PreInit
         String teleporterName = clazz.getSimpleName().toLowerCase(Locale.ENGLISH);
         String id = modId.toLowerCase(Locale.ENGLISH) + ":" + teleporterName;
         if (this.portalAgentTypeMappings.get(id) == null) {
-            SpongePortalAgentType portalAgentType = new SpongePortalAgentType(teleporterName, id, clazz);
+            portalAgentType = new SpongePortalAgentType(teleporterName, id, clazz);
             this.portalAgentTypeMappings.put(id, portalAgentType);
+            this.portalAgentClassToTypeMappings.put((Class<? extends PortalAgent>) clazz, portalAgentType);
         }
         return this.portalAgentTypeMappings.get(id);
 
