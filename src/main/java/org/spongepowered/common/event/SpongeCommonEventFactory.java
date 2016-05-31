@@ -783,7 +783,8 @@ public class SpongeCommonEventFactory {
             return null;
         }
 
-        IMixinWorld spongeWorld = (IMixinWorld) toTransform.getExtent();
+        // Use origin world to get correct cause
+        IMixinWorld spongeWorld = (IMixinWorld) fromTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         Cause teleportCause = null;
         Cause currentCause = causeTracker.getCurrentCause();
