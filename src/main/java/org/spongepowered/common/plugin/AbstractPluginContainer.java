@@ -32,6 +32,7 @@ public abstract class AbstractPluginContainer implements PluginContainer {
     protected AbstractPluginContainer() {
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public String getUnqualifiedId() {
         // @minecrell: is this supposed to call the static method below?

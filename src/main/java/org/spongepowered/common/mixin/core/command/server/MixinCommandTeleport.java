@@ -26,88 +26,202 @@ package org.spongepowered.common.mixin.core.command.server;
 
 import com.flowpowered.math.vector.Vector3d;
 import net.minecraft.command.CommandBase;
-import net.minecraft.command.CommandBase.CoordinateArg;
+import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
+import net.minecraft.command.WrongUsageException;
 import net.minecraft.command.server.CommandTeleport;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.EntityPlayerMP;
 import net.minecraft.network.play.server.S08PacketPlayerPosLook;
+import net.minecraft.util.MathHelper;
 import org.spongepowered.api.event.entity.DisplaceEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
+import java.util.EnumSet;
 import java.util.Set;
 
 @Mixin(CommandTeleport.class)
 public abstract class MixinCommandTeleport extends CommandBase {
 
-    @Inject(method = "processCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;setPlayerLocation(DDDFFLjava/util/Set;)V"), cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onPlayerTeleport(ICommandSender sender, String args[], CallbackInfo ci, int i, Entity entity, int lvt_5_2_, CoordinateArg commandbase$coordinatearg, CoordinateArg commandbase$coordinatearg1, CoordinateArg commandbase$coordinatearg2, CoordinateArg commandbase$coordinatearg3, CoordinateArg commandbase$coordinatearg4, Set<S08PacketPlayerPosLook.EnumFlags> set, float f, float f1) {
-        EntityPlayerMP player = (EntityPlayerMP) sender;
-        double x = commandbase$coordinatearg.func_179629_b();
-        double y = commandbase$coordinatearg1.func_179629_b();
-        double z = commandbase$coordinatearg2.func_179629_b();
-        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            Vector3d position = event.getToTransform().getPosition();
-            player.playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
-            entity.setRotationYawHead((float) event.getToTransform().getYaw());
-            notifyOperators(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), position.getX(), position.getY(), position.getZ()});
-            ci.cancel();
+    /**
+     * @author blood - May 31st, 2016
+     * @reason to fix LVT errors with SpongeForge
+     *     
+     * @param sender The command source
+     * @param args The command arguments
+     */
+    @Overwrite
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException
+    {
+        if (args.length < 1)
+        {
+            throw new WrongUsageException("commands.tp.usage", new Object[0]);
         }
-    }
+        else
+        {
+            int i = 0;
+            Entity entity;
 
-    @Inject(method = "processCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/NetHandlerPlayServer;setPlayerLocation(DDDFF)V"), cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onPlayerTeleport2(ICommandSender sender, String args[], CallbackInfo ci, int i, Entity entity, Entity entity1) {
-        EntityPlayerMP player = (EntityPlayerMP) sender;
-        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            Vector3d position = event.getToTransform().getPosition();
-            player.playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-            notifyOperators(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
-            ci.cancel();
-        }
-    }
+            if (args.length != 2 && args.length != 4 && args.length != 6)
+            {
+                entity = getCommandSenderAsPlayer(sender);
+            }
+            else
+            {
+                entity = getEntity(sender, args[0]);
+                i = 1;
+            }
 
-    @Inject(method = "processCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setLocationAndAngles(DDDFF)V", ordinal = 0), cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onEntityTeleport(ICommandSender sender, String args[], CallbackInfo ci, int i, Entity entity, int lvt_5_2_, CoordinateArg commandbase$coordinatearg, CoordinateArg commandbase$coordinatearg1, CoordinateArg commandbase$coordinatearg2, CoordinateArg commandbase$coordinatearg3, CoordinateArg commandbase$coordinatearg4, float f2, float f3) {
-        double x = commandbase$coordinatearg.func_179628_a();
-        double y = commandbase$coordinatearg1.func_179628_a();
-        double z = commandbase$coordinatearg2.func_179628_a();
-        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, x, y, z, f2, f3);
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            Vector3d position = event.getToTransform().getPosition();
-            entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-            entity.setRotationYawHead((float) event.getToTransform().getYaw());
-            notifyOperators(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), position.getX(), position.getY(), position.getZ()});
-            ci.cancel();
-        }
-    }
+            if (args.length != 1 && args.length != 2)
+            {
+                if (args.length < i + 3)
+                {
+                    throw new WrongUsageException("commands.tp.usage", new Object[0]);
+                }
+                else if (entity.worldObj != null)
+                {
+                    int lvt_5_2_ = i + 1;
+                    CommandBase.CoordinateArg commandbase$coordinatearg = parseCoordinate(entity.posX, args[i], true);
+                    CommandBase.CoordinateArg commandbase$coordinatearg1 = parseCoordinate(entity.posY, args[lvt_5_2_++], 0, 0, false);
+                    CommandBase.CoordinateArg commandbase$coordinatearg2 = parseCoordinate(entity.posZ, args[lvt_5_2_++], true);
+                    CommandBase.CoordinateArg commandbase$coordinatearg3 = parseCoordinate((double)entity.rotationYaw, args.length > lvt_5_2_ ? args[lvt_5_2_++] : "~", false);
+                    CommandBase.CoordinateArg commandbase$coordinatearg4 = parseCoordinate((double)entity.rotationPitch, args.length > lvt_5_2_ ? args[lvt_5_2_] : "~", false);
 
-    @Inject(method = "processCommand", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;setLocationAndAngles(DDDFF)V", ordinal = 1), cancellable = true,
-            locals = LocalCapture.CAPTURE_FAILHARD)
-    public void onEntityTeleport2(ICommandSender sender, String args[], CallbackInfo ci, int i, Entity entity, Entity entity1) {
-        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            Vector3d position = event.getToTransform().getPosition();
-            entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
-            notifyOperators(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
-            ci.cancel();
+                    if (entity instanceof EntityPlayerMP)
+                    {
+                        Set<S08PacketPlayerPosLook.EnumFlags> set = EnumSet.<S08PacketPlayerPosLook.EnumFlags>noneOf(S08PacketPlayerPosLook.EnumFlags.class);
+
+                        if (commandbase$coordinatearg.func_179630_c())
+                        {
+                            set.add(S08PacketPlayerPosLook.EnumFlags.X);
+                        }
+
+                        if (commandbase$coordinatearg1.func_179630_c())
+                        {
+                            set.add(S08PacketPlayerPosLook.EnumFlags.Y);
+                        }
+
+                        if (commandbase$coordinatearg2.func_179630_c())
+                        {
+                            set.add(S08PacketPlayerPosLook.EnumFlags.Z);
+                        }
+
+                        if (commandbase$coordinatearg4.func_179630_c())
+                        {
+                            set.add(S08PacketPlayerPosLook.EnumFlags.X_ROT);
+                        }
+
+                        if (commandbase$coordinatearg3.func_179630_c())
+                        {
+                            set.add(S08PacketPlayerPosLook.EnumFlags.Y_ROT);
+                        }
+
+                        float f = (float)commandbase$coordinatearg3.func_179629_b();
+
+                        if (!commandbase$coordinatearg3.func_179630_c())
+                        {
+                            f = MathHelper.wrapAngleTo180_float(f);
+                        }
+
+                        float f1 = (float)commandbase$coordinatearg4.func_179629_b();
+
+                        if (!commandbase$coordinatearg4.func_179630_c())
+                        {
+                            f1 = MathHelper.wrapAngleTo180_float(f1);
+                        }
+
+                        if (f1 > 90.0F || f1 < -90.0F)
+                        {
+                            f1 = MathHelper.wrapAngleTo180_float(180.0F - f1);
+                            f = MathHelper.wrapAngleTo180_float(f + 180.0F);
+                        }
+
+                        // Sponge start
+                        EntityPlayerMP player = (EntityPlayerMP) sender;
+                        double x = commandbase$coordinatearg.func_179629_b();
+                        double y = commandbase$coordinatearg1.func_179629_b();
+                        double z = commandbase$coordinatearg2.func_179629_b();
+                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(player, x, y, z, f, f1);
+                        if (event.isCancelled()) {
+                            return;
+                        }
+
+                        entity.mountEntity((Entity)null);
+                        Vector3d position = event.getToTransform().getPosition();
+                        ((EntityPlayerMP)entity).playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch(), set);
+                        entity.setRotationYawHead((float) event.getToTransform().getYaw());
+                        // Sponge end
+                    }
+                    else
+                    {
+                        float f2 = (float)MathHelper.wrapAngleTo180_double(commandbase$coordinatearg3.func_179628_a());
+                        float f3 = (float)MathHelper.wrapAngleTo180_double(commandbase$coordinatearg4.func_179628_a());
+
+                        if (f3 > 90.0F || f3 < -90.0F)
+                        {
+                            f3 = MathHelper.wrapAngleTo180_float(180.0F - f3);
+                            f2 = MathHelper.wrapAngleTo180_float(f2 + 180.0F);
+                        }
+
+                        // Sponge start
+                        double x = commandbase$coordinatearg.func_179628_a();
+                        double y = commandbase$coordinatearg1.func_179628_a();
+                        double z = commandbase$coordinatearg2.func_179628_a();
+                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, x, y, z, f2, f3);
+                        if (event.isCancelled()) {
+                            return;
+                        }
+
+                        Vector3d position = event.getToTransform().getPosition();
+                        entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        entity.setRotationYawHead((float) event.getToTransform().getYaw());
+                        // Sponge end
+                    }
+
+                    notifyOperators(sender, this, "commands.tp.success.coordinates", new Object[] {entity.getName(), Double.valueOf(commandbase$coordinatearg.func_179628_a()), Double.valueOf(commandbase$coordinatearg1.func_179628_a()), Double.valueOf(commandbase$coordinatearg2.func_179628_a())});
+                }
+            }
+            else
+            {
+                Entity entity1 = getEntity(sender, args[args.length - 1]);
+
+                if (entity1.worldObj != entity.worldObj)
+                {
+                    throw new CommandException("commands.tp.notSameDimension", new Object[0]);
+                }
+                else
+                {
+                    entity.mountEntity((Entity)null);
+
+                    if (entity instanceof EntityPlayerMP)
+                    {
+                        // Sponge start
+                        EntityPlayerMP player = (EntityPlayerMP) sender;
+                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        if (event.isCancelled()) {
+                            return;
+                        }
+
+                        Vector3d position = event.getToTransform().getPosition();
+                        player.playerNetServerHandler.setPlayerLocation(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                        // Sponge end
+                    }
+                    else
+                    {
+                        DisplaceEntityEvent.Teleport event = SpongeCommonEventFactory.handleDisplaceEntityTeleportEvent(entity, entity1.posX, entity1.posY, entity1.posZ, entity1.rotationYaw, entity1.rotationPitch);
+                        if (event.isCancelled()) {
+                            return;
+                        }
+
+                        Vector3d position = event.getToTransform().getPosition();
+                        entity.setLocationAndAngles(position.getX(), position.getY(), position.getZ(), (float) event.getToTransform().getYaw(), (float) event.getToTransform().getPitch());
+                    }
+
+                    notifyOperators(sender, this, "commands.tp.success", new Object[] {entity.getName(), entity1.getName()});
+                }
+            }
         }
     }
 }
