@@ -94,6 +94,14 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         return this;
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     * @param rotationYaw The yaw of entity
+     */
     @Overwrite
     public void placeInPortal(Entity entityIn, float rotationYaw) {
         Location<World> targetLocation = ((org.spongepowered.api.entity.Entity) entityIn).getLocation();
@@ -145,6 +153,14 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         return foundTeleporter;
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     * @param rotationYaw The yaw of entity
+     */
     @Overwrite
     public boolean placeInExistingPortal(Entity entityIn, float rotationYaw) {
         if (entityIn == null) {
@@ -221,9 +237,9 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
 
     private void handleEntityPortalExit(Entity entityIn, Location<World> portalLocation, float rotationYaw) {
         BlockPos blockPos = VecHelper.toBlockPos(portalLocation);
-        double xTarget = (double) portalLocation.getX() + 0.5D;
-        double yTarget = (double) portalLocation.getY() + 0.5D;
-        double zTarget = (double) portalLocation.getZ() + 0.5D;
+        double xTarget = portalLocation.getX() + 0.5D;
+        double yTarget = portalLocation.getY() + 0.5D;
+        double zTarget = portalLocation.getZ() + 0.5D;
         BlockPattern.PatternHelper blockpattern$patternhelper = Blocks.portal.func_181089_f(this.worldServerInstance, blockPos);
         boolean flag1 = blockpattern$patternhelper.getFinger().rotateY().getAxisDirection() == EnumFacing.AxisDirection.NEGATIVE;
         double d2 = blockpattern$patternhelper.getFinger().getAxis() == EnumFacing.Axis.X ? (double) blockpattern$patternhelper.getPos().getZ()
@@ -271,6 +287,13 @@ public class MixinTeleporter implements PortalAgent, IMixinTeleporter {
         entityIn.setLocationAndAngles(xTarget, yTarget, zTarget, entityIn.rotationYaw, entityIn.rotationPitch);
     }
 
+    /**
+     * @author blood - May 21st, 2016
+     *
+     * @reason - rewritten to handle {@link DisplaceEntityEvent.Teleport.Portal}
+     *
+     * @param entityIn The entity being placed into the portal
+     */
     @Overwrite
     public boolean makePortal(Entity entityIn) {
         if (createPortal(((org.spongepowered.api.entity.Entity) entityIn).getLocation()).isPresent()) {

@@ -140,7 +140,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         PortalAgentType portalAgentType = ((WorldProperties) this.worldInfo).getPortalAgentType();
         if (!portalAgentType.equals(PortalAgentTypes.DEFAULT)) {
             try {
-                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class[] {WorldServer.class})
+                this.worldTeleporter = (Teleporter) portalAgentType.getPortalAgentClass().getConstructor(new Class<?>[] {WorldServer.class})
                         .newInstance(new Object[] {this});
             } catch (Exception e) {
                 SpongeImpl.getLogger().log(Level.ERROR, "Could not create PortalAgent of type " + portalAgentType.getId()
@@ -415,7 +415,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         // Sponge end
         for (int i = 0; i < this.weatherEffects.size(); ++i)
         {
-            net.minecraft.entity.Entity entity = (net.minecraft.entity.Entity)this.weatherEffects.get(i);
+            net.minecraft.entity.Entity entity = this.weatherEffects.get(i);
             IMixinEntity spongeEntity = (IMixinEntity) entity; // Sponge
             try
             {
@@ -462,7 +462,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
         for (int k = 0; k < this.unloadedEntityList.size(); ++k)
         {
-            net.minecraft.entity.Entity entity1 = (net.minecraft.entity.Entity)this.unloadedEntityList.get(k);
+            net.minecraft.entity.Entity entity1 = this.unloadedEntityList.get(k);
             int j = entity1.chunkCoordX;
             int l1 = entity1.chunkCoordZ;
 
@@ -474,7 +474,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
         for (int l = 0; l < this.unloadedEntityList.size(); ++l)
         {
-            this.onEntityRemoved((net.minecraft.entity.Entity)this.unloadedEntityList.get(l));
+            this.onEntityRemoved(this.unloadedEntityList.get(l));
         }
 
         this.unloadedEntityList.clear();
@@ -483,7 +483,7 @@ public abstract class MixinWorldServer extends MixinWorld {
 
         for (int i1 = 0; i1 < this.loadedEntityList.size(); ++i1)
         {
-            net.minecraft.entity.Entity entity2 = (net.minecraft.entity.Entity)this.loadedEntityList.get(i1);
+            net.minecraft.entity.Entity entity2 = this.loadedEntityList.get(i1);
             IMixinEntity spongeEntity = (IMixinEntity) entity2; // Sponge
             if (entity2.ridingEntity != null)
             {
@@ -555,7 +555,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         while (iterator.hasNext())
         {
             this.timings.tileEntityTick.startTiming(); // Sponge
-            net.minecraft.tileentity.TileEntity tileentity = (net.minecraft.tileentity.TileEntity)iterator.next();
+            net.minecraft.tileentity.TileEntity tileentity = iterator.next();
             IMixinTileEntity spongeTile = (IMixinTileEntity) tileentity;
             if (!tileentity.isInvalid() && tileentity.hasWorldObj())
             {
@@ -608,7 +608,7 @@ public abstract class MixinWorldServer extends MixinWorld {
         {
             for (int j1 = 0; j1 < this.addedTileEntityList.size(); ++j1)
             {
-                net.minecraft.tileentity.TileEntity tileentity1 = (net.minecraft.tileentity.TileEntity)this.addedTileEntityList.get(j1);
+                net.minecraft.tileentity.TileEntity tileentity1 = this.addedTileEntityList.get(j1);
 
                 if (!tileentity1.isInvalid())
                 {

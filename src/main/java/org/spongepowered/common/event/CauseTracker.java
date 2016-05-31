@@ -685,7 +685,7 @@ public final class CauseTracker {
         if (preEntitySize != postEntitySize && postEntitySize > preEntitySize) {
             // add spawn causes for newly captured items
             for (int x = preEntitySize; x < postEntitySize; x++) {
-                Entity entity = (Entity) this.capturedSpawnedEntities.get(x);
+                Entity entity = this.capturedSpawnedEntities.get(x);
                 BlockSnapshot blockSnapshot = originalBlockSnapshot;
                 if (blockSnapshot == null) {
                     Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) this.getMinecraftWorld(), VecHelper.toVector(pos));
@@ -705,7 +705,7 @@ public final class CauseTracker {
         if (preEntityItemSize != postEntityItemSize && postEntityItemSize > preEntityItemSize) {
             // add spawn causes for newly captured items
             for (int x = preEntityItemSize; x < postEntityItemSize; x++) {
-                Entity entity = (Entity) this.capturedSpawnedEntityItems.get(x);
+                Entity entity = this.capturedSpawnedEntityItems.get(x);
                 BlockSnapshot blockSnapshot = originalBlockSnapshot;
                 if (blockSnapshot == null) {
                     Location<org.spongepowered.api.world.World> location = new Location<>((org.spongepowered.api.world.World) this.getMinecraftWorld(), VecHelper.toVector(pos));

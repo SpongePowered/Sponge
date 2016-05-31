@@ -535,7 +535,6 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
      * @param targetDimensionId The id of target dimension.
      * @param teleporter The teleporter used to transport and create the portal
      */
-    @Overwrite
     public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
         DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
         if (event.isCancelled()) {
@@ -632,8 +631,13 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
      * @author blood - May 21st, 2016
      *
      * @reason - rewritten to capture a plugin or mod that attempts to call this method directly.
+     * 
+     * @param entityIn The entity being teleported
+     * @param fromDimensionId The origin dimension id
+     * @param fromWorld The origin world
+     * @param toWorld The destination world
+     * @param teleporter The teleporter being used to transport the entity
      */
-    @Overwrite
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
         DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionId(), teleporter);
