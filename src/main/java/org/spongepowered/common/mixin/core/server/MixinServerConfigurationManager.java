@@ -537,7 +537,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
      */
     public void transferPlayerToDimension(EntityPlayerMP playerIn, int targetDimensionId, net.minecraft.world.Teleporter teleporter) {
         DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(playerIn, targetDimensionId, teleporter);
-        if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             return;
         }
 
@@ -641,7 +641,7 @@ public abstract class MixinServerConfigurationManager implements IMixinServerCon
     public void transferEntityToWorld(Entity entityIn, int fromDimensionId, WorldServer fromWorld, WorldServer toWorld, net.minecraft.world.Teleporter teleporter) {
         // rewritten completely to handle our portal event
         DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(entityIn, toWorld.provider.getDimensionId(), teleporter);
-        if (event.isCancelled()) {
+        if (event == null || event.isCancelled()) {
             return;
         }
 

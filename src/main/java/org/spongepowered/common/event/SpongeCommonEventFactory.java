@@ -778,8 +778,12 @@ public class SpongeCommonEventFactory {
     }
 
     public static DisplaceEntityEvent.Teleport handleDisplaceEntityTeleportEvent(net.minecraft.entity.Entity entityIn, Transform<World> fromTransform, Transform<World> toTransform, boolean apiCall) {
-        IMixinWorld spongeWorld = (IMixinWorld) entityIn.worldObj;
+        // Don't allow non-player entities to load chunks
+        if (!(entityIn instanceof EntityPlayerMP) && !((net.minecraft.world.World) toTransform.getExtent()).isChunkLoaded((int) toTransform.getPosition().getX() >> 4, (int) toTransform.getPosition().getZ() >> 4, false)) {
+            return null;
+        }
 
+        IMixinWorld spongeWorld = (IMixinWorld) toTransform.getExtent();
         final CauseTracker causeTracker = spongeWorld.getCauseTracker();
         Cause teleportCause = null;
         Cause currentCause = causeTracker.getCurrentCause();
@@ -851,9 +855,15 @@ public class SpongeCommonEventFactory {
         }
 
         scm.prepareEntityForPortal(entityIn, fromWorld, toWorld);
+        Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
         if (entityIn instanceof EntityPlayerMP) {
             // disable packets from being sent to clients to avoid syncing issues, this is re-enabled before the event
             ((IMixinNetHandlerPlayServer) ((EntityPlayerMP) entityIn).playerNetServerHandler).setAllowClientLocationUpdate(false);
+        } else {
+            // Don't allow non-player entities to load chunks
+            if (!(entityIn instanceof EntityPlayerMP) && !toWorld.isChunkLoaded((int) portalExitTransform.getPosition().getX() >> 4, (int) portalExitTransform.getPosition().getZ() >> 4, false)) {
+                return null;
+            }
         }
 
         Cause teleportCause = Cause.of(NamedCause.source(PortalTeleportCause.builder().agent((PortalAgent) teleporter).type(TeleportTypes.PORTAL).build()));
@@ -872,7 +882,7 @@ public class SpongeCommonEventFactory {
             teleporter.placeInPortal(entityIn, entityIn.rotationYaw);
             fromWorld.theProfiler.endSection();
         }
-        Transform<World> portalExitTransform = spongeEntity.getTransform().setExtent((World) toWorld);
+
         DisplaceEntityEvent.Teleport.Portal event = SpongeEventFactory.createDisplaceEntityEventTeleportPortal(teleportCause, fromTransform, portalExitTransform, (PortalAgent) teleporter, spongeEntity, true);
         SpongeImpl.postEvent(event);
         if (entityIn instanceof EntityPlayerMP) {

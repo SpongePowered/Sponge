@@ -855,18 +855,13 @@ public abstract class MixinEntity implements Entity, IMixinEntity {
         {
             // handle portal event
             DisplaceEntityEvent.Teleport.Portal event = SpongeCommonEventFactory.handleDisplaceEntityPortalEvent(this.mcEntity, toDimensionId, null);
-            if (event.isCancelled()) {
+            if (event == null || event.isCancelled()) {
                 return;
             }
 
             this.worldObj.theProfiler.startSection("changeDimension");
-            // use the worlds from event
+            // use the world from event
             WorldServer toWorld = (WorldServer) event.getToTransform().getExtent();
-            // Don't allow entities to load chunks in worlds with no players
-            if (!(this.mcEntity instanceof EntityPlayerMP) && !toWorld.isChunkLoaded((int) this.posX >> 4, (int) this.posZ >> 4, false) && toWorld.playerEntities.size() == 0) {
-                return;
-            }
-
             this.worldObj.removeEntity(this.mcEntity);
             this.isDead = false;
             this.worldObj.theProfiler.startSection("reposition");
