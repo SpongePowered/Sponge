@@ -821,10 +821,14 @@ public abstract class MixinWorld implements World, IMixinWorld {
         tile.update();
     }
 
-    @SuppressWarnings("rawtypes")
     @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;onUpdate()V"))
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         entity.onUpdate();
+    }
+
+    @Redirect(method = "updateEntityWithOptionalForce", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/Entity;updateRidden()V"))
+    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+        entity.updateRidden();
     }
 
     /*********************** TIMINGS ***********************/

@@ -95,6 +95,21 @@ public final class TrackingUtil {
         causeTracker.completePhase();
     }
 
+    public static void tickRidingEntity(CauseTracker causeTracker, net.minecraft.entity.Entity entity) {
+        checkArgument(entity instanceof Entity, "Entity %s is not an instance of SpongeAPI's Entity!", entity);
+        checkNotNull(entity, "Cannot capture on a null ticking entity!");
+        causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.ENTITY, PhaseContext.start()
+                .add(NamedCause.source(entity))
+                .addEntityCaptures()
+                .addBlockCaptures()
+                .complete());
+        final Timing entityTiming = EntityUtil.toMixin(entity).getTimingsHandler();
+        entityTiming.startTiming();
+        entity.updateRidden();
+        entityTiming.stopTiming();
+        causeTracker.completePhase();
+    }
+
     public static void tickTileEntity(CauseTracker causeTracker, ITickable tile) {
         causeTracker.switchToPhase(TrackingPhases.GENERAL, WorldPhase.Tick.TILE_ENTITY, PhaseContext.start()
                 .add(NamedCause.source(tile))

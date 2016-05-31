@@ -741,7 +741,6 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         TrackingUtil.tickTileEntity(causeTracker, tile);
     }
 
-    @SuppressWarnings("Duplicates")
     @Override
     protected void onCallEntityUpdate(net.minecraft.entity.Entity entity) {
         final CauseTracker causeTracker = this.getCauseTracker();
@@ -752,6 +751,19 @@ public abstract class MixinWorldServer extends MixinWorld implements IMixinWorld
         }
 
         TrackingUtil.tickEntity(causeTracker, entity);
+        updateRotation(entity);
+    }
+
+    @Override
+    protected void onCallEntityRidingUpdate(net.minecraft.entity.Entity entity) {
+        final CauseTracker causeTracker = this.getCauseTracker();
+        final IPhaseState state = causeTracker.getStack().peekState();
+        if (state.getPhase().alreadyCapturingEntityTicks(state)) {
+            entity.updateRidden();
+            return;
+        }
+
+        TrackingUtil.tickRidingEntity(causeTracker, entity);
         updateRotation(entity);
     }
 

@@ -308,7 +308,7 @@ public class SpongeHooks {
         int maxSpeed = config.getConfig().getEntity().getMaxSpeed();
         if (maxSpeed > 0) {
             double distance = x * x + z * z;
-            if (distance > maxSpeed) {
+            if (distance > maxSpeed && !entity.isRiding()) {
                 if (config.getConfig().getLogging().logEntitySpeedRemoval()) {
                     logInfo("Speed violation: {0} was over {1} - Removing Entity: {2}", distance, maxSpeed, entity);
                     if (entity instanceof EntityLivingBase) {
