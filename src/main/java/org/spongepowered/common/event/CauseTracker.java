@@ -351,10 +351,7 @@ public final class CauseTracker {
     }
 
     public Cause getCurrentCause() {
-        if (this.causeStack.isEmpty()) {
-            return null;
-        }
-        return this.causeStack.getFirst();
+        return this.causeStack.peekFirst();
     }
 
     public void addCause(Cause cause) {
